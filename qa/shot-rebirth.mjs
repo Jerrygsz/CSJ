@@ -21,7 +21,7 @@ const b = await chromium.launch({ channel: 'chrome' });
 const page = await b.newPage({ viewport: { width: 420, height: 820 } });
 await page.goto(`http://127.0.0.1:${PORT}/index.html?test=1`, { waitUntil: 'load' });
 await page.waitForFunction(() => !!window.__FR);
-await page.evaluate(() => { const F = window.__FR; F.rebirthResetPool(); F.clearProgress(); F.setLevel(82); F.setSkill('sword', 82); F.toTitle(); });
+await page.evaluate(() => { const F = window.__FR; F.rebirthResetPool(); F.clearProgress(); F.setLevel(82); F.toTitle(); });
 await page.waitForTimeout(400);
 await page.screenshot({ path: join(here, 'shot-rebirth-title.png') });
 await page.evaluate(() => document.getElementById('rebirthBtn').click());

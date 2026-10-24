@@ -11,17 +11,21 @@
   // ---------- 存档 ----------
   const SAVE_KEY = 'fanren_save_v1';
   // 转世重修：独立于主存档的「轮回余荫」池，删档也保留，代代叠加。
-  // 只炼「修为（境界）」——功法等其他一切，转世后一律清零、从头再来。
+  // 只炼「人物属性值」——本世超出凡胎初始的属性（生命/伤害/攻速/移速等）各取 1/81，
+  // 叠加进新生角色的属性面板；功法、法器、灵石、洞府等一律清零、从头再来。
   const REBIRTH_KEY = 'fanren_rebirth_v1';
-  const REBIRTH_DIV = 81;   // 九九归一轮回：每世只取超出凡胎修为的 1/81
+  const REBIRTH_DIV = 81;   // 九九归一轮回：每世只取超出凡胎属性的 1/81
+  const REBIRTH_KEYS = ['maxhp', 'dmg', 'atkSpd', 'spd', 'regen', 'crit', 'armor', 'pickup', 'xpMul'];
   function rebirthPool() {
     try {
       const raw = localStorage.getItem(REBIRTH_KEY);
-      if (raw) { const p = JSON.parse(raw) || {}; return { cycles: p.cycles | 0, level: Number(p.level) || 0 }; }
+      if (raw) { const p = JSON.parse(raw) || {}; return { cycles: p.cycles | 0, stats: (p.stats && typeof p.stats === 'object') ? p.stats : {} }; }
     } catch (e) {}
-    return { cycles: 0, level: 0 };
+    return { cycles: 0, stats: {} };
   }
   function writeRebirthPool(p) { try { localStorage.setItem(REBIRTH_KEY, JSON.stringify(p)); } catch (e) {} }
+  let REBIRTH = rebirthPool();           // 常驻内存的轮回余荫，删档不清
+  function rb(k) { return (REBIRTH.stats && REBIRTH.stats[k]) || 0; }
   // 永久加成上限：留出后期成长空间，避免一次刷满
   const BONUS_CAP = { dmg: 1.2, atkSpd: 0.6, spd: 0.4, pickup: 1.5, regen: 3, armor: 0.35, xpMul: 0.5, crit: 0.25, maxhp: 300 };
   const BONUS_KEYS = ['dmg', 'atkSpd', 'spd', 'pickup', 'regen', 'armor', 'xpMul', 'crit'];
@@ -328,12 +332,12 @@
   function gb(k) { return (G.gear && G.gear[k]) || 0; }
   // 被动加成全部走「功法属性」聚合：新旧被动功法一起算，练到几层就给几层的力
   function hasteMul() { return Math.pow(0.92, (passiveSum('atkSpd') + buffSum('atkSpd')) / 0.08); }
-  function spdMul() { return 1 + passiveSum('spd') + buffSum('spd') + G.realm.spd + gb('spd'); }
-  function atkMul() { return 1 / (1 + (G.bonus.atkSpd || 0) + gb('atkSpd') + G.realm.atk); }
-  function dmgMul() { return (1 + (G.bonus.dmg || 0) + gb('dmg')) * (1 + G.realm.dmg) * (1 + passiveSum('dmg') + buffSum('dmg')); }
-  function pickupR() { return 46 * (1 + passiveSum('pickup') + buffSum('pickup')) * (1 + (G.bonus.pickup || 0) + gb('pickup')); }
-  function critChance() { return 0.05 + (G.bonus.crit || 0) + gb('crit') + passiveSum('crit') + buffSum('crit'); }
-  function armorRate() { return Math.min(0.62, (G.bonus.armor || 0) + gb('armor') + passiveSum('armor') + buffSum('armor')); }
+  function spdMul() { return 1 + rb('spd') + passiveSum('spd') + buffSum('spd') + G.realm.spd + gb('spd'); }
+  function atkMul() { return 1 / (1 + rb('atkSpd') + (G.bonus.atkSpd || 0) + gb('atkSpd') + G.realm.atk); }
+  function dmgMul() { return (1 + rb('dmg') + (G.bonus.dmg || 0) + gb('dmg')) * (1 + G.realm.dmg) * (1 + passiveSum('dmg') + buffSum('dmg')); }
+  function pickupR() { return 46 * (1 + passiveSum('pickup') + buffSum('pickup')) * (1 + rb('pickup') + (G.bonus.pickup || 0) + gb('pickup')); }
+  function critChance() { return 0.05 + rb('crit') + (G.bonus.crit || 0) + gb('crit') + passiveSum('crit') + buffSum('crit'); }
+  function armorRate() { return Math.min(0.62, rb('armor') + (G.bonus.armor || 0) + gb('armor') + passiveSum('armor') + buffSum('armor')); }
   // 生命上限 = 基础 + 永久道具 + 境界累计 + 装备 + 葫芦功法
   // 形象跟着人走：袍色看境界，甲色看身上穿的护甲，封印了人就灰下去
   function heroTierOf(lv) {
@@ -368,7 +372,7 @@
     const p = G.player; if (!p) return;
     const old = p.maxhp || 1;
     const ratio = keepPct ? U.clamp(p.hp / old, 0, 1) : -1;
-    p.maxhp = 100 + (G.bonus.maxhp || 0) + (G.realmHp || 0) + gb('maxhp') + passiveSum('maxhp');
+    p.maxhp = 100 + rb('maxhp') + (G.bonus.maxhp || 0) + (G.realmHp || 0) + gb('maxhp') + passiveSum('maxhp');
     // 五鬼锁魂这类封印：人被压着，气血也翻不上去
     if (save.sealed) p.maxhp = Math.round(p.maxhp * (save.sealed.hp || 0.5));
     if (ratio >= 0) p.hp = p.maxhp * ratio;
@@ -393,7 +397,7 @@
     save.bonuses[k] = Math.min(BONUS_CAP[k] || 99, (save.bonuses[k] || 0) + v);
   }
   function addRunBonus(k, v) { G.bonus[k] = Math.min(BONUS_CAP[k] || 99, (G.bonus[k] || 0) + v); }
-  function gainXp(v) { if (G.player) G.player.xp += v * (1 + (G.bonus.xpMul || 0) + gb('xpMul') + passiveSum('xpMul') + buffSum('xpMul')); }
+  function gainXp(v) { if (G.player) G.player.xp += v * (1 + rb('xpMul') + (G.bonus.xpMul || 0) + gb('xpMul') + passiveSum('xpMul') + buffSum('xpMul')); }
 
   // ---------- 限时增益：符箓 / 丹药服下，一段时间内属性见长，到点自行散去 ----------
   function buffSum(k) {
@@ -2644,7 +2648,7 @@
     // 迈步相位只在真的走的时候推进：站着的时候腿不该还在摆
     p.moving = (dx !== 0 || dy !== 0);
     if (p.moving) p.gait = (p.gait || 0) + dt * 9.5;
-    const rg = passiveSum('regen') + buffSum('regen') + (G.bonus.regen || 0) + gb('regen');
+    const rg = rb('regen') + passiveSum('regen') + buffSum('regen') + (G.bonus.regen || 0) + gb('regen');
     if (rg > 0 && p.hp < p.maxhp) p.hp = Math.min(p.maxhp, p.hp + rg * dt);
     if (p.iv > 0) p.iv -= dt;
     if (p.hurtFlash > 0) p.hurtFlash -= dt;
@@ -3770,7 +3774,7 @@
         tsRow('最多斩敌', save.best.kills) +
         tsRow('最高境界', realmName(save.best.level) + '（' + save.best.level + ' 层）') +
         tsRow('通关', save.wins + ' 次') +
-        (rp.cycles ? tsRow('轮回余荫', '第 ' + rp.cycles + ' 世 · +' + rp.level.toFixed(2) + ' 层') : '') +
+        (rp.cycles ? tsRow('轮回余荫', '第 ' + rp.cycles + ' 世 · 属性已加成') : '') +
         '</div>';
     }
     if (elTitleBag) {
@@ -4112,12 +4116,12 @@
   function renderCaveStat(lv) {
     const g = gearBonus();
     const rs = realmSum(lv);
-    const maxhp = 100 + (save.bonuses.maxhp || 0) + rs.hp + (g.maxhp || 0);
-    const dmg = (1 + (save.bonuses.dmg || 0) + (g.dmg || 0)) * (1 + rs.dmg);
-    const atk = 1 / (1 + (save.bonuses.atkSpd || 0) + (g.atkSpd || 0) + rs.atk);
-    const spd = 1 + (save.bonuses.spd || 0) + (g.spd || 0) + rs.spd;
-    const crit = 0.05 + (save.bonuses.crit || 0) + (g.crit || 0);
-    const armor = Math.min(0.62, (save.bonuses.armor || 0) + (g.armor || 0));
+    const maxhp = 100 + rb('maxhp') + (save.bonuses.maxhp || 0) + rs.hp + (g.maxhp || 0);
+    const dmg = (1 + rb('dmg') + (save.bonuses.dmg || 0) + (g.dmg || 0)) * (1 + rs.dmg);
+    const atk = 1 / (1 + rb('atkSpd') + (save.bonuses.atkSpd || 0) + (g.atkSpd || 0) + rs.atk);
+    const spd = 1 + rb('spd') + (save.bonuses.spd || 0) + (g.spd || 0) + rs.spd;
+    const crit = 0.05 + rb('crit') + (save.bonuses.crit || 0) + (g.crit || 0);
+    const armor = Math.min(0.62, rb('armor') + (save.bonuses.armor || 0) + (g.armor || 0));
     const rows = [
       ['境界', realmName(lv)],
       ['肉身等级', 'Lv ' + lv],
@@ -4127,9 +4131,9 @@
       ['移动速度', '×' + spd.toFixed(2)],
       ['暴击', Math.round(crit * 100) + '%'],
       ['减伤', Math.round(armor * 100) + '%'],
-      ['每秒回血', ((0.7 * ((save.cultivate.skills || {}).regen || 0)) + (save.bonuses.regen || 0) + (g.regen || 0)).toFixed(1)],
-      ['拾取范围', '×' + (1 + (save.bonuses.pickup || 0) + (g.pickup || 0)).toFixed(2)],
-      ['修为加成', pct((save.bonuses.xpMul || 0) + (g.xpMul || 0))],
+      ['每秒回血', ((0.7 * ((save.cultivate.skills || {}).regen || 0)) + rb('regen') + (save.bonuses.regen || 0) + (g.regen || 0)).toFixed(1)],
+      ['拾取范围', '×' + (1 + rb('pickup') + (save.bonuses.pickup || 0) + (g.pickup || 0)).toFixed(2)],
+      ['修为加成', pct(rb('xpMul') + (save.bonuses.xpMul || 0) + (g.xpMul || 0))],
       ['已佩法器', equippedCount() + ' / 4']
     ];
     const grid = rows.map(r => '<div class="statcell"><i>' + r[0] + '</i><b>' + r[1] + '</b></div>').join('');
@@ -5044,15 +5048,25 @@
   document.getElementById('muteTitle').addEventListener('click', () => { Sfx.toggle(); syncMute(); });
   document.getElementById('mutePause').addEventListener('click', () => { Sfx.toggle(); syncMute(); });
   // 转世重修：先算出本次能炼出的余荫给玩家看，再确认
+  function fmtRebirthVal(k, v) {
+    if (k === 'maxhp') return '+' + Math.round(v);
+    if (k === 'crit' || k === 'armor' || k === 'xpMul') return '+' + Math.round(v * 100) + '%';
+    if (k === 'regen') return '+' + v.toFixed(1);
+    return '+' + v.toFixed(2);
+  }
   function openRebirth() {
     const p = rebirthPreview();
-    const curLv = Math.max(1, save.cultivate.level || 1);
+    const names = { maxhp: '生命', dmg: '伤害', atkSpd: '攻速', spd: '移速', regen: '回血', crit: '暴击', armor: '减伤', pickup: '拾取', xpMul: '修为' };
+    const bits = [];
+    for (const k of REBIRTH_KEYS) {
+      const v = (p.add[k] || 0) / REBIRTH_DIV;
+      if (v > 1e-9) bits.push(names[k] + ' ' + fmtRebirthVal(k, v));
+    }
     const lines = [];
-    lines.push('本世修为：境界 ' + curLv + ' 层');
-    lines.push('本次可炼余荫：修为 +' + p.addLevel.toFixed(2) + ' 层（取 1/81）');
-    if (p.cycles > 0) lines.push('累计余荫池：+' + p.nextLevel.toFixed(2) + ' 层（含本次，已转 ' + p.cycles + ' 世）');
+    lines.push('本次可炼余荫（超出凡胎属性 × 1/81）：');
+    lines.push(bits.length ? bits.join('　') : '（本世尚无超出凡胎的属性）');
+    if (REBIRTH.cycles > 0) lines.push('累计余荫：已转 ' + REBIRTH.cycles + ' 世，已入属性面板');
     lines.push('功法、法器、灵石、洞府等，一律清零，从头再来');
-    lines.push('来生起步：' + realmName(p.startLevel) + '（' + p.startLevel + ' 层）');
     elRebirthText.innerHTML = lines.join('<br>');
     elRebirth.style.display = 'flex';
   }
@@ -5436,42 +5450,45 @@
     if (G.player) { resetRunBonus(); G.gear = {}; G.runLoot = []; }
   }
 
-  // 本世可炼出的余荫（浮点、未取整）：只炼「修为」，超出凡胎的部分取 1/81
+  // 本世可炼出的属性余荫：把「人物属性值」超出凡胎初始的来源（永久加成 + 境界 + 装备 + 功法回血）逐项累计
   function rebirthHarvest() {
-    const c = cultObj();
-    const curLv = Math.max(1, c.level || 1);
-    return Math.max(0, curLv - 1) / REBIRTH_DIV;
+    const lv = Math.max(1, save.cultivate.level || 1);
+    const rs = realmSum(lv);
+    const g = gearBonus();
+    const b = save.bonuses || {};
+    const sk = save.cultivate.skills || {};
+    const c = {};
+    c.maxhp = (b.maxhp || 0) + rs.hp + (g.maxhp || 0);
+    c.dmg = (b.dmg || 0) + (g.dmg || 0) + rs.dmg;
+    c.atkSpd = (b.atkSpd || 0) + (g.atkSpd || 0) + rs.atk;
+    c.spd = (b.spd || 0) + (g.spd || 0) + rs.spd;
+    c.regen = (b.regen || 0) + (g.regen || 0) + 0.7 * (sk.regen || 0);
+    c.crit = (b.crit || 0) + (g.crit || 0);
+    c.armor = (b.armor || 0) + (g.armor || 0);
+    c.pickup = (b.pickup || 0) + (g.pickup || 0);
+    c.xpMul = (b.xpMul || 0) + (g.xpMul || 0);
+    return c;
   }
 
-  // 预览：本次转世会炼出多少余荫、来生从哪一境起步（不落盘）
+  // 预览：本次转世能炼出多少属性余荫（不落盘）
   function rebirthPreview() {
-    const pool = rebirthPool();
-    const addLevel = rebirthHarvest();
-    const nextLevel = (pool.level || 0) + addLevel;
-    return {
-      cycles: pool.cycles,
-      addLevel,
-      nextLevel,
-      startLevel: 1 + Math.floor(nextLevel)
-    };
+    const h = rebirthHarvest();
+    const next = {};
+    for (const k of REBIRTH_KEYS) next[k] = rb(k) + (h[k] || 0) / REBIRTH_DIV;
+    return { cycles: REBIRTH.cycles, add: h, next };
   }
 
   function doRebirth() {
-    const pool = rebirthPool();
-    const addLevel = rebirthHarvest();
-    pool.level = (pool.level || 0) + addLevel;
-    pool.cycles = (pool.cycles || 0) + 1;
-    writeRebirthPool(pool);
+    const h = rebirthHarvest();
+    REBIRTH.cycles = (REBIRTH.cycles || 0) + 1;
+    REBIRTH.stats = REBIRTH.stats || {};
+    for (const k of REBIRTH_KEYS) {
+      const add = (h[k] || 0) / REBIRTH_DIV;
+      if (add > 0) REBIRTH.stats[k] = (REBIRTH.stats[k] || 0) + add;
+    }
+    writeRebirthPool(REBIRTH);
 
     resetAllProgress();
-
-    // 新生角色 = 凡胎初始 + 累计修为余荫（向下取整）；功法一律回到剑一层、不继承
-    const startLevel = 1 + Math.floor(pool.level);
-    const c = cultObj();
-    c.level = startLevel; c.xp = 0;
-    c.skills = { sword: 1 };
-    c.equipped = [];
-    save.best.level = startLevel;
     writeSave();
 
     hideAllOverlays();
@@ -5481,8 +5498,8 @@
     elTitle.style.display = 'flex';
     refreshTitle();
 
-    banner('转世重修 · 第 ' + pool.cycles + ' 世 · 今在 ' + realmName(startLevel));
-    return { cycles: pool.cycles, startLevel, carriedLevel: Math.floor(pool.level) };
+    banner('转世重修 · 第 ' + REBIRTH.cycles + ' 世 · 余荫入体');
+    return { cycles: REBIRTH.cycles, stats: Object.assign({}, REBIRTH.stats) };
   }
 
   // ---------- 调试 API ----------
@@ -6060,9 +6077,9 @@
     rebirth() { return doRebirth(); },
     rebirthPool() {
       const p = rebirthPool();
-      return { cycles: p.cycles, level: p.level };
+      return { cycles: p.cycles, stats: Object.assign({}, p.stats) };
     },
-    rebirthResetPool() { writeRebirthPool({ cycles: 0, level: 0 }); return 'rebirth pool cleared'; },
+    rebirthResetPool() { writeRebirthPool({ cycles: 0, stats: {} }); REBIRTH = rebirthPool(); return 'rebirth pool cleared'; },
     save: {
       read: () => localStorage.getItem(SAVE_KEY),
       clear: () => { localStorage.removeItem(SAVE_KEY); return '已清除存档'; },

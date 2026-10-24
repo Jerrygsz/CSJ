@@ -1,10 +1,10 @@
-// 转世重修守门：表面删档，实则是「超出凡胎的修为（境界）×1/81」叠加到新生角色，
-// 代代累积；功法等其他一切，转世后一律清零、从头再来。
+// 转世重修守门（v2）：删档重来，把「人物属性值」超出凡胎初始的部分（生命/伤害/攻速/移速等）
+// 各取 1/81 叠加为永久属性余荫，代代累积；功法/装备/灵石等一律清零、从头再来。
 //
-// 机制口径（与 js/game.js 里 REBIRTH_DIV=81 一致）：
-//   修为余荫 = (当前境界 - 1) / 81
-//   新生角色 = 凡胎初始(练气一层 + 剑一层) + floor(累计修为余荫)
-//   功法不继承：转世后 skills 回到 { sword: 1 }
+// 口径（与 js/game.js 里 REBIRTH_DIV=81、REBIRTH_KEYS 一致）：
+//   本世可炼属性 = 永久加成(bonuses) + 境界(realmSum) + 装备(gear) + 功法回血(0.7*regen)
+//   余荫 R.stats[k] += 本世可炼属性[k] / 81
+//   新生角色 = 凡胎初始 + R（在属性公式里统一 rb(k) 加回）
 //
 // 断言全部在页面内把比较算完、只回传布尔/数字。
 // 用法：node qa/verify-rebirth.mjs
@@ -49,49 +49,46 @@ await page.waitForFunction(() => !!window.__FR);
 const E = (code) => page.evaluate(code);
 const close = (a, b) => Math.abs(a - b) < 1e-6;
 
-// ===== 1. 首次转世：修为超出部分 ×1/81 =====
-console.log('\n== 1. 首次转世（修为 1/81）==');
+// ===== 1. 首次转世：境界属性 ×1/81 入余荫池 =====
+console.log('\n== 1. 首次转世（属性 1/81）==');
 let r1 = await E(`(() => {
   const F = window.__FR;
   F.rebirthResetPool(); F.clearProgress(); F.setLevel(82);
   const pv = F.previewRebirth();
   const r = F.rebirth();
-  const info = F.info().cultivate;
   const pool = F.rebirthPool();
-  return { pv, r, lvl: info.level, sword: info.skills.sword, skills: info.skills, pool };
+  return { pv, r, lvl: F.info().cultivate.level, pool };
 })()`);
-ok(close(r1.pv.addLevel, 1.0), '预览：修为余荫 = (82-1)/81 = 1.0', r1.pv);
-ok(r1.pv.startLevel === 2, '预览：来生起步 = 练气一层 + 1 = 2 层', r1.pv.startLevel);
-ok(r1.r.cycles === 1 && r1.r.startLevel === 2 && r1.r.carriedLevel === 1, '转世后：第1世、起步2层、携1层余荫', r1.r);
-ok(r1.lvl === 2, '新生角色境界 = 2', r1.lvl);
-ok(r1.sword === 1 && Object.keys(r1.skills).length === 1, '新生功法只有剑一层（无其他功法）', r1.skills);
-ok(r1.pool.cycles === 1 && close(r1.pool.level, 1.0) && !('skills' in r1.pool), '余荫池只存 {cycles,level}=1.0，无功法字段', r1.pool);
+ok(r1.pv.add.maxhp > 0 && r1.pv.add.dmg > 0 && r1.pv.add.atkSpd > 0 && r1.pv.add.spd > 0,
+  '境界 82 可炼出生命/伤害/攻速/移速余荫', r1.pv.add);
+ok(close(r1.pool.stats.maxhp, r1.pv.add.maxhp / 81), '余荫生命 = 本世生命 / 81', { pool: r1.pool.stats.maxhp, expect: r1.pv.add.maxhp / 81 });
+ok(close(r1.pool.stats.dmg, r1.pv.add.dmg / 81), '余荫伤害 = 本世伤害 / 81', { pool: r1.pool.stats.dmg, expect: r1.pv.add.dmg / 81 });
+ok(r1.r.cycles === 1, '第 1 世', r1.r.cycles);
+ok(r1.lvl === 1, '境界清零回到 1（余荫走属性不走层数）', r1.lvl);
 
-// ===== 2. 二次转世：余荫叠加 =====
+// ===== 2. 二次转世：属性余荫叠加 =====
 console.log('\n== 2. 二次转世（余荫叠加）==');
 let r2 = await E(`(() => {
   const F = window.__FR;
   F.setLevel(82);                       // 新生角色又修到 82 层，再转一次
   const r = F.rebirth();
   const pool = F.rebirthPool();
-  return { r, lvl: F.info().cultivate.level, pool };
+  return { r, pool };
 })()`);
-ok(r2.r.cycles === 2 && r2.r.startLevel === 3, '第2世：起步 3 层', r2.r);
-ok(close(r2.pool.level, 2.0), '余荫池累计 level = 2.0（两世各 +1）', r2.pool);
-ok(r2.lvl === 3, '新生角色境界 = 3', r2.lvl);
+ok(r2.r.cycles === 2, '第 2 世', r2.r.cycles);
+ok(close(r2.pool.stats.maxhp, r1.pv.add.maxhp / 81 * 2), '余荫生命 = 两世各 /81 叠加（×2）', { pool: r2.pool.stats.maxhp, expect: r1.pv.add.maxhp / 81 * 2 });
 
-// ===== 3. 功法清零：只炼修为，功法一律从头 =====
-console.log('\n== 3. 功法清零（只炼修为）==');
+// ===== 3. 余荫真的加进属性面板 =====
+console.log('\n== 3. 余荫进属性（rb 生效）==');
 let r3 = await E(`(() => {
   const F = window.__FR;
-  F.rebirthResetPool(); F.clearProgress(); F.setLevel(82); F.learn('fire');
-  const r = F.rebirth();
-  const info = F.info().cultivate;
-  return { r, lvl: info.level, skills: info.skills, pool: F.rebirthPool() };
+  F.rebirthResetPool(); F.clearProgress(); F.setLevel(82); F.rebirth();
+  F.enterMap('houshan', 'easy'); F.skipStory(); F.muteStory(true);
+  const info = F.info();
+  return { maxhp: info.maxhp, rbMaxhp: F.rebirthPool().stats.maxhp };
 })()`);
-ok(r3.lvl === 2, '境界仍按 1/81 继承（82→2 层）', r3.lvl);
-ok(r3.skills && r3.skills.sword === 1 && !r3.skills.fire, '转世后功法清零：只剩剑一层，fire 不继承', r3.skills);
-ok(!('skills' in r3.pool), '余荫池无功法字段', r3.pool);
+ok(r3.rbMaxhp > 0, '余荫池有生命加成', r3.rbMaxhp);
+ok(r3.maxhp > 100 + r3.rbMaxhp - 1, '角色生命上限 > 100（余荫已生效）', r3);
 
 // ===== 4. 表面删档：灵石/道具/进度全归零 =====
 console.log('\n== 4. 表面删档（进度归零）==');
@@ -106,7 +103,7 @@ let r4 = await E(`(() => {
 ok(r4.stones === 0, '灵石归零', r4.stones);
 ok(r4.totalItems === 0, '道具归零', r4.totalItems);
 ok(Array.isArray(r4.unlocked) && r4.unlocked.length === 1 && r4.unlocked[0] === 'qixuan', '修行图只剩七玄门', r4.unlocked);
-ok(r4.lvl === 1, '境界回到 1 + 余荫（无余荫时=1）', r4.lvl);
+ok(r4.lvl === 1, '境界回到 1', r4.lvl);
 
 // ===== 5. 全程零报错 =====
 console.log('\n== 5. 全程零报错 ==');
