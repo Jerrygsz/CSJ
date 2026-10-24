@@ -10,15 +10,16 @@
 
   // ---------- 存档 ----------
   const SAVE_KEY = 'fanren_save_v1';
-  // 转世重修：独立于主存档的「轮回余荫」池，删档也保留，代代叠加
+  // 转世重修：独立于主存档的「轮回余荫」池，删档也保留，代代叠加。
+  // 只炼「修为（境界）」——功法等其他一切，转世后一律清零、从头再来。
   const REBIRTH_KEY = 'fanren_rebirth_v1';
-  const REBIRTH_DIV = 81;   // 九九归一轮回：每世只取超出凡胎部分的 1/81
+  const REBIRTH_DIV = 81;   // 九九归一轮回：每世只取超出凡胎修为的 1/81
   function rebirthPool() {
     try {
       const raw = localStorage.getItem(REBIRTH_KEY);
-      if (raw) { const p = JSON.parse(raw) || {}; return { cycles: p.cycles | 0, level: Number(p.level) || 0, skills: (p.skills && typeof p.skills === 'object') ? p.skills : {} }; }
+      if (raw) { const p = JSON.parse(raw) || {}; return { cycles: p.cycles | 0, level: Number(p.level) || 0 }; }
     } catch (e) {}
-    return { cycles: 0, level: 0, skills: {} };
+    return { cycles: 0, level: 0 };
   }
   function writeRebirthPool(p) { try { localStorage.setItem(REBIRTH_KEY, JSON.stringify(p)); } catch (e) {} }
   // 永久加成上限：留出后期成长空间，避免一次刷满
@@ -5046,13 +5047,8 @@
     const curLv = Math.max(1, save.cultivate.level || 1);
     const lines = [];
     lines.push('本世修为：境界 ' + curLv + ' 层');
-    lines.push('本次可炼余荫：境界 +' + p.addLevel.toFixed(2) + ' 层（取 1/81）');
-    const sk = [];
-    for (const id in p.addSkills) {
-      const d = window.skillById ? window.skillById(id) : null;
-      sk.push('·' + (d ? d.name : id) + ' +' + p.addSkills[id].toFixed(2));
-    }
-    if (sk.length) lines.push('功法余荫：' + sk.join('　'));
+    lines.push('本次可炼余荫：修为 +' + p.addLevel.toFixed(2) + ' 层（取 1/81）');
+    lines.push('功法、法器、灵石、洞府等，一律清零，从头再来');
     lines.push('来生起步：' + realmName(p.startLevel) + '（' + p.startLevel + ' 层）' + (p.cycles > 0 ? '　已累积 ' + p.cycles + ' 世余荫' : ''));
     elRebirthText.innerHTML = lines.join('<br>');
     elRebirth.style.display = 'flex';
@@ -5437,58 +5433,40 @@
     if (G.player) { resetRunBonus(); G.gear = {}; G.runLoot = []; }
   }
 
-  // 本世可炼出的余荫（浮点、未取整）：境界 + 功法两层，超出凡胎的部分各取 1/81
+  // 本世可炼出的余荫（浮点、未取整）：只炼「修为」，超出凡胎的部分取 1/81
   function rebirthHarvest() {
     const c = cultObj();
     const curLv = Math.max(1, c.level || 1);
-    const addLevel = Math.max(0, curLv - 1) / REBIRTH_DIV;
-    const addSkills = {};
-    for (const id in c.skills) {
-      const lv = c.skills[id] | 0;
-      const base = (id === 'sword') ? 1 : 0;
-      const e = Math.max(0, lv - base);
-      if (e > 0) addSkills[id] = e / REBIRTH_DIV;
-    }
-    return { addLevel, addSkills };
+    return Math.max(0, curLv - 1) / REBIRTH_DIV;
   }
 
   // 预览：本次转世会炼出多少余荫、来生从哪一境起步（不落盘）
   function rebirthPreview() {
     const pool = rebirthPool();
-    const h = rebirthHarvest();
-    const nextLevel = (pool.level || 0) + h.addLevel;
-    const nextSkills = Object.assign({}, pool.skills || {});
-    for (const id in h.addSkills) nextSkills[id] = (nextSkills[id] || 0) + h.addSkills[id];
+    const addLevel = rebirthHarvest();
+    const nextLevel = (pool.level || 0) + addLevel;
     return {
       cycles: pool.cycles,
-      addLevel: h.addLevel,
-      addSkills: h.addSkills,
+      addLevel,
       nextLevel,
-      startLevel: 1 + Math.floor(nextLevel),
-      carriedSkills: Object.keys(nextSkills).filter(id => Math.floor(nextSkills[id] || 0) > 0).length
+      startLevel: 1 + Math.floor(nextLevel)
     };
   }
 
   function doRebirth() {
     const pool = rebirthPool();
-    const h = rebirthHarvest();
-    pool.level = (pool.level || 0) + h.addLevel;
-    for (const id in h.addSkills) pool.skills[id] = (pool.skills[id] || 0) + h.addSkills[id];
+    const addLevel = rebirthHarvest();
+    pool.level = (pool.level || 0) + addLevel;
     pool.cycles = (pool.cycles || 0) + 1;
     writeRebirthPool(pool);
 
     resetAllProgress();
 
-    // 新生角色 = 凡胎初始 + 累计余荫（向下取整）
+    // 新生角色 = 凡胎初始 + 累计修为余荫（向下取整）；功法一律回到剑一层、不继承
     const startLevel = 1 + Math.floor(pool.level);
     const c = cultObj();
     c.level = startLevel; c.xp = 0;
-    c.skills = { sword: 1 + Math.floor(pool.skills.sword || 0) };
-    for (const id in pool.skills) {
-      if (id === 'sword') continue;
-      const add = Math.floor(pool.skills[id] || 0);
-      if (add > 0) c.skills[id] = add;
-    }
+    c.skills = { sword: 1 };
     c.equipped = [];
     save.best.level = startLevel;
     writeSave();
@@ -5990,7 +5968,6 @@
     addMats(n) { const pool = (G.map && G.map.mats) || ['m_chijing', 'm_jingtie', 'm_fuzhi', 'm_lingmo']; for (const id of pool) { save.inventory[id] = (save.inventory[id] || 0) + (n || 3); save.totalItems = (save.totalItems || 0) + (n || 3); } writeSave(); if (G.state === 'cave') renderCave(); return pool.length; },
     mats() { const o = {}; for (const k in save.inventory) if (Items.mat(k)) o[k] = save.inventory[k]; return o; },
     setLevel(n) { save.cultivate.level = Math.max(1, n || 1); save.cultivate.xp = 0; syncBestLevel(); writeSave(); if (G.state === 'cave') renderCave(); return save.cultivate.level; },
-    setSkill(id, n) { const c = cultObj(); c.skills[id] = Math.max(0, n | 0); writeSave(); return c.skills[id]; },
     unlockAll() { for (const m of MAPS) if (save.unlocked.indexOf(m.id) < 0) save.unlocked.push(m.id); writeSave(); renderWorldMap(); return save.unlocked.length; },
     shop(tab) { openShop(tab); return G.shopTab; },
     stones(n) { save.stones = Math.max(0, (save.stones || 0) + (n == null ? 100 : n)); writeSave(); renderShop(); renderWorldMap(); refreshTitle(); return save.stones; },
@@ -6080,9 +6057,9 @@
     rebirth() { return doRebirth(); },
     rebirthPool() {
       const p = rebirthPool();
-      return { cycles: p.cycles, level: p.level, skills: Object.assign({}, p.skills) };
+      return { cycles: p.cycles, level: p.level };
     },
-    rebirthResetPool() { writeRebirthPool({ cycles: 0, level: 0, skills: {} }); return 'rebirth pool cleared'; },
+    rebirthResetPool() { writeRebirthPool({ cycles: 0, level: 0 }); return 'rebirth pool cleared'; },
     save: {
       read: () => localStorage.getItem(SAVE_KEY),
       clear: () => { localStorage.removeItem(SAVE_KEY); return '已清除存档'; },
