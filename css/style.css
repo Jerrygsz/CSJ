@@ -198,6 +198,11 @@ body.fs #wrap { background: #000; }
 #dialogSpeaker { color: var(--danger-deep); font-weight: bold; font-size: var(--fs-h2); margin-bottom: 8px; }
 #dialogText { font-size: var(--fs-h2); line-height: 1.7; min-height: 54px; }
 #dialogHint { text-align: right; color: var(--text-3); font-size: var(--fs-cap); margin-top: 4px; }
+/* 突破剧情演出：整屏暗场 + 暖金底光，对话幕布居中放大，像戏台上一幕 */
+#dialog.break-scene { background: radial-gradient(130% 85% at 50% 28%, #2b2118 0%, #140f0a 58%, #080605 100%); justify-content: center; padding-bottom: 0; }
+#dialog.break-scene #dialogbox { border-color: rgba(255,206,110,0.6); box-shadow: 0 0 46px rgba(255,170,70,0.20), inset 0 0 60px rgba(255,150,50,0.07); }
+#dialog.break-scene #dialogSpeaker { color: #d9a94a; letter-spacing: 4px; }
+#dialog.break-scene #dialogText { line-height: 1.9; }
 
 /* ---------- 升级 ---------- */
 #levelup { background: rgba(8,10,14,0.85); }

@@ -2765,9 +2765,9 @@
     if (G.state === 'play') updateEncounters(dt);
 
     if (G.state === 'play' && p.xp >= p.next) {
-      // 大境界卡一道门：物事不齐，修为就顶在这儿，破不了关
-      const blk = breakBlock(p.level + 1);
-      if (blk) { p.xp = Math.min(p.xp, p.next - 0.5); markBlocked(blk); }
+      // 大境界卡一道门：材料齐了也不再自动破关 —— 得回洞府「突破」走那段剧情才破
+      const req = breakReqFor(p.level + 1);
+      if (req) { p.xp = Math.min(p.xp, p.next - 0.5); markBlocked(req); }
       else if (G.vacuumT > 0 || G.pendingEnding) { autoLevelUp(); }
       else {
         p.xp -= p.next; p.level++; p.next = xpNeed(p.level);
@@ -4472,7 +4472,7 @@
         '<div class="cs-note">' + (b.tip || '') + '</div><div class="brk-list">' +
         renderBreakList(b) + '</div>';
       if (!done && !miss.length) {
-        html += '<button class="btn small" data-breaknow="' + b.lv + '">此刻突破 · ' + b.realm + '</button>';
+        html += '<button class="btn small" data-breaknow="' + b.lv + '">入洞府冲关 · ' + b.realm + '</button>';
       }
       html += '</div>';
     }
@@ -4549,16 +4549,39 @@
     elBreak.style.display = 'flex';
   }
   function closeBreak() { if (elBreak) elBreak.style.display = 'none'; }
-  // 撞上瓶颈：修为卡住。战斗里不再反复弹全屏面板遮挡画面 ——
-  // 每张图进门只弹幕提醒一次；物事备齐时修为会自行破关，不需要任何按钮。
-  // 想看缺什么，去洞府「突破」页看全账。
+  // 撞上瓶颈：修为卡住。战斗里不弹全屏面板遮挡画面 ——
+  // 每张图进门只弹幕提示一次：料不齐说缺什么；料齐了叫回洞府走「突破」剧情。
   function markBlocked(b) {
     G.breakPending = b || null;
     if (!b) return;
     if (!G.breakHinted) {
       G.breakHinted = true;
-      banner('修为已至 ' + (b.from || '') + ' · 缺 ' + b.realm + ' 的物事');
+      banner(canBreak(b)
+        ? ('物事已齐 · 回任一洞府选「突破」冲关 · ' + b.realm)
+        : ('修为已至 ' + (b.from || '') + ' · 缺 ' + b.realm + ' 的物事'));
     }
+  }
+  // 洞府「突破」：先演一段原著剧情，演完才真正破境（突破页按钮走这里）
+  function startBreakScene(b) {
+    if (!b) return;
+    if (breakMissing(b).length) { notify('物事不齐 · 备齐了再来'); Sfx.warn(); return; }
+    G.breakCur = b;
+    const scene = (b.story && b.story[0] && b.story[0].name) || '洞府';
+    const lines = [['　' + scene + '　', (b.from || '') + ' → ' + b.realm]];
+    const novel = (b.lines && b.lines.length) ? b.lines : [['旁白', b.tip || '']];
+    for (const l of novel) lines.push(l);
+    // 收起洞府面板，整屏演这一段
+    if (elCave) elCave.style.display = 'none';
+    G.breakScene = b.lv;
+    if (elDialog) elDialog.classList.add('break-scene');
+    showLines(lines, () => {
+      if (elDialog) elDialog.classList.remove('break-scene');
+      doBreakNow();
+      G.breakScene = null;
+      G.state = 'cave';
+      if (elCave) elCave.style.display = 'flex';
+      renderCave();
+    }, 'break:' + b.lv);
   }
   function doBreakNow() {
     const b = G.breakCur; if (!b) return;
@@ -4572,8 +4595,17 @@
       p.xp = Math.max(p.xp, p.next);
       if (G.state === 'play') { p.xp -= p.next; p.level++; p.next = xpNeed(p.level); checkRealm(); queueLevelUp(); }
     } else {
-      const lv = save.cultivate.level || 1;
-      addCultivateXp(Math.max(1, xpNeed(lv)));
+      // 洞府冲关：丹料即丹，服下便破 —— 直接把境界推到这道门后那一层（b.lv）。
+      // 旧写法走 addCultivateXp，料刚吃完又会被 breakReqFor 卡住，破了个寂寞。
+      const newLv = Math.max(save.cultivate.level || 1, b.lv);
+      save.cultivate.level = newLv;
+      save.cultivate.xp = 0;
+      syncBestLevel();
+      if (G.player) {
+        G.player.level = newLv; G.player.next = xpNeed(newLv);
+        checkRealm(true); recalcMaxhp();
+        G.player.hp = G.player.maxhp;
+      }
       writeSave(); refreshTitle(); renderCave();
     }
   }
@@ -4835,8 +4867,8 @@
     while (lv < 140 && guard++ < 400) {
       const need = xpNeed(lv);
       if (c.xp < need) break;
-      // 大境界卡一道门：先备齐丹药材料与剧情，否则修为就堆在门口
-      const blk = breakBlock(lv + 1);
+      // 大境界门：丹药材料剧情齐了也得回洞府「突破」冲关，打坐/刷怪过不去
+      const blk = breakReqFor(lv + 1);
       if (blk) { c.xp = Math.min(c.xp, need - 1); G.breakPending = blk; break; }
       c.xp -= need; lv++;
     }
@@ -4846,24 +4878,30 @@
   }
   function doRest(times) {
     const c = CAVES[G.caveId]; if (!c) return;
-    let n = 0;
+    let n = 0, gated = false;
     for (let i = 0; i < times; i++) {
       const lv = save.cultivate.level || 1;
       if (lv >= c.capLevel) break;
       if ((save.stones || 0) < c.restStone) break;
       save.stones -= c.restStone;
       addCultivateXp(Math.max(1, Math.round(xpNeed(lv) * c.restXp)));
+      n++;
+      // 撞上大境界门：修为顶在门口，再坐也是白烧灵石 —— 立刻停下，催他去「突破」页
+      if ((save.cultivate.level || 1) === lv && (save.cultivate.xp || 0) >= xpNeed(lv) - 1) { gated = true; break; }
       // 筑基后掌天瓶日产绿液 —— 前提是瓶子在手上（七玄门那一趟就该拿到了）
       const hasBottle = (save.inventory['gupu'] || 0) > 0 || (save.inventory['zhangtian'] || 0) > 0;
       if (lv >= 36 && hasBottle) save.greenLiquid = (save.greenLiquid || 0) + 1;
-      n++;
     }
-    if (!n) {
+    if (n) { writeSave(); }
+    if (gated) {
+      notify('修为已至瓶颈 · 回「突破」页备料冲关');
+      Sfx.warn();
+    } else if (!n) {
       const lv = save.cultivate.level || 1;
       notify(lv >= c.capLevel ? '此地灵气已尽，须往更远处去' : '灵石不足');
       Sfx.warn();
     } else {
-      writeSave(); Sfx.levelup();
+      Sfx.levelup();
       notify('闭关 ' + n + ' 次　今在 ' + realmName(save.cultivate.level));
     }
     renderCave();
@@ -5276,12 +5314,12 @@
       notify('掌天瓶催熟 · 灵宠修为大涨'); Sfx.levelup(); renderCave();
       return;
     }
-    // 突破页：备齐了就地破关
+    // 突破页：备齐了 → 进洞府剧情演出，演完破境
     const bn = e.target.closest('button[data-breaknow]');
     if (bn) {
       const lv = parseInt(bn.getAttribute('data-breaknow'), 10) || 0;
       const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv);
-      if (b) { G.breakCur = b; doBreakNow(); renderCave(); }
+      if (b) { startBreakScene(b); }
       return;
     }
   });
@@ -5984,6 +6022,7 @@
     breakList() { return JSON.parse(JSON.stringify(window.BREAKTHROUGH || [])); },    breakMissing(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); return b ? breakMissing(b).map(m => ({ kind: m.kind, id: m.id || null, name: m.name || null, need: m.need, have: m.have })) : null; },
     breakCan(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); return b ? canBreak(b) : true; },
     breakNow(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); if (!b) return 'no req'; G.breakCur = b; doBreakNow(); return { pending: G.breakPending, lv: G.player ? G.player.level : null, cult: save.cultivate.level }; },
+    startBreak(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); if (!b) return 'no req'; startBreakScene(b); return { scene: G.breakScene, dialog: G.state === 'dialog', lines: G.dialogLines ? G.dialogLines.length : 0 }; },
     breakOpen(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); openBreak(b); return !!(elBreak && elBreak.style.display === 'flex'); },
     breakShown() { return !!(elBreak && elBreak.style.display === 'flex'); },
     breakClose() { closeBreak(); return !!(elBreak && elBreak.style.display === 'flex'); },

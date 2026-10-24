@@ -96,14 +96,15 @@ const gate = await page.evaluate(() => {
   F.setStones(0);                       // 缺灵石 → 撞门
   arm(); F.tickFrames(4, 0.05);
   out.blocked = { lv: F.G.player.level, pending: F.breakPending(), can: F.breakCan(lv) };
-  F.setStones(5000);                    // 灵石补足 → 放行
+  F.setStones(5000);                    // 灵石补足 → 物事齐了，但大境界门仍要回洞府破
   arm(); F.tickFrames(4, 0.05);
-  out.passed = { lv: F.G.player.level, pending: F.breakPending() };
+  out.passed = { lv: F.G.player.level, pending: F.breakPending(), can: F.breakCan(lv) };
   return out;
 });
 ok(gate.blocked.lv === gate.reqLv - 1, '经验刷满也升不过瓶颈（等级卡在门槛前）', gate.blocked);
 ok(gate.blocked.pending === gate.reqLv && gate.blocked.can === false, '撞门时挂出「缺什么」的提示', gate.blocked);
-ok(gate.passed.lv >= gate.reqLv, '备齐灵石后放行，等级上去', gate.passed);
+ok(gate.passed.lv === gate.reqLv - 1 && gate.passed.pending === gate.reqLv && gate.passed.can === true,
+  '物事备齐后仍卡在门口：须回洞府「突破」走剧情冲关', gate.passed);
 
 
 // 突破面板：能开、能关、会吃掉该吃的丹
