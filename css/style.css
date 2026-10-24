@@ -1,0 +1,682 @@
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body {
+  width: 100%; height: 100%; overflow: hidden; background: var(--bg-base);
+  /* 楷体优先；缺字时落到思源宋体，而不是系统宋体（SimSun 字形差异更大） */
+  font-family: "KaiTi", "STKaiti", "Kaiti SC", "Source Han Serif SC", "Noto Serif SC", "Noto Serif CJK SC", serif;
+  color: var(--text-1); font-size: var(--fs-body); user-select: none; -webkit-user-select: none;
+}
+/* 安全区（刘海 / 底部横条）——--fr-safe-* 可由部署预览页覆盖，用于模拟真机 */
+:root {
+  --fr-safe-top: env(safe-area-inset-top, 0px);
+  --fr-safe-right: env(safe-area-inset-right, 0px);
+  --fr-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --fr-safe-left: env(safe-area-inset-left, 0px);
+
+  /* ---------- 字号阶梯：6 档（规格 §2.4） ---------- */
+  --fs-display: 32px;   /* 游戏标题、连斩数字 */
+  --fs-h1: 24px;        /* 面板标题 */
+  --fs-h2: 17px;        /* 区块标题、卡片名、说话人 */
+  --fs-body: 15px;      /* 正文、对话、主按钮 */
+  --fs-cap: 13px;       /* 次要说明、列表描述、页签、次按钮 */
+  --fs-micro: 11px;     /* 标签、角标、难度章、键位号 */
+  --fs-num: 12px;       /* 例外：HUD 数值（等宽，防跳动） */
+
+  /* ---------- 间距：基准 4px，6 档（规格 §2.2） ---------- */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px;
+  --sp-4: 16px; --sp-5: 24px; --sp-6: 32px;
+
+  /* ---------- 圆角：4 档（规格 §2.8） ---------- */
+  --r-sm: 6px;   /* 标签、徽章 */
+  --r-md: 10px;  /* 按钮、列表行、输入框 */
+  --r-lg: 14px;  /* 卡片、面板、对话框 */
+  --r-pill: 999px;
+
+  /* ---------- 交互状态：按下幅度 / 禁用透明度（规格 §2.10） ----------
+     按下分三档，按元素大小定，不是为统一而统一：
+     小圆钮缩得多一点才有手感，整行卡片缩一点点就够，缩多了会像在晃 */
+  --press-sm: 0.94;   /* 圆形小钮：快捷栏 / 飞鸽 / 表情 */
+  --press: 0.97;      /* 一般按钮、列表行、装备格 */
+  --press-lg: 0.99;   /* 大卡片：地图卡 / 难度卡 */
+  --op-disabled: 0.45;
+
+  /* ---------- 层级：8 层（规格 §2.6） ----------
+     z-combat 必须独立成层：战斗里弹剧情时，快捷栏/飘字仍要压过对话遮罩
+     z-banner 必须压过 panel：坊市、洞府里的操作反馈（灵石不足/买到了）原先被面板盖住，
+     玩家只觉得「点了没反应」。横幅是纯文字反馈，pointer-events 一律 none。 */
+  --z-world: 0;
+  --z-hud: 10;
+  --z-toast: 20;
+  --z-panel: 30;
+  --z-dialog: 40;
+  --z-combat: 45;
+  --z-banner: 55;
+  --z-modal: 60;
+
+  /* ---------- 颜色：语义 token（规格 §2.7） ----------
+     这里必须是字面值，不能写 var()：token 定义自身引用自身会形成循环，整块失效 */
+  --bg-base: #0d0f14;
+  --bg-panel-a: #1d2230;
+  --bg-panel-b: #141823;
+  --bg-card-a: #232a3b;
+  --bg-card-b: #171c27;
+  --bg-scrim: rgba(8,10,14,0.82);
+  --line-gold: #c9a24a;
+  --line-soft: rgba(201,162,74,0.28);
+  --text-1: #f2e8d5;   /* 主文字 13.9:1 */
+  --text-2: #cfc6b2;   /* 正文 9.4:1 */
+  --text-3: #9a927f;   /* 次要 5.9:1 */
+  --text-4: #8f8878;   /* 禁用 / 弱提示 5.21:1（原 #7c7768 仅 4.11，不达 AA） */
+  --accent: #ffd24a;   /* 强调金 */
+  --accent-lite: #e0b24a;
+  --accent-deep: #c9912f;
+  --accent-soft: #c9b27a;
+  --accent-shadow: #8a5e1c;
+  --ok: #6fe08a;
+  --ok-soft: #cfe6c0;
+  --danger: #ff9a9a;
+  --danger-deep: #b03a3a;
+  --hp-a: #e23b3b; --hp-b: #ff7a6a;
+  --mp-a: #2fb6c8; --mp-b: #7fe6f0;
+  --paper: #f2e8d5;    /* 对话框纸底 */
+  --ink: #2a1c06;      /* 金底上的墨色字 */
+  /* 仅状态色：只用于标签描边，不进文字体系 */
+  --tag-blue: #7fd8ff;
+  --tag-purple: #c48cff;
+  --tag-orange: #ff9a6a;
+}
+#wrap {
+  position: fixed; inset: 0; overflow: hidden;
+  padding: var(--fr-safe-top) var(--fr-safe-right) var(--fr-safe-bottom) var(--fr-safe-left);
+  background: radial-gradient(circle at 50% 42%, #171b23 0%, #0a0c10 78%);
+}
+#fit { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+/* 舞台：与画布同尺寸，所有 HUD / 弹窗都以它为定位基准，避免跑到黑边上 */
+#stage { position: relative; flex: 0 0 auto; width: 480px; height: 864px; }
+#game {
+  display: block; width: 100%; height: 100%;
+  background: #36532f; image-rendering: pixelated; image-rendering: crisp-edges;
+  touch-action: none; box-shadow: 0 0 40px rgba(0,0,0,0.6);
+}
+
+/* 浏览器全屏时铺满 */
+body.fs #wrap { background: #000; }
+
+/* ---------- HUD ---------- */
+#hud { position: absolute; inset: 0; pointer-events: none; display: none; }
+#topbar { position: absolute; top: 0; left: 0; right: 0; padding: 8px 12px 4px; display: flex; flex-direction: column; gap: var(--sp-1); }
+#hpwrap, #xpwrap { position: relative; height: 16px; background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.18); border-radius: var(--r-md); overflow: hidden; }
+#hpfill { height: 100%; width: 100%; background: linear-gradient(90deg,var(--hp-a),var(--hp-b)); transition: width .12s linear; }
+#xpfill { height: 100%; width: 0%; background: linear-gradient(90deg,var(--mp-a),var(--mp-b)); transition: width .12s linear; }
+.barlabel { position: absolute; left: 8px; top: 0; line-height: 16px; font-size: var(--fs-micro); color: var(--text-1); text-shadow: 0 1px 2px #000; }
+/* 血量 / 灵力数值：等宽数字，位数变化时不会左右抖 */
+.barval { position: absolute; right: 8px; top: 0; line-height: 16px; font-size: var(--fs-num); font-variant-numeric: tabular-nums; color: var(--text-1); text-shadow: 0 1px 2px #000; }
+#stats { display: flex; flex-wrap: wrap; gap: var(--sp-2); font-size: var(--fs-cap); color: var(--text-1); text-shadow: 0 1px 3px #000; }
+#stats span { background: rgba(0,0,0,0.35); padding: 0 8px; border-radius: var(--r-md); white-space: nowrap; }
+#level { color: var(--accent-soft); }
+#stones { color: var(--accent); }
+#mapName { align-self: flex-start; font-size: var(--fs-cap); color: var(--ok-soft); background: rgba(0,0,0,0.4); padding: 0 8px; border-radius: var(--r-md); text-shadow: 0 1px 2px #000; }
+/* 暂停键：⏸(U+23F8) 在部分安卓字体里缺字形，会渲成豆腐块 —— 改用两根竖条画，不依赖字体 */
+#pauseBtn { position: absolute; right: 12px; top: 62px; width: 44px; height: 44px; border: none; border-radius: var(--r-md); background: rgba(0,0,0,0.5); color: var(--text-1); pointer-events: auto; display: flex; align-items: center; justify-content: center; gap: var(--sp-1); padding: 0; }
+#pauseBtn::before, #pauseBtn::after { content: ''; display: block; width: 5px; height: 17px; border-radius: 1px; background: currentColor; }
+#pauseBtn:active { background: rgba(0,0,0,0.72); transform: scale(var(--press)); }
+#bosswrap { position: absolute; top: 104px; left: 12px; right: 12px; display: none; }
+#bossname { font-size: var(--fs-body); color: var(--accent); text-shadow: 0 1px 3px #000; margin-bottom: 0; }
+#bossbar { height: 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--accent); border-radius: var(--r-sm); overflow: hidden; }
+#bossfill { height: 100%; width: 100%; background: linear-gradient(90deg,var(--danger-deep),#ff5a4a); transition: width .15s linear; }
+#skillrow { position: absolute; left: 12px; bottom: 12px; display: flex; flex-wrap: wrap; gap: var(--sp-1); max-width: 70%; }
+.pip { width: 26px; height: 26px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); border-radius: var(--r-sm); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: var(--fs-cap); line-height: 1; }
+.pip b { font-size: var(--fs-micro); color: var(--accent); }
+
+/* ---------- 横幅 ---------- */
+/* z-banner 压过面板层：否则坊市/洞府里的「灵石不足」全被面板盖住，等于没提示。
+   pointer-events:none —— 它是飘过去的字，不能挡住底下按钮的点击。
+   背景必须做实：半透明压在半屏文字上会透出底下的字，看着像糊了一层。 */
+#banner { position: absolute; top: 152px; left: 50%; transform: translateX(-50%); background: rgba(10,13,20,0.94); border: 1px solid rgba(201,162,74,0.5); box-shadow: 0 6px 20px rgba(0,0,0,0.6); color: var(--accent); padding: 8px 16px; border-radius: var(--r-md); font-size: var(--fs-h2); display: none; text-shadow: 0 1px 3px #000; white-space: nowrap; z-index: var(--z-banner); pointer-events: none; }
+
+/* ---------- 覆盖层 ---------- */
+/* 覆盖层：左右各留 16，面板一律吃满可用宽（上限 460）——切界面时左右不再跳 */
+.overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-4); background: var(--bg-scrim); padding: var(--sp-4); text-align: center; z-index: var(--z-panel); }
+/* 层级按规格 §2.6 命名，不再靠 z-index 硬补：
+   panel(30) < dialog(40) < combat(45) < modal(60) —— z-combat 必须压过对话 */
+#dialog { z-index: var(--z-dialog); }
+#pause, #victory, #gameover, #levelup { z-index: var(--z-modal); }
+/* 覆盖层默认 display:flex，凡是「不该一进页面就露出」的都要列进这里 */
+#dialog, #levelup, #pause, #gameover, #victory, #worldmap, #shop, #difficulty, #cave, #prefight, #coop, #break { display: none; }
+
+/* 突破清单：一样一行，齐了打勾 */
+.brk-list { display: flex; flex-direction: column; gap: var(--sp-2); margin: 8px 0 4px; }
+.brk-row {
+  display: flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-cap); color: var(--text-2);
+  background: rgba(0,0,0,0.26); border: 1px solid rgba(201,162,74,0.2);
+  border-radius: var(--r-md); padding: 8px 8px;
+}
+.brk-row i {
+  font-style: normal; font-size: var(--fs-micro); color: var(--ink); background: var(--line-gold);
+  border-radius: var(--r-sm); padding: 0 4px; flex: none;
+}
+.brk-row span { flex: 1; min-width: 0; }
+.brk-row b { flex: none; font-size: var(--fs-cap); color: var(--danger); }
+.brk-row.ok { border-color: rgba(111,224,138,0.4); }
+.brk-row.ok i { background: var(--ok); }
+.brk-row.ok b { color: var(--ok); }
+.cave-sec2 { margin: 8px 0; padding-top: 8px; border-top: 1px dashed rgba(201,162,74,0.22); }
+/* 内容型面板（标题 / 暂停 / 道陨 / 通关 / 升级）：高度贴合内容，垂直居中 */
+.panel { width: 100%; max-width: 460px; background: linear-gradient(180deg,var(--bg-panel-a),var(--bg-panel-b)); border: 1px solid var(--line-gold); border-radius: var(--r-lg); padding: var(--sp-5); box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
+.panel h2 { color: var(--accent); font-size: var(--fs-h1); margin-bottom: 8px; }
+#victory .panel, #gameover .panel { max-height: 92%; overflow-y: auto; }
+.panel p { color: var(--text-2); line-height: 1.6; margin: 4px 0; font-size: var(--fs-body); }
+#title h1 { font-size: var(--fs-display); color: var(--accent); letter-spacing: 4px; text-shadow: 0 2px 8px #000; margin-bottom: 4px; }
+.sub { color: var(--accent-soft); font-size: var(--fs-body); margin-bottom: var(--sp-3); letter-spacing: 1px; }
+.desc { color: var(--text-2); font-size: var(--fs-body); line-height: 1.7; margin-bottom: 16px; }
+.hint { color: var(--text-3); font-size: var(--fs-cap); line-height: 1.7; margin-top: 12px; }
+.btn { background: linear-gradient(180deg,var(--accent-lite),var(--accent-deep)); color: var(--ink); border: none; border-radius: var(--r-md); padding: 12px 24px; min-height: 48px; font-size: var(--fs-body); font-family: inherit; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 var(--accent-shadow); margin-top: 4px; }
+.btn:not(.small) { min-width: 160px; }
+.btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--accent-shadow); }
+.btn:disabled, .btn[disabled] { opacity: var(--op-disabled); cursor: not-allowed; box-shadow: 0 4px 0 var(--accent-shadow); }
+.btn:disabled:active, .btn[disabled]:active { transform: none; }
+.btn.small { font-size: var(--fs-cap); padding: 12px 16px; min-height: 44px; background: rgba(255,255,255,0.1); color: var(--text-1); box-shadow: none; border: 1px solid rgba(255,255,255,0.25); }
+.btn.small:active { transform: translateY(2px); }
+/* 标题页统计：两列 key-value（替代原来用「·」串成的长流水句） */
+#best { margin-top: var(--sp-4); }
+.ts-hd { text-align: left; color: var(--text-4); font-size: var(--fs-micro); letter-spacing: 2px; margin-bottom: var(--sp-1); }
+.ts-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--sp-4); text-align: left; }
+.ts-row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-2); font-size: var(--fs-micro); line-height: 1.9; border-bottom: 1px dotted rgba(201,162,74,0.14); }
+.ts-row i { font-style: normal; color: var(--text-3); }
+.ts-row b { color: var(--accent); font-variant-numeric: tabular-nums; }
+.ts-row.wide { grid-column: 1 / -1; }
+.stats2 { display: flex; gap: var(--sp-4); justify-content: center; margin: 12px 0; color: var(--text-2); font-size: var(--fs-body); }
+.stats2 b { color: var(--accent); font-size: var(--fs-h2); display: block; }
+
+/* ---------- 对话 ---------- */
+#dialog { background: rgba(8,10,14,0.35); justify-content: flex-end; padding-bottom: 8%; }
+#dialogbox { width: 92%; max-width: 460px; background: var(--paper); color: var(--ink); border: 2px solid var(--line-gold); border-radius: var(--r-lg); padding: var(--sp-4); text-align: left; box-shadow: 0 8px 30px rgba(0,0,0,0.6); cursor: pointer; }
+/* 纸底按下去只压一点亮度：整框缩放会让对话文字跟着抖 */
+#dialogbox:active { filter: brightness(0.955); }
+#dialogSpeaker { color: var(--danger-deep); font-weight: bold; font-size: var(--fs-h2); margin-bottom: 8px; }
+#dialogText { font-size: var(--fs-h2); line-height: 1.7; min-height: 54px; }
+#dialogHint { text-align: right; color: var(--text-3); font-size: var(--fs-cap); margin-top: 4px; }
+
+/* ---------- 升级 ---------- */
+#levelup { background: rgba(8,10,14,0.85); }
+.lu-title { color: var(--accent); font-size: var(--fs-h1); margin-bottom: 4px; text-shadow: 0 2px 6px #000; }
+#cards { display: flex; gap: var(--sp-3); flex-wrap: wrap; justify-content: center; max-width: 460px; }
+.card { width: 130px; min-height: 150px; background: linear-gradient(180deg,var(--bg-card-a),var(--bg-card-b)); border: 1px solid var(--line-gold); border-radius: var(--r-lg); padding: 12px 8px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); transition: transform .1s, border-color .1s; }
+.card:active { transform: scale(var(--press)); }
+.card:hover { border-color: var(--accent); }
+.cicon { font-size: var(--fs-display); }
+.cname { color: var(--accent); font-size: var(--fs-h2); font-weight: bold; }
+.cdesc { color: var(--text-2); font-size: var(--fs-cap); line-height: 1.5; }
+
+/* ---------- 储物袋 / 道具 ---------- */
+#titleBag { margin-top: var(--sp-3); }
+#bag { color: var(--ok); }
+
+/* 拾取提示：贴右侧、同名合并、最多三条 —— 连续捡一堆也不会糊住半个屏 */
+#itemToast {
+  position: absolute; right: 8px; top: 148px;
+  width: 44%; max-width: 200px; max-height: 150px; overflow: hidden;
+  display: flex; flex-direction: column; gap: var(--sp-1); align-items: flex-end;
+  pointer-events: none; z-index: var(--z-combat); /* 拾取飘字：战斗反馈，压过对话遮罩 */
+  transition: top .16s ease-out;
+}
+/* 居中横幅出现时整体下移，避免压住横幅文字 */
+#itemToast.below { top: 196px; }
+.itoast {
+  background: rgba(10,13,19,0.80); border: 1px solid var(--line-gold); border-radius: var(--r-md);
+  padding: 4px 8px; font-size: var(--fs-micro); line-height: 1.35; max-width: 100%;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.45); animation: toastIn .16s ease-out;
+}
+.itoast b { display: block; font-size: var(--fs-cap); font-weight: 600; letter-spacing: .3px; }
+.itoast b i { font-style: normal; color: var(--accent-soft); margin-left: 4px; font-size: var(--fs-micro); }
+.itoast span {
+  color: var(--text-3); font-size: var(--fs-micro); display: block;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.itoast.more { color: var(--text-3); font-size: var(--fs-micro); border-color: rgba(201,162,74,0.35); }
+@keyframes toastIn { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
+
+/* ---------- 存档设置 ---------- */
+.settings { margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(201,162,74,0.28); display: flex; flex-direction: column; gap: var(--sp-2); align-items: center; }
+.setrow { display: flex; align-items: center; gap: var(--sp-2); min-height: 44px; font-size: var(--fs-body); color: var(--text-2); cursor: pointer; }
+.setrow input { width: 16px; height: 16px; accent-color: var(--accent-deep); cursor: pointer; }
+#saveHint, .savesub { font-size: var(--fs-micro); color: var(--text-4); line-height: 1.5; }
+#saveNowBtn { margin-top: 0; }
+
+/* ---------- 战利品清单 ---------- */
+#victoryLoot { width: 100%; max-height: 196px; overflow-y: auto; background: rgba(0,0,0,0.3); border: 1px solid rgba(201,162,74,0.3); border-radius: var(--r-md); padding: 8px 8px; text-align: left; margin: 4px 0 0; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); }
+#victoryNext { width: 100%; text-align: left; }
+#victoryNext .loottotal { margin-top: 0; border-top: none; }
+#victoryNext .newmap { color: var(--accent); font-size: var(--fs-cap); padding: 4px 0 0; }
+.loottitle { color: var(--accent); font-size: var(--fs-cap); margin-bottom: 4px; }
+.lootrow { display: flex; justify-content: space-between; gap: var(--sp-2); font-size: var(--fs-cap); line-height: 1.55; }
+.lootrow span { color: var(--text-3); }
+.lootrow.muted { color: var(--text-4); }
+.lootrow.reward b { color: var(--accent); }
+.loottotal { margin-top: 4px; padding-top: var(--sp-2); border-top: 1px dashed rgba(201,162,74,0.25); font-size: var(--fs-micro); color: var(--ok); }
+.loottotal.newmap { border-top: none; color: var(--accent); font-size: var(--fs-cap); margin-top: 4px; }
+
+/* ---------- 连斩 ---------- */
+#combo {
+  position: absolute; top: 194px; left: 16px;
+  display: none; pointer-events: none; text-align: left; z-index: var(--z-toast);
+  text-shadow: 0 2px 6px #000, 0 0 14px rgba(255,180,60,0.55);
+}
+#combo b { display: block; font-size: var(--fs-display); line-height: 1; color: var(--accent); letter-spacing: 1px; }
+#combo span { display: block; font-size: var(--fs-cap); color: var(--accent-soft); margin-top: 0; letter-spacing: 1px; }
+#combo.pop { animation: comboPop .26s ease-out; }
+@keyframes comboPop {
+  0% { transform: scale(1.5); opacity: .25; }
+  55% { transform: scale(0.96); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+/* ---------- 修行图 ---------- */
+/* 列表型面板：三段式（头 / 滚动体 / 底），高度定死不随内容跳 */
+.wm-panel {
+  width: 100%; max-width: 460px; max-height: 92%;
+  background: linear-gradient(180deg,var(--bg-panel-a),var(--bg-panel-b));
+  border: 1px solid var(--line-gold); border-radius: var(--r-lg);
+  padding: var(--sp-4); box-shadow: 0 10px 40px rgba(0,0,0,0.65);
+  display: flex; flex-direction: column; gap: var(--sp-3); text-align: left;
+}
+/* 这五个是「换页签换内容的列表」，高度必须固定：否则内容一多一少，面板就上下跳。
+   难度选择不进这组 —— 它只有三五张卡，定高只留下一片空。 */
+#worldmap .wm-panel, #shop .wm-panel, #cave .wm-panel, #prefight .wm-panel {
+  height: min(calc(100% - var(--sp-6)), 720px);
+}
+.wm-head { flex: 0 0 auto; }
+.wm-head h2 { color: var(--accent); font-size: var(--fs-h1); letter-spacing: 2px; margin-bottom: 0; }
+.wm-sub { color: var(--text-3); font-size: var(--fs-cap); line-height: 1.6; }
+.wm-stats { display: flex; gap: var(--sp-2); margin-top: 8px; flex-wrap: wrap; }
+.wm-stats span { font-size: var(--fs-micro); color: var(--ok-soft); background: rgba(0,0,0,0.4); border: 1px solid rgba(201,162,74,0.25); border-radius: var(--r-sm); padding: 0 8px; }
+#wmList { flex: 1 1 auto; overflow-y: auto; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); display: flex; flex-direction: column; gap: var(--sp-2); padding-bottom: var(--sp-2); -webkit-overflow-scrolling: touch; }
+
+.mapcard {
+  border: 1px solid rgba(201,162,74,0.35); border-radius: var(--r-lg); padding: 8px 8px;
+  background: linear-gradient(180deg, var(--bg-card-a), var(--bg-card-b));
+  cursor: pointer; transition: border-color .12s, transform .1s;
+}
+.mapcard:active { transform: scale(var(--press-lg)); }
+.mapcard:hover { border-color: var(--accent); }
+.mapcard.current { border-color: rgba(111,224,138,0.55); box-shadow: inset 0 0 0 1px rgba(111,224,138,0.15); }
+.mapcard.locked { opacity: var(--op-disabled); filter: grayscale(0.5); cursor: not-allowed; }
+.mapcard.locked:hover { border-color: rgba(201,162,74,0.35); }
+.mc-top { display: flex; align-items: center; gap: var(--sp-2); }
+.mc-num { color: var(--line-gold); font-size: var(--fs-cap); background: rgba(201,162,74,0.14); border-radius: var(--r-sm); padding: 0 4px; }
+.mc-name { color: var(--text-1); font-size: var(--fs-body); font-weight: bold; flex: 1; }
+.mc-tag { font-size: var(--fs-micro); padding: 0 var(--sp-2); line-height: 1.6; border-radius: var(--r-sm); border: 1px solid; }
+.mc-tag.story { color: var(--accent-soft); border-color: rgba(201,178,122,0.55); }
+.mc-tag.fight { color: var(--tag-orange); border-color: rgba(255,154,106,0.5); }
+.mc-tag.bossfight { color: var(--danger); border-color: rgba(255,122,122,0.55); }
+.mc-tag.market { color: var(--tag-blue); border-color: rgba(127,216,255,0.5); }
+.mc-pos { color: var(--text-3); font-size: var(--fs-micro); margin-top: 4px; letter-spacing: .5px; }
+.mc-desc { color: var(--text-2); font-size: var(--fs-cap); line-height: 1.55; margin-top: 4px; }
+.mc-meta { color: var(--text-3); font-size: var(--fs-micro); line-height: 1.5; margin-top: 4px; }
+.mc-boss { color: var(--danger); font-size: var(--fs-micro); margin-top: 4px; }
+.mc-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: var(--sp-2); border-top: 1px dashed rgba(201,162,74,0.2); }
+.mc-state { font-size: var(--fs-micro); }
+.mc-state.on { color: var(--ok); }
+.mc-state.off { color: var(--text-4); }
+.mc-go { font-size: var(--fs-cap); color: var(--accent); }
+.mc-lock { font-size: var(--fs-micro); color: var(--text-4); }
+
+/* ---------- 坊市 ---------- */
+#shopTabs { display: flex; gap: var(--sp-2); flex: 0 0 auto; }
+/* 页签：视觉高 40，命中区用 ::after 补到 44（规格 §2.5） */
+.tab {
+  position: relative; flex: 1; padding: 8px 0; min-height: 40px;
+  font-size: var(--fs-cap); font-family: inherit; cursor: pointer;
+  background: rgba(255,255,255,0.06); color: var(--text-3);
+  border: 1px solid rgba(201,162,74,0.3); border-radius: var(--r-md);
+}
+.tab::after { content: ''; position: absolute; inset: -2px 0; }
+/* 已选中的页签按下去不该闪回灰底 —— 状态叠加要排除自身 */
+.tab:active:not(.active) { background: rgba(255,255,255,0.12); }
+.tab:disabled { opacity: var(--op-disabled); cursor: not-allowed; }
+.tab.active { background: linear-gradient(180deg,var(--accent-lite),var(--accent-deep)); color: var(--ink); font-weight: bold; border-color: var(--accent); }
+#shopList { flex: 1 1 auto; overflow-y: auto; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); display: flex; flex-direction: column; gap: var(--sp-2); -webkit-overflow-scrolling: touch; padding-bottom: var(--sp-2); }
+.shoprow { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(201,162,74,0.2); border-radius: var(--r-md); }
+.shoprow.poor { opacity: .55; }
+.sr-main { flex: 1; min-width: 0; }
+.sr-main b { font-size: var(--fs-cap); display: block; }
+.sr-main i { display: block; font-style: normal; color: var(--text-3); font-size: var(--fs-micro); line-height: 1.45; margin-top: 0; }
+.sr-right { display: flex; align-items: center; gap: var(--sp-2); flex: 0 0 auto; }
+.shoprow .sr-right { flex-direction: column; align-items: flex-end; gap: var(--sp-1); }
+.sr-own { color: var(--text-3); font-size: var(--fs-micro); }
+/* 列表内按钮：视觉 36，命中补到 44。
+   取 -6 而不是理论值 -4：边界像素有取整，实测 -4 只能扩出 3/2px（合计 41），够不到 44。
+   代价是同一组里换行的两排会互相侵入 —— 所以 .sr-btns 的行间距必须 ≥12，见下方。 */
+.sr-btn {
+  position: relative; min-height: 36px; padding: 8px 12px;
+  font-family: inherit; font-size: var(--fs-cap); border-radius: var(--r-sm); cursor: pointer;
+  background: rgba(255,255,255,0.08); color: var(--text-1); border: 1px solid rgba(255,255,255,0.22);
+}
+.sr-btn::after { content: ''; position: absolute; inset: -6px 0; }
+/* 按下用提亮而不是换底色：金底买入 / 灰底卖出同一套，且不打断渐变 */
+.sr-btn:active { filter: brightness(1.18); }
+.sr-btn.buy { background: linear-gradient(180deg,var(--accent-lite),var(--accent-deep)); color: var(--ink); font-weight: bold; border-color: var(--accent); }
+.sr-btn.buy:active { filter: brightness(1.3); }
+.sr-btn:disabled { opacity: var(--op-disabled); cursor: not-allowed; }
+.sr-btn:disabled:active { filter: none; }
+/* 买不起 / 境界不够的货：只提示「不能买」，不吞点击。
+   disabled 会让浏览器不发事件，连「差多少灵石」都问不出来 —— 所以这里只管样子。
+   （不用 aria-disabled：那是「控件不可操作」的语义，与「点了要能解释」自相矛盾） */
+.sr-btn[data-cant] { cursor: not-allowed; }
+.sr-btn[data-cant]:active { filter: brightness(1.1); }
+.shopempty { color: var(--text-4); font-size: var(--fs-cap); text-align: center; padding: var(--sp-6) 0; line-height: 1.8; }
+/* 整柜空着时，说明文字放到面板正中 —— 定高面板里贴顶会显得像没加载出来 */
+#shopList > .shopempty:only-child, #wmList > .shopempty:only-child { margin: auto 0; padding: 0; }
+
+/* ---------- 修行图：洞府 / 难度徽记 ---------- */
+.mapcard.home { border-color: rgba(127,216,255,0.55); background: linear-gradient(180deg,#1e2b33,#151d24); }
+.mc-tag.home { color: var(--tag-blue); border-color: rgba(127,216,255,0.6); }
+.mc-go.home { color: var(--tag-blue); }
+.mc-cave { color: #8fd8c8; font-size: var(--fs-micro); margin-top: 4px; }
+.mc-diffs { display: flex; gap: var(--sp-1); margin-top: 4px; }
+.dchip {
+  font-size: var(--fs-micro); padding: 0 4px; border-radius: var(--r-sm); color: var(--text-4);
+  border: 1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.25);
+}
+.dchip.on { color: var(--dc); border-color: var(--dc); background: rgba(255,255,255,0.06); }
+
+/* ---------- 难度选择 ---------- */
+#diffList { flex: 1 1 auto; overflow-y: auto; display: flex; flex-direction: column; gap: var(--sp-2); padding-bottom: var(--sp-2); -webkit-overflow-scrolling: touch; }
+.diffcard {
+  position: relative; cursor: pointer; padding: 8px 12px; border-radius: var(--r-lg);
+  border: 1px solid rgba(201,162,74,0.3); background: linear-gradient(180deg,var(--bg-card-a),var(--bg-card-b));
+  transition: border-color .12s, transform .1s;
+}
+.diffcard:hover { border-color: var(--dc); }
+.diffcard:active { transform: scale(var(--press-lg)); }
+.dc-top { display: flex; align-items: center; gap: var(--sp-2); }
+.dc-top b { font-size: var(--fs-h2); color: var(--dc); letter-spacing: 1px; }
+.dc-tag { font-size: var(--fs-micro); color: var(--text-3); border: 1px solid rgba(255,255,255,0.2); border-radius: var(--r-sm); padding: 0 4px; }
+.dc-done { margin-left: auto; font-size: var(--fs-micro); color: var(--ok); border: 1px solid rgba(111,224,138,0.5); border-radius: var(--r-sm); padding: 0 4px; }
+.dc-desc { color: var(--text-2); font-size: var(--fs-cap); line-height: 1.55; margin-top: 4px; }
+.dc-mul { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-2); margin-top: 4px; }
+.dc-mul span { font-size: var(--fs-micro); color: var(--text-3); }
+.dc-go { text-align: right; color: var(--dc); font-size: var(--fs-cap); margin-top: 4px; }
+
+/* ---------- 洞府 ---------- */
+.cave-quote { color: var(--accent-soft); font-size: var(--fs-cap); font-style: italic; line-height: 1.6; margin-top: 4px; }
+#caveTabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-2); flex: 0 0 auto; }
+#caveTabs .tab { padding: 4px 0; font-size: var(--fs-cap); }
+#caveBody { flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: var(--sp-3); padding-bottom: var(--sp-2); }
+.cave-foot { display: flex; gap: var(--sp-2); justify-content: flex-end; flex: 0 0 auto; }
+.cave-sec { display: flex; flex-direction: column; gap: var(--sp-2); }
+.cs-title { color: var(--accent); font-size: var(--fs-cap); letter-spacing: 1px; border-left: 2px solid rgba(201,162,74,0.6); padding-left: var(--sp-2); }
+.cs-note { color: var(--text-3); font-size: var(--fs-micro); line-height: 1.55; }
+/* 空态：面板定高之后，一行小字挂在顶上会让下面整片发空，居中给出一个重心 */
+.cs-empty { color: var(--text-4); font-size: var(--fs-cap); text-align: center; padding: var(--sp-6) 0; }
+.cave-sec.empty { flex: 1; justify-content: center; }
+.cave-sec.empty .cs-empty { padding: 0; }
+.statgrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-1); }
+.statcell { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-2); background: rgba(255,255,255,0.04); border: 1px solid rgba(201,162,74,0.16); border-radius: var(--r-md); padding: 4px 8px; }
+.statcell i { font-style: normal; color: var(--text-3); font-size: var(--fs-micro); }
+.statcell b { color: var(--text-1); font-size: var(--fs-cap); }
+.skipills { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-1); }
+/* 功法格：opacity 低是「未运起」，不是禁用 —— 别拿它当 disabled 用 */
+.skipill { display: flex; align-items: center; gap: var(--sp-1); background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--r-md); padding: 4px 8px; opacity: .55; }
+.skipill.on { opacity: 1; border-color: rgba(201,162,74,0.3); }
+.skipill span { font-size: var(--fs-cap); }
+.skipill b { font-size: var(--fs-micro); color: var(--text-2); font-weight: normal; flex: 1; }
+.skipill i { font-style: normal; font-size: var(--fs-micro); color: var(--accent); }
+
+.equipgrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-2); }
+.eqslot { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 8px; border-radius: var(--r-md); border: 1px dashed rgba(201,162,74,0.3); background: rgba(255,255,255,0.03); cursor: pointer; transition: background .1s; }
+.eqslot:active { transform: scale(var(--press)); background: rgba(255,255,255,0.08); }
+.eqslot.filled { border-style: solid; border-color: rgba(109,182,255,0.45); background: rgba(109,182,255,0.07); }
+.es-ico { font-size: var(--fs-h2); }
+.es-body { flex: 1; min-width: 0; }
+.es-body b { display: block; font-size: var(--fs-micro); color: var(--text-3); font-weight: normal; }
+.es-body i { display: block; font-style: normal; font-size: var(--fs-cap); margin-top: 0; }
+.es-off { font-size: var(--fs-micro); color: var(--danger); border: 1px solid rgba(255,154,154,0.4); border-radius: var(--r-sm); padding: 0 4px; }
+
+.gearlist { display: flex; flex-direction: column; gap: var(--sp-2); }
+.gearrow { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 8px; border-radius: var(--r-md); border: 1px solid rgba(201,162,74,0.2); background: rgba(255,255,255,0.04); cursor: pointer; transition: background .1s; }
+.gearrow:active { transform: scale(var(--press)); background: rgba(255,255,255,0.09); }
+.gearrow.equipped { border-color: rgba(111,224,138,0.5); background: rgba(111,224,138,0.07); }
+.gearrow.locked { opacity: var(--op-disabled); cursor: not-allowed; }
+.gearrow.locked:active { transform: none; background: rgba(255,255,255,0.04); }
+.gr-main { flex: 1; min-width: 0; }
+.gr-main b { font-size: var(--fs-cap); display: block; }
+.gr-main i { display: block; font-style: normal; color: var(--text-3); font-size: var(--fs-micro); line-height: 1.45; margin-top: 0; }
+.gr-right { display: flex; align-items: center; gap: var(--sp-2); flex: 0 0 auto; }
+.gr-need { font-size: var(--fs-micro); color: var(--danger); }
+.gr-on { font-size: var(--fs-micro); color: var(--ok); }
+
+.recrow { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 8px; border-radius: var(--r-md); border: 1px solid rgba(201,162,74,0.18); background: rgba(255,255,255,0.03); }
+.recrow.can { border-color: rgba(111,224,138,0.35); background: rgba(111,224,138,0.05); }
+.rr-main { flex: 1; min-width: 0; }
+.rr-main b { font-size: var(--fs-cap); display: block; }
+.rr-rate { display: inline-block; margin-top: 0; font-size: var(--fs-micro); letter-spacing: .02em; color: var(--accent-soft); }
+.recrow.can .rr-rate { color: var(--ok); }
+.rr-main em { display: block; font-style: normal; color: var(--text-4); font-size: var(--fs-micro); line-height: 1.45; margin-top: 4px; }
+.rr-mats { display: flex; flex-wrap: wrap; gap: var(--sp-1); margin-top: 4px; }
+.mat { font-size: var(--fs-micro); color: var(--danger); border: 1px solid rgba(255,120,120,0.28); border-radius: var(--r-sm); padding: 0 4px; }
+.mat.ok { color: var(--ok); border-color: rgba(159,224,192,0.45); }
+.mat.stone { color: var(--accent); border-color: rgba(255,210,74,0.3); }
+.mat.stone.ok { color: var(--accent); border-color: rgba(255,210,74,0.6); }
+.rr-right { flex: 0 0 auto; }
+
+.restbox { display: flex; flex-direction: column; gap: var(--sp-2); }
+.resttip { color: var(--ok-soft); font-size: var(--fs-cap); line-height: 1.6; }
+.resttip.warn { color: var(--danger); }
+.restbtns { display: flex; gap: var(--sp-2); }
+.restbtns .btn { flex: 1; }
+/* 打坐按钮的禁用只管透明度，其余交给 .btn:disabled 统一处理 */
+.restbtns .btn:disabled { opacity: var(--op-disabled); }
+
+/* ---------- 坊市分类 / 标签 ---------- */
+#shopCats { display: flex; gap: var(--sp-2); flex: 0 0 auto; }
+/* 分类页签更矮，命中区扩到 44 */
+.tab.mini { flex: 1; padding: 8px 0; min-height: 32px; font-size: var(--fs-cap); }
+.tab.mini::after { inset: -6px 0; }
+.sr-gear, .sr-mat { font-style: normal; font-size: var(--fs-micro); margin-left: 4px; padding: 0 4px; border-radius: var(--r-sm); vertical-align: middle; }
+.sr-gear { color: var(--tag-blue); border: 1px solid rgba(127,216,255,0.45); }
+.sr-mat { color: var(--ok); border: 1px solid rgba(159,224,192,0.4); }
+.dl-tag { font-size: var(--fs-micro); }
+
+/* ---------- 按钮排 / 全屏 ---------- */
+.btnrow { display: flex; gap: var(--sp-2); justify-content: center; flex-wrap: wrap; }
+#pause .btn { width: 100%; }
+#pause .btn.small { width: auto; flex: 1; }
+#pause .btnrow { width: 100%; }
+#title .btnrow { margin-top: 4px; }
+
+#fsHint {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  background: rgba(0,0,0,0.72); color: var(--accent); border: 1px solid rgba(201,162,74,0.5);
+  border-radius: var(--r-md); padding: 8px 16px; font-size: var(--fs-cap); letter-spacing: 1px;
+  opacity: 0; pointer-events: none; transition: opacity .3s; z-index: var(--z-modal); white-space: nowrap;
+}
+#fsHint.show { opacity: 1; }
+
+/* ---------- 支线：地图卡片与分组 ---------- */
+.wm-sec {
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-2);
+  margin: 8px 0 0; padding-top: 8px;
+  border-top: 1px dashed rgba(201,162,74,0.26);
+  color: var(--accent-soft); font-size: var(--fs-cap); letter-spacing: .5px;
+}
+.wm-sec b { color: var(--accent-soft); font-size: var(--fs-cap); letter-spacing: 2px; }
+.wm-sec span { color: var(--text-4); font-size: var(--fs-micro); }
+.wm-sec:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+.wm-sec.empty {
+  display: block; border-top: 1px dashed rgba(201,162,74,0.16);
+  color: var(--text-3); font-size: var(--fs-micro); line-height: 1.6; letter-spacing: 0;
+}
+.mapcard.side {
+  border-color: rgba(196,140,255,0.42);
+  background: linear-gradient(180deg,#241d33,#171422);
+  box-shadow: inset 3px 0 0 rgba(196,140,255,0.45);
+}
+.mapcard.side:hover { border-color: var(--tag-purple); }
+.mapcard.side .mc-num { color: #d9c2ff; background: rgba(196,140,255,0.16); }
+.mc-tag.side { color: var(--tag-purple); border-color: rgba(196,140,255,0.55); }
+.mapcard.side.done { opacity: .78; }
+
+/* 坊市：卖 / 拆 按钮组 —— 相邻可点元素水平间距 ≥8，避免「卖」误点成「买」；
+   行间距 12：命中区上下各扩 6，两排之间必须留够 12，否则上排的下缘会被下排吃掉 */
+.sr-btns { display: flex; flex-wrap: wrap; gap: var(--sp-3) var(--sp-2); justify-content: flex-end; max-width: 152px; }
+.sr-btn.ghost {
+  background: transparent; border: 1px solid rgba(255,255,255,0.2);
+  color: var(--text-2); padding: 8px; font-size: var(--fs-cap);
+}
+.sr-btn.ghost:hover { border-color: var(--tag-purple); color: #e6d9ff; }
+.sr-eq { color: var(--ok); font-size: var(--fs-micro); font-style: normal; margin-left: 4px; }
+.shopempty.tip { padding: 4px 0 8px; font-size: var(--fs-micro); line-height: 1.5; text-align: left; color: var(--text-3); }
+
+/* 右侧快捷栏：三格，灵宠 / 消耗道具，各自有回气时间
+   z-index 压过对话/横幅这一层 —— 战斗里弹出际遇对话时，玩家仍要点得到这三格 */
+#quickbar { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); display: none; flex-direction: column; gap: var(--sp-3); pointer-events: auto; z-index: var(--z-combat); }
+#quickbar.on { display: flex; }
+.qb { position: relative; width: 46px; height: 46px; padding: 0; border-radius: 50%; border: 1px solid rgba(201,162,74,0.5); background: rgba(10,12,18,0.74); color: var(--text-1); font-size: 20px; /* 图标字号，非文字档 */ line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.qb .qb-icon { font-style: normal; }
+/* 角落的键位号：告诉玩家这三格也能按 1 / 2 / 3（压在下沿，圆角裁不到） */
+.qb::after { content: attr(data-key); position: absolute; left: 0; right: 0; bottom: 2px; text-align: center; font-size: var(--fs-micro); line-height: 1; color: var(--line-gold); opacity: .7; pointer-events: none; z-index: 2; }
+.qb.empty::after { opacity: .3; }
+.qb.empty { opacity: .4; }
+.qb .qb-cd { position: absolute; inset: 0; border-radius: 50%; background: rgba(0,0,0,0.62); display: none; align-items: center; justify-content: center; font-style: normal; font-size: var(--fs-cap); color: var(--accent); }
+.qb.cooling .qb-cd { display: flex; }
+.qb.pet { border-color: rgba(140,220,255,0.55); }
+.qb:active { transform: scale(var(--press-sm)); }
+
+.qb-picks { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: 4px; }
+
+/* 战前运功面板：功法再多也只在面板内滚动，绝不顶出屏幕 */
+#pfBody {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  display: flex; flex-direction: column; gap: var(--sp-2); padding-bottom: var(--sp-2);
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent);
+}
+
+/* ---------- 战前运功：功法按大境界分组收纳，点击展开 ---------- */
+/* flex:0 0 auto 很关键：#pfBody 是 flex 列，档位块一旦可收缩就会被压扁（内容被裁掉），
+   必须保持自身高度，让它撑出滚动条，而不是被挤没 */
+.pf-tier { flex: 0 0 auto; margin: 8px 0; border: 1px solid rgba(201,178,122,0.26); border-radius: var(--r-md); overflow: hidden; }
+.pf-tier-hd { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 12px; cursor: pointer; background: rgba(201,178,122,0.08); font-weight: 700; -webkit-user-select: none; user-select: none; transition: background .1s; }
+.pf-tier-hd:hover { background: rgba(201,178,122,0.14); }
+.pf-tier-hd:active { background: rgba(201,178,122,0.2); }
+.pf-tier-hd .caret { display: inline-block; transition: transform .18s; opacity: .85; }
+.pf-tier.open .pf-tier-hd .caret { transform: rotate(90deg); }
+.pf-tier .pf-list { display: none; padding: 4px 8px 8px; }
+.pf-tier.open .pf-list { display: block; }
+.pf-tier.cur > .pf-tier-hd { background: rgba(255,210,74,0.15); }
+.pf-count { font-size: var(--fs-micro); font-weight: 400; opacity: .72; }
+.pf-note { flex: 0 0 auto; font-size: var(--fs-micro); opacity: .7; padding: 4px 0 8px; }
+
+/* ---------- 修行图：支线像叠牌挂在主线卡后 ---------- */
+.mapdeck { position: relative; margin: 8px 0; }
+.mapdeck .deck-side { margin: 8px 0 0 16px; padding-left: 12px; border-left: 2px dashed rgba(201,178,122,0.35); }
+.mapdeck:not(.open) .deck-side { display: none; }
+/* 支线展开条：视觉一行字，命中区上下各扩 8（规格 §2.5） */
+.deck-toggle { position: relative; display: inline-flex; align-items: center; gap: var(--sp-2); margin: 4px 0 0; font-size: var(--fs-cap); color: var(--accent-soft); cursor: pointer; -webkit-user-select: none; user-select: none; }
+.deck-toggle::after { content: ''; position: absolute; inset: -8px 0; }
+.deck-toggle:hover { color: var(--accent); }
+.deck-toggle:active { color: var(--accent); transform: translateY(1px); }
+.deck-peek { display: flex; gap: var(--sp-1); }
+.deck-peek i { display: block; width: 22px; height: 7px; border-radius: var(--r-sm); background: rgba(201,178,122,0.28); border: 1px solid rgba(201,178,122,0.45); }
+
+/* ---------- 限时增益条：服丹 / 催符后在身的属性 ---------- */
+#buffrow { display: none; gap: var(--sp-2); flex-wrap: wrap; margin-top: 4px; }
+.bpip { display: flex; align-items: center; gap: var(--sp-1); padding: 0 8px; border-radius: var(--r-pill); background: rgba(10,12,18,0.76); border: 1px solid rgba(255,210,74,0.45); font-size: var(--fs-micro); color: var(--accent-soft); }
+.bpip span { font-style: normal; }
+.bpip b { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* ---------- 双人联机面板 ---------- */
+.coop-body { display: flex; flex-direction: column; gap: var(--sp-3); }
+.coop-line { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-cap); color: var(--ok-soft); }
+.coop-line input { flex: 1; min-width: 0; padding: 8px 8px; border-radius: var(--r-md); border: 1px solid rgba(201,162,74,0.35); background: rgba(0,0,0,0.35); color: var(--text-1); font-size: var(--fs-cap); }
+.coop-status { padding: 8px 8px; border-radius: var(--r-md); font-size: var(--fs-cap); border: 1px solid rgba(201,162,74,0.3); background: rgba(0,0,0,0.3); }
+.coop-status.ok { color: var(--ok); border-color: rgba(111,224,138,0.45); }
+.coop-status.bad { color: var(--danger); border-color: rgba(255,120,120,0.45); }
+.coop-status.warn { color: var(--accent); border-color: rgba(255,210,74,0.45); }
+.coop-status.info { color: var(--ok-soft); }
+/* 联机两句话教程：进门前先把话说明白 */
+.coop-tip {
+  font-size: var(--fs-cap); line-height: 1.85; color: var(--text-2);
+  background: rgba(201,162,74,0.09);
+  border: 1px dashed rgba(201,162,74,0.38);
+  border-radius: var(--r-md); padding: 8px 12px;
+}
+.coop-tip b { color: var(--line-gold); margin-right: 4px; }
+.coop-peers { font-size: var(--fs-cap); color: var(--text-3); }
+.coop-log { max-height: 150px; overflow-y: auto; font-size: var(--fs-cap); line-height: 1.7; color: var(--text-3); background: rgba(0,0,0,0.28); border-radius: var(--r-md); padding: 8px; }
+
+/* ================= 飞鸽传书：联机聊天 ================= */
+/* 左下角鸽子按钮；点开后横条输入框从按钮处向左延展，聊天记录陆续向上延展。
+   记录框背景刻意压到 10% 半透明，只为衬出聊天内容本身。 */
+.chat-wrap {
+  position: absolute; right: 12px; bottom: 12px; z-index: var(--z-modal);   /* 右下角：技能栏在左下，正好让开 */
+  display: flex; flex-direction: column; align-items: flex-end;
+  pointer-events: none;                 /* 容器不吃点击，只有控件吃 */
+}
+.chat-wrap .chat-bar { display: flex; flex-direction: row; align-items: center; gap: var(--sp-2); pointer-events: auto; }
+.chat-dove {
+  width: 44px; height: 44px; border-radius: 50%; flex: 0 0 auto; padding: 0;
+  background: rgba(28, 24, 18, 0.72); border: 1px solid rgba(201, 162, 74, 0.5);
+  cursor: pointer; color: var(--text-1);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+/* 鸽子用游戏自己的像素精灵：放大时保持硬边，不糊 */
+.chat-dove canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
+.chat-dove:active { transform: scale(var(--press-sm)); }
+.chat-wrap #chatInput {
+  width: 0; padding: 0; border: none; opacity: 0;
+  height: 34px; border-radius: var(--r-lg); background: rgba(20, 17, 12, 0.86);
+  border: 1px solid rgba(201, 162, 74, 0.34); color: var(--text-1); font-size: var(--fs-cap);
+  outline: none; transition: width .22s ease, opacity .22s ease, padding .22s ease;
+  font-family: inherit;
+}
+.chat-wrap.open #chatInput { width: 190px; padding: 0 12px; opacity: 1; }
+.chat-wrap #chatInput::placeholder { color: var(--text-3); }
+/* 聊天记录：向上延展，最多 5 行，超出滚动 */
+.chat-log {
+  width: 236px; max-height: 118px; overflow-y: auto; margin-bottom: 8px;
+  display: none; flex-direction: column; justify-content: flex-end; gap: var(--sp-1);
+  background: rgba(0, 0, 0, 0.10);      /* 10% 半透明，突出聊天内容 */
+  border-radius: var(--r-md); padding: 8px 8px; pointer-events: auto;
+  -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+}
+.chat-log.show { display: flex; }
+.chat-line { font-size: var(--fs-cap); line-height: 1.5; color: var(--text-1); word-break: break-all; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
+.chat-line.me { color: var(--accent-soft); }
+.chat-line .who { color: var(--line-gold); margin-right: 4px; font-size: var(--fs-cap); }
+.chat-line.sys { color: var(--tag-blue); font-size: var(--fs-cap); font-style: italic; }
+
+/* ================= 结算菜单上移：留出下方空间好说话 ================= */
+/* 打完 Boss 不该一整屏糊住：面板上移，下方可透出地图，
+   右下角飞鸽照常能用 —— 两人就地聊两句、丢个表情，想走再自己点「离开地图」。 */
+#victory {
+  justify-content: flex-start;
+  padding: 16px 16px 0;
+  /* 上方压暗保证面板可读，下方渐透让地图露出来 */
+  background: linear-gradient(to bottom,
+    rgba(8,10,14,0.88) 0%, rgba(8,10,14,0.82) 40%,
+    rgba(8,10,14,0.45) 62%, rgba(8,10,14,0) 78%);
+  pointer-events: none;              /* 只有面板自己吃点击，别挡住下方 */
+}
+#victory .panel { pointer-events: auto; max-height: 60%; }
+
+/* 表情包：一排小按钮，点一下放出去。
+   row-gap 必须 ≥12：命中区靠 ::after 上下各扩 6，两行间距不足 12 就会重叠，
+   重叠意味着点上一行可能发出下一行的表情。column-gap 保持紧凑，一行才排得下。 */
+.chat-emoji {
+  display: none; gap: var(--sp-3) var(--sp-1); margin-top: 8px; flex-wrap: wrap; width: 236px;
+  pointer-events: auto;
+}
+.chat-wrap.open .chat-emoji { display: flex; }
+/* 表情按钮：视觉 32 保持一排 8 个不撑爆，命中区上下扩到 44 */
+.chat-emoji button {
+  position: relative; width: 32px; height: 32px; border-radius: var(--r-md); font-size: var(--fs-h2); line-height: 1;
+  background: rgba(20, 17, 12, 0.86); border: 1px solid rgba(201, 162, 74, 0.28);
+  cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center;
+}
+.chat-emoji button::after { content: ''; position: absolute; inset: -6px 0; }
+.chat-emoji button:active { transform: scale(var(--press-sm)); }
+.chat-emoji button:disabled { opacity: var(--op-disabled); cursor: not-allowed; }
+/* 表情消息放大显示，一眼看见对方的反应 */
+.chat-line.big { font-size: var(--fs-h1); line-height: 1.35; }

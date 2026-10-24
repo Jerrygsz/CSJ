@@ -1,0 +1,884 @@
+// ============================================================================
+// 第二部：筑基 · 结丹（越国篇 / 乱星海篇）
+//
+// 依《凡人修仙传》原著第 2-5 卷编排，接在血色禁地之后：
+//   地火之屋（炼丹筑基 / 地火暴动）→ 燕家堡（夺宝大会 / 假名厉飞雨）
+//   → 金鼓原（七派溃败）→ 古传送阵（齐云霄 / 独自走）
+//   → 乱星海魁星岛（法力枯竭，非跌境）→ 六连殿出海（婴鲤兽 / 古长老）
+//   → 海猿岛闭关（曲魂凝煞丹 / 噬金虫）→ 天星城 → 凝翠岛（杀妖取丹）
+//   → 闭府结丹（六十年）→ 青竹小轩（紫灵 / 天雷竹）→ 古修遗址（玄骨夺曲魂）
+//   → 虚天殿（极阴 / 玄骨 / 虚天鼎）→ 奇渊岛（风希不可敌 / 斩毒蛟夺翅）
+//
+// 本文件只往原有的表里追加数据，不改动练气篇的任何一条。
+// 加载顺序：encounters.js 之后、game.js 之前。
+// ============================================================================
+(function () {
+
+  // ========================= 一、境界：筑基 / 结丹 =========================
+  // 练气十三层止于 lv 35。此后每上一层，都是一道真正的大坎。
+  // 原著境界写的是「结丹」，结出来的那颗丹才叫金丹 —— 名字不能倒着叫。
+  window.REALM_LAYERS.push(
+    { lv: 36, name: '筑基初期', hp: 70,  dmg: 0.14, atk: 0.10, spd: 0.03, skill: 'sword', note: '灵液化真元，寿元倍增' },
+    { lv: 42, name: '筑基中期', hp: 90,  dmg: 0.15, atk: 0.11, spd: 0.03, skill: 'orb',   note: '法力渐厚，可御数宝' },
+    { lv: 48, name: '筑基后期', hp: 120, dmg: 0.16, atk: 0.12, spd: 0.04, skill: 'nova',  note: '神识大进，御器成阵' },
+    { lv: 56, name: '结丹初期', hp: 200, dmg: 0.22, atk: 0.14, spd: 0.04, skill: 'frost', note: '丹成之日，一方称尊' },
+    { lv: 64, name: '结丹中期', hp: 240, dmg: 0.24, atk: 0.15, spd: 0.04, skill: 'fire',  note: '金丹运转，法力不绝' },
+    { lv: 72, name: '结丹后期', hp: 300, dmg: 0.26, atk: 0.16, spd: 0.05, skill: 'gourd', note: '金丹圆满，只待凝婴' }
+  );
+
+  // ========================= 二、材料 =========================
+  window.MATERIALS.push(
+    { id: 'm_yaodan',  name: '妖丹',     icon: '🦪', rarity: 3, desc: '海中妖兽的内丹，腥气里裹着灵气。乱星海的硬通货。' },
+    { id: 'm_banyao',  name: '伴妖草',   icon: '🌿', rarity: 3, desc: '只长在大妖巢穴旁。妖气养它，它也引妖。' },
+    { id: 'm_jinlei',  name: '金雷竹',   icon: '🎋', rarity: 4, desc: '万年天雷竹，竹节里锁着雷。炼飞剑最好的一味。' },
+    { id: 'm_lingru',  name: '万年灵乳', icon: '🥛', rarity: 4, desc: '石钟乳滴了万年，在洼里凝成一小汪。' },
+    { id: 'm_yanghun', name: '养魂木',   icon: '🪵', rarity: 4, desc: '木心存魂。鬼修见了要抢，器灵住了不肯走。' },
+    { id: 'm_xueyu',   name: '血玉',     icon: '🩸', rarity: 2, desc: '鬼灵门以血养的玉，握久了心里发燥。' },
+    { id: 'm_zhizhu',  name: '血玉蜘蛛卵', icon: '🥚', rarity: 4, desc: '卵壳上爬着血丝，摸上去是暖的。虚天殿里取鼎，就靠它。', unique: true }
+  );
+
+  // ========================= 三、成品 =========================
+  window.ITEMS.push(
+    // ---- 秘籍 ----
+    // 剧情所得的高阶功法：化开就学会一门功法，从此按「学 / 装 / 练层」走
+    { id: 'qingyuan', name: '青元剑诀', rarity: 4, icon: '📗', req: 36, teach: 'qingyuan', desc: '习得《青元剑诀》。李化元所授，残缺处自己补上了', unique: true },
+    { id: 'dayan',    name: '大衍诀',   rarity: 4, icon: '📘', req: 36, teach: 'dayan', desc: '习得《大衍诀》前四层。元神培炼之法', unique: true },
+    // ---- 丹药（杀人越货 / 殿中所得，不是丹方） ----
+    // 降尘丹是六连殿拿命换的东西，古长老身上那几枚就是全部来历；
+    // 补天丹是虚天殿二层的存货。这两味原著里都不是韩立炼出来的，所以不给丹方。
+    { id: 'jiangchen', name: '降尘丹', rarity: 4, icon: '🌫', req: 40, desc: '修为 +22%，上限 +50。古长老袖里那几枚，六连殿拿它换散修的命', effect: { xpMul: 0.22, maxhp: 50 }, unique: true },
+    { id: 'butian',    name: '补天丹', rarity: 4, icon: '☀', req: 52, desc: '伤害 +30%，上限 +80，回血 +1.5。虚天殿二层带出来的，世上没有第二炉', effect: { dmg: 0.30, maxhp: 80, regen: 1.5 }, unique: true },
+    // ---- 兵器 / 护甲 ----
+    { id: 'w_qingzhu', name: '青竹蜂云剑', rarity: 4, icon: '⚔', slot: 'weapon', req: 56, desc: '伤害 +45%，暴击 +8%。本命飞剑，七十二口，化蜂成云', effect: { dmg: 0.45, crit: 0.08 }, craftOnly: 'forge' },
+    { id: 'a_yunwen',  name: '云纹法衣',   rarity: 4, icon: '👘', slot: 'armor', req: 44, desc: '上限 +90，减伤 16%。云纹自生，水火不侵', effect: { maxhp: 90, armor: 0.16 }, craftOnly: 'forge' },
+    // ---- 佩饰 / 符宝 ----
+    { id: 't_shijin',  name: '噬金虫袋', rarity: 4, icon: '🐛', slot: 'trinket', req: 46, desc: '拾取 +50%，伤害 +12%。袋里那窝虫子，见石就啃', effect: { pickup: 0.5, dmg: 0.12 }, unique: true },
+    { id: 't_hunyuan', name: '混元钵',   rarity: 4, icon: '🥣', slot: 'trinket', req: 46, desc: '减伤 10%，上限 +50。古长老的护身之宝，钵口一圈旧血洗不掉', effect: { armor: 0.10, maxhp: 50 }, unique: true },
+    { id: 't_cantu',   name: '虚天残图', rarity: 4, icon: '🗺', slot: 'trinket', req: 40, desc: '修为 +12%，拾取 +20%。一角酥了的旧皮，阵纹是上古的路子', effect: { xpMul: 0.12, pickup: 0.2 }, unique: true },
+    { id: 't_dayi',    name: '大挪移令', rarity: 4, icon: '🪪', slot: 'trinket', req: 44, desc: '移速 +12%，减伤 6%。古传送阵的钥匙，捏在手里像捏着一块冰', effect: { spd: 0.12, armor: 0.06 }, unique: true },
+    { id: 't_xutianding', name: '虚天鼎', rarity: 4, icon: '🏺', slot: 'trinket', req: 56, desc: '伤害 +25%，上限 +60。鼎内有乾坤，装了半个虚天殿', effect: { dmg: 0.25, maxhp: 60 }, unique: true },
+    { id: 't_yinyue',  name: '银月',     rarity: 4, icon: '🌙', slot: 'trinket', req: 58, desc: '回血 +2，暴击 +8%。鼎里的器灵，认主是后来的事', effect: { regen: 2, crit: 0.08 }, unique: true },
+    { id: 't_honghuang', name: '洪荒古宝', rarity: 4, icon: '🔱', slot: 'talisman', req: 54, desc: '伤害 +26%，暴击 +8%。荒岛土山下压了三百年的东西，认主', effect: { dmg: 0.26, crit: 0.08 }, unique: true },
+    // 燕家堡从王蝉手里捡的符宝 —— 原著里就这么一件，毒发时他连符宝都顾不上收
+    { id: 'fb_jinkulou', name: '金骷髅符宝', rarity: 4, icon: '💀', slot: 'talisman', req: 40, desc: '伤害 +18%，暴击 +6%。骷髅口里衔着一枚金珠，咬人时咯咯地响', effect: { dmg: 0.18, crit: 0.06 }, unique: true },
+    { id: 'fb_fenglei', name: '风雷翅', rarity: 4, icon: '🪽', slot: 'talisman', req: 60, desc: '移速 +20%，伤害 +15%。八级妖兽炼的，展开带风雷声', effect: { spd: 0.20, dmg: 0.15 }, craftOnly: 'forge' }
+  );
+
+  // 索引重建：成品 + 材料（items.js 里那份是加载时算的，追加后要重算）
+  window.ALL_ITEMS = window.ITEMS.concat(window.MATERIALS);
+
+  // ========================= 四、配方 =========================
+  // 降尘丹、补天丹没有丹方 —— 原著里它们是抢来的、殿里带出来的，不是炼出来的。
+  // 剩下的三样才是韩立自己动手做的：法衣、本命飞剑、风雷翅。炼器比炼丹更看火候。
+  window.RECIPES.push(
+    { id: 'r_a_yunwen', kind: 'forge', name: '云纹法衣', out: 'a_yunwen', outN: 1, cost: 1600, req: 44, rate: 0.60,
+      mats: [['m_hantie', 2], ['m_xueyu', 2], ['m_yusui', 3]],
+      desc: '寒铁抽丝，血玉压纹。穿上它，水火都近不了身。' },
+    { id: 'r_w_qingzhu', kind: 'forge', name: '青竹蜂云剑', out: 'w_qingzhu', outN: 1, cost: 3200, req: 56, rate: 0.40,
+      mats: [['m_jinlei', 2], ['m_xuantie', 3], ['m_yusui', 3]],
+      desc: '七十二口，一口一雷。炼成那日，竹节里的雷全空了。' },
+    { id: 'r_fb_fenglei', kind: 'forge', name: '风雷翅', out: 'fb_fenglei', outN: 1, cost: 2800, req: 60, rate: 0.50,
+      mats: [['m_yaodan', 2], ['m_xueyu', 2], ['m_lingmo', 5], ['m_jinlei', 1]],
+      desc: '照风希那只仿的。真品飞起来带雷，这只只能带风。' }
+  );
+
+  // ========================= 五、敌人 =========================
+  Object.assign(window.ENEMY_TYPES, {
+    guiling: { name: '鬼灵门弟子', hp: 120, spd: 62, dmg: 20, r: 10, xp: 5, spr: 'assassin', drop: 0.055, tier: 0, dash: true, mats: ['m_xueyu', 'm_fuzhi', 'm_lingmo'] },
+    // skillDrop：这些人身上揣着自家功法，杀了就有机会摸走法诀
+    moxiu:   { name: '魔道修士',   hp: 170, spd: 54, dmg: 24, r: 11, xp: 6, spr: 'mo',       drop: 0.060, tier: 0, mats: ['m_xueyu', 'm_xuesha', 'm_hantie'], skillDrop: { id: 'sk_xuemo', chance: 0.012 } },
+    haishou: { name: '海妖兽',     hp: 210, spd: 58, dmg: 26, r: 11, xp: 7, spr: 'haishou',  drop: 0.075, tier: 0, mats: ['m_yaodan', 'm_banyao'] },
+    yuyao:   { name: '青鳞鲤妖',   hp: 150, spd: 74, dmg: 22, r: 9,  xp: 6, spr: 'snake',    drop: 0.060, tier: 0, wob: true, mats: ['m_yaodan'] },
+    guixiu:  { name: '鬼修',       hp: 250, spd: 70, dmg: 30, r: 10, xp: 8, spr: 'guixiu',   drop: 0.080, tier: 0, mats: ['m_yanghun', 'm_xueyu'], skillDrop: { id: 'sk_xuanyin', chance: 0.010 } },
+    kui:     { name: '机关傀儡',   hp: 300, spd: 34, dmg: 28, r: 13, xp: 8, spr: 'kui',      drop: 0.080, tier: 0, mats: ['m_xuantie', 'm_hantie'], skillDrop: { id: 'sk_sanyan', chance: 0.010 } },
+    dujiao:  { name: '毒蛟',       hp: 420, spd: 62, dmg: 38, r: 14, xp: 10, spr: 'dujiao',  drop: 0.100, tier: 0, wob: true, mats: ['m_yaodan', 'm_banyao'] }
+  });
+
+  // ========================= 六、洞府 =========================
+  Object.assign(window.CAVES, {
+    cuiping: {
+      id: 'cuiping', name: '翠屏山洞府', pos: '黄枫谷·翠屏山 内门', from: 'zhuji',
+      desc: '内门弟子分的洞府，灵脉直通山腹。石室三间，另有一眼灵泉。',
+      quote: '从药园搬到翠屏山，走了半日。路上没人送。',
+      capLevel: 58, restStone: 120, restXp: 0.28,
+      crafts: ['alchemy', 'forge', 'talisman'],
+      restTip: '翠屏山灵脉厚，一夜静修，胜过外门半年。'
+    },
+    xiaohuan: {
+      id: 'xiaohuan', name: '小寰岛洞府', pos: '乱星海·小寰岛', from: 'kuixing',
+      desc: '一座无人小岛，礁石底下挖出的三间石室。涨潮时浪声灌满整条甬道。',
+      quote: '海外无亲无故，反倒干净。',
+      capLevel: 70, restStone: 200, restXp: 0.26,
+      crafts: ['alchemy', 'forge', 'talisman'],
+      restTip: '海岛灵气带着咸味，比越国浓得多。'
+    },
+    qingzhuxuan: {
+      id: 'qingzhuxuan', name: '青竹小轩', pos: '乱星海·天星城 外街', from: 'qingzhu',
+      desc: '一间小铺面，前头卖符箓法器，后头就是丹房。铺子开了二十余年。',
+      quote: '入世也是修行。人来人往，看多了也就明白了。',
+      capLevel: 80, restStone: 320, restXp: 0.24,
+      crafts: ['alchemy', 'forge', 'talisman'],
+      restTip: '城中灵气不弱，铺子后头更静。'
+    }
+  });
+
+  // ========================= 七、地图 =========================
+  // 境界顺序：练气十三 →（地火之屋筑基）→ 筑基初中后 →（闭府结丹）→ 结丹初中后
+  // endLevel：这一图打完才落地的境界突破，不写在 startLevel 上（门还没进就筑基说不过去）
+  window.MAPS.push(
+    // ---------------- 筑基 · 越国 ----------------
+    {
+      id: 'zhuji', name: '黄枫谷·地火之屋', pos: '越国·黄枫谷 地火之屋', arc: 'C',
+      type: 'boss', tag: '剧情战',
+      desc: '三味主药，一炉丹，一间引着地火的石室。丹成那天，地火先炸了。',
+      startLevel: 35, endLevel: 36, startSkills: { sword: 4, fire: 3, orb: 2, nova: 2 },
+      unlock: 'xuese', next: 'yanjia', cave: 'cuiping',
+      diff: 1.6, bossAt: 0, intro: 'zhuji', outro: 'zhuji_out',
+      enemies: ['disciple', 'assassin'], elites: ['隔壁炉的执事', '地火火灵'],
+      mats: ['m_zihua', 'm_tianling', 'm_shihui', 'm_yusui'],
+      boss: { kind: 'beast', name: '地火之灵', hp: 3600, spd: 54, dmg: 22, r: 18, spr: 'huoling', scale: 6.0 },
+      reward: { stones: 300, items: ['qingyuan'], mats: [['m_zihua', 2], ['m_tianling', 2]] },
+      clearTitle: '筑基已成',
+      clearDesc: '地火退了，丹也成了。灵液化真元，练气到筑基那道坎，跨过去了。'
+    },
+    {
+      id: 'yanjia', name: '燕家堡', pos: '越国·燕家堡', arc: 'C',
+      type: 'combat', tag: '战斗',
+      desc: '受李化元之命，带董萱儿赴燕家堡夺宝大会。堡门挂红，来客一半佩着鬼灵门的腰牌。',
+      startLevel: 36, startSkills: { sword: 4, fire: 3, orb: 2, nova: 2 },
+      unlock: 'zhuji', next: 'jingu',
+      diff: 1.75, bossAt: 120,
+      enemies: ['guiling', 'moxiu', 'assassin'],
+      elites: ['鬼灵门·执事', '血灵阵眼'],
+      mats: ['m_xueyu', 'm_xuesha', 'm_hantie', 'm_yusui', 'm_fuzhi'],
+      boss: { kind: 'mo', name: '鬼灵门少主·王蝉', hp: 4200, spd: 58, dmg: 26, r: 19, spr: 'wangchan', scale: 4.4 },
+      reward: { stones: 460, items: ['fb_jinkulou'], mats: [['m_xueyu', 2], ['m_yusui', 2]] },
+      outro: 'yanjia_out',
+      clearTitle: '燕家堡已破',
+      clearDesc: '血灵阵破了一角。王蝉手背上中了墨蛟之毒，退走前把「厉飞雨」三个字记住了。'
+    },
+    {
+      id: 'jingu', name: '金鼓原', pos: '越国·金鼓原', arc: 'C',
+      type: 'boss', tag: '剧情战',
+      desc: '七派联军与魔道六宗决战之地。战线一破，身后就再没人接应。',
+      startLevel: 42, startSkills: { sword: 5, fire: 3, orb: 3, nova: 2, frost: 1 },
+      unlock: 'yanjia', next: 'guchuan',
+      diff: 1.9, bossAt: 0, intro: 'jingu', outro: 'jingu_out',
+      enemies: ['moxiu', 'guiling', 'ghoul', 'assassin'],
+      elites: ['魔道长老', '血煞傀儡'],
+      mats: ['m_xueyu', 'm_xuesha', 'm_hantie', 'm_xuantie', 'm_shihui'],
+      boss: { kind: 'blood', name: '鬼灵门·执法长老', hp: 5200, spd: 58, dmg: 30, r: 19, spr: 'mo', scale: 4.6 },
+      reward: { stones: 680, items: ['a_yunwen'] },
+      clearTitle: '金鼓原已破',
+      clearDesc: '阵列没了，断旗还在。黄枫谷的高层早走了，留下的都是没人要的。'
+    },
+    {
+      id: 'guchuan', name: '古传送阵', pos: '越国·荒山古阵', arc: 'C',
+      type: 'story', tag: '剧情',
+      desc: '齐云霄修复的古传送阵。阵纹一亮，越国就在身后了。',
+      startLevel: 44, startSkills: { sword: 5, fire: 3, orb: 3, nova: 2, frost: 1 },
+      unlock: 'jingu', next: 'kuixing',
+      reward: { stones: 360, mats: [['m_xuantie', 2], ['m_hantie', 2]] },
+      clearTitle: '越国已远',
+      clearDesc: '阵纹熄了。她站在阵外，他站在阵里。脚下的土是黑的，风里带着咸味。'
+    },
+
+    // ---------------- 乱星海 ----------------
+    {
+      id: 'kuixing', name: '魁星岛', pos: '乱星海·魁星岛', arc: 'D',
+      type: 'story', tag: '剧情',
+      desc: '落点在海底。飞天盾被水压挤碎，靠最后一张水遁符浮上来。修为还在，法力空得发慌。',
+      startLevel: 44, startSkills: { sword: 5, fire: 4, orb: 3, nova: 3, frost: 1 },
+      unlock: 'guchuan', next: 'liulian', cave: 'xiaohuan',
+      reward: { stones: 320, mats: [['m_yaodan', 1]] },
+      clearTitle: '海外落脚',
+      clearDesc: '小寰岛的石室挖成了。涨潮时浪声灌满整条甬道，倒比越国清静。'
+    },
+    {
+      id: 'liulian', name: '六连殿·出海捕妖', pos: '乱星海·外海', arc: 'D',
+      type: 'combat', tag: '战斗',
+      desc: '六连殿雇散修出海。这一趟要捕的是一头婴鲤兽——捕到了，才知道雇主是谁。',
+      startLevel: 46, startSkills: { sword: 5, fire: 4, orb: 3, nova: 3, frost: 2 },
+      unlock: 'kuixing', next: 'haian',
+      diff: 2.0, bossAt: 150,
+      enemies: ['haishou', 'yuyao', 'moxiu'],
+      elites: ['六级妖兽·婴鲤兽', '极阴岛·乌丑'],
+      mats: ['m_yaodan', 'm_banyao', 'm_yusui', 'm_xuantie'],
+      boss: { kind: 'mo', name: '六连殿·古长老', hp: 5800, spd: 52, dmg: 32, r: 19, spr: 'mo', scale: 4.6 },
+      reward: { stones: 760, items: ['jiangchen', 't_hunyuan'], mats: [['m_yaodan', 3], ['m_banyao', 1]] },
+      outro: 'liulian_out',
+      clearTitle: '古长老已毙',
+      clearDesc: '结丹初期的人，死在筑基修士的阵里。混元钵与降尘丹，都进了袋。'
+    },
+    {
+      id: 'haian', name: '海猿岛·闭关', pos: '乱星海·海猿岛', arc: 'D',
+      type: 'story', tag: '剧情',
+      desc: '荒岛一座，灵脉勉强够用。凿三间石室，一修四年，把根基一层层夯回去。',
+      startLevel: 48, startSkills: { sword: 6, fire: 4, orb: 3, nova: 3, frost: 2 },
+      unlock: 'liulian', next: 'tianxing',
+      reward: { stones: 420, items: ['t_shijin'], mats: [['m_yaodan', 2], ['m_yusui', 2]] },
+      clearTitle: '四年已过',
+      clearDesc: '法力补齐，根基稳住。礁石缝里那窝金虫，也养成了气候。'
+    },
+    {
+      id: 'tianxing', name: '天星城', pos: '乱星海·天星城', arc: 'D',
+      type: 'market', tag: '坊市',
+      desc: '乱星海第一大城。正道、魔道、星宫三方在此摆摊，谁也不问谁的来历。',
+      startLevel: 50, startSkills: { sword: 6, fire: 4, orb: 3, nova: 3, frost: 2 },
+      unlock: 'haian', next: 'ningcui',
+      reward: { stones: 0 },
+      clearTitle: '城中一游',
+      clearDesc: '妖丹换灵石，灵石换法器。乱星海的规矩，就是价钱。'
+    },
+    {
+      id: 'ningcui', name: '凝翠岛·杀妖取丹', pos: '乱星海·凝翠岛', arc: 'D',
+      type: 'combat', tag: '战斗',
+      desc: '礁盘上生着霓裳草，叶随光变色。撒一片下去，妖就自己浮上来。',
+      startLevel: 52, startSkills: { sword: 6, fire: 4, orb: 3, nova: 3, frost: 3 },
+      unlock: 'tianxing', next: 'jiedan',
+      diff: 2.1, bossAt: 140,
+      enemies: ['haishou', 'yuyao'],
+      elites: ['七级妖兽', '深海妖蟒'],
+      mats: ['m_yaodan', 'm_banyao', 'm_jinlei', 'm_yusui'],
+      boss: { kind: 'beast', name: '七级妖兽·蓝面鲛', hp: 6400, spd: 60, dmg: 30, r: 22, spr: 'haishou', scale: 5.4 },
+      reward: { stones: 900, mats: [['m_yaodan', 4], ['m_jinlei', 1]] },
+      outro: 'ningcui_out',
+      clearTitle: '妖丹已足',
+      clearDesc: '石台上堆了三百多枚妖丹。料备够了，剩下的不是打出来的。'
+    },
+    {
+      id: 'jiedan', name: '小寰岛·闭府结丹', pos: '乱星海·小寰岛 洞府', arc: 'D',
+      type: 'story', tag: '剧情',
+      desc: '颠倒五行阵布七处，降尘丹洗髓，闭死关。石门一落，外头就是六十年。',
+      startLevel: 54, endLevel: 56, startSkills: { sword: 6, fire: 4, orb: 3, nova: 3, frost: 3 },
+      unlock: 'ningcui', next: 'xutian',
+      reward: { stones: 1000, mats: [['m_yaodan', 3], ['m_lingru', 1]] },
+      clearTitle: '结丹已成',
+      clearDesc: '六十年闭门，一枚丹。出关那日天星城传来消息——妙音门在找一个压得住丹火的人。'
+    },
+
+    // ---------------- 结丹 ----------------
+    {
+      id: 'xutian', name: '虚天殿', pos: '乱星海·虚天殿', arc: 'E',
+      type: 'boss', tag: '剧情战',
+      desc: '三百年一开。外殿玄晶道、宝光阁、极妙幻境，内殿冰火道；进得去的，十不存三。',
+      startLevel: 56, startSkills: { sword: 6, fire: 5, orb: 4, nova: 4, frost: 4 },
+      unlock: 'jiedan', next: 'waihai',
+      diff: 2.25, bossAt: 0, intro: 'xutian', outro: 'xutian_out',
+      enemies: ['guixiu', 'kui', 'ghoul'],
+      elites: ['煞宝阴灵', '守殿傀儡'],
+      mats: ['m_yanghun', 'm_lingru', 'm_jinlei', 'm_yaodan', 'm_xueyu'],
+      boss: { kind: 'mo', name: '玄骨上人', hp: 8600, spd: 56, dmg: 36, r: 20, spr: 'guixiu', scale: 5.0 },
+      reward: { stones: 1400, items: ['t_xutianding', 't_yinyue', 'butian'], mats: [['m_lingru', 2], ['m_yanghun', 2]] },
+      clearTitle: '虚天殿闭',
+      clearDesc: '玄骨散了，鼎口压着一缕乾蓝的焰。鼎腹里那道银白身影睁了眼，没有出声。'
+    },
+    {
+      id: 'waihai', name: '外星海·奇渊岛', pos: '乱星海·外星海', arc: 'E',
+      type: 'boss', tag: '剧情战',
+      desc: '这里的海水是黑的。他为一株伴妖草而来，撞上的是九级裂风兽的洞府。',
+      startLevel: 64, startSkills: { sword: 6, fire: 5, orb: 4, nova: 4, frost: 4 },
+      unlock: 'xutian', next: 'yinming',
+      diff: 2.4, bossAt: 0, intro: 'waihai', outro: 'waihai_out',
+      enemies: ['haishou', 'guixiu', 'kui', 'dujiao'],
+      elites: ['化形妖仆', '海沟巨兽'],
+      mats: ['m_yaodan', 'm_banyao', 'm_jinlei', 'm_yanghun'],
+      boss: { kind: 'beast', name: '八级妖兽·毒蛟', hp: 9800, spd: 64, dmg: 40, r: 23, spr: 'dujiao', scale: 6.6 },
+      reward: { stones: 2000, mats: [['m_jinlei', 2], ['m_yaodan', 4], ['m_lingmo', 4], ['m_xueyu', 2]] },
+      clearTitle: '风雷翅已夺',
+      clearDesc: '毒蛟死，龟妖伤，翅只带出半副。回洞府还得自己补齐那一炉。风希追了万里，那股风到现在还在耳边。'
+    },
+
+    // ---------------- 支线：因缘所至 ----------------
+    {
+      id: 'heisha', side: true, sorder: 7, name: '越国·京城皇宫', pos: '越国·京城 皇宫地宫',
+      type: 'combat', tag: '支线', unlockBy: 'e_liujing',
+      desc: '护秦府入京，撞见黑煞教在宫墙底下血祭。教主不是别人，是越皇。',
+      startLevel: 38, startSkills: { sword: 4, fire: 3, orb: 2, nova: 2 },
+      unlock: null, next: null,
+      diff: 1.8, bossAt: 130,
+      enemies: ['moxiu', 'ghoul', 'assassin', 'guiling'],
+      elites: ['血侍·冰妖', '血侍·铁罗', '血侍·青纹', '血侍·叶蛇'],
+      mats: ['m_xueyu', 'm_xuesha', 'm_shihui', 'm_hantie'],
+      boss: { kind: 'blood', name: '越皇', hp: 4600, spd: 50, dmg: 28, r: 20, spr: 'mo', scale: 4.6 },
+      reward: { stones: 520, items: ['t_cantu'], mats: [['m_xuesha', 2], ['m_hantie', 2]] },
+      outro: 'heisha_out',
+      clearTitle: '黑煞教已灭',
+      clearDesc: '越皇伏诛。虚天残图、血凝五行丹、《玄阴经》残本，都归了正道这边。'
+    },
+    {
+      id: 'shiku', side: true, sorder: 8, name: '灵石矿·魔道矿场', pos: '越国边境 灵矿脉',
+      type: 'combat', tag: '支线', unlockBy: 'e_captain',
+      desc: '魔道六宗占了七派的灵石矿。正道小队要突一次，矿里守着的可不止人。',
+      startLevel: 40, startSkills: { sword: 5, fire: 3, orb: 3, nova: 2 },
+      unlock: null, next: null,
+      diff: 1.85, bossAt: 135,
+      enemies: ['moxiu', 'kui', 'guiling'],
+      elites: ['魔道矿监', '矿脉傀儡'],
+      mats: ['m_xuantie', 'm_hantie', 'm_yusui', 'm_jingtie', 'm_xueyu'],
+      boss: { kind: 'swarm', name: '魔道矿监', hp: 4400, spd: 44, dmg: 26, r: 19, spr: 'kui', scale: 4.6 },
+      reward: { stones: 560, items: ['t_dayi'], mats: [['m_xuantie', 3], ['m_zhizhu', 1]] },
+      outro: 'shiku_out',
+      clearTitle: '矿场已夺',
+      clearDesc: '阵旗倒了，灵石原矿堆了半座山。矿监的箱子里翻出一枚令牌、一只血丝缠着的卵。'
+    },
+    {
+      id: 'qingzhu', side: true, sorder: 9, name: '青竹小轩', pos: '乱星海·天星城 外街',
+      type: 'story', tag: '支线', unlockBy: 'e_wangning',
+      desc: '一间铺面，前头卖符箓法器，后头是丹房。结丹之后入世，铺子一开就是二十余年。',
+      startLevel: 56, startSkills: { sword: 6, fire: 4, orb: 3, nova: 3, frost: 3 },
+      unlock: null, next: null, cave: 'qingzhuxuan',
+      reward: { stones: 600, mats: [['m_jinlei', 1], ['m_yaodan', 2]] },
+      clearTitle: '入世二十载',
+      clearDesc: '铺子还开着。后院那根万年天雷竹，成了金雷竹。'
+    },
+    {
+      id: 'guxiu', side: true, sorder: 10, name: '古修遗址', pos: '乱星海·无名荒岛',
+      type: 'combat', tag: '支线', unlockBy: 'e_jinqing',
+      desc: '金青那张残图上标的。阵还在，阵眼里压着一样东西，压了三百年。',
+      startLevel: 54, startSkills: { sword: 6, fire: 5, orb: 4, nova: 3, frost: 3 },
+      unlock: null, next: null,
+      diff: 2.2, bossAt: 120,
+      enemies: ['kui', 'guixiu', 'ghoul'],
+      elites: ['守阵傀儡', '古修遗蜕'],
+      mats: ['m_yanghun', 'm_lingru', 'm_xueyu', 'm_yusui'],
+      boss: { kind: 'mo', name: '古修遗蜕', hp: 8000, spd: 50, dmg: 34, r: 21, spr: 'guixiu', scale: 5.0 },
+      reward: { stones: 1100, items: ['t_honghuang'], mats: [['m_yanghun', 1], ['m_lingru', 1]] },
+      outro: 'guxiu_out',
+      clearTitle: '遗址已开',
+      clearDesc: '洪荒古宝到手，曲魂却被那缕残魂夺走了。石壁上的残图，和虚天残图是一路。'
+    }
+  );
+
+  // 陆师兄归位：原著里他死在血色禁地之前（欲害陈巧倩、夺筑基丹），
+  // 不是在地火之屋里抢丹。地火之屋那一炉，从头到尾只有韩立一个人。
+  window.MAPS.push({
+    id: 'luxiong', side: true, sorder: 6.5, name: '黄枫谷·下山岔道', pos: '黄枫谷 山门外 岔道',
+    type: 'combat', tag: '支线', unlockBy: 'e_luxiong', arc: 'B',
+    desc: '从坊市回谷的必经之路。两边的林子密得看不见人，喊一声也没人应。',
+    startLevel: 18, startSkills: { sword: 5, fire: 3, orb: 2, nova: 1 },
+    unlock: null, next: null,
+    diff: 1.45, bossAt: 90,
+    enemies: ['disciple', 'assassin'],
+    elites: ['陆师兄的随从', '丹房护卫'],
+    mats: ['m_zihua', 'm_tianling', 'm_yusui', 'm_hantie'],
+    boss: { kind: 'mo', name: '同门 陆师兄', hp: 2800, spd: 56, dmg: 17, r: 18, spr: 'neimen', scale: 5.6 },
+    reward: { stones: 260, mats: [['m_zihua', 2], ['m_tianling', 2], ['m_yusuizhi', 1]] },
+    outro: 'luxiong_out',
+    clearTitle: '岔道已静',
+    clearDesc: '人埋在岔道边的土里，剑收进储物袋。陈师姐醒来，什么都不记得。'
+  });
+
+  // 大衍诀的来路 —— 原著里就这一处，不能挪到别处去：
+  // 筑基之后，韩立搬进翠屏山洞府，同门「林师兄」（千竹教叛徒）夜里来夺舍，
+  // 反被韩立灭了神魂，从储物袋里得了《大衍诀》前四层。
+  // 前四层到这儿为止；后三层在极西之地大衍神君手上，那是元婴以后的事。
+  window.MAPS.push({
+    id: 'linxiong', side: true, sorder: 6.6, name: '翠屏山·洞府夜变', pos: '黄枫谷·翠屏山 洞府',
+    type: 'boss', tag: '支线', unlockBy: 'e_lin', arc: 'C',
+    desc: '筑基之后分下的洞府。夜里石门被人从外头推开——来的是同门，来的也不只是同门。',
+    startLevel: 36, startSkills: { sword: 4, fire: 3, orb: 2, nova: 2 },
+    unlock: null, next: null,
+    diff: 1.7, bossAt: 0, intro: 'lin', outro: 'lin_out',
+    enemies: ['disciple', 'assassin'],
+    elites: ['千竹教·傀儡仆', '夺舍残魂'],
+    mats: ['m_shihui', 'm_yusui', 'm_hantie', 'm_fuzhi'],
+    boss: { kind: 'mo', name: '千竹教·林师兄', hp: 3200, spd: 56, dmg: 19, r: 18, spr: 'linmo', scale: 6.4 },
+    reward: { stones: 340, items: ['dayan'], mats: [['m_yusui', 2], ['m_shihui', 1]] },
+    clearTitle: '夺舍未成',
+    clearDesc: '林师兄的身子凉在石地上。储物袋里一枚玉简，写着《大衍诀》前四层。'
+  });
+
+  // ========================= 八、场景底色 =========================
+  Object.assign(window.MAP_SCENERY, {
+    zhuji:    { bg: { base: '#3b2f27', a: '#46382e', b: '#302520' }, decor: [['rock', 0.34], ['tuft', 0.06]] },
+    yanjia:   { bg: { base: '#3b2f2a', a: '#463830', b: '#2f2521' }, decor: [['rock', 0.26], ['tree', 0.12], ['tuft', 0.10]] },
+    jingu:    { bg: { base: '#3a2a24', a: '#452f28', b: '#2e211c' }, decor: [['rock', 0.38], ['tuft', 0.08]] },
+    guchuan:  { bg: { base: '#282433', a: '#302b3d', b: '#1f1c28' }, decor: [['rock', 0.40], ['tuft', 0.08]] },
+    kuixing:  { bg: { base: '#1f3a3c', a: '#264648', b: '#182e30' }, decor: [['rock', 0.30], ['tuft', 0.14]] },
+    liulian:  { bg: { base: '#182c3c', a: '#1e3546', b: '#12222f' }, decor: [['rock', 0.22], ['tuft', 0.06]] },
+    haian:    { bg: { base: '#1d3038', a: '#243c46', b: '#16262c' }, decor: [['rock', 0.34], ['tuft', 0.10]] },
+    tianxing: { bg: { base: '#3a3630', a: '#45413a', b: '#2e2b26' }, decor: [['rock', 0.24], ['tuft', 0.12]] },
+    ningcui:  { bg: { base: '#1c3a30', a: '#234638', b: '#152c25' }, decor: [['tuft', 0.36], ['rock', 0.20]] },
+    jiedan:   { bg: { base: '#1b2b33', a: '#22343d', b: '#152129' }, decor: [['rock', 0.30], ['tuft', 0.06]] },
+    xutian:   { bg: { base: '#2a2434', a: '#342c42', b: '#201b29' }, decor: [['rock', 0.34], ['tuft', 0.06]] },
+    waihai:   { bg: { base: '#141e2a', a: '#1a2735', b: '#0e1620' }, decor: [['rock', 0.28], ['tuft', 0.04]] },
+    heisha:   { bg: { base: '#33201f', a: '#3e2726', b: '#281917' }, decor: [['rock', 0.36], ['tuft', 0.06]] },
+    shiku:    { bg: { base: '#2d2c2a', a: '#373632', b: '#232220' }, decor: [['rock', 0.48], ['tuft', 0.04]] },
+    qingzhu:  { bg: { base: '#2c3f2a', a: '#354b32', b: '#233321' }, decor: [['tuft', 0.34], ['tree', 0.14], ['rock', 0.08]] },
+    guxiu:    { bg: { base: '#232a30', a: '#2b343c', b: '#1a2026' }, decor: [['rock', 0.42], ['tuft', 0.05]] },
+    luxiong:  { bg: { base: '#2f3a2b', a: '#374433', b: '#263023' }, decor: [['tree', 0.34], ['tuft', 0.18], ['rock', 0.08]] },
+    linxiong: { bg: { base: '#40474c', a: '#4a5257', b: '#343a3e' }, decor: [['rock', 0.34], ['tuft', 0.05]] }
+  });
+
+  // ========================= 九、剧情对白 =========================
+  Object.assign(window.MAP_STORIES, {
+    // 陆师兄这一段在原著里发生在血色禁地之前（从坊市回谷的岔道上），
+    // 韩立为陈巧倩出手，杀了陆师兄，得他抢来的灵药。
+    luxiong: [
+      ['旁白', '从坊市回谷的岔道上，林子里传来一声闷响。'],
+      ['旁白', '一个女修倒在草里，内门弟子正俯身去解她的储物袋。'],
+      ['陆师兄', '……谁？'],
+      ['韩立', '（陈巧倩。黄枫谷内门弟子。她脸上泛着不正常的红。）'],
+      ['韩立', '（催情迷药。他要的不只是储物袋。）'],
+      ['陆师兄', '韩立。你一个药农，也敢管我的事？'],
+      ['韩立', '（我在谷里忍了很多次。这一次不能忍——她要是醒不过来，这口锅就得我背。）'],
+      ['旁白', '陆师兄拔剑。剑是新的，鞘上还挂着丹房的牌子。']
+    ],
+    luxiong_out: [
+      ['旁白', '陆师兄倒在草丛里。储物袋散开，几株灵药滚出来。'],
+      ['韩立', '（紫猴花、天灵果、玉髓芝。他从别处抢来的，正好凑我的炉。）'],
+      ['旁白', '陈巧倩醒来时眼神是散的。韩立把一粒忘忧丹喂进她嘴里。'],
+      ['韩立', '（这一夜的事，她不必记得。记得了，对她对我都不是好事。）'],
+      ['旁白', '人埋进岔道边的土里。剑收进储物袋，丹房的牌子摘下来扔了。'],
+      ['韩立', '（谷里少一个内门弟子，不会有人来问一个药农。）']
+    ],
+
+    // 翠屏山洞府：大衍诀只从这一处来
+    lin: [
+      ['旁白', '翠屏山洞府。三间石室，一眼灵泉。筑基之后分下来的，头一夜。'],
+      ['旁白', '子时，石门被人从外头推开。进来的穿着黄枫谷的道袍。'],
+      ['林师兄', '韩师弟。我这条路走到头了，借你的身子走一程。'],
+      ['韩立', '（林师兄。谷里没人知道他师承何处，只知道他从不与人同修。）'],
+      ['韩立', '（他袖口露出的那卷玉简，边角刻的是千竹教的符纹。）'],
+      ['林师兄', '夺舍这一步，我备了三十年。你一个筑基初期，神魂还嫩。'],
+      ['韩立', '（他说得对。可夺舍拼的不是年头，是谁更不肯死。）'],
+      ['旁白', '灯灭了。石室里两团神魂扑在一起，谁也看不见谁。']
+    ],
+    lin_out: [
+      ['旁白', '林师兄倒在自己的血里。神魂散尽的时候，眼睛还睁着。'],
+      ['韩立', '（备了三十年，输在一间石室。）'],
+      ['旁白', '储物袋里一枚玉简，边角磨得发圆，显然被人翻过无数遍。'],
+      ['韩立', '（《大衍诀》前四层。养神、分神、御傀儡。）'],
+      ['韩立', '（他叛出千竹教，把这半卷带在身上，是想有朝一日补全吧。）'],
+      ['韩立', '（前四层够我用了。后三层在极西之地，那是元婴之后的事。）'],
+      ['旁白', '石门重新落下。这一夜之后，他的神识比同阶厚了一层。']
+    ],
+
+    // 地火之屋：这一炉从头到尾只有韩立一个人。原著里筑基没有对手，
+    // 但地火之屋本就靠地火，火脉一乱就是要命的事 —— 对手从人换成火。
+    zhuji: [
+      ['旁白', '黄枫谷地火之屋。石室底下引着一条地火，一年到头闷得像蒸笼。'],
+      ['韩立', '（三味主药，一炉丹。火候差一分，三年就白等。）'],
+      ['旁白', '丹在炉里转了三日。第四日，石缝里的地火忽然往上翻。'],
+      ['韩立', '（火脉乱了。丹要成，火却先炸。）'],
+      ['旁白', '地火凝成一头赤红的火灵，撞在丹炉上。'],
+      ['韩立', '（丹在炉里，炉在我身后。这一步退不得。）']
+    ],
+    zhuji_out: [
+      ['旁白', '地火退了。炉底剩一枚丹，圆得没有一丝纹。'],
+      ['韩立', '（吞下去第三天，灵液在丹田里化开，一寸一寸凝成真元。）'],
+      ['韩立', '（练气十三层，到此为止。再往上，是另一条路。）'],
+      ['旁白', '出关那日，李化元召他去了一趟。'],
+      ['李化元', '筑基了？'],
+      ['韩立', '托师父的福。'],
+      ['李化元', '《青元剑诀》你拿去。残缺的那几处，自己补。'],
+      ['韩立', '（残卷。也好——残卷没人盯着。）'],
+      ['李化元', '翠屏山那间洞府空着，你自己去收拾。'],
+      ['韩立', '（往后是内门弟子的名分。谷里的规矩，也跟着变了。）'],
+      ['韩立', '（越国要变天了。魔道的探子，近来在山门外头转得勤。）']
+    ],
+    yanjia_out: [
+      ['旁白', '血灵阵破了一角。韩立拽着董萱儿，从缺口退出去。'],
+      ['王蝉', '站住。报个名字。'],
+      ['韩立', '（他问名字，是打算记着。）'],
+      ['韩立', '在下黄枫谷，厉飞雨。'],
+      ['王蝉', '厉飞雨。好。'],
+      ['旁白', '王蝉踩着巨叉追上来，血云翻涌压顶。韩立甩出七十余张符箓，在血云里炸开一条缝。'],
+      ['旁白', '他炼的护身毒雾里掺了血色禁地那条墨蛟的丹毒。王蝉运功，把毒一并吸回体内。'],
+      ['王蝉', '……你！'],
+      ['旁白', '金骷髅符宝咬住黄芒，毒性却已发作。王蝉连符宝都顾不上收，裹着血云倒飞而走。'],
+      ['韩立', '（毒不致命。但足够让他记住这个名字，记上很多年。）'],
+      ['韩立', '（金骷髅。白捡一件符宝。）']
+    ],
+    jingu: [
+      ['旁白', '金鼓原。七派联军列阵三十里，魔道六宗的旗子比人多。'],
+      ['旁白', '战鼓响了三通。第三通还没落，左翼就散了。'],
+      ['韩立', '（灵兽山的人先退的。他们一退，这边就是口袋。）'],
+      ['旁白', '传令符在掌心碎成粉末。令下得很干脆：低阶弟子往后撤，把追兵引开。'],
+      ['韩立', '（我们这一队，全是炼气和筑基初期。引开追兵，就是留下来死。）'],
+      ['韩立', '（令狐老祖这一手，谷里人人都懂，只是没人说破。）'],
+      ['旁白', '血雾自地面涌起。魔道的执法长老踏雾而来，身后跟着十余同阶。'],
+      ['韩立', '（既然要跑，就往灵矿那边跑。那座古阵，齐云霄还在修。）']
+    ],
+    jingu_out: [
+      ['旁白', '金鼓原上再无阵列，只剩尸身与断旗。'],
+      ['韩立', '（黄枫谷的高层早走了。留下的都是没人要的。）'],
+      ['韩立', '（七派散了，越国也就没了。）'],
+      ['旁白', '韩立撕下袖口染血的谷徽，埋进土里。'],
+      ['韩立', '（从今日起，我不再是黄枫谷的人。）']
+    ],
+    guchuan: [
+      ['旁白', '灵石矿底下，一座古传送阵压在半塌的石台上。矿道塌了半边，阵纹却被人一笔一笔描新过。'],
+      ['齐云霄', '阵修好了。材料按古法配的，只够走一次。'],
+      ['韩立', '（齐云霄。他为这座阵，把命都填了进去。）'],
+      ['齐云霄', '付家的人，你记着。'],
+      ['韩立', '记着。'],
+      ['旁白', '阵纹亮起前一刻，矿道里追来两道剑光——一道是魔修，一道是掩月宗的。'],
+      ['旁白', '那女修一身狼狈，正是血色禁地里那位。'],
+      ['南宫婉', '……让开。'],
+      ['韩立', '（南宫婉。掩月宗的结丹修士，此刻气息却乱得像个炼气弟子。）'],
+      ['旁白', '他伸手把她从阵外拖开，法力顺着掌心被抽走大半，丹田一阵空。'],
+      ['韩立', '（她在吸我的修为。再拖一刻，我连阵都走不了。）'],
+      ['旁白', '他把手抽回来。阵纹已经亮到极致。'],
+      ['南宫婉', '你不带我走？'],
+      ['韩立', '（阵只够一个人。带她走，两个都死。）'],
+      ['旁白', '王蝉的剑光压到阵沿。韩立把大挪移令按在阵眼上。白光起，那道剑光落了空。'],
+      ['韩立', '（越国，到此为止了。）']
+    ],
+    // 乱星海：境界没跌，跌的是法力。这是动漫改编与原著的分别。
+    kuixing: [
+      ['旁白', '落点是海底。水压挤上来，飞天盾碎成三片。'],
+      ['韩立', '（最后一张水遁符。）'],
+      ['旁白', '符光托着他往上冲。冲出水面那一刻，天是灰的，海是黑的。'],
+      ['旁白', '一条渔船把他捞了上去。船上的人说的话，他只听懂一半。'],
+      ['老渔夫', '外乡人？法力空成这样还没死，算命大。'],
+      ['韩立', '（境界还在，丹田里却空得能听见回声。被吸走的是法力，不是修为。）'],
+      ['老渔夫', '往东三十里有座小寰岛，没人住。礁石底下能挖洞。'],
+      ['韩立', '（先有个落脚处。法力，一点点补回来。）']
+    ],
+    liulian_out: [
+      ['旁白', '古长老倒在浪里。混元钵脱手，沉了半尺又浮上来。'],
+      ['韩立', '（结丹初期。若不是他先前耗了大半法力，今日死的是我。）'],
+      ['韩立', '（降尘丹、混元钵，还有他袖里那几页手记。）'],
+      ['韩立', '（这趟出海，本是为了一枚妖丹。）']
+    ],
+    haian: [
+      ['旁白', '海猿岛。荒岛一座，灵脉勉强够用。韩立在此凿了三间石室。'],
+      ['韩立', '（四年。法力补回来了，根基也一层层夯实了。）'],
+      ['韩立', '（曲魂倒先凝了煞丹。一具傀儡，比我快。）'],
+      ['旁白', '回小寰岛那一日，他在礁石缝里翻出一窝小虫，通体金亮，见石就啃。'],
+      ['韩立', '（噬金虫。这东西……能养。）'],
+      ['韩立', '（妖丹还差得远。凝翠岛那边，霓裳草该长成了。）']
+    ],
+    ningcui_out: [
+      ['旁白', '妖丹堆在石台上，够炼三十炉。'],
+      ['韩立', '（杀妖取丹，三年。这一趟攒下的，比在越国十年还多。）'],
+      ['韩立', '（可妖丹只是料。要结丹，还得回洞府闭死关。）'],
+      ['韩立', '（降尘丹洗髓，颠倒五行阵护法。该走了。）']
+    ],
+    // 结丹在洞府里闭出来，不是哪只妖兽掉出来的
+    jiedan: [
+      ['旁白', '小寰岛洞府。颠倒五行阵布了七处，石门落下，外头的事就断了。'],
+      ['韩立', '（古长老那几枚降尘丹，只剩最后一枚。洗髓，然后等。）'],
+      ['旁白', '一年，十年，三十年。石室里没有昼夜，只有丹火明明灭灭。'],
+      ['韩立', '（一百二十六岁。丹田里那点微光转了三日，终于沉下去。）'],
+      ['旁白', '丹成那一刻，整座洞府的灵气往他身上收了一收。'],
+      ['韩立', '（结丹。从山村里那个连饭都吃不饱的娃，走到今日。）'],
+      ['旁白', '石门开了。海风灌进来，把六十年的灰吹了一地。']
+    ],
+    xutian: [
+      ['旁白', '虚天殿。三百年一开。凭一角残图入门，殿门开时，半个乱星海的修士都到了。'],
+      ['旁白', '外殿三重：玄晶道、宝光阁、极妙幻境。内殿是冰火道。进得去的，十不存三。'],
+      ['韩立', '（残图是越国皇宫那趟得的。黑煞教拿它当命根子，最后便宜了我。）'],
+      ['旁白', '殿门内，一个披发老者拦住去路，目光落在他袖口。'],
+      ['极阴祖师', '血玉蜘蛛。你身上有一只。'],
+      ['韩立', '（极阴祖师。他一眼就看见了。这东西我藏了六十年。）'],
+      ['极阴祖师', '拜我为师。这鼎，你替我取。'],
+      ['韩立', '（拜师是假的，取鼎是真的。不答应，今日就出不了这道门。）'],
+      ['旁白', '内殿深处，一具枯骨忽然抬起手。'],
+      ['玄骨上人', '小友。这口鼎，你抬得动么？']
+    ],
+    xutian_out: [
+      ['旁白', '玄骨散了。乾蓝冰焰裹着虚天鼎，落在石台上。'],
+      ['韩立', '（补天丹、《玄阴经》、九曲灵参……这一趟够了。）'],
+      ['旁白', '殿外，极阴祖师、妙鹤真人、万法门与星宫的旗子同时动了。'],
+      ['韩立', '（四家都要这口鼎。那就谁都别想好拿。）'],
+      ['旁白', '二层偏殿里，一个女修靠着石壁喘气，怀里抱着一只木匣。'],
+      ['元瑶', '……道友也是被追进来的？'],
+      ['韩立', '（万年灵乳，养魂木。她抱着的东西，比她的命值钱。）']
+    ],
+    // 奇渊岛：风希打不死。该斩的是毒蛟，该走的是翅。
+    waihai: [
+      ['旁白', '奇渊岛。海水是黑的，妖兽的巢穴在海沟底下。'],
+      ['旁白', '韩立是为了一株伴妖草来的。草没采到，先撞上了一个化形的。'],
+      ['风希', '结丹中期。胆子不小。'],
+      ['韩立', '（九级裂风兽。这东西一只手就能把我按死。）'],
+      ['风希', '你身上有绿液。我看得出来。'],
+      ['风希', '给我炼一对翅。炼成，我送你一场造化。'],
+      ['旁白', '巢里还卧着两头：一条八级毒蛟，一只龟妖。三双眼睛都盯着他。'],
+      ['韩立', '（碧焰酒。他真给了。这一口下去，结丹后期的门就开了。）'],
+      ['韩立', '（炼翅是假，找机会是真。毒要下在鼎里，只够一次。）']
+    ],
+    waihai_out: [
+      ['旁白', '毒蛟的尸身沉下去。龟妖背上裂开一道口子，血把半片海染红了。'],
+      ['旁白', '半成品的风雷翅张开，带着韩立冲出水面。'],
+      ['风希', '……你跑不掉。'],
+      ['韩立', '（翅是残的。风是它的。这条命，是自己挣的。）'],
+      ['旁白', '风希追了他一万里。追到内海边上，才收住。'],
+      ['韩立', '（乱星海待不下去了。回天南。）']
+    ],
+    heisha_out: [
+      ['旁白', '地宫塌了半边。越皇的尸身压在阵眼上，龙袍泡在血里。'],
+      ['韩立', '（颠倒五行阵，布了七处。他每一步都在阵里。）'],
+      ['韩立', '（刘靖用凤凰符斩了青纹。符宝还没收回来，教主的手就从他背后穿了过去。）'],
+      ['旁白', '钟卫娘捡起刘靖遗下的符宝，补上最后一击。'],
+      ['韩立', '（刘靖。你这人一辈子不肯退，最后也没退。）'],
+      ['旁白', '越皇的储物袋里，除了《玄阴经》残本，还有一角酥了的残图。'],
+      ['韩立', '（虚天残图。这角图上的阵纹，和古传送阵是一路。）']
+    ],
+    shiku_out: [
+      ['旁白', '矿场的阵旗倒了，灵石原矿堆了半座山。'],
+      ['韩立', '（正道小队只管杀人，没人管矿。便宜我了。）'],
+      ['旁白', '矿监的箱子里翻出两样东西：一枚大挪移令，一只封着血丝的卵。'],
+      ['韩立', '（大挪移令，古传送阵上用得着。这卵……血玉蜘蛛。）'],
+      ['韩立', '（今日还不知有什么用。收着。）']
+    ],
+    qingzhu: [
+      ['旁白', '天星城外街，一间铺面挂上木牌：青竹小轩。'],
+      ['韩立', '（妙音门缺个压得住丹火的。紫灵开这个价，买的不只是手艺。）'],
+      ['紫灵', '铺子归你，货归我。妙音门不问你在后头炼什么。'],
+      ['韩立', '（天雷竹。她给的三根里，有一根是万年以上的。）'],
+      ['旁白', '铺子开了二十余年。韩立看着修士进进出出，也看着他们死。'],
+      ['韩立', '（入世也是修行。看多了，就知道什么话该接，什么话不该接。）'],
+      ['旁白', '后院丹房里，那根万年天雷竹成了金雷竹。'],
+      ['韩立', '（青竹蜂云剑。七十二口，该炼了。）']
+    ],
+    guxiu_out: [
+      ['旁白', '阵眼碎了。石台上一具枯骨，手指动了一下。'],
+      ['玄骨上人', '……三百年了。多谢小友。'],
+      ['韩立', '（他只是一缕残魂，却比整座遗址都沉。）'],
+      ['旁白', '残魂没有扑向韩立。它扑向了曲魂。'],
+      ['韩立', '（曲魂！）'],
+      ['玄骨上人', '这具身子，比你合用。'],
+      ['旁白', '曲魂的眼窝亮了一下，随即站直，转身走进石壁。'],
+      ['韩立', '（它带走了我半个底牌。石台上还剩一物——洪荒古宝。）'],
+      ['韩立', '（残图。又是残图。这世上到底有几角。）']
+    ]
+  });
+
+  // ========================= 十、战斗内定时剧情 =========================
+  window.STORY.push(
+    {
+      id: 'yj_open', map: 'yanjia', t: 2, lines: [
+        ['旁白', '燕家堡。堡门挂红，来客都提着礼盒——夺宝大会，三年一次。'],
+        ['董萱儿', '我跟着你，只跟到大会散场。别的事，我不问。'],
+        ['韩立', '（红拂师伯命我看着她。她不肯来，我也不愿带。这趟更像押着两个人走过场。）'],
+        ['旁白', '廊下过来个锦袍公子，眼睛在董萱儿脸上停了一瞬。'],
+        ['田不缺', '这位师妹面善。合欢宗田不缺，见过道友。'],
+        ['韩立', '（合欢宗的人。他把人从头到脚看了一遍，像在估一件货。）'],
+        ['韩立', '（这堡里进的人，一半佩的是鬼灵门的腰牌。剩下那一半，也不像来赴会的。）']
+      ]
+    },
+    {
+      id: 'yj_chase', map: 'yanjia', t: 96, lines: [
+        ['旁白', '后院火起。前厅的红绸烧着了，血雾从地缝里冒出来。'],
+        ['韩立', '（阴火阵、血灵阵。这哪是大会，是要把七派来的人一锅祭了。）']
+      ]
+    },
+    {
+      id: 'll_open', map: 'liulian', t: 2, lines: [
+        ['旁白', '六连殿的船出了外海。舱里挤着二十来个散修，谁也不看谁。'],
+        ['韩立', '（雇散修捕妖，按妖丹分账。这买卖在乱星海很寻常。）'],
+        ['旁白', '海面下浮起一片青影。婴鲤兽。']
+      ]
+    },
+    {
+      id: 'll_greed', map: 'liulian', t: 120, lines: [
+        ['旁白', '婴鲤兽刚拖上甲板，极阴岛的乌丑就带着人上了船。'],
+        ['韩立', '（乌丑。极阴岛的手，什么时候伸到六连殿的账上了。）'],
+        ['旁白', '乌丑把妖丹拎走。六连殿的苗长老、古长老，一声没吭。'],
+        ['韩立', '（他们是一伙的。这一船人，都是要被灭口的。）']
+      ]
+    },
+    {
+      id: 'nc_open', map: 'ningcui', t: 2, lines: [
+        ['旁白', '凝翠岛。霓裳草生在礁盘上，叶随光变色。'],
+        ['韩立', '（霓裳草引妖。撒一片下去，抵得上布一次阵。）'],
+        ['旁白', '水下的影子，一条接一条浮了上来。']
+      ]
+    },
+    {
+      id: 'sk_open', map: 'shiku', t: 2, lines: [
+        ['旁白', '矿口堆着新掘的灵石原矿。守矿的傀儡，眼睛是红的。'],
+        ['韩立', '（正道小队从东口进，我从西口。谁也别等谁。）']
+      ]
+    },
+    {
+      id: 'hx_open', map: 'heisha', t: 2, lines: [
+        ['旁白', '越国京城。宫墙底下挖出一条地宫，血从砖缝里往外渗。'],
+        ['韩立', '（护秦府进京，本是一趟闲差。地宫里这味道，我在血色禁地闻过。）'],
+        ['刘靖', '阵我已经布好了。你别管别的，只管杀。'],
+        ['韩立', '（钟卫娘、宋蒙、武炫都到了。四大血侍，一人一个。）']
+      ]
+    },
+    {
+      id: 'gx_open', map: 'guxiu', t: 2, lines: [
+        ['旁白', '古修遗址的阵还在转。三百年了，没人给它添过一块灵石。'],
+        ['金青', '阵眼在中间。破得开，里头的东西我们一人一半。']
+      ]
+    }
+  );
+
+  // ========================= 十一、际遇 =========================
+  window.ENCOUNTERS.push(
+    {
+      id: 'e_lin', map: 'yaoyuan', name: '同门 林师兄', spr: 'linmo', scale: 1.9,
+      cond: { level: 36, cleared: ['zhuji'] },
+      lines: [
+        ['旁白', '回百药园收拾旧物。田埂上站着个人，袍子是内门的，站了很久。'],
+        ['林师兄', '搬到翠屏山了？那地方灵脉好。'],
+        ['韩立', '（林师兄。谷里跟他来往的人不多，说他从不提自己的师承。）'],
+        ['林师兄', '你身上有股味儿。药味底下压着别的。'],
+        ['韩立', '（他看人的眼神不像在看同门，像在估一件器物的成色。）'],
+        ['林师兄', '夜里别锁门。'],
+        ['韩立', '（他说完就走了。我站在田埂上，手心是凉的。）']
+      ],
+      unlock: 'linxiong',
+      reward: { stones: 0 }
+    },
+    {
+      id: 'e_liujing', map: 'yanjia', name: '三师兄 刘靖', spr: 'disciple', scale: 1.9,
+      cond: { level: 36, cleared: ['zhuji'] },
+      lines: [
+        ['旁白', '堡后偏院，一个黄枫谷弟子靠在柱上，袖口缝着内门的青线。'],
+        ['刘靖', '韩师弟。你也来了。'],
+        ['韩立', '（刘靖。门里三师兄，脾气直，剑也直。）'],
+        ['刘靖', '越京出了事。黑煞教在宫墙底下血祭，一城的人都在里头。'],
+        ['韩立', '门里不管？'],
+        ['刘靖', '管不了。魔道六宗压在山门外头，谁腾得出手。我拉了几个人，自己去。'],
+        ['刘靖', '阵我来布，你只管杀人。'],
+        ['韩立', '（他这趟去，多半回不来。）'],
+        ['韩立', '我去。']
+      ],
+      unlock: 'heisha',
+      reward: { stones: 120 }
+    },
+    {
+      id: 'e_captain', map: 'yanjia', name: '正道小队 队长', spr: 'disciple', scale: 1.85,
+      cond: { level: 38, cleared: ['yanjia'] },
+      lines: [
+        ['旁白', '廊下站着个披甲的修士，手里捏着一卷矿图。'],
+        ['队长', '黄枫谷的？会破阵么。'],
+        ['韩立', '会一点。'],
+        ['队长', '灵石矿被魔道占了。上头的令是夺回来，可上头的令从来没说给多少人。'],
+        ['韩立', '（意思是要我自己挑人。）'],
+        ['队长', '西口没人守。你要去，就从西口进。'],
+        ['队长', '矿监手里有一枚大挪移令。你要是认得这东西，就自己去拿。'],
+        ['韩立', '（矿脉里的玄铁与寒铁……这一趟值得。）']
+      ],
+      unlock: 'shiku',
+      reward: { stones: 100 }
+    },
+    {
+      id: 'e_wangning', map: 'tianxing', name: '妙音门 紫灵', spr: 'nvxiu', scale: 1.8,
+      cond: { level: 56, cleared: ['jiedan'] },
+      lines: [
+        ['旁白', '天星城中街，一个女修拦住去路，纱帘后头一双眼睛很静。'],
+        ['紫灵', '道友的丹火，压得很稳。'],
+        ['韩立', '（妙音门的人。这身衣裳，我认得。）'],
+        ['紫灵', '妙音门缺一个压得住丹火的。外街有间铺面空着。'],
+        ['韩立', '（紫灵。如今妙音门里，数她说话算数。）'],
+        ['紫灵', '铺子归你，货归我。妙音门不问你在后头炼什么。'],
+        ['韩立', '（她要的不是丹术。是我这个人，能替她挡什么。）'],
+        ['韩立', '铺面我看看。']
+      ],
+      unlock: 'qingzhu',
+      reward: { stones: 200 }
+    },
+    {
+      id: 'e_jinqing', map: 'ningcui', name: '散修 金青', spr: 'jinqing', scale: 1.9,
+      cond: { level: 54, cleared: ['haian'] },
+      lines: [
+        ['旁白', '茶棚里一个青衫散修推过来一张残图，纸都酥了。'],
+        ['金青', '古修遗址，阵还在。我一个人破不开。'],
+        ['韩立', '（残图上的阵纹，是上古的路子。）'],
+        ['金青', '破开了，里头的东西一人一半。'],
+        ['韩立', '（一半。这话在乱星海，值不了几块灵石。）'],
+        ['韩立', '阵我来看。东西，先说明白怎么分。']
+      ],
+      unlock: 'guxiu',
+      reward: { stones: 160 }
+    },
+    {
+      id: 'e_yuyao', map: 'ningcui', name: '女修 元瑶', spr: 'nvxiu', scale: 1.8,
+      cond: { level: 50, cleared: ['liulian'] },
+      lines: [
+        ['旁白', '礁石后头转出个女修，一身水气，腰间挂着一只旧玉瓶。'],
+        ['元瑶', '道友也在采霓裳草？'],
+        ['韩立', '（她身上的气息不稳，像是刚受过伤。）'],
+        ['元瑶', '我不抢你的。只要一株，够配一炉药就行。'],
+        ['韩立', '（一株草换一个结丹修士的人情。这买卖不亏。）'],
+        ['韩立', '拿去。']
+      ],
+      reward: { stones: 0, heal: 0.4 }
+    },
+    {
+      id: 'e_yufu', map: 'liulian', name: '船上的老渔夫', spr: 'laoyu', scale: 1.7, repeat: true,
+      lines: [
+        ['旁白', '船尾坐着个老渔夫，正把网上的海草一根根摘下来。'],
+        ['老渔夫', '外海的妖，是越打越多的。你们修士打完了就走，我们还得在这儿打鱼。'],
+        ['韩立', '（他说得对。乱星海这几十年，妖是越来越凶了。）'],
+        ['旁白', '老渔夫从舱里拖出一小袋妖丹碎块，说是船上分的，他留着没用。']
+      ],
+      reward: { stones: 60, mats: [['m_yaodan', 1], ['m_banyao', 1]] }
+    },
+    {
+      id: 'e_haishi', map: 'liulian', name: '船上的海市散修', spr: 'rogue', scale: 1.85, repeat: true,
+      lines: [
+        ['旁白', '船尾货舱里蹲着个散修，脚边摆着三只布袋，袋子一动一动的。'],
+        ['散修', '妖丹换灵石，灵石换法器。道友身上有妖丹么？'],
+        ['韩立', '（这船上的海市，不问来路，只看成色。）'],
+        ['旁白', '韩立挑了两块玉髓，把一袋妖丹碎块推过去。']
+      ],
+      reward: { stones: 80, mats: [['m_yusui', 1], ['m_xueyu', 1]] }
+    }
+  );
+
+  // ========================= 十二、坊市 =========================
+  // 坊市只卖「有价的东西」。孤本、独苗、镇店之宝，摊子上不会有：
+  // 青竹蜂云剑与云纹法衣只能自己炼；血玉蜘蛛卵世上只有一只；
+  // 金雷竹、万年灵乳、养魂木这种万年灵物，也没人摆在摊上卖。
+  window.SHOP_STOCK.push(
+    { id: 'moyu',       price: 680,  cat: 'qi' },
+    { id: 'a_xuangui',  price: 1400, cat: 'qi' },
+    { id: 't_tianlei',  price: 1800, cat: 'qi' },
+    { id: 'fb_feng',    price: 620,  cat: 'qi' },
+    { id: 'm_yaodan',   price: 180,  cat: 'cai' },
+    { id: 'm_banyao',   price: 240,  cat: 'cai' },
+    { id: 'm_xueyu',    price: 60,   cat: 'cai' },
+    { id: 'm_xuantie',  price: 240,  cat: 'cai' },
+    { id: 'm_hantie',   price: 380,  cat: 'cai' },
+    { id: 'm_fuzhi',    price: 20,   cat: 'cai' },
+    { id: 'm_lingmo',   price: 60,   cat: 'cai' }
+  );
+
+  const TN = window.MAPS.find(m => m.id === 'tainan');
+  if (TN) TN.shopSub = '散修云集，灵石为凭。买所得，卖所余。';
+  // 太南小会是练气散修的摊子：长春功是墨大夫私下传的，掌天瓶的绿液世上独一份，
+  // 两样都不该出现在摊子上。
+  if (TN) TN.shop = ['xueshen', 'qiannian', 'shenxing', 'qingyan', 'jifeng', 'jingtie', 'money_sword', 'qingzhu',
+    'juling', 'xuantie', 'huyu', 'lianqi',
+    'm_fuzhi', 'm_lingmo', 'm_chijing', 'm_huangjing', 'm_jingtie', 'm_chitong', 'm_zihua', 'm_yusui', 'm_tianling'];
+
+  const TX = window.MAPS.find(m => m.id === 'tianxing');
+  if (TX) {
+    TX.shop = ['xueshen', 'qiannian', 'shenxing', 'jifeng', 'huyu', 'fb_feng',
+      'moyu', 'xuantie', 'a_xuangui', 't_tianlei',
+      'm_yaodan', 'm_banyao', 'm_xueyu',
+      'm_xuantie', 'm_hantie', 'm_yusui', 'm_fuzhi', 'm_lingmo'];
+    TX.shopSub = '正、魔、星宫三方同街摆摊，谁也不问谁的来历。';
+  }
+
+  // ========================= 十三、篇章与收尾 =========================
+  // 修行图按篇章分组，越往后越靠下
+  window.MAP_ARCS = [
+    { id: 'A', name: '七玄门', note: '青牛山上，练气初启' },
+    { id: 'B', name: '越国·七派', note: '黄枫谷外门，血色禁地' },
+    { id: 'C', name: '越国·魔劫', note: '筑基之后，魔道六宗南下' },
+    { id: 'D', name: '乱星海', note: '海外重修，杀妖取丹' },
+    { id: 'E', name: '结丹·虚天', note: '丹成之后，秘宝现世' }
+  ];
+  const ARC_OF = {
+    qixuan: 'A', houshan: 'A', mishi: 'A',
+    tainan: 'B', huangfeng: 'B', yaoyuan: 'B', xuese: 'B'
+  };
+  for (const m of window.MAPS) {
+    if (!m.arc) m.arc = ARC_OF[m.id] || (m.side ? 'X' : 'B');
+    const sc = window.MAP_SCENERY[m.id];
+    if (sc) { m.bg = sc.bg; m.decorScheme = sc.decor; }
+  }
+
+  window.MAIN_MAP_COUNT = window.MAPS.filter(m => !m.side).length;
+
+})();

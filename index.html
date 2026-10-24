@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#0d0f14">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>凡人·长生劫 — 练气 · 筑基 · 结丹 · 元婴 · 化神</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%23131821%22/%3E%3Ctext x=%2216%22 y=%2223%22 font-size=%2220%22 text-anchor=%22middle%22 fill=%22%23ffd24a%22%3E凡%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="wrap">
+    <div id="fit">
+      <div id="stage">
+        <canvas id="game" width="480" height="864"></canvas>
+
+        <!-- HUD -->
+        <div id="hud">
+          <div id="topbar">
+            <div id="hpwrap"><div id="hpfill"></div><span class="barlabel">生命</span></div>
+            <div id="xpwrap"><div id="xpfill"></div><span class="barlabel">灵力</span></div>
+            <div id="stats"><span id="level">练气一层</span><span id="time">00:00</span><span id="kills">斩 0</span><span id="bag">袋 0</span><span id="stones">灵石 0</span></div>
+            <div id="mapName">七玄门·后山</div>
+          </div>
+          <button id="pauseBtn">⏸</button>
+          <div id="bosswrap">
+            <div id="bossname">墨大夫</div>
+            <div id="bossbar"><div id="bossfill"></div></div>
+          </div>
+          <div id="skillrow"></div>
+          <!-- 限时增益：服丹 / 催符之后在身的属性，到点自散 -->
+          <div id="buffrow"></div>
+          <!-- 右侧快捷栏：三格，装灵宠或消耗道具，点一下就放 -->
+          <div id="quickbar">
+            <button class="qb empty" data-q="0"><i class="qb-icon">·</i><i class="qb-cd"></i></button>
+            <button class="qb empty" data-q="1"><i class="qb-icon">·</i><i class="qb-cd"></i></button>
+            <button class="qb empty" data-q="2"><i class="qb-icon">·</i><i class="qb-cd"></i></button>
+          </div>
+        </div>
+
+        <!-- 横幅提示 -->
+        <div id="banner"></div>
+        <!-- 拾取提示 -->
+        <div id="itemToast"></div>
+        <!-- 连斩 -->
+        <div id="combo"></div>
+
+        <!-- 飞鸽传书：联机聊天（左下角鸽子按钮，点开向左延展横条输入框） -->
+        <div id="chatWrap" class="chat-wrap">
+          <div id="chatLog" class="chat-log"></div>
+          <div class="chat-bar">
+            <input id="chatInput" type="text" maxlength="60" placeholder="飞鸽传书…" autocomplete="off">
+            <button id="chatBtn" class="chat-dove" title="飞鸽传书" aria-label="飞鸽传书"></button>
+          </div>
+          <!-- 表情包：点一下就放出去（同样走数据通道） -->
+          <div id="chatEmoji" class="chat-emoji">
+            <button type="button" data-emoji="👍">👍</button>
+            <button type="button" data-emoji="😂">😂</button>
+            <button type="button" data-emoji="😎">😎</button>
+            <button type="button" data-emoji="🔥">🔥</button>
+            <button type="button" data-emoji="💪">💪</button>
+            <button type="button" data-emoji="🎉">🎉</button>
+            <button type="button" data-emoji="😱">😱</button>
+            <button type="button" data-emoji="🗡">🗡</button>
+          </div>
+        </div>
+
+        <!-- 标题 -->
+        <div id="title" class="overlay">
+          <div class="panel">
+            <h1>凡人·长生劫</h1>
+            <p class="sub">练气 · 筑基 · 结丹 · 元婴 · 化神</p>
+            <p class="desc">七玄门药童韩立，自青牛山起步。闯血色禁地、渡乱星海、归天南结婴、赴大晋化神——斩妖、夺宝、辟洞府，长生之路由此铺开。</p>
+            <button id="startBtn" class="btn">踏入修行图</button>
+            <div id="best"></div>
+            <div id="titleBag"></div>
+            <p class="hint">拖动屏幕 / WASD 移动　·　战斗分 凡境·险境·死境，越险所得越厚<br>触碰图中旧人旧事可开支线　·　双击画面顶部 进 / 出全屏</p>
+            <div class="btnrow">
+              <button id="muteTitle" class="btn small">🔊 音效：开</button>
+              <button id="fullTitle" class="btn small">⛶ 全屏</button>
+              <button id="coopBtn" class="btn small">👥 双人联机</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 剧情对话 -->
+        <div id="dialog" class="overlay">
+          <div id="dialogbox">
+            <div id="dialogSpeaker"></div>
+            <div id="dialogText"></div>
+            <div id="dialogHint">点击继续 ▸</div>
+          </div>
+        </div>
+
+        <!-- 升级三选一 -->
+        <div id="levelup" class="overlay">
+          <h2 class="lu-title">突破 · 择一功法</h2>
+          <div id="cards"></div>
+        </div>
+
+        <!-- 暂停 -->
+        <!-- 突破：修为到了顶，缺什么摆出来，齐了才破 -->
+        <div id="break" class="overlay">
+          <div class="wm-panel">
+            <div class="wm-head">
+              <h2>突破</h2>
+              <p class="wm-sub">修为已到瓶颈。丹药、材料、灵石、剧情，四样齐备才破得开。</p>
+            </div>
+            <div id="breakBody" class="cave-body"></div>
+            <div class="cave-foot">
+              <button id="breakGo" class="btn small">突破</button>
+              <button id="breakLater" class="btn small">再攒攒</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="pause" class="overlay">
+          <div class="panel">
+            <h2>暂停</h2>
+            <button id="resumeBtn" class="btn">继续</button>
+            <button id="restartBtn" class="btn">重新开始</button>
+            <button id="pauseBack" class="btn small">返回修行图</button>
+            <button id="pauseLeaveCoop" class="btn small">离开联机房间</button>
+            <div class="btnrow">
+              <button id="mutePause" class="btn small">🔊 音效：开</button>
+              <button id="fullPause" class="btn small">⛶ 全屏</button>
+            </div>
+            <div class="settings">
+              <label class="setrow"><input type="checkbox" id="autoSaveChk" checked> 自动存档</label>
+              <label class="setrow"><input type="checkbox" id="manualSaveChk" checked> 手动存档</label>
+              <button id="saveNowBtn" class="btn small">立即存档</button>
+              <div id="saveHint" class="savesub">存档含道具与加成，跨地图保留</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 道陨 -->
+        <div id="gameover" class="overlay">
+          <div class="panel">
+            <h2>道陨</h2>
+            <p>长生路远，今日先折于此。</p>
+            <div class="stats2"><span>存活 <b id="goTime"></b></span><span>斩敌 <b id="goKills"></b></span><span>境界 <b id="goLevel"></b></span></div>
+            <button id="goRetry" class="btn">重试此图</button>
+            <button id="goBack" class="btn small">返回修行图</button>
+          </div>
+        </div>
+
+        <!-- 通关 -->
+        <div id="victory" class="overlay">
+          <div class="panel">
+            <h2 id="victoryTitle">此战已了</h2>
+            <p id="victoryDesc">所得已入储物袋。</p>
+            <div class="stats2" id="vStats"><span>存活 <b id="vTime"></b></span><span>斩敌 <b id="vKills"></b></span><span>境界 <b id="vLevel"></b></span></div>
+            <div id="victoryLoot"></div>
+            <div id="victoryNext"></div>
+            <button id="vBack" class="btn">离开地图</button>
+            <button id="vRetry" class="btn small">重打此图</button>
+          </div>
+        </div>
+
+        <!-- 修行图（地图选择） -->
+        <div id="worldmap" class="overlay">
+          <div class="wm-panel">
+            <div class="wm-head">
+              <h2>修行图</h2>
+              <p class="wm-sub">从青牛山到五龙海，练气到化神，择一处前行。剧情、战斗、坊市、追逃，皆在此图。</p>
+              <div class="wm-stats">
+                <span id="wmStones">灵石 0</span>
+                <span id="wmRealm">练气一层</span>
+                <span id="wmBag">储物袋 0 件</span>
+              </div>
+            </div>
+            <div id="wmList"></div>
+            <button id="wmClose" class="btn small">返回标题</button>
+          </div>
+        </div>
+
+        <!-- 太南小会（坊市） -->
+        <div id="shop" class="overlay">
+          <div class="wm-panel">
+            <div class="wm-head">
+              <h2 id="shopTitle">太南小会</h2>
+              <p class="wm-sub" id="shopSub">散修云集，灵石为凭。买所得，卖所余。</p>
+              <div class="wm-stats"><span id="shopStones">灵石 0</span><span id="shopBag">储物袋 0 件</span></div>
+            </div>
+            <div id="shopTabs">
+              <button id="shopBuyTab" class="tab active">买入</button>
+              <button id="shopSellTab" class="tab">卖出</button>
+            </div>
+            <div id="shopCats"></div>
+            <div id="shopList"></div>
+            <button id="shopClose" class="btn small">离开坊市</button>
+          </div>
+        </div>
+
+        <!-- 难度选择 -->
+        <div id="difficulty" class="overlay">
+          <div class="wm-panel">
+            <div class="wm-head">
+              <h2 id="diffMapName">七玄门·后山</h2>
+              <p id="diffMapSub" class="wm-sub">择一难度入山。怪愈强，所得愈厚。</p>
+            </div>
+            <div id="diffList"></div>
+            <button id="diffClose" class="btn small">再想想</button>
+          </div>
+        </div>
+
+        <!-- 战前运功：进战斗图前先把功法运起 / 卸下 -->
+        <div id="prefight" class="overlay">
+          <div class="wm-panel">
+            <div class="wm-head">
+              <h2 id="pfName">运功</h2>
+              <p id="pfSub" class="wm-sub">入山之前，先把身上要运的功法定下来。</p>
+              <div class="wm-stats">
+                <span id="pfSlots">可运 0 / 0</span>
+                <span id="pfRealm">练气一层</span>
+              </div>
+            </div>
+            <div id="pfBody"></div>
+            <div class="cave-foot">
+              <button id="pfGo" class="btn small">入山 →</button>
+              <button id="pfClose" class="btn small">再想想</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 洞府（安全屋） -->
+        <div id="cave" class="overlay">
+          <div class="wm-panel">
+            <div class="wm-head">
+              <h2 id="caveName">药庐草舍</h2>
+              <p id="cavePos" class="wm-sub"></p>
+              <p id="caveDesc" class="cave-quote"></p>
+              <div class="wm-stats">
+                <span id="caveStones">灵石 0</span>
+                <span id="caveRealm">练气一层</span>
+                <span id="caveBag">储物袋 0 件</span>
+              </div>
+            </div>
+            <div id="caveTabs"></div>
+            <div id="caveBody"></div>
+            <div class="cave-foot">
+              <button id="caveStory" class="btn small">重温此段</button>
+              <button id="caveClose" class="btn small">出洞</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 双人联机：P1 只做接通（SDK 在点进来时才懒加载，不拖慢单人） -->
+        <div id="coop" class="overlay">
+          <div class="wm-panel">
+            <div class="wm-head">
+              <h2>双人联机</h2>
+              <p class="wm-sub">两人各开一个窗口，填同一个房间号，即可同行。</p>
+            </div>
+            <div class="coop-body">
+              <label class="coop-line">房间号
+                <input id="coopRoom" type="text" placeholder="例如 changsheng-01" autocomplete="off" />
+              </label>
+              <div class="coop-tip">
+                <b>①</b> 两人各开一个窗口，填同一个房间号 → 点「进入房间」，再点下面「保持联机 · 去世界地图」。<br />
+                <b>②</b> 在世界地图上点同一张图进图就能同行；房主负责刷怪与结算，倒下了走到队友身边站一秒就能被拉起。
+              </div>
+              <div class="coop-line">
+                <button id="coopJoin" class="btn small">进入房间</button>
+                <button id="coopLeave" class="btn small">退出</button>
+              </div>
+              <div id="coopStatus" class="coop-status info">未连接</div>
+              <div id="coopPeers" class="coop-peers"></div>
+              <div id="coopLog" class="coop-log"></div>
+            </div>
+            <div class="cave-foot">
+              <button id="coopPlay" class="btn small">保持联机 · 去世界地图</button>
+              <button id="coopClose" class="btn small">断开并回标题</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 全屏提示 -->
+        <div id="fsHint">双击顶部 · 退出全屏</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/utils.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/sprites.js"></script>
+  <script src="js/skills.js"></script>
+  <script src="js/enemies.js"></script>
+  <script src="js/story.js"></script>
+  <script src="js/items.js"></script>
+  <script src="js/maps.js"></script>
+  <script src="js/recipes.js"></script>
+  <script src="js/encounters.js"></script>
+  <script src="js/late.js"></script>
+  <script src="js/late2.js"></script>
+  <script src="js/late3.js"></script>
+  <script src="js/value.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/debugapi.js"></script>
+  <script src="js/net.js"></script>
+  <script src="js/coop.js"></script>
+  <script src="js/chat.js"></script>
+</body>
+</html>
