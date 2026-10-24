@@ -14,7 +14,7 @@
   window.ITEMS = window.ITEMS || [];
   window.ITEMS.push(
     { id: 'siling', name: '饲灵丸', rarity: 2, icon: '💊', req: 12, desc: '以饲灵草炼成，喂灵宠可短时增其神识。', craftOnly: true },
-    { id: 'zaohua', name: '造化丹', rarity: 3, icon: '💊', req: 24, desc: '造化果为核，辅以灵草，丹成有造化之机。', craftOnly: true }
+    { id: 'zaohua', name: '造化丹', rarity: 4, icon: '🌠', req: 84, desc: '造化果为核，辅以灵草。修为 +35%，服下可先尝一口下一层境界。', craftOnly: true, effect: { xpMul: 0.35 } }
   );
 
   // 3) 刷新索引（items.js 在载入时已将 ALL_ITEMS 固化为快照，追加后需重建）

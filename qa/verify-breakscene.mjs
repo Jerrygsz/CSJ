@@ -182,8 +182,37 @@ ok(r7.r3.rate === 1, '13 枚丹 → 十成把握', r7.r3);
 ok(r7.lvAfterFail === 35 && r7.pend === 36, '冲关失败：境界不动、瓶颈仍在', r7);
 ok(r7.afterBag === 0, '冲关失败：押上的丹药全部散尽', { before: r7.bagBefore, after: r7.afterBag });
 
-// ===== 8. 全程零报错 =====
-console.log('\n== 8. 全程零报错 ==');
+// ===== 8. 后三关按原著配平 =====
+console.log('\n== 8. 结丹 / 元婴 / 化神（原著配平）==');
+let r8 = await E(`(() => {
+  const F = window.__FR;
+  F.muteStory(true); F.clearProgress();
+  const out = {};
+  // 结丹：天火液 每份 20%，五份必成
+  F.addItem('tianhuo', 1); out.j1 = F.breakRate(56);
+  F.addItem('tianhuo', 4); out.j5 = F.breakRate(56);
+  // 元婴：九曲+定灵 每套 34%，三套必成；补天丹是硬门槛（带上即可，不参与把握）
+  F.addItem('jiuqu', 3); F.addItem('dianling', 3);
+  out.y3 = F.breakRate(82);
+  const missNoButian = F.breakMissing(82).map(m => m.id).filter(Boolean);
+  F.addItem('butian', 1);
+  const missWithButian = F.breakMissing(82).map(m => m.id).filter(Boolean);
+  // 化神：魔元丹 每枚 34%，三枚必成（原著换了三枚）
+  F.addItem('moyuan', 3); out.h3 = F.breakRate(112);
+  // 造化丹不该再出现在任何突破门里
+  const zaohuaInGate = (window.BREAKTHROUGH || []).some(b =>
+    (b.items || []).some(x => x[0] === 'zaohua') || (b.needs || []).some(x => x[0] === 'zaohua'));
+  return { out, missNoButian, missWithButian, zaohuaInGate };
+})()`);
+ok(r8.out.j1.rate === 0.2 && r8.out.j5.rate === 1, '结丹：1 份天火液 20%，5 份必成', r8.out);
+ok(r8.out.y3.rate === 1, '元婴：3 套（九曲+定灵）必成', r8.out.y3);
+ok(r8.missNoButian.indexOf('butian') >= 0, '元婴缺补天丹时冲不了关', r8.missNoButian);
+ok(r8.missWithButian.indexOf('butian') < 0, '带上补天丹后门槛解除', r8.missWithButian);
+ok(r8.out.h3.rate === 1, '化神：3 枚魔元丹必成（原著三枚）', r8.out.h3);
+ok(r8.zaohuaInGate === false, '非原著的造化丹已移出突破门', r8.zaohuaInGate);
+
+// ===== 9. 全程零报错 =====
+console.log('\n== 9. 全程零报错 ==');
 ok(errs.length === 0, '无页面/控制台报错', errs.slice(0, 3));
 
 await b.close();

@@ -26,6 +26,7 @@
       items: [['zhuji', 1]],
       mats: [['m_yusuizhi', 3], ['m_zihua', 3], ['m_tianling', 3]],
       stones: 300,
+      chance: { step: 0.08 },   // 筑基：每枚筑基丹 +8%，十三枚必成（原著韩立炼了二十余颗）
       story: [{ id: 'zhuji', name: '黄枫谷·地火之屋' }],
       lines: [
         ['韩立', '三味主药已齐，筑基丹成。散修无丹，困死练气；这一炉，赌的是往后百年。'],
@@ -37,10 +38,11 @@
     },
     {
       lv: 56, realm: '结丹初期', from: '筑基后期',
-      tip: '结丹之难，百不存一。天火液引动火属性妖丹为基，闭死关的六十年就在天星城洞府里熬。',
+      tip: '结丹之难，百不存一。原著里韩立先服雪灵水与天火液为引，又靠三转重元功三次散功重修压纯真元，最后拿妖丹炼的灵丹硬堆上去 —— 天火液备得越多，这一炉越稳。',
       items: [['tianhuo', 1]],
       mats: [],
       stones: 1200,
+      chance: { step: 0.2 },    // 结丹：每份天火液 +20%，五份必成
       story: [{ id: 'tianxing', name: '天星城·洞府闭关' }],
       lines: [
         ['韩立', '天火液已备，火属性妖丹为基。结丹之难，百不存一。'],
@@ -53,10 +55,12 @@
     },
     {
       lv: 82, realm: '元婴初期', from: '结丹后期',
-      tip: '碎丹成婴。九曲灵参丹增结婴几率，定灵丹安魂定神——少了定灵丹，碎丹时神识溃散便是爆体而亡。',
+      tip: '碎丹成婴。九曲灵参丹增结婴几率，定灵丹安魂定神（少了它碎丹时神识溃散便是爆体而亡）；补天丹是虚天殿带出来的那一枚，提纯灵根、稳固元婴 —— 三样缺一不可。',
       items: [['jiuqu', 1], ['dianling', 1]],
+      needs: [['butian', 1]],   // 补天丹：虚天殿独有的一枚，硬门槛，不参与押丹
       mats: [],
       stones: 3000,
+      chance: { step: 0.34 },   // 元婴：每套（九曲+定灵）+34%，三套必成
       story: [{ id: 'jieying', name: '云梦山·结婴' }],
       lines: [
         ['韩立', '碎丹成婴。九曲灵参丹增结婴之望，定灵丹安魂；少了定灵，碎丹时神识溃散，便是爆体而亡。'],
@@ -68,10 +72,11 @@
     },
     {
       lv: 112, realm: '化神初期', from: '元婴后期',
-      tip: '人界之巅。元磁神山修出元磁神光为前置，五色寒焰淬炼灵力品质，再回天星城闭关潜修数十年。',
-      items: [['moyuan', 1], ['zaohua', 1]],
+      tip: '人界之巅。元磁神山修出元磁神光为前置，五色寒焰淬炼灵力品质；魔元丹是魔陀山的秘丹，原著里韩立拿玄玉换了三枚，三枚押上才敢冲这一关。',
+      items: [['moyuan', 1]],
       mats: [['m_hanhuo', 5], ['m_yuanci', 1]],
       stones: 8000,
+      chance: { step: 0.34 },   // 化神：每枚魔元丹 +34%，三枚必成（原著换了三枚）
       story: [{ id: 'jixi', name: '极西之地·元磁神山' }, { id: 'tianxing', name: '天星城·洞府闭关' }],
       lines: [
         ['韩立', '元磁神光淬体，五色寒焰炼灵。人界之巅，只差这一步。'],
@@ -141,10 +146,10 @@
     { id: 'egg_mojiao', name: '墨蛟卵', icon: '🥚', rarity: 4, hatch: 'p_mojiao',
       desc: '潭底淤泥里挖出来的，沉得压手。蛟性凶，得从小养。' },
 
-    // ---- 突破系统新增丹药（依合规定稿） ----
-    { id: 'tianhuo', name: '天火液', rarity: 3, icon: '🔥', req: 56, desc: '火属性妖丹为基，火灵草引火，朱果定火性。结丹辅助丹药，闭死关前服下。', effect: { xpMul: 0.12 }, unique: true },
-    { id: 'jiuqu',   name: '九曲灵参丹', rarity: 4, icon: '💊', req: 82, desc: '三百年九曲灵参炼成，碎丹成婴几率大增。结婴正道路线的主药。', effect: { maxhp: 90, regen: 1.5 }, unique: true },
-    { id: 'dianling', name: '定灵丹', rarity: 4, icon: '💊', req: 82, desc: '定灵玉为核，安魂定神。碎丹成婴必备——少了它神识溃散。', effect: { maxhp: 60, regen: 1.2 }, unique: true },
+    // ---- 突破系统新增丹药（依原著：可炼数枚，「押丹」越多把握越大） ----
+    { id: 'tianhuo', name: '天火液', rarity: 3, icon: '🔥', req: 56, desc: '火属性妖丹为基，火灵草引火，朱果定火性。结丹主药，闭死关前服下（韩立服的是雪灵水与天火液）。', effect: { xpMul: 0.12 } },
+    { id: 'jiuqu',   name: '九曲灵参丹', rarity: 4, icon: '💊', req: 82, desc: '三百年九曲灵参炼成，碎丹成婴几率大增。结婴第一圣药。', effect: { maxhp: 90, regen: 1.5 } },
+    { id: 'dianling', name: '定灵丹', rarity: 4, icon: '💊', req: 82, desc: '定灵玉为核，安魂定神。碎丹成婴必备——少了它神识溃散。', effect: { maxhp: 60, regen: 1.2 } },
 
     // ---- 结丹可选前置功法（P1-9） ----
     { id: 'sanzhong', name: '三转重元功', rarity: 3, icon: '📗', req: 50, teach: 'sanzhong', desc: '散功重修三次，每重修回境界再结丹。结丹可选前置，修习后结丹品质更佳。', unique: true },
@@ -198,6 +203,9 @@
     { id: 'r_dianling', kind: 'alchemy', name: '定灵丹', out: 'dianling', outN: 1, cost: 2200, req: 82, rate: 0.5,
       mats: [['m_dingling', 1], ['m_ningshen', 2], ['m_lingzhi', 3]],
       desc: '定灵玉为核，凝神花镇神，灵芝辅之。碎丹时安魂定神，防神识溃散（必备）。' },
+    { id: 'r_moyuan', kind: 'alchemy', name: '魔元丹', out: 'moyuan', outN: 1, cost: 3600, req: 108, rate: 0.4,
+      mats: [['m_yaodan', 3], ['m_xuesha', 2]],
+      desc: '魔陀山秘法：妖丹为骨，血煞凝元。原著里韩立以玄玉换丹，此处折作玄玉灵材自炼 —— 三枚押上，化神才稳。' },
     { id: 'r_t_qingzhu', kind: 'forge', name: '青竹蜂云剑', out: 't_qingzhu', outN: 1, cost: 4800, req: 92, rate: 0.45,
       mats: [['m_jinlei', 1], ['m_gengjing', 2], ['m_yusui', 4]],
       desc: '金雷竹为本命剑骨，庚精为锋，玉髓刻符。韩立本命法宝之路的开端。' }

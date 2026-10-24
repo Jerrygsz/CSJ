@@ -1195,6 +1195,8 @@
       if (!it) { notify('此物已不存在 · 去洞府重装'); Sfx.warn(); return false; }
       // 装备不能凭空"用掉"，它得在洞府穿在身上
       if (it.slot) { notify(it.name + ' 得在洞府佩戴'); Sfx.warn(); return false; }
+      // 破境要带在身上的至宝（补天丹之类），别当补药吃了
+      if (isGateNeed(it.id)) { notify(it.name + ' 另有他用 · 破境时要带在身上'); Sfx.warn(); return false; }
       if ((save.inventory[slot.id] || 0) <= 0) {
         if (pl) spawnText(pl.x, pl.y - 34, '袋中没有了', '#c9b27a', 12);
         notify('袋中没有了'); Sfx.warn(); return false;
@@ -1436,6 +1438,11 @@
       const have = save.inventory[it[0]] || 0;
       if (have < it[1]) miss.push({ kind: 'item', id: it[0], need: it[1], have: have });
     }
+    // needs：一次性的硬门槛（虚天殿独有之类的至宝），不参与「押丹」算把握
+    for (const it of (b.needs || [])) {
+      const have = save.inventory[it[0]] || 0;
+      if (have < it[1]) miss.push({ kind: 'need', id: it[0], need: it[1], have: have });
+    }
     for (const mt of (b.mats || [])) {
       const have = save.inventory[mt[0]] || 0;
       if (have < mt[1]) miss.push({ kind: 'mat', id: mt[0], need: mt[1], have: have });
@@ -1456,6 +1463,13 @@
     }
     return false;
   }
+  // 冲关必须「带在身上」的一次性至宝（如虚天殿的补天丹）：不能被当成普通丹药吃掉
+  function isGateNeed(id) {
+    for (const b of (window.BREAKTHROUGH || [])) {
+      for (const it of (b.needs || [])) if (it[0] === id) return true;
+    }
+    return false;
+  }
   // 「押丹冲关」：破境不是凑够一样就必成 —— 原著里韩立四属性伪灵根，
   // 一粒筑基丹不足十分之一把握；他是炼了二十余颗、一颗颗嗑下去才筑基的。
   // 这里每枚破境丹 +8%（十三枚必成），只带一枚也只是赌一把。
@@ -1472,8 +1486,10 @@
   function breakSuccessRate(b) {
     if (!b) return 1;
     if (!b.items || !b.items.length) return 1;
-    return Math.min(1, breakGatePills(b) * BREAK_RATE_PER_PILL);
+    const step = (b.chance && b.chance.step) || BREAK_RATE_PER_PILL;   // 每门可自定义：筑基 8%、结丹 20%、元婴/化神 34%
+    return Math.min(1, breakGatePills(b) * step);
   }
+  function breakStepOf(b) { return (b && b.chance && b.chance.step) || BREAK_RATE_PER_PILL; }
   // 下一级是否撞上瓶颈：撞上就返回那条突破要求，没撞上返回 null
   function breakBlock(nextLv) {
     const b = breakReqFor(nextLv);
@@ -1494,6 +1510,7 @@
         delete save.inventory[it[0]];
       }
     }
+    // needs（虚天殿独有之类的一次性至宝）只「出示」，不焚毁 —— 带上就行，破了还在
     for (const mt of (b.mats || [])) {
       save.inventory[mt[0]] = (save.inventory[mt[0]] || 0) - mt[1];
       if (save.inventory[mt[0]] <= 0) delete save.inventory[mt[0]];
@@ -4554,7 +4571,7 @@
     const list = window.BREAKTHROUGH || [];
     let html = '<div class="cave-sec"><div class="cs-title">突破</div>' +
       '<div class="cs-note">大境界不是刷满修为就能过。丹药、材料、灵石、剧情，四样齐备才谈得上冲关；' +
-      '而冲关有成败 —— 破境丹押得越多把握越大（每枚 +8%），只带一枚，也只是赌一把。缺什么这里都写着。</div>';
+      '而冲关有成败 —— 破境丹押得越多把握越大（各境每枚的加成都不同），只带一枚，也只是赌一把。缺什么这里都写着。</div>';
     let pending = null;
     for (const b of list) {
       const done = lv >= b.lv;
@@ -4567,8 +4584,9 @@
       if (!done && !miss.length) {
         const bm = MAPS.find(x => x.endLevel === b.lv);
         const pills = breakGatePills(b), rate = breakSuccessRate(b);
+        const stepPct = Math.round(breakStepOf(b) * 100), fullN = Math.ceil(1 / breakStepOf(b));
         html += '<div class="cs-note">持丹 <b>' + pills + '</b> 枚 · 冲关把握 <b>' + Math.round(rate * 100) + '%</b>'
-          + (rate >= 1 ? '（十成把握）' : '（每枚 +8%，十三枚必成；败则丹药尽毁）') + '</div>';
+          + (rate >= 1 ? '（十成把握）' : '（每枚 +' + stepPct + '%，' + fullN + ' 枚必成；败则丹药尽毁）') + '</div>';
         html += '<button class="btn small" data-breaknow="' + b.lv + '">入' + (bm ? '「' + bm.name + '」' : '洞府') + '冲关 · ' + b.realm + '</button>';
       }
       html += '<div class="brk-list">' + renderBreakList(b) + '</div></div>';
@@ -4581,6 +4599,10 @@
     for (const it of (b.items || [])) {
       const have = save.inventory[it[0]] || 0;
       h += breakRow(have >= it[1], '丹', breakNameOf(it[0]) + '　' + have + ' / ' + it[1]);
+    }
+    for (const it of (b.needs || [])) {
+      const have = save.inventory[it[0]] || 0;
+      h += breakRow(have >= it[1], '宝', breakNameOf(it[0]) + '　' + have + ' / ' + it[1] + (it[1] === 1 ? '（天下独一份）' : ''));
     }
     for (const mt of (b.mats || [])) {
       const have = save.inventory[mt[0]] || 0;

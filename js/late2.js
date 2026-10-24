@@ -46,8 +46,8 @@
     { id: 'dayan2',   name: '大衍诀·后三层', rarity: 4, icon: '📘', req: 82, teach: 'dayan2', desc: '习得《大衍诀》后三层。大衍神君亲手补全的那半卷', unique: true },
     { id: 'yuanci',   name: '元磁神光',     rarity: 4, icon: '🌌', req: 102, teach: 'yuanci', desc: '习得《元磁神光》。元磁山炼化之后的神通，近身领域的极致', unique: true },
     // ---- 丹药（剧情所得，无丹方） ----
-    { id: 'zaohua',   name: '造化丹',       rarity: 4, icon: '🌠', req: 84, desc: '修为 +35%。灵烛果炼的，服下可先尝一口下一层境界', effect: { xpMul: 0.35 }, unique: true },
-    { id: 'moyuan',   name: '魔元丹',       rarity: 4, icon: '😈', req: 108, desc: '伤害 +45%，上限 +160。呼老魔手里换来的，化神那一炉的主药', effect: { dmg: 0.45, maxhp: 160 }, unique: true },
+    // 造化丹的定义与丹方统一收在 value.js（造化果炼），此处不再重复定义（曾致 id 重复）。
+    { id: 'moyuan',   name: '魔元丹',       rarity: 4, icon: '😈', req: 108, desc: '伤害 +45%，上限 +160。魔陀山秘丹，原著里韩立拿玄玉换了三枚，化神那一炉的主药', effect: { dmg: 0.45, maxhp: 160 } },
     // ---- 兵器 / 护甲 ----
     { id: 'w_xuemo',  name: '血魔剑',       rarity: 4, icon: '🗡', slot: 'weapon', req: 82, desc: '伤害 +42%，暴击 +10%。掩月宗大长老的佩剑，剑身有血色纹路', effect: { dmg: 0.42, crit: 0.10 }, unique: true },
     { id: 'a_xuemo',  name: '血魔甲',       rarity: 4, icon: '🥷', slot: 'armor', req: 82, desc: '上限 +130，减伤 18%。血魔剑的配套甲衣，穿上人显小一圈', effect: { maxhp: 130, armor: 0.18 }, unique: true },

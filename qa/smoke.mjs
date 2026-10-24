@@ -501,7 +501,7 @@ for (const r of W.RECIPES) {
 }
 eq(badRecipe.length, 0, '配方产物与材料都取得到', badRecipe.slice(0, 5));
 // 6 条基础方 + late3 新增 3 条突破用方（天火液 / 九曲灵参丹 / 定灵丹）+ value.js 2 条（饲灵丸 / 造化丹）
-eq(W.RECIPES.filter(r => r.kind === 'alchemy').length, 11, '炼丹方 11 条（降尘丹 / 补天丹按原著改为剧情所得，没有丹方）');
+eq(W.RECIPES.filter(r => r.kind === 'alchemy').length, 12, '炼丹方 12 条（含魔元丹；降尘丹 / 补天丹按原著为剧情所得，无丹方）');
 
 const badEnc = [];
 for (const e of W.ENCOUNTERS) {
