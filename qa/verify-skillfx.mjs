@@ -232,7 +232,38 @@ ok(R.normal.webCount === 2, '正常敌人雷网是基础 2 段', R.normal.webCou
 ok(Math.abs(R.normal.dealt - R.normal.expectedDealt) < 1e-6 && R.normal.mult === 1,
   '正常敌人无加伤（倍率=1）', R.normal);
 
-console.log('\n== 9. 全程零报错 ==');
+console.log('\n== 10. 击杀碎裂碎的是当前帧，不是 idle 整图 ==');
+const SH = await page.evaluate(() => {
+  const out = {};
+  // 有手绘跑步帧的精灵：死亡瞬间若在跑/浮/受击姿态，碎裂应抓到那一帧（usedFrame=true）
+  const runSprites = Object.keys(window.__FR.frames('run') || {}).filter(s => window.__FR.frames('run')[s]);
+  out.runSprites = runSprites;
+  out.frameCases = runSprites.map(spr => {
+    const r = window.__FR.shatterOnce(spr, {});            // 默认在跑（t=0.1 → 跑相位）
+    return { spr, frame: r.spr, usedFrame: r.usedFrame };
+  });
+  // 没手绘帧的精灵：整图就是 idle，碎裂回退到 e.spr，usedFrame=false（本就无差别，不报错）
+  out.noFrame = window.__FR.shatterOnce('wolf', {});
+  // 受击死亡：hitFlash>0 时应抓到受击那一帧（前提：该精灵配了 handrawn 受击帧）
+  const hurtSprites = Object.keys(window.__FR.frames('hurt') || {}).filter(s => window.__FR.frames('hurt')[s]);
+  const hitSpr = (hurtSprites.find(s => runSprites.includes(s))) || hurtSprites[0] || null;
+  out.hitSpr = hitSpr;
+  out.hit = hitSpr ? window.__FR.shatterOnce(hitSpr, { hitFlash: 0.1 }) : null;
+  return out;
+});
+// 凡是有手绘跑步帧的精灵，跑动中死亡都应碎出那一帧（不是 idle 站姿）
+for (const c of SH.frameCases) {
+  ok(c.usedFrame === true, `击杀碎裂抓到 ${c.spr} 的当前帧（非 idle 整图）`, c);
+}
+ok(SH.noFrame.usedFrame === false && SH.noFrame.spr === 'wolf',
+  '无手绘帧的 wolf 碎裂回退到自身整图（本就无差别）', SH.noFrame);
+if (SH.hit) {
+  ok(SH.hit.usedFrame === true, `受击死亡碎裂同样抓到当前帧（${SH.hitSpr}）`, SH.hit);
+} else {
+  ok(true, '无受击手绘帧的精灵，受击碎裂分支不适用（跳过）');
+}
+
+console.log('\n== 11. 全程零报错 ==');
 ok(errs.length === 0, '页面没有抛异常', errs.slice(0, 3));
 
 console.log('\n========================================');

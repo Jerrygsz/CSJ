@@ -2023,7 +2023,13 @@
   // 击杀碎裂：把精灵切成 3×3 炸开。比撒一把金粉更像"这东西被劈了"，
   // 而且用的就是它自己的样子 —— 不用多画一帧碎尸。
   function spawnShatter(e) {
-    if (!e || !Sprites[e.spr]) return;
+    if (!e) return;
+    // 抓死亡这一帧真正显示的那张图：跑/浮/受击有手绘帧时 tf.frame 指到 spr_run0 之类，
+    // 否则回退到 e.spr（程序化切片的怪整图就是 idle 姿态）。不抓当前帧的话，
+    // 敌人跑动中死会碎出 idle 站姿，差一两像素一眼假。
+    const tf = enemyTf(e);
+    const name = (tf && tf.frame && Sprites[tf.frame]) ? tf.frame : e.spr;
+    if (!Sprites[name]) return;
     const n = 3, tiles = [];
     for (let i = 0; i < n * n; i++) {
       tiles.push({
@@ -2032,7 +2038,7 @@
       });
     }
     G.parts.push({
-      shatter: true, spr: e.spr, x: e.x, y: e.y,
+      shatter: true, spr: name, x: e.x, y: e.y,
       sc: e.scale || 1, flip: !!e._flip, n, tiles,
       life: 0.4, maxlife: 0.4
     });
@@ -5664,6 +5670,20 @@
         expectedDealt: dmgMul() * dmg * mult,
         mult
       };
+    },
+    // 击杀碎裂：返回死亡瞬间真正被劈碎的那张图名（当前帧优先，否则回退 e.spr）。
+    // 验收据它断言「碎的是当前姿态，不是 idle 整图」——这是修掉的小瑕疵。
+    shatterOnce(spr, opts) {
+      const o = opts || {};
+      const e = {
+        spr, x: 0, y: 0, scale: o.scale || 1, _flip: !!o.flip,
+        hitFlash: o.hitFlash || 0, t: o.t == null ? 0.1 : o.t
+      };
+      const before = G.parts.length;
+      spawnShatter(e);
+      const parts = G.parts.slice(before);
+      const s = parts.find(p => p.shatter);
+      return { count: parts.length, spr: s ? s.spr : null, usedFrame: s ? s.spr !== spr : null };
     },
     // 把某一门功法的特效直接铺到画面里（暂停态下冻住那一帧截图用）
     previewVfx(name, evil) {
