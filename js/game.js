@@ -314,6 +314,37 @@
     writeSave();
     return c.equipped.slice();
   }
+  // 剧情一次性所授的传世功法（unique 法诀）：失而不可复得，永不入「清掉」之列
+  let _uniqueTaught = null;
+  function isUniqueTaught(id) {
+    if (!_uniqueTaught) {
+      _uniqueTaught = {};
+      for (const it of (window.ALL_ITEMS || [])) if (it && it.teach && it.unique) _uniqueTaught[it.teach] = true;
+    }
+    return !!_uniqueTaught[id];
+  }
+  // 地图打完：只留三门练得最精的功法（等级原样带去下张图），余者散去。
+  // 同层随机留 —— 「随机保留三个升级最高的」；剧情传世功法不在此列。
+  // 进图前运哪几门，照旧走「战前运功」自选，等级沿用。
+  function pruneSkillsTop3() {
+    const c = cultObj();
+    const ids = Object.keys(c.skills).filter(id => (c.skills[id] || 0) > 0);
+    const keep = [];
+    const rest = [];
+    for (const id of ids) (isUniqueTaught(id) ? keep : rest).push(id);
+    if (rest.length + keep.length <= 3 || rest.length <= 3) {
+      // 总共不过三门（或可留的不过三门），无需收敛
+      return { kept: ids.length, cut: 0 };
+    }
+    rest.sort((a, b) => (c.skills[b] || 0) - (c.skills[a] || 0) || (Math.random() - 0.5));
+    for (const id of rest.slice(0, 3)) keep.push(id);
+    const cut = ids.length - keep.length;
+    const next = {};
+    for (const id of keep) next[id] = c.skills[id];
+    c.skills = next;
+    c.equipped = (c.equipped || []).filter(id => next[id]);
+    return { kept: keep.length, cut };
+  }
   function buildPlayerSkills(lv, m) {
     const c = cultObj();
     // 地图给的起手功法只记进「已习得」，装不装由自己决定
@@ -3399,6 +3430,7 @@
     G.fieldSlow = []; G.shake = 0; G.flash = 0; G.hitStop = 0;
     G.decor = []; G.chunkMap = {}; G.cam = { x: -W / 2, y: -H / 2 }; G.orbPos = [];
     G.vacuumT = 0; G.pendingEnding = false; G.runLoot = []; G.matGain = 0; G.lastAutoSave = 0;
+    G.breakHinted = false;   // 瓶颈弹幕每图只提一次
     G.npcs = []; G.encT = 8;
     G.realmIdx = 0; G.realm = { dmg: 0, atk: 0, spd: 0 }; G.realmHp = 0;
     resetCombo();
@@ -3698,6 +3730,8 @@
     const newly = unlockNext(m);
     save.mapId = m.next || m.id;
     save.wins++;
+    // 打完一张图：只留三门最精的功法带去下一张，余者散去（剧情传世功法除外）
+    G.lastPrune = pruneSkillsTop3();
     writeSave();
     showVictory(m, gained, newly, cave, newDiff, realmUp);
   }
@@ -3710,7 +3744,8 @@
     if (elVictoryTitle) elVictoryTitle.textContent = m.clearTitle || (m.name + ' · 已了');
     if (elVictoryDesc) {
       const base = m.clearDesc || '所得已入储物袋。';
-      elVictoryDesc.textContent = realmUp ? ('境界已进 · ' + realmUp + '　' + base) : base;
+      const pruneNote = (G.lastPrune && G.lastPrune.cut > 0) ? '　功法已敛 · 只留三门最精' : '';
+      elVictoryDesc.textContent = (realmUp ? ('境界已进 · ' + realmUp + '　') : '') + base + pruneNote;
     }
     if (elVictoryStats) elVictoryStats.style.display = (m.type === 'story' || m.type === 'market') ? 'none' : 'flex';
     elVTime.textContent = fmtTime(G.time); elVKills.textContent = G.kills; elVLevel.textContent = realmName(G.player.level);
@@ -4514,13 +4549,16 @@
     elBreak.style.display = 'flex';
   }
   function closeBreak() { if (elBreak) elBreak.style.display = 'none'; }
-  // 撞上瓶颈：修为卡住，摆一次面板，之后只提醒
+  // 撞上瓶颈：修为卡住。战斗里不再反复弹全屏面板遮挡画面 ——
+  // 每张图进门只弹幕提醒一次；物事备齐时修为会自行破关，不需要任何按钮。
+  // 想看缺什么，去洞府「突破」页看全账。
   function markBlocked(b) {
     G.breakPending = b || null;
     if (!b) return;
-    const now = performance.now();
-    if (now - (G.breakHintAt || 0) > 15000) { G.breakHintAt = now; openBreak(b); }
-    else if (G.state === 'play') notify('修为已至 ' + (b.from || '') + ' · 缺 ' + b.realm + ' 的物事');
+    if (!G.breakHinted) {
+      G.breakHinted = true;
+      banner('修为已至 ' + (b.from || '') + ' · 缺 ' + b.realm + ' 的物事');
+    }
   }
   function doBreakNow() {
     const b = G.breakCur; if (!b) return;
@@ -6080,6 +6118,8 @@
       return { cycles: p.cycles, stats: Object.assign({}, p.stats) };
     },
     rebirthResetPool() { writeRebirthPool({ cycles: 0, stats: {} }); REBIRTH = rebirthPool(); return 'rebirth pool cleared'; },
+    // 功法收敛（打图后 Top3）：供守门断言
+    pruneNow() { const r = pruneSkillsTop3(); return { kept: r.kept, cut: r.cut, skills: Object.assign({}, cultObj().skills), equipped: (cultObj().equipped || []).slice() }; },
     save: {
       read: () => localStorage.getItem(SAVE_KEY),
       clear: () => { localStorage.removeItem(SAVE_KEY); return '已清除存档'; },
