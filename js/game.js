@@ -3763,12 +3763,14 @@
   }
   function refreshTitle() {
     if (elBest) {
+      const rp = rebirthPool();
       elBest.innerHTML =
         '<div class="ts-hd">生涯</div><div class="ts-grid">' +
         tsRow('最高存活', fmtTime(save.best.time)) +
         tsRow('最多斩敌', save.best.kills) +
-        tsRow('最高境界', realmName(save.best.level)) +
+        tsRow('最高境界', realmName(save.best.level) + '（' + save.best.level + ' 层）') +
         tsRow('通关', save.wins + ' 次') +
+        (rp.cycles ? tsRow('轮回余荫', '第 ' + rp.cycles + ' 世 · +' + rp.level.toFixed(2) + ' 层') : '') +
         '</div>';
     }
     if (elTitleBag) {
@@ -5048,8 +5050,9 @@
     const lines = [];
     lines.push('本世修为：境界 ' + curLv + ' 层');
     lines.push('本次可炼余荫：修为 +' + p.addLevel.toFixed(2) + ' 层（取 1/81）');
+    if (p.cycles > 0) lines.push('累计余荫池：+' + p.nextLevel.toFixed(2) + ' 层（含本次，已转 ' + p.cycles + ' 世）');
     lines.push('功法、法器、灵石、洞府等，一律清零，从头再来');
-    lines.push('来生起步：' + realmName(p.startLevel) + '（' + p.startLevel + ' 层）' + (p.cycles > 0 ? '　已累积 ' + p.cycles + ' 世余荫' : ''));
+    lines.push('来生起步：' + realmName(p.startLevel) + '（' + p.startLevel + ' 层）');
     elRebirthText.innerHTML = lines.join('<br>');
     elRebirth.style.display = 'flex';
   }
