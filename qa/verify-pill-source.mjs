@@ -111,8 +111,26 @@ let r4 = await E(`(() => {
 ok(r4.before.indexOf('zhuji') >= 0, '备丹前，丹药缺项里有筑基丹', r4.before);
 ok(r4.after.indexOf('zhuji') < 0, '得丹后，丹药缺项里不再有筑基丹', r4);
 
-// ===== 5. 全程零报错 =====
-console.log('\n== 5. 全程零报错 ==');
+// ===== 5. 旧档补发：已通禁地的老存档，读档补一枚（只补一次）=====
+console.log('\n== 5. 旧档补发 ==');
+await page.evaluate(() => {
+  localStorage.setItem('fanren_save_v1', JSON.stringify({
+    cultivate: { level: 35, xp: 0, skills: { sword: 4 } },
+    cleared: ['xuese'], unlocked: ['qixuan', 'xuese'],
+    inventory: {}, bonuses: {}, best: { time: 0, kills: 0, level: 35 }
+  }));
+});
+await page.reload({ waitUntil: 'load' });
+await page.waitForFunction(() => !!window.__FR);
+const g1 = await E(`(() => ({ zhuji: window.__FR.bag().zhuji || 0, lv: window.__FR.info().cultivate.level }))()`);
+await page.reload({ waitUntil: 'load' });
+await page.waitForFunction(() => !!window.__FR);
+const g2 = await E(`(() => ({ zhuji: window.__FR.bag().zhuji || 0 }))()`);
+ok(g1.zhuji === 1 && g1.lv === 35, '旧档（禁地已通、卡在筑基门）读档补发 1 枚筑基丹', g1);
+ok(g2.zhuji === 1, '再读档不重复补发', g2);
+
+// ===== 6. 全程零报错 =====
+console.log('\n== 6. 全程零报错 ==');
 ok(errs.length === 0, '无页面/控制台报错', errs.slice(0, 3));
 
 await b.close();

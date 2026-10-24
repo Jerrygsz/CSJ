@@ -183,7 +183,8 @@
         identity: (s.identity === 'li' || s.identity === 'han') ? s.identity : 'han',
         liUnlocked: !!s.liUnlocked,
         ach: (s.ach && typeof s.ach === 'object') ? s.ach : {},
-        greenLiquid: s.greenLiquid || 0
+        greenLiquid: s.greenLiquid || 0,
+        gift_zhuji: !!s.gift_zhuji
       };
       // 老存档：已通关的剧情图自动补成洞府
       for (const id of save.cleared) { const m = MAPS.find(x => x.id === id); if (m && m.cave && save.caves.indexOf(m.cave) < 0) save.caves.push(m.cave); }
@@ -196,6 +197,20 @@
   }
   function writeSave() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
   loadSave();
+  // 旧档补发：血色禁地已经通关，宗门该赏的那一枚筑基丹却没到手（本版才补上的剧情奖励）。
+  // 老存档不必重开：读档即补，只补一次，且只在还卡在筑基门前（Lv36 之前）时才补。
+  let pendingZhujiGift = false;
+  (function backfillZhujiGift() {
+    if (save.gift_zhuji) return;
+    if ((save.cleared || []).indexOf('xuese') < 0) return;
+    save.gift_zhuji = true;
+    if (((save.cultivate && save.cultivate.level) || 1) < 36) {
+      save.inventory.zhuji = (save.inventory.zhuji || 0) + 1;
+      save.totalItems = (save.totalItems || 0) + 1;
+      pendingZhujiGift = true;
+    }
+    writeSave();
+  })();
 
   // ---------- 游戏状态 ----------
   const G = {
@@ -6255,5 +6270,9 @@
   refreshTitle();
   syncMute();
   syncSettingsUI();
+  if (pendingZhujiGift) {
+    pendingZhujiGift = false;
+    setTimeout(function () { try { banner('宗门旧例 · 补授筑基丹一枚'); Sfx.buff(); } catch (e) {} }, 900);
+  }
   requestAnimationFrame(loop);
 })();
