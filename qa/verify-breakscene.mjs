@@ -110,7 +110,7 @@ console.log('\n== 4. 料齐：打完演出破境 ==');
 let r4 = await E(`(() => {
   const F = window.__FR;
   F.muteStory(true); F.clearProgress();
-  F.addItem('zhuji', 2);
+  F.addItem('zhuji', 13);                 // 十三枚 = 十成把握
   for (const id of ['m_yusuizhi','m_zihua','m_tianling']) F.addItem(id, 5);
   F.setStones(5000); F.clearMap('zhuji'); F.setLevel(35);
   F.enterMap('zhuji', 'easy');
@@ -126,7 +126,7 @@ let r4 = await E(`(() => {
 ok(r4.dlg === true && r4.nLines >= 5, '打完先弹出突破剧情演出（含幕头）', { dlg: r4.dlg, n: r4.nLines });
 ok(r4.spk.indexOf('地火之屋') >= 0, '幕头是原著地点「黄枫谷·地火之屋」', r4.spk);
 ok(r4.lv === 36, '演完境界推到筑基初期（Lv36）', r4.lv);
-ok(r4.zhuji === r4.before - 1, '吃掉了 1 颗筑基丹', { before: r4.before, after: r4.zhuji });
+ok(r4.zhuji === 0, '这一炉丹尽数押上了（13 枚全无）', { before: r4.before, after: r4.zhuji });
 ok(r4.state === 'victory', '演出后进结算', r4.state);
 
 // ===== 5. 料未齐：打完不演对话，只结算不解锁 =====
@@ -157,8 +157,33 @@ let r6 = await E(`(() => {
 ok(r6.lv === 35, '打坐也过不了大境界门', r6.lv);
 ok(r6.before - r6.after <= 2, '撞门即停，不再空烧灵石（最多坐一次）', r6);
 
-// ===== 7. 全程零报错 =====
-console.log('\n== 7. 全程零报错 ==');
+// ===== 7. 押丹冲关：把握随丹药数涨，失败则丹药散尽、境界不动 =====
+console.log('\n== 7. 把握与失败 ==');
+let r7 = await E(`(() => {
+  const F = window.__FR;
+  F.muteStory(true); F.clearProgress(); F.setLevel(35);
+  for (const id of ['m_yusuizhi','m_zihua','m_tianling']) F.addItem(id, 5);
+  F.setStones(5000); F.clearMap('zhuji');
+  const r1 = F.breakRate(36);
+  F.addItem('zhuji', 1);  const r2 = F.breakRate(36);
+  F.addItem('zhuji', 12); const r3 = F.breakRate(36);
+  F.breakLuck(false);                        // 强制这一炉炸了
+  const bagBefore = F.bag().zhuji || 0;
+  const res = F.breakNow(36);
+  const afterBag = F.bag().zhuji || 0;
+  const lvAfterFail = F.info().cultivate.level;
+  const pend = F.breakPending();
+  F.breakLuck(null);
+  return { r1, r2, r3, bagBefore, afterBag, lvAfterFail, pend, res };
+})()`);
+ok(r7.r1 && r7.r1.rate === 0, '没丹时把握为 0（连试都试不了）', r7.r1);
+ok(Math.abs(r7.r2.rate - 0.08) < 1e-9, '1 枚丹 → 8%（原著「不足十分之一」）', r7.r2);
+ok(r7.r3.rate === 1, '13 枚丹 → 十成把握', r7.r3);
+ok(r7.lvAfterFail === 35 && r7.pend === 36, '冲关失败：境界不动、瓶颈仍在', r7);
+ok(r7.afterBag === 0, '冲关失败：押上的丹药全部散尽', { before: r7.bagBefore, after: r7.afterBag });
+
+// ===== 8. 全程零报错 =====
+console.log('\n== 8. 全程零报错 ==');
 ok(errs.length === 0, '无页面/控制台报错', errs.slice(0, 3));
 
 await b.close();

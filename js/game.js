@@ -1456,6 +1456,24 @@
     }
     return false;
   }
+  // 「押丹冲关」：破境不是凑够一样就必成 —— 原著里韩立四属性伪灵根，
+  // 一粒筑基丹不足十分之一把握；他是炼了二十余颗、一颗颗嗑下去才筑基的。
+  // 这里每枚破境丹 +8%（十三枚必成），只带一枚也只是赌一把。
+  const BREAK_RATE_PER_PILL = 0.08;
+  function breakGatePills(b) {
+    if (!b || !b.items || !b.items.length) return 0;
+    let n = Infinity;
+    for (const it of b.items) {
+      const need = Math.max(1, it[1] || 1);
+      n = Math.min(n, Math.floor((save.inventory[it[0]] || 0) / need));
+    }
+    return n === Infinity ? 0 : n;
+  }
+  function breakSuccessRate(b) {
+    if (!b) return 1;
+    if (!b.items || !b.items.length) return 1;
+    return Math.min(1, breakGatePills(b) * BREAK_RATE_PER_PILL);
+  }
   // 下一级是否撞上瓶颈：撞上就返回那条突破要求，没撞上返回 null
   function breakBlock(nextLv) {
     const b = breakReqFor(nextLv);
@@ -1466,12 +1484,15 @@
     const it = Items.get(id);
     return it ? it.name : id;
   }
-  // 真正突破：吃掉该吃的东西，然后放行升级
+  // 真正突破：吃掉该吃的东西，然后放行升级。
+  // 「押丹」：身上这门破境丹有几枚，这一炉就押几枚 —— 多一枚多一分把握（见 breakSuccessRate）。
   function payBreak(b) {
     for (const it of (b.items || [])) {
-      save.inventory[it[0]] = (save.inventory[it[0]] || 0) - it[1];
-      if (save.inventory[it[0]] <= 0) delete save.inventory[it[0]];
-      save.totalItems = Math.max(0, (save.totalItems || 1) - it[1]);
+      const have = save.inventory[it[0]] || 0;
+      if (have > 0) {
+        save.totalItems = Math.max(0, (save.totalItems || 1) - have);
+        delete save.inventory[it[0]];
+      }
     }
     for (const mt of (b.mats || [])) {
       save.inventory[mt[0]] = (save.inventory[mt[0]] || 0) - mt[1];
@@ -3769,30 +3790,42 @@
       save.caves.push(m.cave);
       cave = CAVES[m.cave];
     }
-    // 破境图：物事齐了才继续推进（解锁下一图）；未齐则只取物、卡在此图，可反复来打
+    // 破境图：物事齐了才谈冲关；冲关还可能失败 —— 解锁下一图要等「真的破了」才给
     const breakReady = breakGate ? breakMissing(breakGate).length === 0 : true;
     const blocked = !!(breakGate && !breakReady);
-    let newly = null;
-    if (blocked) {
-      G.breakPending = breakGate;
-      save.mapId = m.id;
-    } else {
-      newly = unlockNext(m);
-      save.mapId = m.next || m.id;
-    }
     save.wins++;
     // 打完一张图：只留三门最精的功法带去下一张，余者散去（剧情传世功法除外）
     G.lastPrune = pruneSkillsTop3();
-    G.victoryNote = blocked
-      ? ('破境之物未齐（还差 ' + breakMissing(breakGate).length + ' 样）· 集齐了再来此图冲关')
-      : (breakGate ? ('破境之物已齐 · 就地冲关') : '');
-    writeSave();
-    if (breakGate && breakReady) {
-      // 就地冲关：先按原著剧情演一段突破，演完才破境，再结算
-      breakSceneThen(breakGate, () => showVictory(m, gained, newly, cave, newDiff, realmName(breakGate.lv)));
+    if (breakGate) {
+      G.victoryNote = blocked
+        ? ('破境之物未齐（还差 ' + breakMissing(breakGate).length + ' 样）· 集齐了再来此图冲关')
+        : ('破境之物已齐 · 就地冲关（持丹 ' + breakGatePills(breakGate) + ' 枚 · 把握 ' + Math.round(breakSuccessRate(breakGate) * 100) + '%）');
     } else {
-      showVictory(m, gained, newly, cave, newDiff, realmUp);
+      G.victoryNote = '';
     }
+    if (blocked) {
+      G.breakPending = breakGate;
+      save.mapId = m.id;
+      writeSave();
+      showVictory(m, gained, null, cave, newDiff, realmUp);
+      return;
+    }
+    if (!breakGate) {
+      const newly = unlockNext(m);
+      save.mapId = m.next || m.id;
+      writeSave();
+      showVictory(m, gained, newly, cave, newDiff, realmUp);
+      return;
+    }
+    // 冲关演出 → 成则破境并解锁下一图；败则丹药散尽、原地再来
+    writeSave();
+    breakSceneThen(breakGate, (g, ok) => {
+      let newly = null;
+      if (ok) { newly = unlockNext(m); save.mapId = m.next || m.id; }
+      else { G.breakPending = g; save.mapId = m.id; G.victoryNote = '冲关失败 · 丹药散尽，另备丹药再来此图'; }
+      writeSave();
+      showVictory(m, gained, newly, cave, newDiff, ok ? realmName(g.lv) : null);
+    });
   }
   function showVictory(m, gained, newly, cave, newDiff, realmUp) {
     G.state = 'victory';
@@ -4533,6 +4566,9 @@
       // 物事齐了：「闭门冲关」按钮顶在最上面，不用往下翻就能点
       if (!done && !miss.length) {
         const bm = MAPS.find(x => x.endLevel === b.lv);
+        const pills = breakGatePills(b), rate = breakSuccessRate(b);
+        html += '<div class="cs-note">持丹 <b>' + pills + '</b> 枚 · 冲关把握 <b>' + Math.round(rate * 100) + '%</b>'
+          + (rate >= 1 ? '（十成把握）' : '（每枚 +8%，十三枚必成；败则丹药尽毁）') + '</div>';
         html += '<button class="btn small" data-breaknow="' + b.lv + '">入' + (bm ? '「' + bm.name + '」' : '洞府') + '冲关 · ' + b.realm + '</button>';
       }
       html += '<div class="brk-list">' + renderBreakList(b) + '</div></div>';
@@ -4622,24 +4658,41 @@
         : ('修为已至 ' + (b.from || '') + ' · 缺 ' + b.realm + ' 的物事'));
     }
   }
-  // 突破剧情演出：按原著演一段，演完 payBreak + 把境界推到门后那一层，再回调
+  // 突破剧情演出：按原著演一段，演完押上这一炉丹搏一把 —— 成则破境，败则丹药散尽、可再来。
+  // onDone(gate, ok)
   function breakSceneThen(gate, onDone) {
-    if (!gate) { if (onDone) onDone(); return; }
+    if (!gate) { if (onDone) onDone(null, true); return; }
     G.breakCur = gate;
     const scene = (gate.story && gate.story[0] && gate.story[0].name) || '洞府';
     const lines = [['　' + scene + '　', (gate.from || '') + ' → ' + gate.realm]];
     const novel = (gate.lines && gate.lines.length) ? gate.lines : [['旁白', gate.tip || '']];
     for (const l of novel) lines.push(l);
+    // 幕落之前把这一炉的底牌摆明：押几枚丹、几分把握
+    const pills = breakGatePills(gate);
+    const rate = breakSuccessRate(gate);
+    const pillName = (gate.items && gate.items[0] && Items.get(gate.items[0][0])) ? Items.get(gate.items[0][0]).name : '破境丹';
+    lines.push(['旁白', '（囊中' + pillName + ' ' + pills + ' 枚，尽数入炉 —— 冲关把握约 ' + Math.round(rate * 100) + '%。）']);
     G.breakScene = gate.lv;
     if (elDialog) elDialog.classList.add('break-scene');
     showLines(lines, () => {
       if (elDialog) elDialog.classList.remove('break-scene');
       if (breakMissing(gate).length) {                  // 结算前料被别处吃掉（极端情况）：不硬破
         G.breakPending = gate; G.breakCur = null; G.breakScene = null;
-        if (onDone) onDone();
+        if (onDone) onDone(gate, false);
         return;
       }
-      payBreak(gate);
+      payBreak(gate);                                    // 押丹：手上几枚全押
+      const ok = (G.breakForce != null) ? !!G.breakForce : (Math.random() < rate);
+      G.breakCur = null; G.breakScene = null;
+      if (!ok) {
+        // 冲关失败：丹毁炉炸，修为退回门口，可以再备丹药重来
+        G.breakPending = gate;
+        writeSave();
+        banner('冲关失败 · 丹药散尽，另备丹药再来');
+        Sfx.warn();
+        if (onDone) onDone(gate, false);
+        return;
+      }
       const newLv = Math.max(save.cultivate.level || 1, gate.lv);
       save.cultivate.level = newLv;
       save.cultivate.xp = 0;
@@ -4650,9 +4703,9 @@
         checkRealm(true); recalcMaxhp();
         G.player.hp = G.player.maxhp;
       }
-      G.breakPending = null; G.breakCur = null; G.breakScene = null;
+      G.breakPending = null;
       writeSave();
-      if (onDone) onDone(gate);
+      if (onDone) onDone(gate, true);
     }, 'break:' + gate.lv);
   }
   // 洞府「突破」按钮：物事齐了 → 进这张门对应的破境地图，走完剧情/打完，就地在剧情里破境
@@ -4666,19 +4719,32 @@
     if (!bm) {
       // 没有对应的剧情地图：就地演一段破境（退路）
       if (elCave) elCave.style.display = 'none';
-      breakSceneThen(gate, () => { G.state = 'cave'; if (elCave) elCave.style.display = 'flex'; renderCave(); banner('破境 · ' + gate.realm); });
+      breakSceneThen(gate, (g, ok) => {
+        G.state = 'cave'; if (elCave) elCave.style.display = 'flex'; renderCave();
+        banner(ok ? ('破境 · ' + g.realm) : '冲关失败 · 另备丹药再来');
+      });
       return;
     }
     if (save.unlocked.indexOf(bm.id) < 0) save.unlocked.push(bm.id);
     G.breakCur = gate;
     beginMap(bm.id);
   }
+  // 直接冲关（无剧情地图 / 调试口）：同样要过这一炉丹的成败
   function doBreakNow() {
-    const b = G.breakCur; if (!b) return;
-    if (breakMissing(b).length) { notify('物事不齐 · 备齐了再来'); Sfx.warn(); return; }
+    const b = G.breakCur; if (!b) return false;
+    if (breakMissing(b).length) { notify('物事不齐 · 备齐了再来'); Sfx.warn(); return false; }
+    const rate = breakSuccessRate(b);
     payBreak(b);
-    G.breakPending = null; G.breakCur = null;
+    G.breakCur = null;
     closeBreak();
+    const ok = (G.breakForce != null) ? !!G.breakForce : (Math.random() < rate);
+    if (!ok) {
+      G.breakPending = b;
+      banner('冲关失败 · 丹药散尽，另备丹药再来'); Sfx.warn();
+      writeSave(); renderCave(); refreshTitle();
+      return false;
+    }
+    G.breakPending = null;
     banner('冲关 · ' + b.realm); Sfx.levelup();
     if (G.player && (G.state === 'play' || G.state === 'down')) {
       const p = G.player;
@@ -4698,6 +4764,7 @@
       }
       writeSave(); refreshTitle(); renderCave();
     }
+    return true;
   }
 
   function renderCaveRest(c, lv) {
@@ -6111,7 +6178,9 @@
     },
     breakList() { return JSON.parse(JSON.stringify(window.BREAKTHROUGH || [])); },    breakMissing(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); return b ? breakMissing(b).map(m => ({ kind: m.kind, id: m.id || null, name: m.name || null, need: m.need, have: m.have })) : null; },
     breakCan(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); return b ? canBreak(b) : true; },
-    breakNow(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); if (!b) return 'no req'; G.breakCur = b; doBreakNow(); return { pending: G.breakPending, lv: G.player ? G.player.level : null, cult: save.cultivate.level }; },
+    breakNow(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); if (!b) return 'no req'; G.breakCur = b; const ok = doBreakNow(); return { ok: ok, pending: G.breakPending, lv: G.player ? G.player.level : null, cult: save.cultivate.level }; },
+    breakLuck(v) { G.breakForce = (v == null) ? null : !!v; return G.breakForce; },   // 调试：固定冲关成败
+    breakRate(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); return b ? { pills: breakGatePills(b), rate: breakSuccessRate(b) } : null; },
     startBreak(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); if (!b) return 'no req'; enterBreakMap(b); return { map: G.mapId, state: G.state }; },
     breakScene(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); if (!b) return 'no req'; breakSceneThen(b, () => { G.state = 'cave'; if (elCave) elCave.style.display = 'flex'; renderCave(); }); return { scene: G.breakScene, dialog: G.state === 'dialog', lines: G.dialogLines ? G.dialogLines.length : 0 }; },
     finishMapNow() { if (!G.map) return 'no map'; const m = G.map; finishMap(m); return { state: G.state, level: save.cultivate.level, cleared: save.cleared.slice(), unlocked: save.unlocked.slice() }; },

@@ -24,7 +24,7 @@ await page.waitForFunction(() => !!window.__FR);
 await page.evaluate(() => {
   const F = window.__FR;
   F.muteStory(true); F.clearProgress(); F.setLevel(35);
-  F.addItem('zhuji', 1);
+  F.addItem('zhuji', 5);
   for (const id of ['m_yusuizhi', 'm_zihua', 'm_tianling']) F.addItem(id, 3);
   F.setStones(5000); F.clearMap('zhuji');
   F.cave('qixuan'); F.caveTab('break');

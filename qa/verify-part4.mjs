@@ -111,7 +111,7 @@ ok(gate.passed.lv === gate.reqLv - 1 && gate.passed.pending === gate.reqLv && ga
 const panel = await page.evaluate(() => {
   const F = window.__FR;
   const lv = (window.BREAKTHROUGH || [])[0].lv;
-  F.addItem('zhuji', 2);
+  F.addItem('zhuji', 13);          // 十三枚必成（每枚 +8%），免得冲关失败把断言随机打挂
   F.setStones(5000);
   const before = F.bag();
   const opened = F.breakOpen(lv);

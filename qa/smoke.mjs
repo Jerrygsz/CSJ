@@ -593,7 +593,8 @@ console.log('\n== 筑基 / 结丹 新章：境界与解锁真的会推进 ==');
 F.clearProgress();
 F.setLevel(35);
 // 筑基门：丹药 + 材料 + 灵石齐备（剧情节点「打通此图」在 finishMap 时自然满足）
-F.addItem('zhuji', 1);
+// 冲关有成败：十三枚筑基丹 = 十成把握（每枚 +8%），此处押满，避免随机失败打挂回归
+F.addItem('zhuji', 13);
 for (const id of ['m_yusuizhi', 'm_zihua', 'm_tianling']) F.addItem(id, 3);
 F.setStones(5000);
 // 筑基闭关打通 → 燕家堡解锁
