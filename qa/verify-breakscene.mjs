@@ -1,5 +1,9 @@
-// 突破演出守门：①四大境界门都备了原著剧情 lines ②物料齐了战斗里也不自动破（弹幕叫回洞府）
-// ③洞府「突破」→ 剧情演出 → 演完才破境 ④打坐撞门不再空烧灵石。
+// 突破演出守门（v2，破境地图版）：
+//   ①四大境界门备有原著剧情 lines ②物料齐了战斗里也不自动破（弹幕叫回洞府）
+//   ③洞府「突破」按钮 → 进对应剧情地图（战前运功 → 开打）
+//   ④料齐打完这张破境图 → 演一段剧情 → 演完才破境
+//   ⑤料未齐打完 → 不演对话、直接结算，等级不动、不解锁下一图
+//   ⑥打坐撞门不空烧灵石
 // 用法：node qa/verify-breakscene.mjs
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -46,6 +50,8 @@ let r1 = await E(`(() => (window.BREAKTHROUGH || []).map(x => ({ lv: x.lv, realm
 ok(r1.length >= 4, '四大境界门齐备', r1);
 ok(r1.every(x => x.n >= 4), '每门都有一段（≥4 句）剧情演出', r1);
 ok(r1.every(x => x.scene), '每门都挂了一处剧情地点', r1);
+let r1b = await E(`(() => (window.BREAKTHROUGH || []).map(g => ({ lv: g.lv, map: ((window.MAPS || []).find(m => m.endLevel === g.lv) || {}).id || null, name: ((window.MAPS || []).find(m => m.endLevel === g.lv) || {}).name || null })))()`);
+ok(r1b.every(x => x.map), '每道门都能反查到一张破境地图（endLevel 匹配）', r1b);
 
 // ===== 2. 物料齐了，战斗里也不自动破 =====
 console.log('\n== 2. 料齐仍须回洞府 ==');
@@ -54,10 +60,10 @@ let r2 = await E(`(() => {
   F.muteStory(true); F.clearProgress();
   F.addItem('zhuji', 2);
   for (const id of ['m_yusuizhi','m_zihua','m_tianling']) F.addItem(id, 5);
-  F.setStones(5000); F.clearMap('zhuji');       // 四样齐备
+  F.setStones(5000); F.clearMap('zhuji');
   const can = F.breakCan(36);
   F.setLevel(35); F.enterMap('houshan','easy'); F.skipStory();
-  const g = F.G; g.player.xp = 9999;
+  F.G.player.xp = 9999;
   F.tickFrames(3, 0.05);
   const banner = (document.getElementById('banner') || {}).textContent || '';
   return { can, lv: F.G.player.level, pending: F.breakPending(), banner, shown: F.breakShown() };
@@ -67,57 +73,86 @@ ok(r2.lv === 35 && r2.pending === 36, '战斗里经验顶满也不自动破境�
 ok(r2.shown === false, '不再弹全屏面板', r2);
 ok(r2.banner.indexOf('洞府') >= 0 && r2.banner.indexOf('突破') >= 0, '弹幕提示「回洞府选突破」', r2.banner);
 
-// ===== 3. 洞府突破 → 剧情演出（场景 + 原著台词）=====
-console.log('\n== 3. 剧情演出 ==');
+// ===== 3. 洞府「突破」按钮 → 进剧情地图 =====
+console.log('\n== 3. 突破按钮进破境地图 ==');
 let r3 = await E(`(() => {
-  const F = window.__FR;
-  const r = F.startBreak(36);
-  const spk = (document.getElementById('dialogSpeaker') || {}).textContent || '';
-  const firstText = (document.getElementById('dialogText') || {}).textContent || '';
-  return { r, spk, firstText };
-})()`);
-ok(r3.r.dialog === true && r3.r.lines >= 5, '点「入洞府冲关」弹出剧情演出（含幕头）', r3.r);
-ok(r3.spk.indexOf('地火之屋') >= 0, '幕头是原著地点「黄枫谷·地火之屋」', r3.spk);
-ok(r3.firstText.indexOf('筑基') >= 0, '起手一句点明筑基门槛', r3.firstText);
-
-// ===== 4. 演完才破境、料被吃掉 =====
-console.log('\n== 4. 演完破境 ==');
-let r4 = await E(`(() => {
-  const F = window.__FR;
-  F.skipStory();                       // 点完这段演出
-  const info = F.info();
-  return { lv: info.cultivate.level, zhuji: (F.bag().zhuji || 0), state: info.state, dlg: !!document.getElementById('dialog').offsetParent };
-})()`);
-ok(r4.lv === 36, '演完境界推到筑基初期（Lv36）', r4);
-ok(r4.zhuji === 1, '吃掉了 1 颗筑基丹（备了 2 颗，剩 1）', r4.zhuji);
-ok(r4.dlg === false, '演出收场，对话关闭', r4.dlg);
-
-// ===== 5. 洞府「突破」页按钮走同一段演出 =====
-console.log('\n== 5. 突破页按钮 ==');
-let r5 = await E(`(() => {
   const F = window.__FR;
   F.clearProgress(); F.addItem('zhuji', 2);
   for (const id of ['m_yusuizhi','m_zihua','m_tianling']) F.addItem(id, 5);
   F.setStones(5000); F.clearMap('zhuji');
+  F.setLevel(35);
   F.cave('qixuan'); F.caveTab('break');
   const btn = document.querySelector('button[data-breaknow="36"]');
   const has = !!btn;
   if (btn) btn.click();
-  return { has, dialog: F.info().state === 'dialog', spk: (document.getElementById('dialogSpeaker') || {}).textContent || '' };
+  return { has, state: F.info().state, pf: F.G.pf ? F.G.pf.id : null, map: F.G.mapId };
 })()`);
-ok(r5.has === true, '突破页出现「入洞府冲关」按钮', r5.has);
-ok(r5.dialog === true && r5.spk.indexOf('地火之屋') >= 0, '点按钮进入同一段剧情演出', r5);
+ok(r3.has === true, '突破页出现「入洞府冲关」按钮', r3.has);
+ok(r3.state === 'prefight' && r3.pf === 'zhuji', '点按钮 → 进「黄枫谷·地火之屋」破境图（先战前运功）', r3);
+
+// 3b. 结丹门 → 破境图是「小寰岛·闭府结丹」（剧情图，不经战前运功）
+let r3b = await E(`(() => {
+  const F = window.__FR;
+  F.muteStory(true); F.clearProgress(); F.setLevel(54);
+  F.addItem('tianhuo', 1); F.setStones(5000); F.clearMap('tianxing');
+  F.cave('qixuan'); F.caveTab('break');
+  const btn = document.querySelector('button[data-breaknow="56"]');
+  const has = !!btn;
+  if (btn) btn.click();
+  const map = F.G.mapId;
+  F.skipStory();
+  return { has, map };
+})()`);
+ok(r3b.has === true && r3b.map === 'jiedan', '结丹按钮进「小寰岛·闭府结丹」（按 endLevel 反查，不误进坊市）', r3b);
+
+// ===== 4. 料齐打完破境图 → 演出 → 破境 =====
+console.log('\n== 4. 料齐：打完演出破境 ==');
+let r4 = await E(`(() => {
+  const F = window.__FR;
+  F.muteStory(true); F.clearProgress();
+  F.addItem('zhuji', 2);
+  for (const id of ['m_yusuizhi','m_zihua','m_tianling']) F.addItem(id, 5);
+  F.setStones(5000); F.clearMap('zhuji'); F.setLevel(35);
+  F.enterMap('zhuji', 'easy');
+  const before = F.bag().zhuji || 0;
+  const mid = F.finishMapNow();
+  const dlg = F.info().state === 'dialog';
+  const spk = (document.getElementById('dialogSpeaker') || {}).textContent || '';
+  const nLines = F.G.dialogLines ? F.G.dialogLines.length : 0;
+  F.skipStory();
+  const info = F.info();
+  return { before, mid, dlg, spk, nLines, lv: info.cultivate.level, zhuji: (F.bag().zhuji || 0), state: info.state, desc: (document.getElementById('victoryDesc') || {}).textContent || '' };
+})()`);
+ok(r4.dlg === true && r4.nLines >= 5, '打完先弹出突破剧情演出（含幕头）', { dlg: r4.dlg, n: r4.nLines });
+ok(r4.spk.indexOf('地火之屋') >= 0, '幕头是原著地点「黄枫谷·地火之屋」', r4.spk);
+ok(r4.lv === 36, '演完境界推到筑基初期（Lv36）', r4.lv);
+ok(r4.zhuji === r4.before - 1, '吃掉了 1 颗筑基丹', { before: r4.before, after: r4.zhuji });
+ok(r4.state === 'victory', '演出后进结算', r4.state);
+
+// ===== 5. 料未齐：打完不演对话，只结算不解锁 =====
+console.log('\n== 5. 料未齐：只取物不解锁 ==');
+let r5 = await E(`(() => {
+  const F = window.__FR;
+  F.muteStory(true); F.clearProgress(); F.setLevel(35);
+  F.enterMap('zhuji', 'easy');           // 什么都不备
+  const mid = F.finishMapNow();
+  const info = F.info();
+  return { state: mid.state, lv: info.cultivate.level, unYanjia: mid.unlocked.indexOf('yanjia') >= 0, cleared: mid.cleared.indexOf('zhuji') >= 0, desc: (document.getElementById('victoryDesc') || {}).textContent || '' };
+})()`);
+ok(r5.state === 'victory', '料未齐时直接进结算，不弹突破对话', r5);
+ok(r5.lv === 35, '境界不涨（仍 35）', r5.lv);
+ok(r5.unYanjia === false, '不解锁下一图「燕家堡」（防止绕过瓶颈）', r5);
+ok(r5.cleared === true, '本图记为已通（可再来，物只取一次）', r5);
+ok(r5.desc.indexOf('未齐') >= 0, '结算页提示「破境之物未齐」', r5.desc);
 
 // ===== 6. 打坐撞门不空烧灵石 =====
 console.log('\n== 6. 打坐撞门不烧钱 ==');
 let r6 = await E(`(() => {
   const F = window.__FR;
-  F.skipStory();
   F.clearProgress(); F.setLevel(35); F.setStones(9000);
   const before = F.info().stones;
-  F.cave('qixuan'); F.rest(8);          // 连坐八次
-  const after = F.info().stones;
-  return { before, after, lv: F.info().cultivate.level };
+  F.cave('qixuan'); F.rest(8);
+  return { before, after: F.info().stones, lv: F.info().cultivate.level };
 })()`);
 ok(r6.lv === 35, '打坐也过不了大境界门', r6.lv);
 ok(r6.before - r6.after <= 2, '撞门即停，不再空烧灵石（最多坐一次）', r6);

@@ -592,6 +592,10 @@ eq(F.info().state, 'shop', '天星城进得去坊市（state=shop）');
 console.log('\n== 筑基 / 结丹 新章：境界与解锁真的会推进 ==');
 F.clearProgress();
 F.setLevel(35);
+// 筑基门：丹药 + 材料 + 灵石齐备（剧情节点「打通此图」在 finishMap 时自然满足）
+F.addItem('zhuji', 1);
+for (const id of ['m_yusuizhi', 'm_zihua', 'm_tianling']) F.addItem(id, 3);
+F.setStones(5000);
 // 筑基闭关打通 → 燕家堡解锁
 F.enterMap('zhuji', 'easy');
 frames(10);

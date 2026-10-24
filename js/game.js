@@ -3431,6 +3431,7 @@
     G.decor = []; G.chunkMap = {}; G.cam = { x: -W / 2, y: -H / 2 }; G.orbPos = [];
     G.vacuumT = 0; G.pendingEnding = false; G.runLoot = []; G.matGain = 0; G.lastAutoSave = 0;
     G.breakHinted = false;   // 瓶颈弹幕每图只提一次
+    G.victoryNote = '';
     G.npcs = []; G.encT = 8;
     G.realmIdx = 0; G.realm = { dmg: 0, atk: 0, spd: 0 }; G.realmHp = 0;
     resetCombo();
@@ -3588,6 +3589,16 @@
     G._claimedDrops = new Set(); G._hostVacuum = false; G._endSent = false;
     // 一进门就跨了大境界（筑基 / 结丹）：这一声得给，别让人不知道自己现在在哪一层
     if (realmName(p.level) !== realmBefore) banner('境界 · ' + realmName(p.level));
+    // 破境图：物事未齐时进门就提醒一句 —— 此图可打可拾，破不了境
+    if (m.endLevel) {
+      const g = breakReqFor(m.endLevel);
+      if (g && breakMissing(g).length) {
+        const missN = breakMissing(g).length;
+        setTimeout(function () {
+          if (G.state === 'play' || G.state === 'dialog') banner('破境之物未齐（还差 ' + missN + ' 样）· 此图可打可拾，集齐了再来冲关');
+        }, 1400);
+      }
+    }
     // 修为被封着：进图先提醒一句，别让人以为自己变弱了
     if (save.sealed) setTimeout(function () { if (G.state === 'play') banner('修为被封 · ' + (save.sealed.name || '煞气')); }, 900);
 
@@ -3661,10 +3672,13 @@
   function finishMap(m) {
     if (!m) return;
     syncCultivate();
+    // 这张图是不是「大境界破境图」：endLevel 恰好是一道大境界门（地火之屋筑基 / 天星城结丹 …）
+    const breakGate = m.endLevel ? breakReqFor(m.endLevel) : null;
     // 有些图通关本身就是一次境界跃迁（地火之屋炼丹筑基 / 洞府闭府结丹）。
     // 这类突破必须落在「图打通之后」，不能一进门就把人抬上去 —— 门还没进就筑基，说不过去。
+    // 但若这张图正是大境界破境图，则境界不在此刻落地，改为「先演一段剧情、演完再破」，见文末。
     let realmUp = null;
-    if (m.endLevel && m.endLevel > (save.cultivate.level || 1)) {
+    if (m.endLevel && m.endLevel > (save.cultivate.level || 1) && !breakGate) {
       const prevName = realmName(save.cultivate.level || 1);
       save.cultivate.level = m.endLevel;
       save.cultivate.xp = 0;
@@ -3727,13 +3741,30 @@
       save.caves.push(m.cave);
       cave = CAVES[m.cave];
     }
-    const newly = unlockNext(m);
-    save.mapId = m.next || m.id;
+    // 破境图：物事齐了才继续推进（解锁下一图）；未齐则只取物、卡在此图，可反复来打
+    const breakReady = breakGate ? breakMissing(breakGate).length === 0 : true;
+    const blocked = !!(breakGate && !breakReady);
+    let newly = null;
+    if (blocked) {
+      G.breakPending = breakGate;
+      save.mapId = m.id;
+    } else {
+      newly = unlockNext(m);
+      save.mapId = m.next || m.id;
+    }
     save.wins++;
     // 打完一张图：只留三门最精的功法带去下一张，余者散去（剧情传世功法除外）
     G.lastPrune = pruneSkillsTop3();
+    G.victoryNote = blocked
+      ? ('破境之物未齐（还差 ' + breakMissing(breakGate).length + ' 样）· 集齐了再来此图冲关')
+      : (breakGate ? ('破境之物已齐 · 就地冲关') : '');
     writeSave();
-    showVictory(m, gained, newly, cave, newDiff, realmUp);
+    if (breakGate && breakReady) {
+      // 就地冲关：先按原著剧情演一段突破，演完才破境，再结算
+      breakSceneThen(breakGate, () => showVictory(m, gained, newly, cave, newDiff, realmName(breakGate.lv)));
+    } else {
+      showVictory(m, gained, newly, cave, newDiff, realmUp);
+    }
   }
   function showVictory(m, gained, newly, cave, newDiff, realmUp) {
     G.state = 'victory';
@@ -3745,7 +3776,8 @@
     if (elVictoryDesc) {
       const base = m.clearDesc || '所得已入储物袋。';
       const pruneNote = (G.lastPrune && G.lastPrune.cut > 0) ? '　功法已敛 · 只留三门最精' : '';
-      elVictoryDesc.textContent = (realmUp ? ('境界已进 · ' + realmUp + '　') : '') + base + pruneNote;
+      const bn = G.victoryNote ? ('　' + G.victoryNote) : '';
+      elVictoryDesc.textContent = (realmUp ? ('境界已进 · ' + realmUp + '　') : '') + base + pruneNote + bn;
     }
     if (elVictoryStats) elVictoryStats.style.display = (m.type === 'story' || m.type === 'market') ? 'none' : 'flex';
     elVTime.textContent = fmtTime(G.time); elVKills.textContent = G.kills; elVLevel.textContent = realmName(G.player.level);
@@ -4469,12 +4501,13 @@
       if (!done && !pending) pending = b;
       html += '<div class="cave-sec2"><div class="cs-title">' + (done ? '✔ ' : '') + b.from + ' → ' + b.realm +
         '（Lv ' + b.lv + '）' + (done ? '　已过' : (miss.length ? '　还差 ' + miss.length + ' 样' : '　齐了')) + '</div>' +
-        '<div class="cs-note">' + (b.tip || '') + '</div><div class="brk-list">' +
-        renderBreakList(b) + '</div>';
+        '<div class="cs-note">' + (b.tip || '') + '</div>';
+      // 物事齐了：「闭门冲关」按钮顶在最上面，不用往下翻就能点
       if (!done && !miss.length) {
-        html += '<button class="btn small" data-breaknow="' + b.lv + '">入洞府冲关 · ' + b.realm + '</button>';
+        const bm = MAPS.find(x => x.endLevel === b.lv);
+        html += '<button class="btn small" data-breaknow="' + b.lv + '">入' + (bm ? '「' + bm.name + '」' : '洞府') + '冲关 · ' + b.realm + '</button>';
       }
-      html += '</div>';
+      html += '<div class="brk-list">' + renderBreakList(b) + '</div></div>';
     }
     html += '</div>';
     return html;
@@ -4561,27 +4594,56 @@
         : ('修为已至 ' + (b.from || '') + ' · 缺 ' + b.realm + ' 的物事'));
     }
   }
-  // 洞府「突破」：先演一段原著剧情，演完才真正破境（突破页按钮走这里）
-  function startBreakScene(b) {
-    if (!b) return;
-    if (breakMissing(b).length) { notify('物事不齐 · 备齐了再来'); Sfx.warn(); return; }
-    G.breakCur = b;
-    const scene = (b.story && b.story[0] && b.story[0].name) || '洞府';
-    const lines = [['　' + scene + '　', (b.from || '') + ' → ' + b.realm]];
-    const novel = (b.lines && b.lines.length) ? b.lines : [['旁白', b.tip || '']];
+  // 突破剧情演出：按原著演一段，演完 payBreak + 把境界推到门后那一层，再回调
+  function breakSceneThen(gate, onDone) {
+    if (!gate) { if (onDone) onDone(); return; }
+    G.breakCur = gate;
+    const scene = (gate.story && gate.story[0] && gate.story[0].name) || '洞府';
+    const lines = [['　' + scene + '　', (gate.from || '') + ' → ' + gate.realm]];
+    const novel = (gate.lines && gate.lines.length) ? gate.lines : [['旁白', gate.tip || '']];
     for (const l of novel) lines.push(l);
-    // 收起洞府面板，整屏演这一段
-    if (elCave) elCave.style.display = 'none';
-    G.breakScene = b.lv;
+    G.breakScene = gate.lv;
     if (elDialog) elDialog.classList.add('break-scene');
     showLines(lines, () => {
       if (elDialog) elDialog.classList.remove('break-scene');
-      doBreakNow();
-      G.breakScene = null;
-      G.state = 'cave';
-      if (elCave) elCave.style.display = 'flex';
-      renderCave();
-    }, 'break:' + b.lv);
+      if (breakMissing(gate).length) {                  // 结算前料被别处吃掉（极端情况）：不硬破
+        G.breakPending = gate; G.breakCur = null; G.breakScene = null;
+        if (onDone) onDone();
+        return;
+      }
+      payBreak(gate);
+      const newLv = Math.max(save.cultivate.level || 1, gate.lv);
+      save.cultivate.level = newLv;
+      save.cultivate.xp = 0;
+      syncBestLevel();
+      if (G.player) {
+        G.player.level = Math.max(G.player.level || 1, newLv);
+        G.player.next = xpNeed(newLv);
+        checkRealm(true); recalcMaxhp();
+        G.player.hp = G.player.maxhp;
+      }
+      G.breakPending = null; G.breakCur = null; G.breakScene = null;
+      writeSave();
+      if (onDone) onDone(gate);
+    }, 'break:' + gate.lv);
+  }
+  // 洞府「突破」按钮：物事齐了 → 进这张门对应的破境地图，走完剧情/打完，就地在剧情里破境
+  function enterBreakMap(gate) {
+    if (!gate) return;
+    if (breakMissing(gate).length) { notify('物事不齐 · 备齐了再来'); Sfx.warn(); return; }
+    // 破境图 = endLevel 恰好等于这道门的剧情图（地火之屋 / 小寰岛闭府 / 云梦山结婴 / 芥子空间…）
+    const bm = MAPS.find(x => x.endLevel === gate.lv)
+      || (gate.story && MAPS.find(x => x.id === gate.story[0].id))
+      || null;
+    if (!bm) {
+      // 没有对应的剧情地图：就地演一段破境（退路）
+      if (elCave) elCave.style.display = 'none';
+      breakSceneThen(gate, () => { G.state = 'cave'; if (elCave) elCave.style.display = 'flex'; renderCave(); banner('破境 · ' + gate.realm); });
+      return;
+    }
+    if (save.unlocked.indexOf(bm.id) < 0) save.unlocked.push(bm.id);
+    G.breakCur = gate;
+    beginMap(bm.id);
   }
   function doBreakNow() {
     const b = G.breakCur; if (!b) return;
@@ -5314,12 +5376,12 @@
       notify('掌天瓶催熟 · 灵宠修为大涨'); Sfx.levelup(); renderCave();
       return;
     }
-    // 突破页：备齐了 → 进洞府剧情演出，演完破境
+    // 突破页：物事齐了 → 进对应的剧情地图，打到关底就地在剧情里破境
     const bn = e.target.closest('button[data-breaknow]');
     if (bn) {
       const lv = parseInt(bn.getAttribute('data-breaknow'), 10) || 0;
       const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv);
-      if (b) { startBreakScene(b); }
+      if (b) { enterBreakMap(b); }
       return;
     }
   });
@@ -6022,7 +6084,9 @@
     breakList() { return JSON.parse(JSON.stringify(window.BREAKTHROUGH || [])); },    breakMissing(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); return b ? breakMissing(b).map(m => ({ kind: m.kind, id: m.id || null, name: m.name || null, need: m.need, have: m.have })) : null; },
     breakCan(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); return b ? canBreak(b) : true; },
     breakNow(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); if (!b) return 'no req'; G.breakCur = b; doBreakNow(); return { pending: G.breakPending, lv: G.player ? G.player.level : null, cult: save.cultivate.level }; },
-    startBreak(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); if (!b) return 'no req'; startBreakScene(b); return { scene: G.breakScene, dialog: G.state === 'dialog', lines: G.dialogLines ? G.dialogLines.length : 0 }; },
+    startBreak(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); if (!b) return 'no req'; enterBreakMap(b); return { map: G.mapId, state: G.state }; },
+    breakScene(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); if (!b) return 'no req'; breakSceneThen(b, () => { G.state = 'cave'; if (elCave) elCave.style.display = 'flex'; renderCave(); }); return { scene: G.breakScene, dialog: G.state === 'dialog', lines: G.dialogLines ? G.dialogLines.length : 0 }; },
+    finishMapNow() { if (!G.map) return 'no map'; const m = G.map; finishMap(m); return { state: G.state, level: save.cultivate.level, cleared: save.cleared.slice(), unlocked: save.unlocked.slice() }; },
     breakOpen(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); openBreak(b); return !!(elBreak && elBreak.style.display === 'flex'); },
     breakShown() { return !!(elBreak && elBreak.style.display === 'flex'); },
     breakClose() { closeBreak(); return !!(elBreak && elBreak.style.display === 'flex'); },

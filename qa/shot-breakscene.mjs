@@ -23,7 +23,7 @@ await page.goto(`http://127.0.0.1:${PORT}/index.html?test=1`, { waitUntil: 'load
 await page.waitForFunction(() => !!window.__FR);
 await page.evaluate(() => {
   const F = window.__FR;
-  F.muteStory(true); F.clearProgress();
+  F.muteStory(true); F.clearProgress(); F.setLevel(35);
   F.addItem('zhuji', 1);
   for (const id of ['m_yusuizhi', 'm_zihua', 'm_tianling']) F.addItem(id, 3);
   F.setStones(5000); F.clearMap('zhuji');
@@ -33,9 +33,6 @@ await page.waitForTimeout(300);
 await page.screenshot({ path: join(here, 'shot-break-panel.png') });
 await page.evaluate(() => { const btn = document.querySelector('button[data-breaknow="36"]'); if (btn) btn.click(); });
 await page.waitForTimeout(400);
-await page.screenshot({ path: join(here, 'shot-break-scene.png') });
-await page.evaluate(() => { const F = window.__FR; F.skipStory(); document.getElementById('dialog').style.display = 'none'; F.toTitle(); F.setLevel(36); F.toTitle(); });
-await page.waitForTimeout(300);
-await page.screenshot({ path: join(here, 'shot-break-done.png') });
+await page.screenshot({ path: join(here, 'shot-break-prefight.png') });
 await b.close(); server.close();
 console.log('done');
