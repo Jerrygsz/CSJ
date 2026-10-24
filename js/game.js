@@ -4553,8 +4553,8 @@
   function renderCaveBreak(lv) {
     const list = window.BREAKTHROUGH || [];
     let html = '<div class="cave-sec"><div class="cs-title">突破</div>' +
-      '<div class="cs-note">大境界不是刷满修为就能过。丹药、材料、灵石、剧情，四样齐备才破得开 —— ' +
-      '修为到了顶就卡在门口，缺什么这里都写着。</div>';
+      '<div class="cs-note">大境界不是刷满修为就能过。丹药、材料、灵石、剧情，四样齐备才谈得上冲关；' +
+      '而冲关有成败 —— 破境丹押得越多把握越大（每枚 +8%），只带一枚，也只是赌一把。缺什么这里都写着。</div>';
     let pending = null;
     for (const b of list) {
       const done = lv >= b.lv;
