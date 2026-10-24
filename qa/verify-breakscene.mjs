@@ -94,7 +94,7 @@ ok(r3.state === 'prefight' && r3.pf === 'zhuji', '点按钮 → 进「黄枫谷�
 let r3b = await E(`(() => {
   const F = window.__FR;
   F.muteStory(true); F.clearProgress(); F.setLevel(54);
-  F.addItem('tianhuo', 1); F.setStones(5000); F.clearMap('tianxing');
+  F.addItem('xueling', 1); F.addItem('tianhuo', 1); F.setStones(5000); F.clearMap('tianxing');
   F.cave('qixuan'); F.caveTab('break');
   const btn = document.querySelector('button[data-breaknow="56"]');
   const has = !!btn;
@@ -177,7 +177,7 @@ let r7 = await E(`(() => {
   return { r1, r2, r3, bagBefore, afterBag, lvAfterFail, pend, res };
 })()`);
 ok(r7.r1 && r7.r1.rate === 0, '没丹时把握为 0（连试都试不了）', r7.r1);
-ok(Math.abs(r7.r2.rate - 0.08) < 1e-9, '1 枚丹 → 8%（原著「不足十分之一」）', r7.r2);
+ok(Math.abs(r7.r2.rate - 0.1) < 1e-9, '1 枚丹 → 10%（原著「不足十分之一」）', r7.r2);
 ok(r7.r3.rate === 1, '13 枚丹 → 十成把握', r7.r3);
 ok(r7.lvAfterFail === 35 && r7.pend === 36, '冲关失败：境界不动、瓶颈仍在', r7);
 ok(r7.afterBag === 0, '冲关失败：押上的丹药全部散尽', { before: r7.bagBefore, after: r7.afterBag });
@@ -188,31 +188,64 @@ let r8 = await E(`(() => {
   const F = window.__FR;
   F.muteStory(true); F.clearProgress();
   const out = {};
-  // 结丹：天火液 每份 20%，五份必成
-  F.addItem('tianhuo', 1); out.j1 = F.breakRate(56);
-  F.addItem('tianhuo', 4); out.j5 = F.breakRate(56);
-  // 元婴：九曲+定灵 每套 34%，三套必成；补天丹是硬门槛（带上即可，不参与把握）
-  F.addItem('jiuqu', 3); F.addItem('dianling', 3);
-  out.y3 = F.breakRate(82);
+  // 结丹：雪灵水 + 天火液 打底五成；降尘丹每枚 +10%，五枚即十成（原著得五枚）
+  F.addItem('xueling', 1); F.addItem('tianhuo', 1);
+  out.j0 = F.breakRate(56);
+  F.addItem('jiangchen', 5); out.j5 = F.breakRate(56);
+  // 元婴：九曲+定灵+补天 三样齐备即必成（原著圣药）
+  F.addItem('jiuqu', 1); F.addItem('dianling', 1);
   const missNoButian = F.breakMissing(82).map(m => m.id).filter(Boolean);
   F.addItem('butian', 1);
   const missWithButian = F.breakMissing(82).map(m => m.id).filter(Boolean);
+  out.y = F.breakRate(82);
   // 化神：魔元丹 每枚 34%，三枚必成（原著换了三枚）
   F.addItem('moyuan', 3); out.h3 = F.breakRate(112);
   // 造化丹不该再出现在任何突破门里
   const zaohuaInGate = (window.BREAKTHROUGH || []).some(b =>
     (b.items || []).some(x => x[0] === 'zaohua') || (b.needs || []).some(x => x[0] === 'zaohua'));
-  return { out, missNoButian, missWithButian, zaohuaInGate };
+  // 结丹门票必须含雪灵水（原著第376章「必须服用」）
+  const jiedan = (window.BREAKTHROUGH || []).find(b => b.lv === 56) || {};
+  const jiedanItems = (jiedan.items || []).map(x => x[0]);
+  return { out, missNoButian, missWithButian, zaohuaInGate, jiedanItems };
 })()`);
-ok(r8.out.j1.rate === 0.2 && r8.out.j5.rate === 1, '结丹：1 份天火液 20%，5 份必成', r8.out);
-ok(r8.out.y3.rate === 1, '元婴：3 套（九曲+定灵）必成', r8.out.y3);
+ok(r8.jiedanItems.indexOf('xueling') >= 0 && r8.jiedanItems.indexOf('tianhuo') >= 0, '结丹门票含雪灵水 + 天火液（原著必须服用）', r8.jiedanItems);
+ok(r8.out.j0.rate === 0.5 && r8.out.j5.rate === 1, '结丹：无降尘丹五成，五枚降尘丹必成', r8.out);
+ok(r8.out.y.rate === 1, '元婴：九曲+定灵+补天齐备即必成', r8.out.y);
 ok(r8.missNoButian.indexOf('butian') >= 0, '元婴缺补天丹时冲不了关', r8.missNoButian);
 ok(r8.missWithButian.indexOf('butian') < 0, '带上补天丹后门槛解除', r8.missWithButian);
 ok(r8.out.h3.rate === 1, '化神：3 枚魔元丹必成（原著三枚）', r8.out.h3);
 ok(r8.zaohuaInGate === false, '非原著的造化丹已移出突破门', r8.zaohuaInGate);
 
-// ===== 9. 全程零报错 =====
-console.log('\n== 9. 全程零报错 ==');
+// 8b. 雪灵水 / 碧焰酒在坊市有售（原著：白水楼卖雪灵水；碧焰酒为裂风兽所酿）
+let r8b = await E(`(() => {
+  const s = window.SHOP_STOCK || [];
+  return { xueling: s.some(x => x.id === 'xueling'), biyan: s.some(x => x.id === 'biyanjiu') };
+})()`);
+ok(r8b.xueling === true, '坊市可买雪灵水', r8b);
+ok(r8b.biyan === true, '坊市可买碧焰酒', r8b);
+
+// ===== 9. 小境界门（原著点名：结丹中期 · 碧焰酒）=====
+console.log('\n== 9. 小境界：结丹中期须碧焰酒 ==');
+let r9 = await E(`(() => {
+  const F = window.__FR;
+  F.muteStory(true); F.clearProgress(); F.setLevel(63); F.setStones(9000);
+  F.enterMap('houshan', 'easy'); F.skipStory();
+  F.G.player.xp = 99999;
+  F.tickFrames(3, 0.05);
+  const lvNoItem = F.G.player.level;
+  const bannerTxt = (document.getElementById('banner') || {}).textContent || '';
+  F.addItem('biyanjiu', 1);
+  F.G.player.xp = 99999;
+  F.tickFrames(3, 0.05);
+  return { lvNoItem, lvWithItem: F.G.player.level, bannerTxt, bagBiyan: F.bag().biyanjiu || 0 };
+})()`);
+ok(r9.lvNoItem === 63, '结丹中期关口：没碧焰酒过不去（仍 63）', r9.lvNoItem);
+ok(r9.bannerTxt.indexOf('碧焰酒') >= 0, '弹幕提示须服碧焰酒', r9.bannerTxt);
+ok(r9.lvWithItem >= 64, '备下碧焰酒后越过关口', r9.lvWithItem);
+ok(r9.bagBiyan === 0, '过口时碧焰酒被服下', r9.bagBiyan);
+
+// ===== 10. 全程零报错 =====
+console.log('\n== 10. 全程零报错 ==');
 ok(errs.length === 0, '无页面/控制台报错', errs.slice(0, 3));
 
 await b.close();

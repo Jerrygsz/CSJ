@@ -829,10 +829,11 @@ ok(!!W.Sprites.dujiao, '毒蛟立绘已注册');
   const leak = mustForge.filter(id => { const it = W.Items.get(id); return !it || !it.craftOnly; });
   eq(leak.length, 0, '炼器产出全部标了 craftOnly（不掉落、买不到）', leak);
   // 杀人越货 / 殿中所得：降尘丹、补天丹、混元钵。既没有丹方，也不进坊市
+  // （降尘丹按原著是古长老身上那「五枚」，可叠加，故不再算 unique）
   const lootOnly = ['jiangchen', 'butian', 't_hunyuan'];
   const badLoot = lootOnly.filter(id => {
     const it = W.Items.get(id);
-    return !it || !it.unique || it.craftOnly || W.RECIPES.some(r => r.out === id);
+    return !it || it.craftOnly || W.RECIPES.some(r => r.out === id) || (W.SHOP_STOCK || []).some(s => s.id === id);
   });
   eq(badLoot.length, 0, '降尘丹 / 补天丹 / 混元钵 只靠剧情所得：无丹方、买不到', badLoot);
   // 坊市里一件 unique / craftOnly 的东西都不许有

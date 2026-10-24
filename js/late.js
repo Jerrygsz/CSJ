@@ -46,7 +46,11 @@
     // ---- 丹药（杀人越货 / 殿中所得，不是丹方） ----
     // 降尘丹是六连殿拿命换的东西，古长老身上那几枚就是全部来历；
     // 补天丹是虚天殿二层的存货。这两味原著里都不是韩立炼出来的，所以不给丹方。
-    { id: 'jiangchen', name: '降尘丹', rarity: 4, icon: '🌫', req: 40, desc: '修为 +22%，上限 +50。古长老袖里那几枚，六连殿拿它换散修的命', effect: { xpMul: 0.22, maxhp: 50 }, unique: true },
+    { id: 'jiangchen', name: '降尘丹', rarity: 4, icon: '🌫', req: 40, desc: '修为 +22%，上限 +50。古长老袖里那五枚，六连殿拿它换散修的命；原著里只能「有一定几率」助结丹', effect: { xpMul: 0.22, maxhp: 50 } },
+    // 雪灵水：第376章，透明清水样液体，启盖一股奇寒阴气 —— 结丹「必须服用」的灵物，六连殿白水楼重金求得
+    { id: 'xueling', name: '雪灵水', rarity: 4, icon: '💧', req: 48, desc: '透明清水样液体，启盖便有一股奇寒阴气扑面。辅助结丹、增加结丹几率必须服用的灵物，世间难求', effect: { maxhp: 40, regen: 1 } },
+    // 碧焰酒：裂风兽一族以化形阶妖丹酿的灵酒，原著里韩立借它冲过结丹中期这道瓶颈
+    { id: 'biyanjiu', name: '碧焰酒', rarity: 4, icon: '🍶', req: 60, desc: '碧绿之极，酒香浓烈。裂风兽一族以化形妖丹所酿，结丹中期瓶颈就靠这一口冲过去', effect: { dmg: 0.15 } },
     { id: 'butian',    name: '补天丹', rarity: 4, icon: '☀', req: 52, desc: '伤害 +30%，上限 +80，回血 +1.5。虚天殿二层带出来的，世上没有第二炉', effect: { dmg: 0.30, maxhp: 80, regen: 1.5 }, unique: true },
     // ---- 兵器 / 护甲 ----
     { id: 'w_qingzhu', name: '青竹蜂云剑', rarity: 4, icon: '⚔', slot: 'weapon', req: 56, desc: '伤害 +45%，暴击 +8%。本命飞剑，七十二口，化蜂成云', effect: { dmg: 0.45, crit: 0.08 }, craftOnly: 'forge' },
@@ -205,7 +209,7 @@
       elites: ['六级妖兽·婴鲤兽', '极阴岛·乌丑'],
       mats: ['m_yaodan', 'm_banyao', 'm_yusui', 'm_xuantie'],
       boss: { kind: 'mo', name: '六连殿·古长老', hp: 5800, spd: 52, dmg: 32, r: 19, spr: 'mo', scale: 4.6 },
-      reward: { stones: 760, items: ['jiangchen', 't_hunyuan'], mats: [['m_yaodan', 3], ['m_banyao', 1]] },
+      reward: { stones: 760, items: ['t_hunyuan'], grants: [['jiangchen', 5]], mats: [['m_yaodan', 3], ['m_banyao', 1]] },
       outro: 'liulian_out',
       clearTitle: '古长老已毙',
       clearDesc: '结丹初期的人，死在筑基修士的阵里。混元钵与降尘丹，都进了袋。'
@@ -831,6 +835,9 @@
   // 金雷竹、万年灵乳、养魂木这种万年灵物，也没人摆在摊上卖。
   window.SHOP_STOCK.push(
     { id: 'moyu',       price: 680,  cat: 'qi' },
+    // 乱星海大城才有的两味灵物（原著：白水楼卖雪灵水、碧焰酒则是裂风兽一族所酿）
+    { id: 'xueling',    price: 2600, cat: 'dan' },
+    { id: 'biyanjiu',   price: 1800, cat: 'dan' },
     { id: 'a_xuangui',  price: 1400, cat: 'qi' },
     { id: 't_tianlei',  price: 1800, cat: 'qi' },
     { id: 'fb_feng',    price: 620,  cat: 'qi' },

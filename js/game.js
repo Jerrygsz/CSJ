@@ -1484,12 +1484,34 @@
     return n === Infinity ? 0 : n;
   }
   function breakSuccessRate(b) {
-    if (!b) return 1;
-    if (!b.items || !b.items.length) return 1;
-    const step = (b.chance && b.chance.step) || BREAK_RATE_PER_PILL;   // 每门可自定义：筑基 8%、结丹 20%、元婴/化神 34%
-    return Math.min(1, breakGatePills(b) * step);
+    if (!b || !b.items || !b.items.length) return 1;
+    const c = b.chance || {};
+    // 助丹型（结丹：雪灵水+天火液打底，降尘丹每枚加一点 —— 原著「有一定几率」）
+    if (c.booster) {
+      const base = (c.min != null) ? c.min : 0.4;
+      const n = save.inventory[c.booster] || 0;
+      return Math.min(1, base + n * (c.step || 0.1));
+    }
+    // 主丹型（筑基：原著就是靠嗑丹数往上堆）
+    if (c.step != null) return Math.min(1, breakGatePills(b) * c.step);
+    return Math.min(1, (c.min != null) ? c.min : 1);
   }
   function breakStepOf(b) { return (b && b.chance && b.chance.step) || BREAK_RATE_PER_PILL; }
+  // 小境界（中期 / 后期 / 大圆满）的门槛：原著点名的就摆上，没点名的不臆造
+  window.MINOR_BREAKS = window.MINOR_BREAKS || [
+    { lv: 64, realm: '结丹中期', item: 'biyanjiu', tip: '原著里韩立卡在结丹中期瓶颈，是借裂风兽一族酿的碧焰酒冲过去的。' }
+  ];
+  function minorReqFor(nextLv) {
+    for (const m of (window.MINOR_BREAKS || [])) if (m.lv === nextLv) return m;
+    return null;
+  }
+  function minorHave(m) { return m ? (save.inventory[m.item] || 0) : 1; }
+  function payMinor(m) {
+    if (!m) return;
+    save.inventory[m.item] = (save.inventory[m.item] || 0) - 1;
+    if (save.inventory[m.item] <= 0) delete save.inventory[m.item];
+    save.totalItems = Math.max(0, (save.totalItems || 1) - 1);
+  }
   // 下一级是否撞上瓶颈：撞上就返回那条突破要求，没撞上返回 null
   function breakBlock(nextLv) {
     const b = breakReqFor(nextLv);
@@ -1508,6 +1530,15 @@
       if (have > 0) {
         save.totalItems = Math.max(0, (save.totalItems || 1) - have);
         delete save.inventory[it[0]];
+      }
+    }
+    // 助丹（降尘丹）：手上有几枚就押几枚，全数入炉
+    if (b.chance && b.chance.booster) {
+      const bid = b.chance.booster;
+      const have = save.inventory[bid] || 0;
+      if (have > 0) {
+        save.totalItems = Math.max(0, (save.totalItems || 1) - have);
+        delete save.inventory[bid];
       }
     }
     // needs（虚天殿独有之类的一次性至宝）只「出示」，不焚毁 —— 带上就行，破了还在
@@ -2831,11 +2862,23 @@
       // 大境界卡一道门：材料齐了也不再自动破关 —— 得回洞府「突破」走那段剧情才破
       const req = breakReqFor(p.level + 1);
       if (req) { p.xp = Math.min(p.xp, p.next - 0.5); markBlocked(req); }
-      else if (G.vacuumT > 0 || G.pendingEnding) { autoLevelUp(); }
       else {
-        p.xp -= p.next; p.level++; p.next = xpNeed(p.level);
-        checkRealm();
-        queueLevelUp();
+        // 小境界（原著点名的那几处，如结丹中期的碧焰酒）：没备物事就过不去
+        const mn = minorReqFor(p.level + 1);
+        if (mn && minorHave(mn) <= 0) {
+          p.xp = Math.min(p.xp, p.next - 0.5);
+          if (G.minorHint !== p.level + 1) {
+            G.minorHint = p.level + 1;
+            const mi = Items.get(mn.item);
+            banner('修为已至 ' + mn.realm + ' 关口 · 须服「' + (mi ? mi.name : mn.item) + '」');
+          }
+        } else if (G.vacuumT > 0 || G.pendingEnding) { autoLevelUp(); }
+        else {
+          if (mn) payMinor(mn);
+          p.xp -= p.next; p.level++; p.next = xpNeed(p.level);
+          checkRealm();
+          queueLevelUp();
+        }
       }
     }
   }
@@ -3494,6 +3537,7 @@
     G.decor = []; G.chunkMap = {}; G.cam = { x: -W / 2, y: -H / 2 }; G.orbPos = [];
     G.vacuumT = 0; G.pendingEnding = false; G.runLoot = []; G.matGain = 0; G.lastAutoSave = 0;
     G.breakHinted = false;   // 瓶颈弹幕每图只提一次
+    G.minorHint = 0;         // 小境界关口弹幕也每图只提一次
     G.victoryNote = '';
     G.npcs = []; G.encT = 8;
     G.realmIdx = 0; G.realm = { dmg: 0, atk: 0, spd: 0 }; G.realmHp = 0;
@@ -3795,6 +3839,15 @@
         save.inventory[it.id] = (save.inventory[it.id] || 0) + mm[1];
         save.totalItems = (save.totalItems || 0) + mm[1];
         gained.mats.push({ item: it, n: mm[1] });
+      }
+      // 批量成品（古长老袖里那五枚降尘丹之类）：只入袋，不当场服下
+      if (nr.grants) for (const g of nr.grants) {
+        const it = Items.get(g[0]);
+        if (!it) continue;
+        const n = g[1] || 1;
+        save.inventory[it.id] = (save.inventory[it.id] || 0) + n;
+        save.totalItems = (save.totalItems || 0) + n;
+        gained.mats.push({ item: it, n: n });
       }
     } else if (newDiff && nr.stones) {
       // 重刷时首次拿下更高难度：补一份灵石
@@ -4583,10 +4636,19 @@
       // 物事齐了：「闭门冲关」按钮顶在最上面，不用往下翻就能点
       if (!done && !miss.length) {
         const bm = MAPS.find(x => x.endLevel === b.lv);
+        const c = b.chance || {};
         const pills = breakGatePills(b), rate = breakSuccessRate(b);
-        const stepPct = Math.round(breakStepOf(b) * 100), fullN = Math.ceil(1 / breakStepOf(b));
-        html += '<div class="cs-note">持丹 <b>' + pills + '</b> 枚 · 冲关把握 <b>' + Math.round(rate * 100) + '%</b>'
-          + (rate >= 1 ? '（十成把握）' : '（每枚 +' + stepPct + '%，' + fullN + ' 枚必成；败则丹药尽毁）') + '</div>';
+        let odds;
+        if (c.booster) {
+          const bn = Items.get(c.booster) || { name: '助丹' };
+          const n = save.inventory[c.booster] || 0;
+          odds = '持丹 <b>' + pills + '</b> 套 · ' + bn.name + ' <b>' + n + '</b> 枚 · 冲关把握 <b>' + Math.round(rate * 100) + '%</b>'
+            + (rate >= 1 ? '（十成把握）' : '（每枚 +' + Math.round((c.step || 0.1) * 100) + '%；败则丹药尽毁）');
+        } else {
+          odds = '持丹 <b>' + pills + '</b> 枚 · 冲关把握 <b>' + Math.round(rate * 100) + '%</b>'
+            + (rate >= 1 ? '（十成把握）' : '（每枚 +' + Math.round(breakStepOf(b) * 100) + '%，' + Math.ceil(1 / breakStepOf(b)) + ' 枚必成；败则丹药尽毁）');
+        }
+        html += '<div class="cs-note">' + odds + '</div>';
         html += '<button class="btn small" data-breaknow="' + b.lv + '">入' + (bm ? '「' + bm.name + '」' : '洞府') + '冲关 · ' + b.realm + '</button>';
       }
       html += '<div class="brk-list">' + renderBreakList(b) + '</div></div>';
@@ -4692,8 +4754,14 @@
     // 幕落之前把这一炉的底牌摆明：押几枚丹、几分把握
     const pills = breakGatePills(gate);
     const rate = breakSuccessRate(gate);
-    const pillName = (gate.items && gate.items[0] && Items.get(gate.items[0][0])) ? Items.get(gate.items[0][0]).name : '破境丹';
-    lines.push(['旁白', '（囊中' + pillName + ' ' + pills + ' 枚，尽数入炉 —— 冲关把握约 ' + Math.round(rate * 100) + '%。）']);
+    const itemNames = (gate.items || []).map(it => (Items.get(it[0]) || {}).name).filter(Boolean).join(' + ') || '破境丹';
+    if (gate.chance && gate.chance.booster) {
+      const bn = Items.get(gate.chance.booster) || { name: '助丹' };
+      const n = save.inventory[gate.chance.booster] || 0;
+      lines.push(['旁白', '（' + itemNames + ' 已入炉，' + bn.name + ' ' + n + ' 枚尽数服下 —— 冲关把握约 ' + Math.round(rate * 100) + '%。）']);
+    } else {
+      lines.push(['旁白', '（囊中' + itemNames + ' ' + pills + ' 枚，尽数入炉 —— 冲关把握约 ' + Math.round(rate * 100) + '%。）']);
+    }
     G.breakScene = gate.lv;
     if (elDialog) elDialog.classList.add('break-scene');
     showLines(lines, () => {
@@ -5049,6 +5117,10 @@
       // 大境界门：丹药材料剧情齐了也得回洞府「突破」冲关，打坐/刷怪过不去
       const blk = breakReqFor(lv + 1);
       if (blk) { c.xp = Math.min(c.xp, need - 1); G.breakPending = blk; break; }
+      // 小境界门（原著点名处）：物事没备齐就顶在关口
+      const mn = minorReqFor(lv + 1);
+      if (mn && minorHave(mn) <= 0) { c.xp = Math.min(c.xp, need - 1); G.minorPending = mn; break; }
+      if (mn) payMinor(mn);
       c.xp -= need; lv++;
     }
     c.level = lv;
