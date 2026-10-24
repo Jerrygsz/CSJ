@@ -134,9 +134,9 @@ window.MAPS = [
     elites: ['魔道凶徒', '血傀儡'],
     mats: ['m_yusuizhi', 'm_tianling', 'm_zihua', 'm_longlin', 'm_xuantie', 'm_xuesha', 'm_yusui'],
     boss: { kind: 'mo', name: '灵兽山·封岳', hp: 3600, spd: 52, dmg: 19, r: 19, spr: 'bandit', scale: 4.2 },
-    reward: { stones: 320, items: ['zhangtian'] },
+    reward: { stones: 320, items: ['zhangtian', 'zhuji', 'qingyuan'] },
     clearTitle: '禁地已出',
-    clearDesc: '封岳倒了，药草从他储物袋里撒出来。主药凑齐了，活着走出来的人不足半数。李化元赢了那一场赌，把他收作记名弟子。'
+    clearDesc: '封岳倒了，药草从他储物袋里撒出来。活着走出禁地的人不足半数——宗门立下的规矩：生还者赏一枚筑基丹。李化元看中他这半篓主药，收作记名弟子，药草取走一半，另授《青元剑诀》。'
   },
 
   // ==================== 支线：因缘所至，另行成图 ====================

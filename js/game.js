@@ -1433,6 +1433,14 @@
     return miss;
   }
   function canBreak(b) { return !b || breakMissing(b).length === 0; }
+  // 破境丹药（筑基丹 / 天火液 …）：是「冲关的钥匙」，不是路上的补药。
+  // 奖励到手只入储物袋，绝不立地服下 —— 否则还没冲关先把丹药的增益吃了。
+  function isGatePill(id) {
+    for (const b of (window.BREAKTHROUGH || [])) {
+      for (const it of (b.items || [])) if (it[0] === id) return true;
+    }
+    return false;
+  }
   // 下一级是否撞上瓶颈：撞上就返回那条突破要求，没撞上返回 null
   function breakBlock(nextLv) {
     const b = breakReqFor(nextLv);
@@ -2493,7 +2501,9 @@
       const s = split(rw.items);
       for (const id of s.mine) {
         const it = Items.get(id);
-        if (it) applyItem(it, { noRun: true });
+        if (!it) continue;
+        if (isGatePill(it.id)) addToBag(it, { silent: true });   // 破境丹药只收着，不当场吃
+        else applyItem(it, { noRun: true });
       }
       if (s.theirs.length) window.Coop.sendEncShare({ items: s.theirs });
     }
@@ -3713,7 +3723,10 @@
       if (st) { save.stones = (save.stones || 0) + st; gained.stones = st; }
       if (nr.items) for (const id of nr.items) {
         const it = Items.get(id);
-        if (it) { applyItem(it, { silent: true, noRun: true }); gained.items.push(it); }
+        if (!it) continue;
+        if (isGatePill(it.id)) addToBag(it, { silent: true });
+        else applyItem(it, { silent: true, noRun: true });
+        gained.items.push(it);
       }
       // 剧情给的灵宠
       if (nr.pets) for (const pid of nr.pets) { if (addPet(pid) === 'ok') gained.pets.push(pid); }
