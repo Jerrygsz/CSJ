@@ -1,3 +1,22 @@
+// ---------------------------------------------------------------------------
+// 兜底：半径绝不能是负数。
+// 收缩/外扩类特效的时间参数一旦算过界（-0.5、-16、-19 都出现过），
+// ctx.arc 会直接抛 DOMException，整帧渲染中断 —— 画面就卡住。
+// 与其在每个特效里各钳一次（已经漏过三回），不如在 canvas 层统一钳。
+// ---------------------------------------------------------------------------
+(function () {
+  if (typeof CanvasRenderingContext2D === 'undefined') return;
+  const proto = CanvasRenderingContext2D.prototype;
+  const arc0 = proto.arc;
+  proto.arc = function (x, y, r, a0, a1, ccw) {
+    return arc0.call(this, x, y, (r > 0 ? r : 0), a0, a1, ccw);
+  };
+  const ellipse0 = proto.ellipse;
+  if (ellipse0) proto.ellipse = function (x, y, rx, ry, rot, a0, a1, ccw) {
+    return ellipse0.call(this, x, y, (rx > 0 ? rx : 0), (ry > 0 ? ry : 0), rot, a0, a1, ccw);
+  };
+})();
+
 // 《凡人·长生劫》—— 主逻辑（多地图 / 练气十三层 / 太南小会坊市）
 (function () {
   'use strict';
@@ -1515,7 +1534,44 @@
     }
     return n === Infinity ? 0 : n;
   }
+  // ---- 煞丹术：正路走不通时的备用结丹法 ----
+  // 原著里这是玄阴经的旁门：拿一身煞气硬压出一颗丹。丹能成，根基却不纯 ——
+  // 所以这里给它三重代价：耗一大笔灵石、记一笔「煞丹」，此后每次破境都更险。
+  function shaDanCost(b) { return Math.round(1200 + (b && b.lv ? b.lv : 50) * 30); }
+  function shaDanReady(b) {
+    if (!b) return false;
+    if (!((save.cultivate && save.cultivate.skills && save.cultivate.skills.shadan) > 0)) return false;
+    return (save.stones || 0) >= shaDanCost(b);
+  }
+  function applyShaDan(b) {
+    if (!shaDanReady(b)) return false;
+    save.stones -= shaDanCost(b);
+    save.shaDan = (save.shaDan || 0) + 1;
+    const newLv = Math.max(save.cultivate.level || 1, b.lv);
+    save.cultivate.level = newLv;
+    save.cultivate.xp = 0;
+    syncBestLevel();
+    if (G.player) {
+      G.player.level = Math.max(G.player.level || 1, newLv);
+      G.player.next = xpNeed(newLv);
+      checkRealm(true); recalcMaxhp();
+      G.player.hp = G.player.maxhp;
+    }
+    G.breakPending = null;
+    writeSave();
+    banner('煞丹术 · 以煞凝丹，丹成但根基不纯');
+    Sfx.levelup();
+    return true;
+  }
+  // 吃过几颗煞丹，破境就多险几分（最多扣三成）
+  function shaDanPenalty() { return Math.min(0.3, (save.shaDan || 0) * 0.15); }
+
   function breakSuccessRate(b) {
+    const raw = breakSuccessRate0(b);
+    if (raw <= 0) return 0;                        // 没丹就是没丹，不给保底
+    return Math.max(0.05, raw * (1 - shaDanPenalty()));
+  }
+  function breakSuccessRate0(b) {
     if (!b || !b.items || !b.items.length) return 1;
     const c = b.chance || {};
     // 助丹型（结丹：雪灵水+天火液打底，降尘丹每枚加一点 —— 原著「有一定几率」）
@@ -3633,6 +3689,11 @@
   // 每加一种特效要同时改两处条件，漏一处就会被当成方块画出来；合成一条 else-if 链不再漏。
   function drawPart(pt) {
     const life = Math.max(0, pt.life / pt.maxlife);
+    // 粒子半径一律不许为负：收缩/外扩类特效算过头就会喂给 arc 一个负数，直接抛错
+    if (pt.r < 0) pt.r = 0;
+    if (pt.maxr < 0) pt.maxr = 0;
+    if (pt.rad < 0) pt.rad = 0;
+    if (pt.len < 0) pt.len = 0;
 
     if (pt.ring) {
       // 半径可能是负的（收缩类特效算出来 -16 这种），arc 会直接抛错，钳一下
@@ -5271,6 +5332,8 @@
     } else {
       lines.push(['旁白', '（囊中' + itemNames + ' ' + pills + ' 枚，尽数入炉 —— 冲关把握约 ' + Math.round(rate * 100) + '%。）']);
     }
+    // 手里还留着煞丹术这一手的，提前说一声（这是原著里那条旁门）
+    if (shaDanReady(gate)) lines.push(['旁白', '（另外 —— 这一炉真炸了，你还有煞丹术可走，只是根基要脏一分。）']);
     G.breakScene = gate.lv;
     if (elDialog) elDialog.classList.add('break-scene');
     showLines(lines, () => {
@@ -5284,6 +5347,8 @@
       const ok = (G.breakForce != null) ? !!G.breakForce : (Math.random() < rate);
       G.breakCur = null; G.breakScene = null;
       if (!ok) {
+        // 失败时先看煞丹术能不能兜一手（有这个法门、灵石也够）
+        if (applyShaDan(gate)) { if (onDone) onDone(gate, true); return; }
         // 冲关失败：丹毁炉炸，修为退回门口，可以再备丹药重来
         G.breakPending = gate;
         writeSave();
@@ -5338,6 +5403,7 @@
     closeBreak();
     const ok = (G.breakForce != null) ? !!G.breakForce : (Math.random() < rate);
     if (!ok) {
+      if (applyShaDan(b)) { renderCave(); refreshTitle(); return true; }
       G.breakPending = b;
       banner('冲关失败 · 丹药散尽，另备丹药再来'); Sfx.warn();
       writeSave(); renderCave(); refreshTitle();
@@ -6856,6 +6922,10 @@
     breakShown() { return !!(elBreak && elBreak.style.display === 'flex'); },
     breakClose() { closeBreak(); return !!(elBreak && elBreak.style.display === 'flex'); },
     breakPending() { return G.breakPending ? G.breakPending.lv : null; },
+    shaDan(lv) {
+      const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv) || null;
+      return { count: save.shaDan || 0, penalty: shaDanPenalty(), cost: b ? shaDanCost(b) : null, ready: shaDanReady(b) };
+    },
     sealed() { return save.sealed ? Object.assign({}, save.sealed) : null; },
     warp(sec) { G.time += (sec || 0); return +G.time.toFixed(1); },
     skillState() { return { learned: Object.assign({}, cultObj().skills), equipped: equippedOf().slice(), slots: slotCapOf(Math.max(save.cultivate.level || 1, save.best.level || 1)) }; },

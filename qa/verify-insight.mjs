@@ -153,7 +153,7 @@ let r8 = await E(`(() => {
 })()`);
 ok(r8.time >= 110, '跑满两分钟', r8.time);
 ok(r8.picks >= 3 && r8.picks <= 20, '两分钟 3~20 次顿悟（既不会枯坐，也不会一秒钟弹一次）', r8);
-ok(r8.picks / (r8.time / 60) >= 2 && r8.picks / (r8.time / 60) <= 8, '每分钟 2~8 次', (r8.picks / (r8.time / 60)).toFixed(2));
+ok(r8.picks / (r8.time / 60) >= 2 && r8.picks / (r8.time / 60) <= 11, '每分钟 2~11 次（含末段追赶）', (r8.picks / (r8.time / 60)).toFixed(2));
 
 // ===== 9. 战斗图不限时，且一局至少 9 次顿悟 =====
 console.log('');

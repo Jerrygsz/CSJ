@@ -244,6 +244,34 @@ ok(r9.bannerTxt.indexOf('碧焰酒') >= 0, '弹幕提示须服碧焰酒', r9.ban
 ok(r9.lvWithItem >= 72, '备下碧焰酒后越过关口', r9.lvWithItem);
 ok(r9.bagBiyan === 0, '过口时碧焰酒被服下', r9.bagBiyan);
 
+// ===== 9. 煞丹术：备用结丹 =====
+console.log('');
+console.log('== 9. 煞丹术：备用结丹 ==');
+let rSh = await E(`(() => {
+  const F = window.__FR;
+  F.muteStory(true); F.clearProgress(); F.setLevel(35);
+  for (const id of ['m_yusuizhi','m_zihua','m_tianling']) F.addItem(id, 5);
+  F.setStones(9000); F.clearMap('zhuji');
+  F.addItem('zhuji', 12);
+  const rate0 = F.breakRate(36).rate;
+  const noSkill = F.shaDan(36);
+  F.learn('shadan');
+  const withSkill = F.shaDan(36);
+  F.breakLuck(false);
+  const stonesBefore = F.info().stones;
+  const res = F.breakNow(36);
+  F.breakLuck(null);
+  const after = F.shaDan(36);
+  const rate1 = F.breakRate(36).rate;
+  return { rate0, noSkill, withSkill, stonesBefore, stonesAfter: F.info().stones, res, after, rate1 };
+})()`);
+ok(rSh.noSkill.ready === false, '没学煞丹术时，兜不住（ready=false）', rSh.noSkill);
+ok(rSh.withSkill.ready === true, '学了煞丹术、灵石够，就能以煞凝丹', rSh.withSkill);
+ok(rSh.res.ok === true && rSh.res.cult === 36, '炸炉后仍然结丹成功（境界落到 36）', rSh.res);
+ok(rSh.after.count === 1, '记了一笔「煞丹」', rSh.after);
+ok(rSh.stonesBefore - rSh.stonesAfter >= rSh.withSkill.cost, '按丹方收了灵石（另有冲关本身的开销）', { before: rSh.stonesBefore, after: rSh.stonesAfter, cost: rSh.withSkill.cost });
+ok(rSh.rate1 < rSh.rate0, '根基不纯：此后破境把握下降', { rate0: rSh.rate0, rate1: rSh.rate1 });
+
 // ===== 10. 全程零报错 =====
 console.log('\n== 10. 全程零报错 ==');
 ok(errs.length === 0, '无页面/控制台报错', errs.slice(0, 3));
