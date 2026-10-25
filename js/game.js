@@ -746,7 +746,7 @@
       if (struck) spawnRune(p.x, p.y, 26, VFX_HIT_COLOR[a.vfx || 'fan']);
       Sfx.fire();
     } else if (a.kind === 'burst') {
-      // 中心爆发：金光符的金光一炸 / 其它以己身为心的爆发
+      // 中心爆发：定神符的金光一炸 / 其它以己身为心的爆发
       if (struck) spawnRune(p.x, p.y, 30, VFX_HIT_COLOR[a.vfx || 'gold']);
       novaBlast(p.x, p.y, window.skillAtk.rad(a, lv), dmg, a.vfx || 'gold');
     } else if (a.kind === 'thunder') {
@@ -816,7 +816,7 @@
           }
         }
       } else if (a.kind === 'field') {
-        // 领域：踏入即被拖慢，还得持续挨打（玄冰符 / 元磁神光）
+        // 领域：踏入即被拖慢，还得持续挨打（冰冻术 / 元磁神光）
         const rad = window.skillAtk.rad(a, e.lv);
         const dmg = window.skillAtk.dmg(a, e.lv);
         G.fieldSlow.push({ rad: rad, slow: a.slow || 0.4, vfx: a.vfx || 'ice' });
@@ -1638,7 +1638,7 @@
       if (e.dash) { e.dashT -= dt; if (e.dashT <= 0) { e.dashing = 0.25; e.dashT = U.rand(2, 4); } if (e.dashing > 0) { spd *= 2.4; e.dashing -= dt; } }
       if (e.wob) { const perp = ang + Math.PI / 2; const w = Math.sin(e.t * 6) * 0.5; px += Math.cos(perp) * w; py += Math.sin(perp) * w; }
       let sm = 1;
-      // 近身领域（玄冰符 / 元磁神光）：踏进场中就被拖住
+      // 近身领域（冰冻术 / 元磁神光）：踏进场中就被拖住
       for (const f of (G.fieldSlow || [])) {
         if (U.dist(p.x, p.y, e.x, e.y) < f.rad + (e.r || 0)) sm *= (1 - f.slow);
       }
@@ -1987,7 +1987,7 @@
   // ---------- 粒子 / 文字 ----------
   // ---------- 施法表现：按功法分发 ----------
   // 原著里各门手段本来就不是一个样子：青元剑诀是青碧剑芒、血魔剑是通红剑芒带血雾、
-  // 火蛇符是真的窜出一条蛇、三焰扇是三色火、辟邪神雷是从天上劈下来的雷。
+  // 火弹术是真的窜出一条蛇、三焰扇是三色火、辟邪神雷是从天上劈下来的雷。
   // 所以这里不再"一律画剑、一律画火"，而是各自一套。
   const vfxGradCache = new Map();
   function vfxTrail(x, y, ang, len, color, alpha) {

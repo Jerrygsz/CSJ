@@ -77,15 +77,15 @@ const S = await page.evaluate(() => {
   out.active_count = SK.filter(s => s.atk && s.atk.vfx).length;
   return out;
 });
-ok(S.vfx_sword, '御剑术(sword) → qingmang');
+ok(S.vfx_sword, '控物术(sword) → qingmang');
 ok(S.vfx_xuemo, '血魔剑诀(xuemo) → blood');
-ok(S.vfx_fire, '火蛇符(fire) → snake');
+ok(S.vfx_fire, '火弹术(fire) → snake');
 ok(S.vfx_sanyan, '三焰扇(sanyan) → fan');
-ok(S.vfx_nova, '金光符(nova) → gold');
-ok(S.vfx_qinxian, '七弦琴(qinxian) → gold');
-ok(S.vfx_frost, '玄冰符(frost) → ice');
+ok(S.vfx_nova, '定神符(nova) → gold');
+ok(S.vfx_qinxian, '惊神刺(qinxian) → gold');
+ok(S.vfx_frost, '冰冻术(frost) → ice');
 ok(S.vfx_yuanci, '元磁神光(yuanci) → gravity');
-ok(S.vfx_orb, '玄罡护体(orb) → gang');
+ok(S.vfx_orb, '金光罩(orb) → gang');
 ok(S.vfx_leishen, '辟邪神雷(leishen) → thunder');
 ok(S.active_count >= 10, '至少 10 门战斗功法带了 vfx（没被误降成被动）', S.active_count);
 
@@ -130,7 +130,7 @@ ok(F.gravity_purple, 'gravity 用紫色重力波纹（#b49cff）');
 ok(F.ice, 'drawField 的 else 分支画玄冰寒域（冷色）');
 ok(F.not_shared, '两门领域各走各的分支（没退化成一个）');
 
-console.log('\n== 4. 玄罡护体在 drawOrb 里的金青气团 ==');
+console.log('\n== 4. 金光罩在 drawOrb 里的金青气团 ==');
 const O = await page.evaluate(() => {
   const src = window.__FR.src('drawOrb') || '';
   return {

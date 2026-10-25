@@ -1,0 +1,3262 @@
+{
+ "skills": [
+  {
+   "id": "sword",
+   "name": "控物术",
+   "minLv": 1,
+   "max": 6,
+   "type": "ranged",
+   "vfx": "qingmang",
+   "kind": "beam",
+   "desc": "御使飞剑，自动锁定最近之敌。七玄门剑修根基，韩立最早会的攻击术"
+  },
+  {
+   "id": "fire",
+   "name": "火弹术",
+   "minLv": 5,
+   "max": 5,
+   "type": "ranged_aoe",
+   "vfx": "snake",
+   "kind": "homing",
+   "desc": "放出追踪火蛇，缠绕敌身。韩立早年期自炼符箓"
+  },
+  {
+   "id": "orb",
+   "name": "金光罩",
+   "minLv": 8,
+   "max": 5,
+   "type": "aura",
+   "vfx": "gang",
+   "kind": "orbit",
+   "desc": "庚金玄罡环绕周身，触敌即伤。贴身近战之法，韩立早年淬体护身"
+  },
+  {
+   "id": "nova",
+   "name": "定神符",
+   "minLv": 12,
+   "max": 5,
+   "type": "ranged_aoe",
+   "vfx": "gold",
+   "kind": "burst",
+   "desc": "周期性金光爆发，范围杀伤。韩立常用的金光类符箓"
+  },
+  {
+   "id": "frost",
+   "name": "冰冻术",
+   "minLv": 20,
+   "max": 5,
+   "type": "aura",
+   "vfx": "ice",
+   "kind": "field",
+   "desc": "身周凝出冰霜领域，近身之敌移速大减。韩立参悟的冰霜符箓"
+  },
+  {
+   "id": "changchun",
+   "name": "长春功",
+   "minLv": 1,
+   "max": 6,
+   "type": "passive",
+   "vfx": null,
+   "kind": "passive",
+   "desc": "墨大夫传授的引气吐纳根基，韩立练气期的根本功法。缓缓回血，修为略进"
+  },
+  {
+   "id": "swift",
+   "name": "罗烟步",
+   "minLv": 1,
+   "max": 5,
+   "type": "passive",
+   "vfx": null,
+   "kind": "passive",
+   "desc": "血色禁地所得身法真传，步法如烟，移速大增"
+  },
+  {
+   "id": "regen",
+   "name": "回春诀",
+   "minLv": 10,
+   "max": 5,
+   "type": "passive",
+   "vfx": null,
+   "kind": "passive",
+   "desc": "缓缓回血，久战不竭。韩立借灵药丹力"
+  },
+  {
+   "id": "magnet",
+   "name": "聚灵术",
+   "minLv": 1,
+   "max": 5,
+   "type": "passive",
+   "vfx": null,
+   "kind": "passive",
+   "desc": "广布灵识，灵石自行来投。借掌天瓶之能炼出的聚灵之法"
+  },
+  {
+   "id": "haste",
+   "name": "雷遁术",
+   "minLv": 15,
+   "max": 5,
+   "type": "passive",
+   "vfx": null,
+   "kind": "passive",
+   "desc": "吐纳如雷，出手更急。所有攻击间隔随之缩短，韩立后期参悟的急攻之术"
+  },
+  {
+   "id": "gourd",
+   "name": "灵葫诀",
+   "minLv": 25,
+   "max": 5,
+   "type": "passive",
+   "vfx": null,
+   "kind": "passive",
+   "desc": "本命灵葫在身，生命上限提升，灵草常落"
+  },
+  {
+   "id": "qingyuan",
+   "name": "青元剑诀",
+   "minLv": 36,
+   "max": 7,
+   "type": "passive",
+   "vfx": null,
+   "kind": "passive",
+   "desc": "青元子创立的剑道根本，韩立筑基后期补全。御剑更利、出手更疾，是刻在他一辈子里的剑法"
+  },
+  {
+   "id": "dayan",
+   "name": "大衍诀",
+   "minLv": 36,
+   "max": 7,
+   "type": "passive",
+   "vfx": null,
+   "kind": "passive",
+   "desc": "元神培炼之法，前四层。神识大增，出手更狠"
+  },
+  {
+   "id": "xuemo",
+   "name": "血魔剑诀",
+   "minLv": 56,
+   "max": 6,
+   "type": "ranged",
+   "vfx": "blood",
+   "kind": "beam",
+   "desc": "血魔剑配套剑诀，血煞剑气破体而出。掩月宗大长老的佩剑连同这套剑法，一起换了主人"
+  },
+  {
+   "id": "sanyan",
+   "name": "三焰扇",
+   "minLv": 56,
+   "max": 6,
+   "type": "ranged_aoe",
+   "vfx": "fan",
+   "kind": "spread",
+   "desc": "虚天殿所得古宝扇形仿法，三色火扇一扇到底，正面一片都过不去"
+  },
+  {
+   "id": "fenglei",
+   "name": "风雷翅",
+   "minLv": 56,
+   "max": 6,
+   "type": "passive",
+   "vfx": null,
+   "kind": "passive",
+   "desc": "乱星海炼器所得飞行翼，背生双翼，闪转腾挪都快人一线"
+  },
+  {
+   "id": "tianzhu",
+   "name": "天蛛诀",
+   "minLv": 56,
+   "max": 6,
+   "type": "passive",
+   "vfx": null,
+   "kind": "passive",
+   "desc": "天蛛岛所得操控法，灵识铺得更开，落物都逃不掉"
+  },
+  {
+   "id": "tongbao",
+   "name": "洞漩金光",
+   "minLv": 56,
+   "max": 6,
+   "type": "passive",
+   "vfx": null,
+   "kind": "passive",
+   "desc": "虚天残图所藏敛财储物之术，灵石灵草自己往身上滚"
+  },
+  {
+   "id": "dayan2",
+   "name": "大衍诀·后三层",
+   "minLv": 82,
+   "max": 7,
+   "type": "passive",
+   "vfx": null,
+   "kind": "passive",
+   "desc": "大衍神君亲手补全的那半卷。神识通天，看一眼就能想明白对方下一招往哪去"
+  },
+  {
+   "id": "leishen",
+   "name": "辟邪神雷",
+   "minLv": 82,
+   "max": 7,
+   "type": "ranged_aoe",
+   "vfx": "thunder",
+   "kind": "thunder",
+   "desc": "韩立专修克制魔功的神雷，以金雷竹为引，自天劈落。魔道见此雷，先矮三分"
+  },
+  {
+   "id": "qinxian",
+   "name": "惊神刺",
+   "minLv": 82,
+   "max": 7,
+   "type": "ranged_aoe",
+   "vfx": "gold",
+   "kind": "burst",
+   "desc": "元婴期音攻手段，魔音化作环形波纹荡开，远近皆伤"
+  },
+  {
+   "id": "yuanci",
+   "name": "元磁神光",
+   "minLv": 102,
+   "max": 7,
+   "type": "aura",
+   "vfx": "gravity",
+   "kind": "field",
+   "desc": "元磁山炼化之后的重力神光，破化神的门。场中人动不了，还得一直挨"
+  },
+  {
+   "id": "wuzi",
+   "name": "五子同心魔",
+   "minLv": 102,
+   "max": 7,
+   "type": "passive",
+   "vfx": null,
+   "kind": "passive",
+   "desc": "昆吾山所得子母魔头操控法，五魔分神助战，出手更毒"
+  },
+  {
+   "id": "pojie",
+   "name": "破界符·空间诀",
+   "minLv": 112,
+   "max": 7,
+   "type": "passive",
+   "vfx": null,
+   "kind": "passive",
+   "desc": "玲珑所留的飞升之凭，空间之力加身。握着它，才知道什么叫界外还有界"
+  },
+  {
+   "id": "sanzhong",
+   "name": "三转重元功",
+   "minLv": 50,
+   "max": 3,
+   "type": "passive",
+   "vfx": null,
+   "kind": "passive",
+   "desc": "散功重修三次，每转一回境界更厚。结丹可选前置，转满三次再结丹，成色自不相同。"
+  }
+ ],
+ "recipes": [
+  {
+   "id": "r_huiqi",
+   "kind": "alchemy",
+   "name": "回气丹",
+   "out": "huiqi",
+   "req": 1,
+   "mats": [
+    "m_chijing"
+   ],
+   "book": null,
+   "rate": 0.92
+  },
+  {
+   "id": "r_lingzhi",
+   "kind": "alchemy",
+   "name": "灵芝",
+   "out": "lingzhi",
+   "req": 1,
+   "mats": [
+    "m_huangjing",
+    "m_chijing"
+   ],
+   "book": null,
+   "rate": 0.92
+  },
+  {
+   "id": "r_peiyuan",
+   "kind": "alchemy",
+   "name": "培元丹",
+   "out": "peiyuan",
+   "req": 3,
+   "mats": [
+    "m_chijing",
+    "m_huangjing"
+   ],
+   "book": null,
+   "rate": 0.85
+  },
+  {
+   "id": "r_huanglong",
+   "kind": "alchemy",
+   "name": "黄龙丹",
+   "out": "huanglong",
+   "req": 8,
+   "mats": [
+    "m_zihua",
+    "m_tianling",
+    "m_wolfdan"
+   ],
+   "book": null,
+   "rate": 0.78
+  },
+  {
+   "id": "r_jinsui",
+   "kind": "alchemy",
+   "name": "金髓丸",
+   "out": "jinsui",
+   "req": 12,
+   "mats": [
+    "m_tianling",
+    "m_chongjing",
+    "m_yusui"
+   ],
+   "book": null,
+   "rate": 0.7
+  },
+  {
+   "id": "r_zhuji",
+   "kind": "alchemy",
+   "name": "筑基丹",
+   "out": "zhuji",
+   "req": 35,
+   "mats": [
+    "m_yusuizhi",
+    "m_zihua",
+    "m_tianling",
+    "m_longlin",
+    "m_xuesha"
+   ],
+   "book": null,
+   "rate": 0.55
+  },
+  {
+   "id": "r_jingtie",
+   "kind": "forge",
+   "name": "精铁短剑",
+   "out": "jingtie",
+   "req": 3,
+   "mats": [
+    "m_jingtie"
+   ],
+   "book": null,
+   "rate": 0.9
+  },
+  {
+   "id": "r_chitong",
+   "kind": "forge",
+   "name": "赤铜短戟",
+   "out": "chitong",
+   "req": 9,
+   "mats": [
+    "m_chitong",
+    "m_jingtie"
+   ],
+   "book": null,
+   "rate": 0.85
+  },
+  {
+   "id": "r_qingzhu",
+   "kind": "forge",
+   "name": "青竹剑",
+   "out": "qingzhu",
+   "req": 7,
+   "mats": [
+    "m_jingtie",
+    "m_yusui",
+    "m_huangjing"
+   ],
+   "book": null,
+   "rate": 0.82
+  },
+  {
+   "id": "r_ruanwei",
+   "kind": "forge",
+   "name": "软猬甲",
+   "out": "a_ruanwei",
+   "req": 9,
+   "mats": [
+    "m_jingtie",
+    "m_shihui"
+   ],
+   "book": null,
+   "rate": 0.84
+  },
+  {
+   "id": "r_moyu",
+   "kind": "forge",
+   "name": "墨玉飞刀",
+   "out": "moyu",
+   "req": 12,
+   "mats": [
+    "m_xuantie",
+    "m_yusui",
+    "m_shihui"
+   ],
+   "book": null,
+   "rate": 0.74
+  },
+  {
+   "id": "r_hanyu",
+   "kind": "forge",
+   "name": "寒玉甲",
+   "out": "a_hanyu",
+   "req": 14,
+   "mats": [
+    "m_hantie",
+    "m_yusui"
+   ],
+   "book": null,
+   "rate": 0.72
+  },
+  {
+   "id": "r_xuantie",
+   "kind": "forge",
+   "name": "玄铁重剑",
+   "out": "xuantie",
+   "req": 16,
+   "mats": [
+    "m_xuantie",
+    "m_hantie",
+    "m_jingtie"
+   ],
+   "book": null,
+   "rate": 0.68
+  },
+  {
+   "id": "r_xuangui",
+   "kind": "forge",
+   "name": "玄龟甲",
+   "out": "a_xuangui",
+   "req": 20,
+   "mats": [
+    "m_hantie",
+    "m_xuantie",
+    "m_yusui"
+   ],
+   "book": null,
+   "rate": 0.6
+  },
+  {
+   "id": "r_tianlei",
+   "kind": "forge",
+   "name": "天雷子",
+   "out": "t_tianlei",
+   "req": 22,
+   "mats": [
+    "m_xuantie",
+    "m_xuesha",
+    "m_yusui"
+   ],
+   "book": null,
+   "rate": 0.66
+  },
+  {
+   "id": "r_shenxing",
+   "kind": "talisman",
+   "name": "神行符",
+   "out": "shenxing",
+   "req": 1,
+   "mats": [
+    "m_fuzhi",
+    "m_lingmo"
+   ],
+   "book": null,
+   "rate": 0.92
+  },
+  {
+   "id": "r_qingyan",
+   "kind": "talisman",
+   "name": "轻烟符",
+   "out": "qingyan",
+   "req": 1,
+   "mats": [
+    "m_fuzhi",
+    "m_lingmo"
+   ],
+   "book": null,
+   "rate": 0.92
+  },
+  {
+   "id": "r_jifeng",
+   "kind": "talisman",
+   "name": "疾风符",
+   "out": "jifeng",
+   "req": 5,
+   "mats": [
+    "m_fuzhi",
+    "m_lingmo",
+    "m_wolfdan"
+   ],
+   "book": null,
+   "rate": 0.8
+  },
+  {
+   "id": "r_fb_huo",
+   "kind": "talisman",
+   "name": "火球符宝",
+   "out": "fb_huo",
+   "req": 5,
+   "mats": [
+    "m_fuzhi",
+    "m_lingmo",
+    "m_xuesha"
+   ],
+   "book": null,
+   "rate": 0.78
+  },
+  {
+   "id": "r_fb_bing",
+   "kind": "talisman",
+   "name": "冰锥符宝",
+   "out": "fb_bing",
+   "req": 8,
+   "mats": [
+    "m_fuzhi",
+    "m_lingmo",
+    "m_hantie"
+   ],
+   "book": null,
+   "rate": 0.76
+  },
+  {
+   "id": "r_huyu",
+   "kind": "talisman",
+   "name": "护身玉符",
+   "out": "huyu",
+   "req": 10,
+   "mats": [
+    "m_yusui",
+    "m_fuzhi",
+    "m_lingmo"
+   ],
+   "book": null,
+   "rate": 0.72
+  },
+  {
+   "id": "r_fb_feng",
+   "kind": "talisman",
+   "name": "风刃符宝",
+   "out": "fb_feng",
+   "req": 12,
+   "mats": [
+    "m_fuzhi",
+    "m_lingmo",
+    "m_wolfdan"
+   ],
+   "book": null,
+   "rate": 0.74
+  },
+  {
+   "id": "r_a_yunwen",
+   "kind": "forge",
+   "name": "云纹法衣",
+   "out": "a_yunwen",
+   "req": 44,
+   "mats": [
+    "m_hantie",
+    "m_xueyu",
+    "m_yusui"
+   ],
+   "book": null,
+   "rate": 0.6
+  },
+  {
+   "id": "r_w_qingzhu",
+   "kind": "forge",
+   "name": "青竹蜂云剑",
+   "out": "w_qingzhu",
+   "req": 56,
+   "mats": [
+    "m_jinlei",
+    "m_xuantie",
+    "m_yusui"
+   ],
+   "book": null,
+   "rate": 0.4
+  },
+  {
+   "id": "r_fb_fenglei",
+   "kind": "forge",
+   "name": "风雷翅",
+   "out": "fb_fenglei",
+   "req": 60,
+   "mats": [
+    "m_yaodan",
+    "m_xueyu",
+    "m_lingmo",
+    "m_jinlei"
+   ],
+   "book": null,
+   "rate": 0.5
+  },
+  {
+   "id": "r_sanyan",
+   "kind": "forge",
+   "name": "三焰扇",
+   "out": "fb_sanyan",
+   "req": 96,
+   "mats": [
+    "m_huodan",
+    "m_gangyin",
+    "m_gengjing",
+    "m_yusui"
+   ],
+   "book": null,
+   "rate": 0.45
+  },
+  {
+   "id": "r_yuanying_kui",
+   "kind": "forge",
+   "name": "元婴后期傀儡",
+   "out": "t_kui",
+   "req": 102,
+   "mats": [
+    "m_gangyin",
+    "m_gengjing",
+    "m_yanghun",
+    "m_yaodan"
+   ],
+   "book": null,
+   "rate": 0.35
+  },
+  {
+   "id": "r_tianhuo",
+   "kind": "alchemy",
+   "name": "天火液",
+   "out": "tianhuo",
+   "req": 56,
+   "mats": [
+    "m_huodan",
+    "m_huoling",
+    "m_zhuguo"
+   ],
+   "book": null,
+   "rate": 0.6
+  },
+  {
+   "id": "r_jiuqu",
+   "kind": "alchemy",
+   "name": "九曲灵参丹",
+   "out": "jiuqu",
+   "req": 82,
+   "mats": [
+    "m_jiuqu",
+    "m_yusui",
+    "m_lingzhi"
+   ],
+   "book": null,
+   "rate": 0.5
+  },
+  {
+   "id": "r_dianling",
+   "kind": "alchemy",
+   "name": "定灵丹",
+   "out": "dianling",
+   "req": 82,
+   "mats": [
+    "m_dingling",
+    "m_ningshen",
+    "m_lingzhi"
+   ],
+   "book": null,
+   "rate": 0.5
+  },
+  {
+   "id": "r_moyuan",
+   "kind": "alchemy",
+   "name": "魔元丹",
+   "out": "moyuan",
+   "req": 108,
+   "mats": [
+    "m_yaodan",
+    "m_xuesha"
+   ],
+   "book": null,
+   "rate": 0.4
+  },
+  {
+   "id": "r_t_qingzhu",
+   "kind": "forge",
+   "name": "青竹蜂云剑",
+   "out": "t_qingzhu",
+   "req": 92,
+   "mats": [
+    "m_jinlei",
+    "m_gengjing",
+    "m_yusui"
+   ],
+   "book": null,
+   "rate": 0.45
+  },
+  {
+   "id": "r_siling",
+   "kind": "alchemy",
+   "name": "饲灵丸",
+   "out": "siling",
+   "req": 12,
+   "mats": [
+    "m_silingcao",
+    "m_chijing"
+   ],
+   "book": null,
+   "rate": 0.78
+  },
+  {
+   "id": "r_zaohua",
+   "kind": "alchemy",
+   "name": "造化丹",
+   "out": "zaohua",
+   "req": 24,
+   "mats": [
+    "m_zaohuacao",
+    "m_zihua"
+   ],
+   "book": null,
+   "rate": 0.6
+  }
+ ],
+ "items": [
+  {
+   "id": "huiqi",
+   "name": "止血丹",
+   "req": 1,
+   "rarity": 0,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "炼:回气丹(Lv1)"
+   ]
+  },
+  {
+   "id": "lingzhi",
+   "name": "辟谷丹",
+   "req": 1,
+   "rarity": 0,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "炼:灵芝(Lv1)"
+   ]
+  },
+  {
+   "id": "lingshi",
+   "name": "下品灵石",
+   "req": 1,
+   "rarity": 0,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "peiyuan",
+   "name": "疗元丹",
+   "req": 56,
+   "rarity": 2,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "炼:培元丹(Lv3)"
+   ]
+  },
+  {
+   "id": "huanglong",
+   "name": "黄龙丹",
+   "req": 8,
+   "rarity": 2,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "炼:黄龙丹(Lv8)"
+   ]
+  },
+  {
+   "id": "jinsui",
+   "name": "金髓丸",
+   "req": 12,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "炼:金髓丸(Lv12)"
+   ]
+  },
+  {
+   "id": "zhuji",
+   "name": "筑基丹",
+   "req": 35,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "炼:筑基丹(Lv35)",
+    "剧情:血色禁地",
+    "际遇:七派弟子的遗体"
+   ]
+  },
+  {
+   "id": "qingyan",
+   "name": "轻身符",
+   "req": 1,
+   "rarity": 1,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "炼:轻烟符(Lv1)",
+    "坊:太南小会"
+   ]
+  },
+  {
+   "id": "xueshen",
+   "name": "火弹符",
+   "req": 3,
+   "rarity": 1,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:太南小会",
+    "坊:天星城"
+   ]
+  },
+  {
+   "id": "shenxing",
+   "name": "神行符",
+   "req": 36,
+   "rarity": 1,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "炼:神行符(Lv1)",
+    "坊:天星城"
+   ]
+  },
+  {
+   "id": "jifeng",
+   "name": "爆裂符",
+   "req": 36,
+   "rarity": 2,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "炼:疾风符(Lv5)",
+    "坊:天星城"
+   ]
+  },
+  {
+   "id": "qiannian",
+   "name": "清心符",
+   "req": 36,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:黄枫谷·药园",
+    "坊:天星城"
+   ]
+  },
+  {
+   "id": "lianqi",
+   "name": "破禁符",
+   "req": 56,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:天南交易会"
+   ]
+  },
+  {
+   "id": "bichen",
+   "name": "避尘符",
+   "req": 56,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:天南交易会"
+   ]
+  },
+  {
+   "id": "chuansong",
+   "name": "空间传送符",
+   "req": 82,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:天南交易会"
+   ]
+  },
+  {
+   "id": "tishen",
+   "name": "替身傀儡",
+   "req": 82,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:天南交易会"
+   ]
+  },
+  {
+   "id": "baoliebao",
+   "name": "爆裂符宝",
+   "req": 82,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:天南交易会"
+   ]
+  },
+  {
+   "id": "changchun",
+   "name": "长春功残卷",
+   "req": 6,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:七玄门·山门"
+   ]
+  },
+  {
+   "id": "zhangtian",
+   "name": "掌天瓶绿液",
+   "req": 15,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:血色禁地"
+   ]
+  },
+  {
+   "id": "jipin",
+   "name": "极品灵石",
+   "req": 112,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:天南交易会",
+    "剧情:坠魔谷·芥子空间"
+   ]
+  },
+  {
+   "id": "jingtie",
+   "name": "精铁短剑",
+   "req": 3,
+   "rarity": 1,
+   "slot": "weapon",
+   "teach": null,
+   "src": [
+    "炼:精铁短剑(Lv3)",
+    "坊:太南小会",
+    "剧情:七玄门·演武场"
+   ]
+  },
+  {
+   "id": "money_sword",
+   "name": "金钱剑",
+   "req": 5,
+   "rarity": 2,
+   "slot": "weapon",
+   "teach": null,
+   "src": [
+    "坊:太南小会"
+   ]
+  },
+  {
+   "id": "chitong",
+   "name": "赤铜短戟",
+   "req": 9,
+   "rarity": 2,
+   "slot": "weapon",
+   "teach": null,
+   "src": [
+    "炼:赤铜短戟(Lv9)"
+   ]
+  },
+  {
+   "id": "qingzhu",
+   "name": "青竹剑",
+   "req": 7,
+   "rarity": 2,
+   "slot": "weapon",
+   "teach": null,
+   "src": [
+    "炼:青竹剑(Lv7)",
+    "剧情:墨大夫·密室",
+    "坊:太南小会"
+   ]
+  },
+  {
+   "id": "moyu",
+   "name": "墨玉飞刀",
+   "req": 12,
+   "rarity": 3,
+   "slot": "weapon",
+   "teach": null,
+   "src": [
+    "炼:墨玉飞刀(Lv12)",
+    "坊:天星城"
+   ]
+  },
+  {
+   "id": "xuantie",
+   "name": "玄铁重剑",
+   "req": 16,
+   "rarity": 3,
+   "slot": "weapon",
+   "teach": null,
+   "src": [
+    "炼:玄铁重剑(Lv16)",
+    "坊:天星城"
+   ]
+  },
+  {
+   "id": "a_bu",
+   "name": "粗布道袍",
+   "req": 1,
+   "rarity": 0,
+   "slot": "armor",
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "a_lupi",
+   "name": "鹿皮软甲",
+   "req": 4,
+   "rarity": 1,
+   "slot": "armor",
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "a_ruanwei",
+   "name": "软猬甲",
+   "req": 9,
+   "rarity": 2,
+   "slot": "armor",
+   "teach": null,
+   "src": [
+    "炼:软猬甲(Lv9)"
+   ]
+  },
+  {
+   "id": "a_hanyu",
+   "name": "寒玉甲",
+   "req": 14,
+   "rarity": 3,
+   "slot": "armor",
+   "teach": null,
+   "src": [
+    "炼:寒玉甲(Lv14)"
+   ]
+  },
+  {
+   "id": "a_xuangui",
+   "name": "玄龟甲",
+   "req": 20,
+   "rarity": 4,
+   "slot": "armor",
+   "teach": null,
+   "src": [
+    "炼:玄龟甲(Lv20)",
+    "坊:天星城"
+   ]
+  },
+  {
+   "id": "t_mupai",
+   "name": "旧木牌",
+   "req": 1,
+   "rarity": 0,
+   "slot": "trinket",
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "juling",
+   "name": "聚灵珠",
+   "req": 6,
+   "rarity": 2,
+   "slot": "trinket",
+   "teach": null,
+   "src": [
+    "坊:太南小会"
+   ]
+  },
+  {
+   "id": "t_xuanyu",
+   "name": "玄玉珠",
+   "req": 13,
+   "rarity": 3,
+   "slot": "trinket",
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "t_tianlei",
+   "name": "天雷子",
+   "req": 22,
+   "rarity": 4,
+   "slot": "trinket",
+   "teach": null,
+   "src": [
+    "炼:天雷子(Lv22)",
+    "坊:天星城"
+   ]
+  },
+  {
+   "id": "t_zhangtie",
+   "name": "张铁的铁牌",
+   "req": 5,
+   "rarity": 2,
+   "slot": "trinket",
+   "teach": null,
+   "src": [
+    "际遇:张铁的铁匠棚"
+   ]
+  },
+  {
+   "id": "fb_huo",
+   "name": "火球符宝",
+   "req": 5,
+   "rarity": 2,
+   "slot": "talisman",
+   "teach": null,
+   "src": [
+    "炼:火球符宝(Lv5)"
+   ]
+  },
+  {
+   "id": "fb_bing",
+   "name": "冰锥符宝",
+   "req": 8,
+   "rarity": 2,
+   "slot": "talisman",
+   "teach": null,
+   "src": [
+    "炼:冰锥符宝(Lv8)"
+   ]
+  },
+  {
+   "id": "huyu",
+   "name": "护身玉符",
+   "req": 10,
+   "rarity": 3,
+   "slot": "talisman",
+   "teach": null,
+   "src": [
+    "炼:护身玉符(Lv10)",
+    "坊:太南小会",
+    "坊:天星城"
+   ]
+  },
+  {
+   "id": "fb_feng",
+   "name": "风刃符宝",
+   "req": 12,
+   "rarity": 3,
+   "slot": "talisman",
+   "teach": null,
+   "src": [
+    "炼:风刃符宝(Lv12)",
+    "坊:天星城"
+   ]
+  },
+  {
+   "id": "qingyuan",
+   "name": "青元剑诀",
+   "req": 36,
+   "rarity": 4,
+   "slot": null,
+   "teach": "qingyuan",
+   "src": [
+    "剧情:血色禁地",
+    "剧情:黄枫谷·地火之屋"
+   ]
+  },
+  {
+   "id": "dayan",
+   "name": "大衍诀",
+   "req": 36,
+   "rarity": 4,
+   "slot": null,
+   "teach": "dayan",
+   "src": [
+    "剧情:翠屏山·洞府夜变"
+   ]
+  },
+  {
+   "id": "jiangchen",
+   "name": "降尘丹",
+   "req": 40,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:六连殿·出海捕妖"
+   ]
+  },
+  {
+   "id": "xueling",
+   "name": "雪灵水",
+   "req": 48,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:天星城"
+   ]
+  },
+  {
+   "id": "biyanjiu",
+   "name": "碧焰酒",
+   "req": 60,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:天星城"
+   ]
+  },
+  {
+   "id": "haoyuan",
+   "name": "昊元丹",
+   "req": 56,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:天星城"
+   ]
+  },
+  {
+   "id": "peiyin",
+   "name": "培婴丹",
+   "req": 82,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:天南交易会"
+   ]
+  },
+  {
+   "id": "butian",
+   "name": "补天丹",
+   "req": 52,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:虚天殿"
+   ]
+  },
+  {
+   "id": "w_qingzhu",
+   "name": "青竹蜂云剑",
+   "req": 56,
+   "rarity": 4,
+   "slot": "weapon",
+   "teach": null,
+   "src": [
+    "炼:青竹蜂云剑(Lv56)"
+   ]
+  },
+  {
+   "id": "a_yunwen",
+   "name": "云纹法衣",
+   "req": 44,
+   "rarity": 4,
+   "slot": "armor",
+   "teach": null,
+   "src": [
+    "炼:云纹法衣(Lv44)",
+    "剧情:金鼓原"
+   ]
+  },
+  {
+   "id": "t_shijin",
+   "name": "噬金虫袋",
+   "req": 46,
+   "rarity": 4,
+   "slot": "trinket",
+   "teach": null,
+   "src": [
+    "剧情:海猿岛·闭关"
+   ]
+  },
+  {
+   "id": "t_hunyuan",
+   "name": "混元钵",
+   "req": 46,
+   "rarity": 4,
+   "slot": "trinket",
+   "teach": null,
+   "src": [
+    "剧情:六连殿·出海捕妖"
+   ]
+  },
+  {
+   "id": "t_cantu",
+   "name": "虚天残图",
+   "req": 40,
+   "rarity": 4,
+   "slot": "trinket",
+   "teach": null,
+   "src": [
+    "剧情:越国·京城皇宫"
+   ]
+  },
+  {
+   "id": "t_dayi",
+   "name": "大挪移令",
+   "req": 44,
+   "rarity": 4,
+   "slot": "trinket",
+   "teach": null,
+   "src": [
+    "剧情:灵石矿·魔道矿场"
+   ]
+  },
+  {
+   "id": "t_xutianding",
+   "name": "虚天鼎",
+   "req": 56,
+   "rarity": 4,
+   "slot": "trinket",
+   "teach": null,
+   "src": [
+    "剧情:虚天殿"
+   ]
+  },
+  {
+   "id": "t_yinyue",
+   "name": "银月",
+   "req": 58,
+   "rarity": 4,
+   "slot": "trinket",
+   "teach": null,
+   "src": [
+    "剧情:虚天殿"
+   ]
+  },
+  {
+   "id": "t_honghuang",
+   "name": "洪荒古宝",
+   "req": 54,
+   "rarity": 4,
+   "slot": "talisman",
+   "teach": null,
+   "src": [
+    "剧情:古修遗址"
+   ]
+  },
+  {
+   "id": "fb_jinkulou",
+   "name": "金骷髅符宝",
+   "req": 40,
+   "rarity": 4,
+   "slot": "talisman",
+   "teach": null,
+   "src": [
+    "剧情:燕家堡"
+   ]
+  },
+  {
+   "id": "fb_fenglei",
+   "name": "风雷翅",
+   "req": 60,
+   "rarity": 4,
+   "slot": "talisman",
+   "teach": null,
+   "src": [
+    "炼:风雷翅(Lv60)"
+   ]
+  },
+  {
+   "id": "dayan2",
+   "name": "大衍诀·后三层",
+   "req": 82,
+   "rarity": 4,
+   "slot": null,
+   "teach": "dayan2",
+   "src": [
+    "剧情:极西之地"
+   ]
+  },
+  {
+   "id": "yuanci",
+   "name": "元磁神光",
+   "req": 102,
+   "rarity": 4,
+   "slot": null,
+   "teach": "yuanci",
+   "src": [
+    "剧情:坠魔谷·芥子空间"
+   ]
+  },
+  {
+   "id": "moyuan",
+   "name": "魔元丹",
+   "req": 108,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "炼:魔元丹(Lv108)",
+    "剧情:坠魔谷·芥子空间"
+   ]
+  },
+  {
+   "id": "w_xuemo",
+   "name": "血魔剑",
+   "req": 82,
+   "rarity": 4,
+   "slot": "weapon",
+   "teach": null,
+   "src": [
+    "剧情:掩月宗"
+   ]
+  },
+  {
+   "id": "a_xuemo",
+   "name": "血魔甲",
+   "req": 82,
+   "rarity": 4,
+   "slot": "armor",
+   "teach": null,
+   "src": [
+    "剧情:掩月宗"
+   ]
+  },
+  {
+   "id": "a_jiaolong",
+   "name": "蛟龙甲",
+   "req": 92,
+   "rarity": 4,
+   "slot": "armor",
+   "teach": null,
+   "src": [
+    "剧情:坠魔谷"
+   ]
+  },
+  {
+   "id": "a_tiancan",
+   "name": "天蚕衣",
+   "req": 102,
+   "rarity": 4,
+   "slot": "armor",
+   "teach": null,
+   "src": [
+    "剧情:虚天殿·闭关"
+   ]
+  },
+  {
+   "id": "t_yanghuan",
+   "name": "阳环",
+   "req": 82,
+   "rarity": 4,
+   "slot": "trinket",
+   "teach": null,
+   "src": [
+    "剧情:掩月宗"
+   ]
+  },
+  {
+   "id": "t_guiluo",
+   "name": "鬼罗幡",
+   "req": 92,
+   "rarity": 4,
+   "slot": "trinket",
+   "teach": null,
+   "src": [
+    "剧情:阴罗宗四长老"
+   ]
+  },
+  {
+   "id": "t_yinluo",
+   "name": "阴罗蟠",
+   "req": 92,
+   "rarity": 4,
+   "slot": "trinket",
+   "teach": null,
+   "src": [
+    "剧情:阴罗宗四长老"
+   ]
+  },
+  {
+   "id": "t_wuzi",
+   "name": "五子同心魔",
+   "req": 102,
+   "rarity": 4,
+   "slot": "talisman",
+   "teach": null,
+   "src": [
+    "剧情:昆吾山"
+   ]
+  },
+  {
+   "id": "t_yuanci",
+   "name": "元磁山",
+   "req": 112,
+   "rarity": 4,
+   "slot": "talisman",
+   "teach": null,
+   "src": [
+    "剧情:坠魔谷·芥子空间"
+   ]
+  },
+  {
+   "id": "fb_sanyan",
+   "name": "三焰扇",
+   "req": 96,
+   "rarity": 4,
+   "slot": "talisman",
+   "teach": null,
+   "src": [
+    "炼:三焰扇(Lv96)"
+   ]
+  },
+  {
+   "id": "t_pojie",
+   "name": "破界符",
+   "req": 112,
+   "rarity": 4,
+   "slot": "trinket",
+   "teach": null,
+   "src": [
+    "剧情:镇魔塔"
+   ]
+  },
+  {
+   "id": "t_kui",
+   "name": "元婴后期傀儡",
+   "req": 102,
+   "rarity": 4,
+   "slot": "trinket",
+   "teach": null,
+   "src": [
+    "炼:元婴后期傀儡(Lv102)"
+   ]
+  },
+  {
+   "id": "t_zicheng",
+   "name": "紫铖兜",
+   "req": 84,
+   "rarity": 4,
+   "slot": "trinket",
+   "teach": null,
+   "src": [
+    "拍:天南交易会"
+   ]
+  },
+  {
+   "id": "t_beiji",
+   "name": "北极元光指环",
+   "req": 84,
+   "rarity": 4,
+   "slot": "trinket",
+   "teach": null,
+   "src": [
+    "拍:天南交易会"
+   ]
+  },
+  {
+   "id": "sk_swift",
+   "name": "罗烟步·法诀",
+   "req": 1,
+   "rarity": 1,
+   "slot": null,
+   "teach": "swift",
+   "src": [
+    "坊:太南小会"
+   ]
+  },
+  {
+   "id": "sk_magnet",
+   "name": "聚灵术·法诀",
+   "req": 1,
+   "rarity": 1,
+   "slot": null,
+   "teach": "magnet",
+   "src": [
+    "坊:太南小会"
+   ]
+  },
+  {
+   "id": "sk_fire",
+   "name": "火弹术·法诀",
+   "req": 5,
+   "rarity": 2,
+   "slot": null,
+   "teach": "fire",
+   "src": [
+    "坊:太南小会"
+   ]
+  },
+  {
+   "id": "sk_orb",
+   "name": "金光罩·法诀",
+   "req": 8,
+   "rarity": 2,
+   "slot": null,
+   "teach": "orb",
+   "src": [
+    "坊:太南小会"
+   ]
+  },
+  {
+   "id": "sk_regen",
+   "name": "回春诀·法诀",
+   "req": 10,
+   "rarity": 2,
+   "slot": null,
+   "teach": "regen",
+   "src": [
+    "坊:太南小会",
+    "坊:天星城"
+   ]
+  },
+  {
+   "id": "sk_nova",
+   "name": "定神符·法诀",
+   "req": 12,
+   "rarity": 3,
+   "slot": null,
+   "teach": "nova",
+   "src": [
+    "坊:天星城"
+   ]
+  },
+  {
+   "id": "sk_haste",
+   "name": "雷遁术·法诀",
+   "req": 15,
+   "rarity": 3,
+   "slot": null,
+   "teach": "haste",
+   "src": [
+    "坊:天星城"
+   ]
+  },
+  {
+   "id": "sk_frost",
+   "name": "冰冻术·法诀",
+   "req": 20,
+   "rarity": 3,
+   "slot": null,
+   "teach": "frost",
+   "src": [
+    "坊:天星城"
+   ]
+  },
+  {
+   "id": "sk_gourd",
+   "name": "灵葫诀·炼法",
+   "req": 25,
+   "rarity": 3,
+   "slot": null,
+   "teach": "gourd",
+   "src": [
+    "坊:天星城"
+   ]
+  },
+  {
+   "id": "sk_changchun",
+   "name": "长春功·法诀",
+   "req": 1,
+   "rarity": 2,
+   "slot": null,
+   "teach": "changchun",
+   "src": []
+  },
+  {
+   "id": "sk_xuemo",
+   "name": "血魔剑诀·法诀",
+   "req": 56,
+   "rarity": 4,
+   "slot": null,
+   "teach": "xuemo",
+   "src": [
+    "坊:天南交易会",
+    "掉落:魔道修士"
+   ]
+  },
+  {
+   "id": "sk_sanyan",
+   "name": "三焰扇·扇法",
+   "req": 82,
+   "rarity": 4,
+   "slot": null,
+   "teach": "sanyan",
+   "src": [
+    "坊:天南交易会",
+    "掉落:机关傀儡"
+   ]
+  },
+  {
+   "id": "sk_sanzhuan",
+   "name": "三转重元功·法诀",
+   "req": 50,
+   "rarity": 4,
+   "slot": null,
+   "teach": "sanzhong",
+   "src": [
+    "坊:天南交易会"
+   ]
+  },
+  {
+   "id": "sk_fenglei",
+   "name": "风雷翅·炼法",
+   "req": 56,
+   "rarity": 4,
+   "slot": null,
+   "teach": "fenglei",
+   "src": [
+    "坊:天南交易会"
+   ]
+  },
+  {
+   "id": "sk_tianzhu",
+   "name": "身外化身·法诀",
+   "req": 56,
+   "rarity": 4,
+   "slot": null,
+   "teach": "tianzhu",
+   "src": [
+    "坊:天南交易会"
+   ]
+  },
+  {
+   "id": "sk_tongbao",
+   "name": "明王诀·法诀",
+   "req": 82,
+   "rarity": 4,
+   "slot": null,
+   "teach": "tongbao",
+   "src": [
+    "坊:天南交易会"
+   ]
+  },
+  {
+   "id": "sk_leishen",
+   "name": "辟邪神雷·雷诀",
+   "req": 56,
+   "rarity": 4,
+   "slot": null,
+   "teach": "leishen",
+   "src": [
+    "坊:天南交易会"
+   ]
+  },
+  {
+   "id": "sk_qinxian",
+   "name": "大庚剑阵·阵图",
+   "req": 82,
+   "rarity": 4,
+   "slot": null,
+   "teach": "qinxian",
+   "src": [
+    "坊:天南交易会"
+   ]
+  },
+  {
+   "id": "sk_xuanyin",
+   "name": "玄阴经·残卷",
+   "req": 56,
+   "rarity": 4,
+   "slot": null,
+   "teach": "xuanyin",
+   "src": [
+    "坊:天南交易会",
+    "掉落:鬼修"
+   ]
+  },
+  {
+   "id": "sk_wuzi",
+   "name": "五子同心魔·魔诀",
+   "req": 102,
+   "rarity": 4,
+   "slot": null,
+   "teach": "wuzi",
+   "src": []
+  },
+  {
+   "id": "sk_pojie",
+   "name": "破界符·空间诀",
+   "req": 112,
+   "rarity": 4,
+   "slot": null,
+   "teach": "pojie",
+   "src": []
+  },
+  {
+   "id": "bag_ling",
+   "name": "灵兽袋",
+   "req": 1,
+   "rarity": 2,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:七玄门·后山"
+   ]
+  },
+  {
+   "id": "bag_ling2",
+   "name": "特制灵兽袋",
+   "req": 1,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "ring_ling",
+   "name": "灵兽环",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "egg_yunchi",
+   "name": "云翅鸟卵",
+   "req": 1,
+   "rarity": 2,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "egg_mojiao",
+   "name": "墨蛟卵",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "tianhuo",
+   "name": "天火液",
+   "req": 56,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "炼:天火液(Lv56)"
+   ]
+  },
+  {
+   "id": "jiuqu",
+   "name": "九曲灵参丹",
+   "req": 82,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "炼:九曲灵参丹(Lv82)"
+   ]
+  },
+  {
+   "id": "dianling",
+   "name": "定灵丹",
+   "req": 82,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "炼:定灵丹(Lv82)"
+   ]
+  },
+  {
+   "id": "sanzhong",
+   "name": "三转重元功",
+   "req": 50,
+   "rarity": 3,
+   "slot": null,
+   "teach": "sanzhong",
+   "src": []
+  },
+  {
+   "id": "t_qingzhu",
+   "name": "青竹蜂云剑",
+   "req": 92,
+   "rarity": 4,
+   "slot": "weapon",
+   "teach": null,
+   "src": [
+    "炼:青竹蜂云剑(Lv92)"
+   ]
+  },
+  {
+   "id": "lianzhi",
+   "name": "炼尸术残卷",
+   "req": 7,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:墨大夫·密室"
+   ]
+  },
+  {
+   "id": "gupu",
+   "name": "古朴小瓶",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:七玄门·山门"
+   ]
+  },
+  {
+   "id": "siling",
+   "name": "饲灵丸",
+   "req": 12,
+   "rarity": 2,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "炼:饲灵丸(Lv12)"
+   ]
+  },
+  {
+   "id": "zaohua",
+   "name": "造化丹",
+   "req": 84,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "炼:造化丹(Lv24)"
+   ]
+  },
+  {
+   "id": "m_chijing",
+   "name": "赤精草",
+   "req": 1,
+   "rarity": 0,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:七玄门·山门",
+    "坊:太南小会",
+    "际遇:采药人 老周",
+    "掉落:灰毛野狼",
+    "掉落:吸血妖蝠"
+   ]
+  },
+  {
+   "id": "m_huangjing",
+   "name": "黄精",
+   "req": 1,
+   "rarity": 0,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:七玄门·山门",
+    "坊:太南小会",
+    "掉落:铁背野猪"
+   ]
+  },
+  {
+   "id": "m_zihua",
+   "name": "紫猴花",
+   "req": 1,
+   "rarity": 1,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:太南小会",
+    "剧情:黄枫谷·山门",
+    "剧情:黄枫谷·灵药圃深处",
+    "剧情:黄枫谷·地火之屋",
+    "剧情:黄枫谷·下山岔道"
+   ]
+  },
+  {
+   "id": "m_tianling",
+   "name": "天灵果",
+   "req": 1,
+   "rarity": 2,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:太南小会",
+    "剧情:黄枫谷·山门",
+    "剧情:黄枫谷·灵药圃深处",
+    "剧情:黄枫谷·地火之屋",
+    "剧情:黄枫谷·下山岔道"
+   ]
+  },
+  {
+   "id": "t_shengxian",
+   "name": "升仙令",
+   "req": 1,
+   "rarity": 4,
+   "slot": "trinket",
+   "teach": null,
+   "src": [
+    "剧情:太南小会"
+   ]
+  },
+  {
+   "id": "m_yusuizhi",
+   "name": "玉髓芝",
+   "req": 1,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:血色禁地·血池",
+    "剧情:黄枫谷·下山岔道"
+   ]
+  },
+  {
+   "id": "m_longlin",
+   "name": "龙鳞果",
+   "req": 1,
+   "rarity": 2,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:黄枫谷·灵药圃深处"
+   ]
+  },
+  {
+   "id": "m_nishang",
+   "name": "霓裳草",
+   "req": 1,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "m_jingtie",
+   "name": "精铁",
+   "req": 1,
+   "rarity": 0,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:太南小会",
+    "剧情:后山·废弃矿洞",
+    "剧情:七玄门·演武场",
+    "际遇:山贼丢下的行囊",
+    "际遇:迷路的矿工",
+    "掉落:山贼喽啰",
+    "掉落:同门陪练",
+    "掉落:矿洞石魈"
+   ]
+  },
+  {
+   "id": "m_chitong",
+   "name": "赤铜",
+   "req": 1,
+   "rarity": 1,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:太南小会",
+    "剧情:后山·废弃矿洞",
+    "际遇:迷路的矿工",
+    "掉落:矿洞石魈"
+   ]
+  },
+  {
+   "id": "m_xuantie",
+   "name": "玄铁",
+   "req": 1,
+   "rarity": 2,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:太南小会·后巷",
+    "剧情:古传送阵",
+    "坊:天星城",
+    "剧情:灵石矿·魔道矿场",
+    "剧情:三派试剑",
+    "掉落:矿洞石魈",
+    "掉落:机关傀儡",
+    "掉落:慕兰法士",
+    "掉落:大晋修士",
+    "掉落:上古傀儡",
+    "掉落:正道修士"
+   ]
+  },
+  {
+   "id": "m_hantie",
+   "name": "寒铁",
+   "req": 1,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:太南小会·后巷",
+    "剧情:古传送阵",
+    "坊:天星城",
+    "剧情:越国·京城皇宫",
+    "剧情:黄龙山大战",
+    "掉落:魔道修士",
+    "掉落:机关傀儡",
+    "掉落:魔道修士"
+   ]
+  },
+  {
+   "id": "m_yusui",
+   "name": "玉髓",
+   "req": 1,
+   "rarity": 2,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:太南小会",
+    "剧情:燕家堡",
+    "剧情:海猿岛·闭关",
+    "坊:天星城",
+    "剧情:翠屏山·洞府夜变",
+    "剧情:落云宗",
+    "剧情:尸魈之乱",
+    "剧情:三派试剑",
+    "剧情:云梦山·结婴",
+    "剧情:掩月宗",
+    "剧情:灵渺园",
+    "剧情:大晋·佛宗",
+    "剧情:元武国·付家",
+    "剧情:越国·韩家村",
+    "际遇:密室角落的丹炉",
+    "际遇:七派弟子的遗体",
+    "际遇:船上的海市散修",
+    "掉落:矿洞石魈",
+    "掉落:尸魈",
+    "掉落:慕兰法士",
+    "掉落:大晋修士",
+    "掉落:正道修士"
+   ]
+  },
+  {
+   "id": "m_wolfdan",
+   "name": "妖狼内丹",
+   "req": 1,
+   "rarity": 1,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "掉落:灰毛野狼"
+   ]
+  },
+  {
+   "id": "m_shedan",
+   "name": "蛇胆",
+   "req": 1,
+   "rarity": 0,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "掉落:青纹毒蛇"
+   ]
+  },
+  {
+   "id": "m_chongjing",
+   "name": "虫母晶核",
+   "req": 1,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "m_xuesha",
+   "name": "血煞珠",
+   "req": 1,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:血色禁地·血池",
+    "剧情:越国·京城皇宫",
+    "掉落:魔道修士"
+   ]
+  },
+  {
+   "id": "m_shihui",
+   "name": "尸傀骨粉",
+   "req": 1,
+   "rarity": 1,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:翠屏山·洞府夜变",
+    "剧情:尸魈之乱",
+    "掉落:尸傀",
+    "掉落:尸魈"
+   ]
+  },
+  {
+   "id": "m_fuzhi",
+   "name": "空白符纸",
+   "req": 1,
+   "rarity": 0,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:太南小会",
+    "坊:天星城",
+    "掉落:山贼喽啰",
+    "掉落:黑衣杀手",
+    "掉落:鬼灵门弟子"
+   ]
+  },
+  {
+   "id": "m_lingmo",
+   "name": "灵墨",
+   "req": 1,
+   "rarity": 1,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:太南小会",
+    "坊:天星城",
+    "剧情:外星海·奇渊岛",
+    "剧情:落云宗",
+    "际遇:密室角落的丹炉",
+    "掉落:黑衣杀手",
+    "掉落:鬼灵门弟子"
+   ]
+  },
+  {
+   "id": "m_yaodan",
+   "name": "妖丹",
+   "req": 1,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:魁星岛",
+    "剧情:六连殿·出海捕妖",
+    "剧情:海猿岛·闭关",
+    "坊:天星城",
+    "剧情:凝翠岛·杀妖取丹",
+    "剧情:天星城·闭府结丹",
+    "剧情:外星海·奇渊岛",
+    "剧情:青竹小轩",
+    "剧情:无边海",
+    "坊:天南交易会",
+    "剧情:鲲鹏之战",
+    "剧情:乱星海·紫灵",
+    "际遇:船上的老渔夫",
+    "掉落:海妖兽",
+    "掉落:青鳞鲤妖",
+    "掉落:毒蛟",
+    "掉落:大晋妖兽"
+   ]
+  },
+  {
+   "id": "m_banyao",
+   "name": "伴妖草",
+   "req": 1,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:六连殿·出海捕妖",
+    "坊:天星城",
+    "际遇:船上的老渔夫",
+    "掉落:海妖兽",
+    "掉落:毒蛟",
+    "掉落:大晋妖兽"
+   ]
+  },
+  {
+   "id": "m_jinlei",
+   "name": "金雷竹",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:凝翠岛·杀妖取丹",
+    "剧情:外星海·奇渊岛",
+    "剧情:青竹小轩"
+   ]
+  },
+  {
+   "id": "m_lingru",
+   "name": "万年灵乳",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:天星城·闭府结丹",
+    "剧情:虚天殿",
+    "剧情:古修遗址"
+   ]
+  },
+  {
+   "id": "m_yanghun",
+   "name": "养魂木",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:虚天殿",
+    "剧情:古修遗址",
+    "剧情:阴冥之地",
+    "剧情:银月认主",
+    "剧情:云梦山·结婴",
+    "剧情:阴罗宗四长老",
+    "剧情:镇魔塔",
+    "掉落:鬼修",
+    "掉落:阴雾鬼物",
+    "掉落:古魔残躯"
+   ]
+  },
+  {
+   "id": "m_xueyu",
+   "name": "血玉",
+   "req": 1,
+   "rarity": 2,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:燕家堡",
+    "坊:天星城",
+    "剧情:外星海·奇渊岛",
+    "剧情:阴冥之地",
+    "剧情:黄龙山大战",
+    "剧情:慕兰草原",
+    "际遇:船上的海市散修",
+    "掉落:鬼灵门弟子",
+    "掉落:魔道修士",
+    "掉落:鬼修",
+    "掉落:阴雾鬼物",
+    "掉落:魔道修士",
+    "掉落:古魔残躯"
+   ]
+  },
+  {
+   "id": "m_zhizhu",
+   "name": "血玉蜘蛛卵",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:灵石矿·魔道矿场"
+   ]
+  },
+  {
+   "id": "m_gengjing",
+   "name": "庚精",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:天南交易会",
+    "剧情:苍坤上人洞府",
+    "剧情:慕兰边界大战",
+    "剧情:极西之地",
+    "剧情:昆吾山",
+    "剧情:乱星海·星宫",
+    "剧情:落云宗立威",
+    "剧情:乱星海·斩六道",
+    "剧情:元武国·付家"
+   ]
+  },
+  {
+   "id": "m_chijingzhi",
+   "name": "三千年赤精芝",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:天南交易会",
+    "拍:天南交易会"
+   ]
+  },
+  {
+   "id": "m_kuilei",
+   "name": "上古傀儡核",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "拍:天南交易会"
+   ]
+  },
+  {
+   "id": "m_lingzhu",
+   "name": "灵烛果",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:坠魔谷",
+    "剧情:灵渺园"
+   ]
+  },
+  {
+   "id": "m_yinzhi",
+   "name": "阴芝马",
+   "req": 1,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "m_gangyin",
+   "name": "罡银沙",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:苍坤上人洞府",
+    "剧情:极西之地",
+    "剧情:坠魔谷",
+    "剧情:昆吾山",
+    "剧情:镇魔塔",
+    "剧情:虚天殿·闭关",
+    "剧情:乱星海·星宫",
+    "剧情:落云宗立威",
+    "剧情:天澜圣兽·雷劫",
+    "剧情:乱星海·斩六道",
+    "剧情:乱星海·紫灵",
+    "掉落:上古傀儡"
+   ]
+  },
+  {
+   "id": "m_huodan",
+   "name": "火蟾兽内丹",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:坠魔谷"
+   ]
+  },
+  {
+   "id": "m_hanhuo",
+   "name": "五色寒焰",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:慕兰边界大战",
+    "剧情:小极宫",
+    "剧情:天澜圣兽·雷劫",
+    "剧情:坠魔谷·芥子空间"
+   ]
+  },
+  {
+   "id": "m_jingang",
+   "name": "金刚舍利",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:大晋·佛宗"
+   ]
+  },
+  {
+   "id": "m_kunpeng",
+   "name": "鲲鹏之羽",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:鲲鹏之战",
+    "剧情:五龙海·飞升"
+   ]
+  },
+  {
+   "id": "m_xuanbing",
+   "name": "万年玄冰",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:小极宫"
+   ]
+  },
+  {
+   "id": "m_siling",
+   "name": "饲灵丸",
+   "req": 1,
+   "rarity": 1,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "m_zhuguo",
+   "name": "朱果",
+   "req": 1,
+   "rarity": 1,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "m_huoling",
+   "name": "火灵草",
+   "req": 1,
+   "rarity": 1,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "m_jiuqu",
+   "name": "九曲灵参",
+   "req": 1,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "m_dingling",
+   "name": "定灵玉",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "m_ningshen",
+   "name": "凝神花",
+   "req": 1,
+   "rarity": 2,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "m_lingzhi",
+   "name": "灵芝",
+   "req": 1,
+   "rarity": 1,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "m_yuanci",
+   "name": "元磁神山核心",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "m_silingcao",
+   "name": "饲灵草",
+   "req": 1,
+   "rarity": 1,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "m_zaohuacao",
+   "name": "造化果",
+   "req": 1,
+   "rarity": 2,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "m_chijing",
+   "name": "赤精草",
+   "req": 1,
+   "rarity": 0,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:七玄门·山门",
+    "坊:太南小会",
+    "际遇:采药人 老周",
+    "掉落:灰毛野狼",
+    "掉落:吸血妖蝠"
+   ]
+  },
+  {
+   "id": "m_huangjing",
+   "name": "黄精",
+   "req": 1,
+   "rarity": 0,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:七玄门·山门",
+    "坊:太南小会",
+    "掉落:铁背野猪"
+   ]
+  },
+  {
+   "id": "m_zihua",
+   "name": "紫猴花",
+   "req": 1,
+   "rarity": 1,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:太南小会",
+    "剧情:黄枫谷·山门",
+    "剧情:黄枫谷·灵药圃深处",
+    "剧情:黄枫谷·地火之屋",
+    "剧情:黄枫谷·下山岔道"
+   ]
+  },
+  {
+   "id": "m_tianling",
+   "name": "天灵果",
+   "req": 1,
+   "rarity": 2,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:太南小会",
+    "剧情:黄枫谷·山门",
+    "剧情:黄枫谷·灵药圃深处",
+    "剧情:黄枫谷·地火之屋",
+    "剧情:黄枫谷·下山岔道"
+   ]
+  },
+  {
+   "id": "t_shengxian",
+   "name": "升仙令",
+   "req": 1,
+   "rarity": 4,
+   "slot": "trinket",
+   "teach": null,
+   "src": [
+    "剧情:太南小会"
+   ]
+  },
+  {
+   "id": "m_yusuizhi",
+   "name": "玉髓芝",
+   "req": 1,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:血色禁地·血池",
+    "剧情:黄枫谷·下山岔道"
+   ]
+  },
+  {
+   "id": "m_longlin",
+   "name": "龙鳞果",
+   "req": 1,
+   "rarity": 2,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:黄枫谷·灵药圃深处"
+   ]
+  },
+  {
+   "id": "m_nishang",
+   "name": "霓裳草",
+   "req": 1,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "m_jingtie",
+   "name": "精铁",
+   "req": 1,
+   "rarity": 0,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:太南小会",
+    "剧情:后山·废弃矿洞",
+    "剧情:七玄门·演武场",
+    "际遇:山贼丢下的行囊",
+    "际遇:迷路的矿工",
+    "掉落:山贼喽啰",
+    "掉落:同门陪练",
+    "掉落:矿洞石魈"
+   ]
+  },
+  {
+   "id": "m_chitong",
+   "name": "赤铜",
+   "req": 1,
+   "rarity": 1,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:太南小会",
+    "剧情:后山·废弃矿洞",
+    "际遇:迷路的矿工",
+    "掉落:矿洞石魈"
+   ]
+  },
+  {
+   "id": "m_xuantie",
+   "name": "玄铁",
+   "req": 1,
+   "rarity": 2,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:太南小会·后巷",
+    "剧情:古传送阵",
+    "坊:天星城",
+    "剧情:灵石矿·魔道矿场",
+    "剧情:三派试剑",
+    "掉落:矿洞石魈",
+    "掉落:机关傀儡",
+    "掉落:慕兰法士",
+    "掉落:大晋修士",
+    "掉落:上古傀儡",
+    "掉落:正道修士"
+   ]
+  },
+  {
+   "id": "m_hantie",
+   "name": "寒铁",
+   "req": 1,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:太南小会·后巷",
+    "剧情:古传送阵",
+    "坊:天星城",
+    "剧情:越国·京城皇宫",
+    "剧情:黄龙山大战",
+    "掉落:魔道修士",
+    "掉落:机关傀儡",
+    "掉落:魔道修士"
+   ]
+  },
+  {
+   "id": "m_yusui",
+   "name": "玉髓",
+   "req": 1,
+   "rarity": 2,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:太南小会",
+    "剧情:燕家堡",
+    "剧情:海猿岛·闭关",
+    "坊:天星城",
+    "剧情:翠屏山·洞府夜变",
+    "剧情:落云宗",
+    "剧情:尸魈之乱",
+    "剧情:三派试剑",
+    "剧情:云梦山·结婴",
+    "剧情:掩月宗",
+    "剧情:灵渺园",
+    "剧情:大晋·佛宗",
+    "剧情:元武国·付家",
+    "剧情:越国·韩家村",
+    "际遇:密室角落的丹炉",
+    "际遇:七派弟子的遗体",
+    "际遇:船上的海市散修",
+    "掉落:矿洞石魈",
+    "掉落:尸魈",
+    "掉落:慕兰法士",
+    "掉落:大晋修士",
+    "掉落:正道修士"
+   ]
+  },
+  {
+   "id": "m_wolfdan",
+   "name": "妖狼内丹",
+   "req": 1,
+   "rarity": 1,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "掉落:灰毛野狼"
+   ]
+  },
+  {
+   "id": "m_shedan",
+   "name": "蛇胆",
+   "req": 1,
+   "rarity": 0,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "掉落:青纹毒蛇"
+   ]
+  },
+  {
+   "id": "m_chongjing",
+   "name": "虫母晶核",
+   "req": 1,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "m_xuesha",
+   "name": "血煞珠",
+   "req": 1,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:血色禁地·血池",
+    "剧情:越国·京城皇宫",
+    "掉落:魔道修士"
+   ]
+  },
+  {
+   "id": "m_shihui",
+   "name": "尸傀骨粉",
+   "req": 1,
+   "rarity": 1,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:翠屏山·洞府夜变",
+    "剧情:尸魈之乱",
+    "掉落:尸傀",
+    "掉落:尸魈"
+   ]
+  },
+  {
+   "id": "m_fuzhi",
+   "name": "空白符纸",
+   "req": 1,
+   "rarity": 0,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:太南小会",
+    "坊:天星城",
+    "掉落:山贼喽啰",
+    "掉落:黑衣杀手",
+    "掉落:鬼灵门弟子"
+   ]
+  },
+  {
+   "id": "m_lingmo",
+   "name": "灵墨",
+   "req": 1,
+   "rarity": 1,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:太南小会",
+    "坊:天星城",
+    "剧情:外星海·奇渊岛",
+    "剧情:落云宗",
+    "际遇:密室角落的丹炉",
+    "掉落:黑衣杀手",
+    "掉落:鬼灵门弟子"
+   ]
+  },
+  {
+   "id": "m_yaodan",
+   "name": "妖丹",
+   "req": 1,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:魁星岛",
+    "剧情:六连殿·出海捕妖",
+    "剧情:海猿岛·闭关",
+    "坊:天星城",
+    "剧情:凝翠岛·杀妖取丹",
+    "剧情:天星城·闭府结丹",
+    "剧情:外星海·奇渊岛",
+    "剧情:青竹小轩",
+    "剧情:无边海",
+    "坊:天南交易会",
+    "剧情:鲲鹏之战",
+    "剧情:乱星海·紫灵",
+    "际遇:船上的老渔夫",
+    "掉落:海妖兽",
+    "掉落:青鳞鲤妖",
+    "掉落:毒蛟",
+    "掉落:大晋妖兽"
+   ]
+  },
+  {
+   "id": "m_banyao",
+   "name": "伴妖草",
+   "req": 1,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:六连殿·出海捕妖",
+    "坊:天星城",
+    "际遇:船上的老渔夫",
+    "掉落:海妖兽",
+    "掉落:毒蛟",
+    "掉落:大晋妖兽"
+   ]
+  },
+  {
+   "id": "m_jinlei",
+   "name": "金雷竹",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:凝翠岛·杀妖取丹",
+    "剧情:外星海·奇渊岛",
+    "剧情:青竹小轩"
+   ]
+  },
+  {
+   "id": "m_lingru",
+   "name": "万年灵乳",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:天星城·闭府结丹",
+    "剧情:虚天殿",
+    "剧情:古修遗址"
+   ]
+  },
+  {
+   "id": "m_yanghun",
+   "name": "养魂木",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:虚天殿",
+    "剧情:古修遗址",
+    "剧情:阴冥之地",
+    "剧情:银月认主",
+    "剧情:云梦山·结婴",
+    "剧情:阴罗宗四长老",
+    "剧情:镇魔塔",
+    "掉落:鬼修",
+    "掉落:阴雾鬼物",
+    "掉落:古魔残躯"
+   ]
+  },
+  {
+   "id": "m_xueyu",
+   "name": "血玉",
+   "req": 1,
+   "rarity": 2,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:燕家堡",
+    "坊:天星城",
+    "剧情:外星海·奇渊岛",
+    "剧情:阴冥之地",
+    "剧情:黄龙山大战",
+    "剧情:慕兰草原",
+    "际遇:船上的海市散修",
+    "掉落:鬼灵门弟子",
+    "掉落:魔道修士",
+    "掉落:鬼修",
+    "掉落:阴雾鬼物",
+    "掉落:魔道修士",
+    "掉落:古魔残躯"
+   ]
+  },
+  {
+   "id": "m_zhizhu",
+   "name": "血玉蜘蛛卵",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:灵石矿·魔道矿场"
+   ]
+  },
+  {
+   "id": "m_gengjing",
+   "name": "庚精",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:天南交易会",
+    "剧情:苍坤上人洞府",
+    "剧情:慕兰边界大战",
+    "剧情:极西之地",
+    "剧情:昆吾山",
+    "剧情:乱星海·星宫",
+    "剧情:落云宗立威",
+    "剧情:乱星海·斩六道",
+    "剧情:元武国·付家"
+   ]
+  },
+  {
+   "id": "m_chijingzhi",
+   "name": "三千年赤精芝",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "坊:天南交易会",
+    "拍:天南交易会"
+   ]
+  },
+  {
+   "id": "m_kuilei",
+   "name": "上古傀儡核",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "拍:天南交易会"
+   ]
+  },
+  {
+   "id": "m_lingzhu",
+   "name": "灵烛果",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:坠魔谷",
+    "剧情:灵渺园"
+   ]
+  },
+  {
+   "id": "m_yinzhi",
+   "name": "阴芝马",
+   "req": 1,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "m_gangyin",
+   "name": "罡银沙",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:苍坤上人洞府",
+    "剧情:极西之地",
+    "剧情:坠魔谷",
+    "剧情:昆吾山",
+    "剧情:镇魔塔",
+    "剧情:虚天殿·闭关",
+    "剧情:乱星海·星宫",
+    "剧情:落云宗立威",
+    "剧情:天澜圣兽·雷劫",
+    "剧情:乱星海·斩六道",
+    "剧情:乱星海·紫灵",
+    "掉落:上古傀儡"
+   ]
+  },
+  {
+   "id": "m_huodan",
+   "name": "火蟾兽内丹",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:坠魔谷"
+   ]
+  },
+  {
+   "id": "m_hanhuo",
+   "name": "五色寒焰",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:慕兰边界大战",
+    "剧情:小极宫",
+    "剧情:天澜圣兽·雷劫",
+    "剧情:坠魔谷·芥子空间"
+   ]
+  },
+  {
+   "id": "m_jingang",
+   "name": "金刚舍利",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:大晋·佛宗"
+   ]
+  },
+  {
+   "id": "m_kunpeng",
+   "name": "鲲鹏之羽",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:鲲鹏之战",
+    "剧情:五龙海·飞升"
+   ]
+  },
+  {
+   "id": "m_xuanbing",
+   "name": "万年玄冰",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "剧情:小极宫"
+   ]
+  },
+  {
+   "id": "m_siling",
+   "name": "饲灵丸",
+   "req": 1,
+   "rarity": 1,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "m_zhuguo",
+   "name": "朱果",
+   "req": 1,
+   "rarity": 1,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "m_huoling",
+   "name": "火灵草",
+   "req": 1,
+   "rarity": 1,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "m_jiuqu",
+   "name": "九曲灵参",
+   "req": 1,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "m_dingling",
+   "name": "定灵玉",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "m_ningshen",
+   "name": "凝神花",
+   "req": 1,
+   "rarity": 2,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "m_lingzhi",
+   "name": "灵芝",
+   "req": 1,
+   "rarity": 1,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "m_yuanci",
+   "name": "元磁神山核心",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "m_silingcao",
+   "name": "饲灵草",
+   "req": 1,
+   "rarity": 1,
+   "slot": null,
+   "teach": null,
+   "src": []
+  },
+  {
+   "id": "m_zaohuacao",
+   "name": "造化果",
+   "req": 1,
+   "rarity": 2,
+   "slot": null,
+   "teach": null,
+   "src": []
+  }
+ ],
+ "shopOver": [
+  {
+   "map": "天星城",
+   "lv": 50,
+   "item": "碧焰酒",
+   "req": 60
+  },
+  {
+   "map": "天南交易会",
+   "lv": 82,
+   "item": "极品灵石",
+   "req": 112
+  }
+ ]
+}

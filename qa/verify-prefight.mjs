@@ -90,7 +90,7 @@ const collapse = await page.evaluate(() => {
 ok(collapse.open === false, '点切换可收起牌堆', collapse);
 
 // 学了一堆之后槽位会被自动占满，这里把「身上运着谁」定死，后面的断言才有准数：
-// 只运两门 —— 低境界的御剑术 + 本境的血魔剑诀
+// 只运两门 —— 低境界的控物术 + 本境的血魔剑诀
 await page.evaluate(() => {
   ['sword', 'regen', 'xuemo', 'fire', 'orb', 'nova', 'frost', 'swift', 'magnet', 'haste', 'gourd', 'changchun']
     .forEach(id => F.setSkill(id, false));
@@ -99,7 +99,7 @@ await page.evaluate(() => {
 });
 const equippedNow = await page.evaluate(() => F.skillState().equipped.slice());
 ok(equippedNow.indexOf('sword') >= 0 && equippedNow.indexOf('xuemo') >= 0,
-  '已明确运起：御剑术（练气档）+ 血魔剑诀（结丹档）', equippedNow);
+  '已明确运起：控物术（练气档）+ 血魔剑诀（结丹档）', equippedNow);
 
 // ---------- 1) 进战斗图前先弹运功面板 ----------
 const toDiff = await page.evaluate(() => {
@@ -145,7 +145,7 @@ const lowerBlocks = pf.blocks.filter(x => !x.cur);
 ok(lowerBlocks.length >= 1, '低境界另成一档（收纳着）', lowerBlocks.map(x => x.id));
 ok(lowerBlocks.every(x => !x.open), '低境界档默认收起，点档名才展开', lowerBlocks.map(x => ({ id: x.id, open: x.open })));
 ok(curBlock && curBlock.skills.indexOf('sword') >= 0,
-  '低境界已运起的御剑术被提到本境档并列（可直接卸，不必回低境界翻）', curBlock && curBlock.skills);
+  '低境界已运起的控物术被提到本境档并列（可直接卸，不必回低境界翻）', curBlock && curBlock.skills);
 
 // 展开低境界档 → 能看到剩下的低境功法
 const expandLower = await page.evaluate(() => {
@@ -196,7 +196,7 @@ const went = await page.evaluate(() => {
 ok(went.state === 'play' || went.state === 'dialog', '点「入山」才真的开打', went);
 ok(went.pfShown !== 'flex', '开打后面板收起', went);
 
-// 把御剑术卸了，再进下一张战斗图，应照记忆先运起
+// 把控物术卸了，再进下一张战斗图，应照记忆先运起
 const memory = await page.evaluate(() => {
   F.setSkill('sword', false);
   const info = F.info();
@@ -214,7 +214,7 @@ const memory = await page.evaluate(() => {
 });
 const same = JSON.stringify(memory.equipped.slice().sort()) === JSON.stringify(beforeGo.slice().sort());
 ok(same, '下一张战斗图照上一张的记忆先运起（与上次一致）', { before: beforeGo, after: memory.equipped });
-ok(memory.equipped.indexOf('sword') >= 0, '记忆里有上次运起的御剑术（低境界那门也一并恢复）', memory.equipped);
+ok(memory.equipped.indexOf('sword') >= 0, '记忆里有上次运起的控物术（低境界那门也一并恢复）', memory.equipped);
 
 ok(errs.length === 0, '页面无报错', errs.slice(0, 5));
 

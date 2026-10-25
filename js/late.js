@@ -864,6 +864,12 @@
     'juling', 'xuantie', 'huyu', 'lianqi',
     'm_fuzhi', 'm_lingmo', 'm_chijing', 'm_huangjing', 'm_jingtie', 'm_chitong', 'm_zihua', 'm_yusui', 'm_tianling'];
 
+  // 太南小会只摆练气期用得上的东西：按道具境界门槛过滤，越级的（清心符/破禁符/玄铁重剑…）撤柜
+  if (TN) TN.shop = TN.shop.filter(id => {
+    const it = window.Items.get(id);
+    return it && (it.req || 1) <= 12;
+  });
+
   const TX = window.MAPS.find(m => m.id === 'tianxing');
   if (TX) {
     TX.shop = ['xueshen', 'qiannian', 'shenxing', 'jifeng', 'huyu', 'fb_feng',

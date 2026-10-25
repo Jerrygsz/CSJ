@@ -756,7 +756,7 @@ ok(hasLine('qixuan', null, '内门'), '两人都没进内门，才被墨大夫�
   const bad = allStory.filter(t => t.indexOf('青竹蜂云剑') >= 0);
   eq(bad.length, 0, '除青竹小轩与虚天殿闭关外，对白不再提青竹蜂云剑', bad.slice(0, 2));
 }
-eq(W.SKILLS.find(k => k.id === 'sword').name, '御剑术', '剑技回归中性名「御剑术」');
+eq(W.SKILLS.find(k => k.id === 'sword').name, '控物术', '剑技回归中性名「控物术」');
 ok(!hasLine('hs_clue', null, '夺') && !(W.STORY || []).some(s => s.id === 'hs_clue' && s.lines.some(l => String(l[1]).includes('夺'))), '掌天瓶不再编造「瓶底夺字」');
 ok((W.STORY || []).some(s => s.id === 'hs_meet' && s.lines.some(l => String(l[1]).includes('罗烟步'))), '后山补上厉飞雨授眨眼剑法与罗烟步');
 
@@ -1073,12 +1073,12 @@ F.enterMap('xuese', 'easy'); frames(20);
 const beforeBreak = F.skillState().equipped.length;
 const kept = F.trimSkills();
 eq(kept.length, 1, '突破之后身上只剩一门主力', kept);
-eq(kept[0], 'sword', '主力是御剑术（攻击类优先）');
+eq(kept[0], 'sword', '主力是控物术（攻击类优先）');
 
 // 法诀：买回去就化了，学会一门功法
 F.clearProgress(); F.setLevel(40); F.unlockAll();
 const learnedBefore = Object.keys(F.skillState().learned).length;
-ok(!!W.Items.get('sk_frost'), '坊市有玄冰符法诀');
+ok(!!W.Items.get('sk_frost'), '坊市有冰冻术法诀');
 eq(W.Items.get('sk_frost').teach, 'frost', '法诀对应一门功法');
 ok(!!W.SHOP_STOCK.find(x => x.id === 'sk_frost'), '法诀上了货架');
 const tnShop = W.MAPS.find(m => m.id === 'tainan').shop;

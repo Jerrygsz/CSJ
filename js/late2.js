@@ -1052,12 +1052,12 @@
   window.ITEMS.push(
     { id: 'sk_swift',  name: '罗烟步·法诀', rarity: 1, icon: '📕', req: 1,  teach: 'swift',  desc: '习得《罗烟步》第一层。血色禁地所得身法真传，步法如烟，移速大增。' },
     { id: 'sk_magnet', name: '聚灵术·法诀', rarity: 1, icon: '📕', req: 1,  teach: 'magnet', desc: '习得《聚灵术》第一层。广布灵识，灵石自行来投，拾取范围变大。' },
-    { id: 'sk_fire',   name: '火蛇符·法诀', rarity: 2, icon: '📕', req: 5,  teach: 'fire',   desc: '习得《火蛇符》第一层。韩立早年期自炼符箓，放出追踪火蛇。' },
-    { id: 'sk_orb',    name: '玄罡护体·法诀', rarity: 2, icon: '📕', req: 8, teach: 'orb',   desc: '习得《玄罡护体》第一层。庚金玄罡环绕周身，触敌即伤。' },
+    { id: 'sk_fire',   name: '火弹术·法诀', rarity: 2, icon: '📕', req: 5,  teach: 'fire',   desc: '习得《火弹术》第一层。韩立早年期自炼符箓，放出追踪火蛇。' },
+    { id: 'sk_orb',    name: '金光罩·法诀', rarity: 2, icon: '📕', req: 8, teach: 'orb',   desc: '习得《金光罩》第一层。庚金玄罡环绕周身，触敌即伤。' },
     { id: 'sk_regen',  name: '回春诀·法诀', rarity: 2, icon: '📕', req: 10, teach: 'regen',  desc: '习得《回春诀》第一层。韩立借灵药丹力缓缓回血。' },
-    { id: 'sk_nova',   name: '金光符·法诀', rarity: 3, icon: '📕', req: 12, teach: 'nova',   desc: '习得《金光符》第一层。韩立常用的金光类符箓，周期性金光爆发。' },
-    { id: 'sk_haste',  name: '迅雷诀·法诀', rarity: 3, icon: '📕', req: 15, teach: 'haste',  desc: '习得《迅雷诀》第一层。吐纳如雷，出手更急。' },
-    { id: 'sk_frost',  name: '玄冰符·法诀', rarity: 3, icon: '📕', req: 20, teach: 'frost',  desc: '习得《玄冰符》第一层。韩立参悟的冰霜符箓，减速近身之敌。' },
+    { id: 'sk_nova',   name: '定神符·法诀', rarity: 3, icon: '📕', req: 12, teach: 'nova',   desc: '习得《定神符》第一层。韩立常用的金光类符箓，周期性金光爆发。' },
+    { id: 'sk_haste',  name: '雷遁术·法诀', rarity: 3, icon: '📕', req: 15, teach: 'haste',  desc: '习得《雷遁术》第一层。吐纳如雷，出手更急。' },
+    { id: 'sk_frost',  name: '冰冻术·法诀', rarity: 3, icon: '📕', req: 20, teach: 'frost',  desc: '习得《冰冻术》第一层。韩立参悟的冰霜符箓，减速近身之敌。' },
     { id: 'sk_gourd',  name: '灵葫诀·炼法', rarity: 3, icon: '📕', req: 25, teach: 'gourd', desc: '习得《灵葫诀》第一层。本命灵葫在身，生命上限提升。' },
     // ---- 按原著补的各境界功法：买到或搜出来，回去逐个学 ----
     { id: 'sk_changchun', name: '长春功·法诀',     rarity: 2, icon: '📕', req: 1,   teach: 'changchun', desc: '习得《长春功》。墨大夫传授的引气吐纳根基，韩立练气期的根本功法' },
@@ -1116,7 +1116,7 @@
     JY.shopSub = '九国盟阗天城，百年一届。元婴老怪戴面具换物，晶龙阁里另有拍卖。';
     JY.shop = [
       // 高阶符箓与灵石（元婴身家）
-      'bichen', 'chuansong', 'baoliebao', 'tishen', 'jipin',
+      'bichen', 'chuansong', 'baoliebao', 'tishen', 'jipin', 'lianqi',   // 破禁符：太南小会撤柜后，落到这里
       // 元婴期法诀（原著：交易会是功法与情报的核心平台）
       'sk_xuemo', 'sk_sanyan', 'sk_sanzhuan', 'sk_fenglei', 'sk_tianzhu', 'sk_xuanyin', 'sk_tongbao', 'sk_leishen', 'sk_qinxian',
       // 元婴级灵物与法宝料：韩立此行要换的庚精、换到的三千年赤精芝

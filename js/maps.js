@@ -6,16 +6,16 @@ window.REALM_LAYERS = [
   { lv: 1,  name: '练气一层',   hp: 0,  dmg: 0,    atk: 0,    spd: 0,    note: '引气入体' },
   { lv: 3,  name: '练气二层',   hp: 12, dmg: 0.05, atk: 0.03, spd: 0.01, note: '气感渐稳' },
   { lv: 5,  name: '练气三层',   hp: 14, dmg: 0.05, atk: 0.03, spd: 0.01, note: '真气小成' },
-  { lv: 7,  name: '练气四层',   hp: 16, dmg: 0.06, atk: 0.04, spd: 0.02, skill: 'fire',  note: '得授火蛇符' },
+  { lv: 7,  name: '练气四层',   hp: 16, dmg: 0.06, atk: 0.04, spd: 0.02, skill: 'fire',  note: '得授火弹术' },
   { lv: 9,  name: '练气五层',   hp: 18, dmg: 0.06, atk: 0.04, spd: 0.02, note: '经脉拓宽' },
   { lv: 11, name: '练气六层',   hp: 20, dmg: 0.07, atk: 0.05, spd: 0.02, note: '灵力充盈' },
-  { lv: 13, name: '练气七层',   hp: 22, dmg: 0.07, atk: 0.05, spd: 0.03, skill: 'orb',   note: '得授玄罡护体' },
+  { lv: 13, name: '练气七层',   hp: 22, dmg: 0.07, atk: 0.05, spd: 0.03, skill: 'orb',   note: '得授金光罩' },
   { lv: 16, name: '练气八层',   hp: 26, dmg: 0.08, atk: 0.06, spd: 0.03, note: '筋骨如铁' },
   { lv: 19, name: '练气九层',   hp: 28, dmg: 0.08, atk: 0.06, spd: 0.03, note: '神识初开' },
-  { lv: 22, name: '练气十层',   hp: 32, dmg: 0.09, atk: 0.07, spd: 0.04, skill: 'nova',  note: '得授金光符' },
+  { lv: 22, name: '练气十层',   hp: 32, dmg: 0.09, atk: 0.07, spd: 0.04, skill: 'nova',  note: '得授定神符' },
   { lv: 26, name: '练气十一层', hp: 36, dmg: 0.10, atk: 0.08, spd: 0.04, note: '法力浑厚' },
   { lv: 30, name: '练气十二层', hp: 40, dmg: 0.11, atk: 0.09, spd: 0.05, note: '气息绵长' },
-  { lv: 35, name: '练气十三层', hp: 48, dmg: 0.13, atk: 0.10, spd: 0.05, skill: 'frost', note: '得授玄冰符' }
+  { lv: 35, name: '练气十三层', hp: 48, dmg: 0.13, atk: 0.10, spd: 0.05, skill: 'frost', note: '得授冰冻术' }
 ];
 
 // 三档难度：怪更强、掉落更厚、灵石与修为更多
