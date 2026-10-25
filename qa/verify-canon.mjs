@@ -190,6 +190,30 @@ let r4d = await E(`(() => {
   return { vis: btn ? btn.style.display !== 'none' : null };
 })()`);
 ok(r4d.vis === false, '都遇完了按钮自动隐藏', r4d);
+
+// ===== 4c. 坊市开场白只播一次（可反复进出的图不能成复读机）=====
+console.log('\n== 4c. 坊市开场白只讲一次 ==');
+let r4e = await E(`(() => {
+  const F = window.__FR;
+  const drain = () => { for (let i = 0; i < 40; i++) { if (F.info().state !== 'dialog') return; F.skipStory(); } };
+  F.muteStory(true); F.clearProgress(); F.setLevel(10);
+  F.enterMap('tainan', 'easy');            // 第一次：开场白 → 自动遇人 → 摆摊
+  drain();
+  const first = F.info().state;
+  const met1 = JSON.parse(localStorage.getItem('fanren_save_v1') || '{}').met || [];
+  document.getElementById('shopClose').click();
+  const cleared1 = F.info().cleared.indexOf('tainan') >= 0;
+  F.enterMap('tainan', 'easy');            // 第二次：不该再把开场白念一遍
+  drain();
+  const second = F.info().state;
+  const spk = (document.getElementById('dialogSpeaker') || {}).textContent || '';
+  return { first, met1, cleared1, second, spk };
+})()`);
+ok(r4e.first === 'shop', '第一次进坊市：开场白 + 自动遇人 + 摆摊', r4e.first);
+ok(r4e.met1.indexOf('e_huo') >= 0, '进门自动播待办际遇（兜售黑货）', r4e.met1);
+ok(r4e.cleared1 === true, '离坊市即算通关（可反复再来）', r4e.cleared1);
+ok(r4e.second === 'shop', '第二次进坊市：直接摆摊，不再重念开场白', { second: r4e.second, spk: r4e.spk });
+
 console.log('\n== 5. 全程零报错 ==');
 ok(errs.length === 0, '无页面/控制台报错', errs.slice(0, 3));
 

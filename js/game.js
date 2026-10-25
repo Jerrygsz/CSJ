@@ -3823,7 +3823,8 @@
         openShop();
       };
       // 坊市也有它自己的开场白（太南小会：金光上人的升仙令、万小山）
-      if (MAP_STORIES[m.id] && MAP_STORIES[m.id].length) {
+      // 只讲一次 —— 坊市是可以反复进出的，没有「已通」判断的话每进一次就把整段开场重念一遍
+      if (MAP_STORIES[m.id] && MAP_STORIES[m.id].length && (save.cleared || []).indexOf(m.id) < 0) {
         G.state = 'dialog';
         showLines(MAP_STORIES[m.id], meetThenShop, 'map:' + m.id);
         return;
