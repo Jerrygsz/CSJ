@@ -161,6 +161,16 @@
    "desc": "妖族禽修的身法：九转之间身形如风，配风雷翅可再快一线"
   },
   {
+   "id": "xuelian",
+   "name": "血炼神光",
+   "minLv": 56,
+   "max": 6,
+   "type": "ranged",
+   "vfx": "blood",
+   "kind": "beam",
+   "desc": "玄阴经附属的血炼之法：一道血光打出去，吞了对方的精血再回来养自己"
+  },
+  {
    "id": "sanyan",
    "name": "三焰扇",
    "minLv": 56,
@@ -189,6 +199,56 @@
    "vfx": null,
    "kind": "passive",
    "desc": "虚天残图所藏敛财储物之术，灵石灵草自己往身上滚"
+  },
+  {
+   "id": "dageng",
+   "name": "大庚剑阵",
+   "minLv": 82,
+   "max": 7,
+   "type": "ranged",
+   "vfx": "swordarray",
+   "kind": "beam",
+   "desc": "庚精入剑，青竹蜂云剑为骨：一阵五道剑气齐出，元婴期的主杀招"
+  },
+  {
+   "id": "tiandu",
+   "name": "天都尸火",
+   "minLv": 82,
+   "max": 7,
+   "type": "ranged_aoe",
+   "vfx": "fire",
+   "kind": "burst",
+   "desc": "魔道尸火，焚的是魂不是身。一点落下去，方圆十丈阴火自燃"
+  },
+  {
+   "id": "cuigu",
+   "name": "淬骨诀",
+   "minLv": 82,
+   "max": 5,
+   "type": "passive",
+   "vfx": null,
+   "kind": "passive",
+   "desc": "金蛟王身上夺来的炼体法：把骨头当法宝淬，淬成了，单臂举万斤"
+  },
+  {
+   "id": "tuotian",
+   "name": "托天魔功",
+   "minLv": 86,
+   "max": 5,
+   "type": "passive",
+   "vfx": null,
+   "kind": "passive",
+   "desc": "乱星海的防御魔功：覆一层金鳞在皮肉下，寻常法宝打上去只留一道白痕"
+  },
+  {
+   "id": "xueying",
+   "name": "血影遁",
+   "minLv": 86,
+   "max": 5,
+   "type": "passive",
+   "vfx": null,
+   "kind": "passive",
+   "desc": "燃精血换一线生机：一遁百里，回头时只剩一道血影"
   },
   {
    "id": "dayan2",
@@ -1752,6 +1812,72 @@
    "teach": "jifeng",
    "src": [
     "剧情:外星海·奇渊岛"
+   ]
+  },
+  {
+   "id": "sk_xuelian",
+   "name": "血炼神光·法诀",
+   "req": 56,
+   "rarity": 4,
+   "slot": null,
+   "teach": "xuelian",
+   "src": [
+    "剧情:乱星海·星宫"
+   ]
+  },
+  {
+   "id": "sk_dageng",
+   "name": "大庚剑阵·法诀",
+   "req": 82,
+   "rarity": 4,
+   "slot": null,
+   "teach": "dageng",
+   "src": [
+    "剧情:落云宗"
+   ]
+  },
+  {
+   "id": "sk_tiandu",
+   "name": "天都尸火·法诀",
+   "req": 82,
+   "rarity": 4,
+   "slot": null,
+   "teach": "tiandu",
+   "src": [
+    "剧情:乱星海·星宫"
+   ]
+  },
+  {
+   "id": "sk_cuigu",
+   "name": "淬骨诀·法诀",
+   "req": 82,
+   "rarity": 4,
+   "slot": null,
+   "teach": "cuigu",
+   "src": [
+    "剧情:外星海·奇渊岛"
+   ]
+  },
+  {
+   "id": "sk_tuotian",
+   "name": "托天魔功·法诀",
+   "req": 86,
+   "rarity": 4,
+   "slot": null,
+   "teach": "tuotian",
+   "src": [
+    "剧情:乱星海·星宫"
+   ]
+  },
+  {
+   "id": "sk_xueying",
+   "name": "血影遁·法诀",
+   "req": 86,
+   "rarity": 4,
+   "slot": null,
+   "teach": "xueying",
+   "src": [
+    "剧情:阴罗宗四长老"
    ]
   },
   {

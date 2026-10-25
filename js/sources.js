@@ -109,6 +109,12 @@
   addTo('dajin',   { items: ['sk_mingwang'] });  // 大晋佛宗，佛门炼体
   addTo('waihai',  { items: ['sk_jifeng'] });    // 外星海妖修的身法
 
+  // ---------- 三·七、结丹/元婴各门：按原著所在发放 ----------
+  addTo('xinggong', { items: ['sk_xuelian', 'sk_tiandu', 'sk_tuotian'] });  // 玄阴经/乱星海魔功
+  addTo('luoyun',   { items: ['sk_dageng'] });    // 落云宗炼成大庚剑阵
+  addTo('waihai',   { items: ['sk_cuigu'] });     // 金蛟王身上夺来的淬骨诀
+  addTo('yinluo',   { items: ['sk_xueying'] });   // 阴罗宗一带的血影遁
+
   // ---------- 四、功法：原著里「谁传给韩立」的，就该在哪张图学 ----------
   // 长春功：墨大夫在密室里硬塞给他的（不是坊市货）
   addTo('mishi', { items: ['sk_changchun'] });

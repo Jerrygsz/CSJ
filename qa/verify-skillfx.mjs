@@ -66,6 +66,7 @@ const S = await page.evaluate(() => {
   const get = id => SK.find(s => s.id === id);
   const map = {
     sword: 'qingmang', xueling: 'blood', fire: 'fire', sanyan: 'fan', jianfen: 'swordarray', shayao: 'blood',
+    dageng: 'swordarray', tiandu: 'fire', xuelian: 'blood',
     nova: 'gold', qinxian: 'gold', frost: 'ice', yuanci: 'gravity',
     orb: 'gang', leishen: 'thunder'
   };
@@ -81,6 +82,9 @@ ok(S.vfx_sword, '控物术(sword) → qingmang');
 ok(S.vfx_xueling, '血灵钻(xueling) → blood');
 ok(S.vfx_jianfen, '剑影分光术(jianfen) → swordarray');
 ok(S.vfx_shayao, '煞妖诀(shayao) → blood');
+ok(S.vfx_dageng, '大庚剑阵(dageng) → swordarray');
+ok(S.vfx_tiandu, '天都尸火(tiandu) → fire');
+ok(S.vfx_xuelian, '血炼神光(xuelian) → blood');
 ok(S.vfx_fire, '火弹术(fire) → fire（直线火球）');
 ok(S.vfx_sanyan, '三焰扇(sanyan) → fan');
 ok(S.vfx_nova, '定神符(nova) → gold');

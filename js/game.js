@@ -847,7 +847,8 @@
       gainSha(d / e.maxhp * SHA_BOSS_DUEL);
     }
     // 吸血（顿悟被动）：打出去多少，按比例回一点气血
-    const lc = G.bonus.leech || 0;
+    // 吸血：顿悟被动的 leech + 血炼神光（每层 0.4%，满层 2.4%）
+    const lc = (G.bonus.leech || 0) + ((G.player && G.player.skills && (G.player.skills.xuelian || 0)) * 0.004);
     if (lc > 0 && G.player && G.player.hp > 0) {
       G.player.hp = Math.min(G.player.maxhp, G.player.hp + d * Math.min(0.2, lc));
     }

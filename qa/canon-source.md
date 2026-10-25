@@ -1,6 +1,6 @@
 # 功法 / 配方 / 道具来源底稿
 
-## 一、功法（26）
+## 一、功法（32）
 
 | id | 名称 | 解锁 | 满层 | 类型 | 特效 |
 |---|---|---:|---:|---|---|
@@ -20,9 +20,15 @@
 | xueling | 血灵钻 | Lv60 | 6 | beam/ranged | blood |
 | mingwang | 明王诀 | Lv64 | 5 | passive/passive | — |
 | jifeng | 疾风九变 | Lv60 | 5 | passive/passive | — |
+| xuelian | 血炼神光 | Lv56 | 6 | beam/ranged | blood |
 | sanyan | 三焰扇 | Lv56 | 6 | spread/ranged_aoe | fan |
 | fenglei | 风雷翅 | Lv56 | 6 | passive/passive | — |
 | tongbao | 洞漩金光 | Lv56 | 6 | passive/passive | — |
+| dageng | 大庚剑阵 | Lv82 | 7 | beam/ranged | swordarray |
+| tiandu | 天都尸火 | Lv82 | 7 | burst/ranged_aoe | fire |
+| cuigu | 淬骨诀 | Lv82 | 5 | passive/passive | — |
+| tuotian | 托天魔功 | Lv86 | 5 | passive/passive | — |
+| xueying | 血影遁 | Lv86 | 5 | passive/passive | — |
 | dayan2 | 大衍诀·后三层 | Lv82 | 7 | passive/passive | — |
 | leishen | 辟邪神雷 | Lv82 | 7 | thunder/ranged_aoe | thunder |
 | qinxian | 惊神刺 | Lv82 | 7 | burst/ranged_aoe | gold |
