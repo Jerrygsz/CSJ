@@ -1,0 +1,4471 @@
+{
+ "realms": [
+  {
+   "lv": 1,
+   "name": "练气一层",
+   "hp": 0,
+   "dmg": 0,
+   "atk": 0,
+   "spd": 0,
+   "note": "引气入体",
+   "xp": 7
+  },
+  {
+   "lv": 3,
+   "name": "练气二层",
+   "hp": 12,
+   "dmg": 0.05,
+   "atk": 0.03,
+   "spd": 0.01,
+   "note": "气感渐稳",
+   "xp": 14
+  },
+  {
+   "lv": 5,
+   "name": "练气三层",
+   "hp": 14,
+   "dmg": 0.05,
+   "atk": 0.03,
+   "spd": 0.01,
+   "note": "真气小成",
+   "xp": 21
+  },
+  {
+   "lv": 7,
+   "name": "练气四层",
+   "hp": 16,
+   "dmg": 0.06,
+   "atk": 0.04,
+   "spd": 0.02,
+   "skill": "fire",
+   "note": "得授火蛇符",
+   "xp": 30
+  },
+  {
+   "lv": 9,
+   "name": "练气五层",
+   "hp": 18,
+   "dmg": 0.06,
+   "atk": 0.04,
+   "spd": 0.02,
+   "note": "经脉拓宽",
+   "xp": 39
+  },
+  {
+   "lv": 11,
+   "name": "练气六层",
+   "hp": 20,
+   "dmg": 0.07,
+   "atk": 0.05,
+   "spd": 0.02,
+   "note": "灵力充盈",
+   "xp": 50
+  },
+  {
+   "lv": 13,
+   "name": "练气七层",
+   "hp": 22,
+   "dmg": 0.07,
+   "atk": 0.05,
+   "spd": 0.03,
+   "skill": "orb",
+   "note": "得授玄罡护体",
+   "xp": 62
+  },
+  {
+   "lv": 16,
+   "name": "练气八层",
+   "hp": 26,
+   "dmg": 0.08,
+   "atk": 0.06,
+   "spd": 0.03,
+   "note": "筋骨如铁",
+   "xp": 82
+  },
+  {
+   "lv": 19,
+   "name": "练气九层",
+   "hp": 28,
+   "dmg": 0.08,
+   "atk": 0.06,
+   "spd": 0.03,
+   "note": "神识初开",
+   "xp": 104
+  },
+  {
+   "lv": 22,
+   "name": "练气十层",
+   "hp": 32,
+   "dmg": 0.09,
+   "atk": 0.07,
+   "spd": 0.04,
+   "skill": "nova",
+   "note": "得授金光符",
+   "xp": 129
+  },
+  {
+   "lv": 26,
+   "name": "练气十一层",
+   "hp": 36,
+   "dmg": 0.1,
+   "atk": 0.08,
+   "spd": 0.04,
+   "note": "法力浑厚",
+   "xp": 167
+  },
+  {
+   "lv": 30,
+   "name": "练气十二层",
+   "hp": 40,
+   "dmg": 0.11,
+   "atk": 0.09,
+   "spd": 0.05,
+   "note": "气息绵长",
+   "xp": 209
+  },
+  {
+   "lv": 35,
+   "name": "练气十三层",
+   "hp": 48,
+   "dmg": 0.13,
+   "atk": 0.1,
+   "spd": 0.05,
+   "skill": "frost",
+   "note": "得授玄冰符",
+   "xp": 267
+  },
+  {
+   "lv": 36,
+   "name": "筑基初期",
+   "hp": 70,
+   "dmg": 0.14,
+   "atk": 0.1,
+   "spd": 0.03,
+   "skill": "sword",
+   "note": "灵液化真元，寿元倍增",
+   "xp": 280
+  },
+  {
+   "lv": 42,
+   "name": "筑基中期",
+   "hp": 90,
+   "dmg": 0.15,
+   "atk": 0.11,
+   "spd": 0.03,
+   "skill": "orb",
+   "note": "法力渐厚，可御数宝",
+   "xp": 361
+  },
+  {
+   "lv": 48,
+   "name": "筑基后期",
+   "hp": 120,
+   "dmg": 0.16,
+   "atk": 0.12,
+   "spd": 0.04,
+   "skill": "nova",
+   "note": "神识大进，御器成阵",
+   "xp": 452
+  },
+  {
+   "lv": 56,
+   "name": "结丹初期",
+   "hp": 200,
+   "dmg": 0.22,
+   "atk": 0.14,
+   "spd": 0.04,
+   "skill": "frost",
+   "note": "丹成之日，一方称尊",
+   "xp": 589
+  },
+  {
+   "lv": 64,
+   "name": "结丹中期",
+   "hp": 240,
+   "dmg": 0.24,
+   "atk": 0.15,
+   "spd": 0.04,
+   "skill": "fire",
+   "note": "金丹运转，法力不绝",
+   "xp": 744
+  },
+  {
+   "lv": 72,
+   "name": "结丹后期",
+   "hp": 300,
+   "dmg": 0.26,
+   "atk": 0.16,
+   "spd": 0.05,
+   "skill": "gourd",
+   "note": "金丹圆满，只待凝婴",
+   "xp": 917
+  },
+  {
+   "lv": 82,
+   "name": "元婴初期",
+   "hp": 420,
+   "dmg": 0.3,
+   "atk": 0.18,
+   "spd": 0.05,
+   "skill": "sword",
+   "note": "元婴离体，寿元千载",
+   "xp": 1159
+  },
+  {
+   "lv": 92,
+   "name": "元婴中期",
+   "hp": 560,
+   "dmg": 0.34,
+   "atk": 0.2,
+   "spd": 0.06,
+   "skill": "nova",
+   "note": "婴变日熟，神通渐成",
+   "xp": 1429
+  },
+  {
+   "lv": 102,
+   "name": "元婴后期",
+   "hp": 720,
+   "dmg": 0.38,
+   "atk": 0.22,
+   "spd": 0.06,
+   "skill": "frost",
+   "note": "大修士之列，一方称雄",
+   "xp": 1726
+  },
+  {
+   "lv": 112,
+   "name": "化神初期",
+   "hp": 1000,
+   "dmg": 0.45,
+   "atk": 0.26,
+   "spd": 0.07,
+   "skill": "fire",
+   "note": "可调天地元气，呼风唤雨",
+   "xp": 2052
+  },
+  {
+   "lv": 122,
+   "name": "化神中期",
+   "hp": 1300,
+   "dmg": 0.5,
+   "atk": 0.28,
+   "spd": 0.07,
+   "skill": "gourd",
+   "note": "神念化虚，隔空取物",
+   "xp": 2405
+  },
+  {
+   "lv": 132,
+   "name": "化神后期",
+   "hp": 1700,
+   "dmg": 0.56,
+   "atk": 0.3,
+   "spd": 0.08,
+   "skill": "nova",
+   "note": "人界之巅，只待飞升",
+   "xp": 2787
+  }
+ ],
+ "enemies": [
+  {
+   "id": "wolf",
+   "name": "灰毛野狼",
+   "hp": 9,
+   "spd": 62,
+   "dmg": 6,
+   "r": 9,
+   "xp": 1,
+   "spr": "wolf",
+   "drop": 0.03,
+   "tier": 0,
+   "mats": [
+    "m_wolfdan",
+    "m_chijing"
+   ]
+  },
+  {
+   "id": "snake",
+   "name": "青纹毒蛇",
+   "hp": 6,
+   "spd": 74,
+   "dmg": 5,
+   "r": 7,
+   "xp": 1,
+   "spr": "snake",
+   "drop": 0.028,
+   "tier": 0,
+   "wob": true,
+   "mats": [
+    "m_shedan"
+   ]
+  },
+  {
+   "id": "bat",
+   "name": "吸血妖蝠",
+   "hp": 5,
+   "spd": 68,
+   "dmg": 4,
+   "r": 7,
+   "xp": 1,
+   "spr": "bat",
+   "drop": 0.032,
+   "tier": 0,
+   "wob": true,
+   "mats": [
+    "m_chijing"
+   ],
+   "eggDrop": {
+    "id": "egg_yunchi",
+    "chance": 0.02
+   }
+  },
+  {
+   "id": "boar",
+   "name": "铁背野猪",
+   "hp": 24,
+   "spd": 42,
+   "dmg": 12,
+   "r": 11,
+   "xp": 2,
+   "spr": "boar",
+   "drop": 0.045,
+   "tier": 0,
+   "charge": true,
+   "mats": [
+    "m_huangjing"
+   ]
+  },
+  {
+   "id": "bandit",
+   "name": "山贼喽啰",
+   "hp": 16,
+   "spd": 48,
+   "dmg": 8,
+   "r": 10,
+   "xp": 2,
+   "spr": "bandit",
+   "drop": 0.04,
+   "tier": 0,
+   "mats": [
+    "m_jingtie",
+    "m_fuzhi"
+   ]
+  },
+  {
+   "id": "assassin",
+   "name": "黑衣杀手",
+   "hp": 14,
+   "spd": 86,
+   "dmg": 9,
+   "r": 9,
+   "xp": 3,
+   "spr": "assassin",
+   "drop": 0.055,
+   "tier": 0,
+   "dash": true,
+   "mats": [
+    "m_lingmo",
+    "m_fuzhi"
+   ]
+  },
+  {
+   "id": "ghoul",
+   "name": "尸傀",
+   "hp": 52,
+   "spd": 26,
+   "dmg": 15,
+   "r": 12,
+   "xp": 4,
+   "spr": "ghoul",
+   "drop": 0.07,
+   "tier": 0,
+   "mats": [
+    "m_shihui"
+   ]
+  },
+  {
+   "id": "disciple",
+   "name": "同门陪练",
+   "hp": 30,
+   "spd": 66,
+   "dmg": 8,
+   "r": 9,
+   "xp": 3,
+   "spr": "disciple",
+   "drop": 0.05,
+   "tier": 0,
+   "mats": [
+    "m_jingtie"
+   ]
+  },
+  {
+   "id": "shigui",
+   "name": "矿洞石魈",
+   "hp": 70,
+   "spd": 30,
+   "dmg": 14,
+   "r": 12,
+   "xp": 5,
+   "spr": "shigui",
+   "drop": 0.08,
+   "tier": 0,
+   "mats": [
+    "m_jingtie",
+    "m_chitong",
+    "m_xuantie",
+    "m_yusui"
+   ]
+  },
+  {
+   "id": "guiling",
+   "name": "鬼灵门弟子",
+   "hp": 120,
+   "spd": 62,
+   "dmg": 20,
+   "r": 10,
+   "xp": 5,
+   "spr": "assassin",
+   "drop": 0.055,
+   "tier": 0,
+   "dash": true,
+   "mats": [
+    "m_xueyu",
+    "m_fuzhi",
+    "m_lingmo"
+   ]
+  },
+  {
+   "id": "moxiu",
+   "name": "魔道修士",
+   "hp": 170,
+   "spd": 54,
+   "dmg": 24,
+   "r": 11,
+   "xp": 6,
+   "spr": "mo",
+   "drop": 0.06,
+   "tier": 0,
+   "mats": [
+    "m_xueyu",
+    "m_xuesha",
+    "m_hantie"
+   ],
+   "skillDrop": {
+    "id": "sk_xuemo",
+    "chance": 0.012
+   }
+  },
+  {
+   "id": "haishou",
+   "name": "海妖兽",
+   "hp": 210,
+   "spd": 58,
+   "dmg": 26,
+   "r": 11,
+   "xp": 7,
+   "spr": "haishou",
+   "drop": 0.075,
+   "tier": 0,
+   "mats": [
+    "m_yaodan",
+    "m_banyao"
+   ]
+  },
+  {
+   "id": "yuyao",
+   "name": "青鳞鲤妖",
+   "hp": 150,
+   "spd": 74,
+   "dmg": 22,
+   "r": 9,
+   "xp": 6,
+   "spr": "snake",
+   "drop": 0.06,
+   "tier": 0,
+   "wob": true,
+   "mats": [
+    "m_yaodan"
+   ]
+  },
+  {
+   "id": "guixiu",
+   "name": "鬼修",
+   "hp": 250,
+   "spd": 70,
+   "dmg": 30,
+   "r": 10,
+   "xp": 8,
+   "spr": "guixiu",
+   "drop": 0.08,
+   "tier": 0,
+   "mats": [
+    "m_yanghun",
+    "m_xueyu"
+   ],
+   "skillDrop": {
+    "id": "sk_xuanyin",
+    "chance": 0.01
+   }
+  },
+  {
+   "id": "kui",
+   "name": "机关傀儡",
+   "hp": 300,
+   "spd": 34,
+   "dmg": 28,
+   "r": 13,
+   "xp": 8,
+   "spr": "kui",
+   "drop": 0.08,
+   "tier": 0,
+   "mats": [
+    "m_xuantie",
+    "m_hantie"
+   ],
+   "skillDrop": {
+    "id": "sk_sanyan",
+    "chance": 0.01
+   }
+  },
+  {
+   "id": "dujiao",
+   "name": "毒蛟",
+   "hp": 420,
+   "spd": 62,
+   "dmg": 38,
+   "r": 14,
+   "xp": 10,
+   "spr": "dujiao",
+   "drop": 0.1,
+   "tier": 0,
+   "wob": true,
+   "mats": [
+    "m_yaodan",
+    "m_banyao"
+   ],
+   "eggDrop": {
+    "id": "egg_mojiao",
+    "chance": 0.03
+   }
+  },
+  {
+   "id": "guiwu",
+   "name": "阴雾鬼物",
+   "hp": 620,
+   "spd": 66,
+   "dmg": 40,
+   "r": 11,
+   "xp": 14,
+   "spr": "guixiu",
+   "drop": 0.09,
+   "tier": 0,
+   "mats": [
+    "m_yanghun",
+    "m_xueyu"
+   ]
+  },
+  {
+   "id": "shixiao",
+   "name": "尸魈",
+   "hp": 700,
+   "spd": 58,
+   "dmg": 44,
+   "r": 12,
+   "xp": 15,
+   "spr": "ghoul",
+   "drop": 0.09,
+   "tier": 0,
+   "dash": true,
+   "mats": [
+    "m_shihui",
+    "m_yusui"
+   ]
+  },
+  {
+   "id": "moxiu2",
+   "name": "魔道修士",
+   "hp": 760,
+   "spd": 62,
+   "dmg": 46,
+   "r": 11,
+   "xp": 16,
+   "spr": "mo",
+   "drop": 0.1,
+   "tier": 0,
+   "mats": [
+    "m_xueyu",
+    "m_hantie"
+   ]
+  },
+  {
+   "id": "fashi",
+   "name": "慕兰法士",
+   "hp": 820,
+   "spd": 70,
+   "dmg": 50,
+   "r": 11,
+   "xp": 17,
+   "spr": "neimen",
+   "drop": 0.09,
+   "tier": 0,
+   "mats": [
+    "m_yusui",
+    "m_xuantie"
+   ]
+  },
+  {
+   "id": "dajinxiu",
+   "name": "大晋修士",
+   "hp": 900,
+   "spd": 64,
+   "dmg": 52,
+   "r": 11,
+   "xp": 18,
+   "spr": "linmo",
+   "drop": 0.1,
+   "tier": 0,
+   "mats": [
+    "m_xuantie",
+    "m_yusui"
+   ]
+  },
+  {
+   "id": "yaoshou2",
+   "name": "大晋妖兽",
+   "hp": 1000,
+   "spd": 60,
+   "dmg": 56,
+   "r": 13,
+   "xp": 20,
+   "spr": "haishou",
+   "drop": 0.11,
+   "tier": 0,
+   "mats": [
+    "m_yaodan",
+    "m_banyao"
+   ]
+  },
+  {
+   "id": "gui2",
+   "name": "古魔残躯",
+   "hp": 1200,
+   "spd": 54,
+   "dmg": 62,
+   "r": 14,
+   "xp": 24,
+   "spr": "mo",
+   "drop": 0.12,
+   "tier": 0,
+   "mats": [
+    "m_xueyu",
+    "m_yanghun"
+   ]
+  },
+  {
+   "id": "kui2",
+   "name": "上古傀儡",
+   "hp": 1100,
+   "spd": 40,
+   "dmg": 58,
+   "r": 14,
+   "xp": 22,
+   "spr": "kui",
+   "drop": 0.12,
+   "tier": 0,
+   "mats": [
+    "m_gangyin",
+    "m_xuantie"
+   ]
+  },
+  {
+   "id": "zhengdao",
+   "name": "正道修士",
+   "hp": 880,
+   "spd": 66,
+   "dmg": 48,
+   "r": 11,
+   "xp": 17,
+   "spr": "neimen",
+   "drop": 0.09,
+   "tier": 0,
+   "mats": [
+    "m_yusui",
+    "m_xuantie"
+   ]
+  }
+ ],
+ "maps": [
+  {
+   "id": "qixuan",
+   "name": "七玄门·山门",
+   "pos": "越国·镜州 青牛山",
+   "arc": "A",
+   "side": false,
+   "type": "story",
+   "startLevel": 1,
+   "endLevel": null,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": null,
+   "auction": null,
+   "unlock": null,
+   "next": "houshan",
+   "unlockBy": null,
+   "reward": {
+    "stones": 40,
+    "items": [
+     "changchun",
+     "gupu"
+    ],
+    "mats": [
+     [
+      "m_chijing",
+      3
+     ],
+     [
+      "m_huangjing",
+      2
+     ]
+    ]
+   }
+  },
+  {
+   "id": "houshan",
+   "name": "七玄门·后山",
+   "pos": "青牛山北麓",
+   "arc": "A",
+   "side": false,
+   "type": "combat",
+   "startLevel": 1,
+   "endLevel": null,
+   "diff": 1,
+   "bossAt": 110,
+   "enemies": [
+    "wolf",
+    "snake",
+    "bat",
+    "boar",
+    "bandit"
+   ],
+   "boss": {
+    "kind": "beast",
+    "name": "百年狼妖",
+    "hp": 1100,
+    "spd": 66,
+    "dmg": 15,
+    "r": 20,
+    "spr": "wolf",
+    "scale": 3.4
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": "qixuan",
+   "next": "mishi",
+   "unlockBy": null,
+   "reward": {
+    "stones": 80,
+    "items": [
+     "bag_ling"
+    ]
+   }
+  },
+  {
+   "id": "mishi",
+   "name": "墨大夫·密室",
+   "pos": "七玄门·药庐地底",
+   "arc": "A",
+   "side": false,
+   "type": "boss",
+   "startLevel": 7,
+   "endLevel": null,
+   "diff": 1.15,
+   "bossAt": 0,
+   "enemies": [
+    "ghoul",
+    "assassin"
+   ],
+   "boss": {
+    "kind": "mo",
+    "name": "墨大夫·墨居仁",
+    "hp": 1500,
+    "spd": 40,
+    "dmg": 18,
+    "r": 20,
+    "spr": "mo",
+    "scale": 2.9
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": "houshan",
+   "next": "tainan",
+   "unlockBy": null,
+   "reward": {
+    "stones": 160,
+    "items": [
+     "qingzhu",
+     "lianzhi"
+    ]
+   }
+  },
+  {
+   "id": "tainan",
+   "name": "太南小会",
+   "pos": "越国·太南山",
+   "arc": "B",
+   "side": false,
+   "type": "market",
+   "startLevel": 7,
+   "endLevel": null,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": [
+    "xueshen",
+    "qiannian",
+    "shenxing",
+    "qingyan",
+    "jifeng",
+    "jingtie",
+    "money_sword",
+    "qingzhu",
+    "juling",
+    "xuantie",
+    "huyu",
+    "lianqi",
+    "m_fuzhi",
+    "m_lingmo",
+    "m_chijing",
+    "m_huangjing",
+    "m_jingtie",
+    "m_chitong",
+    "m_zihua",
+    "m_yusui",
+    "m_tianling",
+    "sk_swift",
+    "sk_magnet",
+    "sk_fire",
+    "sk_orb",
+    "sk_regen"
+   ],
+   "auction": null,
+   "unlock": "mishi",
+   "next": "huangfeng",
+   "unlockBy": null,
+   "reward": {
+    "stones": 0,
+    "items": []
+   }
+  },
+  {
+   "id": "huangfeng",
+   "name": "黄枫谷·山门",
+   "pos": "越国·黄枫谷",
+   "arc": "B",
+   "side": false,
+   "type": "story",
+   "startLevel": 10,
+   "endLevel": null,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": null,
+   "auction": null,
+   "unlock": "tainan",
+   "next": "yaoyuan",
+   "unlockBy": null,
+   "reward": {
+    "stones": 100,
+    "mats": [
+     [
+      "m_zihua",
+      1
+     ],
+     [
+      "m_tianling",
+      1
+     ]
+    ]
+   }
+  },
+  {
+   "id": "yaoyuan",
+   "name": "黄枫谷·药园",
+   "pos": "黄枫谷后山药田",
+   "arc": "B",
+   "side": false,
+   "type": "combat",
+   "startLevel": 13,
+   "endLevel": null,
+   "diff": 1.35,
+   "bossAt": 140,
+   "enemies": [
+    "bat",
+    "snake",
+    "assassin",
+    "ghoul",
+    "bandit"
+   ],
+   "boss": {
+    "kind": "swarm",
+    "name": "噬灵虫母",
+    "hp": 2100,
+    "spd": 38,
+    "dmg": 15,
+    "r": 18,
+    "spr": "blacklord",
+    "scale": 3
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": "huangfeng",
+   "next": "xuese",
+   "unlockBy": null,
+   "reward": {
+    "stones": 200,
+    "items": [
+     "qiannian"
+    ]
+   }
+  },
+  {
+   "id": "xuese",
+   "name": "血色禁地",
+   "pos": "越国·七派共管秘境",
+   "arc": "B",
+   "side": false,
+   "type": "combat",
+   "startLevel": 20,
+   "endLevel": null,
+   "diff": 1.6,
+   "bossAt": 170,
+   "enemies": [
+    "assassin",
+    "ghoul",
+    "boar",
+    "bandit",
+    "assassin"
+   ],
+   "boss": {
+    "kind": "mo",
+    "name": "灵兽山·封岳",
+    "hp": 3600,
+    "spd": 52,
+    "dmg": 19,
+    "r": 19,
+    "spr": "bandit",
+    "scale": 4.2
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": "yaoyuan",
+   "next": "zhuji",
+   "unlockBy": null,
+   "reward": {
+    "stones": 320,
+    "items": [
+     "zhangtian",
+     "zhuji",
+     "qingyuan"
+    ],
+    "mates": [
+     "m_nangongwan"
+    ]
+   }
+  },
+  {
+   "id": "mkuang",
+   "name": "后山·废弃矿洞",
+   "pos": "青牛山北麓 旧矿脉",
+   "arc": "X",
+   "side": true,
+   "type": "combat",
+   "startLevel": 3,
+   "endLevel": null,
+   "diff": 1.05,
+   "bossAt": 95,
+   "enemies": [
+    "bat",
+    "snake",
+    "shigui",
+    "bandit"
+   ],
+   "boss": {
+    "kind": "beast",
+    "name": "石魈王",
+    "hp": 980,
+    "spd": 52,
+    "dmg": 14,
+    "r": 20,
+    "spr": "shigui",
+    "scale": 3.2
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": null,
+   "next": null,
+   "unlockBy": "e_zhou",
+   "reward": {
+    "stones": 70,
+    "items": [],
+    "mats": [
+     [
+      "m_jingtie",
+      4
+     ],
+     [
+      "m_chitong",
+      2
+     ]
+    ]
+   }
+  },
+  {
+   "id": "zhangtie",
+   "name": "后山·张铁的铁匠棚",
+   "pos": "青牛山北麓 松林边",
+   "arc": "X",
+   "side": true,
+   "type": "story",
+   "startLevel": 7,
+   "endLevel": null,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": null,
+   "auction": null,
+   "unlock": null,
+   "next": null,
+   "unlockBy": "e_tie",
+   "reward": {
+    "stones": 40,
+    "items": []
+   }
+  },
+  {
+   "id": "yanwu",
+   "name": "七玄门·演武场",
+   "pos": "七玄门 前山校场",
+   "arc": "X",
+   "side": true,
+   "type": "combat",
+   "startLevel": 9,
+   "endLevel": null,
+   "diff": 1.1,
+   "bossAt": 80,
+   "enemies": [
+    "disciple",
+    "bandit"
+   ],
+   "boss": {
+    "kind": "mo",
+    "name": "厉飞雨（切磋）",
+    "hp": 1900,
+    "spd": 58,
+    "dmg": 13,
+    "r": 18,
+    "spr": "disciple",
+    "scale": 2.4
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": null,
+   "next": null,
+   "unlockBy": "e_li",
+   "reward": {
+    "stones": 120,
+    "items": [
+     "jingtie"
+    ],
+    "mats": [
+     [
+      "m_jingtie",
+      3
+     ]
+    ]
+   }
+  },
+  {
+   "id": "yaopu",
+   "name": "黄枫谷·灵药圃深处",
+   "pos": "黄枫谷后山 最里一畦",
+   "arc": "X",
+   "side": true,
+   "type": "combat",
+   "startLevel": 15,
+   "endLevel": null,
+   "diff": 1.3,
+   "bossAt": 120,
+   "enemies": [
+    "snake",
+    "bat",
+    "ghoul",
+    "assassin"
+   ],
+   "boss": {
+    "kind": "beast",
+    "name": "守药灵猿",
+    "hp": 2400,
+    "spd": 54,
+    "dmg": 16,
+    "r": 20,
+    "spr": "ape",
+    "scale": 3
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": null,
+   "next": null,
+   "unlockBy": "e_yaotong",
+   "reward": {
+    "stones": 180,
+    "items": [],
+    "mats": [
+     [
+      "m_tianling",
+      2
+     ],
+     [
+      "m_longlin",
+      1
+     ],
+     [
+      "m_zihua",
+      2
+     ]
+    ]
+   }
+  },
+  {
+   "id": "heixiang",
+   "name": "太南小会·后巷",
+   "pos": "太南山 小会后巷",
+   "arc": "X",
+   "side": true,
+   "type": "story",
+   "startLevel": 8,
+   "endLevel": null,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": null,
+   "auction": null,
+   "unlock": null,
+   "next": null,
+   "unlockBy": "e_huo",
+   "reward": {
+    "stones": 0,
+    "items": [],
+    "mats": [
+     [
+      "m_xuantie",
+      1
+     ],
+     [
+      "m_hantie",
+      1
+     ]
+    ]
+   }
+  },
+  {
+   "id": "xuechi",
+   "name": "血色禁地·血池",
+   "pos": "血色禁地 北侧洼地",
+   "arc": "X",
+   "side": true,
+   "type": "combat",
+   "startLevel": 24,
+   "endLevel": null,
+   "diff": 1.5,
+   "bossAt": 150,
+   "enemies": [
+    "assassin",
+    "ghoul",
+    "bandit"
+   ],
+   "boss": {
+    "kind": "blood",
+    "name": "血傀儡",
+    "hp": 3200,
+    "spd": 46,
+    "dmg": 18,
+    "r": 19,
+    "spr": "ghoul",
+    "scale": 3
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": null,
+   "next": null,
+   "unlockBy": "e_moxiu",
+   "reward": {
+    "stones": 260,
+    "items": [],
+    "mats": [
+     [
+      "m_xuesha",
+      2
+     ],
+     [
+      "m_yusuizhi",
+      1
+     ]
+    ]
+   }
+  },
+  {
+   "id": "zhuji",
+   "name": "黄枫谷·地火之屋",
+   "pos": "越国·黄枫谷 地火之屋",
+   "arc": "C",
+   "side": false,
+   "type": "boss",
+   "startLevel": 35,
+   "endLevel": 36,
+   "diff": 1.6,
+   "bossAt": 0,
+   "enemies": [
+    "disciple",
+    "assassin"
+   ],
+   "boss": {
+    "kind": "beast",
+    "name": "地火之灵",
+    "hp": 3600,
+    "spd": 54,
+    "dmg": 22,
+    "r": 18,
+    "spr": "huoling",
+    "scale": 6
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": "xuese",
+   "next": "yanjia",
+   "unlockBy": null,
+   "reward": {
+    "stones": 300,
+    "mats": [
+     [
+      "m_zihua",
+      2
+     ],
+     [
+      "m_tianling",
+      2
+     ]
+    ]
+   }
+  },
+  {
+   "id": "yanjia",
+   "name": "燕家堡",
+   "pos": "越国·燕家堡",
+   "arc": "C",
+   "side": false,
+   "type": "combat",
+   "startLevel": 36,
+   "endLevel": null,
+   "diff": 1.75,
+   "bossAt": 120,
+   "enemies": [
+    "guiling",
+    "moxiu",
+    "assassin"
+   ],
+   "boss": {
+    "kind": "mo",
+    "name": "鬼灵门少主·王蝉",
+    "hp": 4200,
+    "spd": 58,
+    "dmg": 26,
+    "r": 19,
+    "spr": "wangchan",
+    "scale": 4.4
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": "zhuji",
+   "next": "jingu",
+   "unlockBy": null,
+   "reward": {
+    "stones": 460,
+    "items": [
+     "fb_jinkulou"
+    ],
+    "mats": [
+     [
+      "m_xueyu",
+      2
+     ],
+     [
+      "m_yusui",
+      2
+     ]
+    ]
+   }
+  },
+  {
+   "id": "jingu",
+   "name": "金鼓原",
+   "pos": "越国·金鼓原",
+   "arc": "C",
+   "side": false,
+   "type": "boss",
+   "startLevel": 42,
+   "endLevel": null,
+   "diff": 1.9,
+   "bossAt": 0,
+   "enemies": [
+    "moxiu",
+    "guiling",
+    "ghoul",
+    "assassin"
+   ],
+   "boss": {
+    "kind": "blood",
+    "name": "鬼灵门·执法长老",
+    "hp": 5200,
+    "spd": 58,
+    "dmg": 30,
+    "r": 19,
+    "spr": "mo",
+    "scale": 4.6
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": "yanjia",
+   "next": "guchuan",
+   "unlockBy": null,
+   "reward": {
+    "stones": 680,
+    "items": [
+     "a_yunwen"
+    ]
+   }
+  },
+  {
+   "id": "guchuan",
+   "name": "古传送阵",
+   "pos": "越国·荒山古阵",
+   "arc": "C",
+   "side": false,
+   "type": "story",
+   "startLevel": 44,
+   "endLevel": null,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": null,
+   "auction": null,
+   "unlock": "jingu",
+   "next": "kuixing",
+   "unlockBy": null,
+   "reward": {
+    "stones": 360,
+    "mats": [
+     [
+      "m_xuantie",
+      2
+     ],
+     [
+      "m_hantie",
+      2
+     ]
+    ]
+   }
+  },
+  {
+   "id": "kuixing",
+   "name": "魁星岛",
+   "pos": "乱星海·魁星岛",
+   "arc": "D",
+   "side": false,
+   "type": "story",
+   "startLevel": 44,
+   "endLevel": null,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": null,
+   "auction": null,
+   "unlock": "guchuan",
+   "next": "liulian",
+   "unlockBy": null,
+   "reward": {
+    "stones": 320,
+    "mats": [
+     [
+      "m_yaodan",
+      1
+     ]
+    ]
+   }
+  },
+  {
+   "id": "liulian",
+   "name": "六连殿·出海捕妖",
+   "pos": "乱星海·外海",
+   "arc": "D",
+   "side": false,
+   "type": "combat",
+   "startLevel": 46,
+   "endLevel": null,
+   "diff": 2,
+   "bossAt": 150,
+   "enemies": [
+    "haishou",
+    "yuyao",
+    "moxiu"
+   ],
+   "boss": {
+    "kind": "mo",
+    "name": "六连殿·古长老",
+    "hp": 5800,
+    "spd": 52,
+    "dmg": 32,
+    "r": 19,
+    "spr": "mo",
+    "scale": 4.6
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": "kuixing",
+   "next": "haian",
+   "unlockBy": null,
+   "reward": {
+    "stones": 760,
+    "items": [
+     "t_hunyuan"
+    ],
+    "grants": [
+     [
+      "jiangchen",
+      5
+     ]
+    ],
+    "mats": [
+     [
+      "m_yaodan",
+      3
+     ],
+     [
+      "m_banyao",
+      1
+     ]
+    ]
+   }
+  },
+  {
+   "id": "haian",
+   "name": "海猿岛·闭关",
+   "pos": "乱星海·海猿岛",
+   "arc": "D",
+   "side": false,
+   "type": "story",
+   "startLevel": 48,
+   "endLevel": null,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": null,
+   "auction": null,
+   "unlock": "liulian",
+   "next": "tianxing",
+   "unlockBy": null,
+   "reward": {
+    "stones": 420,
+    "items": [
+     "t_shijin"
+    ],
+    "mats": [
+     [
+      "m_yaodan",
+      2
+     ],
+     [
+      "m_yusui",
+      2
+     ]
+    ]
+   }
+  },
+  {
+   "id": "tianxing",
+   "name": "天星城",
+   "pos": "乱星海·天星城",
+   "arc": "D",
+   "side": false,
+   "type": "market",
+   "startLevel": 50,
+   "endLevel": null,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": [
+    "xueshen",
+    "qiannian",
+    "shenxing",
+    "jifeng",
+    "huyu",
+    "fb_feng",
+    "moyu",
+    "xuantie",
+    "a_xuangui",
+    "t_tianlei",
+    "m_yaodan",
+    "m_banyao",
+    "m_xueyu",
+    "m_xuantie",
+    "m_hantie",
+    "m_yusui",
+    "m_fuzhi",
+    "m_lingmo",
+    "xueling",
+    "biyanjiu",
+    "haoyuan",
+    "sk_nova",
+    "sk_haste",
+    "sk_frost",
+    "sk_gourd",
+    "sk_regen"
+   ],
+   "auction": null,
+   "unlock": "haian",
+   "next": "ningcui",
+   "unlockBy": null,
+   "reward": {
+    "stones": 0
+   }
+  },
+  {
+   "id": "ningcui",
+   "name": "凝翠岛·杀妖取丹",
+   "pos": "乱星海·凝翠岛",
+   "arc": "D",
+   "side": false,
+   "type": "combat",
+   "startLevel": 52,
+   "endLevel": null,
+   "diff": 2.1,
+   "bossAt": 140,
+   "enemies": [
+    "haishou",
+    "yuyao"
+   ],
+   "boss": {
+    "kind": "beast",
+    "name": "七级妖兽·蓝面鲛",
+    "hp": 6400,
+    "spd": 60,
+    "dmg": 30,
+    "r": 22,
+    "spr": "haishou",
+    "scale": 5.4
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": "tianxing",
+   "next": "jiedan",
+   "unlockBy": null,
+   "reward": {
+    "stones": 900,
+    "mats": [
+     [
+      "m_yaodan",
+      4
+     ],
+     [
+      "m_jinlei",
+      1
+     ]
+    ],
+    "mates": [
+     "m_yuanyao"
+    ]
+   }
+  },
+  {
+   "id": "jiedan",
+   "name": "天星城·闭府结丹",
+   "pos": "乱星海·天星城 租来的洞府",
+   "arc": "D",
+   "side": false,
+   "type": "story",
+   "startLevel": 54,
+   "endLevel": 56,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": null,
+   "auction": null,
+   "unlock": "ningcui",
+   "next": "xutian",
+   "unlockBy": null,
+   "reward": {
+    "stones": 1000,
+    "mats": [
+     [
+      "m_yaodan",
+      3
+     ],
+     [
+      "m_lingru",
+      1
+     ]
+    ]
+   }
+  },
+  {
+   "id": "xutian",
+   "name": "虚天殿",
+   "pos": "乱星海·虚天殿",
+   "arc": "E",
+   "side": false,
+   "type": "boss",
+   "startLevel": 56,
+   "endLevel": null,
+   "diff": 2.25,
+   "bossAt": 0,
+   "enemies": [
+    "guixiu",
+    "kui",
+    "ghoul"
+   ],
+   "boss": {
+    "kind": "mo",
+    "name": "玄骨上人",
+    "hp": 8600,
+    "spd": 56,
+    "dmg": 36,
+    "r": 20,
+    "spr": "guixiu",
+    "scale": 5
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": "jiedan",
+   "next": "waihai",
+   "unlockBy": null,
+   "reward": {
+    "stones": 1400,
+    "items": [
+     "t_xutianding",
+     "t_yinyue",
+     "butian"
+    ],
+    "mats": [
+     [
+      "m_lingru",
+      2
+     ],
+     [
+      "m_yanghun",
+      2
+     ]
+    ]
+   }
+  },
+  {
+   "id": "waihai",
+   "name": "外星海·奇渊岛",
+   "pos": "乱星海·外星海",
+   "arc": "E",
+   "side": false,
+   "type": "boss",
+   "startLevel": 64,
+   "endLevel": null,
+   "diff": 2.4,
+   "bossAt": 0,
+   "enemies": [
+    "haishou",
+    "guixiu",
+    "kui",
+    "dujiao"
+   ],
+   "boss": {
+    "kind": "beast",
+    "name": "八级妖兽·毒蛟",
+    "hp": 9800,
+    "spd": 64,
+    "dmg": 40,
+    "r": 23,
+    "spr": "dujiao",
+    "scale": 6.6
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": "xutian",
+   "next": "yinming",
+   "unlockBy": null,
+   "reward": {
+    "stones": 2000,
+    "mats": [
+     [
+      "m_jinlei",
+      2
+     ],
+     [
+      "m_yaodan",
+      4
+     ],
+     [
+      "m_lingmo",
+      4
+     ],
+     [
+      "m_xueyu",
+      2
+     ]
+    ]
+   }
+  },
+  {
+   "id": "heisha",
+   "name": "越国·京城皇宫",
+   "pos": "越国·京城 皇宫地宫",
+   "arc": "X",
+   "side": true,
+   "type": "combat",
+   "startLevel": 38,
+   "endLevel": null,
+   "diff": 1.8,
+   "bossAt": 130,
+   "enemies": [
+    "moxiu",
+    "ghoul",
+    "assassin",
+    "guiling"
+   ],
+   "boss": {
+    "kind": "blood",
+    "name": "越皇",
+    "hp": 4600,
+    "spd": 50,
+    "dmg": 28,
+    "r": 20,
+    "spr": "mo",
+    "scale": 4.6
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": null,
+   "next": null,
+   "unlockBy": "e_liujing",
+   "reward": {
+    "stones": 520,
+    "items": [
+     "t_cantu"
+    ],
+    "mats": [
+     [
+      "m_xuesha",
+      2
+     ],
+     [
+      "m_hantie",
+      2
+     ]
+    ]
+   }
+  },
+  {
+   "id": "shiku",
+   "name": "灵石矿·魔道矿场",
+   "pos": "越国边境 灵矿脉",
+   "arc": "X",
+   "side": true,
+   "type": "combat",
+   "startLevel": 40,
+   "endLevel": null,
+   "diff": 1.85,
+   "bossAt": 135,
+   "enemies": [
+    "moxiu",
+    "kui",
+    "guiling"
+   ],
+   "boss": {
+    "kind": "swarm",
+    "name": "魔道矿监",
+    "hp": 4400,
+    "spd": 44,
+    "dmg": 26,
+    "r": 19,
+    "spr": "kui",
+    "scale": 4.6
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": null,
+   "next": null,
+   "unlockBy": "e_captain",
+   "reward": {
+    "stones": 560,
+    "items": [
+     "t_dayi"
+    ],
+    "mats": [
+     [
+      "m_xuantie",
+      3
+     ],
+     [
+      "m_zhizhu",
+      1
+     ]
+    ]
+   }
+  },
+  {
+   "id": "qingzhu",
+   "name": "青竹小轩",
+   "pos": "乱星海·天星城 外街",
+   "arc": "X",
+   "side": true,
+   "type": "story",
+   "startLevel": 56,
+   "endLevel": null,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": null,
+   "auction": null,
+   "unlock": null,
+   "next": null,
+   "unlockBy": "e_wangning",
+   "reward": {
+    "stones": 600,
+    "mats": [
+     [
+      "m_jinlei",
+      1
+     ],
+     [
+      "m_yaodan",
+      2
+     ]
+    ]
+   }
+  },
+  {
+   "id": "guxiu",
+   "name": "古修遗址",
+   "pos": "乱星海·无名荒岛",
+   "arc": "X",
+   "side": true,
+   "type": "combat",
+   "startLevel": 54,
+   "endLevel": null,
+   "diff": 2.2,
+   "bossAt": 120,
+   "enemies": [
+    "kui",
+    "guixiu",
+    "ghoul"
+   ],
+   "boss": {
+    "kind": "mo",
+    "name": "古修遗蜕",
+    "hp": 8000,
+    "spd": 50,
+    "dmg": 34,
+    "r": 21,
+    "spr": "guixiu",
+    "scale": 5
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": null,
+   "next": null,
+   "unlockBy": "e_jinqing",
+   "reward": {
+    "stones": 1100,
+    "items": [
+     "t_honghuang"
+    ],
+    "mats": [
+     [
+      "m_yanghun",
+      1
+     ],
+     [
+      "m_lingru",
+      1
+     ]
+    ]
+   }
+  },
+  {
+   "id": "luxiong",
+   "name": "黄枫谷·下山岔道",
+   "pos": "黄枫谷 山门外 岔道",
+   "arc": "B",
+   "side": true,
+   "type": "combat",
+   "startLevel": 18,
+   "endLevel": null,
+   "diff": 1.45,
+   "bossAt": 90,
+   "enemies": [
+    "disciple",
+    "assassin"
+   ],
+   "boss": {
+    "kind": "mo",
+    "name": "同门 陆师兄",
+    "hp": 2800,
+    "spd": 56,
+    "dmg": 17,
+    "r": 18,
+    "spr": "neimen",
+    "scale": 5.6
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": null,
+   "next": null,
+   "unlockBy": "e_luxiong",
+   "reward": {
+    "stones": 260,
+    "mats": [
+     [
+      "m_zihua",
+      2
+     ],
+     [
+      "m_tianling",
+      2
+     ],
+     [
+      "m_yusuizhi",
+      1
+     ]
+    ]
+   }
+  },
+  {
+   "id": "linxiong",
+   "name": "翠屏山·洞府夜变",
+   "pos": "黄枫谷·翠屏山 洞府",
+   "arc": "C",
+   "side": true,
+   "type": "boss",
+   "startLevel": 36,
+   "endLevel": null,
+   "diff": 1.7,
+   "bossAt": 0,
+   "enemies": [
+    "disciple",
+    "assassin"
+   ],
+   "boss": {
+    "kind": "mo",
+    "name": "千竹教·林师兄",
+    "hp": 3200,
+    "spd": 56,
+    "dmg": 19,
+    "r": 18,
+    "spr": "linmo",
+    "scale": 6.4
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": null,
+   "next": null,
+   "unlockBy": "e_lin",
+   "reward": {
+    "stones": 340,
+    "items": [
+     "dayan"
+    ],
+    "mats": [
+     [
+      "m_yusui",
+      2
+     ],
+     [
+      "m_shihui",
+      1
+     ]
+    ]
+   }
+  },
+  {
+   "id": "yinming",
+   "name": "阴冥之地",
+   "pos": "阴冥之地·鬼雾深处",
+   "arc": "F",
+   "side": false,
+   "type": "combat",
+   "startLevel": 74,
+   "endLevel": null,
+   "diff": 2.5,
+   "bossAt": 120,
+   "enemies": [
+    "guiwu",
+    "guixiu",
+    "ghoul"
+   ],
+   "boss": {
+    "kind": "mo",
+    "name": "六道传人",
+    "hp": 12000,
+    "spd": 62,
+    "dmg": 44,
+    "r": 20,
+    "spr": "mo",
+    "scale": 5.2
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": "waihai",
+   "next": "bianhai",
+   "unlockBy": null,
+   "reward": {
+    "stones": 2200,
+    "pets": [
+     "p_tihun"
+    ],
+    "mats": [
+     [
+      "m_yanghun",
+      2
+     ],
+     [
+      "m_xueyu",
+      3
+     ]
+    ]
+   }
+  },
+  {
+   "id": "bianhai",
+   "name": "无边海",
+   "pos": "天南外海·无边海",
+   "arc": "F",
+   "side": false,
+   "type": "story",
+   "startLevel": 74,
+   "endLevel": null,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": null,
+   "auction": null,
+   "unlock": "yinming",
+   "next": "luoyun",
+   "unlockBy": null,
+   "reward": {
+    "stones": 600,
+    "mats": [
+     [
+      "m_yaodan",
+      3
+     ]
+    ]
+   }
+  },
+  {
+   "id": "luoyun",
+   "name": "落云宗",
+   "pos": "天南·云梦山",
+   "arc": "F",
+   "side": false,
+   "type": "story",
+   "startLevel": 76,
+   "endLevel": null,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": null,
+   "auction": null,
+   "unlock": "bianhai",
+   "next": "shixiao",
+   "unlockBy": null,
+   "reward": {
+    "stones": 800,
+    "mats": [
+     [
+      "m_yusui",
+      4
+     ],
+     [
+      "m_lingmo",
+      4
+     ]
+    ]
+   }
+  },
+  {
+   "id": "shixiao",
+   "name": "尸魈之乱",
+   "pos": "天南·云梦山 后山",
+   "arc": "F",
+   "side": false,
+   "type": "combat",
+   "startLevel": 76,
+   "endLevel": null,
+   "diff": 2.45,
+   "bossAt": 110,
+   "enemies": [
+    "shixiao",
+    "ghoul",
+    "guiwu"
+   ],
+   "boss": {
+    "kind": "blood",
+    "name": "尸魈王",
+    "hp": 11000,
+    "spd": 56,
+    "dmg": 42,
+    "r": 20,
+    "spr": "ghoul",
+    "scale": 5
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": "luoyun",
+   "next": "sanjian",
+   "unlockBy": null,
+   "reward": {
+    "stones": 1400,
+    "mats": [
+     [
+      "m_shihui",
+      4
+     ],
+     [
+      "m_yusui",
+      3
+     ]
+    ]
+   }
+  },
+  {
+   "id": "sanjian",
+   "name": "三派试剑",
+   "pos": "天南·云梦山 剑坪",
+   "arc": "F",
+   "side": false,
+   "type": "combat",
+   "startLevel": 78,
+   "endLevel": null,
+   "diff": 2.5,
+   "bossAt": 100,
+   "enemies": [
+    "zhengdao",
+    "moxiu2",
+    "assassin"
+   ],
+   "boss": {
+    "kind": "mo",
+    "name": "御灵宗·魏长峰",
+    "hp": 11500,
+    "spd": 64,
+    "dmg": 44,
+    "r": 19,
+    "spr": "neimen",
+    "scale": 5
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": "shixiao",
+   "next": "yinyue",
+   "unlockBy": null,
+   "reward": {
+    "stones": 1600,
+    "mats": [
+     [
+      "m_yusui",
+      3
+     ],
+     [
+      "m_xuantie",
+      3
+     ]
+    ]
+   }
+  },
+  {
+   "id": "yinyue",
+   "name": "银月认主",
+   "pos": "天南·云梦山 洞府",
+   "arc": "F",
+   "side": false,
+   "type": "story",
+   "startLevel": 78,
+   "endLevel": null,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": null,
+   "auction": null,
+   "unlock": "sanjian",
+   "next": "jieying",
+   "unlockBy": null,
+   "reward": {
+    "stones": 400,
+    "pets": [
+     "p_yinyue"
+    ],
+    "mats": [
+     [
+      "m_yanghun",
+      1
+     ]
+    ]
+   }
+  },
+  {
+   "id": "jieying",
+   "name": "云梦山·结婴",
+   "pos": "天南·云梦山 洞府",
+   "arc": "F",
+   "side": false,
+   "type": "story",
+   "startLevel": 80,
+   "endLevel": 82,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": null,
+   "auction": null,
+   "unlock": "yinyue",
+   "next": "jiaoyihui",
+   "unlockBy": null,
+   "reward": {
+    "stones": 1200,
+    "mats": [
+     [
+      "m_yusui",
+      5
+     ],
+     [
+      "m_yanghun",
+      2
+     ]
+    ]
+   }
+  },
+  {
+   "id": "jiaoyihui",
+   "name": "天南交易会",
+   "pos": "天南·阗天城",
+   "arc": "F",
+   "side": false,
+   "type": "market",
+   "startLevel": 82,
+   "endLevel": null,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": [
+    "bichen",
+    "chuansong",
+    "baoliebao",
+    "tishen",
+    "jipin",
+    "sk_xuemo",
+    "sk_sanyan",
+    "sk_sanzhuan",
+    "sk_fenglei",
+    "sk_tianzhu",
+    "sk_xuanyin",
+    "sk_tongbao",
+    "sk_leishen",
+    "sk_qinxian",
+    "m_gengjing",
+    "m_chijingzhi",
+    "m_yaodan",
+    "peiyin"
+   ],
+   "auction": [
+    {
+     "id": "t_zicheng",
+     "price": 9000,
+     "note": "紫铖兜 · 元婴修士旧物，防御一件"
+    },
+    {
+     "id": "m_kuilei",
+     "price": 15000,
+     "note": "上古傀儡核 · 附元婴傀儡炼制之法"
+    },
+    {
+     "id": "t_beiji",
+     "price": 12000,
+     "note": "北极元光指环 · 完善攻防一环"
+    },
+    {
+     "id": "m_chijingzhi",
+     "price": 16000,
+     "note": "三千年赤精芝 · 仅次于化形九曲灵参"
+    }
+   ],
+   "unlock": "jieying",
+   "next": "cangkun",
+   "unlockBy": null,
+   "reward": {
+    "stones": 0
+   }
+  },
+  {
+   "id": "cangkun",
+   "name": "苍坤上人洞府",
+   "pos": "天南·大草原 苍坤洞府",
+   "arc": "F",
+   "side": false,
+   "type": "combat",
+   "startLevel": 84,
+   "endLevel": null,
+   "diff": 2.6,
+   "bossAt": 120,
+   "enemies": [
+    "kui2",
+    "dajinxiu",
+    "ghoul"
+   ],
+   "boss": {
+    "kind": "mo",
+    "name": "苍坤洞府·禁制灵影",
+    "hp": 14000,
+    "spd": 58,
+    "dmg": 48,
+    "r": 20,
+    "spr": "guixiu",
+    "scale": 5.2
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": "jiaoyihui",
+   "next": "yanyue",
+   "unlockBy": null,
+   "reward": {
+    "stones": 2400,
+    "mats": [
+     [
+      "m_gengjing",
+      2
+     ],
+     [
+      "m_gangyin",
+      1
+     ]
+    ]
+   }
+  },
+  {
+   "id": "yanyue",
+   "name": "掩月宗",
+   "pos": "天南·掩月宗 山门",
+   "arc": "F",
+   "side": false,
+   "type": "combat",
+   "startLevel": 86,
+   "endLevel": null,
+   "diff": 2.7,
+   "bossAt": 0,
+   "enemies": [
+    "zhengdao",
+    "moxiu2",
+    "assassin"
+   ],
+   "boss": {
+    "kind": "mo",
+    "name": "掩月宗大长老",
+    "hp": 16000,
+    "spd": 60,
+    "dmg": 52,
+    "r": 21,
+    "spr": "neimen",
+    "scale": 5.4
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": "cangkun",
+   "next": "huanglong",
+   "unlockBy": null,
+   "reward": {
+    "stones": 3000,
+    "items": [
+     "w_xuemo",
+     "a_xuemo",
+     "t_yanghuan"
+    ],
+    "mats": [
+     [
+      "m_yusui",
+      4
+     ]
+    ]
+   }
+  },
+  {
+   "id": "huanglong",
+   "name": "黄龙山大战",
+   "pos": "天南·黄龙山",
+   "arc": "F",
+   "side": false,
+   "type": "chase",
+   "startLevel": 88,
+   "endLevel": null,
+   "diff": 2.8,
+   "bossAt": null,
+   "enemies": [
+    "moxiu2",
+    "gui2",
+    "fashi"
+   ],
+   "boss": null,
+   "shop": null,
+   "auction": null,
+   "unlock": "yanyue",
+   "next": "bianjie",
+   "unlockBy": null,
+   "reward": {
+    "stones": 2600,
+    "mats": [
+     [
+      "m_xueyu",
+      4
+     ],
+     [
+      "m_hantie",
+      3
+     ]
+    ]
+   }
+  },
+  {
+   "id": "bianjie",
+   "name": "慕兰边界大战",
+   "pos": "天南·慕兰草原 边界",
+   "arc": "G",
+   "side": false,
+   "type": "boss",
+   "startLevel": 88,
+   "endLevel": null,
+   "diff": 2.85,
+   "bossAt": 0,
+   "enemies": [
+    "fashi",
+    "moxiu2",
+    "gui2"
+   ],
+   "boss": {
+    "kind": "blood",
+    "name": "阴罗宗宗主夫人·陆夫人",
+    "hp": 18000,
+    "spd": 60,
+    "dmg": 56,
+    "r": 21,
+    "spr": "nvxiu",
+    "scale": 5.4
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": "huanglong",
+   "next": "yinluo",
+   "unlockBy": null,
+   "reward": {
+    "stones": 3600,
+    "mats": [
+     [
+      "m_gengjing",
+      2
+     ],
+     [
+      "m_hanhuo",
+      1
+     ]
+    ]
+   }
+  },
+  {
+   "id": "yinluo",
+   "name": "阴罗宗四长老",
+   "pos": "天南·落云宗 外山",
+   "arc": "G",
+   "side": false,
+   "type": "boss",
+   "startLevel": 90,
+   "endLevel": null,
+   "diff": 2.9,
+   "bossAt": 0,
+   "enemies": [
+    "gui2",
+    "moxiu2",
+    "dajinxiu"
+   ],
+   "boss": {
+    "kind": "mo",
+    "name": "阴罗宗四长老",
+    "hp": 20000,
+    "spd": 62,
+    "dmg": 58,
+    "r": 21,
+    "spr": "linmo",
+    "scale": 5.4
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": "bianjie",
+   "next": "jixi",
+   "unlockBy": null,
+   "reward": {
+    "stones": 3800,
+    "items": [
+     "t_guiluo",
+     "t_yinluo"
+    ],
+    "mats": [
+     [
+      "m_yanghun",
+      3
+     ]
+    ]
+   }
+  },
+  {
+   "id": "jixi",
+   "name": "极西之地",
+   "pos": "极西之地·千竹教故地",
+   "arc": "G",
+   "side": false,
+   "type": "story",
+   "startLevel": 90,
+   "endLevel": null,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": null,
+   "auction": null,
+   "unlock": "yinluo",
+   "next": "zhuimo",
+   "unlockBy": null,
+   "reward": {
+    "stones": 2000,
+    "items": [
+     "dayan2"
+    ],
+    "pets": [
+     "p_kui"
+    ],
+    "mats": [
+     [
+      "m_gangyin",
+      2
+     ],
+     [
+      "m_gengjing",
+      2
+     ]
+    ],
+    "mates": [
+     "m_dayanshenjun"
+    ]
+   }
+  },
+  {
+   "id": "zhuimo",
+   "name": "坠魔谷",
+   "pos": "天南·坠魔谷",
+   "arc": "G",
+   "side": false,
+   "type": "combat",
+   "startLevel": 90,
+   "endLevel": null,
+   "diff": 2.95,
+   "bossAt": 130,
+   "enemies": [
+    "yaoshou2",
+    "gui2",
+    "shixiao"
+   ],
+   "boss": {
+    "kind": "blood",
+    "name": "血焰主魂",
+    "hp": 24000,
+    "spd": 58,
+    "dmg": 62,
+    "r": 22,
+    "spr": "mo",
+    "scale": 5.8
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": "jixi",
+   "next": "lingmiao",
+   "unlockBy": null,
+   "reward": {
+    "stones": 4200,
+    "items": [
+     "a_jiaolong"
+    ],
+    "mats": [
+     [
+      "m_lingzhu",
+      1
+     ],
+     [
+      "m_huodan",
+      1
+     ],
+     [
+      "m_gangyin",
+      2
+     ]
+    ]
+   }
+  },
+  {
+   "id": "lingmiao",
+   "name": "灵渺园",
+   "pos": "坠魔谷·灵渺园 芥子空间",
+   "arc": "G",
+   "side": false,
+   "type": "story",
+   "startLevel": 90,
+   "endLevel": 92,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": null,
+   "auction": null,
+   "unlock": "zhuimo",
+   "next": "mulan",
+   "unlockBy": null,
+   "reward": {
+    "stones": 2600,
+    "mats": [
+     [
+      "m_lingzhu",
+      1
+     ],
+     [
+      "m_yusui",
+      6
+     ]
+    ]
+   }
+  },
+  {
+   "id": "mulan",
+   "name": "慕兰草原",
+   "pos": "慕兰草原·去大晋的路上",
+   "arc": "G",
+   "side": false,
+   "type": "chase",
+   "startLevel": 92,
+   "endLevel": null,
+   "diff": 3,
+   "bossAt": null,
+   "enemies": [
+    "fashi",
+    "moxiu2",
+    "gui2"
+   ],
+   "boss": null,
+   "shop": null,
+   "auction": null,
+   "unlock": "lingmiao",
+   "next": "dajin",
+   "unlockBy": null,
+   "reward": {
+    "stones": 1800,
+    "mats": [
+     [
+      "m_xueyu",
+      3
+     ]
+    ],
+    "seal": {
+     "name": "五鬼锁魂",
+     "dmg": 0.45,
+     "hp": 0.45,
+     "note": "煞气封体，修为只剩四成"
+    }
+   }
+  },
+  {
+   "id": "dajin",
+   "name": "大晋·佛宗",
+   "pos": "大晋·南疆 佛宗",
+   "arc": "G",
+   "side": false,
+   "type": "story",
+   "startLevel": 88,
+   "endLevel": null,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": null,
+   "auction": null,
+   "unlock": "mulan",
+   "next": "kunwu",
+   "unlockBy": null,
+   "reward": {
+    "stones": 2400,
+    "unseal": true,
+    "mats": [
+     [
+      "m_jingang",
+      1
+     ],
+     [
+      "m_yusui",
+      5
+     ]
+    ]
+   }
+  },
+  {
+   "id": "kunwu",
+   "name": "昆吾山",
+   "pos": "大晋·昆吾山",
+   "arc": "G",
+   "side": false,
+   "type": "boss",
+   "startLevel": 94,
+   "endLevel": null,
+   "diff": 3.1,
+   "bossAt": 0,
+   "enemies": [
+    "kui2",
+    "dajinxiu",
+    "gui2"
+   ],
+   "boss": {
+    "kind": "mo",
+    "name": "阴罗宗大长老·乾老魔",
+    "hp": 30000,
+    "spd": 60,
+    "dmg": 70,
+    "r": 22,
+    "spr": "linmo",
+    "scale": 5.8
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": "dajin",
+   "next": "zhenmo",
+   "unlockBy": null,
+   "reward": {
+    "stones": 5000,
+    "items": [
+     "t_wuzi"
+    ],
+    "mats": [
+     [
+      "m_gangyin",
+      3
+     ],
+     [
+      "m_gengjing",
+      3
+     ]
+    ]
+   }
+  },
+  {
+   "id": "zhenmo",
+   "name": "镇魔塔",
+   "pos": "昆吾山·镇魔塔 第九层",
+   "arc": "G",
+   "side": false,
+   "type": "boss",
+   "startLevel": 96,
+   "endLevel": null,
+   "diff": 3.15,
+   "bossAt": 0,
+   "enemies": [
+    "gui2",
+    "kui2",
+    "dajinxiu"
+   ],
+   "boss": {
+    "kind": "blood",
+    "name": "元刹圣祖分魂",
+    "hp": 34000,
+    "spd": 62,
+    "dmg": 76,
+    "r": 23,
+    "spr": "guixiu",
+    "scale": 6.2
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": "kunwu",
+   "next": "xiaoji",
+   "unlockBy": null,
+   "reward": {
+    "stones": 6000,
+    "items": [
+     "t_pojie"
+    ],
+    "mats": [
+     [
+      "m_gangyin",
+      4
+     ],
+     [
+      "m_yanghun",
+      4
+     ]
+    ]
+   }
+  },
+  {
+   "id": "xiaoji",
+   "name": "小极宫",
+   "pos": "北夜·小极宫",
+   "arc": "G",
+   "side": false,
+   "type": "combat",
+   "startLevel": 98,
+   "endLevel": null,
+   "diff": 3.2,
+   "bossAt": 120,
+   "enemies": [
+    "yaoshou2",
+    "kui2",
+    "dajinxiu"
+   ],
+   "boss": {
+    "kind": "mo",
+    "name": "寒俪上人",
+    "hp": 32000,
+    "spd": 58,
+    "dmg": 72,
+    "r": 21,
+    "spr": "neimen",
+    "scale": 5.6
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": "zhenmo",
+   "next": "xutian2",
+   "unlockBy": null,
+   "reward": {
+    "stones": 5200,
+    "pets": [
+     "p_bingfeng"
+    ],
+    "mats": [
+     [
+      "m_xuanbing",
+      3
+     ],
+     [
+      "m_hanhuo",
+      2
+     ]
+    ]
+   }
+  },
+  {
+   "id": "xutian2",
+   "name": "虚天殿·闭关",
+   "pos": "乱星海·虚天殿",
+   "arc": "G",
+   "side": false,
+   "type": "story",
+   "startLevel": 98,
+   "endLevel": 102,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": null,
+   "auction": null,
+   "unlock": "xiaoji",
+   "next": "xinggong",
+   "unlockBy": null,
+   "reward": {
+    "stones": 4000,
+    "items": [
+     "a_tiancan"
+    ],
+    "mats": [
+     [
+      "m_gangyin",
+      4
+     ]
+    ]
+   }
+  },
+  {
+   "id": "xinggong",
+   "name": "乱星海·星宫",
+   "pos": "乱星海·天星城 星宫",
+   "arc": "H",
+   "side": false,
+   "type": "story",
+   "startLevel": 102,
+   "endLevel": null,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": null,
+   "auction": null,
+   "unlock": "xutian2",
+   "next": "kunpeng",
+   "unlockBy": null,
+   "reward": {
+    "stones": 5000,
+    "mats": [
+     [
+      "m_gengjing",
+      3
+     ],
+     [
+      "m_gangyin",
+      3
+     ]
+    ]
+   }
+  },
+  {
+   "id": "kunpeng",
+   "name": "鲲鹏之战",
+   "pos": "乱星海·外海",
+   "arc": "H",
+   "side": false,
+   "type": "story",
+   "startLevel": 104,
+   "endLevel": null,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": null,
+   "auction": null,
+   "unlock": "xinggong",
+   "next": "luoyun2",
+   "unlockBy": null,
+   "reward": {
+    "stones": 3000,
+    "mats": [
+     [
+      "m_kunpeng",
+      1
+     ],
+     [
+      "m_yaodan",
+      6
+     ]
+    ]
+   }
+  },
+  {
+   "id": "luoyun2",
+   "name": "落云宗立威",
+   "pos": "天南·云梦山 落云宗",
+   "arc": "H",
+   "side": false,
+   "type": "boss",
+   "startLevel": 106,
+   "endLevel": null,
+   "diff": 3.3,
+   "bossAt": 0,
+   "enemies": [
+    "zhengdao",
+    "moxiu2",
+    "kui2"
+   ],
+   "boss": {
+    "kind": "mo",
+    "name": "天南二修·合击",
+    "hp": 40000,
+    "spd": 62,
+    "dmg": 84,
+    "r": 22,
+    "spr": "neimen",
+    "scale": 5.8
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": "kunpeng",
+   "next": "tianlan",
+   "unlockBy": null,
+   "reward": {
+    "stones": 7000,
+    "mats": [
+     [
+      "m_gengjing",
+      4
+     ],
+     [
+      "m_gangyin",
+      4
+     ]
+    ]
+   }
+  },
+  {
+   "id": "tianlan",
+   "name": "天澜圣兽·雷劫",
+   "pos": "天澜草原·圣山",
+   "arc": "H",
+   "side": false,
+   "type": "story",
+   "startLevel": 108,
+   "endLevel": null,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": null,
+   "auction": null,
+   "unlock": "luoyun2",
+   "next": "liudao",
+   "unlockBy": null,
+   "reward": {
+    "stones": 4000,
+    "mats": [
+     [
+      "m_hanhuo",
+      2
+     ],
+     [
+      "m_gangyin",
+      2
+     ]
+    ]
+   }
+  },
+  {
+   "id": "liudao",
+   "name": "乱星海·斩六道",
+   "pos": "乱星海·天星城",
+   "arc": "H",
+   "side": false,
+   "type": "boss",
+   "startLevel": 110,
+   "endLevel": null,
+   "diff": 3.4,
+   "bossAt": 0,
+   "enemies": [
+    "gui2",
+    "kui2",
+    "dajinxiu"
+   ],
+   "boss": {
+    "kind": "mo",
+    "name": "六道·万天明之身",
+    "hp": 46000,
+    "spd": 64,
+    "dmg": 92,
+    "r": 23,
+    "spr": "mo",
+    "scale": 6
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": "tianlan",
+   "next": "jiezi",
+   "unlockBy": null,
+   "reward": {
+    "stones": 8000,
+    "mats": [
+     [
+      "m_gangyin",
+      5
+     ],
+     [
+      "m_gengjing",
+      5
+     ]
+    ]
+   }
+  },
+  {
+   "id": "jiezi",
+   "name": "坠魔谷·芥子空间",
+   "pos": "天南·坠魔谷 内谷",
+   "arc": "H",
+   "side": false,
+   "type": "story",
+   "startLevel": 106,
+   "endLevel": 112,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": null,
+   "auction": null,
+   "unlock": "liudao",
+   "next": "feisheng",
+   "unlockBy": null,
+   "reward": {
+    "stones": 6000,
+    "items": [
+     "yuanci",
+     "moyuan",
+     "t_yuanci"
+    ],
+    "mats": [
+     [
+      "m_hanhuo",
+      2
+     ]
+    ]
+   }
+  },
+  {
+   "id": "feisheng",
+   "name": "五龙海·飞升",
+   "pos": "五龙海·空间节点",
+   "arc": "H",
+   "side": false,
+   "type": "story",
+   "startLevel": 126,
+   "endLevel": 132,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": null,
+   "auction": null,
+   "unlock": "jiezi",
+   "next": null,
+   "unlockBy": null,
+   "reward": {
+    "stones": 12000,
+    "mats": [
+     [
+      "m_kunpeng",
+      1
+     ]
+    ]
+   }
+  },
+  {
+   "id": "fujia",
+   "name": "元武国·付家",
+   "pos": "元武国·付家堡",
+   "arc": "F",
+   "side": true,
+   "type": "combat",
+   "startLevel": 84,
+   "endLevel": null,
+   "diff": 2.65,
+   "bossAt": 110,
+   "enemies": [
+    "zhengdao",
+    "moxiu2",
+    "kui"
+   ],
+   "boss": {
+    "kind": "mo",
+    "name": "付家家主",
+    "hp": 15000,
+    "spd": 60,
+    "dmg": 50,
+    "r": 20,
+    "spr": "neimen",
+    "scale": 5.2
+   },
+   "shop": null,
+   "auction": null,
+   "unlock": null,
+   "next": null,
+   "unlockBy": "e_fujia",
+   "reward": {
+    "stones": 2600,
+    "pets": [
+     "p_liuyi"
+    ],
+    "mats": [
+     [
+      "m_gengjing",
+      2
+     ],
+     [
+      "m_yusui",
+      4
+     ]
+    ]
+   }
+  },
+  {
+   "id": "huixiang",
+   "name": "越国·韩家村",
+   "pos": "越国·镜州 山边小村",
+   "arc": "F",
+   "side": true,
+   "type": "story",
+   "startLevel": 82,
+   "endLevel": null,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": null,
+   "auction": null,
+   "unlock": null,
+   "next": null,
+   "unlockBy": "e_huixiang",
+   "reward": {
+    "stones": 800,
+    "mats": [
+     [
+      "m_yusui",
+      3
+     ]
+    ]
+   }
+  },
+  {
+   "id": "zijian",
+   "name": "乱星海·紫灵",
+   "pos": "乱星海·妙音门旧地",
+   "arc": "H",
+   "side": true,
+   "type": "story",
+   "startLevel": 92,
+   "endLevel": null,
+   "diff": null,
+   "bossAt": null,
+   "enemies": [],
+   "boss": null,
+   "shop": null,
+   "auction": null,
+   "unlock": null,
+   "next": null,
+   "unlockBy": "e_zijian",
+   "reward": {
+    "stones": 3000,
+    "mats": [
+     [
+      "m_yaodan",
+      5
+     ],
+     [
+      "m_gangyin",
+      2
+     ]
+    ]
+   }
+  }
+ ],
+ "encs": [
+  {
+   "id": "e_zhou",
+   "name": "采药人 老周",
+   "map": "houshan",
+   "unlock": "mkuang",
+   "cond": null,
+   "repeat": false,
+   "reward": {
+    "stones": 20,
+    "mats": [
+     [
+      "m_chijing",
+      2
+     ]
+    ]
+   },
+   "n": 7
+  },
+  {
+   "id": "e_li",
+   "name": "同门 厉飞雨",
+   "map": "houshan",
+   "unlock": "yanwu",
+   "cond": {
+    "level": 8
+   },
+   "repeat": false,
+   "reward": {
+    "stones": 40
+   },
+   "n": 7
+  },
+  {
+   "id": "e_tie",
+   "name": "张铁的铁匠棚",
+   "map": "houshan",
+   "unlock": "zhangtie",
+   "cond": {
+    "level": 7,
+    "cleared": [
+     "mishi"
+    ]
+   },
+   "repeat": false,
+   "reward": {
+    "stones": 60,
+    "items": [
+     "t_zhangtie"
+    ]
+   },
+   "n": 5
+  },
+  {
+   "id": "e_xingnang",
+   "name": "山贼丢下的行囊",
+   "map": "houshan",
+   "unlock": null,
+   "cond": null,
+   "repeat": true,
+   "reward": {
+    "stones": 30,
+    "mats": [
+     [
+      "m_jingtie",
+      2
+     ]
+    ]
+   },
+   "n": 2
+  },
+  {
+   "id": "e_danfang",
+   "name": "密室角落的丹炉",
+   "map": "mishi",
+   "unlock": null,
+   "cond": null,
+   "repeat": true,
+   "reward": {
+    "stones": 40,
+    "mats": [
+     [
+      "m_lingmo",
+      1
+     ],
+     [
+      "m_yusui",
+      1
+     ]
+    ]
+   },
+   "n": 3
+  },
+  {
+   "id": "e_huo",
+   "name": "兜售黑货的散修",
+   "map": "tainan",
+   "unlock": "heixiang",
+   "cond": null,
+   "repeat": false,
+   "reward": {
+    "stones": 0
+   },
+   "n": 6
+  },
+  {
+   "id": "e_qingyan",
+   "name": "青颜真人",
+   "map": "tainan",
+   "unlock": null,
+   "cond": null,
+   "repeat": false,
+   "reward": {
+    "stones": 20
+   },
+   "n": 7
+  },
+  {
+   "id": "e_yaotong",
+   "name": "药童 小禾",
+   "map": "yaoyuan",
+   "unlock": "yaopu",
+   "cond": {
+    "level": 10
+   },
+   "repeat": false,
+   "reward": {
+    "stones": 30
+   },
+   "n": 6
+  },
+  {
+   "id": "e_luxiong",
+   "name": "内门弟子 陆师兄",
+   "map": "yaoyuan",
+   "unlock": "luxiong",
+   "cond": {
+    "level": 12,
+    "cleared": [
+     "huangfeng"
+    ]
+   },
+   "repeat": false,
+   "reward": {
+    "stones": 0
+   },
+   "n": 8
+  },
+  {
+   "id": "e_shang",
+   "name": "受伤的守园弟子",
+   "map": "yaoyuan",
+   "unlock": null,
+   "cond": null,
+   "repeat": true,
+   "reward": {
+    "stones": 25,
+    "heal": 0.15
+   },
+   "n": 5
+  },
+  {
+   "id": "e_moxiu",
+   "name": "重伤的魔修",
+   "map": "xuese",
+   "unlock": "xuechi",
+   "cond": null,
+   "repeat": false,
+   "reward": {
+    "stones": 0
+   },
+   "n": 6
+  },
+  {
+   "id": "e_yihai",
+   "name": "七派弟子的遗体",
+   "map": "xuese",
+   "unlock": null,
+   "cond": {
+    "level": 20
+   },
+   "repeat": false,
+   "reward": {
+    "stones": 60,
+    "mats": [
+     [
+      "m_yusui",
+      1
+     ]
+    ],
+    "items": [
+     "zhuji"
+    ]
+   },
+   "n": 6
+  },
+  {
+   "id": "e_kuanggong",
+   "name": "迷路的矿工",
+   "map": "mkuang",
+   "unlock": null,
+   "cond": null,
+   "repeat": true,
+   "reward": {
+    "stones": 20,
+    "mats": [
+     [
+      "m_jingtie",
+      2
+     ],
+     [
+      "m_chitong",
+      1
+     ]
+    ]
+   },
+   "n": 5
+  },
+  {
+   "id": "e_lin",
+   "name": "同门 林师兄",
+   "map": "yaoyuan",
+   "unlock": "linxiong",
+   "cond": {
+    "level": 36,
+    "cleared": [
+     "zhuji"
+    ]
+   },
+   "repeat": false,
+   "reward": {
+    "stones": 0
+   },
+   "n": 7
+  },
+  {
+   "id": "e_liujing",
+   "name": "三师兄 刘靖",
+   "map": "yanjia",
+   "unlock": "heisha",
+   "cond": {
+    "level": 36,
+    "cleared": [
+     "zhuji"
+    ]
+   },
+   "repeat": false,
+   "reward": {
+    "stones": 120
+   },
+   "n": 9
+  },
+  {
+   "id": "e_captain",
+   "name": "正道小队 队长",
+   "map": "yanjia",
+   "unlock": "shiku",
+   "cond": {
+    "level": 38,
+    "cleared": [
+     "yanjia"
+    ]
+   },
+   "repeat": false,
+   "reward": {
+    "stones": 100
+   },
+   "n": 8
+  },
+  {
+   "id": "e_wangning",
+   "name": "妙音门 紫灵",
+   "map": "tianxing",
+   "unlock": "qingzhu",
+   "cond": {
+    "level": 56,
+    "cleared": [
+     "jiedan"
+    ]
+   },
+   "repeat": false,
+   "reward": {
+    "stones": 200
+   },
+   "n": 8
+  },
+  {
+   "id": "e_jinqing",
+   "name": "散修 金青",
+   "map": "ningcui",
+   "unlock": "guxiu",
+   "cond": {
+    "level": 54,
+    "cleared": [
+     "haian"
+    ]
+   },
+   "repeat": false,
+   "reward": {
+    "stones": 160
+   },
+   "n": 6
+  },
+  {
+   "id": "e_yuyao",
+   "name": "女修 元瑶",
+   "map": "ningcui",
+   "unlock": null,
+   "cond": {
+    "level": 50,
+    "cleared": [
+     "liulian"
+    ]
+   },
+   "repeat": false,
+   "reward": {
+    "stones": 0,
+    "heal": 0.4
+   },
+   "n": 6
+  },
+  {
+   "id": "e_yufu",
+   "name": "船上的老渔夫",
+   "map": "liulian",
+   "unlock": null,
+   "cond": null,
+   "repeat": true,
+   "reward": {
+    "stones": 60,
+    "mats": [
+     [
+      "m_yaodan",
+      1
+     ],
+     [
+      "m_banyao",
+      1
+     ]
+    ]
+   },
+   "n": 4
+  },
+  {
+   "id": "e_haishi",
+   "name": "船上的海市散修",
+   "map": "liulian",
+   "unlock": null,
+   "cond": null,
+   "repeat": true,
+   "reward": {
+    "stones": 80,
+    "mats": [
+     [
+      "m_yusui",
+      1
+     ],
+     [
+      "m_xueyu",
+      1
+     ]
+    ]
+   },
+   "n": 4
+  },
+  {
+   "id": "e_fujia",
+   "name": "辛如音的旧识",
+   "map": "sanjian",
+   "unlock": "fujia",
+   "cond": {
+    "level": 80,
+    "cleared": [
+     "jieying"
+    ]
+   },
+   "repeat": false,
+   "reward": {
+    "stones": 200
+   },
+   "n": 6
+  },
+  {
+   "id": "e_huixiang",
+   "name": "越国来的散修",
+   "map": "sanjian",
+   "unlock": "huixiang",
+   "cond": {
+    "level": 82,
+    "cleared": [
+     "jieying"
+    ]
+   },
+   "repeat": false,
+   "reward": {
+    "stones": 0
+   },
+   "n": 5
+  },
+  {
+   "id": "e_zijian",
+   "name": "妙音门 紫灵",
+   "map": "zhuimo",
+   "unlock": "zijian",
+   "cond": {
+    "level": 90,
+    "cleared": [
+     "jixi"
+    ]
+   },
+   "repeat": false,
+   "reward": {
+    "stones": 300
+   },
+   "n": 7
+  }
+ ],
+ "brk": [
+  {
+   "lv": 36,
+   "from": "炼气十三层",
+   "realm": "筑基初期",
+   "items": [
+    [
+     "zhuji",
+     1
+    ]
+   ],
+   "mats": [
+    [
+     "m_yusuizhi",
+     3
+    ],
+    [
+     "m_zihua",
+     3
+    ],
+    [
+     "m_tianling",
+     3
+    ]
+   ],
+   "stones": 300,
+   "needs": [],
+   "story": [
+    {
+     "id": "zhuji",
+     "name": "黄枫谷·地火之屋"
+    }
+   ],
+   "chance": {
+    "step": 0.1
+   }
+  },
+  {
+   "lv": 56,
+   "from": "筑基后期",
+   "realm": "结丹初期",
+   "items": [
+    [
+     "xueling",
+     1
+    ],
+    [
+     "tianhuo",
+     1
+    ]
+   ],
+   "mats": [],
+   "stones": 1200,
+   "needs": [],
+   "story": [
+    {
+     "id": "tianxing",
+     "name": "天星城·洞府闭关"
+    }
+   ],
+   "chance": {
+    "min": 0.5,
+    "booster": "jiangchen",
+    "step": 0.1
+   }
+  },
+  {
+   "lv": 82,
+   "from": "结丹后期",
+   "realm": "元婴初期",
+   "items": [
+    [
+     "jiuqu",
+     1
+    ],
+    [
+     "dianling",
+     1
+    ]
+   ],
+   "mats": [],
+   "stones": 3000,
+   "needs": [
+    [
+     "butian",
+     1
+    ]
+   ],
+   "story": [
+    {
+     "id": "jieying",
+     "name": "云梦山·结婴"
+    }
+   ],
+   "chance": {
+    "min": 1
+   }
+  },
+  {
+   "lv": 112,
+   "from": "元婴后期",
+   "realm": "化神初期",
+   "items": [
+    [
+     "moyuan",
+     1
+    ]
+   ],
+   "mats": [
+    [
+     "m_hanhuo",
+     5
+    ],
+    [
+     "m_yuanci",
+     1
+    ]
+   ],
+   "stones": 8000,
+   "needs": [],
+   "story": [
+    {
+     "id": "jixi",
+     "name": "极西之地·元磁神山"
+    },
+    {
+     "id": "tianxing",
+     "name": "天星城·洞府闭关"
+    }
+   ],
+   "chance": {
+    "step": 0.34
+   }
+  }
+ ],
+ "caves": [
+  {
+   "id": "qixuan",
+   "name": "药庐草舍",
+   "from": "qixuan",
+   "capLevel": 16,
+   "restStone": 30,
+   "restXp": 0.34
+  },
+  {
+   "id": "huangfeng",
+   "name": "百药园草庐",
+   "from": "huangfeng",
+   "capLevel": 26,
+   "restStone": 60,
+   "restXp": 0.3
+  },
+  {
+   "id": "cuiping",
+   "name": "翠屏山洞府",
+   "from": "zhuji",
+   "capLevel": 58,
+   "restStone": 120,
+   "restXp": 0.28
+  },
+  {
+   "id": "xiaohuan",
+   "name": "小寰岛洞府",
+   "from": "kuixing",
+   "capLevel": 70,
+   "restStone": 200,
+   "restXp": 0.26
+  },
+  {
+   "id": "qingzhuxuan",
+   "name": "青竹小轩",
+   "from": "qingzhu",
+   "capLevel": 80,
+   "restStone": 320,
+   "restXp": 0.24
+  },
+  {
+   "id": "luoyun",
+   "name": "落云宗洞府",
+   "from": "jieying",
+   "capLevel": 98,
+   "restStone": 420,
+   "restXp": 0.22
+  },
+  {
+   "id": "foxin",
+   "name": "大晋·佛宗别院",
+   "from": "dajin",
+   "capLevel": 112,
+   "restStone": 560,
+   "restXp": 0.2
+  },
+  {
+   "id": "jiezi",
+   "name": "坠魔谷·芥子空间",
+   "from": "jiezi",
+   "capLevel": 140,
+   "restStone": 700,
+   "restXp": 0.18
+  }
+ ],
+ "pets": [
+  {
+   "id": "p_tihun",
+   "name": "啼魂兽",
+   "dmg": 0.5,
+   "rate": 1,
+   "from": "阴冥之地",
+   "desc": "阴冥之地捡的小兽，叫声能震散阴魂。"
+  },
+  {
+   "id": "p_shijin",
+   "name": "噬金虫",
+   "dmg": 0.42,
+   "rate": 0.8,
+   "from": "海猿岛",
+   "desc": "一窝金虫，见石就啃。养到后来，连法宝都咬。"
+  },
+  {
+   "id": "p_liuyi",
+   "name": "六翼霜蚣",
+   "dmg": 0.62,
+   "rate": 1.1,
+   "from": "落云宗",
+   "desc": "背生六翼的霜蚣，飞过之处结霜。"
+  },
+  {
+   "id": "p_yinyue",
+   "name": "银月",
+   "dmg": 0.7,
+   "rate": 0.9,
+   "from": "落云宗",
+   "desc": "器灵之身。一只银白小狼，跟着他很多年。"
+  },
+  {
+   "id": "p_kui",
+   "name": "元婴后期傀儡",
+   "dmg": 0.9,
+   "rate": 1.3,
+   "from": "极西之地",
+   "desc": "大衍神君毕生心血。不会说话，只服从一个人。"
+  },
+  {
+   "id": "p_bingfeng",
+   "name": "冰凤",
+   "dmg": 1,
+   "rate": 1.2,
+   "from": "小极宫",
+   "desc": "十级冰凤，性子傲。肯跟着，是因为打不过。"
+  },
+  {
+   "id": "p_xueyu",
+   "name": "血玉蜘蛛",
+   "dmg": 0.5,
+   "rate": 0.95,
+   "from": "灵石矿洞",
+   "desc": "卵壳上爬着血丝，摸上去是暖的。成对才肯进阶，蛛丝连乾蓝冰焰都不怕。"
+  },
+  {
+   "id": "p_yunchi",
+   "name": "云翅鸟",
+   "dmg": 0.34,
+   "rate": 0.7,
+   "from": "七玄门",
+   "desc": "墨大夫养来盯人的小黄鸟。飞得快，眼睛也毒。"
+  },
+  {
+   "id": "p_mojiao",
+   "name": "墨蛟",
+   "dmg": 0.8,
+   "rate": 1.25,
+   "from": "血色禁地",
+   "desc": "潭底淤泥里挖出来的卵，沉得压手。蛟性凶，得从小养。"
+  }
+ ],
+ "mates": [
+  {
+   "id": "m_nangongwan",
+   "name": "南宫婉",
+   "dmg": 0.75,
+   "rate": 1,
+   "from": "血色禁地",
+   "leave": "掩月宗线后冰封期，强制离队（剧情）；解冻前不可出战。",
+   "desc": "掩月宗结丹女修。血色禁地那一夜，是两人都不愿再提、也忘不掉的。"
+  },
+  {
+   "id": "m_yuanyao",
+   "name": "元瑶",
+   "dmg": 0.62,
+   "rate": 1.05,
+   "from": "乱星海",
+   "leave": "借尸还魂修行期，强制离队（剧情）；还魂功成前不可出战。",
+   "desc": "魁星岛的小门派女修。为了师姐，什么都肯做。"
+  },
+  {
+   "id": "m_dayanshenjun",
+   "name": "大衍神君",
+   "dmg": 0.95,
+   "rate": 1.35,
+   "from": "极西之地",
+   "leave": "",
+   "desc": "千竹教的大衍诀是他写的。如今只剩一缕神念，住在袖子里指手画脚。"
+  }
+ ],
+ "skills": [
+  {
+   "id": "sword",
+   "name": "御剑术",
+   "minLv": 1,
+   "max": 6,
+   "type": "ranged",
+   "base": 8,
+   "perLv": 3,
+   "cd": 0.85,
+   "main": true,
+   "desc": "御使飞剑，自动锁定最近之敌。七玄门剑修根基，韩立最早会的攻击术"
+  },
+  {
+   "id": "fire",
+   "name": "火蛇符",
+   "minLv": 5,
+   "max": 5,
+   "type": "ranged_aoe",
+   "base": 9,
+   "perLv": 4,
+   "cd": 2,
+   "main": false,
+   "desc": "放出追踪火蛇，缠绕敌身。韩立早年期自炼符箓"
+  },
+  {
+   "id": "orb",
+   "name": "玄罡护体",
+   "minLv": 8,
+   "max": 5,
+   "type": "aura",
+   "base": 5,
+   "perLv": 2,
+   "main": false,
+   "desc": "庚金玄罡环绕周身，触敌即伤。贴身近战之法，韩立早年淬体护身"
+  },
+  {
+   "id": "nova",
+   "name": "金光符",
+   "minLv": 12,
+   "max": 5,
+   "type": "ranged_aoe",
+   "base": 10,
+   "perLv": 5,
+   "main": false,
+   "desc": "周期性金光爆发，范围杀伤。韩立常用的金光类符箓"
+  },
+  {
+   "id": "frost",
+   "name": "玄冰符",
+   "minLv": 20,
+   "max": 5,
+   "type": "aura",
+   "base": 2,
+   "perLv": 1,
+   "main": false,
+   "desc": "身周凝出冰霜领域，近身之敌移速大减。韩立参悟的冰霜符箓"
+  },
+  {
+   "id": "changchun",
+   "name": "长春功",
+   "minLv": 1,
+   "max": 6,
+   "type": "passive",
+   "base": null,
+   "perLv": null,
+   "cd": null,
+   "main": false,
+   "desc": "墨大夫传授的引气吐纳根基，韩立练气期的根本功法。缓缓回血，修为略进"
+  },
+  {
+   "id": "swift",
+   "name": "罗烟步",
+   "minLv": 1,
+   "max": 5,
+   "type": "passive",
+   "base": null,
+   "perLv": null,
+   "cd": null,
+   "main": false,
+   "desc": "血色禁地所得身法真传，步法如烟，移速大增"
+  },
+  {
+   "id": "regen",
+   "name": "回春诀",
+   "minLv": 10,
+   "max": 5,
+   "type": "passive",
+   "base": null,
+   "perLv": null,
+   "cd": null,
+   "main": false,
+   "desc": "缓缓回血，久战不竭。韩立借灵药丹力"
+  },
+  {
+   "id": "magnet",
+   "name": "聚灵术",
+   "minLv": 1,
+   "max": 5,
+   "type": "passive",
+   "base": null,
+   "perLv": null,
+   "cd": null,
+   "main": false,
+   "desc": "广布灵识，灵石自行来投。借掌天瓶之能炼出的聚灵之法"
+  },
+  {
+   "id": "haste",
+   "name": "迅雷诀",
+   "minLv": 15,
+   "max": 5,
+   "type": "passive",
+   "base": null,
+   "perLv": null,
+   "cd": null,
+   "main": false,
+   "desc": "吐纳如雷，出手更急。所有攻击间隔随之缩短，韩立后期参悟的急攻之术"
+  },
+  {
+   "id": "gourd",
+   "name": "灵葫诀",
+   "minLv": 25,
+   "max": 5,
+   "type": "passive",
+   "base": null,
+   "perLv": null,
+   "cd": null,
+   "main": false,
+   "desc": "本命灵葫在身，生命上限提升，灵草常落"
+  },
+  {
+   "id": "qingyuan",
+   "name": "青元剑诀",
+   "minLv": 36,
+   "max": 7,
+   "type": "passive",
+   "base": null,
+   "perLv": null,
+   "cd": null,
+   "main": false,
+   "desc": "青元子创立的剑道根本，韩立筑基后期补全。御剑更利、出手更疾，是刻在他一辈子里的剑法"
+  },
+  {
+   "id": "dayan",
+   "name": "大衍诀",
+   "minLv": 36,
+   "max": 7,
+   "type": "passive",
+   "base": null,
+   "perLv": null,
+   "cd": null,
+   "main": false,
+   "desc": "元神培炼之法，前四层。神识大增，出手更狠"
+  },
+  {
+   "id": "xuemo",
+   "name": "血魔剑诀",
+   "minLv": 56,
+   "max": 6,
+   "type": "ranged",
+   "base": 16,
+   "perLv": 6,
+   "cd": 1.1,
+   "main": false,
+   "desc": "血魔剑配套剑诀，血煞剑气破体而出。掩月宗大长老的佩剑连同这套剑法，一起换了主人"
+  },
+  {
+   "id": "sanyan",
+   "name": "三焰扇",
+   "minLv": 56,
+   "max": 6,
+   "type": "ranged_aoe",
+   "base": 11,
+   "perLv": 4,
+   "cd": 2.6,
+   "main": false,
+   "desc": "虚天殿所得古宝扇形仿法，三色火扇一扇到底，正面一片都过不去"
+  },
+  {
+   "id": "fenglei",
+   "name": "风雷翅",
+   "minLv": 56,
+   "max": 6,
+   "type": "passive",
+   "base": null,
+   "perLv": null,
+   "cd": null,
+   "main": false,
+   "desc": "乱星海炼器所得飞行翼，背生双翼，闪转腾挪都快人一线"
+  },
+  {
+   "id": "tianzhu",
+   "name": "天蛛诀",
+   "minLv": 56,
+   "max": 6,
+   "type": "passive",
+   "base": null,
+   "perLv": null,
+   "cd": null,
+   "main": false,
+   "desc": "天蛛岛所得操控法，灵识铺得更开，落物都逃不掉"
+  },
+  {
+   "id": "tongbao",
+   "name": "通宝诀",
+   "minLv": 56,
+   "max": 6,
+   "type": "passive",
+   "base": null,
+   "perLv": null,
+   "cd": null,
+   "main": false,
+   "desc": "虚天残图所藏敛财储物之术，灵石灵草自己往身上滚"
+  },
+  {
+   "id": "dayan2",
+   "name": "大衍诀·后三层",
+   "minLv": 82,
+   "max": 7,
+   "type": "passive",
+   "base": null,
+   "perLv": null,
+   "cd": null,
+   "main": false,
+   "desc": "大衍神君亲手补全的那半卷。神识通天，看一眼就能想明白对方下一招往哪去"
+  },
+  {
+   "id": "leishen",
+   "name": "辟邪神雷",
+   "minLv": 82,
+   "max": 7,
+   "type": "ranged_aoe",
+   "base": 14,
+   "perLv": 6,
+   "cd": 2.4,
+   "main": false,
+   "desc": "韩立专修克制魔功的神雷，以金雷竹为引，自天劈落。魔道见此雷，先矮三分"
+  },
+  {
+   "id": "qinxian",
+   "name": "七弦琴",
+   "minLv": 82,
+   "max": 7,
+   "type": "ranged_aoe",
+   "base": 16,
+   "perLv": 6,
+   "main": false,
+   "desc": "元婴期音攻手段，魔音化作环形波纹荡开，远近皆伤"
+  },
+  {
+   "id": "yuanci",
+   "name": "元磁神光",
+   "minLv": 102,
+   "max": 7,
+   "type": "aura",
+   "base": 10,
+   "perLv": 8,
+   "main": false,
+   "desc": "元磁山炼化之后的重力神光，破化神的门。场中人动不了，还得一直挨"
+  },
+  {
+   "id": "wuzi",
+   "name": "五子同心魔",
+   "minLv": 102,
+   "max": 7,
+   "type": "passive",
+   "base": null,
+   "perLv": null,
+   "cd": null,
+   "main": false,
+   "desc": "昆吾山所得子母魔头操控法，五魔分神助战，出手更毒"
+  },
+  {
+   "id": "pojie",
+   "name": "破界符·空间诀",
+   "minLv": 112,
+   "max": 7,
+   "type": "passive",
+   "base": null,
+   "perLv": null,
+   "cd": null,
+   "main": false,
+   "desc": "玲珑所留的飞升之凭，空间之力加身。握着它，才知道什么叫界外还有界"
+  },
+  {
+   "id": "sanzhong",
+   "name": "三转重元功",
+   "minLv": 50,
+   "max": 3,
+   "type": "passive",
+   "base": null,
+   "perLv": null,
+   "cd": null,
+   "main": false,
+   "desc": "散功重修三次，每转一回境界更厚。结丹可选前置，转满三次再结丹，成色自不相同。"
+  }
+ ],
+ "names": {
+  "huiqi": "止血丹",
+  "lingzhi": "辟谷丹",
+  "lingshi": "下品灵石",
+  "peiyuan": "疗元丹",
+  "huanglong": "黄龙丹",
+  "jinsui": "金髓丸",
+  "zhuji": "筑基丹",
+  "qingyan": "轻身符",
+  "xueshen": "火弹符",
+  "shenxing": "神行符",
+  "jifeng": "爆裂符",
+  "qiannian": "清心符",
+  "lianqi": "破禁符",
+  "bichen": "避尘符",
+  "chuansong": "空间传送符",
+  "tishen": "替身傀儡",
+  "baoliebao": "爆裂符宝",
+  "changchun": "长春功",
+  "zhangtian": "掌天瓶绿液",
+  "jipin": "极品灵石",
+  "jingtie": "精铁短剑",
+  "money_sword": "金钱剑",
+  "chitong": "赤铜短戟",
+  "qingzhu": "青竹剑",
+  "moyu": "墨玉飞刀",
+  "xuantie": "玄铁重剑",
+  "a_bu": "粗布道袍",
+  "a_lupi": "鹿皮软甲",
+  "a_ruanwei": "软猬甲",
+  "a_hanyu": "寒玉甲",
+  "a_xuangui": "玄龟甲",
+  "t_mupai": "旧木牌",
+  "juling": "聚灵珠",
+  "t_xuanyu": "玄玉珠",
+  "t_tianlei": "天雷子",
+  "t_zhangtie": "张铁的铁牌",
+  "fb_huo": "火球符宝",
+  "fb_bing": "冰锥符宝",
+  "huyu": "护身玉符",
+  "fb_feng": "风刃符宝",
+  "qingyuan": "青元剑诀",
+  "dayan": "大衍诀",
+  "jiangchen": "降尘丹",
+  "xueling": "雪灵水",
+  "biyanjiu": "碧焰酒",
+  "haoyuan": "昊元丹",
+  "peiyin": "培婴丹",
+  "butian": "补天丹",
+  "w_qingzhu": "青竹蜂云剑",
+  "a_yunwen": "云纹法衣",
+  "t_shijin": "噬金虫袋",
+  "t_hunyuan": "混元钵",
+  "t_cantu": "虚天残图",
+  "t_dayi": "大挪移令",
+  "t_xutianding": "虚天鼎",
+  "t_yinyue": "银月",
+  "t_honghuang": "洪荒古宝",
+  "fb_jinkulou": "金骷髅符宝",
+  "fb_fenglei": "风雷翅",
+  "dayan2": "大衍诀·后三层",
+  "yuanci": "元磁神光",
+  "moyuan": "魔元丹",
+  "w_xuemo": "血魔剑",
+  "a_xuemo": "血魔甲",
+  "a_jiaolong": "蛟龙甲",
+  "a_tiancan": "天蚕衣",
+  "t_yanghuan": "阳环",
+  "t_guiluo": "鬼罗幡",
+  "t_yinluo": "阴罗蟠",
+  "t_wuzi": "五子同心魔",
+  "t_yuanci": "元磁山",
+  "fb_sanyan": "三焰扇",
+  "t_pojie": "破界符",
+  "t_kui": "元婴后期傀儡",
+  "t_zicheng": "紫铖兜",
+  "t_beiji": "北极元光指环",
+  "sk_swift": "罗烟步·法诀",
+  "sk_magnet": "聚灵术·法诀",
+  "sk_fire": "火蛇符·法诀",
+  "sk_orb": "玄罡护体·法诀",
+  "sk_regen": "回春诀·法诀",
+  "sk_nova": "金光符·法诀",
+  "sk_haste": "迅雷诀·法诀",
+  "sk_frost": "玄冰符·法诀",
+  "sk_gourd": "灵葫诀·炼法",
+  "sk_changchun": "长春功·法诀",
+  "sk_xuemo": "血魔剑诀·法诀",
+  "sk_sanyan": "三焰扇·扇法",
+  "sk_sanzhuan": "三转重元功·法诀",
+  "sk_fenglei": "风雷翅·炼法",
+  "sk_tianzhu": "身外化身·法诀",
+  "sk_tongbao": "明王诀·法诀",
+  "sk_leishen": "辟邪神雷·雷诀",
+  "sk_qinxian": "大庚剑阵·阵图",
+  "sk_xuanyin": "玄阴经·残卷",
+  "sk_wuzi": "五子同心魔·魔诀",
+  "sk_pojie": "破界符·空间诀",
+  "bag_ling": "灵兽袋",
+  "bag_ling2": "特制灵兽袋",
+  "ring_ling": "灵兽环",
+  "egg_yunchi": "云翅鸟卵",
+  "egg_mojiao": "墨蛟卵",
+  "tianhuo": "天火液",
+  "jiuqu": "九曲灵参丹",
+  "dianling": "定灵丹",
+  "sanzhong": "三转重元功",
+  "t_qingzhu": "青竹蜂云剑",
+  "lianzhi": "炼尸术残卷",
+  "gupu": "古朴小瓶",
+  "siling": "饲灵丸",
+  "zaohua": "造化丹",
+  "m_chijing": "赤精草",
+  "m_huangjing": "黄精",
+  "m_zihua": "紫猴花",
+  "m_tianling": "天灵果",
+  "m_yusuizhi": "玉髓芝",
+  "m_longlin": "龙鳞果",
+  "m_nishang": "霓裳草",
+  "m_jingtie": "精铁",
+  "m_chitong": "赤铜",
+  "m_xuantie": "玄铁",
+  "m_hantie": "寒铁",
+  "m_yusui": "玉髓",
+  "m_wolfdan": "妖狼内丹",
+  "m_shedan": "蛇胆",
+  "m_chongjing": "虫母晶核",
+  "m_xuesha": "血煞珠",
+  "m_shihui": "尸傀骨粉",
+  "m_fuzhi": "空白符纸",
+  "m_lingmo": "灵墨",
+  "m_yaodan": "妖丹",
+  "m_banyao": "伴妖草",
+  "m_jinlei": "金雷竹",
+  "m_lingru": "万年灵乳",
+  "m_yanghun": "养魂木",
+  "m_xueyu": "血玉",
+  "m_zhizhu": "血玉蜘蛛卵",
+  "m_gengjing": "庚精",
+  "m_chijingzhi": "三千年赤精芝",
+  "m_kuilei": "上古傀儡核",
+  "m_lingzhu": "灵烛果",
+  "m_yinzhi": "阴芝马",
+  "m_gangyin": "罡银沙",
+  "m_huodan": "火蟾兽内丹",
+  "m_hanhuo": "五色寒焰",
+  "m_jingang": "金刚舍利",
+  "m_kunpeng": "鲲鹏之羽",
+  "m_xuanbing": "万年玄冰",
+  "m_siling": "饲灵丸",
+  "m_zhuguo": "朱果",
+  "m_huoling": "火灵草",
+  "m_jiuqu": "九曲灵参",
+  "m_dingling": "定灵玉",
+  "m_ningshen": "凝神花",
+  "m_lingzhi": "灵芝",
+  "m_yuanci": "元磁神山核心",
+  "m_silingcao": "饲灵草",
+  "m_zaohuacao": "造化果",
+  "sword": "御剑术",
+  "fire": "火蛇符",
+  "orb": "玄罡护体",
+  "nova": "金光符",
+  "frost": "玄冰符",
+  "swift": "罗烟步",
+  "regen": "回春诀",
+  "magnet": "聚灵术",
+  "haste": "迅雷诀",
+  "gourd": "灵葫诀",
+  "xuemo": "血魔剑诀",
+  "sanyan": "三焰扇",
+  "fenglei": "风雷翅",
+  "tianzhu": "天蛛诀",
+  "tongbao": "通宝诀",
+  "leishen": "辟邪神雷",
+  "qinxian": "七弦琴",
+  "wuzi": "五子同心魔",
+  "pojie": "破界符·空间诀"
+ }
+}
