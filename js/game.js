@@ -184,7 +184,8 @@
         liUnlocked: !!s.liUnlocked,
         ach: (s.ach && typeof s.ach === 'object') ? s.ach : {},
         greenLiquid: s.greenLiquid || 0,
-        gift_zhuji: !!s.gift_zhuji
+        gift_zhuji: !!s.gift_zhuji,
+        wounded: (s.wounded && typeof s.wounded === 'object') ? s.wounded : null
       };
       // 老存档：已通关的剧情图自动补成洞府
       for (const id of save.cleared) { const m = MAPS.find(x => x.id === id); if (m && m.cave && save.caves.indexOf(m.cave) < 0) save.caves.push(m.cave); }
@@ -1519,6 +1520,40 @@
   window.MINOR_BREAKS = window.MINOR_BREAKS || [
     { lv: 72, realm: '结丹后期', item: 'biyanjiu', tip: '原著里韩立卡在结丹中期瓶颈，是借裂风兽一族酿的碧焰酒冲过去的。' }
   ];
+  // 修为受创后的重修：原著里韩立在小寰岛闭关、大量服食丹药——
+  // 一年回到练气九层，再一年重回筑基，又六年修成大衍诀第二层与身外化身，51 岁筑基后期。
+  window.REBUILD_STAGES = window.REBUILD_STAGES || [
+    { lv: 19, label: '闭关一年', to: '练气九层', stones: 600, canon: '一年，丹药不断，气感一层层接回来。' },
+    { lv: 36, label: '再闭关一年', to: '筑基初期', stones: 1600, canon: '又一年。灵液重新凝作真元，筑基那道坎第二次跨过去。' },
+    { lv: 48, label: '闭关六年', to: '筑基后期', stones: 3600, canon: '六年。大衍诀第二层成了，身外化身也立住了。' }
+  ];
+  function rebuildStageNext() {
+    if (!save.wounded) return null;
+    const lv = save.cultivate.level || 1;
+    for (const s of (window.REBUILD_STAGES || [])) if (s.lv > lv) return s;
+    return null;
+  }
+  function rebuildTo(lv) {
+    if (!save.wounded) { notify('修为未损 · 不必重修'); return false; }
+    const st = (window.REBUILD_STAGES || []).find(x => x.lv === lv);
+    if (!st) return false;
+    if ((save.cultivate.level || 1) >= st.lv) { notify('这一层已经修回来了'); return false; }
+    if ((save.stones || 0) < st.stones) { notify('灵石不足 · 需 ' + st.stones); Sfx.warn(); return false; }
+    save.stones -= st.stones;
+    save.cultivate.level = st.lv;
+    save.cultivate.xp = 0;
+    syncBestLevel();
+    if (G.player) {
+      G.player.level = st.lv; G.player.next = xpNeed(st.lv);
+      checkRealm(true); recalcMaxhp(); G.player.hp = G.player.maxhp;
+    }
+    clearWoundedIfDone();
+    writeSave();
+    banner(st.canon);
+    Sfx.levelup();
+    if (G.state === 'cave') renderCave();
+    return true;
+  }
   function minorReqFor(nextLv) {
     for (const m of (window.MINOR_BREAKS || [])) if (m.lv === nextLv) return m;
     return null;
@@ -3674,6 +3709,12 @@
     const m = MAPS.find(x => x.id === id);
     if (!m) return;
     if (save.unlocked.indexOf(id) < 0) { notify('此路尚未开启'); return; }
+    // 修为受创期间：比自身高出太多的战图不放行（原著里是闭完关、筑基后期才出海）
+    if (save.wounded && (m.type === 'combat' || m.type === 'boss') && (m.startLevel || 1) > (save.cultivate.level || 1) + 12) {
+      notify('修为未复 · 此图太凶，先回洞府闭关重修');
+      Sfx.warn();
+      return;
+    }
 
     G.mapId = id; G.map = m;
     G.diff = diffById(diffId || save.lastDiff || 'easy');
@@ -3682,11 +3723,12 @@
     resetRun();
 
     // 境界继承：取「存档永久修为」与「本图起点」的较高者 —— 回刷低级图不会倒退
+    // 但「修为受创」期间不吃图的下限：跌回练气四层，就是练气四层，得自己修回来
     const p = G.player;
     const cult = save.cultivate || { level: 1, skills: {} };
     // 记下「进来之前」的境界：有些人进图就会被图的下限抬上去（筑基 / 结丹）
     const realmBefore = realmName(Math.max(1, cult.level || 1));
-    p.level = Math.max(1, cult.level || 1, m.startLevel || 1);
+    p.level = Math.max(1, cult.level || 1, save.wounded ? 0 : (m.startLevel || 1));
     p.next = xpNeed(p.level);
     // 身上运转哪几门功法，由「已装配」决定；没装任何一门时自动运起主力
     p.skills = buildPlayerSkills(p.level, m);
@@ -3879,17 +3921,20 @@
       save.caves.push(m.cave);
       cave = CAVES[m.cave];
     }
-    // 古传送阵：为南宫婉疗伤，被吸走修为（原著跌回练气四层）——
-    // 这里按可玩性只跌两层、保底筑基初期，并给一段「重修期」经验翻倍，修回原层即止。
+    // 古传送阵：为南宫婉疗伤，修为被吸干 —— 原著第403章左右：跌回「练气四层」。
+    // 照原著照抄：真跌到练气四层。恢复不走打怪，走「回洞府闭关 + 大量服食丹药」，见 REBUILD_STAGES。
     if (m.id === 'guchuan' && !save.wounded) {
       const lv0 = save.cultivate.level || 1;
-      const lv1 = Math.max(36, lv0 - 2);
-      if (lv1 < lv0) {
-        save.wounded = { to: lv0, mult: 2 };
-        save.cultivate.level = lv1;
+      if (lv0 > 7) {
+        save.wounded = { to: lv0, mult: 1 };
+        // 练气四层在境界表里是 Lv7（Lv4 只是「练气二层」），别按数字直觉写 4
+        save.cultivate.level = 7;
         save.cultivate.xp = 0;
-        if (G.player) { G.player.level = lv1; G.player.next = xpNeed(lv1); checkRealm(true); recalcMaxhp(); G.player.hp = G.player.maxhp; }
-        G.woundedNote = '修为受创 · 跌至 ' + realmName(lv1) + '（重修期经验翻倍，修回 ' + realmName(lv0) + ' 即止）';
+        // 「历史最高」也一并压下去：洞府与属性面板都是取 max(修为, 最高) 显示境界，
+        // 不压的话跌了也看不出来，还会被当成本境去算功法位与装配。
+        save.best.level = 7;
+        if (G.player) { G.player.level = 7; G.player.next = xpNeed(7); checkRealm(true); recalcMaxhp(); G.player.hp = G.player.maxhp; }
+        G.woundedNote = '修为受创 · 跌回练气四层（原著如此）。回小寰岛洞府闭关重修，方能一层层补回';
       }
     }
     // 太南小会散场后，后巷才会有人（原著那两个散修际遇挂在小会上，坊市里刷不出人）
@@ -4657,7 +4702,26 @@
 
   function renderCaveBreak(lv) {
     const list = window.BREAKTHROUGH || [];
-    let html = '<div class="cave-sec"><div class="cs-title">突破</div>' +
+    let html = '';
+    // 修为受创：原著里跌回练气四层，靠在小寰岛闭关、大量服食丹药一层层修回来
+    if (save.wounded) {
+      html += '<div class="cave-sec"><div class="cs-title">重修 · 修为受创</div>' +
+        '<div class="cs-note">被南宫婉吸干修为，跌回 <b>练气四层</b>（原著如此）。' +
+        '原著里他在小寰岛闭府，大量服食丹药：<b>一年</b>回到练气九层，<b>再一年</b>重回筑基，' +
+        '<b>又六年</b>修成大衍诀第二层与身外化身，五十一岁筑基后期。眼下修到 <b>' + realmName(lv) + '</b>。</div>';
+      for (const st of (window.REBUILD_STAGES || [])) {
+        const done = lv >= st.lv;
+        const can = !done && (save.stones || 0) >= st.stones;
+        html += '<div class="cs-note">' + (done ? '✔ ' : '') + st.label + ' · 归 <b>' + st.to + '</b>' +
+          '（灵石 ' + st.stones + '）　' + st.canon + '</div>';
+        if (!done) {
+          html += '<button class="btn small' + (can ? '' : ' off') + '" data-rebuild="' + st.lv + '">' +
+            st.label + ' · 归' + st.to + '</button>';
+        }
+      }
+      html += '</div>';
+    }
+    html += '<div class="cave-sec"><div class="cs-title">突破</div>' +
       '<div class="cs-note">大境界不是刷满修为就能过。丹药、材料、灵石、剧情，四样齐备才谈得上冲关；' +
       '而冲关有成败 —— 破境丹押得越多把握越大（各境每枚的加成都不同），只带一枚，也只是赌一把。缺什么这里都写着。</div>';
     let pending = null;
@@ -5601,6 +5665,9 @@
       notify('掌天瓶催熟 · 灵宠修为大涨'); Sfx.levelup(); renderCave();
       return;
     }
+    // 重修：闭关一年/六年，把跌掉的修为补回来（原著小寰岛闭关服丹的路子）
+    const rb = e.target.closest('button[data-rebuild]');
+    if (rb) { rebuildTo(parseInt(rb.getAttribute('data-rebuild'), 10) || 0); return; }
     // 突破页：物事齐了 → 进对应的剧情地图，打到关底就地在剧情里破境
     const bn = e.target.closest('button[data-breaknow]');
     if (bn) {
@@ -5809,6 +5876,8 @@
     save.quick = [null, null, null];
     save.petFeed = { on: false, t: 0 };
     save.greenLiquid = 0; save.ach = {};
+    save.wounded = null;      // 存档重来：修为受创一并清掉
+    save.gift_zhuji = false;
     save.repBlack = 0; save.repWhite = 0; save.identity = 'han'; save.liUnlocked = false;
     if (G.player) { resetRunBonus(); G.gear = {}; G.runLoot = []; }
   }
@@ -6356,6 +6425,7 @@
     addMats(n) { const pool = (G.map && G.map.mats) || ['m_chijing', 'm_jingtie', 'm_fuzhi', 'm_lingmo']; for (const id of pool) { save.inventory[id] = (save.inventory[id] || 0) + (n || 3); save.totalItems = (save.totalItems || 0) + (n || 3); } writeSave(); if (G.state === 'cave') renderCave(); return pool.length; },
     mats() { const o = {}; for (const k in save.inventory) if (Items.mat(k)) o[k] = save.inventory[k]; return o; },
     setLevel(n) { save.cultivate.level = Math.max(1, n || 1); save.cultivate.xp = 0; syncBestLevel(); clearWoundedIfDone(); writeSave(); if (G.state === 'cave') renderCave(); return save.cultivate.level; },
+    rebuild(lv) { const ok = rebuildTo(lv); return { ok: ok, lv: save.cultivate.level, wounded: save.wounded || null }; },
     unlockAll() { for (const m of MAPS) if (save.unlocked.indexOf(m.id) < 0) save.unlocked.push(m.id); writeSave(); renderWorldMap(); return save.unlocked.length; },
     shop(tab) { openShop(tab); return G.shopTab; },
     stones(n) { save.stones = Math.max(0, (save.stones || 0) + (n == null ? 100 : n)); writeSave(); renderShop(); renderWorldMap(); refreshTitle(); return save.stones; },

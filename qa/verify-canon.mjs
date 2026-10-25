@@ -49,27 +49,67 @@ ok(r1.n >= 18, '太南小会对话已加长（含回程一段）', r1.n);
 ok(r1.txt.indexOf('万小山') >= 0 && r1.txt.indexOf('刀口') >= 0, '写入万小山被劫杀', r1.txt.slice(-80));
 ok(r1.txt.indexOf('三个人') >= 0 && r1.txt.indexOf('一个钻进林子') >= 0, '韩立杀二、一人逃（原著情节）', '');
 
-// ===== 2. 古传送阵：修为受创 + 重修期 =====
-console.log('\n== 2. 修为受创与重修 ==');
+// ===== 2. 古传送阵：跌回练气四层（照原著）+ 不吃抬级 + 高阶战图不放行 =====
+console.log('\n== 2. 跌回练气四层 ==');
 let r2 = await E(`(() => {
   const F = window.__FR;
   F.muteStory(true); F.clearProgress(); F.setLevel(48);
   F.enterMap('guchuan', 'easy'); F.skipStory();
   F.finishMapNow();
   const s = JSON.parse(localStorage.getItem('fanren_save_v1') || '{}');
-  return { lv: F.info().cultivate.level, wounded: s.wounded || null, desc: (document.getElementById('victoryDesc') || {}).textContent || '' };
+  const lv = F.info().cultivate.level;
+  // 受创期进「魁星岛」（剧情图，图下限 44）—— 不该被抬到 44
+  F.enterMap('kuixing', 'easy'); F.skipStory();
+  const lvAfterMap = F.G.player ? F.G.player.level : null;
+  // 受创期进「六连殿」（战图，46）—— 不放行
+  const before = F.G.mapId;
+  F.enterMap('liulian', 'easy');
+  return {
+    lv, wounded: s.wounded || null, lvAfterMap, blocked: F.G.mapId === before ? 'blocked' : F.G.mapId,
+    desc: (document.getElementById('victoryDesc') || {}).textContent || ''
+  };
 })()`);
-ok(r2.lv === 46, '被吸走修为：跌两层（48 → 46，保底筑基初期）', r2.lv);
-ok(r2.wounded && r2.wounded.to === 48 && r2.wounded.mult === 2, '记下重修目标与翻倍', r2.wounded);
-ok(r2.desc.indexOf('修为受创') >= 0, '结算页写明修为受创', r2.desc);
+ok(r2.lv === 7, '跌回练气四层（Lv7 即练气四层，照原著照抄）', r2.lv);
+ok(r2.wounded && r2.wounded.to === 48, '记下受创前境界（筑基后期）', r2.wounded);
+ok(r2.lvAfterMap === 7, '受创期不吃地图基础等级（进魁星岛仍是练气四层）', r2.lvAfterMap);
+ok(r2.blocked === 'blocked', '受创期不放行高阶战图（六连殿要筑基后期才出海）', r2.blocked);
 
+// ===== 2b. 三段闭关重修（按原著节奏）=====
+console.log('\n== 2b. 小寰岛闭关重修 ==');
 let r2b = await E(`(() => {
   const F = window.__FR;
-  F.setLevel(48);
+  F.setLevel(7); F.setStones(9000);
+  const a = F.rebuild(19);
+  const b = F.rebuild(36);
+  const c = F.rebuild(48);
   const s = JSON.parse(localStorage.getItem('fanren_save_v1') || '{}');
-  return { wounded: s.wounded || null };
+  return { a, b, c, wounded: s.wounded || null, stones: F.info().stones };
 })()`);
-ok(r2b.wounded === null, '修回原层后重修状态自动解除', r2b.wounded);
+ok(r2b.a.ok && r2b.a.lv === 19, '闭关一年 → 练气九层', r2b.a);
+ok(r2b.b.ok && r2b.b.lv === 36, '再闭关一年 → 筑基初期', r2b.b);
+ok(r2b.c.ok && r2b.c.lv === 48, '闭关六年 → 筑基后期（大衍诀/身外化身）', r2b.c);
+ok(r2b.wounded === null, '修回原层后受创状态解除', r2b.wounded);
+
+let r2c = await E(`(() => {
+  const F = window.__FR;
+  F.setLevel(7); F.setStones(100);            // 灵石不够
+  return F.rebuild(19);
+})()`);
+ok(r2c.ok === false && r2c.lv === 7, '灵石不足时重修不生效', r2c);
+
+// 受创状态必须能存住（读档之后还在，否则一刷新就白跌）
+await E(`(() => {
+  const F = window.__FR;
+  F.clearProgress(); F.setLevel(48);
+  F.enterMap('guchuan', 'easy'); F.skipStory(); F.finishMapNow();
+})()`);
+await page.reload({ waitUntil: 'load' });
+await page.waitForFunction(() => !!window.__FR);
+const r2d = await E(`(() => {
+  const s = JSON.parse(localStorage.getItem('fanren_save_v1') || '{}');
+  return { lv: s.cultivate ? s.cultivate.level : null, wounded: s.wounded || null };
+})()`);
+ok(r2d.lv === 7 && r2d.wounded && r2d.wounded.to === 48, '读档后仍是练气四层、受创状态仍在', r2d);
 
 // ===== 3. 昊元丹 / 培婴丹：只作修行辅助，不入突破门 =====
 console.log('\n== 3. 昊元丹 / 培婴丹 ==');
