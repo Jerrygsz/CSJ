@@ -443,7 +443,23 @@
     save.bonuses[k] = Math.min(BONUS_CAP[k] || 99, (save.bonuses[k] || 0) + v);
   }
   function addRunBonus(k, v) { G.bonus[k] = Math.min(BONUS_CAP[k] || 99, (G.bonus[k] || 0) + v); }
-  function gainXp(v) { if (G.player) G.player.xp += v * (1 + rb('xpMul') + (G.bonus.xpMul || 0) + gb('xpMul') + passiveSum('xpMul') + buffSum('xpMul')); }
+  // 修为受创（古传送阵被南宫婉吸走修为）之后有一段重修期：经验翻倍，修回原层即止
+  function clearWoundedIfDone() {
+    if (save.wounded && (save.cultivate.level || 1) >= (save.wounded.to || 0)) {
+      save.wounded = null;
+      writeSave();
+      try { banner('重修已毕 · ' + realmName(save.cultivate.level)); } catch (e) {}
+    }
+  }
+  function gainXp(v) {
+    if (!G.player) return;
+    let mult = 1;
+    if (save.wounded) {
+      if ((save.cultivate.level || 1) >= (save.wounded.to || 0)) save.wounded = null;
+      else mult = save.wounded.mult || 2;
+    }
+    G.player.xp += v * mult * (1 + rb('xpMul') + (G.bonus.xpMul || 0) + gb('xpMul') + passiveSum('xpMul') + buffSum('xpMul'));
+  }
 
   // ---------- 限时增益：符箓 / 丹药服下，一段时间内属性见长，到点自行散去 ----------
   function buffSum(k) {
@@ -3541,6 +3557,7 @@
     G.breakHinted = false;   // 瓶颈弹幕每图只提一次
     G.minorHint = 0;         // 小境界关口弹幕也每图只提一次
     G.victoryNote = '';
+    G.woundedNote = '';
     G.npcs = []; G.encT = 8;
     G.realmIdx = 0; G.realm = { dmg: 0, atk: 0, spd: 0 }; G.realmHp = 0;
     resetCombo();
@@ -3862,6 +3879,21 @@
       save.caves.push(m.cave);
       cave = CAVES[m.cave];
     }
+    // 古传送阵：为南宫婉疗伤，被吸走修为（原著跌回练气四层）——
+    // 这里按可玩性只跌两层、保底筑基初期，并给一段「重修期」经验翻倍，修回原层即止。
+    if (m.id === 'guchuan' && !save.wounded) {
+      const lv0 = save.cultivate.level || 1;
+      const lv1 = Math.max(36, lv0 - 2);
+      if (lv1 < lv0) {
+        save.wounded = { to: lv0, mult: 2 };
+        save.cultivate.level = lv1;
+        save.cultivate.xp = 0;
+        if (G.player) { G.player.level = lv1; G.player.next = xpNeed(lv1); checkRealm(true); recalcMaxhp(); G.player.hp = G.player.maxhp; }
+        G.woundedNote = '修为受创 · 跌至 ' + realmName(lv1) + '（重修期经验翻倍，修回 ' + realmName(lv0) + ' 即止）';
+      }
+    }
+    // 太南小会散场后，后巷才会有人（原著那两个散修际遇挂在小会上，坊市里刷不出人）
+    if (m.id === 'tainan' && save.unlocked.indexOf('heixiang') < 0) save.unlocked.push('heixiang');
     // 破境图：物事齐了才谈冲关；冲关还可能失败 —— 解锁下一图要等「真的破了」才给
     const breakReady = breakGate ? breakMissing(breakGate).length === 0 : true;
     const blocked = !!(breakGate && !breakReady);
@@ -3910,7 +3942,8 @@
       const base = m.clearDesc || '所得已入储物袋。';
       const pruneNote = (G.lastPrune && G.lastPrune.cut > 0) ? '　功法已敛 · 只留三门最精' : '';
       const bn = G.victoryNote ? ('　' + G.victoryNote) : '';
-      elVictoryDesc.textContent = (realmUp ? ('境界已进 · ' + realmUp + '　') : '') + base + pruneNote + bn;
+      const wn = G.woundedNote ? ('　' + G.woundedNote) : '';
+      elVictoryDesc.textContent = (realmUp ? ('境界已进 · ' + realmUp + '　') : '') + base + pruneNote + bn + wn;
     }
     if (elVictoryStats) elVictoryStats.style.display = (m.type === 'story' || m.type === 'market') ? 'none' : 'flex';
     elVTime.textContent = fmtTime(G.time); elVKills.textContent = G.kills; elVLevel.textContent = realmName(G.player.level);
@@ -5127,6 +5160,7 @@
     }
     c.level = lv;
     syncBestLevel();
+    clearWoundedIfDone();
     return lv;
   }
   function doRest(times) {
@@ -6321,7 +6355,7 @@
     addMat(id, n) { const it = Items.get(id); if (!it) return 'no item'; save.inventory[id] = (save.inventory[id] || 0) + (n || 1); save.totalItems = (save.totalItems || 0) + (n || 1); writeSave(); if (G.state === 'cave') renderCave(); return save.inventory[id]; },
     addMats(n) { const pool = (G.map && G.map.mats) || ['m_chijing', 'm_jingtie', 'm_fuzhi', 'm_lingmo']; for (const id of pool) { save.inventory[id] = (save.inventory[id] || 0) + (n || 3); save.totalItems = (save.totalItems || 0) + (n || 3); } writeSave(); if (G.state === 'cave') renderCave(); return pool.length; },
     mats() { const o = {}; for (const k in save.inventory) if (Items.mat(k)) o[k] = save.inventory[k]; return o; },
-    setLevel(n) { save.cultivate.level = Math.max(1, n || 1); save.cultivate.xp = 0; syncBestLevel(); writeSave(); if (G.state === 'cave') renderCave(); return save.cultivate.level; },
+    setLevel(n) { save.cultivate.level = Math.max(1, n || 1); save.cultivate.xp = 0; syncBestLevel(); clearWoundedIfDone(); writeSave(); if (G.state === 'cave') renderCave(); return save.cultivate.level; },
     unlockAll() { for (const m of MAPS) if (save.unlocked.indexOf(m.id) < 0) save.unlocked.push(m.id); writeSave(); renderWorldMap(); return save.unlocked.length; },
     shop(tab) { openShop(tab); return G.shopTab; },
     stones(n) { save.stones = Math.max(0, (save.stones || 0) + (n == null ? 100 : n)); writeSave(); renderShop(); renderWorldMap(); refreshTitle(); return save.stones; },
