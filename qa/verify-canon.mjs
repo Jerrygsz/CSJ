@@ -42,12 +42,22 @@ const E = c => page.evaluate(c);
 // ===== 1. 万小山遇害（原著：散修三人谋财，韩立杀二、一逃）=====
 console.log('\n== 1. 太南小会：万小山之死 ==');
 let r1 = await E(`(() => {
-  const s = (window.MAP_STORIES || {}).tainan || [];
-  return { n: s.length, txt: s.map(x => x[1]).join('') };
+  const S = (window.MAP_STORIES || {});
+  const t = S.tainan || [], h = S.huangfeng || [];
+  return {
+    n: t.length,
+    txt: t.map(x => x[1]).join(''),
+    headT: (t[0] || [])[1] || '',
+    headH: (h[0] || [])[1] || '',
+    txtH: h.map(x => x[1]).join('')
+  };
 })()`);
-ok(r1.n >= 18, '太南小会对话已加长（含回程一段）', r1.n);
-ok(r1.txt.indexOf('万小山') >= 0 && r1.txt.indexOf('刀口') >= 0, '写入万小山被劫杀', r1.txt.slice(-80));
-ok(r1.txt.indexOf('三个人') >= 0 && r1.txt.indexOf('一个钻进林子') >= 0, '韩立杀二、一人逃（原著情节）', '');
+ok(r1.n >= 13, '太南小会对话完整（会中一段）', r1.n);
+ok(r1.txt.indexOf('升仙令。这东西你从哪儿得来的') >= 0, '补上「拿出令牌问人」这一问（否则万小山不该知道他有令）', '');
+ok(r1.txt.indexOf('刀口') < 0 && r1.txt.indexOf('散会那日') < 0, '会中不再写「散会/遇害」——坊市还要逛、际遇还在会上', '');
+ok(r1.headT.indexOf('太南山') >= 0, '太南小会开场落在会场', r1.headT);
+ok(r1.txtH.indexOf('万小山') >= 0 && r1.txtH.indexOf('一个钻进林子') >= 0, '万小山遇害移到黄枫谷开场（回程路上）', '');
+ok(r1.headH.indexOf('散会那日') >= 0, '黄枫谷开场先演回程，再上山门', r1.headH);
 
 // ===== 2. 古传送阵：跌回练气四层（照原著）+ 不吃抬级 + 高阶战图不放行 =====
 console.log('\n== 2. 跌回练气四层 ==');
