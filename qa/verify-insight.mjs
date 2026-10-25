@@ -155,7 +155,33 @@ ok(r8.time >= 110, '跑满两分钟', r8.time);
 ok(r8.picks >= 3 && r8.picks <= 12, '两分钟 3~12 次顿悟（约 10~40 秒一次）', r8);
 ok(r8.picks / (r8.time / 60) >= 1.2 && r8.picks / (r8.time / 60) <= 6, '每分钟 1.2~6 次，不会刷屏也不会枯坐', (r8.picks / (r8.time / 60)).toFixed(2));
 
-// ===== 9. 零报错 =====
+// ===== 9. 局时：Boss 现身 90 秒打不完 = 本局未竟 =====
+console.log('\n== 9. 三分钟局时 ==');
+let r9 = await E(`(() => {
+  const F = window.__FR;
+  F.muteStory(true); F.clearProgress(); F.setLevel(56);
+  F.enterMap('ningcui', 'easy'); F.skipStory();
+  F.boss();
+  F.G.boss.hp = 1e9; F.G.boss.maxhp = 1e9;      // 打不死，逼出超时
+  const limitAt = F.G.limitT;
+  let g = 0;
+  while (g++ < 4000) {
+    if (F.G.player) { F.G.player.hp = F.G.player.maxhp; }
+    if (F.G.boss) { F.G.boss.hp = 1e9; }
+    F.tickFrames(1, 0.05);
+    const st = F.info().state;
+    if (st === 'dialog') { F.skipStory(); continue; }
+    if (st === 'victory' || st === 'world') break;
+  }
+  const desc = (document.getElementById('victoryDesc') || {}).textContent || '';
+  return { limitAt: Math.round(limitAt || 0), timeoutEnd: !!F.G.timeoutEnd,
+    cleared: (F.info().cleared || []).indexOf('ningcui') >= 0, state: F.info().state, desc };
+})()`);
+ok(r9.timeoutEnd === true, 'Boss 现身 90 秒未打完 → 判定「时辰已尽」', { limit: r9.limitAt, end: r9.timeoutEnd });
+ok(r9.cleared === false, '未竟不记通关（可以再来）', r9.cleared);
+ok(r9.desc.indexOf('未竟') >= 0, '结算页写明「本局未竟」', r9.desc);
+
+// ===== 10. 零报错 =====
 console.log('\n== 7. 全程零报错 ==');
 ok(errs.length === 0, '无页面/控制台报错', errs.slice(0, 3));
 

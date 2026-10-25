@@ -1664,6 +1664,7 @@
 
   // ---------- Boss（按地图配置，四种打法） ----------
   function spawnBoss() {
+    G.limitT = (G.time || 0) + BOSS_LIMIT;
     const cfg = (G.map && G.map.boss) || { kind: 'mo', name: '墨大夫', hp: 1800, spd: 40, dmg: 18, r: 20, spr: 'mo', scale: 1.8 };
     const p = G.player;
     const dm = curDiff();
@@ -2812,6 +2813,9 @@
   // 每顿悟一次，下一次门槛抬 35%：不抬的话杀得快的人会 5 秒一次顿悟，刷屏
   // （120 → 162 → 219 → 296 → 400 → 540…，一局 4~6 次，正好落在设计要的节奏里）
   const SHA_GROW = 1.35;
+  // Boss 现身之后只给 90 秒：不打完就是「本局未竟」。这样一局稳定落在 3 分钟量级，
+  // 也不会把 13 张「Boss 开场即现」的剧情战卡住（那类 bossAt=0，同样吃这 90 秒）。
+  const BOSS_LIMIT = 90;
   function ownSkills() { return SKILLS.filter(s => (G.player.skills[s.id] || 0) > 0); }
   function newSkills() { return SKILLS.filter(s => !(G.player.skills[s.id] || 0) && (!s.minLv || G.player.level >= s.minLv)); }
 
@@ -3146,6 +3150,14 @@
       const at = G.map.bossAt || 0;
       if (at > 0 && G.time >= at - 3 && !G.bossWarned) { G.bossWarned = true; banner('⚠ 妖气逼近'); Sfx.warn(); }
       if (at > 0 && G.time >= at) spawnBoss();
+    }
+    // 时辰：Boss 现身之后 90 秒。到点还没打完就收功退走（不记通关），一局稳定压在 3 分钟量级
+    if (G.bossActive && G.limitT && !G.timeoutEnd && G.time >= G.limitT
+        && !(G.coopRole === 'client' && G.coopShared)) {
+      G.timeoutEnd = true;
+      G.enemies.length = 0; G.ebullets.length = 0;
+      banner('时辰已尽 · 收功退走'); Sfx.warn();
+      G.vacuumT = 1.2; G.pendingEnding = true;
     }
 
     // 追逃图：打不过就跑。撑到时辰，自然脱身
@@ -3807,7 +3819,11 @@
     if (elHpval) elHpval.textContent = Math.max(0, Math.ceil(p.hp)) + '/' + Math.ceil(p.maxhp);
     if (elXpval) elXpval.textContent = Math.floor(sst.v) + '/' + Math.ceil(sst.need);
     elLevel.textContent = stageLabel(p) + (sst.dmgT > 0 ? '　·　杀意' : '');
-    elTime.textContent = fmtTime(G.time);
+    if (G.bossActive && G.limitT) {
+      const left = Math.max(0, G.limitT - G.time);
+      elTime.textContent = '⏳' + fmtTime(left);
+      elTime.style.color = left < 15 ? '#ff6b6b' : '';
+    } else { elTime.textContent = fmtTime(G.time); elTime.style.color = ''; }
     elKills.textContent = '斩 ' + G.kills;
     if (elBag) elBag.textContent = '袋 ' + (G.runLoot ? G.runLoot.length : 0);
     if (elStones) elStones.textContent = '灵石 ' + (save.stones || 0);
@@ -3873,8 +3889,9 @@
     for (const s of STORY) s.done = false;
     // 带入永久进度（跨地图不清零）：道具加成 + 装备加成
     resetRunBonus();
-    // 单局循环：煞气清零、上一局的顿悟与祭炼不带进来
+    // 单局循环：煞气清零、上一局的顿悟与祭炼不带进来；局时与「未竟」也归零
     resetRunBuffs();
+    G.timeoutEnd = false; G.limitT = 0;
     G.gear = gearBonus();
     recalcMaxhp();
     G.player.hp = G.player.maxhp;
@@ -4117,13 +4134,15 @@
   function finishMap(m) {
     if (!m) return;
     syncCultivate();
+    // 时辰已尽：不记通关、不给章节奖励、不推境界、不解锁下一图
+    const timedOut = !!G.timeoutEnd;
     // 这张图是不是「大境界破境图」：endLevel 恰好是一道大境界门（地火之屋筑基 / 天星城结丹 …）
     const breakGate = m.endLevel ? breakReqFor(m.endLevel) : null;
     // 有些图通关本身就是一次境界跃迁（地火之屋炼丹筑基 / 洞府闭府结丹）。
     // 这类突破必须落在「图打通之后」，不能一进门就把人抬上去 —— 门还没进就筑基，说不过去。
     // 但若这张图正是大境界破境图，则境界不在此刻落地，改为「先演一段剧情、演完再破」，见文末。
     let realmUp = null;
-    if (m.endLevel && m.endLevel > (save.cultivate.level || 1) && !breakGate) {
+    if (!timedOut && m.endLevel && m.endLevel > (save.cultivate.level || 1) && !breakGate) {
       const prevName = realmName(save.cultivate.level || 1);
       save.cultivate.level = m.endLevel;
       save.cultivate.xp = 0;
@@ -4137,7 +4156,7 @@
       if (m.endLevel > (save.best.level || 1)) save.best.level = m.endLevel;
       if (realmName(m.endLevel) !== prevName) realmUp = realmName(m.endLevel);
     }
-    const first = isFirstClear(m);
+    const first = !timedOut && isFirstClear(m);
     if (first) save.cleared.push(m.id);
     checkLiUnlock();
     checkPetRelease(m);
@@ -4237,10 +4256,19 @@
       return;
     }
     if (!breakGate) {
-      const newly = unlockNext(m);
-      save.mapId = m.next || m.id;
+      const newly = timedOut ? null : unlockNext(m);
+      save.mapId = timedOut ? m.id : (m.next || m.id);
+      if (timedOut) G.victoryNote = '时辰已尽 · 本局未竟（不记通关，下一趟再来）';
       writeSave();
       showVictory(m, gained, newly, cave, newDiff, realmUp);
+      return;
+    }
+    if (timedOut) {
+      G.breakPending = breakGate;
+      save.mapId = m.id;
+      G.victoryNote = '时辰已尽 · 本局未竟（不记通关，丹药未动）';
+      writeSave();
+      showVictory(m, gained, null, cave, newDiff, null);
       return;
     }
     // 冲关演出 → 成则破境并解锁下一图；败则丹药散尽、原地再来
