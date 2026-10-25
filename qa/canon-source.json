@@ -8,7 +8,7 @@
    "type": "ranged",
    "vfx": "qingmang",
    "kind": "beam",
-   "desc": "御使飞剑，自动锁定最近之敌。七玄门剑修根基，韩立最早会的攻击术"
+   "desc": "以神念御物，一道青光直取最近的敌人。长春功所含的基础法术，韩立起步就靠它"
   },
   {
    "id": "fire",
@@ -16,9 +16,9 @@
    "minLv": 5,
    "max": 5,
    "type": "ranged_aoe",
-   "vfx": "snake",
-   "kind": "homing",
-   "desc": "放出追踪火蛇，缠绕敌身。韩立早年期自炼符箓"
+   "vfx": "fire",
+   "kind": "beam",
+   "desc": "长春功所含的基础法术：一团火球直直打出去，撞上就炸。韩立最早会的攻击手段"
   },
   {
    "id": "orb",
@@ -28,7 +28,7 @@
    "type": "aura",
    "vfx": "gang",
    "kind": "orbit",
-   "desc": "庚金玄罡环绕周身，触敌即伤。贴身近战之法，韩立早年淬体护身"
+   "desc": "金光上人那门护体金光：一层金罩绕身流转，近身者自伤。韩立夺来改成了自己的"
   },
   {
    "id": "nova",
@@ -38,7 +38,7 @@
    "type": "ranged_aoe",
    "vfx": "gold",
    "kind": "burst",
-   "desc": "周期性金光爆发，范围杀伤。韩立常用的金光类符箓"
+   "desc": "定神符一抖，金光炸开，震退近身邪祟。长春功中所含的安神破幻之符"
   },
   {
    "id": "frost",
@@ -48,7 +48,7 @@
    "type": "aura",
    "vfx": "ice",
    "kind": "field",
-   "desc": "身周凝出冰霜领域，近身之敌移速大减。韩立参悟的冰霜符箓"
+   "desc": "长春功所含冰冻术：身周五丈寒气凝结，踏入者行动迟滞"
   },
   {
    "id": "changchun",
@@ -72,23 +72,23 @@
   },
   {
    "id": "regen",
-   "name": "回春诀",
+   "name": "长春续脉术",
    "minLv": 10,
    "max": 5,
    "type": "passive",
    "vfx": null,
    "kind": "passive",
-   "desc": "缓缓回血，久战不竭。韩立借灵药丹力"
+   "desc": "长春功一脉的续脉之法：木灵缓缓养着经脉，伤后自复，久战不竭"
   },
   {
    "id": "magnet",
-   "name": "聚灵术",
+   "name": "凝元聚灵术",
    "minLv": 1,
    "max": 5,
    "type": "passive",
    "vfx": null,
    "kind": "passive",
-   "desc": "广布灵识，灵石自行来投。借掌天瓶之能炼出的聚灵之法"
+   "desc": "凝元功一脉的吐纳法：灵气自行往身上聚，落地的灵石走得比别人近"
   },
   {
    "id": "haste",
@@ -132,13 +132,13 @@
   },
   {
    "id": "xuemo",
-   "name": "血魔剑诀",
+   "name": "血煞剑芒",
    "minLv": 56,
    "max": 6,
    "type": "ranged",
    "vfx": "blood",
    "kind": "beam",
-   "desc": "血魔剑配套剑诀，血煞剑气破体而出。掩月宗大长老的佩剑连同这套剑法，一起换了主人"
+   "desc": "煞妖诀与血炼神光一路化出的剑气：以煞养血，血煞破体而出"
   },
   {
    "id": "sanyan",
@@ -162,13 +162,13 @@
   },
   {
    "id": "tianzhu",
-   "name": "天蛛诀",
+   "name": "虫丝缚",
    "minLv": 56,
    "max": 6,
    "type": "passive",
    "vfx": null,
    "kind": "passive",
-   "desc": "天蛛岛所得操控法，灵识铺得更开，落物都逃不掉"
+   "desc": "驱虫术衍生的虫丝之法：一口气吐出千缕细丝，缠住便跑不脱"
   },
   {
    "id": "tongbao",
@@ -287,7 +287,7 @@
     "m_chijing",
     "m_huangjing"
    ],
-   "book": null,
+   "book": "f_peiyuan",
    "rate": 0.85
   },
   {
@@ -301,7 +301,7 @@
     "m_tianling",
     "m_wolfdan"
    ],
-   "book": null,
+   "book": "f_huanglong",
    "rate": 0.78
   },
   {
@@ -315,7 +315,7 @@
     "m_chongjing",
     "m_yusui"
    ],
-   "book": null,
+   "book": "f_jinsui",
    "rate": 0.7
   },
   {
@@ -331,7 +331,7 @@
     "m_longlin",
     "m_xuesha"
    ],
-   "book": null,
+   "book": "f_zhuji",
    "rate": 0.55
   },
   {
@@ -1590,7 +1590,7 @@
   },
   {
    "id": "sk_magnet",
-   "name": "聚灵术·法诀",
+   "name": "凝元聚灵术·法诀",
    "req": 1,
    "rarity": 1,
    "slot": null,
@@ -1623,7 +1623,7 @@
   },
   {
    "id": "sk_regen",
-   "name": "回春诀·法诀",
+   "name": "长春续脉术·法诀",
    "req": 10,
    "rarity": 2,
    "slot": null,
@@ -1690,7 +1690,7 @@
   },
   {
    "id": "sk_xuemo",
-   "name": "血魔剑诀·法诀",
+   "name": "血煞剑芒·法诀",
    "req": 56,
    "rarity": 4,
    "slot": null,
@@ -2022,6 +2022,54 @@
     "剧情:黄枫谷·灵药圃深处",
     "剧情:黄枫谷·地火之屋",
     "剧情:黄枫谷·下山岔道"
+   ]
+  },
+  {
+   "id": "f_peiyuan",
+   "name": "培元丹方",
+   "req": 1,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "丹方(培元丹)",
+    "剧情:七玄门·后山"
+   ]
+  },
+  {
+   "id": "f_huanglong",
+   "name": "黄龙丹方",
+   "req": 1,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "丹方(黄龙丹)",
+    "剧情:太南小会"
+   ]
+  },
+  {
+   "id": "f_zhuji",
+   "name": "筑基丹方",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "丹方(筑基丹)",
+    "剧情:黄枫谷·药园"
+   ]
+  },
+  {
+   "id": "f_jinsui",
+   "name": "金髓丸方",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "丹方(金髓丸)",
+    "剧情:天星城"
    ]
   },
   {
@@ -2704,6 +2752,54 @@
     "剧情:黄枫谷·灵药圃深处",
     "剧情:黄枫谷·地火之屋",
     "剧情:黄枫谷·下山岔道"
+   ]
+  },
+  {
+   "id": "f_peiyuan",
+   "name": "培元丹方",
+   "req": 1,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "丹方(培元丹)",
+    "剧情:七玄门·后山"
+   ]
+  },
+  {
+   "id": "f_huanglong",
+   "name": "黄龙丹方",
+   "req": 1,
+   "rarity": 3,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "丹方(黄龙丹)",
+    "剧情:太南小会"
+   ]
+  },
+  {
+   "id": "f_zhuji",
+   "name": "筑基丹方",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "丹方(筑基丹)",
+    "剧情:黄枫谷·药园"
+   ]
+  },
+  {
+   "id": "f_jinsui",
+   "name": "金髓丸方",
+   "req": 1,
+   "rarity": 4,
+   "slot": null,
+   "teach": null,
+   "src": [
+    "丹方(金髓丸)",
+    "剧情:天星城"
    ]
   },
   {

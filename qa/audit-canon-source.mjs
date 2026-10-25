@@ -42,6 +42,7 @@ const d = await page.evaluate(() => {
   const src = {};
   const note = (id, s) => { (src[id] = src[id] || []).push(s); };
   for (const r of (W.RECIPES || [])) note(r.out, '炼:' + r.name + '(Lv' + (r.req || 1) + ')');
+  for (const r of (W.RECIPES || [])) if (r.book) note(r.book, '丹方(' + r.name + ')');
   for (const m of (W.MAPS || [])) {
     for (const id of (m.shop || [])) note(id, '坊:' + m.name);
     for (const a of (m.auction || [])) note(a.id, '拍:' + m.name);

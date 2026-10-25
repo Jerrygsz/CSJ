@@ -278,7 +278,24 @@ let r7b = await E(`(() => {
 ok(r7b.had === true, '坊市里出现了拍卖按钮', r7b.had);
 ok(r7b.own === 1 && r7b.before - r7b.after === 9000, '拍卖品能拍下（紫铖兜 9000 灵石）', r7b);
 
-console.log('\n== 8. 全程零报错 ==');
+console.log('');
+console.log('== 8. 丹方前置 ==');
+let r8f = await E(`(() => {
+  const F = window.__FR;
+  F.muteStory(true); F.clearProgress(); F.setLevel(40);
+  const before = F.hasFormula('r_zhuji');
+  F.addItem('f_zhuji', 1);
+  const after = F.hasFormula('r_zhuji');
+  const plain = F.hasFormula('r_huiqi');
+  const books = ['f_zhuji', 'f_peiyuan', 'f_huanglong', 'f_jinsui'].map(id => !!window.Items.get(id));
+  return { before, after, plain, books };
+})()`);
+ok(r8f.before === false, '没有丹方时炼不了筑基丹', r8f.before);
+ok(r8f.after === true, '得到丹方后就能开炉', r8f.after);
+ok(r8f.plain === true, '回气丹这类基础丹不卡丹方', r8f.plain);
+ok(r8f.books.every(Boolean), '四张丹方道具都存在', r8f.books);
+
+console.log('\n== 9. 全程零报错 ==');
 ok(errs.length === 0, '无页面/控制台报错', errs.slice(0, 3));
 
 await b.close(); server.close();

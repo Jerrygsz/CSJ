@@ -90,7 +90,7 @@ const collapse = await page.evaluate(() => {
 ok(collapse.open === false, '点切换可收起牌堆', collapse);
 
 // 学了一堆之后槽位会被自动占满，这里把「身上运着谁」定死，后面的断言才有准数：
-// 只运两门 —— 低境界的控物术 + 本境的血魔剑诀
+// 只运两门 —— 低境界的控物术 + 本境的血煞剑芒
 await page.evaluate(() => {
   ['sword', 'regen', 'xuemo', 'fire', 'orb', 'nova', 'frost', 'swift', 'magnet', 'haste', 'gourd', 'changchun']
     .forEach(id => F.setSkill(id, false));
@@ -99,7 +99,7 @@ await page.evaluate(() => {
 });
 const equippedNow = await page.evaluate(() => F.skillState().equipped.slice());
 ok(equippedNow.indexOf('sword') >= 0 && equippedNow.indexOf('xuemo') >= 0,
-  '已明确运起：控物术（练气档）+ 血魔剑诀（结丹档）', equippedNow);
+  '已明确运起：控物术（练气档）+ 血煞剑芒（结丹档）', equippedNow);
 
 // ---------- 1) 进战斗图前先弹运功面板 ----------
 const toDiff = await page.evaluate(() => {
@@ -157,7 +157,7 @@ const expandLower = await page.evaluate(() => {
   return { id, open: after.classList.contains('open'), skills: [...after.querySelectorAll('[data-pfskill]')].map(b => b.getAttribute('data-pfskill')) };
 });
 ok(expandLower.open === true, '点档名能展开低境界档', expandLower);
-ok((expandLower.skills || []).indexOf('regen') >= 0, '展开后能看到低境界的回春诀', expandLower.skills);
+ok((expandLower.skills || []).indexOf('regen') >= 0, '展开后能看到低境界的长春续脉术', expandLower.skills);
 
 // ---------- 展开再多也不能顶出屏幕 ----------
 const fit = await page.evaluate(() => {

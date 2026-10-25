@@ -4846,6 +4846,7 @@
       const outItem = Items.get(r.out);
       const rar = outItem ? RARITY[outItem.rarity] : RARITY[0];
       const okReq = lv >= reqLv(r.req || 1);
+      const okBook = hasFormula(r);
       const okStone = (save.stones || 0) >= r.cost;
       let okMat = true;
       const mats = r.mats.map(m => {
@@ -4854,7 +4855,7 @@
         const it = Items.get(m[0]);
         return '<span class="mat' + (have >= m[1] ? ' ok' : '') + '">' + (it ? it.name : m[0]) + ' ' + Math.min(have, 99) + '/' + m[1] + '</span>';
       }).join('');
-      const can = okReq && okStone && okMat;
+      const can = okReq && okBook && okStone && okMat;
       // 火候几成，先让人看见。炼坏了材料是不退的
       const ratePct = Math.round(((typeof r.rate === 'number') ? r.rate : 0.85) * 100);
       html += '<div class="recrow' + (can ? ' can' : '') + '">' +
@@ -4863,7 +4864,8 @@
         '<div class="rr-mats">' + mats + '<span class="mat stone' + (okStone ? ' ok' : '') + '">灵石 ' + r.cost + '</span></div>' +
         '<em>' + r.desc + '</em></div>' +
         '<div class="rr-right">' +
-        (okReq ? '<button class="sr-btn buy" data-craft="' + r.id + '"' + (can ? '' : ' disabled') + '>炼制</button>'
+        (!okBook ? '<span class="gr-need">缺丹方</span>'
+          : okReq ? '<button class="sr-btn buy" data-craft="' + r.id + '"' + (can ? '' : ' disabled') + '>炼制</button>'
           : '<span class="gr-need">需' + realmName(r.req) + '</span>') +
         '</div></div>';
     }
@@ -5558,10 +5560,16 @@
     applyHeroSprite();
     renderCave();
   }
+  // 有没有这张丹方：没有方子，炉子不认这味药（原著里丹方是要「得到」的）
+  function hasFormula(r) {
+    if (!r || !r.book) return true;
+    return (save.inventory[r.book] || 0) > 0;
+  }
   function craftRecipe(rid) {
     const r = Recipes.get(rid), c = CAVES[G.caveId];
     if (!r || !c || c.crafts.indexOf(r.kind) < 0) return;
     const lv = curCultLevel();
+    if (!hasFormula(r)) { notify('缺丹方 · 这味药炉子不认得'); Sfx.warn(); return; }
     if (lv < reqLv(r.req || 1)) { notify('境界不足 · 需' + realmName(r.req)); Sfx.warn(); return; }
     if ((save.stones || 0) < r.cost) { notify('灵石不足'); Sfx.warn(); return; }
     for (const m of r.mats) if ((save.inventory[m[0]] || 0) < m[1]) { notify('材料不足 · ' + ((Items.get(m[0]) || {}).name || m[0])); return; }
@@ -6857,6 +6865,7 @@
     summon() { spawnSummon(); return G.summon ? { name: G.summon.name, spr: G.summon.spr, max: G.summon.max } : null; },
     summonState() { const s = G.summon; return s ? { t: +s.t.toFixed(2), max: s.max, name: s.name, spr: s.spr } : null; },
     summonBullets() { return G.bullets.filter(b => b.summon).length; },
+    hasFormula(rid) { const r = Recipes.get(rid); return r ? hasFormula(r) : null; },
     rebuild(lv) { const ok = rebuildTo(lv); return { ok: ok, lv: save.cultivate.level, wounded: save.wounded || null }; },
     unlockAll() { for (const m of MAPS) if (save.unlocked.indexOf(m.id) < 0) save.unlocked.push(m.id); writeSave(); renderWorldMap(); return save.unlocked.length; },
     shop(tab) { openShop(tab); return G.shopTab; },

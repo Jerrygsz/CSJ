@@ -5,22 +5,22 @@
 | id | 名称 | 解锁 | 满层 | 类型 | 特效 |
 |---|---|---:|---:|---|---|
 | sword | 控物术 | Lv1 | 6 | beam/ranged | qingmang |
-| fire | 火弹术 | Lv5 | 5 | homing/ranged_aoe | snake |
+| fire | 火弹术 | Lv5 | 5 | beam/ranged_aoe | fire |
 | orb | 金光罩 | Lv8 | 5 | orbit/aura | gang |
 | nova | 定神符 | Lv12 | 5 | burst/ranged_aoe | gold |
 | frost | 冰冻术 | Lv20 | 5 | field/aura | ice |
 | changchun | 长春功 | Lv1 | 6 | passive/passive | — |
 | swift | 罗烟步 | Lv1 | 5 | passive/passive | — |
-| regen | 回春诀 | Lv10 | 5 | passive/passive | — |
-| magnet | 聚灵术 | Lv1 | 5 | passive/passive | — |
+| regen | 长春续脉术 | Lv10 | 5 | passive/passive | — |
+| magnet | 凝元聚灵术 | Lv1 | 5 | passive/passive | — |
 | haste | 雷遁术 | Lv15 | 5 | passive/passive | — |
 | gourd | 灵葫诀 | Lv25 | 5 | passive/passive | — |
 | qingyuan | 青元剑诀 | Lv36 | 7 | passive/passive | — |
 | dayan | 大衍诀 | Lv36 | 7 | passive/passive | — |
-| xuemo | 血魔剑诀 | Lv56 | 6 | beam/ranged | blood |
+| xuemo | 血煞剑芒 | Lv56 | 6 | beam/ranged | blood |
 | sanyan | 三焰扇 | Lv56 | 6 | spread/ranged_aoe | fan |
 | fenglei | 风雷翅 | Lv56 | 6 | passive/passive | — |
-| tianzhu | 天蛛诀 | Lv56 | 6 | passive/passive | — |
+| tianzhu | 虫丝缚 | Lv56 | 6 | passive/passive | — |
 | tongbao | 洞漩金光 | Lv56 | 6 | passive/passive | — |
 | dayan2 | 大衍诀·后三层 | Lv82 | 7 | passive/passive | — |
 | leishen | 辟邪神雷 | Lv82 | 7 | thunder/ranged_aoe | thunder |

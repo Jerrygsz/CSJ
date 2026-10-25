@@ -1051,17 +1051,17 @@
 (function () {
   window.ITEMS.push(
     { id: 'sk_swift',  name: '罗烟步·法诀', rarity: 1, icon: '📕', req: 1,  teach: 'swift',  desc: '习得《罗烟步》第一层。血色禁地所得身法真传，步法如烟，移速大增。' },
-    { id: 'sk_magnet', name: '聚灵术·法诀', rarity: 1, icon: '📕', req: 1,  teach: 'magnet', desc: '习得《聚灵术》第一层。广布灵识，灵石自行来投，拾取范围变大。' },
+    { id: 'sk_magnet', name: '凝元聚灵术·法诀', rarity: 1, icon: '📕', req: 1,  teach: 'magnet', desc: '习得《凝元聚灵术》第一层。广布灵识，灵石自行来投，拾取范围变大。' },
     { id: 'sk_fire',   name: '火弹术·法诀', rarity: 2, icon: '📕', req: 5,  teach: 'fire',   desc: '习得《火弹术》第一层。韩立早年期自炼符箓，放出追踪火蛇。' },
     { id: 'sk_orb',    name: '金光罩·法诀', rarity: 2, icon: '📕', req: 8, teach: 'orb',   desc: '习得《金光罩》第一层。庚金玄罡环绕周身，触敌即伤。' },
-    { id: 'sk_regen',  name: '回春诀·法诀', rarity: 2, icon: '📕', req: 10, teach: 'regen',  desc: '习得《回春诀》第一层。韩立借灵药丹力缓缓回血。' },
+    { id: 'sk_regen',  name: '长春续脉术·法诀', rarity: 2, icon: '📕', req: 10, teach: 'regen',  desc: '习得《长春续脉术》第一层。韩立借灵药丹力缓缓回血。' },
     { id: 'sk_nova',   name: '定神符·法诀', rarity: 3, icon: '📕', req: 12, teach: 'nova',   desc: '习得《定神符》第一层。韩立常用的金光类符箓，周期性金光爆发。' },
     { id: 'sk_haste',  name: '雷遁术·法诀', rarity: 3, icon: '📕', req: 15, teach: 'haste',  desc: '习得《雷遁术》第一层。吐纳如雷，出手更急。' },
     { id: 'sk_frost',  name: '冰冻术·法诀', rarity: 3, icon: '📕', req: 20, teach: 'frost',  desc: '习得《冰冻术》第一层。韩立参悟的冰霜符箓，减速近身之敌。' },
     { id: 'sk_gourd',  name: '灵葫诀·炼法', rarity: 3, icon: '📕', req: 25, teach: 'gourd', desc: '习得《灵葫诀》第一层。本命灵葫在身，生命上限提升。' },
     // ---- 按原著补的各境界功法：买到或搜出来，回去逐个学 ----
     { id: 'sk_changchun', name: '长春功·法诀',     rarity: 2, icon: '📕', req: 1,   teach: 'changchun', desc: '习得《长春功》。墨大夫传授的引气吐纳根基，韩立练气期的根本功法' },
-    { id: 'sk_xuemo',     name: '血魔剑诀·法诀',   rarity: 4, icon: '📕', req: 56,  teach: 'xuemo',     desc: '习得《血魔剑诀》。血煞剑气破体而出，杀人夺宝所得' },
+    { id: 'sk_xuemo',     name: '血煞剑芒·法诀',   rarity: 4, icon: '📕', req: 56,  teach: 'xuemo',     desc: '习得《血煞剑芒》。血煞剑气破体而出，杀人夺宝所得' },
     { id: 'sk_sanyan',    name: '三焰扇·扇法',     rarity: 4, icon: '📕', req: 82,  teach: 'sanyan',    desc: '习得《三焰扇》。仿七焰扇而制，大衍神君改制三十一种材料，韩立元婴后期才炼成' },
     { id: 'sk_sanzhuan',  name: '三转重元功·法诀', rarity: 4, icon: '📕', req: 50,  teach: 'sanzhong',  desc: '习得《三转重元功》。青元剑诀附带的辅助法门，散功重修三轮，把真元压实' },
     { id: 'sk_fenglei',   name: '风雷翅·炼法',     rarity: 4, icon: '📕', req: 56,  teach: 'fenglei',   desc: '习得《风雷翅》。乱星海炼器所得飞行翼，移速大增' },

@@ -91,6 +91,13 @@
   addShop('tainan', ['m_siling', 'm_silingcao']);
   addShop('tianxing', ['m_siling', 'm_silingcao']);
 
+  // ---------- 三·五、丹方：谁给的方子，就在哪里得到 ----------
+  // 没有丹方，炉子不认这味药（筑基丹/培元丹/黄龙丹/金髓丸 四张）
+  addTo('houshan', { items: ['f_peiyuan'] });    // 墨大夫药书里的一页
+  addTo('tainan',  { items: ['f_huanglong'] });  // 散修出手的玉简
+  addTo('yaoyuan', { items: ['f_zhuji'] });      // 百药园抄的筑基丹方
+  addTo('tianxing', { items: ['f_jinsui'] });    // 乱星海市面的金髓丸方
+
   // ---------- 四、功法：原著里「谁传给韩立」的，就该在哪张图学 ----------
   // 长春功：墨大夫在密室里硬塞给他的（不是坊市货）
   addTo('mishi', { items: ['sk_changchun'] });
