@@ -140,7 +140,46 @@ let r4 = await E(`(() => {
 ok(r4.unlocked === true, '通关太南小会后开「后巷」', r4);
 ok(r4.side && r4.side.on === true, '后巷在支线列表里亮起', r4.side);
 
-// ===== 5. 零报错 =====
+// ===== 4b. 坊市的「际遇」按钮：有就显示、点了就演、没有就藏 =====
+console.log('\n== 4b. 坊市际遇按钮 ==');
+let r4b = await E(`(() => {
+  const F = window.__FR;
+  F.muteStory(true); F.clearProgress(); F.setLevel(10);
+  F.clearMap('tainan');
+  F.enterMap('tainan', 'easy');
+  F.shop('dan');                       // 进坊市（按钮就在坊市面板里）
+  const btn = document.getElementById('encBtn');
+  return {
+    state: F.info().state,
+    vis: btn ? btn.style.display !== 'none' : null,
+    txt: btn ? btn.textContent : '',
+    id: btn ? btn.getAttribute('data-enc') : ''
+  };
+})()`);
+ok(r4b.state === 'shop', '进得太南小会坊市', r4b.state);
+ok(r4b.vis === true && r4b.txt.indexOf('际遇') >= 0, '坊市里出现「际遇」按钮', r4b);
+ok(!!r4b.id, '按钮指向本图待遇之人', r4b.id);
+
+await E(`document.getElementById('encBtn').click();`);
+let r4c = await E(`(() => {
+  const F = window.__FR;
+  for (let i = 0; i < 12; i++) F.skipStory();
+  const s = JSON.parse(localStorage.getItem('fanren_save_v1') || '{}');
+  const btn = document.getElementById('encBtn');
+  return { met: s.met || [], state: F.info().state, vis: btn ? btn.style.display !== 'none' : null, id: btn ? btn.getAttribute('data-enc') : '' };
+})()`);
+ok(r4c.met.indexOf(r4b.id) >= 0, '点进去能把这件际遇演完（计入 met）', r4c.met);
+ok(r4c.state === 'shop', '演完回到坊市', r4c.state);
+ok(r4c.vis === true && r4c.id !== r4b.id, '还有下一件时按钮换成下一件', r4c);
+
+let r4d = await E(`(() => {
+  const F = window.__FR;
+  document.getElementById('encBtn').click();
+  for (let i = 0; i < 12; i++) F.skipStory();
+  const btn = document.getElementById('encBtn');
+  return { vis: btn ? btn.style.display !== 'none' : null };
+})()`);
+ok(r4d.vis === false, '都遇完了按钮自动隐藏', r4d);
 console.log('\n== 5. 全程零报错 ==');
 ok(errs.length === 0, '无页面/控制台报错', errs.slice(0, 3));
 

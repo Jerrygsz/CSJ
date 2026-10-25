@@ -2521,8 +2521,38 @@
     if (G.npcs.some(x => x.def.id === e.id)) return false;
     return true;
   }
-  function pickEncounter() {
-    const pool = encListOnMap().filter(encCondOk);
+  // 坊市 / 洞府这类「走不动」的地方：把本图的际遇做成菜单按钮，
+  // 有就显示、点进去就演，没有就整个隐藏（见 renderShop / renderCaveRest）
+  // 这里不查「场上是否已有 NPC」——坊市刷出的人走不近，按钮得照样给
+  function encCondOkNoNpc(e) {
+    const c = e.cond || {};
+    if (c.level && curLevel() < c.level) return false;
+    if (c.cleared) for (const id of c.cleared) if (save.cleared.indexOf(id) < 0) return false;
+    if (c.notCleared) for (const id of c.notCleared) if (save.cleared.indexOf(id) >= 0) return false;
+    if (!e.repeat && (save.met || []).indexOf(e.id) >= 0) return false;
+    return true;
+  }
+  function pendingEncOf(mapId) {
+    if (!mapId) return null;
+    const list = (window.encountersOf ? window.encountersOf(mapId) : []).filter(encCondOkNoNpc);
+    return list[0] || null;
+  }
+  function menuEncounter(def) {
+    if (!def) return false;
+    if (!encCondOk(def)) { notify('此事已了'); return false; }
+    const back = (G.state === 'shop') ? 'shop' : (G.state === 'cave' ? 'cave' : 'play');
+    G.state = 'dialog';
+    showLines(def.lines, () => {
+      meetEncounter(def);
+      G.state = back;
+      if (back === 'shop') renderShop();
+      else if (back === 'cave') renderCave();
+      last = performance.now();
+    }, 'enc:' + def.id);
+    Sfx.dialog(def.name);
+    return true;
+  }
+  function pickEncounter() {    const pool = encListOnMap().filter(encCondOk);
     if (!pool.length) return null;
     const opens = pool.filter(e => e.unlock && save.unlocked.indexOf(e.unlock) < 0);
     if (opens.length) return U.pick(opens);
@@ -4959,7 +4989,12 @@
   function renderCaveRest(c, lv) {
     const capped = lv >= c.capLevel;
     const xp = Math.floor(save.cultivate.xp || 0), need = xpNeed(lv);
-    return '<div class="cave-sec"><div class="cs-title">闭关静修</div>' +
+    // 这座洞府来历那张图上若还有没遇的人/事，给个按钮直接演（洞府里走不动）
+    let encBtn = '';
+    const pendCave = pendingEncOf(c && c.from);
+    if (pendCave) encBtn = '<button class="btn small" data-enc="' + pendCave.id + '">际遇 · ' + pendCave.name + '</button>';
+    return (encBtn ? '<div class="cave-sec">' + encBtn + '</div>' : '') +
+      '<div class="cave-sec"><div class="cs-title">闭关静修</div>' +
       '<div class="cs-note">' + c.restTip + '</div>' +
       '<div class="restbox">' +
       '<div class="statgrid">' +
@@ -5002,6 +5037,18 @@
       else elShopCats.innerHTML = SHOP_CATS.map(c =>
         '<button class="tab mini' + (G.shopCat === c.id ? ' active' : '') + '" data-cat="' + c.id + '">' + c.name + '</button>'
       ).join('');
+    }
+    // 本图还有没遇的人/事 → 顶上给一个「际遇」按钮；没有就整个藏掉
+    if (elEncBtn) {
+      const pend = pendingEncOf(G.map && G.map.id);
+      if (pend) {
+        elEncBtn.style.display = '';
+        elEncBtn.textContent = '际遇 · ' + pend.name;
+        elEncBtn.setAttribute('data-enc', pend.id);
+      } else {
+        elEncBtn.style.display = 'none';
+        elEncBtn.removeAttribute('data-enc');
+      }
     }
     const rows = [];
     if (G.shopTab === 'sell') {
@@ -5384,6 +5431,7 @@
   const elShopBuyTab = document.getElementById('shopBuyTab');
   const elShopSellTab = document.getElementById('shopSellTab');
   const elShopCats = document.getElementById('shopCats');
+  const elEncBtn = document.getElementById('encBtn');
   const elDifficulty = document.getElementById('difficulty');
   const elDiffList = document.getElementById('diffList');
   const elPf = document.getElementById('prefight');
@@ -5461,6 +5509,15 @@
     hideAllOverlays();
     if (m && m.type === 'market') { finishMap(m); }
     else openWorldMap();
+  });
+  // 际遇按钮（坊市 #encBtn / 洞府 data-enc）统一走代理
+  document.addEventListener('click', (ev) => {
+    const t = ev.target.closest('#encBtn, [data-enc]');
+    if (!t) return;
+    const id = t.getAttribute('data-enc');
+    if (!id) return;
+    const def = (window.ENCOUNTERS || []).find(e => e.id === id);
+    if (def) menuEncounter(def);
   });
   elDialog.addEventListener('click', () => { if (G.state === 'dialog') advanceDialog(); });
   elPauseBtn.addEventListener('click', () => { if (G.state === 'play') doPause(); });
