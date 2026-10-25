@@ -2076,6 +2076,17 @@
     } else if (vfx === 'gold') {
       ctx.fillStyle = 'rgba(255,225,120,0.95)';
       ctx.beginPath(); ctx.arc(b.x, b.y, 6, 0, 6.28); ctx.fill();
+    } else if (vfx === 'fire') {
+      // 火弹术：一团直射的火球（外焰暗红、内芯亮黄），拖一道火星
+      ctx.fillStyle = 'rgba(255,96,32,0.55)';
+      ctx.beginPath(); ctx.arc(b.x, b.y, 9, 0, 6.28); ctx.fill();
+      ctx.fillStyle = 'rgba(255,214,110,1)';
+      ctx.beginPath(); ctx.arc(b.x, b.y, 5, 0, 6.28); ctx.fill();
+      for (let i = 0; i < 2; i++) {
+        const t = i / 2;
+        G.parts.push({ x: b.x - b.vx * 0.012 * (1 + t), y: b.y - b.vy * 0.012 * (1 + t),
+          vx: -b.vx * 0.05, vy: -b.vy * 0.05, life: 0.22, maxlife: 0.22, r: 2.4 - t, color: '#ff8a3c' });
+      }
     } else {
       drawSpr('sword', b.x, b.y, 1.25, false);
     }

@@ -188,7 +188,7 @@ vm.createContext(sandbox);
 // late3.js：第四部「突破条件 / 同伴 / 灵宠」数据层 —— 必须一并载入，
 // 否则突破门、丹药、灵兽袋、化名系统在 smoke 里都是空的（地图奖励会判定为无效引用）
 const FILES = ['utils.js', 'audio.js', 'sprites.js', 'skills.js', 'enemies.js', 'story.js',
-  'items.js', 'maps.js', 'recipes.js', 'encounters.js', 'late.js', 'late2.js', 'late3.js', 'value.js', 'game.js', 'debugapi.js'];
+  'items.js', 'maps.js', 'recipes.js', 'encounters.js', 'late.js', 'late2.js', 'late3.js', 'sources.js', 'value.js', 'game.js', 'debugapi.js'];
 for (const f of FILES) {
   const code = fs.readFileSync(path.join(ROOT, 'js', f), 'utf8');
   vm.runInContext(code, sandbox, { filename: f });

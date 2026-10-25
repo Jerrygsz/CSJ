@@ -1026,7 +1026,9 @@
    "rarity": 0,
    "slot": "armor",
    "teach": null,
-   "src": []
+   "src": [
+    "坊:太南小会"
+   ]
   },
   {
    "id": "a_lupi",
@@ -1035,7 +1037,9 @@
    "rarity": 1,
    "slot": "armor",
    "teach": null,
-   "src": []
+   "src": [
+    "坊:太南小会"
+   ]
   },
   {
    "id": "a_ruanwei",
@@ -1078,7 +1082,9 @@
    "rarity": 0,
    "slot": "trinket",
    "teach": null,
-   "src": []
+   "src": [
+    "剧情:七玄门·山门"
+   ]
   },
   {
    "id": "juling",
@@ -1098,7 +1104,9 @@
    "rarity": 3,
    "slot": "trinket",
    "teach": null,
-   "src": []
+   "src": [
+    "坊:太南小会"
+   ]
   },
   {
    "id": "t_tianlei",
@@ -1676,7 +1684,9 @@
    "rarity": 2,
    "slot": null,
    "teach": "changchun",
-   "src": []
+   "src": [
+    "剧情:墨大夫·密室"
+   ]
   },
   {
    "id": "sk_xuemo",
@@ -1787,7 +1797,9 @@
    "rarity": 4,
    "slot": null,
    "teach": "wuzi",
-   "src": []
+   "src": [
+    "剧情:昆吾山"
+   ]
   },
   {
    "id": "sk_pojie",
@@ -1796,7 +1808,9 @@
    "rarity": 4,
    "slot": null,
    "teach": "pojie",
-   "src": []
+   "src": [
+    "剧情:镇魔塔"
+   ]
   },
   {
    "id": "bag_ling",
@@ -1816,7 +1830,9 @@
    "rarity": 3,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "坊:天星城"
+   ]
   },
   {
    "id": "ring_ling",
@@ -1825,7 +1841,9 @@
    "rarity": 4,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "坊:天星城"
+   ]
   },
   {
    "id": "egg_yunchi",
@@ -1834,7 +1852,9 @@
    "rarity": 2,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "剧情:七玄门·后山"
+   ]
   },
   {
    "id": "egg_mojiao",
@@ -1843,7 +1863,9 @@
    "rarity": 4,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "剧情:血色禁地"
+   ]
   },
   {
    "id": "tianhuo",
@@ -1885,7 +1907,9 @@
    "rarity": 3,
    "slot": null,
    "teach": "sanzhong",
-   "src": []
+   "src": [
+    "剧情:金鼓原"
+   ]
   },
   {
    "id": "t_qingzhu",
@@ -2041,7 +2065,10 @@
    "rarity": 3,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "剧情:海猿岛·闭关",
+    "掉落:海妖兽"
+   ]
   },
   {
    "id": "m_jingtie",
@@ -2175,7 +2202,9 @@
    "rarity": 3,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "剧情:黄枫谷·药园"
+   ]
   },
   {
    "id": "m_xuesha",
@@ -2420,7 +2449,9 @@
    "rarity": 3,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "剧情:昆吾山"
+   ]
   },
   {
    "id": "m_gangyin",
@@ -2510,7 +2541,10 @@
    "rarity": 1,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "坊:太南小会",
+    "坊:天星城"
+   ]
   },
   {
    "id": "m_zhuguo",
@@ -2519,7 +2553,9 @@
    "rarity": 1,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "剧情:灵渺园"
+   ]
   },
   {
    "id": "m_huoling",
@@ -2528,7 +2564,9 @@
    "rarity": 1,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "剧情:金鼓原"
+   ]
   },
   {
    "id": "m_jiuqu",
@@ -2537,7 +2575,9 @@
    "rarity": 3,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "剧情:虚天殿"
+   ]
   },
   {
    "id": "m_dingling",
@@ -2546,7 +2586,9 @@
    "rarity": 4,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "剧情:昆吾山"
+   ]
   },
   {
    "id": "m_ningshen",
@@ -2555,7 +2597,10 @@
    "rarity": 2,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "剧情:黄枫谷·药园",
+    "掉落:尸傀"
+   ]
   },
   {
    "id": "m_lingzhi",
@@ -2564,7 +2609,10 @@
    "rarity": 1,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "剧情:黄枫谷·药园",
+    "掉落:山贼喽啰"
+   ]
   },
   {
    "id": "m_yuanci",
@@ -2573,7 +2621,9 @@
    "rarity": 4,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "剧情:乱星海·星宫"
+   ]
   },
   {
    "id": "m_silingcao",
@@ -2582,7 +2632,10 @@
    "rarity": 1,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "坊:太南小会",
+    "坊:天星城"
+   ]
   },
   {
    "id": "m_zaohuacao",
@@ -2591,7 +2644,9 @@
    "rarity": 2,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "剧情:灵渺园"
+   ]
   },
   {
    "id": "m_chijing",
@@ -2692,7 +2747,10 @@
    "rarity": 3,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "剧情:海猿岛·闭关",
+    "掉落:海妖兽"
+   ]
   },
   {
    "id": "m_jingtie",
@@ -2826,7 +2884,9 @@
    "rarity": 3,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "剧情:黄枫谷·药园"
+   ]
   },
   {
    "id": "m_xuesha",
@@ -3071,7 +3131,9 @@
    "rarity": 3,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "剧情:昆吾山"
+   ]
   },
   {
    "id": "m_gangyin",
@@ -3161,7 +3223,10 @@
    "rarity": 1,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "坊:太南小会",
+    "坊:天星城"
+   ]
   },
   {
    "id": "m_zhuguo",
@@ -3170,7 +3235,9 @@
    "rarity": 1,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "剧情:灵渺园"
+   ]
   },
   {
    "id": "m_huoling",
@@ -3179,7 +3246,9 @@
    "rarity": 1,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "剧情:金鼓原"
+   ]
   },
   {
    "id": "m_jiuqu",
@@ -3188,7 +3257,9 @@
    "rarity": 3,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "剧情:虚天殿"
+   ]
   },
   {
    "id": "m_dingling",
@@ -3197,7 +3268,9 @@
    "rarity": 4,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "剧情:昆吾山"
+   ]
   },
   {
    "id": "m_ningshen",
@@ -3206,7 +3279,10 @@
    "rarity": 2,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "剧情:黄枫谷·药园",
+    "掉落:尸傀"
+   ]
   },
   {
    "id": "m_lingzhi",
@@ -3215,7 +3291,10 @@
    "rarity": 1,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "剧情:黄枫谷·药园",
+    "掉落:山贼喽啰"
+   ]
   },
   {
    "id": "m_yuanci",
@@ -3224,7 +3303,9 @@
    "rarity": 4,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "剧情:乱星海·星宫"
+   ]
   },
   {
    "id": "m_silingcao",
@@ -3233,7 +3314,10 @@
    "rarity": 1,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "坊:太南小会",
+    "坊:天星城"
+   ]
   },
   {
    "id": "m_zaohuacao",
@@ -3242,7 +3326,9 @@
    "rarity": 2,
    "slot": null,
    "teach": null,
-   "src": []
+   "src": [
+    "剧情:灵渺园"
+   ]
   }
  ],
  "shopOver": [

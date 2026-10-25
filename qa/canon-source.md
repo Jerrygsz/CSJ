@@ -74,44 +74,6 @@
 | 道具 | req |
 |---|---|
 | 下品灵石（lingshi） | 1 |
-| 粗布道袍（a_bu） | 1 |
-| 鹿皮软甲（a_lupi） | 4 |
-| 旧木牌（t_mupai） | 1 |
-| 玄玉珠（t_xuanyu） | 13 |
-| 长春功·法诀（sk_changchun） | 1 |
-| 五子同心魔·魔诀（sk_wuzi） | 102 |
-| 破界符·空间诀（sk_pojie） | 112 |
-| 特制灵兽袋（bag_ling2） | 1 |
-| 灵兽环（ring_ling） | 1 |
-| 云翅鸟卵（egg_yunchi） | 1 |
-| 墨蛟卵（egg_mojiao） | 1 |
-| 三转重元功（sanzhong） | 50 |
-| 霓裳草（m_nishang） | 1 |
-| 虫母晶核（m_chongjing） | 1 |
-| 阴芝马（m_yinzhi） | 1 |
-| 饲灵丸（m_siling） | 1 |
-| 朱果（m_zhuguo） | 1 |
-| 火灵草（m_huoling） | 1 |
-| 九曲灵参（m_jiuqu） | 1 |
-| 定灵玉（m_dingling） | 1 |
-| 凝神花（m_ningshen） | 1 |
-| 灵芝（m_lingzhi） | 1 |
-| 元磁神山核心（m_yuanci） | 1 |
-| 饲灵草（m_silingcao） | 1 |
-| 造化果（m_zaohuacao） | 1 |
-| 霓裳草（m_nishang） | 1 |
-| 虫母晶核（m_chongjing） | 1 |
-| 阴芝马（m_yinzhi） | 1 |
-| 饲灵丸（m_siling） | 1 |
-| 朱果（m_zhuguo） | 1 |
-| 火灵草（m_huoling） | 1 |
-| 九曲灵参（m_jiuqu） | 1 |
-| 定灵玉（m_dingling） | 1 |
-| 凝神花（m_ningshen） | 1 |
-| 灵芝（m_lingzhi） | 1 |
-| 元磁神山核心（m_yuanci） | 1 |
-| 饲灵草（m_silingcao） | 1 |
-| 造化果（m_zaohuacao） | 1 |
 
 ## 四、坊市越级售卖（商品境界 > 该图推荐等级 +8）
 

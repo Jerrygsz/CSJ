@@ -65,7 +65,7 @@ const S = await page.evaluate(() => {
   const SK = window.SKILLS;
   const get = id => SK.find(s => s.id === id);
   const map = {
-    sword: 'qingmang', xuemo: 'blood', fire: 'snake', sanyan: 'fan',
+    sword: 'qingmang', xuemo: 'blood', fire: 'fire', sanyan: 'fan',
     nova: 'gold', qinxian: 'gold', frost: 'ice', yuanci: 'gravity',
     orb: 'gang', leishen: 'thunder'
   };
@@ -79,7 +79,7 @@ const S = await page.evaluate(() => {
 });
 ok(S.vfx_sword, '控物术(sword) → qingmang');
 ok(S.vfx_xuemo, '血魔剑诀(xuemo) → blood');
-ok(S.vfx_fire, '火弹术(fire) → snake');
+ok(S.vfx_fire, '火弹术(fire) → fire（直线火球）');
 ok(S.vfx_sanyan, '三焰扇(sanyan) → fan');
 ok(S.vfx_nova, '定神符(nova) → gold');
 ok(S.vfx_qinxian, '惊神刺(qinxian) → gold');
