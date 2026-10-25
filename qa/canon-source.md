@@ -1,6 +1,6 @@
 # 功法 / 配方 / 道具来源底稿
 
-## 一、功法（34）
+## 一、功法（42）
 
 | id | 名称 | 解锁 | 满层 | 类型 | 特效 |
 |---|---|---:|---:|---|---|
@@ -34,6 +34,14 @@
 | qinxian | 惊神刺 | Lv82 | 7 | burst/ranged_aoe | gold |
 | shishen | 失神刺 | Lv102 | 7 | homing/ranged | gold |
 | huashen | 身外化身 | Lv110 | 5 | passive/passive | — |
+| jzhen | 剑阵圆满 | Lv112 | 7 | orbit/aura | swordarray |
+| heisha | 黑煞修罗功 | Lv102 | 7 | burst/ranged_aoe | blood |
+| jinshen | 禁神术 | Lv112 | 7 | homing/ranged | gold |
+| lihun | 离魂术 | Lv102 | 6 | homing/ranged | blood |
+| mengyin | 梦引术 | Lv110 | 6 | homing/ranged | gold |
+| huanxing | 换形诀 | Lv112 | 5 | passive/passive | — |
+| fansheng | 梵圣真魔功 | Lv112 | 6 | passive/passive | — |
+| shadan | 煞丹术 | Lv112 | 5 | passive/passive | — |
 | yuanci | 元磁神光 | Lv102 | 7 | field/aura | gravity |
 | wuzi | 五子同心魔 | Lv102 | 7 | passive/passive | — |
 | pojie | 破界符·空间诀 | Lv112 | 7 | passive/passive | — |

@@ -301,6 +301,86 @@
    "desc": "玄阴经里的分神之法：以曲魂养出一具化身，替你出手。它打它的，你打你的"
   },
   {
+   "id": "jzhen",
+   "name": "剑阵圆满",
+   "minLv": 112,
+   "max": 7,
+   "type": "aura",
+   "vfx": "swordarray",
+   "kind": "orbit",
+   "desc": "青蟠剑阵成了：四柄飞剑绕身不急不缓，进圈的就挨剑。剑阵一圆，人便是一处绝地"
+  },
+  {
+   "id": "heisha",
+   "name": "黑煞修罗功",
+   "minLv": 102,
+   "max": 7,
+   "type": "ranged_aoe",
+   "vfx": "blood",
+   "kind": "burst",
+   "desc": "玄阴经里的修罗一路：一身黑煞鼓到极处炸开，三尺之内尽成血雾"
+  },
+  {
+   "id": "jinshen",
+   "name": "禁神术",
+   "minLv": 112,
+   "max": 7,
+   "type": "ranged",
+   "vfx": "gold",
+   "kind": "homing",
+   "desc": "锁神而非伤身：一道禁制扣住对方神识，人还站着，念头动不了"
+  },
+  {
+   "id": "lihun",
+   "name": "离魂术",
+   "minLv": 102,
+   "max": 6,
+   "type": "ranged",
+   "vfx": "blood",
+   "kind": "homing",
+   "desc": "阴术之一：把魂往外勾一把，对方愣神的工夫，够你走完一招"
+  },
+  {
+   "id": "mengyin",
+   "name": "梦引术",
+   "minLv": 110,
+   "max": 6,
+   "type": "ranged",
+   "vfx": "gold",
+   "kind": "homing",
+   "desc": "一缕引梦之气渡过去，对方眼里还在打，人已经睡了一瞬"
+  },
+  {
+   "id": "huanxing",
+   "name": "换形诀",
+   "minLv": 112,
+   "max": 5,
+   "type": "passive",
+   "vfx": null,
+   "kind": "passive",
+   "desc": "换一副皮相行走：气息身形都改了，打起来也更容易脱身"
+  },
+  {
+   "id": "fansheng",
+   "name": "梵圣真魔功",
+   "minLv": 112,
+   "max": 6,
+   "type": "passive",
+   "vfx": null,
+   "kind": "passive",
+   "desc": "明王诀走到尽头的模样：佛魔同体，肉身与法力一起压进骨头里"
+  },
+  {
+   "id": "shadan",
+   "name": "煞丹术",
+   "minLv": 112,
+   "max": 5,
+   "type": "passive",
+   "vfx": null,
+   "kind": "passive",
+   "desc": "以煞凝丹的备用法门：正路走不通时，拿一身煞气硬压出一颗丹来"
+  },
+  {
    "id": "yuanci",
    "name": "元磁神光",
    "minLv": 102,
@@ -1918,6 +1998,94 @@
    "rarity": 4,
    "slot": null,
    "teach": "huashen",
+   "src": [
+    "剧情:乱星海·星宫"
+   ]
+  },
+  {
+   "id": "sk_jzhen",
+   "name": "剑阵圆满·法诀",
+   "req": 112,
+   "rarity": 4,
+   "slot": null,
+   "teach": "jzhen",
+   "src": [
+    "剧情:落云宗"
+   ]
+  },
+  {
+   "id": "sk_heisha",
+   "name": "黑煞修罗功·法诀",
+   "req": 102,
+   "rarity": 4,
+   "slot": null,
+   "teach": "heisha",
+   "src": [
+    "剧情:乱星海·星宫"
+   ]
+  },
+  {
+   "id": "sk_jinshen",
+   "name": "禁神术·法诀",
+   "req": 112,
+   "rarity": 4,
+   "slot": null,
+   "teach": "jinshen",
+   "src": [
+    "剧情:乱星海·星宫"
+   ]
+  },
+  {
+   "id": "sk_lihun",
+   "name": "离魂术·法诀",
+   "req": 102,
+   "rarity": 4,
+   "slot": null,
+   "teach": "lihun",
+   "src": [
+    "剧情:昆吾山"
+   ]
+  },
+  {
+   "id": "sk_mengyin",
+   "name": "梦引术·法诀",
+   "req": 110,
+   "rarity": 4,
+   "slot": null,
+   "teach": "mengyin",
+   "src": [
+    "剧情:阴冥之地"
+   ]
+  },
+  {
+   "id": "sk_huanxing",
+   "name": "换形诀·法诀",
+   "req": 112,
+   "rarity": 4,
+   "slot": null,
+   "teach": "huanxing",
+   "src": [
+    "剧情:阴罗宗四长老"
+   ]
+  },
+  {
+   "id": "sk_fansheng",
+   "name": "梵圣真魔功·法诀",
+   "req": 112,
+   "rarity": 4,
+   "slot": null,
+   "teach": "fansheng",
+   "src": [
+    "剧情:大晋·佛宗"
+   ]
+  },
+  {
+   "id": "sk_shadan",
+   "name": "煞丹术·法诀",
+   "req": 112,
+   "rarity": 4,
+   "slot": null,
+   "teach": "shadan",
    "src": [
     "剧情:乱星海·星宫"
    ]

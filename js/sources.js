@@ -119,6 +119,14 @@
   addTo('jixi',     { items: ['sk_shishen'] });   // 极西之地千竹教，大衍诀一脉
   addTo('xinggong', { items: ['sk_huashen'] });   // 玄阴经分神之法
 
+  // ---------- 三·九、化神余下诸门 ----------
+  addTo('luoyun',   { items: ['sk_jzhen'] });                      // 青元剑诀圆满
+  addTo('xinggong', { items: ['sk_heisha', 'sk_jinshen', 'sk_shadan'] });  // 玄阴经诸术
+  addTo('kunwu',    { items: ['sk_lihun'] });
+  addTo('yinming',  { items: ['sk_mengyin'] });
+  addTo('yinluo',   { items: ['sk_huanxing'] });
+  addTo('dajin',    { items: ['sk_fansheng'] });                   // 大晋佛魔同源
+
   // ---------- 四、功法：原著里「谁传给韩立」的，就该在哪张图学 ----------
   // 长春功：墨大夫在密室里硬塞给他的（不是坊市货）
   addTo('mishi', { items: ['sk_changchun'] });

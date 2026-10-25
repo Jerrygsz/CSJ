@@ -67,6 +67,7 @@ const S = await page.evaluate(() => {
   const map = {
     sword: 'qingmang', xueling: 'blood', fire: 'fire', sanyan: 'fan', jianfen: 'swordarray', shayao: 'blood',
     dageng: 'swordarray', tiandu: 'fire', xuelian: 'blood',
+    jzhen: 'swordarray', heisha: 'blood', jinshen: 'gold',
     nova: 'gold', qinxian: 'gold', frost: 'ice', yuanci: 'gravity',
     orb: 'gang', leishen: 'thunder'
   };
@@ -85,6 +86,9 @@ ok(S.vfx_shayao, '煞妖诀(shayao) → blood');
 ok(S.vfx_dageng, '大庚剑阵(dageng) → swordarray');
 ok(S.vfx_tiandu, '天都尸火(tiandu) → fire');
 ok(S.vfx_xuelian, '血炼神光(xuelian) → blood');
+ok(S.vfx_jzhen, '剑阵圆满(jzhen) → swordarray（飞剑绕身）');
+ok(S.vfx_heisha, '黑煞修罗功(heisha) → blood');
+ok(S.vfx_jinshen, '禁神术(jinshen) → gold');
 ok(S.vfx_fire, '火弹术(fire) → fire（直线火球）');
 ok(S.vfx_sanyan, '三焰扇(sanyan) → fan');
 ok(S.vfx_nova, '定神符(nova) → gold');
