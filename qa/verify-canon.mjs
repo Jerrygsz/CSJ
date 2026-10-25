@@ -214,7 +214,27 @@ ok(r4e.met1.indexOf('e_huo') >= 0, '进门自动播待办际遇（兜售黑货�
 ok(r4e.cleared1 === true, '离坊市即算通关（可反复再来）', r4e.cleared1);
 ok(r4e.second === 'shop', '第二次进坊市：直接摆摊，不再重念开场白', { second: r4e.second, spk: r4e.spk });
 
-console.log('\n== 5. 全程零报错 ==');
+// ===== 6. 主线链条与原著顺序一致（防顺序类错误复发）=====
+console.log('\n== 6. 主线链条 ==');
+let r6 = await E(`(() => {
+  const M = window.MAPS || [];
+  const chain = [];
+  let cur = 'qixuan', g = 0;
+  while (cur && g++ < 80) { const m = M.find(x => x.id === cur); if (!m) break; chain.push(cur); cur = m.next || null; }
+  return chain;
+})()`);
+// 七玄门 → 太南小会 → 黄枫谷 → 血色禁地 → 地火之屋 → 燕家堡 → 金鼓原 → 古传送阵 → 魁星岛 →
+// 六连殿 → 海猿岛 → 天星城 → 凝翠岛 → 闭府结丹 → 虚天殿 → 外星海 → 阴冥之地 → 无边海 →
+// 落云宗 → 结婴 → 掩月宗 → 黄龙山 → 慕兰 → 极西之地 → 坠魔谷 → 灵渺园 → 大晋 → 昆吾山 →
+// 镇魔塔 → 小极宫 → 虚天殿闭关 → 星宫 → 鲲鹏 → 天澜圣兽 → 斩六道 → 芥子空间 → 飞升
+const want6 = ['qixuan', 'houshan', 'mishi', 'tainan', 'huangfeng', 'yaoyuan', 'xuese', 'zhuji', 'yanjia', 'jingu',
+  'guchuan', 'kuixing', 'liulian', 'haian', 'tianxing', 'ningcui', 'jiedan', 'xutian', 'waihai', 'yinming',
+  'bianhai', 'luoyun', 'shixiao', 'sanjian', 'yinyue', 'jieying', 'jiaoyihui', 'cangkun', 'yanyue', 'huanglong',
+  'bianjie', 'yinluo', 'jixi', 'zhuimo', 'lingmiao', 'mulan', 'dajin', 'kunwu', 'zhenmo', 'xiaoji',
+  'xutian2', 'xinggong', 'kunpeng', 'luoyun2', 'tianlan', 'liudao', 'jiezi', 'feisheng'];
+ok(JSON.stringify(r6) === JSON.stringify(want6), '主线 ' + want6.length + ' 张图顺序与原著一致', { got: r6.length, want: want6.length });
+
+console.log('\n== 7. 全程零报错 ==');
 ok(errs.length === 0, '无页面/控制台报错', errs.slice(0, 3));
 
 await b.close(); server.close();
