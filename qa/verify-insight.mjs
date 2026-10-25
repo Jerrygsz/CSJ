@@ -131,7 +131,31 @@ let r6 = await E(`(() => {
 ok(Object.keys(r6.after.skills || {}).length === 0 && (r6.after.refine || 0) === 0, '换图后顿悟/祭炼不带入', r6.after);
 ok(r6.shaAfter.v === 0 && r6.shaAfter.need === 120, '煞气与门槛重置', r6.shaAfter);
 
-// ===== 7. 零报错 =====
+// ===== 8. 节奏守门：一局内的顿悟次数必须落在合理区间 =====
+console.log('\n== 8. 一局节奏（120 秒不死跑）==');
+let r8 = await E(`(() => {
+  const F = window.__FR;
+  F.muteStory(true); F.clearProgress(); F.setLevel(30); F.setStones(200);
+  F.enterMap('xuese', 'easy'); F.skipStory();
+  let picks = 0, g = 0;
+  while (g++ < 2600) {
+    if (F.G.player) F.G.player.hp = F.G.player.maxhp;      // 不死，只测节奏
+    F.tickFrames(1, 0.05);
+    const st = F.info().state;
+    if (st === 'levelup') {
+      const c = document.querySelectorAll('#cards .card');
+      if (c.length) { c[0].click(); picks++; }
+      continue;
+    }
+    if (F.info().time > 121) break;
+  }
+  return { picks, kills: F.info().kills, time: Math.round(F.info().time || 0) };
+})()`);
+ok(r8.time >= 110, '跑满两分钟', r8.time);
+ok(r8.picks >= 3 && r8.picks <= 12, '两分钟 3~12 次顿悟（约 10~40 秒一次）', r8);
+ok(r8.picks / (r8.time / 60) >= 1.2 && r8.picks / (r8.time / 60) <= 6, '每分钟 1.2~6 次，不会刷屏也不会枯坐', (r8.picks / (r8.time / 60)).toFixed(2));
+
+// ===== 9. 零报错 =====
 console.log('\n== 7. 全程零报错 ==');
 ok(errs.length === 0, '无页面/控制台报错', errs.slice(0, 3));
 

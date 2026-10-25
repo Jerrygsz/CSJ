@@ -842,6 +842,11 @@
     const crit = Math.random() < critChance();
     if (crit) d *= 1.8;
     e.hp -= d; e.hitFlash = 0.12;
+    // 吸血（顿悟被动）：打出去多少，按比例回一点气血
+    const lc = G.bonus.leech || 0;
+    if (lc > 0 && G.player && G.player.hp > 0) {
+      G.player.hp = Math.min(G.player.maxhp, G.player.hp + d * Math.min(0.2, lc));
+    }
     spawnText(e.x, e.y - e.r - 4, Math.round(d), crit ? '#ffd24a' : '#fff', crit ? 18 : 13);
     if (G.coopRole === 'host' && window.Coop) window.Coop.queueDmg(e.x, e.y - e.r - 4, Math.round(d), crit);
     if (crit) G.hitStop = Math.max(G.hitStop, 0.018);
@@ -2804,6 +2809,9 @@
     G.sha = { v: 0, need: SHA_NEED, dmgT: 0, x2T: 0, sayT: 24 + Math.random() * 12 };
     G.insight = { skills: {}, n: 0, refine: 0 };
   }
+  // 每顿悟一次，下一次门槛抬 35%：不抬的话杀得快的人会 5 秒一次顿悟，刷屏
+  // （120 → 162 → 219 → 296 → 400 → 540…，一局 4~6 次，正好落在设计要的节奏里）
+  const SHA_GROW = 1.35;
   function ownSkills() { return SKILLS.filter(s => (G.player.skills[s.id] || 0) > 0); }
   function newSkills() { return SKILLS.filter(s => !(G.player.skills[s.id] || 0) && (!s.minLv || G.player.level >= s.minLv)); }
 
@@ -2817,7 +2825,7 @@
   ];
   const PASSIVE_MODS = [
     { k: 'spd', v: 0.10, cap: 0.6, name: '移速 +10%' },
-    { k: 'regen', v: 0.6, cap: 6, name: '回血 +0.6/秒' },
+    { k: 'leech', v: 0.04, cap: 0.2, name: '吸血 +4%' },
     { k: 'armor', v: 0.08, cap: 0.35, name: '减伤 +8%' },
     { k: 'pickup', v: 0.20, cap: 1.5, name: '拾取 +20%' },
     { k: 'maxhp', v: 15, cap: 300, name: '气血上限 +15' },
@@ -2912,11 +2920,14 @@
       else if (k === 'x2dmg') { st.dmgT = 15; banner('伤害翻倍 · 15 秒'); }
       else if (k === 'heal') { G.player.hp = G.player.maxhp; banner('气血全满'); Sfx.heal(); }
       else {
+        // 清场：屏内小怪尽灭。这一下不再回煞气 —— 否则「清场→回煞气→更快顿悟→再清场」自我滚雪球
         let n = 0;
+        G.noSha = true;
         for (const en of allEnemies()) {
           if (en === G.boss || en.isBossAlly) continue;
           if (U.dist(G.player.x, G.player.y, en.x, en.y) < 420) { killEnemy(en); n++; }
         }
+        G.noSha = false;
         banner('清场 · ' + n + ' 只'); Sfx.nova();
       }
     } else if (c.kind === 'R') {
@@ -2932,7 +2943,13 @@
     insSt().n++;
     resumePlay();
   }
-  function openInsight() { showCards('煞气顿悟 · 择一', rollInsight()); Sfx.levelup(); }
+  function openInsight() {
+    const st = shaSt();
+    // 这一次顿悟用掉的门槛，用掉之后抬一档
+    st.need = Math.max(SHA_NEED, Math.round(st.need * SHA_GROW));
+    showCards('煞气顿悟 · 择一', rollInsight());
+    Sfx.levelup();
+  }
   // 灵石祭炼：花的是全局灵石，次数越多越贵
   function openRefine() {
     if (!G.player) return;
@@ -2961,6 +2978,7 @@
     }
   }
   function gainSha(n) {
+    if (G.noSha) return;   // 清场这类「一次性收走」不算击杀产出
     const st = shaSt();
     const k = (1 + (G.bonus.shaGain || 0)) * (st.x2T > 0 ? 2 : 1);
     st.v += n * k;
