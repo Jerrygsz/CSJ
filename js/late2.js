@@ -1051,7 +1051,6 @@
 (function () {
   window.ITEMS.push(
     { id: 'sk_swift',  name: '罗烟步·法诀', rarity: 1, icon: '📕', req: 1,  teach: 'swift',  desc: '习得《罗烟步》第一层。血色禁地所得身法真传，步法如烟，移速大增。' },
-    { id: 'sk_magnet', name: '凝元聚灵术·法诀', rarity: 1, icon: '📕', req: 1,  teach: 'magnet', desc: '习得《凝元聚灵术》第一层。广布灵识，灵石自行来投，拾取范围变大。' },
     { id: 'sk_fire',   name: '火弹术·法诀', rarity: 2, icon: '📕', req: 5,  teach: 'fire',   desc: '习得《火弹术》第一层。韩立早年期自炼符箓，放出追踪火蛇。' },
     { id: 'sk_orb',    name: '金光罩·法诀', rarity: 2, icon: '📕', req: 8, teach: 'orb',   desc: '习得《金光罩》第一层。庚金玄罡环绕周身，触敌即伤。' },
     { id: 'sk_regen',  name: '长春续脉术·法诀', rarity: 2, icon: '📕', req: 10, teach: 'regen',  desc: '习得《长春续脉术》第一层。韩立借灵药丹力缓缓回血。' },
@@ -1061,11 +1060,14 @@
     { id: 'sk_gourd',  name: '灵葫诀·炼法', rarity: 3, icon: '📕', req: 25, teach: 'gourd', desc: '习得《灵葫诀》第一层。本命灵葫在身，生命上限提升。' },
     // ---- 按原著补的各境界功法：买到或搜出来，回去逐个学 ----
     { id: 'sk_changchun', name: '长春功·法诀',     rarity: 2, icon: '📕', req: 1,   teach: 'changchun', desc: '习得《长春功》。墨大夫传授的引气吐纳根基，韩立练气期的根本功法' },
-    { id: 'sk_xuemo',     name: '血煞剑芒·法诀',   rarity: 4, icon: '📕', req: 56,  teach: 'xuemo',     desc: '习得《血煞剑芒》。血煞剑气破体而出，杀人夺宝所得' },
     { id: 'sk_sanyan',    name: '三焰扇·扇法',     rarity: 4, icon: '📕', req: 82,  teach: 'sanyan',    desc: '习得《三焰扇》。仿七焰扇而制，大衍神君改制三十一种材料，韩立元婴后期才炼成' },
+    { id: 'sk_jianfen',   name: '剑影分光术·法诀', rarity: 4, icon: '📕', req: 56,  teach: 'jianfen', desc: '习得《剑影分光术》。青元剑诀第三层神通，一剑化数影' },
+    { id: 'sk_shayao',    name: '煞妖诀·法诀',     rarity: 4, icon: '📕', req: 56,  teach: 'shayao',  desc: '习得《煞妖诀》。玄阴经里炼煞气为攻杀的一路，煞气绕身触者即伤' },
+    { id: 'sk_xueling',   name: '血灵钻·法诀',     rarity: 4, icon: '📕', req: 60,  teach: 'xueling', desc: '习得《血灵钻》。精血凝钻，指劲破体，专破护体灵光' },
+    { id: 'sk_mingwang',  name: '明王诀·法诀',     rarity: 4, icon: '📕', req: 64,  teach: 'mingwang', desc: '习得《明王诀》。佛门炼体，借煞气淬身，肉身自成一重法宝' },
+    { id: 'sk_jifeng',    name: '疾风九变·法诀',   rarity: 4, icon: '📕', req: 60,  teach: 'jifeng',  desc: '习得《疾风九变》。妖族禽修身法，九转身形如风' },
     { id: 'sk_sanzhuan',  name: '三转重元功·法诀', rarity: 4, icon: '📕', req: 50,  teach: 'sanzhong',  desc: '习得《三转重元功》。青元剑诀附带的辅助法门，散功重修三轮，把真元压实' },
     { id: 'sk_fenglei',   name: '风雷翅·炼法',     rarity: 4, icon: '📕', req: 56,  teach: 'fenglei',   desc: '习得《风雷翅》。乱星海炼器所得飞行翼，移速大增' },
-    { id: 'sk_tianzhu',   name: '身外化身·法诀',   rarity: 4, icon: '📕', req: 56,  teach: 'tianzhu',   desc: '习得《身外化身》。玄阴经里的分神之法，分出一具化身替你出手' },
     { id: 'sk_tongbao',   name: '明王诀·法诀',     rarity: 4, icon: '📕', req: 82,  teach: 'tongbao',   desc: '习得《明王诀》。佛门炼体功法，借煞气淬身，肉身渐如法宝' },
     { id: 'sk_leishen',   name: '辟邪神雷·雷诀',   rarity: 4, icon: '📕', req: 56,  teach: 'leishen',   desc: '习得《辟邪神雷》。青竹蜂云剑以金雷竹炼成，剑身自蕴此雷，专克魔道鬼道' },
     { id: 'sk_qinxian',   name: '大庚剑阵·阵图',   rarity: 4, icon: '📕', req: 82,  teach: 'qinxian',   desc: '习得《大庚剑阵》。青元剑诀第十层，以本命飞剑布阵，剑光成网' },
@@ -1077,7 +1079,6 @@
 
   window.SHOP_STOCK.push(
     { id: 'sk_swift',  price: 300,  cat: 'skill' },
-    { id: 'sk_magnet', price: 260,  cat: 'skill' },
     { id: 'sk_fire',   price: 420,  cat: 'skill' },
     { id: 'sk_orb',    price: 560,  cat: 'skill' },
     { id: 'sk_regen',  price: 900,  cat: 'skill' },
@@ -1086,11 +1087,9 @@
     { id: 'sk_frost',  price: 2200, cat: 'skill' },
     { id: 'sk_gourd',  price: 1800, cat: 'skill' },
     { id: 'sk_changchun', price: 260,  cat: 'skill' },
-    { id: 'sk_xuemo',     price: 3200, cat: 'skill' },
     { id: 'sk_sanyan',    price: 3000, cat: 'skill' },
     { id: 'sk_sanzhuan',  price: 3400, cat: 'skill' },
     { id: 'sk_fenglei',   price: 2800, cat: 'skill' },
-    { id: 'sk_tianzhu',   price: 2600, cat: 'skill' },
     { id: 'sk_xuanyin',   price: 2800, cat: 'skill' },
     { id: 'sk_tongbao',   price: 4200, cat: 'skill' },
     { id: 'dayan2',       price: 6400, cat: 'skill' },
@@ -1103,7 +1102,7 @@
   // 太南小会是练气散修的摊子，只卖低阶法诀
   const TN = window.MAPS.find(m => m.id === 'tainan');
   // 散修摊子上有的是低阶法诀；**长春功不在此列**——那是墨大夫私下传给韩立的，摊子上不该有
-  if (TN) TN.shop = TN.shop.concat(['sk_swift', 'sk_magnet', 'sk_fire', 'sk_orb', 'sk_regen']);
+  if (TN) TN.shop = TN.shop.concat(['sk_swift', 'sk_fire', 'sk_orb', 'sk_regen']);
   // 天星城是乱星海第一大市，中高阶法诀也上摊
   const TX = window.MAPS.find(m => m.id === 'tianxing');
   if (TX) TX.shop = TX.shop.concat(['sk_nova', 'sk_haste', 'sk_frost', 'sk_gourd', 'sk_regen']);
@@ -1118,7 +1117,7 @@
       // 高阶符箓与灵石（元婴身家）
       'bichen', 'chuansong', 'baoliebao', 'tishen', 'jipin', 'lianqi',   // 破禁符：太南小会撤柜后，落到这里
       // 元婴期法诀（原著：交易会是功法与情报的核心平台）
-      'sk_xuemo', 'sk_sanyan', 'sk_sanzhuan', 'sk_fenglei', 'sk_tianzhu', 'sk_xuanyin', 'sk_tongbao', 'sk_leishen', 'sk_qinxian',
+      'sk_sanyan', 'sk_sanzhuan', 'sk_fenglei', 'sk_xuanyin', 'sk_tongbao', 'sk_leishen', 'sk_qinxian',
       // 元婴级灵物与法宝料：韩立此行要换的庚精、换到的三千年赤精芝
       'm_gengjing', 'm_chijingzhi', 'm_yaodan',
       // 镇宗灵丹

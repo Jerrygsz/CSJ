@@ -71,7 +71,12 @@
     { id: 'bag_ling2',   price: 1800, cat: 'qi' },   // 特制灵兽袋
     { id: 'ring_ling',   price: 2600, cat: 'qi' },   // 灵兽环
     { id: 'm_siling',    price: 40,   cat: 'cai' },  // 饲灵丸
-    { id: 'm_silingcao', price: 20,   cat: 'cai' }   // 饲灵草
+    { id: 'm_silingcao', price: 20,   cat: 'cai' },  // 饲灵草
+    { id: 'sk_jianfen',  price: 4800, cat: 'skill' },
+    { id: 'sk_shayao',   price: 4600, cat: 'skill' },
+    { id: 'sk_xueling',  price: 5200, cat: 'skill' },
+    { id: 'sk_mingwang', price: 5600, cat: 'skill' },
+    { id: 'sk_jifeng',   price: 5000, cat: 'skill' }
   );
 
   // ---------- 二、灵兽：卵跟着「哪里孵出来的」走 ----------
@@ -97,6 +102,12 @@
   addTo('tainan',  { items: ['f_huanglong'] });  // 散修出手的玉简
   addTo('yaoyuan', { items: ['f_zhuji'] });      // 百药园抄的筑基丹方
   addTo('tianxing', { items: ['f_jinsui'] });    // 乱星海市面的金髓丸方
+
+  // ---------- 三·六、结丹期五门新功法：按原著出处发 ----------
+  addTo('luoyun',  { items: ['sk_jianfen'] });   // 青元剑诀门内，落云宗补全第三层
+  addTo('xinggong', { items: ['sk_shayao', 'sk_xueling'] });  // 玄阴经出自乱星海
+  addTo('dajin',   { items: ['sk_mingwang'] });  // 大晋佛宗，佛门炼体
+  addTo('waihai',  { items: ['sk_jifeng'] });    // 外星海妖修的身法
 
   // ---------- 四、功法：原著里「谁传给韩立」的，就该在哪张图学 ----------
   // 长春功：墨大夫在密室里硬塞给他的（不是坊市货）

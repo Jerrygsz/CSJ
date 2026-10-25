@@ -1,6 +1,6 @@
 # 功法 / 配方 / 道具来源底稿
 
-## 一、功法（25）
+## 一、功法（26）
 
 | id | 名称 | 解锁 | 满层 | 类型 | 特效 |
 |---|---|---:|---:|---|---|
@@ -11,16 +11,17 @@
 | frost | 冰冻术 | Lv20 | 5 | field/aura | ice |
 | changchun | 长春功 | Lv1 | 6 | passive/passive | — |
 | swift | 罗烟步 | Lv1 | 5 | passive/passive | — |
-| regen | 长春续脉术 | Lv10 | 5 | passive/passive | — |
-| magnet | 凝元聚灵术 | Lv1 | 5 | passive/passive | — |
 | haste | 雷遁术 | Lv15 | 5 | passive/passive | — |
 | gourd | 灵葫诀 | Lv25 | 5 | passive/passive | — |
 | qingyuan | 青元剑诀 | Lv36 | 7 | passive/passive | — |
 | dayan | 大衍诀 | Lv36 | 7 | passive/passive | — |
-| xuemo | 血煞剑芒 | Lv56 | 6 | beam/ranged | blood |
+| jianfen | 剑影分光术 | Lv56 | 6 | beam/ranged | swordarray |
+| shayao | 煞妖诀 | Lv56 | 6 | orbit/aura | blood |
+| xueling | 血灵钻 | Lv60 | 6 | beam/ranged | blood |
+| mingwang | 明王诀 | Lv64 | 5 | passive/passive | — |
+| jifeng | 疾风九变 | Lv60 | 5 | passive/passive | — |
 | sanyan | 三焰扇 | Lv56 | 6 | spread/ranged_aoe | fan |
 | fenglei | 风雷翅 | Lv56 | 6 | passive/passive | — |
-| tianzhu | 虫丝缚 | Lv56 | 6 | passive/passive | — |
 | tongbao | 洞漩金光 | Lv56 | 6 | passive/passive | — |
 | dayan2 | 大衍诀·后三层 | Lv82 | 7 | passive/passive | — |
 | leishen | 辟邪神雷 | Lv82 | 7 | thunder/ranged_aoe | thunder |

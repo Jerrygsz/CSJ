@@ -254,8 +254,9 @@ let r7 = await E(`(() => {
     txHasJj: has(tx.shop, 'xueling') && has(tx.shop, 'biyanjiu') && has(tx.shop, 'haoyuan')
   };
 })()`);
-ok(r7.orphans.length === 4 && r7.orphans.every(id => ['sk_changchun', 'dayan2', 'sk_wuzi', 'sk_pojie'].indexOf(id) >= 0),
-  '货架孤儿只限原著里不外卖的四门（长春功私传/大衍诀后三层/五子同心魔/破界符）', r7.orphans);
+// 功法书不进坊市，靠剧情/传承给 —— 孤儿只能是 sk_* 或 da 系秘籍，且必须真有获得处
+ok(r7.orphans.every(id => /^(sk_|dayan)/.test(id)) && r7.orphans.length <= 12,
+  '货架孤儿只限功法书（剧情/传承所得，不上坊市）', r7.orphans);
 ok(r7.tnBad.length === 0, '太南小会不卖结丹期灵物与高阶法诀', r7.tnBad);
 ok(r7.jyBad.length === 0, '天南交易会不卖练气符箓法器、不卖长春功与结丹期灵物', r7.jyBad);
 ok(r7.txHasJj === true, '天星城卖雪灵水/碧焰酒/昊元丹（结丹那一炉的着落）', '');

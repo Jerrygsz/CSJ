@@ -44,10 +44,10 @@ await page.evaluate(() => {
   F.openAllCaves();
   F.setLevel(60);                 // 结丹，本境 = 结丹档
   F.learn('sword');               // 练气档
-  F.learn('regen');               // 练气档
-  F.learn('xuemo');               // 结丹档
+  F.learn('gourd');               // 练气/筑基档（原 regen 已删）
+  F.learn('xueling');             // 结丹档
   // 多学几门，把低境界那一档塞满 —— 展开后必定超过一屏，才能验出「不顶出屏幕」
-  ['fire', 'orb', 'nova', 'frost', 'swift', 'magnet', 'haste', 'gourd', 'changchun'].forEach(id => F.learn(id));
+  ['fire', 'orb', 'nova', 'frost', 'swift', 'jifeng', 'haste', 'gourd', 'changchun'].forEach(id => F.learn(id));
   F.setSkill('sword', true);      // 先运起一门「低境界」的
 });
 
@@ -92,14 +92,14 @@ ok(collapse.open === false, '点切换可收起牌堆', collapse);
 // 学了一堆之后槽位会被自动占满，这里把「身上运着谁」定死，后面的断言才有准数：
 // 只运两门 —— 低境界的控物术 + 本境的血煞剑芒
 await page.evaluate(() => {
-  ['sword', 'regen', 'xuemo', 'fire', 'orb', 'nova', 'frost', 'swift', 'magnet', 'haste', 'gourd', 'changchun']
+  ['sword', 'gourd', 'xueling', 'fire', 'orb', 'nova', 'frost', 'swift', 'jifeng', 'haste', 'changchun']
     .forEach(id => F.setSkill(id, false));
   F.setSkill('sword', true);
-  F.setSkill('xuemo', true);
+  F.setSkill('xueling', true);
 });
 const equippedNow = await page.evaluate(() => F.skillState().equipped.slice());
-ok(equippedNow.indexOf('sword') >= 0 && equippedNow.indexOf('xuemo') >= 0,
-  '已明确运起：控物术（练气档）+ 血煞剑芒（结丹档）', equippedNow);
+ok(equippedNow.indexOf('sword') >= 0 && equippedNow.indexOf('xueling') >= 0,
+  '已明确运起：控物术（练气档）+ 血灵钻（结丹档）', equippedNow);
 
 // ---------- 1) 进战斗图前先弹运功面板 ----------
 const toDiff = await page.evaluate(() => {
@@ -157,7 +157,7 @@ const expandLower = await page.evaluate(() => {
   return { id, open: after.classList.contains('open'), skills: [...after.querySelectorAll('[data-pfskill]')].map(b => b.getAttribute('data-pfskill')) };
 });
 ok(expandLower.open === true, '点档名能展开低境界档', expandLower);
-ok((expandLower.skills || []).indexOf('regen') >= 0, '展开后能看到低境界的长春续脉术', expandLower.skills);
+ok((expandLower.skills || []).indexOf('gourd') >= 0, '展开后能看到低境界的功法（灵葫诀）', expandLower.skills);
 
 // ---------- 展开再多也不能顶出屏幕 ----------
 const fit = await page.evaluate(() => {

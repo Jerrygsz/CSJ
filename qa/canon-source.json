@@ -71,26 +71,6 @@
    "desc": "血色禁地所得身法真传，步法如烟，移速大增"
   },
   {
-   "id": "regen",
-   "name": "长春续脉术",
-   "minLv": 10,
-   "max": 5,
-   "type": "passive",
-   "vfx": null,
-   "kind": "passive",
-   "desc": "长春功一脉的续脉之法：木灵缓缓养着经脉，伤后自复，久战不竭"
-  },
-  {
-   "id": "magnet",
-   "name": "凝元聚灵术",
-   "minLv": 1,
-   "max": 5,
-   "type": "passive",
-   "vfx": null,
-   "kind": "passive",
-   "desc": "凝元功一脉的吐纳法：灵气自行往身上聚，落地的灵石走得比别人近"
-  },
-  {
    "id": "haste",
    "name": "雷遁术",
    "minLv": 15,
@@ -131,14 +111,54 @@
    "desc": "元神培炼之法，前四层。神识大增，出手更狠"
   },
   {
-   "id": "xuemo",
-   "name": "血煞剑芒",
+   "id": "jianfen",
+   "name": "剑影分光术",
    "minLv": 56,
+   "max": 6,
+   "type": "ranged",
+   "vfx": "swordarray",
+   "kind": "beam",
+   "desc": "青元剑诀第三层神通：一剑化数影，同出同归。影是虚的，剑是真的"
+  },
+  {
+   "id": "shayao",
+   "name": "煞妖诀",
+   "minLv": 56,
+   "max": 6,
+   "type": "aura",
+   "vfx": "blood",
+   "kind": "orbit",
+   "desc": "玄阴经里炼煞气为攻杀的一路：煞气绕身，触者即伤。修得越深，环越宽"
+  },
+  {
+   "id": "xueling",
+   "name": "血灵钻",
+   "minLv": 60,
    "max": 6,
    "type": "ranged",
    "vfx": "blood",
    "kind": "beam",
-   "desc": "煞妖诀与血炼神光一路化出的剑气：以煞养血，血煞破体而出"
+   "desc": "煞丹术体系的杀招：精血凝成一枚钻，指劲打出，专破护体灵光"
+  },
+  {
+   "id": "mingwang",
+   "name": "明王诀",
+   "minLv": 64,
+   "max": 5,
+   "type": "passive",
+   "vfx": null,
+   "kind": "passive",
+   "desc": "佛门炼体之法，借煞气淬身、化煞不伤神。痛是真痛，扛过去肉身就是一重法宝"
+  },
+  {
+   "id": "jifeng",
+   "name": "疾风九变",
+   "minLv": 60,
+   "max": 5,
+   "type": "passive",
+   "vfx": null,
+   "kind": "passive",
+   "desc": "妖族禽修的身法：九转之间身形如风，配风雷翅可再快一线"
   },
   {
    "id": "sanyan",
@@ -159,16 +179,6 @@
    "vfx": null,
    "kind": "passive",
    "desc": "乱星海炼器所得飞行翼，背生双翼，闪转腾挪都快人一线"
-  },
-  {
-   "id": "tianzhu",
-   "name": "虫丝缚",
-   "minLv": 56,
-   "max": 6,
-   "type": "passive",
-   "vfx": null,
-   "kind": "passive",
-   "desc": "驱虫术衍生的虫丝之法：一口气吐出千缕细丝，缠住便跑不脱"
   },
   {
    "id": "tongbao",
@@ -1589,17 +1599,6 @@
    ]
   },
   {
-   "id": "sk_magnet",
-   "name": "凝元聚灵术·法诀",
-   "req": 1,
-   "rarity": 1,
-   "slot": null,
-   "teach": "magnet",
-   "src": [
-    "坊:太南小会"
-   ]
-  },
-  {
    "id": "sk_fire",
    "name": "火弹术·法诀",
    "req": 5,
@@ -1689,18 +1688,6 @@
    ]
   },
   {
-   "id": "sk_xuemo",
-   "name": "血煞剑芒·法诀",
-   "req": 56,
-   "rarity": 4,
-   "slot": null,
-   "teach": "xuemo",
-   "src": [
-    "坊:天南交易会",
-    "掉落:魔道修士"
-   ]
-  },
-  {
    "id": "sk_sanyan",
    "name": "三焰扇·扇法",
    "req": 82,
@@ -1710,6 +1697,61 @@
    "src": [
     "坊:天南交易会",
     "掉落:机关傀儡"
+   ]
+  },
+  {
+   "id": "sk_jianfen",
+   "name": "剑影分光术·法诀",
+   "req": 56,
+   "rarity": 4,
+   "slot": null,
+   "teach": "jianfen",
+   "src": [
+    "剧情:落云宗"
+   ]
+  },
+  {
+   "id": "sk_shayao",
+   "name": "煞妖诀·法诀",
+   "req": 56,
+   "rarity": 4,
+   "slot": null,
+   "teach": "shayao",
+   "src": [
+    "剧情:乱星海·星宫"
+   ]
+  },
+  {
+   "id": "sk_xueling",
+   "name": "血灵钻·法诀",
+   "req": 60,
+   "rarity": 4,
+   "slot": null,
+   "teach": "xueling",
+   "src": [
+    "剧情:乱星海·星宫"
+   ]
+  },
+  {
+   "id": "sk_mingwang",
+   "name": "明王诀·法诀",
+   "req": 64,
+   "rarity": 4,
+   "slot": null,
+   "teach": "mingwang",
+   "src": [
+    "剧情:大晋·佛宗"
+   ]
+  },
+  {
+   "id": "sk_jifeng",
+   "name": "疾风九变·法诀",
+   "req": 60,
+   "rarity": 4,
+   "slot": null,
+   "teach": "jifeng",
+   "src": [
+    "剧情:外星海·奇渊岛"
    ]
   },
   {
@@ -1730,17 +1772,6 @@
    "rarity": 4,
    "slot": null,
    "teach": "fenglei",
-   "src": [
-    "坊:天南交易会"
-   ]
-  },
-  {
-   "id": "sk_tianzhu",
-   "name": "身外化身·法诀",
-   "req": 56,
-   "rarity": 4,
-   "slot": null,
-   "teach": "tianzhu",
    "src": [
     "坊:天南交易会"
    ]

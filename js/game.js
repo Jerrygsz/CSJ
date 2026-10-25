@@ -2828,9 +2828,9 @@
   // 每顿悟一次，下一次门槛抬 6%：抬太多的话清怪慢的图一局撑不到 9 次
   // （120 → 127 → 135 → 143 → 151…，第 9 次约需 1380 点，一局正好在 9~13 次之间）
   const SHA_GROW = 1.06;
-  // 灵气自然汇聚：站着也在攒（每秒 4 点）。这一条是「每张战图至少 9 次顿悟」的保底 ——
+  // 灵气自然汇聚：站着也在攒（每秒 5 点）。这一条是「每张战图至少 9 次顿悟」的保底 ——
   // 只靠击杀的话，清怪慢的图会卡在 5~6 次
-  const SHA_DRIP = 4;
+  const SHA_DRIP = 5;
   // boss 型剧情战（单挑）没有小怪可刷，一局只有 40~60 秒：
   // 改用「打掉的血量」换煞气，一场打完约 1200 点，照样够 9 次
   const SHA_BOSS_DUEL = 1200;
@@ -3032,7 +3032,10 @@
     const st = shaSt();
     // 自然汇聚只认「真正在打」的图，别让坊市/洞府里也飘煞气
     if (G.state === 'play' && G.map && (G.map.type === 'combat' || G.map.type === 'boss' || G.map.type === 'chase') && !G.paused) {
-      gainSha((G.map.type === 'boss' ? SHA_DRIP_BOSS : SHA_DRIP) * dt);
+      // 保底：过了 100 秒还没吃满 9 次，汇聚加速追一下 —— 清怪慢的图也不会只给七八次
+      const base = G.map.type === 'boss' ? SHA_DRIP_BOSS : SHA_DRIP;
+      const catchUp = ((st.done || 0) < 9 && G.time > 100) ? 2.5 : 1;
+      gainSha(base * catchUp * dt);
     }
     if (st.x2T > 0) st.x2T = Math.max(0, st.x2T - dt);
     if (st.dmgT > 0) st.dmgT = Math.max(0, st.dmgT - dt);
