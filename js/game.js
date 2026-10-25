@@ -1498,8 +1498,10 @@
   }
   function breakStepOf(b) { return (b && b.chance && b.chance.step) || BREAK_RATE_PER_PILL; }
   // 小境界（中期 / 后期 / 大圆满）的门槛：原著点名的就摆上，没点名的不臆造
+  // 碧焰酒：原著「韩立借此突破了结丹中期瓶颈」—— 卡在中期、破的是进后期这一道，
+  // 所以门摆在 72（结丹后期），不是 64（进中期）。
   window.MINOR_BREAKS = window.MINOR_BREAKS || [
-    { lv: 64, realm: '结丹中期', item: 'biyanjiu', tip: '原著里韩立卡在结丹中期瓶颈，是借裂风兽一族酿的碧焰酒冲过去的。' }
+    { lv: 72, realm: '结丹后期', item: 'biyanjiu', tip: '原著里韩立卡在结丹中期瓶颈，是借裂风兽一族酿的碧焰酒冲过去的。' }
   ];
   function minorReqFor(nextLv) {
     for (const m of (window.MINOR_BREAKS || [])) if (m.lv === nextLv) return m;
@@ -4802,7 +4804,7 @@
   function enterBreakMap(gate) {
     if (!gate) return;
     if (breakMissing(gate).length) { notify('物事不齐 · 备齐了再来'); Sfx.warn(); return; }
-    // 破境图 = endLevel 恰好等于这道门的剧情图（地火之屋 / 小寰岛闭府 / 云梦山结婴 / 芥子空间…）
+    // 破境图 = endLevel 恰好等于这道门的剧情图（地火之屋 / 天星城闭府 / 云梦山结婴 / 芥子空间…）
     const bm = MAPS.find(x => x.endLevel === gate.lv)
       || (gate.story && MAPS.find(x => x.id === gate.story[0].id))
       || null;

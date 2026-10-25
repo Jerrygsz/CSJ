@@ -90,7 +90,7 @@ let r3 = await E(`(() => {
 ok(r3.has === true, '突破页出现「入洞府冲关」按钮', r3.has);
 ok(r3.state === 'prefight' && r3.pf === 'zhuji', '点按钮 → 进「黄枫谷·地火之屋」破境图（先战前运功）', r3);
 
-// 3b. 结丹门 → 破境图是「小寰岛·闭府结丹」（剧情图，不经战前运功）
+// 3b. 结丹门 → 破境图是「天星城·闭府结丹」（剧情图，不经战前运功）
 let r3b = await E(`(() => {
   const F = window.__FR;
   F.muteStory(true); F.clearProgress(); F.setLevel(54);
@@ -103,7 +103,7 @@ let r3b = await E(`(() => {
   F.skipStory();
   return { has, map };
 })()`);
-ok(r3b.has === true && r3b.map === 'jiedan', '结丹按钮进「小寰岛·闭府结丹」（按 endLevel 反查，不误进坊市）', r3b);
+ok(r3b.has === true && r3b.map === 'jiedan', '结丹按钮进「天星城·闭府结丹」（按 endLevel 反查，不误进坊市）', r3b);
 
 // ===== 4. 料齐打完破境图 → 演出 → 破境 =====
 console.log('\n== 4. 料齐：打完演出破境 ==');
@@ -224,11 +224,11 @@ let r8b = await E(`(() => {
 ok(r8b.xueling === true, '坊市可买雪灵水', r8b);
 ok(r8b.biyan === true, '坊市可买碧焰酒', r8b);
 
-// ===== 9. 小境界门（原著点名：结丹中期 · 碧焰酒）=====
-console.log('\n== 9. 小境界：结丹中期须碧焰酒 ==');
+// ===== 9. 小境界门（原著点名：破结丹中期瓶颈 · 碧焰酒 → 进结丹后期）=====
+console.log('\n== 9. 小境界：结丹后期须碧焰酒 ==');
 let r9 = await E(`(() => {
   const F = window.__FR;
-  F.muteStory(true); F.clearProgress(); F.setLevel(63); F.setStones(9000);
+  F.muteStory(true); F.clearProgress(); F.setLevel(71); F.setStones(9000);
   F.enterMap('houshan', 'easy'); F.skipStory();
   F.G.player.xp = 99999;
   F.tickFrames(3, 0.05);
@@ -239,9 +239,9 @@ let r9 = await E(`(() => {
   F.tickFrames(3, 0.05);
   return { lvNoItem, lvWithItem: F.G.player.level, bannerTxt, bagBiyan: F.bag().biyanjiu || 0 };
 })()`);
-ok(r9.lvNoItem === 63, '结丹中期关口：没碧焰酒过不去（仍 63）', r9.lvNoItem);
+ok(r9.lvNoItem === 71, '结丹后期关口：没碧焰酒过不去（仍 71）', r9.lvNoItem);
 ok(r9.bannerTxt.indexOf('碧焰酒') >= 0, '弹幕提示须服碧焰酒', r9.bannerTxt);
-ok(r9.lvWithItem >= 64, '备下碧焰酒后越过关口', r9.lvWithItem);
+ok(r9.lvWithItem >= 72, '备下碧焰酒后越过关口', r9.lvWithItem);
 ok(r9.bagBiyan === 0, '过口时碧焰酒被服下', r9.bagBiyan);
 
 // ===== 10. 全程零报错 =====
