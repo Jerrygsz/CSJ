@@ -29,6 +29,9 @@
   // ========================= 二、材料 =========================
   window.MATERIALS.push(
     { id: 'm_gengjing', name: '庚精',       icon: '⚙', rarity: 4, desc: '金气凝成的硬块，炼飞剑的骨。天道盟拿它当赌注。' },
+    // 天南交易会（阗天城）上流通的东西：韩立此行要换庚精，换到三千年赤精芝、紫铖兜与上古傀儡
+    { id: 'm_chijingzhi', name: '三千年赤精芝', icon: '🍄', rarity: 4, desc: '赤精草长到三千年才成芝，仅次于化形的九曲灵参。元婴老怪拿它当硬通货。' },
+    { id: 'm_kuilei',   name: '上古傀儡核', icon: '⚫', rarity: 4, desc: '上古傀儡留下的核，附一份元婴傀儡的炼制之法。阗天城晶龙阁的拍卖品。' },
     { id: 'm_lingzhu',  name: '灵烛果',     icon: '🕯', rarity: 4, desc: '果身像一截白烛，点在暗处会自己亮。服之可预尝下一层境界。' },
     { id: 'm_yinzhi',   name: '阴芝马',     icon: '🐴', rarity: 3, desc: '长成马形的阴芝，跑得比人快。养元培元的一味好药。' },
     { id: 'm_gangyin',  name: '罡银沙',     icon: '🌪', rarity: 4, desc: '沙粒里裹着罡风，一撮能压塌半间石室。' },
@@ -150,6 +153,11 @@
 (function () {
   // 补一件炼器产物（元婴后期傀儡，配方在上一段）
   window.ITEMS.push({ id: 't_kui', name: '元婴后期傀儡', rarity: 4, icon: '🤖', slot: 'trinket', req: 102, desc: '伤害 +28%，上限 +100，减伤 8%。大衍神君毕生心血，不会说话', effect: { dmg: 0.28, maxhp: 100, armor: 0.08 }, unique: true });
+  // 阗天城交易会/晶龙阁拍卖上的两件：紫铖兜（防御）、北极元光指环（攻防一环）
+  window.ITEMS.push(
+    { id: 't_zicheng', name: '紫铖兜', rarity: 4, icon: '🟣', slot: 'trinket', req: 84, desc: '减伤 12%，上限 +70。元婴修士的旧物，兜面一层暗紫流光', effect: { armor: 0.12, maxhp: 70 }, unique: true },
+    { id: 't_beiji',   name: '北极元光指环', rarity: 4, icon: '💍', slot: 'trinket', req: 84, desc: '伤害 +18%，拾取 +15%。指环里锁着一缕北极元光，攻防都补上一环', effect: { dmg: 0.18, pickup: 0.15 }, unique: true }
+  );
   window.ALL_ITEMS = window.ITEMS.concat(window.MATERIALS);
 
   window.MAPS.push(
@@ -1094,11 +1102,36 @@
 
   // 太南小会是练气散修的摊子，只卖低阶法诀
   const TN = window.MAPS.find(m => m.id === 'tainan');
-  // 长春功是练气根基，太南小会这种散修摊子就该有一点
-  if (TN) TN.shop = TN.shop.concat(['sk_swift', 'sk_magnet', 'sk_fire', 'sk_orb', 'sk_regen', 'sk_changchun']);
+  // 散修摊子上有的是低阶法诀；**长春功不在此列**——那是墨大夫私下传给韩立的，摊子上不该有
+  if (TN) TN.shop = TN.shop.concat(['sk_swift', 'sk_magnet', 'sk_fire', 'sk_orb', 'sk_regen']);
   // 天星城是乱星海第一大市，中高阶法诀也上摊
   const TX = window.MAPS.find(m => m.id === 'tianxing');
   if (TX) TX.shop = TX.shop.concat(['sk_nova', 'sk_haste', 'sk_frost', 'sk_gourd', 'sk_regen']);
+
+  // 天南交易会（九国盟·阗天城）：原著里百年一届、元婴老怪戴面具置换宝物的地方，
+  // 「珍稀灵药、法宝、功法及情报」都在这流通，晶龙阁内另有拍卖（天晶真人主持，入场赠面具掩身份）。
+  // 练气期那些符箓法器，不会摆到这种台面上来。
+  const JY = window.MAPS.find(m => m.id === 'jiaoyihui');
+  if (JY) {
+    JY.shopSub = '九国盟阗天城，百年一届。元婴老怪戴面具换物，晶龙阁里另有拍卖。';
+    JY.shop = [
+      // 高阶符箓与灵石（元婴身家）
+      'bichen', 'chuansong', 'baoliebao', 'tishen', 'jipin',
+      // 元婴期法诀（原著：交易会是功法与情报的核心平台）
+      'sk_xuemo', 'sk_sanyan', 'sk_sanzhuan', 'sk_fenglei', 'sk_tianzhu', 'sk_xuanyin', 'sk_tongbao', 'sk_leishen', 'sk_qinxian',
+      // 元婴级灵物与法宝料：韩立此行要换的庚精、换到的三千年赤精芝
+      'm_gengjing', 'm_chijingzhi', 'm_yaodan',
+      // 镇宗灵丹
+      'peiyin'
+    ];
+    // 晶龙阁拍卖：原著里韩立在此换得赤精芝、紫铖兜、上古傀儡（元婴傀儡炼制之法）、北极元光指环
+    JY.auction = [
+      { id: 't_zicheng', price: 9000,  note: '紫铖兜 · 元婴修士旧物，防御一件' },
+      { id: 'm_kuilei',  price: 15000, note: '上古傀儡核 · 附元婴傀儡炼制之法' },
+      { id: 't_beiji',   price: 12000, note: '北极元光指环 · 完善攻防一环' },
+      { id: 'm_chijingzhi', price: 16000, note: '三千年赤精芝 · 仅次于化形九曲灵参' }
+    ];
+  }
 })();
 
 // ============================================================================
@@ -1111,6 +1144,9 @@
     { id: 'chuansong', price: 2600, cat: 'fu' },
     { id: 'baoliebao', price: 3000, cat: 'fu' },
     { id: 'tishen',    price: 2400, cat: 'fu' },   // 替身傀儡：催动即用，与避尘/传送同柜；它是消耗品，不是可佩法器
-    { id: 'jipin',     price: 4200, cat: 'dan' }   // 极品灵石：化开供闭关，是「服下即用」的东西，归丹药柜；它本身不是炼器材料
+    { id: 'jipin',     price: 4200, cat: 'dan' },   // 极品灵石：化开供闭关，是「服下即用」的东西，归丹药柜；它本身不是炼器材料
+    // 元婴级灵物（天南交易会才见得到）：庚精是韩立此行要换的，赤精芝是他换到的
+    { id: 'm_gengjing',   price: 9000,  cat: 'cai' },
+    { id: 'm_chijingzhi', price: 16000, cat: 'cai' }
   );
 })();

@@ -344,6 +344,9 @@ body.fs #wrap { background: #000; }
 .tab.active { background: linear-gradient(180deg,var(--accent-lite),var(--accent-deep)); color: var(--ink); font-weight: bold; border-color: var(--accent); }
 #shopList { flex: 1 1 auto; overflow-y: auto; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); display: flex; flex-direction: column; gap: var(--sp-2); -webkit-overflow-scrolling: touch; padding-bottom: var(--sp-2); }
 .shoprow { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(201,162,74,0.2); border-radius: var(--r-md); }
+/* 晶龙阁拍卖会标题条（天南交易会限定） */
+.shopauc { display: flex; flex-direction: column; gap: 2px; margin: 2px 0 6px; padding: 8px 10px; background: linear-gradient(90deg, rgba(201,162,74,0.22), rgba(201,162,74,0.06)); border: 1px solid rgba(201,162,74,0.45); border-radius: var(--r-md); color: #f0d79a; font-size: var(--fs-cap); letter-spacing: 0.5px; }
+.shopauc span { color: var(--text-3); font-size: var(--fs-micro); letter-spacing: 0; }
 .shoprow.poor { opacity: .55; }
 .sr-main { flex: 1; min-width: 0; }
 .sr-main b { font-size: var(--fs-cap); display: block; }

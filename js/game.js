@@ -5075,6 +5075,19 @@
     } else {
       // 每张图各卖各的：太南小会是练气散修的摊子，天星城是乱星海的市面
       const stock = (G.map && G.map.shop) ? SHOP_STOCK.filter(s => G.map.shop.indexOf(s.id) >= 0) : SHOP_STOCK;
+      // 晶龙阁拍卖（原著：阗天城交易会期间，天晶真人主持，入场赠面具掩身份）
+      if (G.map && G.map.auction && G.map.auction.length) {
+        rows.push('<div class="shopauc">晶龙阁 · 拍卖会<span>天晶真人主持，入场赠面具掩身份。百年一届，过了这村没这店。</span></div>');
+        for (const a of G.map.auction) {
+          const it = Items.get(a.id); if (!it) continue;
+          const r = RARITY[it.rarity];
+          const afford = (save.stones || 0) >= a.price;
+          rows.push('<div class="shoprow' + (afford ? '' : ' poor') + '">' +
+            '<div class="sr-main"><b style="color:' + r.color + '">' + it.name + '</b><i>' + (a.note || it.desc) + '</i></div>' +
+            '<div class="sr-right"><button class="sr-btn buy" data-auc="' + it.id + '"' +
+            (afford ? '' : ' data-cant="1"') + '>' + a.price + '</button></div></div>');
+        }
+      }
       for (const s of stock) {
         if (s.cat !== G.shopCat) continue;
         const it = Items.get(s.id); if (!it) continue;
@@ -5109,7 +5122,10 @@
   // 能卖 / 能拆的数量 = 袋中数量 − 正佩在身上的那件
   function sellableCount(id) { return Math.max(0, (save.inventory[id] || 0) - equippedCountOf(id)); }
   function buyItem(id) {
-    const s = SHOP_STOCK.find(x => x.id === id); const it = Items.get(id);
+    // 拍卖品不在常备货架上，按当前坊市挂的拍卖单取价
+    let s = SHOP_STOCK.find(x => x.id === id);
+    if (!s && G.map && G.map.auction) s = G.map.auction.find(x => x.id === id);
+    const it = Items.get(id);
     if (!it) { notify('架上已无此物'); Sfx.warn(); return; }
     if (!s) { notify('此处不卖这件'); Sfx.warn(); return; }
     const lv = Math.max(save.cultivate.level || 1, save.best.level || 1);
@@ -5750,6 +5766,8 @@
     if (pb) { setPet(pb.getAttribute('data-pet')); return; }
     const b = e.target.closest('button[data-buy]');
     if (b) { buyItem(b.getAttribute('data-buy')); return; }
+    const a = e.target.closest('button[data-auc]');
+    if (a) { buyItem(a.getAttribute('data-auc')); return; }
     const s = e.target.closest('button[data-sell]');
     if (s) { sellItem(s.getAttribute('data-sell')); return; }
     const sa = e.target.closest('button[data-sellall]');

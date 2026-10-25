@@ -869,7 +869,10 @@
     TX.shop = ['xueshen', 'qiannian', 'shenxing', 'jifeng', 'huyu', 'fb_feng',
       'moyu', 'xuantie', 'a_xuangui', 't_tianlei',
       'm_yaodan', 'm_banyao', 'm_xueyu',
-      'm_xuantie', 'm_hantie', 'm_yusui', 'm_fuzhi', 'm_lingmo'];
+      'm_xuantie', 'm_hantie', 'm_yusui', 'm_fuzhi', 'm_lingmo',
+      // 结丹那一炉要用的：雪灵水（六连殿白水楼一路的硬货）、碧焰酒（裂风兽所酿，外星海无坊市，故在此流通）、
+      // 昊元丹（结丹期增进修为的灵丹）。这三味原著里都不是随便哪个摊子都有，所以只挂乱星海这一处。
+      'xueling', 'biyanjiu', 'haoyuan'];
     TX.shopSub = '正、魔、星宫三方同街摆摊，谁也不问谁的来历。';
   }
 

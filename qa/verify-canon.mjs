@@ -234,7 +234,51 @@ const want6 = ['qixuan', 'houshan', 'mishi', 'tainan', 'huangfeng', 'yaoyuan', '
   'xutian2', 'xinggong', 'kunpeng', 'luoyun2', 'tianlan', 'liudao', 'jiezi', 'feisheng'];
 ok(JSON.stringify(r6) === JSON.stringify(want6), '主线 ' + want6.length + ' 张图顺序与原著一致', { got: r6.length, want: want6.length });
 
-console.log('\n== 7. 全程零报错 ==');
+// ===== 7. 坊市货架对版原著 =====
+console.log('\n== 7. 坊市各卖各的 ==');
+let r7 = await E(`(() => {
+  const W = window, M = W.MAPS || [];
+  const byId = id => M.find(m => m.id === id) || {};
+  const tn = byId('tainan'), tx = byId('tianxing'), jy = byId('jiaoyihui');
+  const has = (arr, id) => (arr || []).indexOf(id) >= 0;
+  // 货架上挂着的、却没有任何一张坊市在卖的东西
+  const orphans = (W.SHOP_STOCK || []).filter(s => !M.some(m => m.shop && has(m.shop, s.id))).map(s => s.id);
+  return {
+    tn: tn.shop || [], tx: tx.shop || [], jy: jy.shop || [],
+    auc: jy.auction || [],
+    jySub: jy.shopSub || '',
+    orphans,
+    // 练气期东西不该出现在元婴交易会；结丹期灵物不该出现在练气小会
+    jyBad: ['xueshen', 'jingtie', 'money_sword', 'm_chijing', 'sk_changchun', 'xueling', 'sk_fire'].filter(id => has(jy.shop, id)),
+    tnBad: ['xueling', 'biyanjiu', 'peiyin', 'm_gengjing', 'sk_xuemo'].filter(id => has(tn.shop, id)),
+    txHasJj: has(tx.shop, 'xueling') && has(tx.shop, 'biyanjiu') && has(tx.shop, 'haoyuan')
+  };
+})()`);
+ok(r7.orphans.length === 4 && r7.orphans.every(id => ['sk_changchun', 'dayan2', 'sk_wuzi', 'sk_pojie'].indexOf(id) >= 0),
+  '货架孤儿只限原著里不外卖的四门（长春功私传/大衍诀后三层/五子同心魔/破界符）', r7.orphans);
+ok(r7.tnBad.length === 0, '太南小会不卖结丹期灵物与高阶法诀', r7.tnBad);
+ok(r7.jyBad.length === 0, '天南交易会不卖练气符箓法器、不卖长春功与结丹期灵物', r7.jyBad);
+ok(r7.txHasJj === true, '天星城卖雪灵水/碧焰酒/昊元丹（结丹那一炉的着落）', '');
+ok(r7.auc.length === 4, '天南交易会有晶龙阁拍卖会（4 件拍品）', r7.auc.map(a => a.id));
+ok(r7.jySub.indexOf('阗天城') >= 0 && r7.jySub.indexOf('拍卖') >= 0, '招牌写明九国盟阗天城与拍卖', r7.jySub);
+
+// 拍卖品买得动（点页面上的拍卖按钮）
+let r7b = await E(`(() => {
+  const F = window.__FR;
+  F.muteStory(true); F.clearProgress(); F.setLevel(90); F.setStones(60000);
+  F.clearMap('jiaoyihui');
+  F.enterMap('jiaoyihui', 'easy');
+  F.shop('fu');
+  const btn = document.querySelector('button[data-auc="t_zicheng"]');
+  const before = F.info().stones;
+  if (btn) btn.click();
+  const s = JSON.parse(localStorage.getItem('fanren_save_v1') || '{}');
+  return { had: !!btn, before, after: F.info().stones, own: s.inventory ? (s.inventory.t_zicheng || 0) : 0 };
+})()`);
+ok(r7b.had === true, '坊市里出现了拍卖按钮', r7b.had);
+ok(r7b.own === 1 && r7b.before - r7b.after === 9000, '拍卖品能拍下（紫铖兜 9000 灵石）', r7b);
+
+console.log('\n== 8. 全程零报错 ==');
 ok(errs.length === 0, '无页面/控制台报错', errs.slice(0, 3));
 
 await b.close(); server.close();
