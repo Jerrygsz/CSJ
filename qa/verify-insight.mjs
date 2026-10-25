@@ -65,7 +65,7 @@ let r2 = await E(`(() => {
   const cards = Array.from(document.querySelectorAll('#cards .card .cname')).map(x => x.textContent);
   return { before, st0, st1, cards };
 })()`);
-ok(r2.before.v === 119, '煞气可累积', r2.before);
+ok(r2.before.v > 100 && r2.before.v < 120, '煞气可累积（含自然汇聚，落在 100~120 之间）', r2.before);
 ok(r2.st1 === 'levelup', '攒满即进入顿悟面板', r2.st1);
 ok(r2.cards.length === 3, '顿悟是三选一', r2.cards);
 
@@ -152,37 +152,44 @@ let r8 = await E(`(() => {
   return { picks, kills: F.info().kills, time: Math.round(F.info().time || 0) };
 })()`);
 ok(r8.time >= 110, '跑满两分钟', r8.time);
-ok(r8.picks >= 3 && r8.picks <= 12, '两分钟 3~12 次顿悟（约 10~40 秒一次）', r8);
-ok(r8.picks / (r8.time / 60) >= 1.2 && r8.picks / (r8.time / 60) <= 6, '每分钟 1.2~6 次，不会刷屏也不会枯坐', (r8.picks / (r8.time / 60)).toFixed(2));
+ok(r8.picks >= 3 && r8.picks <= 20, '两分钟 3~20 次顿悟（既不会枯坐，也不会一秒钟弹一次）', r8);
+ok(r8.picks / (r8.time / 60) >= 2 && r8.picks / (r8.time / 60) <= 8, '每分钟 2~8 次', (r8.picks / (r8.time / 60)).toFixed(2));
 
-// ===== 9. 局时：Boss 现身 90 秒打不完 = 本局未竟 =====
-console.log('\n== 9. 三分钟局时 ==');
+// ===== 9. 战斗图不限时，且一局至少 9 次顿悟 =====
+console.log('');
+console.log('== 9. 战图不限时 · 顿悟 ≥9 ==');
 let r9 = await E(`(() => {
   const F = window.__FR;
-  F.muteStory(true); F.clearProgress(); F.setLevel(56);
-  F.enterMap('ningcui', 'easy'); F.skipStory();
-  F.boss();
-  F.G.boss.hp = 1e9; F.G.boss.maxhp = 1e9;      // 打不死，逼出超时
-  const limitAt = F.G.limitT;
+  F.muteStory(true); F.clearProgress(); F.setLevel(9);
+  F.enterMap('houshan', 'easy'); F.skipStory();
   let g = 0;
-  while (g++ < 4000) {
-    if (F.G.player) { F.G.player.hp = F.G.player.maxhp; }
-    if (F.G.boss) { F.G.boss.hp = 1e9; }
+  while (g++ < 6000) {
+    if (F.G.player) F.G.player.hp = F.G.player.maxhp;   // 不死，只看这一局能走到哪
     F.tickFrames(1, 0.05);
     const st = F.info().state;
+    if (st === 'levelup') {
+      const c = document.querySelectorAll('#cards .card');
+      if (c.length) c[0].click();
+      continue;
+    }
     if (st === 'dialog') { F.skipStory(); continue; }
     if (st === 'victory' || st === 'world') break;
   }
-  const desc = (document.getElementById('victoryDesc') || {}).textContent || '';
-  return { limitAt: Math.round(limitAt || 0), timeoutEnd: !!F.G.timeoutEnd,
-    cleared: (F.info().cleared || []).indexOf('ningcui') >= 0, state: F.info().state, desc };
+  const ins = F.insight();
+  return {
+    picks: (ins.n || 0) - (ins.refine || 0),
+    time: Math.round(F.info().time || 0),
+    state: F.info().state,
+    noLimit: F.G.timeoutEnd === undefined && !F.G.limitT,
+    cleared: (F.info().cleared || []).indexOf('houshan') >= 0
+  };
 })()`);
-ok(r9.timeoutEnd === true, 'Boss 现身 90 秒未打完 → 判定「时辰已尽」', { limit: r9.limitAt, end: r9.timeoutEnd });
-ok(r9.cleared === false, '未竟不记通关（可以再来）', r9.cleared);
-ok(r9.desc.indexOf('未竟') >= 0, '结算页写明「本局未竟」', r9.desc);
+ok(r9.noLimit === true, '战斗图没有任何限时机制', r9.noLimit);
+ok(r9.cleared === true, '照常打到 Boss 死才结算（不提前收场）', r9.state);
+ok(r9.picks >= 9, '一局至少 9 次顿悟', { picks: r9.picks, time: r9.time });
 
 // ===== 10. 零报错 =====
-console.log('\n== 7. 全程零报错 ==');
+console.log('\n== 10. 全程零报错 ==');
 ok(errs.length === 0, '无页面/控制台报错', errs.slice(0, 3));
 
 await b.close(); server.close();
