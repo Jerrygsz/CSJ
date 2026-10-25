@@ -1,6 +1,6 @@
 # 功法 / 配方 / 道具来源底稿
 
-## 一、功法（32）
+## 一、功法（34）
 
 | id | 名称 | 解锁 | 满层 | 类型 | 特效 |
 |---|---|---:|---:|---|---|
@@ -32,6 +32,8 @@
 | dayan2 | 大衍诀·后三层 | Lv82 | 7 | passive/passive | — |
 | leishen | 辟邪神雷 | Lv82 | 7 | thunder/ranged_aoe | thunder |
 | qinxian | 惊神刺 | Lv82 | 7 | burst/ranged_aoe | gold |
+| shishen | 失神刺 | Lv102 | 7 | homing/ranged | gold |
+| huashen | 身外化身 | Lv110 | 5 | passive/passive | — |
 | yuanci | 元磁神光 | Lv102 | 7 | field/aura | gravity |
 | wuzi | 五子同心魔 | Lv102 | 7 | passive/passive | — |
 | pojie | 破界符·空间诀 | Lv112 | 7 | passive/passive | — |

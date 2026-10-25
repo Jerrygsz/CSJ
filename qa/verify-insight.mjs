@@ -136,7 +136,7 @@ console.log('\n== 8. 一局节奏（120 秒不死跑）==');
 let r8 = await E(`(() => {
   const F = window.__FR;
   F.muteStory(true); F.clearProgress(); F.setLevel(30); F.setStones(200);
-  F.enterMap('xuese', 'easy'); F.skipStory();
+  F.enterMap('xuese', 'nightmare'); F.skipStory();   // 怪够硬，才看得到硬直
   let picks = 0, g = 0;
   while (g++ < 2600) {
     if (F.G.player) F.G.player.hp = F.G.player.maxhp;      // 不死，只测节奏
@@ -231,7 +231,30 @@ ok(r11.shot > 0, '召出来的灵宠会自己放弹打人', r11.shot);
 ok(r11.mid && r11.mid.t > 1, '召唤物在场上活着并计时', r11.mid);
 ok(r11.after === null, '30 秒后自动散去', r11.after);
 
-console.log('\n== 12. 全程零报错 ==');
+console.log('');
+console.log('== 12. 失神刺与身外化身 ==');
+let r12 = await E(`(() => {
+  const F = window.__FR;
+  F.muteStory(true); F.clearProgress(); F.setLevel(110);
+  ['sword','shishen','huashen'].forEach(id => F.learn(id));
+  F.setSkill('shishen', true);          // 战前运功：进图前先运起
+  F.enterMap('xuese', 'nightmare'); F.skipStory();   // 怪够硬，才看得到硬直
+  const avatar0 = !!F.G.avatar;
+  let maxStun = 0, avatarBullets = 0;
+  for (let i = 0; i < 400; i++) {
+    F.insightAuto(); F.G.player.hp = F.G.player.maxhp;
+    F.tickFrames(1, 0.05);
+    for (const e of F.G.enemies) if (e.stunT > 0) maxStun = Math.max(maxStun, e.stunT);
+    avatarBullets = Math.max(avatarBullets, F.summonBullets());
+  }
+  return { avatar0, maxStun: +maxStun.toFixed(2), stillAlive: !!F.G.avatar, avatarBullets };
+})()`);
+ok(r12.avatar0 === true, '学到身外化身，进图就有化身在场', r12.avatar0);
+ok(r12.stillAlive === true, '化身常驻（不会像召唤物那样到时散去）', r12.stillAlive);
+ok(r12.avatarBullets > 0, '化身会自己放弹打人', r12.avatarBullets);
+ok(r12.maxStun > 0.2, '失神刺能让敌人僵住（stunT > 0）', r12.maxStun);
+
+console.log('\n== 13. 全程零报错 ==');
 ok(errs.length === 0, '无页面/控制台报错', errs.slice(0, 3));
 
 await b.close(); server.close();

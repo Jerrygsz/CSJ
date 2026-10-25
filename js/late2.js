@@ -1072,6 +1072,8 @@
     { id: 'sk_cuigu',   name: '淬骨诀·法诀',   rarity: 4, icon: '📕', req: 82,  teach: 'cuigu',   desc: '习得《淬骨诀》。骨如法宝，气血与自愈俱增' },
     { id: 'sk_tuotian', name: '托天魔功·法诀', rarity: 4, icon: '📕', req: 86,  teach: 'tuotian', desc: '习得《托天魔功》。皮下覆金鳞，硬抗寻常法宝' },
     { id: 'sk_xueying', name: '血影遁·法诀',   rarity: 4, icon: '📕', req: 86,  teach: 'xueying', desc: '习得《血影遁》。燃血一遁百里，逃命第一' },
+    { id: 'sk_shishen', name: '失神刺·法诀', rarity: 4, icon: '📕', req: 102, teach: 'shishen', desc: '习得《失神刺》。大衍诀衍生，神念扎识海，中者僵立' },
+    { id: 'sk_huashen', name: '身外化身·法诀', rarity: 4, icon: '📕', req: 110, teach: 'huashen', desc: '习得《身外化身》。玄阴经分神之法，养出一具化身替你出手' },
     { id: 'sk_sanzhuan',  name: '三转重元功·法诀', rarity: 4, icon: '📕', req: 50,  teach: 'sanzhong',  desc: '习得《三转重元功》。青元剑诀附带的辅助法门，散功重修三轮，把真元压实' },
     { id: 'sk_fenglei',   name: '风雷翅·炼法',     rarity: 4, icon: '📕', req: 56,  teach: 'fenglei',   desc: '习得《风雷翅》。乱星海炼器所得飞行翼，移速大增' },
     { id: 'sk_tongbao',   name: '明王诀·法诀',     rarity: 4, icon: '📕', req: 82,  teach: 'tongbao',   desc: '习得《明王诀》。佛门炼体功法，借煞气淬身，肉身渐如法宝' },

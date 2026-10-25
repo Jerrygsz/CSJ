@@ -281,6 +281,26 @@
    "desc": "元婴期音攻手段，魔音化作环形波纹荡开，远近皆伤"
   },
   {
+   "id": "shishen",
+   "name": "失神刺",
+   "minLv": 102,
+   "max": 7,
+   "type": "ranged",
+   "vfx": "gold",
+   "kind": "homing",
+   "desc": "大衍诀衍生的神识之术：一缕神念扎进识海，人不伤，神先懵。中者当场僵住"
+  },
+  {
+   "id": "huashen",
+   "name": "身外化身",
+   "minLv": 110,
+   "max": 5,
+   "type": "passive",
+   "vfx": null,
+   "kind": "passive",
+   "desc": "玄阴经里的分神之法：以曲魂养出一具化身，替你出手。它打它的，你打你的"
+  },
+  {
    "id": "yuanci",
    "name": "元磁神光",
    "minLv": 102,
@@ -1878,6 +1898,28 @@
    "teach": "xueying",
    "src": [
     "剧情:阴罗宗四长老"
+   ]
+  },
+  {
+   "id": "sk_shishen",
+   "name": "失神刺·法诀",
+   "req": 102,
+   "rarity": 4,
+   "slot": null,
+   "teach": "shishen",
+   "src": [
+    "剧情:极西之地"
+   ]
+  },
+  {
+   "id": "sk_huashen",
+   "name": "身外化身·法诀",
+   "req": 110,
+   "rarity": 4,
+   "slot": null,
+   "teach": "huashen",
+   "src": [
+    "剧情:乱星海·星宫"
    ]
   },
   {

@@ -115,6 +115,10 @@
   addTo('waihai',   { items: ['sk_cuigu'] });     // 金蛟王身上夺来的淬骨诀
   addTo('yinluo',   { items: ['sk_xueying'] });   // 阴罗宗一带的血影遁
 
+  // ---------- 三·八、化神两门：大衍诀出极西，化身出玄阴经 ----------
+  addTo('jixi',     { items: ['sk_shishen'] });   // 极西之地千竹教，大衍诀一脉
+  addTo('xinggong', { items: ['sk_huashen'] });   // 玄阴经分神之法
+
   // ---------- 四、功法：原著里「谁传给韩立」的，就该在哪张图学 ----------
   // 长春功：墨大夫在密室里硬塞给他的（不是坊市货）
   addTo('mishi', { items: ['sk_changchun'] });

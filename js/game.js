@@ -719,7 +719,7 @@
       const base = Math.atan2(tgt.y - p.y, tgt.x - p.x);
       for (let i = 0; i < cnt; i++) {
         const ang = base + (i - (cnt - 1) / 2) * (a.spread || 0.18);
-        pushBullet({ x: p.x, y: p.y, vx: Math.cos(ang) * 360, vy: Math.sin(ang) * 360, r: 6, dmg, life: a.life || 1.4, pierce, hit: new Set(), home: false, fx: a.vfx || 'sword', vfx: a.vfx || 'sword', ang: ang });
+        pushBullet({ x: p.x, y: p.y, vx: Math.cos(ang) * 360, vy: Math.sin(ang) * 360, r: 6, dmg, life: a.life || 1.4, pierce, hit: new Set(), home: false, fx: a.vfx || 'sword', vfx: a.vfx || 'sword', ang: ang, stun: a.stun || 0 });
       }
       // 剑系出手：身前一道弯月。法术系不出刃，改成脚下起一圈符文（读作「在运气」）
       const vfx = a.vfx || 'sword';
@@ -732,7 +732,7 @@
       // 远程追踪：火蛇一类，放出去自己找目标
       for (let i = 0; i < cnt; i++) {
         const ang = Math.random() * Math.PI * 2;
-        pushBullet({ x: p.x, y: p.y, vx: Math.cos(ang) * 160, vy: Math.sin(ang) * 160, r: 7, dmg, life: a.life || 3, pierce: 1, hit: new Set(), home: true, fx: a.vfx || 'snake', vfx: a.vfx || 'snake', ang: ang, phase: Math.random() * 6.28 });
+        pushBullet({ x: p.x, y: p.y, vx: Math.cos(ang) * 160, vy: Math.sin(ang) * 160, r: 7, dmg, life: a.life || 3, pierce: 1, hit: new Set(), home: true, fx: a.vfx || 'snake', vfx: a.vfx || 'snake', ang: ang, phase: Math.random() * 6.28, stun: a.stun || 0 });
       }
       if (struck) spawnRune(p.x, p.y, 22, VFX_HIT_COLOR[a.vfx || 'snake']);
       Sfx.fire();
@@ -1063,6 +1063,7 @@
             b.hit.add(e); spawnHit(b.x, b.y); b.life = 0; continue;
           }
           damageEnemy(e, b.dmg); b.hit.add(e);
+          if (b.stun) e.stunT = Math.max(e.stunT || 0, b.stun);   // 失神刺：硬直
           // 命中处溅出的火花沿着子弹来向的反面飞：一眼看得出是从哪边打过来的
           spawnHit(b.x, b.y, VFX_HIT_COLOR[b.vfx || b.fx] || '#fff', Math.atan2(b.vy, b.vx));
           if (b.pierce <= 0) { hit = true; break; }
@@ -1626,6 +1627,8 @@
       const e = G.enemies[i];
       if (e._dead) { G.enemies.splice(i, 1); continue; }
       e.t += dt; if (e.hitFlash > 0) e.hitFlash -= dt;
+      // 失神刺：识海被扎，这一小会儿不动也不出手
+      if (e.stunT > 0) { e.stunT -= dt; continue; }
       let spd = e.spd;
       // 房主模式：怪追「本地玩家与队友中较近者」
       let tx = p.x, ty = p.y;
@@ -3005,6 +3008,35 @@
     };
     banner((pd ? pd.name : '灵体') + ' 助战 · 30 秒'); Sfx.levelup();
   }
+  // 身外化身：玄阴经分神之法。学到就常驻，不占「召灵宠」那一个位置
+  function spawnAvatar() {
+    const p = G.player; if (!p) return;
+    G.avatar = {
+      x: p.x + 30, y: p.y + 4, cd: 0.6, bob: 0, spr: 'tihun', scale: 1.1,
+      dmg: (G.realm.dmg * 70 + 10) * 1.15, rate: 0.9
+    };
+    banner('身外化身 · 现');
+  }
+  function updateAvatar(dt) {
+    const a = G.avatar;
+    if (!a || !G.player) return;
+    const p = G.player, tx = p.x + 30 * (p.dir || 1), ty = p.y + 4;
+    a.x += (tx - a.x) * Math.min(1, dt * 5);
+    a.y += (ty - a.y) * Math.min(1, dt * 5);
+    a.bob = (a.bob || 0) + dt;
+    if (G.state !== 'play') return;
+    a.cd -= dt;
+    if (a.cd > 0) return;
+    const t = nearestEnemyFrom(a.x, a.y, 440);
+    if (!t) { a.cd = 0.25; return; }
+    const ang = Math.atan2(t.y - a.y, t.x - a.x);
+    G.bullets.push({
+      x: a.x, y: a.y, vx: Math.cos(ang) * 330, vy: Math.sin(ang) * 330,
+      r: 6, dmg: a.dmg, life: 1.2, pierce: 1, hit: new Set(), home: true, pet: true, summon: true
+    });
+    a.cd = a.rate;
+  }
+
   function updateSummon(dt) {
     const s = G.summon;
     if (!s || !G.player) return;
@@ -3211,6 +3243,7 @@
     }
     updatePet(dt);
     updateSummon(dt);
+    updateAvatar(dt);
     updateMate(dt);
     tickQuickCd(dt);
     tickPetFeed(dt);
@@ -3621,7 +3654,7 @@
       const open = pt.arc * Math.min(1, t * 3.2);
       const fd = t < 0.45 ? 1 : Math.max(0, 1 - (t - 0.45) / 0.55);
       const a0 = pt.ang - open / 2, a1 = pt.ang + open / 2;
-      const r = pt.rad * (0.82 + t * 0.32);
+      const r = Math.max(0, pt.rad * (0.82 + t * 0.32));   // 弯月的半径也要钳，负数会让 arc 抛错
       ctx.save(); ctx.lineCap = 'round';
       ctx.globalAlpha = fd * 0.30; ctx.strokeStyle = pt.color; ctx.lineWidth = 9 * fd + 2;
       ctx.beginPath(); ctx.arc(pt.x, pt.y, r, a0, a1); ctx.stroke();
@@ -3786,6 +3819,15 @@
       ctx.fillStyle = 'rgba(0,0,0,0.18)'; ctx.beginPath(); ctx.ellipse(s.x, s.y + 9, 7, 3, 0, 0, 6.28); ctx.fill();
       ctx.globalAlpha = 0.85 * alpha;
       if (Sprites[s.spr]) drawSpr(s.spr, s.x, s.y, s.scale, G.player && G.player.dir < 0, tfIdle(s.x, s.y, s.bob || 0, s.spr));
+      ctx.globalAlpha = 1;
+    }
+
+    // 身外化身：和本体一个样，略淡，看得出是分出来的
+    if (G.avatar) {
+      const a = G.avatar;
+      ctx.fillStyle = 'rgba(0,0,0,0.20)'; ctx.beginPath(); ctx.ellipse(a.x, a.y + 9, 7, 3, 0, 0, 6.28); ctx.fill();
+      ctx.globalAlpha = 0.8;
+      if (Sprites[a.spr]) drawSpr(a.spr, a.x, a.y, a.scale, G.player && G.player.dir < 0, tfIdle(a.x, a.y, a.bob || 0, a.spr));
       ctx.globalAlpha = 1;
     }
 
@@ -4095,6 +4137,8 @@
     p.next = xpNeed(p.level);
     // 身上运转哪几门功法，由「已装配」决定；没装任何一门时自动运起主力
     p.skills = buildPlayerSkills(p.level, m);
+    // 身外化身：学到就常驻（不看槽位，它是被动）
+    if ((save.cultivate.skills || {}).huashen) spawnAvatar();
     if (!p.skills.sword) p.skills.sword = Math.min(cult.skills.sword || 1, window.skillCapById ? window.skillCapById('sword', p.level) : 99);
     checkRealm(true);
     recalcMaxhp();
