@@ -687,8 +687,10 @@
       if (p[key] > 0) continue;
       const tgt = nearestEnemy(a.range || 420);
       if (!tgt && a.kind !== 'burst') { p[key] = 0.2; continue; }
-      fireActive(e.s, a, e.lv, tgt);
-      p[key] = window.skillAtk.cd(a, e.lv) * hasteMul() * atkMul();
+      // 本局顿悟/祭炼对本门功法的加成，只改这一次出手用的配置
+      const a2 = insightAtk(e.id, a);
+      fireActive(e.s, a2, e.lv, tgt);
+      p[key] = window.skillAtk.cd(a2, e.lv) * hasteMul() * atkMul();
       if (tgt) p.dir = tgt.x >= p.x ? 1 : -1;
     }
   }
@@ -796,7 +798,7 @@
     const p = G.player;
     G.orbPos = []; G.fieldSlow = [];
     for (const e of equippedActives()) {
-      const a = e.s.atk;
+      const a = insightAtk(e.id, e.s.atk);
       if (a.kind === 'orbit') {
         p.orbAng = (p.orbAng || 0) + dt * 2.4;
         const rad = window.skillAtk.rad(a, e.lv);
@@ -850,6 +852,8 @@
   function killEnemy(e) {
     if (e._dead) return; e._dead = true;
     G.kills++;
+    // 煞气：小怪 3~5、精英 50、Boss 100 —— 3 分钟一局的燃料
+    gainSha(e === G.boss ? 100 : (e.elite ? 50 : U.rand(3, 5)));
     // 厉飞雨·双身份化名系统（P0-1）：干脏活让「厉飞雨」背锅，好事以「韩天尊」留名
     if (save.liUnlocked && !e.isBossAlly) {
       if (save.identity === 'li') {
@@ -2763,6 +2767,224 @@
   }
 
   // ---------- 升级三选一 ----------
+  // ==================== 煞气 · 顿悟 · 祭炼（3 分钟单局循环） ====================
+  // 单局里的成长不再只靠升级：煞气攒满就弹一次三选一，选完立刻变强；
+  // 灵石可以当场祭炼，把某门功法再推一档。出图/重开即清空，下一局重新滚雪球。
+  const SHA_NEED = 120;
+  const REFINE_COST = [3, 5, 8, 12, 18];
+  const TIER_WORDS = ['小成', '大成', '圆满'];
+  const INSIGHT_SAY = [
+    '灵力由散入凝，始有脉络可循。', '丹田如潭，静水流深。', '气行一周天，骨缝里都是凉的。',
+    '神识外放数十丈，虫蚁动静皆知。', '法力覆体，凡铁难伤。', '心念一动，法与身合。',
+    '周天运转，浊气自去。', '闭目即见山河，睁眼仍是洞府。', '灵气如潮，一浪比一浪高。',
+    '经脉里跑的不是血，是光。', '念头起处，符已成。', '手中无剑，心里有剑。',
+    '天地有隙，法力可乘。', '打坐三年，不如一场生死。', '杀意收得住，才算入了门。',
+    '越往上走，路越窄，也越静。', '一身修为，抵不过一句「再来」。', '境界是墙，悟性是门。',
+    '灵气入体，化作星屑。', '不争一时，只争那一线。', '这道坎，早晚要自己迈。',
+    '若无今日之苦，何来他年之远。', '心静则气顺，气顺则法成。', '一息尚存，便未到头。'
+  ];
+  // 段位：练气期照旧「练气X层」；筑基以上换成「境界·小成/大成/圆满」
+  function stageLabel(p) {
+    if (!p) return '';
+    const base = realmName(p.level);
+    if (p.level < 36) return base;
+    const ratio = p.next > 0 ? U.clamp(p.xp / p.next, 0, 1) : 0;
+    return base + '·' + TIER_WORDS[Math.min(2, Math.floor(ratio * 3))];
+  }
+  function shaSt() {
+    if (!G.sha) G.sha = { v: 0, need: SHA_NEED, dmgT: 0, x2T: 0, sayT: 26 };
+    return G.sha;
+  }
+  function insSt() {
+    if (!G.insight) G.insight = { skills: {}, n: 0, refine: 0 };
+    return G.insight;
+  }
+  // 每局开始时把上一局的顿悟与祭炼清干净
+  function resetRunBuffs() {
+    G.sha = { v: 0, need: SHA_NEED, dmgT: 0, x2T: 0, sayT: 24 + Math.random() * 12 };
+    G.insight = { skills: {}, n: 0, refine: 0 };
+  }
+  function ownSkills() { return SKILLS.filter(s => (G.player.skills[s.id] || 0) > 0); }
+  function newSkills() { return SKILLS.filter(s => !(G.player.skills[s.id] || 0) && (!s.minLv || G.player.level >= s.minLv)); }
+
+  // 顿悟抽卡：A 技能升级 40% / B 新神通 25% / C 被动 20% / D 灵石 10% / E 特殊 5%
+  const SKILL_MODS = [
+    { k: 'dmg', v: 0.25, name: '伤害 +25%' },
+    { k: 'range', v: 0.30, name: '范围 +30%' },
+    { k: 'cd', v: 0.20, name: '攻速 +20%' },
+    { k: 'count', v: 1, name: '多打一发' },
+    { k: 'dur', v: 0.50, name: '持续 +50%' }
+  ];
+  const PASSIVE_MODS = [
+    { k: 'spd', v: 0.10, cap: 0.6, name: '移速 +10%' },
+    { k: 'regen', v: 0.6, cap: 6, name: '回血 +0.6/秒' },
+    { k: 'armor', v: 0.08, cap: 0.35, name: '减伤 +8%' },
+    { k: 'pickup', v: 0.20, cap: 1.5, name: '拾取 +20%' },
+    { k: 'maxhp', v: 15, cap: 300, name: '气血上限 +15' },
+    { k: 'shaGain', v: 0.15, cap: 1.2, name: '煞气 +15%' }
+  ];
+  function optSkillUp() {
+    const own = ownSkills(); if (!own.length) return optNewSkill();
+    const s = U.pick(own), m = U.pick(SKILL_MODS);
+    return { key: 'A' + s.id + m.k, kind: 'A', id: s.id, icon: s.icon || '⚔', mod: m,
+      name: s.name + ' · ' + m.name, desc: '本局内永久生效' };
+  }
+  function optNewSkill() {
+    const pool = newSkills(); if (!pool.length) return optPassive();
+    const s = U.pick(pool);
+    return { key: 'B' + s.id, kind: 'B', id: s.id, icon: s.icon || '📜',
+      name: '悟得「' + s.name + '」', desc: '新神通 · 立刻就跟着打' };
+  }
+  function optPassive() {
+    const p = U.pick(PASSIVE_MODS);
+    return { key: 'C' + p.k, kind: 'C', icon: '🌀', mod: p, name: p.name, desc: '本局被动，可叠加' };
+  }
+  function optStone() {
+    const pick = U.pick([
+      { v: 30, name: '灵石 +30', desc: '立刻揣进袋里，能马上祭炼' },
+      { v: 60, name: '灵石 +60', desc: '一大把，够祭炼两次' },
+      { v: 0.2, name: '煞气门槛 −20%', desc: '下次顿悟来得更快' }
+    ]);
+    return { key: 'D' + pick.name, kind: 'D', icon: '💎', pick: pick, name: pick.name, desc: pick.desc };
+  }
+  function optSpecial() {
+    const pick = U.pick([
+      { k: 'x2sha', name: '煞气翻倍 · 10 秒', desc: '趁现在多杀几只' },
+      { k: 'x2dmg', name: '伤害翻倍 · 15 秒', desc: '这一口气够狠' },
+      { k: 'heal', name: '气血全满', desc: '一口气吊回来' },
+      { k: 'clear', name: '清场 · 屏内小怪尽灭', desc: '连煞气一起收' }
+    ]);
+    return { key: 'E' + pick.k, kind: 'E', icon: '⚡', pick: pick, name: pick.name, desc: pick.desc };
+  }
+  function rollInsight() {
+    const out = [], seen = {};
+    const push = c => { if (!c || seen[c.key]) return; seen[c.key] = 1; out.push(c); };
+    let guard = 0;
+    while (out.length < 3 && guard++ < 80) {
+      const r = Math.random() * 100;
+      if (r < 40) push(optSkillUp());
+      else if (r < 65) push(optNewSkill());
+      else if (r < 85) push(optPassive());
+      else if (r < 95) push(optStone());
+      else push(optSpecial());
+    }
+    while (out.length < 3) push(optStone());
+    return out;
+  }
+  // 通用的三选一面板（顿悟 / 祭炼共用，也是升级选卡那套 UI）
+  function showCards(title, cards) {
+    G.state = 'levelup';
+    const t = document.querySelector('#levelup .lu-title'); if (t) t.textContent = title;
+    elCards.innerHTML = '';
+    for (const c of cards) {
+      const el = document.createElement('div'); el.className = 'card';
+      el.innerHTML = '<div class="cicon">' + (c.icon || '◆') + '</div><div class="cname">' + c.name +
+        '</div><div class="cdesc">' + (c.desc || '') + '</div>';
+      el.addEventListener('click', () => { elLevelup.style.display = 'none'; onPick(c); });
+      elCards.appendChild(el);
+    }
+    elLevelup.style.display = 'flex';
+  }
+  function resumePlay() { G.state = 'play'; last = performance.now(); }
+  function onPick(c) {
+    const ins = insSt();
+    if (c.kind === 'A') {
+      const cur = ins.skills[c.id] || (ins.skills[c.id] = {});
+      cur[c.mod.k] = (cur[c.mod.k] || 0) + c.mod.v;
+      banner(c.name + ' · 本局生效'); Sfx.buff();
+    } else if (c.kind === 'B') {
+      G.player.skills[c.id] = Math.max(1, G.player.skills[c.id] || 0);
+      syncCultivate(); recalcMaxhp();
+      banner(c.name + ' · 已运起'); Sfx.levelup();
+    } else if (c.kind === 'C') {
+      const p = c.mod;
+      G.bonus[p.k] = Math.min(p.cap, (G.bonus[p.k] || 0) + p.v);
+      if (p.k === 'maxhp') recalcMaxhp(true);
+      banner(p.name + ' · 本局生效'); Sfx.buff();
+    } else if (c.kind === 'D') {
+      const st = shaSt();
+      if (c.pick.v <= 1) { save.stones = (save.stones || 0) + c.pick.v; banner('灵石 +' + c.pick.v); }
+      else { st.need = Math.max(40, Math.round(st.need * (1 - c.pick.v))); banner('煞气门槛 → ' + st.need); }
+      Sfx.nova();
+    } else if (c.kind === 'E') {
+      const st = shaSt(), k = c.pick.k;
+      if (k === 'x2sha') { st.x2T = 10; banner('煞气翻倍 · 10 秒'); }
+      else if (k === 'x2dmg') { st.dmgT = 15; banner('伤害翻倍 · 15 秒'); }
+      else if (k === 'heal') { G.player.hp = G.player.maxhp; banner('气血全满'); Sfx.heal(); }
+      else {
+        let n = 0;
+        for (const en of allEnemies()) {
+          if (en === G.boss || en.isBossAlly) continue;
+          if (U.dist(G.player.x, G.player.y, en.x, en.y) < 420) { killEnemy(en); n++; }
+        }
+        banner('清场 · ' + n + ' 只'); Sfx.nova();
+      }
+    } else if (c.kind === 'R') {
+      const cost = REFINE_COST[ins.refine];
+      if ((save.stones || 0) < cost) { notify('灵石不足 · 需 ' + cost); Sfx.warn(); resumePlay(); return; }
+      save.stones -= cost; ins.refine++;
+      writeSave();
+      const cur = ins.skills[c.id] || (ins.skills[c.id] = {});
+      const m = U.pick(SKILL_MODS);
+      cur[m.k] = (cur[m.k] || 0) + m.v;
+      banner('祭炼 ' + c.name + ' · ' + m.name); Sfx.forge ? Sfx.forge() : Sfx.buff();
+    }
+    insSt().n++;
+    resumePlay();
+  }
+  function openInsight() { showCards('煞气顿悟 · 择一', rollInsight()); Sfx.levelup(); }
+  // 灵石祭炼：花的是全局灵石，次数越多越贵
+  function openRefine() {
+    if (!G.player) return;
+    const ins = insSt(), cost = REFINE_COST[ins.refine];
+    const own = ownSkills();
+    if (!own.length) { notify('还没有可祭炼的功法'); Sfx.warn(); return; }
+    if (cost == null) { notify('本局祭炼已到顶'); Sfx.warn(); return; }
+    if ((save.stones || 0) < cost) { notify('灵石不足 · 需 ' + cost); Sfx.warn(); return; }
+    const cards = own.slice(0, 6).map(s => ({
+      key: 'R' + s.id, kind: 'R', id: s.id, icon: s.icon || '⚔', name: s.name,
+      desc: '祭炼 ' + cost + ' 灵石 · 伤害/范围/攻速/多发，随机一条'
+    }));
+    showCards('灵石祭炼 · 择一功法', cards);
+  }
+  // 每帧：特殊效果的倒计时 + 修炼感悟 + 把攒满的顿悟排上
+  function tickInsight(dt) {
+    const st = shaSt();
+    if (st.x2T > 0) st.x2T = Math.max(0, st.x2T - dt);
+    if (st.dmgT > 0) st.dmgT = Math.max(0, st.dmgT - dt);
+    // 攒满的顿悟等回到 play 再弹（击杀/清场途中不打断结算）
+    if (st.pending > 0 && G.state === 'play') { st.pending--; openInsight(); return; }
+    st.sayT -= dt;
+    if (st.sayT <= 0) {
+      st.sayT = 30 + Math.random() * 10;
+      if (G.state === 'play') banner(U.pick(INSIGHT_SAY));
+    }
+  }
+  function gainSha(n) {
+    const st = shaSt();
+    const k = (1 + (G.bonus.shaGain || 0)) * (st.x2T > 0 ? 2 : 1);
+    st.v += n * k;
+    while (st.v >= st.need) { st.v -= st.need; st.pending = (st.pending || 0) + 1; }
+  }
+  // 顿悟/祭炼对某门功法的加成（改的是这次出手用的那份配置，不动全局表）
+  function insightAtk(id, a) {
+    const ins = G.insight, st = G.sha;
+    const m = (ins && ins.skills[id]) || null;
+    const dmgT = st && st.dmgT > 0 ? 2 : 1;
+    if (!m && dmgT === 1) return a;
+    const o = Object.assign({}, a);
+    const dm = (1 + ((m && m.dmg) || 0)) * dmgT;
+    if (dm !== 1) { o.base = (a.base || 0) * dm; o.perLv = (a.perLv || 0) * dm; }
+    if (m && m.range) o.range = (a.range || 320) * (1 + m.range);
+    if (m && m.cd) {
+      if (a.cd != null) o.cd = a.cd * (1 - m.cd);
+      if (a.cdBase != null) o.cdBase = a.cdBase * (1 - m.cd);
+    }
+    if (m && m.count) o.countBase = (a.countBase == null ? 1 : a.countBase) + m.count;
+    if (m && m.dur && a.life) o.life = a.life * (1 + m.dur);
+    return o;
+  }
+
   function queueLevelUp() { G.state = 'levelup'; buildChoicesAndShow(); }
   function buildChoices() {
     const pool = [];
@@ -2783,6 +3005,7 @@
     return picks;
   }
   function buildChoicesAndShow() {
+    const t = document.querySelector('#levelup .lu-title'); if (t) t.textContent = '突破 · 择一功法';
     const choices = buildChoices();
     elCards.innerHTML = '';
     for (const c of choices) {
@@ -2825,6 +3048,7 @@
   function update(dt) {
     G.time += dt;
     tickBuffs(dt);
+    tickInsight(dt);
 
     // 联机：等房主把对话点完（客机已先点掉 / 房主还在对话）
     // 场上怪物、功法特效、掉落一律静止；仍保留联机收发与队友插值，聊天与暂停不受影响
@@ -3558,11 +3782,13 @@
   function updateHUD() {
     const p = G.player; if (!p) return;
     elHpfill.style.width = U.clamp(p.hp / p.maxhp, 0, 1) * 100 + '%';
-    elXpfill.style.width = U.clamp(p.xp / p.next, 0, 1) * 100 + '%';
+    // 第二条是「煞气」：攒满就顿悟。修为本身不再用 Lv 数字露脸，只显示段位
+    const sst = shaSt();
+    elXpfill.style.width = U.clamp(sst.v / sst.need, 0, 1) * 100 + '%';
     // 条上补「当前 / 上限」：只有比例看不出还差多少，也没法判断一颗丹够不够
     if (elHpval) elHpval.textContent = Math.max(0, Math.ceil(p.hp)) + '/' + Math.ceil(p.maxhp);
-    if (elXpval) elXpval.textContent = Math.floor(p.xp) + '/' + Math.ceil(p.next);
-    elLevel.textContent = realmName(p.level);
+    if (elXpval) elXpval.textContent = Math.floor(sst.v) + '/' + Math.ceil(sst.need);
+    elLevel.textContent = stageLabel(p) + (sst.dmgT > 0 ? '　·　杀意' : '');
     elTime.textContent = fmtTime(G.time);
     elKills.textContent = '斩 ' + G.kills;
     if (elBag) elBag.textContent = '袋 ' + (G.runLoot ? G.runLoot.length : 0);
@@ -3629,6 +3855,8 @@
     for (const s of STORY) s.done = false;
     // 带入永久进度（跨地图不清零）：道具加成 + 装备加成
     resetRunBonus();
+    // 单局循环：煞气清零、上一局的顿悟与祭炼不带进来
+    resetRunBuffs();
     G.gear = gearBonus();
     recalcMaxhp();
     G.player.hp = G.player.maxhp;
@@ -5536,6 +5764,14 @@
     const def = (window.ENCOUNTERS || []).find(e => e.id === id);
     if (def) menuEncounter(def);
   });
+  // 灵石祭炼：点 HUD 上的灵石就能当场花钱变强（每局次数越多越贵）
+  if (elStones) {
+    elStones.style.cursor = 'pointer';
+    elStones.addEventListener('click', () => {
+      if (G.state !== 'play') return;
+      openRefine();
+    });
+  }
   elDialog.addEventListener('click', () => { if (G.state === 'dialog') advanceDialog(); });
   elPauseBtn.addEventListener('click', () => { if (G.state === 'play') doPause(); });
   // 联机：暂停菜单里给个「离开联机房间」，不用回标题就能断开（没连上时自动隐藏）
@@ -6501,6 +6737,14 @@
     addMats(n) { const pool = (G.map && G.map.mats) || ['m_chijing', 'm_jingtie', 'm_fuzhi', 'm_lingmo']; for (const id of pool) { save.inventory[id] = (save.inventory[id] || 0) + (n || 3); save.totalItems = (save.totalItems || 0) + (n || 3); } writeSave(); if (G.state === 'cave') renderCave(); return pool.length; },
     mats() { const o = {}; for (const k in save.inventory) if (Items.mat(k)) o[k] = save.inventory[k]; return o; },
     setLevel(n) { save.cultivate.level = Math.max(1, n || 1); save.cultivate.xp = 0; syncBestLevel(); clearWoundedIfDone(); writeSave(); if (G.state === 'cave') renderCave(); return save.cultivate.level; },
+    // 3 分钟单局循环的调试口
+    sha(n) { if (n != null) gainSha(n); return { v: G.sha ? G.sha.v : 0, need: G.sha ? G.sha.need : 0, pending: (G.sha && G.sha.pending) || 0, dmgT: (G.sha && G.sha.dmgT) || 0 }; },
+    insight() { return JSON.parse(JSON.stringify(G.insight || {})); },
+    insightRoll() { return rollInsight().map(c => ({ kind: c.kind, name: c.name })); },
+    refineCost() { const i = G.insight || {}; return REFINE_COST[i.refine || 0] == null ? null : REFINE_COST[i.refine || 0]; },
+    openRefine() { openRefine(); return G.state; },
+    stage() { return G.player ? stageLabel(G.player) : ''; },
+    resetRunBuffs() { resetRunBuffs(); return true; },
     rebuild(lv) { const ok = rebuildTo(lv); return { ok: ok, lv: save.cultivate.level, wounded: save.wounded || null }; },
     unlockAll() { for (const m of MAPS) if (save.unlocked.indexOf(m.id) < 0) save.unlocked.push(m.id); writeSave(); renderWorldMap(); return save.unlocked.length; },
     shop(tab) { openShop(tab); return G.shopTab; },
