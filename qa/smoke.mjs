@@ -555,7 +555,8 @@ for (const id of fightNew) {
   if (!bn || bn === 'fail') { fightBad.push(id + ':noBoss'); continue; }
   frames(2);
   F.killBoss();
-  frames(220);
+  // 煞气顿悟会在这期间弹面板：无头环境下自动选第一张，别把结算挡住
+  for (let t = 0; t < 220; t++) { F.insightAuto(); frames(1); }
   for (let k = 0; k < 16; k++) { F.skipStory(); frames(2); }
   const st = F.info().state;
   if (!['victory', 'dialog', 'map'].includes(st)) fightBad.push(id + ':' + st);
@@ -958,7 +959,8 @@ for (const id of lateFight) {
   if (!bn || bn === 'fail') { badLateFight.push(id + ':noBoss'); continue; }
   frames(2);
   F.killBoss();
-  frames(220);
+  // 煞气顿悟会在这期间弹面板：无头环境下自动选第一张，别把结算挡住
+  for (let t = 0; t < 220; t++) { F.insightAuto(); frames(1); }
   for (let k = 0; k < 16; k++) { F.skipStory(); frames(2); }
   const st = F.info().state;
   if (!['victory', 'dialog', 'map'].includes(st)) badLateFight.push(id + ':' + st);

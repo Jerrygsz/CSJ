@@ -842,6 +842,10 @@
     const crit = Math.random() < critChance();
     if (crit) d *= 1.8;
     e.hp -= d; e.hitFlash = 0.12;
+    // 单挑型剧情战：煞气靠「打掉的血」给，不靠小怪
+    if (e === G.boss && G.map && G.map.type === 'boss' && e.maxhp > 0) {
+      gainSha(d / e.maxhp * SHA_BOSS_DUEL);
+    }
     // 吸血（顿悟被动）：打出去多少，按比例回一点气血
     const lc = G.bonus.leech || 0;
     if (lc > 0 && G.player && G.player.hp > 0) {
@@ -2812,9 +2816,13 @@
   // 每顿悟一次，下一次门槛抬 6%：抬太多的话清怪慢的图一局撑不到 9 次
   // （120 → 127 → 135 → 143 → 151…，第 9 次约需 1380 点，一局正好在 9~13 次之间）
   const SHA_GROW = 1.06;
-  // 灵气自然汇聚：站着也在攒（每秒 3 点）。这一条是「每张战图至少 9 次顿悟」的保底 ——
+  // 灵气自然汇聚：站着也在攒（每秒 4 点）。这一条是「每张战图至少 9 次顿悟」的保底 ——
   // 只靠击杀的话，清怪慢的图会卡在 5~6 次
-  const SHA_DRIP = 3;
+  const SHA_DRIP = 4;
+  // boss 型剧情战（单挑）没有小怪可刷，一局只有 40~60 秒：
+  // 改用「打掉的血量」换煞气，一场打完约 1200 点，照样够 9 次
+  const SHA_BOSS_DUEL = 1200;
+  const SHA_DRIP_BOSS = 8;
   function ownSkills() { return SKILLS.filter(s => (G.player.skills[s.id] || 0) > 0); }
   function newSkills() { return SKILLS.filter(s => !(G.player.skills[s.id] || 0) && (!s.minLv || G.player.level >= s.minLv)); }
 
@@ -2885,6 +2893,7 @@
   // 通用的三选一面板（顿悟 / 祭炼共用，也是升级选卡那套 UI）
   function showCards(title, cards) {
     G.state = 'levelup';
+    G.cardsNow = cards;
     const t = document.querySelector('#levelup .lu-title'); if (t) t.textContent = title;
     elCards.innerHTML = '';
     for (const c of cards) {
@@ -2974,12 +2983,12 @@
     const st = shaSt();
     // 自然汇聚只认「真正在打」的图，别让坊市/洞府里也飘煞气
     if (G.state === 'play' && G.map && (G.map.type === 'combat' || G.map.type === 'boss' || G.map.type === 'chase') && !G.paused) {
-      gainSha(SHA_DRIP * dt);
+      gainSha((G.map.type === 'boss' ? SHA_DRIP_BOSS : SHA_DRIP) * dt);
     }
     if (st.x2T > 0) st.x2T = Math.max(0, st.x2T - dt);
     if (st.dmgT > 0) st.dmgT = Math.max(0, st.dmgT - dt);
     // 攒满的顿悟等回到 play 再弹（击杀/清场途中不打断结算）
-    if (st.pending > 0 && G.state === 'play') { st.pending--; openInsight(); return; }
+    if (st.pending > 0 && G.state === 'play' && !G.pendingEnding && G.vacuumT <= 0) { st.pending--; openInsight(); return; }
     st.sayT -= dt;
     if (st.sayT <= 0) {
       st.sayT = 30 + Math.random() * 10;
@@ -2989,6 +2998,8 @@
   function gainSha(n) {
     if (G.noSha) return;   // 清场这类「一次性收走」不算击杀产出
     const st = shaSt();
+    // 单挑局只给到 9 次：一场 30 秒的密度战，面板再多就成打断节奏了
+    if (G.map && G.map.type === 'boss' && (st.done || 0) >= 9) return;
     // 已经吃过 11 / 14 次之后，煞气来得慢一点：高密度图不至于变成十几次连弹
     const damp = (st.done || 0) >= 14 ? 0.35 : ((st.done || 0) >= 11 ? 0.65 : 1);
     const k = (1 + (G.bonus.shaGain || 0)) * (st.x2T > 0 ? 2 : 1) * damp;
@@ -6771,6 +6782,14 @@
     sha(n) { if (n != null) gainSha(n); return { v: G.sha ? G.sha.v : 0, need: G.sha ? G.sha.need : 0, pending: (G.sha && G.sha.pending) || 0, dmgT: (G.sha && G.sha.dmgT) || 0 }; },
     insight() { return JSON.parse(JSON.stringify(G.insight || {})); },
     insightRoll() { return rollInsight().map(c => ({ kind: c.kind, name: c.name })); },
+    insightAuto() {
+      if (G.state !== 'levelup' || !G.cardsNow || !G.cardsNow.length) return false;
+      const c = G.cardsNow[0];
+      G.cardsNow = null;
+      if (elLevelup) elLevelup.style.display = 'none';
+      onPick(c);
+      return true;
+    },
     refineCost() { const i = G.insight || {}; return REFINE_COST[i.refine || 0] == null ? null : REFINE_COST[i.refine || 0]; },
     openRefine() { openRefine(); return G.state; },
     stage() { return G.player ? stageLabel(G.player) : ''; },

@@ -189,7 +189,28 @@ ok(r9.cleared === true, '照常打到 Boss 死才结算（不提前收场）', r
 ok(r9.picks >= 9, '一局至少 9 次顿悟', { picks: r9.picks, time: r9.time });
 
 // ===== 10. 零报错 =====
-console.log('\n== 10. 全程零报错 ==');
+console.log('');
+console.log('== 10. 单挑型剧情战也够 9 次 ==');
+let r10 = await E(`(() => {
+  const F = window.__FR;
+  F.muteStory(true); F.clearProgress(); F.setLevel(7);
+  F.enterMap('mishi', 'easy'); F.skipStory();
+  let g = 0;
+  while (g++ < 3000) {
+    if (F.G.player) F.G.player.hp = F.G.player.maxhp;
+    F.tickFrames(1, 0.05);
+    const st = F.info().state;
+    if (st === 'levelup') { const c = document.querySelectorAll('#cards .card'); if (c.length) c[0].click(); continue; }
+    if (st === 'dialog') { F.skipStory(); continue; }
+    if (st === 'victory' || st === 'world') break;
+  }
+  const ins = F.insight();
+  return { picks: (ins.n || 0) - (ins.refine || 0), time: Math.round(F.info().time || 0), state: F.info().state };
+})()`);
+ok(r10.picks >= 9, '单挑局（无小怪可刷）也有 9 次顿悟', { picks: r10.picks, time: r10.time });
+ok(r10.picks <= 10, '单挑局最多 9 次，不刷屏', r10.picks);
+
+console.log('\n== 11. 全程零报错 ==');
 ok(errs.length === 0, '无页面/控制台报错', errs.slice(0, 3));
 
 await b.close(); server.close();
