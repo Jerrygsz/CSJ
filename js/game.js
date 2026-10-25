@@ -2812,6 +2812,7 @@
   function resetRunBuffs() {
     G.sha = { v: 0, need: SHA_NEED, dmgT: 0, x2T: 0, sayT: 24 + Math.random() * 12 };
     G.insight = { skills: {}, n: 0, refine: 0 };
+    G.summon = null;
   }
   // 每顿悟一次，下一次门槛抬 6%：抬太多的话清怪慢的图一局撑不到 9 次
   // （120 → 127 → 135 → 143 → 151…，第 9 次约需 1380 点，一局正好在 9~13 次之间）
@@ -2871,6 +2872,7 @@
       { k: 'x2sha', name: '煞气翻倍 · 10 秒', desc: '趁现在多杀几只' },
       { k: 'x2dmg', name: '伤害翻倍 · 15 秒', desc: '这一口气够狠' },
       { k: 'heal', name: '气血全满', desc: '一口气吊回来' },
+      { k: 'summon', name: '召灵宠助战 · 30 秒', desc: '跟在另一侧，替你打半分钟' },
       { k: 'clear', name: '清场 · 屏内小怪尽灭', desc: '连煞气一起收' }
     ]);
     return { key: 'E' + pick.k, kind: 'E', icon: '⚡', pick: pick, name: pick.name, desc: pick.desc };
@@ -2932,6 +2934,7 @@
       if (k === 'x2sha') { st.x2T = 10; banner('煞气翻倍 · 10 秒'); }
       else if (k === 'x2dmg') { st.dmgT = 15; banner('伤害翻倍 · 15 秒'); }
       else if (k === 'heal') { G.player.hp = G.player.maxhp; banner('气血全满'); Sfx.heal(); }
+      else if (k === 'summon') { spawnSummon(); }
       else {
         // 清场：屏内小怪尽灭。这一下不再回煞气 —— 否则「清场→回煞气→更快顿悟→再清场」自我滚雪球
         let n = 0;
@@ -2978,6 +2981,41 @@
     }));
     showCards('灵石祭炼 · 择一功法', cards);
   }
+  // 召灵宠：借身上那只的皮相；没有就召一只灵体（啼魂兽的形）
+  function spawnSummon() {
+    const pd = petDef();
+    const spr = (pd && pd.spr && Sprites[pd.spr]) ? pd.spr : 'tihun';
+    const p = G.player;
+    G.summon = {
+      t: 0, max: 30, x: p.x - 26, y: p.y - 6, cd: 0.3, bob: 0,
+      dmg: (G.realm.dmg * 70 + 10) * 0.9, rate: 0.7,
+      spr: spr, scale: (pd && pd.scale) || 1.15, name: (pd && pd.name) || '灵体'
+    };
+    banner((pd ? pd.name : '灵体') + ' 助战 · 30 秒'); Sfx.levelup();
+  }
+  function updateSummon(dt) {
+    const s = G.summon;
+    if (!s || !G.player) return;
+    s.t += dt;
+    if (s.t >= s.max) { G.summon = null; banner('灵宠散去'); return; }
+    // 站主人另一侧，和真灵宠对称
+    const p = G.player, tx = p.x - 26 * -(p.dir || 1), ty = p.y - 6;
+    s.x += (tx - s.x) * Math.min(1, dt * 6);
+    s.y += (ty - s.y) * Math.min(1, dt * 6);
+    s.bob = (s.bob || 0) + dt;
+    if (G.state !== 'play') return;
+    s.cd -= dt;
+    if (s.cd > 0) return;
+    const t = nearestEnemyFrom(s.x, s.y, 420);
+    if (!t) { s.cd = 0.25; return; }
+    const a = Math.atan2(t.y - s.y, t.x - s.x);
+    G.bullets.push({
+      x: s.x, y: s.y, vx: Math.cos(a) * 340, vy: Math.sin(a) * 340,
+      r: 6, dmg: s.dmg, life: 1.2, pierce: 1, hit: new Set(), home: true, pet: true, summon: true
+    });
+    s.cd = s.rate;
+  }
+
   // 每帧：特殊效果的倒计时 + 修炼感悟 + 把攒满的顿悟排上
   function tickInsight(dt) {
     const st = shaSt();
@@ -3157,6 +3195,7 @@
       updateEnemies(dt);
     }
     updatePet(dt);
+    updateSummon(dt);
     updateMate(dt);
     tickQuickCd(dt);
     tickPetFeed(dt);
@@ -3723,6 +3762,16 @@
           : tfIdle(pt.x, pt.y, pt.bob || 0, pd.spr);
         drawSpr(pd.spr, pt.x, pt.y, pd.scale || 1.3, G.player && G.player.dir < 0, ptf);
       }
+    }
+
+    // 召唤灵宠（顿悟 E 类）：另一侧，半透明一点，看得出是灵体
+    if (G.summon) {
+      const s = G.summon;
+      const alpha = s.t > s.max - 3 ? Math.max(0.15, (s.max - s.t) / 3) : 1;   // 最后三秒渐隐
+      ctx.fillStyle = 'rgba(0,0,0,0.18)'; ctx.beginPath(); ctx.ellipse(s.x, s.y + 9, 7, 3, 0, 0, 6.28); ctx.fill();
+      ctx.globalAlpha = 0.85 * alpha;
+      if (Sprites[s.spr]) drawSpr(s.spr, s.x, s.y, s.scale, G.player && G.player.dir < 0, tfIdle(s.x, s.y, s.bob || 0, s.spr));
+      ctx.globalAlpha = 1;
     }
 
     // 同伴：站在另一侧，画个名牌好认
@@ -6794,6 +6843,9 @@
     openRefine() { openRefine(); return G.state; },
     stage() { return G.player ? stageLabel(G.player) : ''; },
     resetRunBuffs() { resetRunBuffs(); return true; },
+    summon() { spawnSummon(); return G.summon ? { name: G.summon.name, spr: G.summon.spr, max: G.summon.max } : null; },
+    summonState() { const s = G.summon; return s ? { t: +s.t.toFixed(2), max: s.max, name: s.name, spr: s.spr } : null; },
+    summonBullets() { return G.bullets.filter(b => b.summon).length; },
     rebuild(lv) { const ok = rebuildTo(lv); return { ok: ok, lv: save.cultivate.level, wounded: save.wounded || null }; },
     unlockAll() { for (const m of MAPS) if (save.unlocked.indexOf(m.id) < 0) save.unlocked.push(m.id); writeSave(); renderWorldMap(); return save.unlocked.length; },
     shop(tab) { openShop(tab); return G.shopTab; },

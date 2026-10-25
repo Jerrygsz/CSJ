@@ -210,7 +210,28 @@ let r10 = await E(`(() => {
 ok(r10.picks >= 9, '单挑局（无小怪可刷）也有 9 次顿悟', { picks: r10.picks, time: r10.time });
 ok(r10.picks <= 10, '单挑局最多 9 次，不刷屏', r10.picks);
 
-console.log('\n== 11. 全程零报错 ==');
+console.log('');
+console.log('== 11. 召灵宠助战 ==');
+let r11 = await E(`(() => {
+  const F = window.__FR;
+  F.muteStory(true); F.clearProgress(); F.setLevel(56);
+  F.enterMap('ningcui', 'easy'); F.skipStory();
+  F.tickFrames(20, 0.05);
+  const spawned = F.summon();
+  let shot = 0;
+  for (let i = 0; i < 80; i++) { F.insightAuto(); F.G.player.hp = F.G.player.maxhp; F.tickFrames(1, 0.05); shot = Math.max(shot, F.summonBullets()); }
+  const mid = F.summonState();
+  let guard = 0;
+  // 这期间会弹顿悟面板：自动选掉，否则模拟会停在 levelup 不往前走
+  while (F.summonState() && guard++ < 6000) { F.insightAuto(); F.G.player.hp = F.G.player.maxhp; F.tickFrames(1, 0.05); }
+  return { spawned, shot, mid, after: F.summonState() };
+})()`);
+ok(!!r11.spawned && r11.spawned.max === 30, '召唤出灵宠，持续 30 秒', r11.spawned);
+ok(r11.shot > 0, '召出来的灵宠会自己放弹打人', r11.shot);
+ok(r11.mid && r11.mid.t > 1, '召唤物在场上活着并计时', r11.mid);
+ok(r11.after === null, '30 秒后自动散去', r11.after);
+
+console.log('\n== 12. 全程零报错 ==');
 ok(errs.length === 0, '无页面/控制台报错', errs.slice(0, 3));
 
 await b.close(); server.close();
