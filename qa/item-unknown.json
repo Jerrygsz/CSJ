@@ -1,0 +1,839 @@
+[
+ {
+  "w": "七玄门是镜",
+  "where": [
+   "map:qixuan·七玄门·山门"
+  ]
+ },
+ {
+  "w": "张铁无木",
+  "where": [
+   "map:qixuan·七玄门·山门"
+  ]
+ },
+ {
+  "w": "的是另一门象甲",
+  "where": [
+   "map:qixuan·七玄门·山门"
+  ]
+ },
+ {
+  "w": "毒虫在丹",
+  "where": [
+   "map:mishi·墨大夫·密室"
+  ]
+ },
+ {
+  "w": "他趴在石",
+  "where": [
+   "map:huangfeng·黄枫谷·山门"
+  ]
+ },
+ {
+  "w": "七派认令",
+  "where": [
+   "map:huangfeng·黄枫谷·山门",
+   "map:tainan·太南小会"
+  ]
+ },
+ {
+  "w": "换一批灵石",
+  "where": [
+   "map:huangfeng·黄枫谷·山门"
+  ]
+ },
+ {
+  "w": "他挑了青石",
+  "where": [
+   "map:huangfeng·黄枫谷·山门"
+  ]
+ },
+ {
+  "w": "师叔许诺的灵石",
+  "where": [
+   "map:huangfeng·黄枫谷·山门"
+  ]
+ },
+ {
+  "w": "等我结丹",
+  "where": [
+   "map:huangfeng·黄枫谷·山门"
+  ]
+ },
+ {
+  "w": "他练的象甲",
+  "where": [
+   "map:moutro·moutro"
+  ]
+ },
+ {
+  "w": "墨府取暖阳宝玉",
+  "where": [
+   "map:moutro·moutro"
+  ]
+ },
+ {
+  "w": "虫母的甲",
+  "where": [
+   "map:yooutro·yooutro"
+  ]
+ },
+ {
+  "w": "自己打一把剑",
+  "where": [
+   "map:zhangtie·后山·张铁的铁匠棚"
+  ]
+ },
+ {
+  "w": "他袖口露",
+  "where": [
+   "map:heixiang·太南小会·后巷",
+   "map:lin·翠屏山·洞府夜变"
+  ]
+ },
+ {
+  "w": "韩立把灵石",
+  "where": [
+   "map:heixiang·太南小会·后巷"
+  ]
+ },
+ {
+  "w": "立交上去的药草",
+  "where": [
+   "map:xsoutro·xsoutro"
+  ]
+ },
+ {
+  "w": "仙者的身份一露",
+  "where": [
+   "map:tainan·太南小会"
+  ]
+ },
+ {
+  "w": "我把灵石",
+  "where": [
+   "map:tainan·太南小会"
+  ]
+ },
+ {
+  "w": "暖阳宝玉",
+  "where": [
+   "map:tainan·太南小会"
+  ]
+ },
+ {
+  "w": "我这有一块令",
+  "where": [
+   "map:tainan·太南小会"
+  ]
+ },
+ {
+  "w": "他把令",
+  "where": [
+   "map:tainan·太南小会"
+  ]
+ },
+ {
+  "w": "去解她的储物袋",
+  "where": [
+   "map:luxiong·黄枫谷·下山岔道"
+  ]
+ },
+ {
+  "w": "的不只是储物袋",
+  "where": [
+   "map:luxiong·黄枫谷·下山岔道"
+  ]
+ },
+ {
+  "w": "陆师兄拔剑",
+  "where": [
+   "map:luxiong·黄枫谷·下山岔道"
+  ]
+ },
+ {
+  "w": "鞘上还挂着丹",
+  "where": [
+   "map:luxiong·黄枫谷·下山岔道"
+  ]
+ },
+ {
+  "w": "陆师兄倒在草",
+  "where": [
+   "map:luxiong_out·黄枫谷·下山岔道"
+  ]
+ },
+ {
+  "w": "储物袋",
+  "where": [
+   "map:luxiong_out·黄枫谷·下山岔道",
+   "enc:e_yihai·七派弟子的遗体（血色禁地）"
+  ]
+ },
+ {
+  "w": "立把一粒忘忧丹",
+  "where": [
+   "map:luxiong_out·黄枫谷·下山岔道"
+  ]
+ },
+ {
+  "w": "剑收进储物袋",
+  "where": [
+   "map:luxiong_out·黄枫谷·下山岔道"
+  ]
+ },
+ {
+  "w": "三间石",
+  "where": [
+   "map:lin·翠屏山·洞府夜变"
+  ]
+ },
+ {
+  "w": "着黄枫谷的道袍",
+  "where": [
+   "map:lin·翠屏山·洞府夜变"
+  ]
+ },
+ {
+  "w": "出的那卷玉",
+  "where": [
+   "map:lin·翠屏山·洞府夜变"
+  ]
+ },
+ {
+  "w": "的是千竹教的符",
+  "where": [
+   "map:lin·翠屏山·洞府夜变"
+  ]
+ },
+ {
+  "w": "输在一间石",
+  "where": [
+   "map:lin_out·翠屏山·洞府夜变"
+  ]
+ },
+ {
+  "w": "储物袋里一枚玉",
+  "where": [
+   "map:lin_out·翠屏山·洞府夜变"
+  ]
+ },
+ {
+  "w": "撞在丹",
+  "where": [
+   "map:zhuji·黄枫谷·地火之屋"
+  ]
+ },
+ {
+  "w": "炉底剩一枚丹",
+  "where": [
+   "map:zhuji_out·黄枫谷·地火之屋"
+  ]
+ },
+ {
+  "w": "灵液在丹",
+  "where": [
+   "map:zhuji_out·黄枫谷·地火之屋"
+  ]
+ },
+ {
+  "w": "甩出七十余张符",
+  "where": [
+   "map:yanjia_out·燕家堡"
+  ]
+ },
+ {
+  "w": "王蝉连符",
+  "where": [
+   "map:yanjia_out·燕家堡"
+  ]
+ },
+ {
+  "w": "白捡一件符",
+  "where": [
+   "map:yanjia_out·燕家堡"
+  ]
+ },
+ {
+  "w": "魔道六宗的旗",
+  "where": [
+   "map:jingu·金鼓原"
+  ]
+ },
+ {
+  "w": "传令符",
+  "where": [
+   "map:jingu·金鼓原"
+  ]
+ },
+ {
+  "w": "只剩尸身与断旗",
+  "where": [
+   "map:jingu_out·金鼓原"
+  ]
+ },
+ {
+  "w": "阵压在半塌的石",
+  "where": [
+   "map:guchuan·古传送阵"
+  ]
+ },
+ {
+  "w": "道里追来两道剑",
+  "where": [
+   "map:guchuan·古传送阵"
+  ]
+ },
+ {
+  "w": "掩月宗的结丹",
+  "where": [
+   "map:guchuan·古传送阵"
+  ]
+ },
+ {
+  "w": "王蝉的剑",
+  "where": [
+   "map:guchuan·古传送阵"
+  ]
+ },
+ {
+  "w": "最后一张水遁符",
+  "where": [
+   "map:kuixing·魁星岛"
+  ]
+ },
+ {
+  "w": "沉了半尺",
+  "where": [
+   "map:liulian_out·六连殿·出海捕妖"
+  ]
+ },
+ {
+  "w": "在此凿了三间石",
+  "where": [
+   "map:haian·海猿岛·闭关"
+  ]
+ },
+ {
+  "w": "魂倒先凝了煞丹",
+  "where": [
+   "map:haian·海猿岛·闭关"
+  ]
+ },
+ {
+  "w": "他在药园的花",
+  "where": [
+   "map:haian·海猿岛·闭关"
+  ]
+ },
+ {
+  "w": "杀妖取丹",
+  "where": [
+   "map:ningcui_out·凝翠岛·杀妖取丹"
+  ]
+ },
+ {
+  "w": "要结丹",
+  "where": [
+   "map:ningcui_out·凝翠岛·杀妖取丹"
+  ]
+ },
+ {
+  "w": "曲魂先凝了煞丹",
+  "where": [
+   "map:jiedan·天星城·闭府结丹"
+  ]
+ },
+ {
+  "w": "只有丹",
+  "where": [
+   "map:jiedan·天星城·闭府结丹"
+  ]
+ },
+ {
+  "w": "凭一角残图",
+  "where": [
+   "map:xutian·虚天殿"
+  ]
+ },
+ {
+  "w": "九岁起就压在袋",
+  "where": [
+   "map:xutian·虚天殿"
+  ]
+ },
+ {
+  "w": "落在石",
+  "where": [
+   "map:xutian_out·虚天殿"
+  ]
+ },
+ {
+  "w": "法门与星宫的旗",
+  "where": [
+   "map:xutian_out·虚天殿"
+  ]
+ },
+ {
+  "w": "四家都要这口鼎",
+  "where": [
+   "map:xutian_out·虚天殿"
+  ]
+ },
+ {
+  "w": "怀里抱着一只木",
+  "where": [
+   "map:xutian_out·虚天殿"
+  ]
+ },
+ {
+  "w": "你身上有绿液",
+  "where": [
+   "map:waihai·外星海·奇渊岛"
+  ]
+ },
+ {
+  "w": "毒要下在鼎",
+  "where": [
+   "map:waihai·外星海·奇渊岛"
+  ]
+ },
+ {
+  "w": "刘靖用凤凰符",
+  "where": [
+   "map:heisha_out·越国·京城皇宫"
+  ]
+ },
+ {
+  "w": "起刘靖遗下的符",
+  "where": [
+   "map:heisha_out·越国·京城皇宫"
+  ]
+ },
+ {
+  "w": "越皇的储物袋",
+  "where": [
+   "map:heisha_out·越国·京城皇宫"
+  ]
+ },
+ {
+  "w": "矿场的阵旗",
+  "where": [
+   "map:shiku_out·灵石矿·魔道矿场"
+  ]
+ },
+ {
+  "w": "门缺个压得住丹",
+  "where": [
+   "map:qingzhu·青竹小轩"
+  ]
+ },
+ {
+  "w": "后院丹",
+  "where": [
+   "map:qingzhu·青竹小轩"
+  ]
+ },
+ {
+  "w": "转身走进石",
+  "where": [
+   "map:guxiu_out·古修遗址"
+  ]
+ },
+ {
+  "w": "又是残图",
+  "where": [
+   "map:guxiu_out·古修遗址"
+  ]
+ },
+ {
+  "w": "是摸丹",
+  "where": [
+   "map:yinming_out·阴冥之地"
+  ]
+ },
+ {
+  "w": "五间石",
+  "where": [
+   "map:luoyun·落云宗"
+  ]
+ },
+ {
+  "w": "三派试剑",
+  "where": [
+   "map:sanjian·三派试剑"
+  ]
+ },
+ {
+  "w": "银白的身影从鼎",
+  "where": [
+   "map:yinyue·银月认主"
+  ]
+ },
+ {
+  "w": "插进石",
+  "where": [
+   "map:yanyue_out·掩月宗"
+  ]
+ },
+ {
+  "w": "掩月宗的钟",
+  "where": [
+   "map:yanyue_out·掩月宗"
+  ]
+ },
+ {
+  "w": "法士的旗子从草",
+  "where": [
+   "map:bianjie·慕兰边界大战"
+  ]
+ },
+ {
+  "w": "人的尸身落在草",
+  "where": [
+   "map:bianjie_out·慕兰边界大战"
+  ]
+ },
+ {
+  "w": "明灯滚出去三尺",
+  "where": [
+   "map:bianjie_out·慕兰边界大战"
+  ]
+ },
+ {
+  "w": "老者站在石",
+  "where": [
+   "map:yinluo·阴罗宗四长老"
+  ]
+ },
+ {
+  "w": "老者的黑袍",
+  "where": [
+   "map:yinluo·阴罗宗四长老"
+  ]
+ },
+ {
+  "w": "只剩一柄插在石",
+  "where": [
+   "map:zhuimo_out·坠魔谷"
+  ]
+ },
+ {
+  "w": "缝里的剑",
+  "where": [
+   "map:zhuimo_out·坠魔谷"
+  ]
+ },
+ {
+  "w": "上古修士种灵草",
+  "where": [
+   "map:lingmiao·灵渺园"
+  ]
+ },
+ {
+  "w": "慕兰草",
+  "where": [
+   "map:mulan_out·慕兰草原"
+  ]
+ },
+ {
+  "w": "把五鬼锁魂的符",
+  "where": [
+   "map:mulan_out·慕兰草原"
+  ]
+ },
+ {
+  "w": "按在自己丹",
+  "where": [
+   "map:mulan_out·慕兰草原"
+  ]
+ },
+ {
+  "w": "两仪环",
+  "where": [
+   "map:kunwu·昆吾山"
+  ]
+ },
+ {
+  "w": "逆星盘",
+  "where": [
+   "map:zhenmo_out·镇魔塔"
+  ]
+ },
+ {
+  "w": "和一地碎石",
+  "where": [
+   "map:zhenmo_out·镇魔塔"
+  ]
+ },
+ {
+  "w": "道友袖里那口鼎",
+  "where": [
+   "map:xiaoji·小极宫"
+  ]
+ },
+ {
+  "w": "中间三十年磨剑",
+  "where": [
+   "map:xutian2·虚天殿·闭关"
+  ]
+ },
+ {
+  "w": "星宫的旗",
+  "where": [
+   "map:liudao·乱星海·斩六道"
+  ]
+ },
+ {
+  "w": "抬手推开了石",
+  "where": [
+   "map:jiezi·坠魔谷·芥子空间"
+  ]
+ },
+ {
+  "w": "树底下那块石",
+  "where": [
+   "map:huixiang·越国·韩家村"
+  ]
+ },
+ {
+  "w": "坟头的草",
+  "where": [
+   "map:huixiang·越国·韩家村"
+  ]
+ },
+ {
+  "w": "他把灵石",
+  "where": [
+   "map:huixiang·越国·韩家村"
+  ]
+ },
+ {
+  "w": "她把一枚玉",
+  "where": [
+   "map:zijian·乱星海·紫灵"
+  ]
+ },
+ {
+  "w": "佝偻老汉蹲在石",
+  "where": [
+   "enc:e_zhou·采药人 老周（七玄门·后山）"
+  ]
+ },
+ {
+  "w": "铁矿石都露",
+  "where": [
+   "enc:e_zhou·采药人 老周（七玄门·后山）"
+  ]
+ },
+ {
+  "w": "铁矿石露",
+  "where": [
+   "enc:e_zhou·采药人 老周（七玄门·后山）"
+  ]
+ },
+ {
+  "w": "数他剑",
+  "where": [
+   "enc:e_li·同门 厉飞雨（七玄门·后山）"
+  ]
+ },
+ {
+  "w": "木剑对木剑",
+  "where": [
+   "enc:e_li·同门 厉飞雨（七玄门·后山）"
+  ]
+ },
+ {
+  "w": "路边草",
+  "where": [
+   "enc:e_xingnang·山贼丢下的行囊（七玄门·后山）"
+  ]
+ },
+ {
+  "w": "墙角一具小丹",
+  "where": [
+   "enc:e_danfang·密室角落的丹炉（墨大夫·密室）"
+  ]
+ },
+ {
+  "w": "炼了这么多年丹",
+  "where": [
+   "enc:e_danfang·密室角落的丹炉（墨大夫·密室）"
+  ]
+ },
+ {
+  "w": "药渣扫进布袋",
+  "where": [
+   "enc:e_danfang·密室角落的丹炉（墨大夫·密室）"
+  ]
+ },
+ {
+  "w": "袖口露",
+  "where": [
+   "enc:e_huo·兜售黑货的散修（太南小会）"
+  ]
+ },
+ {
+  "w": "他说的是令",
+  "where": [
+   "enc:e_qingyan·青颜真人（太南小会）"
+  ]
+ },
+ {
+  "w": "还是丹",
+  "where": [
+   "enc:e_qingyan·青颜真人（太南小会）"
+  ]
+ },
+ {
+  "w": "又被人把丹",
+  "where": [
+   "enc:e_luxiong·内门弟子 陆师兄（黄枫谷·药园）"
+  ]
+ },
+ {
+  "w": "他家长辈在丹",
+  "where": [
+   "enc:e_luxiong·内门弟子 陆师兄（黄枫谷·药园）"
+  ]
+ },
+ {
+  "w": "回气丹",
+  "where": [
+   "enc:e_shang·受伤的守园弟子（黄枫谷·药园）"
+  ]
+ },
+ {
+  "w": "子的尸身倚在石",
+  "where": [
+   "enc:e_yihai·七派弟子的遗体（血色禁地）"
+  ]
+ },
+ {
+  "w": "胸前一道剑",
+  "where": [
+   "enc:e_yihai·七派弟子的遗体（血色禁地）"
+  ]
+ },
+ {
+  "w": "里翻出几块灵石",
+  "where": [
+   "enc:e_yihai·七派弟子的遗体（血色禁地）"
+  ]
+ },
+ {
+  "w": "有一只蜡封的玉",
+  "where": [
+   "enc:e_yihai·七派弟子的遗体（血色禁地）"
+  ]
+ },
+ {
+  "w": "口蹲着个满身石",
+  "where": [
+   "enc:e_kuanggong·迷路的矿工（后山·废弃矿洞）"
+  ]
+ },
+ {
+  "w": "廊下站着个披甲",
+  "where": [
+   "enc:e_captain·正道小队 队长（燕家堡）"
+  ]
+ },
+ {
+  "w": "里捏着一卷矿图",
+  "where": [
+   "enc:e_captain·正道小队 队长（燕家堡）"
+  ]
+ },
+ {
+  "w": "上头的令",
+  "where": [
+   "enc:e_captain·正道小队 队长（燕家堡）"
+  ]
+ },
+ {
+  "w": "可上头的令",
+  "where": [
+   "enc:e_captain·正道小队 队长（燕家堡）"
+  ]
+ },
+ {
+  "w": "道友的丹",
+  "where": [
+   "enc:e_wangning·妙音门 紫灵（天星城）"
+  ]
+ },
+ {
+  "w": "缺一个压得住丹",
+  "where": [
+   "enc:e_wangning·妙音门 紫灵（天星城）"
+  ]
+ },
+ {
+  "w": "她要的不是丹",
+  "where": [
+   "enc:e_wangning·妙音门 紫灵（天星城）"
+  ]
+ },
+ {
+  "w": "推过来一张残图",
+  "where": [
+   "enc:e_jinqing·散修 金青（凝翠岛·杀妖取丹）"
+  ]
+ },
+ {
+  "w": "值不了几块灵石",
+  "where": [
+   "enc:e_jinqing·散修 金青（凝翠岛·杀妖取丹）"
+  ]
+ },
+ {
+  "w": "间挂着一只旧玉",
+  "where": [
+   "enc:e_yuyao·女修 元瑶（凝翠岛·杀妖取丹）"
+  ]
+ },
+ {
+  "w": "换一个结丹",
+  "where": [
+   "enc:e_yuyao·女修 元瑶（凝翠岛·杀妖取丹）"
+  ]
+ },
+ {
+  "w": "正把网上的海草",
+  "where": [
+   "enc:e_yufu·船上的老渔夫（六连殿·出海捕妖）"
+  ]
+ },
+ {
+  "w": "舱里拖出一小袋",
+  "where": [
+   "enc:e_yufu·船上的老渔夫（六连殿·出海捕妖）"
+  ]
+ },
+ {
+  "w": "边摆着三只布袋",
+  "where": [
+   "enc:e_haishi·船上的海市散修（六连殿·出海捕妖）"
+  ]
+ },
+ {
+  "w": "韩立挑了两块玉",
+  "where": [
+   "enc:e_haishi·船上的海市散修（六连殿·出海捕妖）"
+  ]
+ },
+ {
+  "w": "说起镜",
+  "where": [
+   "enc:e_huixiang·越国来的散修（三派试剑）"
+  ]
+ },
+ {
+  "w": "坠魔谷外的石",
+  "where": [
+   "enc:e_zijian·妙音门 紫灵（坠魔谷）"
+  ]
+ }
+]

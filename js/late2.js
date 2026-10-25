@@ -800,7 +800,7 @@
       desc: '把灵渺园炼成芥子空间。石门一落，外头就是三百年。',
       startLevel: 106, endLevel: 112, startSkills: { sword: 6, fire: 5, orb: 5, nova: 5, frost: 5 },
       unlock: 'liudao', next: 'feisheng',
-      reward: { stones: 6000, items: ['yuanci', 'moyuan', 't_yuanci'], mats: [['m_hanhuo', 2]] },
+      reward: { stones: 6000, items: ['yuanci', 'moyuan', 't_yuanci', 'jipin'], mats: [['m_hanhuo', 2]] },
       clearTitle: '化神',
       clearDesc: '八百八十五岁。魔元丹、极品灵石、五色寒焰，三样齐了；芥子空间里那座元磁山，也一并炼化入体。这一关过去了。'
     },

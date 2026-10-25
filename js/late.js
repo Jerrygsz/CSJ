@@ -144,7 +144,7 @@
       enemies: ['disciple', 'assassin'], elites: ['隔壁炉的执事', '地火火灵'],
       mats: ['m_zihua', 'm_tianling', 'm_shihui', 'm_yusui'],
       boss: { kind: 'beast', name: '地火之灵', hp: 3600, spd: 54, dmg: 22, r: 18, spr: 'huoling', scale: 6.0 },
-      reward: { stones: 300, mats: [['m_zihua', 2], ['m_tianling', 2]] },
+      reward: { stones: 300, items: ['qingyuan'], mats: [['m_zihua', 2], ['m_tianling', 2]] },
       clearTitle: '筑基已成',
       clearDesc: '地火退了，丹也成了。灵液化真元，练气到筑基那道坎，跨过去了。'
     },

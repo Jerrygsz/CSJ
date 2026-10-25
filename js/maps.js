@@ -93,7 +93,7 @@ window.MAPS = [
     desc: '散修云集的交易会。以灵石换丹药、符箓与法器，也能把用不上的东西折价出手。',
     startLevel: 7, startSkills: { sword: 3, fire: 1 },
     unlock: 'mishi', next: 'huangfeng',
-    reward: { stones: 0, items: [] },
+    reward: { stones: 0, items: ['t_shengxian'] },   // 万小山认过的升仙令，剧情后就在袋里
     clearTitle: '小会已散',
     clearDesc: '灵石花得干净，储物袋也换了个模样。'
   },
