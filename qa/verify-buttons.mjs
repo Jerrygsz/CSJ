@@ -532,6 +532,25 @@ async function playOutro() {
   eq(await page.evaluate(() => window.__FR.breakCan(36)), false, 'I：修为未达炼气十三层（物事齐+已通剧情也不行）→ breakCan(36)=false（未备齐）');
 }
 
+// ---- I2. 地图 startLevel 夹逼不得污染「真实修为」：真修为未到炼气十三层，进地火之屋被夹到35也仍判未备齐 ----
+// 这正是上一轮「修了为门槛却还是进突破成功」的根因：进图被夹到 35 后，syncCultivate 把夹出来的
+// 35 写回 save.cultivate.level，门槛便只认被地图抬高的 level、而非玩家真实修为。此处验证修复后：
+// 存档真实修为保持 30，门槛据此判「未备齐」。
+{
+  await run(`F.clearProgress();F.setLevel(30);F.toTitle();F.god(true);F.breakLuck(null);`);  // 真实修为=练气十一层
+  await run(`F.enterMap('zhuji');`);            // 进图被夹到 35（炼气十三层）打怪，仅为战斗平衡
+  await settleDialogs();
+  await wait(200);
+  await run(`F.killBoss();`);
+  await playOutro();                            // 走 lock 分支：zhuji 记入 save.cleared
+  // 战斗等级被夹到 35（仅本图平衡用），但存档真实修为仍应停在 30
+  eq((await st()).level, 35, 'I2：进图后战斗等级被夹到 35（炼气十三层，仅用于本图平衡）');
+  eq((await st()).cultivate.level, 30, 'I2：进图被夹到 35 后，存档真实修为仍为 30（夹逼未污染 save.cultivate.level）');
+  // 物事齐 + 已通剧情，但真实修为只 30（夹逼的 35 不能算数）→ 仍判未备齐
+  await run(`F.addItem('zhuji',1);F.addItem('m_yusuizhi',3);F.addItem('m_zihua',3);F.addItem('m_tianling',3);F.setStones(999);`);
+  eq(await page.evaluate(() => window.__FR.breakCan(36)), false, 'I2：真实修为未达炼气十三层（仅被地图夹到35）→ breakCan(36)=false（未备齐）');
+}
+
 // ---- E. 地火之屋：玩家「已提前筑基」→ 省略突破剧情，直播「被发现已筑基」并解锁下一章 ----
 {
   await run(`F.clearProgress();F.setLevel(36);F.toTitle();F.god(true);F.breakLuck(null);`);

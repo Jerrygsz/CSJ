@@ -4154,7 +4154,13 @@
     if (!save.cultivate) save.cultivate = { level: 1, xp: 0, skills: {} };
     const c = save.cultivate;
     if (!c.skills) c.skills = {};
-    if (p.level > (c.level || 1)) { c.level = p.level; c.xp = 0; }
+    // 破境图（地火之屋等）设有 startLevel 下限：进图会把战斗等级 p.level 抬到底线（如炼气十三层），
+    // 这只为战斗平衡，不代表玩家真修到了这一层。若把这条「夹逼」回写进存档修为，
+    // 突破门槛就会只认被地图抬高的 level、而不是玩家真实修为 —— 即「以 level 论、不以修为论」。
+    // 故：p.level 恰好等于本图下限、且存档修为本就低于该下限时，视为夹逼，不回写存档修为。
+    const floor = (G.map && G.map.startLevel) || 0;
+    const clampedOnly = (p.level === floor && (c.level || 1) < floor);
+    if (p.level > (c.level || 1) && !clampedOnly) { c.level = p.level; c.xp = 0; }
     for (const k in p.skills) if ((p.skills[k] || 0) > (c.skills[k] || 0)) c.skills[k] = p.skills[k];
     if (c.level > (save.best.level || 1)) save.best.level = c.level;
   }
