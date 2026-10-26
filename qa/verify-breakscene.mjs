@@ -57,12 +57,12 @@ ok(r1b.every(x => x.map), '每道门都能反查到一张破境地图（endLevel
 console.log('\n== 2. 料齐仍须回洞府 ==');
 let r2 = await E(`(() => {
   const F = window.__FR;
-  F.muteStory(true); F.clearProgress();
+  F.muteStory(true); F.clearProgress(); F.setLevel(35);
   F.addItem('zhuji', 2);
   for (const id of ['m_yusuizhi','m_zihua','m_tianling']) F.addItem(id, 5);
   F.setStones(5000); F.clearMap('zhuji');
   const can = F.breakCan(36);
-  F.setLevel(35); F.enterMap('houshan','easy'); F.skipStory();
+  F.enterMap('houshan','easy'); F.skipStory();
   F.G.player.xp = 9999;
   F.tickFrames(3, 0.05);
   const banner = (document.getElementById('banner') || {}).textContent || '';
@@ -93,7 +93,7 @@ ok(r3.state === 'prefight' && r3.pf === 'zhuji', '点按钮 → 进「黄枫谷�
 // 3b. 结丹门 → 破境图是「天星城·闭府结丹」（剧情图，不经战前运功）
 let r3b = await E(`(() => {
   const F = window.__FR;
-  F.muteStory(true); F.clearProgress(); F.setLevel(54);
+  F.muteStory(true); F.clearProgress(); F.setLevel(55);
   F.addItem('xueling', 1); F.addItem('tianhuo', 1); F.setStones(5000); F.clearMap('tianxing');
   F.cave('qixuan'); F.caveTab('break');
   const btn = document.querySelector('button[data-breaknow="56"]');

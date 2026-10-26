@@ -1482,9 +1482,14 @@
     for (const b of (window.BREAKTHROUGH || [])) if (b.lv === nextLv) return b;
     return null;
   }
+  // 修为是否已达「下一道门的前一层」（当前境界巅峰）：筑基需炼气十三层(35)、结丹需筑基后期(55)…
+  function breakLevelOk(b) { return !b || (save.cultivate.level || 1) >= ((b.lv || 0) - 1); }
   function breakMissing(b) {
     if (!b) return [];
     const miss = [];
+    // 修为门槛：须达当前境界巅峰（即下一道门的前一层），否则即便破境之物齐了也冲不动
+    const needLv = (b.lv || 0) - 1;
+    if ((save.cultivate.level || 1) < needLv) miss.push({ kind: 'level', name: b.from, need: needLv, have: save.cultivate.level || 1 });
     for (const it of (b.items || [])) {
       const have = save.inventory[it[0]] || 0;
       if (have < it[1]) miss.push({ kind: 'item', id: it[0], need: it[1], have: have });
@@ -1506,9 +1511,10 @@
     return miss;
   }
   // 对话分流用：当前这张破境图「正在通关」，剧情节点天然算通过；
-  // 只看「丹 / 材 / 石」是否齐，用来判断玩家此刻是否已具备筑基条件（决定地火之屋结局台词）。
+  // 看「修为是否已达当前境界巅峰」且「丹 / 材 / 石」是否齐，用来判断玩家此刻是否已具备筑基条件（决定地火之屋结局台词）。
   function breakReadyNow(b) {
     if (!b) return true;
+    if (!breakLevelOk(b)) return false;   // 修为未到门槛（如尚未炼气十三层），即便物事齐了也不能算「备齐」
     for (const it of (b.items || [])) if ((save.inventory[it[0]] || 0) < it[1]) return false;
     for (const it of (b.needs || [])) if ((save.inventory[it[0]] || 0) < it[1]) return false;
     for (const mt of (b.mats || [])) if ((save.inventory[mt[0]] || 0) < mt[1]) return false;
@@ -4370,10 +4376,13 @@
         // 提前已筑基：省略突破剧情，直接进「被发现已筑基」的对白（原著里李化元当场点破）
         key = 'zhuji_out_ready';
       } else if (breakReadyNow(bg)) {
-        // 已备齐破境之物：先问玩家是否就此突破（成败各凭把握）
+        // 已备齐（修为已达炼气十三层 + 破境之物齐）：先问玩家是否就此突破（成败各凭把握）
         key = 'zhuji_out_ask';
+      } else if (bg && !breakLevelOk(bg)) {
+        // 修为未达当前境界巅峰（如尚未炼气十三层）：丹药齐了也冲不动 → 勉励厚实根基 + 锁后章
+        key = 'zhuji_out_lock_lv';
       } else {
-        // 未达筑基：勉励 + 锁后章
+        // 修为到了但破境之物不齐：勉励备齐 + 锁后章
         key = 'zhuji_out_lock';
       }
     }
@@ -4549,14 +4558,18 @@
     // alreadyPast：早已站在这道门之后（如重打这张破境图），不再重复冲关，也不因「没带丹」被反锁
     const alreadyPast = !!(m.endLevel && (save.cultivate.level || 1) >= m.endLevel);
     const isGate = !!(breakGate && !alreadyPast);
-    const breakReady = isGate ? breakMissing(breakGate).length === 0 : true;
+    const missGate = isGate ? breakMissing(breakGate) : [];
+    const breakReady = isGate ? missGate.length === 0 : true;
     const blocked = !!(isGate && !breakReady);
     save.wins++;
     // 打完一张图：只留三门最精的功法带去下一张，余者散去（剧情传世功法除外）
     G.lastPrune = pruneSkillsTop3();
     if (isGate) {
+      const lvMiss = missGate.some(m => m.kind === 'level');
       G.victoryNote = blocked
-        ? ('破境之物未齐（还差 ' + breakMissing(breakGate).length + ' 样）· 集齐了再来此图冲关')
+        ? (lvMiss
+            ? ('修为未达 ' + (breakGate.from || '') + ' · 先厚实根基，再回此图冲关')
+            : ('破境之物未齐（还差 ' + missGate.length + ' 样）· 集齐了再来此图冲关'))
         : ('破境之物已齐 · 就地冲关（持丹 ' + breakGatePills(breakGate) + ' 枚 · 把握 ' + Math.round(breakSuccessRate(breakGate) * 100) + '%）');
     } else {
       G.victoryNote = '';
@@ -5340,8 +5353,13 @@
       const done = lv >= b.lv;
       const miss = breakMissing(b);
       if (!done && !pending) pending = b;
+      let status;
+      if (done) status = '　已过';
+      else if (miss.length && miss.every(m => m.kind === 'level')) status = '　还差修为';
+      else if (miss.length) status = '　还差 ' + miss.length + ' 样';
+      else status = '　齐了';
       html += '<div class="cave-sec2"><div class="cs-title">' + (done ? '✔ ' : '') + b.from + ' → ' + b.realm +
-        '（Lv ' + b.lv + '）' + (done ? '　已过' : (miss.length ? '　还差 ' + miss.length + ' 样' : '　齐了')) + '</div>' +
+        '（Lv ' + b.lv + '）' + status + '</div>' +
         '<div class="cs-note">' + (b.tip || '') + '</div>';
       // 物事齐了：「闭门冲关」按钮顶在最上面，不用往下翻就能点
       if (!done && !miss.length) {
@@ -5447,9 +5465,12 @@
     if (!b) return;
     if (!G.breakHinted) {
       G.breakHinted = true;
-      banner(canBreak(b)
+      const lvOk = breakLevelOk(b);
+      banner((lvOk && canBreak(b))
         ? ('物事已齐 · 回任一洞府选「突破」冲关 · ' + b.realm)
-        : ('修为已至 ' + (b.from || '') + ' · 缺 ' + b.realm + ' 的物事'));
+        : (lvOk
+            ? ('修为已至 ' + (b.from || '') + ' · 缺 ' + b.realm + ' 的物事')
+            : ('修为未达 ' + (b.from || '') + ' · 先厚实根基再来')));
     }
   }
   // 突破剧情演出：按原著演一段，演完押上这一炉丹搏一把 —— 成则破境，败则丹药散尽、可再来。
@@ -5515,7 +5536,12 @@
   // 洞府「突破」按钮：物事齐了 → 进这张门对应的破境地图，走完剧情/打完，就地在剧情里破境
   function enterBreakMap(gate) {
     if (!gate) return;
-    if (breakMissing(gate).length) { notify('物事不齐 · 备齐了再来'); Sfx.warn(); return; }
+    const miss = breakMissing(gate);
+    if (miss.length) {
+      const lvMiss = miss.some(m => m.kind === 'level');
+      notify(lvMiss ? ('修为未达 ' + (gate.from || '') + ' · 先厚实根基再来') : '物事不齐 · 备齐了再来');
+      Sfx.warn(); return;
+    }
     // 破境图 = endLevel 恰好等于这道门的剧情图（地火之屋 / 天星城闭府 / 云梦山结婴 / 芥子空间…）
     const bm = MAPS.find(x => x.endLevel === gate.lv)
       || (gate.story && MAPS.find(x => x.id === gate.story[0].id))
@@ -5537,7 +5563,12 @@
   // 直接冲关（无剧情地图 / 调试口）：同样要过这一炉丹的成败
   function doBreakNow() {
     const b = G.breakCur; if (!b) return false;
-    if (breakMissing(b).length) { notify('物事不齐 · 备齐了再来'); Sfx.warn(); return false; }
+    const miss = breakMissing(b);
+    if (miss.length) {
+      const lvMiss = miss.some(m => m.kind === 'level');
+      notify(lvMiss ? ('修为未达 ' + (b.from || '') + ' · 先厚实根基再来') : '物事不齐 · 备齐了再来');
+      Sfx.warn(); return false;
+    }
     const rate = breakSuccessRate(b);
     payBreak(b);
     G.breakCur = null;

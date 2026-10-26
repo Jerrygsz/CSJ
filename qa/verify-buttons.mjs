@@ -513,6 +513,25 @@ async function playOutro() {
   ok((await st()).unlocked.indexOf('yanjia') < 0, 'B：未达筑基 → 燕家堡（下一章）保持锁定');
 }
 
+// ---- I. 「备齐」= 修为达当前境界巅峰(炼气十三层) + 破境之物齐 + 已通地火之屋；只齐物事、修为未到 → 不算备齐 ----
+// 地火之屋自身由 startLevel 卡在炼气十三层(35)，进了图修为便必达标；真正的「修为漏洞」在
+// 洞府「突破」入口——低修为带齐物事也能冲关。此处先真实打通地火之屋（不突破），把「已通剧情」
+// 这一关满足掉，再单独变动「修为」这一维，验证 readiness 判定确实把修为算进来了。
+{
+  await run(`F.clearProgress();F.setLevel(35);F.toTitle();F.god(true);F.breakLuck(null);`);
+  await run(`F.enterMap('zhuji');`);
+  await settleDialogs();
+  await wait(200);
+  await run(`F.killBoss();`);
+  await playOutro();                 // 走 lock 分支（无物事）：zhuji 记入 save.cleared，修为仍停 35
+  // 物事齐 + 已通剧情 + 修为到炼气十三层：三条件齐 → 备齐
+  await run(`F.addItem('zhuji',1);F.addItem('m_yusuizhi',3);F.addItem('m_zihua',3);F.addItem('m_tianling',3);F.setStones(999);`);
+  eq(await page.evaluate(() => window.__FR.breakCan(36)), true, 'I：修为到炼气十三层 + 物事齐 + 已通地火之屋 → breakCan(36)=true（备齐）');
+  // 只把修为降回未到门槛：物事仍齐、剧情仍通，但修为不够 → 仍不算备齐
+  await run(`F.setLevel(30);`);
+  eq(await page.evaluate(() => window.__FR.breakCan(36)), false, 'I：修为未达炼气十三层（物事齐+已通剧情也不行）→ breakCan(36)=false（未备齐）');
+}
+
 // ---- E. 地火之屋：玩家「已提前筑基」→ 省略突破剧情，直播「被发现已筑基」并解锁下一章 ----
 {
   await run(`F.clearProgress();F.setLevel(36);F.toTitle();F.god(true);F.breakLuck(null);`);
@@ -540,10 +559,8 @@ async function playOutro() {
   const oC = await playOutro();
   ok(oC.choiceSeen, 'C：已备齐破境之物 → 弹出「是否突破」抉择');
   ok((oC.choiceOpts || []).join(',') === '就此突破,暂不突破·回洞府', 'C：抉择选项为「突破 / 暂不突破」');
-  console.log('  [debug C] before pick: breakForce=', await page.evaluate(() => window.__FR.G.breakForce), 'choice=', await page.evaluate(() => window.__FR.dialogState().choice));
   await run(`F.pickChoice('yes');`);
   const aC = await playOutro();
-  console.log('  [debug C] after pick aC.text=', aC.text.slice(0, 200), '| level=', await page.evaluate(() => window.__FR.info().cultivate.level), '| yanjia=', (await st()).unlocked.indexOf('yanjia') >= 0);
   ok(/筑基了\？|《青元剑诀》/.test(aC.text), 'C：选「突破」成功 → 播放正常「筑基已成」台词');
   ok((await st()).unlocked.indexOf('yanjia') >= 0, 'C：突破成功 → 燕家堡（下一章）解锁');
   ok((await page.evaluate(() => window.__FR.info().cultivate.level)) >= 36, 'C：突破成功 → 修为到筑基（≥36）');
