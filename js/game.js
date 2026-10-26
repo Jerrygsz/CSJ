@@ -1731,8 +1731,9 @@
     const cfg = (G.map && G.map.boss) || { kind: 'mo', name: '墨大夫', hp: 1800, spd: 40, dmg: 18, r: 20, spr: 'mo', scale: 1.8 };
     const p = G.player;
     const dm = curDiff();
-    const bhp = Math.round(cfg.hp * (dm.hp || 1) * levelPad());
-    const bdmg = cfg.dmg * (dm.dmg || 1);
+    // Boss 单独吃一档倍率：凡境不变，险境 ×1.5，死境 ×2（Jerry 定：中高难度 Boss 要更硬）
+    const bhp = Math.round(cfg.hp * (dm.hp || 1) * (dm.bossHp || 1) * levelPad());
+    const bdmg = cfg.dmg * (dm.dmg || 1) * (dm.bossDmg || 1);
     G.boss = {
       _id: ++enemySeq,
       type: cfg.kind, kind: cfg.kind, name: cfg.name,
@@ -2893,8 +2894,8 @@
   const SHA_DRIP = 5;
   // boss 型剧情战（单挑）没有小怪可刷，一局只有 40~60 秒：
   // 改用「打掉的血量」换煞气，一场打完约 1200 点，照样够 9 次
-  const SHA_BOSS_DUEL = 1200;
-  const SHA_DRIP_BOSS = 8;
+  const SHA_BOSS_DUEL = 250;
+  const SHA_DRIP_BOSS = 2;
   function ownSkills() { return SKILLS.filter(s => (G.player.skills[s.id] || 0) > 0); }
   function newSkills() { return SKILLS.filter(s => !(G.player.skills[s.id] || 0) && (!s.minLv || G.player.level >= s.minLv)); }
 
@@ -3139,8 +3140,6 @@
   function gainSha(n) {
     if (G.noSha) return;   // 清场这类「一次性收走」不算击杀产出
     const st = shaSt();
-    // 单挑局只给到 9 次：一场 30 秒的密度战，面板再多就成打断节奏了
-    if (G.map && G.map.type === 'boss' && (st.done || 0) >= 9) return;
     // 已经吃过 11 / 14 次之后，煞气来得慢一点：高密度图不至于变成十几次连弹
     const damp = (st.done || 0) >= 14 ? 0.35 : ((st.done || 0) >= 11 ? 0.65 : 1);
     const k = (1 + (G.bonus.shaGain || 0)) * (st.x2T > 0 ? 2 : 1) * damp;

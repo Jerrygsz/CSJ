@@ -188,9 +188,9 @@ ok(r9.noLimit === true, '战斗图没有任何限时机制', r9.noLimit);
 ok(r9.cleared === true, '照常打到 Boss 死才结算（不提前收场）', r9.state);
 ok(r9.picks >= 9, '一局至少 9 次顿悟', { picks: r9.picks, time: r9.time });
 
-// ===== 10. 零报错 =====
+// ===== 10. 纯 Boss 图：顿悟节奏 =====
 console.log('');
-console.log('== 10. 单挑型剧情战也够 9 次 ==');
+console.log('== 10. 纯 Boss 图：20 秒左右一次顿悟 ==');
 let r10 = await E(`(() => {
   const F = window.__FR;
   F.muteStory(true); F.clearProgress(); F.setLevel(7);
@@ -205,10 +205,31 @@ let r10 = await E(`(() => {
     if (st === 'victory' || st === 'world') break;
   }
   const ins = F.insight();
-  return { picks: (ins.n || 0) - (ins.refine || 0), time: Math.round(F.info().time || 0), state: F.info().state };
+  const picks = (ins.n || 0) - (ins.refine || 0);
+  const time = Math.round(F.info().time || 0);
+  return { picks, time, perPick: time / Math.max(1, picks) };
 })()`);
-ok(r10.picks >= 9, '单挑局（无小怪可刷）也有 9 次顿悟', { picks: r10.picks, time: r10.time });
-ok(r10.picks <= 10, '单挑局最多 9 次，不刷屏', r10.picks);
+ok(r10.picks <= 4, '单挑局不再刷屏（一局最多 4 次）', r10);
+ok(r10.perPick >= 12 && r10.perPick <= 30, '平均 12~30 秒一次（目标 20 秒）', +r10.perPick.toFixed(1));
+
+console.log('');
+console.log('== 10b. Boss 难度倍率（凡境不变 / 险境 1.5 / 死境 2）==');
+let r10b = await E(`(() => {
+  const F = window.__FR;
+  const out = {};
+  for (const d of ['easy', 'hard', 'nightmare']) {
+    F.clearProgress(); F.setLevel(70);
+    F.enterMap('ningcui', d); F.skipStory();
+    F.boss();
+    out[d] = F.G.boss ? F.G.boss.maxhp : 0;
+  }
+  const D = window.DIFFICULTIES;
+  return { out, mult: D.map(x => x.bossHp) };
+})()`);
+ok(r10b.mult[0] === 1 && r10b.mult[1] === 1.5 && r10b.mult[2] === 2, '难度表里的 Boss 倍率是 1 / 1.5 / 2', r10b.mult);
+ok(r10b.out.nightmare > r10b.out.hard && r10b.out.hard > r10b.out.easy, '实际血量：死境 > 险境 > 凡境', r10b.out);
+// 比值里还叠着「越级加成」：险境的 levelScale 比凡境高，所以实际会略大于 1.75×1.5
+ok(r10b.out.hard / r10b.out.easy >= 2.5 && r10b.out.hard / r10b.out.easy <= 4, '险境 Boss 血量约凡境的 2.6~3.6 倍（含越级加成）', +(r10b.out.hard / r10b.out.easy).toFixed(2));
 
 console.log('');
 console.log('== 11. 召灵宠助战 ==');

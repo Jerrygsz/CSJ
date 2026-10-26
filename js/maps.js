@@ -23,19 +23,19 @@ window.REALM_LAYERS = [
 window.DIFFICULTIES = [
   {
     id: 'easy', name: '凡境', tag: '寻常', color: '#9fe0c0',
-    hp: 1.0, dmg: 1.0, spd: 1.0, cnt: 1.0, levelScale: 0,
+    hp: 1.0, dmg: 1.0, spd: 1.0, cnt: 1.0, levelScale: 0, bossHp: 1.0, bossDmg: 1.0,
     drop: 1.0, rarity: 0, stone: 1.0, xp: 1.0,
     desc: '山兽如常，正合练手。'
   },
   {
     id: 'hard', name: '险境', tag: '凶险', color: '#ffb060',
-    hp: 1.75, dmg: 1.5, spd: 1.08, cnt: 1.25, levelScale: 0.02,
+    hp: 1.75, dmg: 1.5, spd: 1.08, cnt: 1.25, levelScale: 0.02, bossHp: 1.5, bossDmg: 1.15,
     drop: 1.7, rarity: 1, stone: 1.8, xp: 1.5,
     desc: '妖物壮了两分，落物也厚了两分。'
   },
   {
     id: 'nightmare', name: '死境', tag: '九死', color: '#ff6a6a',
-    hp: 3.1, dmg: 2.2, spd: 1.18, cnt: 1.6, levelScale: 0.05,
+    hp: 3.1, dmg: 2.2, spd: 1.18, cnt: 1.6, levelScale: 0.05, bossHp: 2.0, bossDmg: 1.3,
     drop: 2.6, rarity: 2, stone: 3.0, xp: 2.2,
     desc: '血雾漫天，敢入者少。'
   }
