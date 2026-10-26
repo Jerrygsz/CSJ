@@ -1505,6 +1505,16 @@
     }
     return miss;
   }
+  // 对话分流用：当前这张破境图「正在通关」，剧情节点天然算通过；
+  // 只看「丹 / 材 / 石」是否齐，用来判断玩家此刻是否已具备筑基条件（决定地火之屋结局台词）。
+  function breakReadyNow(b) {
+    if (!b) return true;
+    for (const it of (b.items || [])) if ((save.inventory[it[0]] || 0) < it[1]) return false;
+    for (const it of (b.needs || [])) if ((save.inventory[it[0]] || 0) < it[1]) return false;
+    for (const mt of (b.mats || [])) if ((save.inventory[mt[0]] || 0) < mt[1]) return false;
+    if ((save.stones || 0) < (b.stones || 0)) return false;
+    return true;
+  }
   function canBreak(b) { return !b || breakMissing(b).length === 0; }
   // 破境丹药（筑基丹 / 天火液 …）：是「冲关的钥匙」，不是路上的补药。
   // 奖励到手只入储物袋，绝不立地服下 —— 否则还没冲关先把丹药的增益吃了。
@@ -4287,7 +4297,15 @@
   }
   function startOutro() {
     const m = G.map; if (!m) return;
-    const key = m.outro || (m.id === 'houshan' ? 'houtro' : m.id === 'mishi' ? 'moutro' : m.id === 'yaoyuan' ? 'yooutro' : m.id === 'xuese' ? 'xsoutro' : null);
+    let key = m.outro || (m.id === 'houshan' ? 'houtro' : m.id === 'mishi' ? 'moutro' : m.id === 'yaoyuan' ? 'yooutro' : m.id === 'xuese' ? 'xsoutro' : null);
+    // 地火之屋：击败 Boss 后的台词按「是否已具备筑基条件」分流。
+    // 原著里地火之屋是筑基门槛，玩家到此未必真到了筑基 —— 不能一概说「筑基已成」。
+    // 已具备筑基之物（或早已筑基）→ 正常结局台词；否则 → 勉励台词，且下一章依旧锁着。
+    if (m.id === 'zhuji' && MAP_STORIES['zhuji_out']) {
+      const bg = m.endLevel ? breakReqFor(m.endLevel) : null;
+      const reached = ((save.cultivate.level || 1) >= 36) || breakReadyNow(bg);
+      key = reached ? 'zhuji_out' : 'zhuji_out_lock';
+    }
     const lines = key && MAP_STORIES[key];
     // 共斗中的客机不再自己播一遍收尾对话：房主那段已经通过对话同步过来了。
     // （onEnd 收到 'win' 会走到这里；若再 showLines 一次，客机就得在房主点完之后
@@ -4330,6 +4348,18 @@
     }
     const first = isFirstClear(m);
     if (first) save.cleared.push(m.id);
+    // 黄枫谷·山门：升仙令配发的筑基丹，当场被叶师叔换走（原著因果）。
+    // 对话白纸黑字写「配发筑基丹一枚」又「丹归叶师叔」，储物袋必须真的收到、又真的失去；
+    // 一次结清，且记入 save.met，重进此图绝不重复给/拿（不会凭空多/少一枚）。
+    if (m.id === 'huangfeng' && first && (save.met || []).indexOf('hf_zhuji') < 0) {
+      const zj = Items.get('zhuji');
+      if (zj) {
+        addToBag(zj, { silent: true });                                          // 配发一枚
+        save.inventory.zhuji = Math.max(0, (save.inventory.zhuji || 0) - 1);     // 叶师叔当场换走
+        save.totalItems = Math.max(0, (save.totalItems || 0) - 1);
+        (save.met = save.met || []).push('hf_zhuji');
+      }
+    }
     checkLiUnlock();
     checkPetRelease(m);
     checkMateLeave(m);
@@ -4408,12 +4438,15 @@
     // 太南小会散场后，后巷才会有人（原著那两个散修际遇挂在小会上，坊市里刷不出人）
     if (m.id === 'tainan' && save.unlocked.indexOf('heixiang') < 0) save.unlocked.push('heixiang');
     // 破境图：物事齐了才谈冲关；冲关还可能失败 —— 解锁下一图要等「真的破了」才给
-    const breakReady = breakGate ? breakMissing(breakGate).length === 0 : true;
-    const blocked = !!(breakGate && !breakReady);
+    // alreadyPast：早已站在这道门之后（如重打这张破境图），不再重复冲关，也不因「没带丹」被反锁
+    const alreadyPast = !!(m.endLevel && (save.cultivate.level || 1) >= m.endLevel);
+    const isGate = !!(breakGate && !alreadyPast);
+    const breakReady = isGate ? breakMissing(breakGate).length === 0 : true;
+    const blocked = !!(isGate && !breakReady);
     save.wins++;
     // 打完一张图：只留三门最精的功法带去下一张，余者散去（剧情传世功法除外）
     G.lastPrune = pruneSkillsTop3();
-    if (breakGate) {
+    if (isGate) {
       G.victoryNote = blocked
         ? ('破境之物未齐（还差 ' + breakMissing(breakGate).length + ' 样）· 集齐了再来此图冲关')
         : ('破境之物已齐 · 就地冲关（持丹 ' + breakGatePills(breakGate) + ' 枚 · 把握 ' + Math.round(breakSuccessRate(breakGate) * 100) + '%）');
@@ -4427,7 +4460,7 @@
       showVictory(m, gained, null, cave, newDiff, realmUp);
       return;
     }
-    if (!breakGate) {
+    if (!isGate) {
       const newly = unlockNext(m);
       save.mapId = m.next || m.id;
       writeSave();
