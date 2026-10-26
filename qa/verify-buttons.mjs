@@ -397,6 +397,39 @@ if (await vis('#chatBtn')) {
   console.log('  - 标题页没有飞鸽按钮（可能只在特定界面显示），跳过');
 }
 
+console.log('');
+console.log('== 13b. 洞府「重温此段」必须先选难度 ==');
+{
+  const r = await page.evaluate(() => {
+    const F = window.__FR;
+    F.cave('cuiping');                       // 翠屏山洞府：from = 地火之屋
+    return { cave: F.G.caveId, from: window.CAVES.cuiping.from, state: F.G.state };
+  });
+  eq(r.cave, 'cuiping', '进了翠屏山洞府');
+  await page.locator('#caveStory').click();
+  await page.waitForTimeout(120);
+  const after = await page.evaluate(() => ({
+    state: window.__FR.G.state,
+    pick: window.__FR.G.diffPick,
+    diffOpen: document.getElementById('difficulty') ? getComputedStyle(document.getElementById('difficulty')).display !== 'none' : false,
+    playing: window.__FR.G.state === 'play',
+    hasMap: !!window.__FR.G.map
+  }));
+  eq(after.state, 'diff', '点「重温此段」→ 打开难度面板，而不是直接进图');
+  eq(after.pick, r.from, '难度面板锁定的正是这张图（地火之屋）');
+  eq(!!after.diffOpen, true, '难度面板可见');
+  eq(after.playing, false, '没有直接开局（还在难度面板，没进战斗）');
+  // 选一个非凡境，确认真的按选中的难度进
+  await page.locator('.diffcard[data-diff="hard"]').click();
+  await page.waitForTimeout(200);
+  const started = await page.evaluate(() => ({
+    state: window.__FR.G.state,
+    pfDiff: window.__FR.G.pf ? window.__FR.G.pf.diff : null
+  }));
+  eq(started.pfDiff, 'hard', '选险境后带着「险境」进战前运功（不是默认凡境）');
+  await page.evaluate(() => { window.__FR.toWorld && window.__FR.toWorld(); });
+}
+
 console.log('\n== 14. 全程无脚本报错 ==');
 eq(errors.length, 0, '页面没有抛异常', errors.slice(0, 3));
 

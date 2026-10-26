@@ -6105,7 +6105,8 @@
   if (document.getElementById('caveClose')) document.getElementById('caveClose').addEventListener('click', openWorldMap);
   if (document.getElementById('caveStory')) document.getElementById('caveStory').addEventListener('click', () => {
     const c = CAVES[G.caveId]; if (!c) return;
-    startMap(c.from);
+    // 重温不能替玩家定难度：一律先弹难度面板，让人自己挑（以前直接按凡境进）
+    openDiffPick(c.from);
   });
   if (elCaveTabs) elCaveTabs.addEventListener('click', e => {
     const b = e.target.closest('button[data-ctab]');
