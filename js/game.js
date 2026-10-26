@@ -27,6 +27,14 @@
   const ctx = cv.getContext('2d');
   ctx.imageSmoothingEnabled = false;
 
+  // 角落版本水印：取实际加载的 game.js 的 ?v= 缓存串写入 #ver，确保显示「当前这份构建」的版本
+  try {
+    const _gm = document.querySelector('script[src*="js/game.js"]');
+    const _vv = _gm && (_gm.getAttribute('src').match(/[?&]v=([^&]+)/) || [])[1];
+    const _verEl = document.getElementById('ver');
+    if (_verEl && _vv) _verEl.textContent = 'v' + _vv;
+  } catch (e) {}
+
   // ---------- 存档 ----------
   const SAVE_KEY = 'fanren_save_v1';
   // 转世重修：独立于主存档的「轮回余荫」池，删档也保留，代代叠加。

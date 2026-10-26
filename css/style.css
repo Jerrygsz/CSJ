@@ -503,6 +503,16 @@ body.fs #wrap { background: #000; }
 }
 #fsHint.show { opacity: 1; }
 
+/* ---------- 角落版本水印：便于核对是否加载了最新构建 ---------- */
+#ver {
+  position: fixed; right: 6px; bottom: 5px;
+  font: 10px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: .5px;
+  color: rgba(201,162,74,0.55);
+  text-shadow: 0 1px 2px rgba(0,0,0,.85);
+  pointer-events: none; user-select: none; z-index: 9999;
+}
+
 /* ---------- 支线：地图卡片与分组 ---------- */
 .wm-sec {
   display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-2);
