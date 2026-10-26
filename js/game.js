@@ -1516,6 +1516,24 @@
     return true;
   }
   function canBreak(b) { return !b || breakMissing(b).length === 0; }
+  // 冲关「结算前料还在不在」：只查会被 payBreak 焚毁的实物（丹/材/石），
+  // 不查 story（破境图正被你此刻打通，自然还没进 save.cleared）。
+  // 用于 breakSceneThen 片尾兜底；完整门槛（含 story）仍由 enterBreakMap 等前置把关。
+  function breakMissingGoods(b) {
+    if (!b) return [];
+    const miss = [];
+    for (const it of (b.items || [])) {
+      const have = save.inventory[it[0]] || 0;
+      if (have < it[1]) miss.push({ kind: 'item', id: it[0], need: it[1], have: have });
+    }
+    for (const mt of (b.mats || [])) {
+      const have = save.inventory[mt[0]] || 0;
+      if (have < mt[1]) miss.push({ kind: 'mat', id: mt[0], need: mt[1], have: have });
+    }
+    const st = b.stones || 0;
+    if ((save.stones || 0) < st) miss.push({ kind: 'stone', need: st, have: save.stones || 0 });
+    return miss;
+  }
   // 破境丹药（筑基丹 / 天火液 …）：是「冲关的钥匙」，不是路上的补药。
   // 奖励到手只入储物袋，绝不立地服下 —— 否则还没冲关先把丹药的增益吃了。
   function isGatePill(id) {
@@ -1579,7 +1597,13 @@
   function breakSuccessRate(b) {
     const raw = breakSuccessRate0(b);
     if (raw <= 0) return 0;                        // 没丹就是没丹，不给保底
-    return Math.max(0.05, raw * (1 - shaDanPenalty()));
+    let r = Math.max(0.05, raw * (1 - shaDanPenalty()));
+    // 原著洞府加成：在小说点名的那座洞府突破（如筑基→翠屏山洞府），成功率额外 +30%；
+    // 在其它地方（别的洞府 / 地火之屋当场冲关等）按正常标准计算。
+    if (b && G.breakCaveId && b.canonCave && G.breakCaveId === b.canonCave) {
+      r = Math.min(1, r + 0.3);
+    }
+    return r;
   }
   function breakSuccessRate0(b) {
     if (!b || !b.items || !b.items.length) return 1;
@@ -2477,6 +2501,7 @@
   function showDialog(line) { elDialogSpeaker.textContent = line[0]; elDialogText.textContent = line[1]; elDialog.style.display = 'flex'; Sfx.dialog(line[0]); }
   function advanceDialog() {
     const lines = G.dialogLines; if (!lines) return;
+    if (G.dialogIsChoice) return;   // 抉择未选前，点击不推进剧情
     G.dialogIdx++;
     if (G.dialogIdx >= lines.length) {
       elDialog.style.display = 'none';
@@ -2493,6 +2518,44 @@
       // 联机（房主）：推进到第几句 → 客机同步跳到同一句
       if (window.Coop && window.Coop.sendDlg) window.Coop.sendDlg({ i: G.dialogIdx });
     }
+  }
+  // 抉择：在对话界面弹两个按钮，让玩家自己选（不替玩家做主）。
+  // 仅在单人/房主出现；共斗客机的收尾对白会被 startOutro 提前拦截、直接走 finishMap。
+  function showChoice(prompt, options, onPick) {
+    if (!elDialog || !elDialogText) { if (onPick) onPick(options[0] ? options[0].v : null); return; }
+    G.state = 'dialog';
+    G.dialogIsChoice = true;
+    G.dialogChoiceCb = onPick;
+    G.dialogChoiceOpts = options;
+    elDialogSpeaker.textContent = '抉择';
+    elDialogText.textContent = prompt;
+    let row = document.getElementById('dialogChoices');
+    if (!row) {
+      row = document.createElement('div');
+      row.id = 'dialogChoices';
+      elDialog.appendChild(row);
+    }
+    row.style.cssText = 'margin-top:14px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap';
+    row.innerHTML = '';
+    for (const o of options) {
+      const b = document.createElement('button');
+      b.className = 'btn small';
+      b.textContent = o.t;
+      b.addEventListener('click', (e) => { e.stopPropagation(); pickChoice(o.v); });
+      row.appendChild(b);
+    }
+    elDialog.style.display = 'flex';
+    Sfx.dialog('抉择');
+  }
+  function pickChoice(v) {
+    if (!G.dialogIsChoice || !G.dialogChoiceCb) return false;
+    const cb = G.dialogChoiceCb;
+    G.dialogIsChoice = false; G.dialogChoiceCb = null; G.dialogChoiceOpts = null;
+    const row = document.getElementById('dialogChoices');
+    if (row && row.parentNode) row.parentNode.removeChild(row);
+    if (elDialog) elDialog.style.display = 'none';
+    cb(v);
+    return true;
   }
 
   // 客机镜像了房主的对话 → 把它的触发源一并消费掉。
@@ -4303,8 +4366,16 @@
     // 已具备筑基之物（或早已筑基）→ 正常结局台词；否则 → 勉励台词，且下一章依旧锁着。
     if (m.id === 'zhuji' && MAP_STORIES['zhuji_out']) {
       const bg = m.endLevel ? breakReqFor(m.endLevel) : null;
-      const reached = ((save.cultivate.level || 1) >= 36) || breakReadyNow(bg);
-      key = reached ? 'zhuji_out' : 'zhuji_out_lock';
+      if ((save.cultivate.level || 1) >= 36) {
+        // 提前已筑基：省略突破剧情，直接进「被发现已筑基」的对白（原著里李化元当场点破）
+        key = 'zhuji_out_ready';
+      } else if (breakReadyNow(bg)) {
+        // 已备齐破境之物：先问玩家是否就此突破（成败各凭把握）
+        key = 'zhuji_out_ask';
+      } else {
+        // 未达筑基：勉励 + 锁后章
+        key = 'zhuji_out_lock';
+      }
     }
     const lines = key && MAP_STORIES[key];
     // 共斗中的客机不再自己播一遍收尾对话：房主那段已经通过对话同步过来了。
@@ -4312,8 +4383,45 @@
     //  再点第二遍才进结算 —— 这正是用户报的那个 bug。）
     // 奖励与结算照常走 finishMap，一样不少。
     if (lines && G.coopRole === 'client' && G.coopShared) { finishMap(m); return; }
-    if (lines) { G.state = 'dialog'; showLines(lines, () => finishMap(m), 'outro:' + m.id); }
-    else finishMap(m);
+    if (lines) {
+      G.state = 'dialog';
+      // 「已备齐破境之物」分支：播完询问对白后，让玩家自己选「突破 / 暂不突破」
+      const onEnd = (key === 'zhuji_out_ask') ? () => zhujiAskBreak(m) : () => finishMap(m);
+      showLines(lines, onEnd, 'outro:' + m.id);
+    } else finishMap(m);
+  }
+  // 地火之屋·已备齐破境之物：让玩家自行决定是否突破
+  function zhujiAskBreak(m) {
+    const gate = m.endLevel ? breakReqFor(m.endLevel) : null;
+    const rate = gate ? Math.round(breakSuccessRate(gate) * 100) : 0;
+    showChoice(
+      '丹药、主药、灵石皆已备齐，冲关把握约 ' + rate + '%。是否就此借地火之屋的火脉冲关？',
+      [{ t: '就此突破', v: 'yes' }, { t: '暂不突破·回洞府', v: 'no' }],
+      (v) => {
+        if (v === 'yes') zhujiCommitBreak(m, gate);
+        else gotoZhujiCave();   // 不突破 → 回洞府继续修行打怪备取破境之物
+      }
+    );
+  }
+  // 地火之屋·玩家选择突破：跑真实破境（含成败），成败分别走不同对白与去处
+  function zhujiCommitBreak(m, gate) {
+    if (!gate) { finishMap(m); return; }
+    breakSceneThen(gate, (g, ok) => {
+      if (ok) {
+        // 成功：播「筑基已成」对白，再结算并解锁下一章
+        showLines(MAP_STORIES['zhuji_out'], () => finishMap(m), 'zhuji:success');
+      } else {
+        // 失败：勉励玩家厚实根基，为下次破境做准备，然后退回洞府
+        showLines(MAP_STORIES['zhuji_out_fail'], () => gotoZhujiCave(), 'zhuji:fail');
+      }
+      G.breakCaveId = null;   // 破境结算后清空「出关洞府」上下文
+    });
+  }
+  // 退回翠屏山洞府（地火之屋的归属洞府）；若尚未开启则一并开通，保证「回到洞府界面」可达
+  function gotoZhujiCave() {
+    const c = 'cuiping';
+    if ((save.caves || []).indexOf(c) < 0) { save.caves.push(c); writeSave(); }
+    openCave(c);
   }
   function isFirstClear(m) { return save.cleared.indexOf(m.id) < 0; }
   function unlockNext(m) {
@@ -4849,7 +4957,7 @@
   }
   function openCave(caveId) {
     const c = CAVES[caveId]; if (!c) return;
-    G.caveId = caveId; G.state = 'cave';
+    G.caveId = caveId; G.breakCaveId = caveId; G.state = 'cave';
     const tabs = caveTabs(c);
     if (!tabs.some(t => t.id === G.caveTab)) G.caveTab = 'stat';
     hideAllOverlays();
@@ -5370,7 +5478,7 @@
     if (elDialog) elDialog.classList.add('break-scene');
     showLines(lines, () => {
       if (elDialog) elDialog.classList.remove('break-scene');
-      if (breakMissing(gate).length) {                  // 结算前料被别处吃掉（极端情况）：不硬破
+      if (breakMissingGoods(gate).length) {              // 结算前料被别处吃掉（极端情况）：不硬破
         G.breakPending = gate; G.breakCur = null; G.breakScene = null;
         if (onDone) onDone(gate, false);
         return;
@@ -5423,6 +5531,7 @@
     }
     if (save.unlocked.indexOf(bm.id) < 0) save.unlocked.push(bm.id);
     G.breakCur = gate;
+    G.breakCaveId = G.caveId;   // 从原著洞府进来冲关：把「出关的洞府」带进破境图，便于判定 +30%
     beginMap(bm.id);
   }
   // 直接冲关（无剧情地图 / 调试口）：同样要过这一炉丹的成败
@@ -5461,6 +5570,7 @@
       }
       writeSave(); refreshTitle(); renderCave();
     }
+    G.breakCaveId = null;   // 破境结算后清空「出关洞府」上下文
     return true;
   }
 
@@ -6546,7 +6656,7 @@
       return 'title';
     },
     caveTabsOf(id) { const c = CAVES[id]; return c ? caveTabs(c).map(t => t.id) : []; },
-    skipStory() { let n = 0; while (G.state === 'dialog' && n < 80) { advanceDialog(); n++; } return n; },
+    skipStory() { let n = 0; while (G.state === 'dialog' && !G.dialogIsChoice && n < 80) { advanceDialog(); n++; } return n; },
     muteStory(on) { G.storyMute = !!on; if (on) this.skipStory(); return !!G.storyMute; },
     storyMuted() { return !!G.storyMute; },
     enterMap(id, diff) { if (!save.unlocked.includes(id)) save.unlocked.push(id); startMap(id, diff); return G.mapId; },
@@ -6566,7 +6676,8 @@
     // 对话同步 / 暂停同步的测试入口
     showLines(lines, onEnd, id) { showLines(lines, onEnd || null, id || null); return G.dialogIdx; },
     advanceDialog() { advanceDialog(); return G.dialogIdx; },
-    dialogState() { return { state: G.state, idx: G.dialogIdx, n: G.dialogLines ? G.dialogLines.length : 0, synced: !!G.dialogSynced }; },
+    pickChoice(v) { return pickChoice(v); },
+    dialogState() { return { state: G.state, idx: G.dialogIdx, n: G.dialogLines ? G.dialogLines.length : 0, synced: !!G.dialogSynced, choice: !!G.dialogIsChoice, choiceOpts: G.dialogChoiceOpts ? G.dialogChoiceOpts.map(o => o.t) : null }; },
     settleBubble: settleBubble, settleMate: settleMate,
     settle() { return G.settle ? { x: G.settle.x, y: G.settle.y, mx: G.settle.mx, my: G.settle.my, shown: G.settle.mShown, myBub: G.settle.myBub.length, mateBub: G.settle.mateBub.length } : null; },
     pause() { doPause(); return G.state; },

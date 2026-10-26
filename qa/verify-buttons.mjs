@@ -432,9 +432,13 @@ console.log('== 13b. 洞府「重温此段」必须先选难度 ==');
 
 // ============================================================
 // 13c. 筑基丹 剧情对话 ↔ 实物一致，且只触发一次（不掉/不多道具）
-//      + 地火之屋击败 Boss 后：按「是否已达筑基」分流台词，未达则锁下一章
+//      + 地火之屋击败 Boss 后分流：
+//          已筑基 → 省略突破、直播「被发现已筑基」；
+//          备齐破境之物 → 询问是否突破（成功/失败/暂不各走各的）；
+//          未备齐 → 勉励 + 锁后章
+//      + 原著洞府突破额外 +30% 成功率
 // ============================================================
-console.log('\n== 13c. 筑基丹 对话↔实物一致 & 地火之屋分支 ==');
+console.log('\n== 13c. 筑基丹对话↔实物一致 & 地火之屋分支 & 原著洞府+30% ==');
 
 // 把当前对话（若正在播）一路推进到结束，落到非对话态（结算/胜利）
 async function settleDialogs() {
@@ -447,19 +451,32 @@ async function settleDialogs() {
     if (s2.state !== 'dialog') break;
   }
 }
-// 等「地火之屋收尾对话」出现（两种结局台词都以「地火退了」开头），抓其全文用于判定分支
-async function captureZhujiOutro() {
-  let txt = null;
+async function dialogSnap() {
+  return await page.evaluate(() => {
+    const ds = window.__FR.dialogState();
+    const t = (window.__FR.G.dialogLines || []).map(l => (l[1] || '')).join('|');
+    return { state: ds.state, choice: !!ds.choice, opts: ds.choiceOpts, text: t };
+  });
+}
+// 推进收尾：经历对话才在非对话态停下；遇到「抉择」则停在选择处（返回 choiceSeen/choiceOpts）
+async function playOutro() {
+  let all = '', choiceSeen = false, choiceOpts = null, seenDialog = false;
   const t0 = Date.now();
-  while (Date.now() - t0 < 7000) {
+  while (Date.now() - t0 < 14000) {
     const s = await st();
     if (s.state === 'dialog') {
-      const t = await page.evaluate(() => (window.__FR.G.dialogLines || []).map(l => (l[1] || '')).join('|'));
-      if (/地火退了/.test(t)) { txt = t; break; }
+      seenDialog = true;
+      const snap = await dialogSnap();
+      if (snap.text) all += snap.text + '|';
+      if (snap.choice) { choiceSeen = true; choiceOpts = snap.opts; break; }
+      await run(`F.advanceDialog();`);
+      await wait(60);
+      continue;
     }
-    await wait(100);
+    if (seenDialog) break;
+    await wait(80);
   }
-  return txt;
+  return { text: all, choiceSeen, choiceOpts };
 }
 
 // ---- A. 黄枫谷·山门：升仙令配发筑基丹，叶师叔当场换走（净 0，且只结算一次）----
@@ -483,47 +500,103 @@ async function captureZhujiOutro() {
 
 // ---- B. 地火之屋：击败 Boss，玩家「未达筑基」（材料/灵石/筑基丹皆无）→ 勉励台词 + 锁住燕家堡 ----
 {
-  await run(`F.clearProgress();F.setLevel(35);F.toTitle();F.god(true);`);
-  const preUnlockedB = (await st()).unlocked;
-  ok(preUnlockedB.indexOf('yanjia') < 0, 'B前置：进地火之屋前，燕家堡（下一章）本就锁着');
+  await run(`F.clearProgress();F.setLevel(35);F.toTitle();F.god(true);F.breakLuck(null);`);
+  ok((await st()).unlocked.indexOf('yanjia') < 0, 'B前置：进地火之屋前，燕家堡（下一章）本就锁着');
   await run(`F.enterMap('zhuji');`);            // enterMap 自动解锁本图，无需 unlockAll
   await settleDialogs();                        // 过掉开场白（intro: 'zhuji'），进入战斗
   await wait(200);
-  const inPlayB = (await st()).state === 'play' && !!(await page.evaluate(() => window.__FR.info().boss));
-  ok(inPlayB, 'B：地火之屋已进入战斗且 Boss 在场');
+  ok((await st()).state === 'play' && !!(await page.evaluate(() => window.__FR.info().boss)), 'B：地火之屋已进入战斗且 Boss 在场');
   await run(`F.killBoss();`);
-  const capB = await captureZhujiOutro();
-  ok(!!capB, 'B：地火之屋击败 Boss 后触发了收尾对话');
-  await settleDialogs();
-  await wait(150);
-  const lockBranchB = /石门没有开|燕家堡那章进不去|差一样，这关就过不去/.test(capB || '');
-  const normalBranchB = /筑基了\？|《青元剑诀》/.test(capB || '');
-  ok(lockBranchB && !normalBranchB, 'B：未达筑基 → 播放「勉励 + 锁后章」台词（而非「筑基已成」）');
-  const unlockedB = (await st()).unlocked;
-  ok(unlockedB.indexOf('yanjia') < 0, 'B：未达筑基 → 燕家堡（下一章）保持锁定');
+  const oB = await playOutro();
+  ok(!oB.choiceSeen, 'B：未达筑基 → 不弹「是否突破」抉择');
+  ok(/石门没有开|燕家堡那章进不去|差一样，这关就过不去/.test(oB.text), 'B：播放「勉励 + 锁后章」台词（而非「筑基已成」）');
+  ok((await st()).unlocked.indexOf('yanjia') < 0, 'B：未达筑基 → 燕家堡（下一章）保持锁定');
 }
 
-// ---- C. 地火之屋：击败 Boss，玩家「已备齐破境之物」→ 正常筑基台词 + 解锁燕家堡 ----
+// ---- E. 地火之屋：玩家「已提前筑基」→ 省略突破剧情，直播「被发现已筑基」并解锁下一章 ----
 {
-  await run(`F.clearProgress();F.setLevel(35);F.toTitle();F.god(true);`);
+  await run(`F.clearProgress();F.setLevel(36);F.toTitle();F.god(true);F.breakLuck(null);`);
+  await run(`F.enterMap('zhuji');`);
+  await settleDialogs();
+  await wait(200);
+  ok((await st()).state === 'play' && !!(await page.evaluate(() => window.__FR.info().boss)), 'E：地火之屋已进入战斗且 Boss 在场');
+  await run(`F.killBoss();`);
+  const oE = await playOutro();
+  ok(!oE.choiceSeen, 'E：已筑基 → 不弹「是否突破」抉择（突破剧情已省略）');
+  ok(/竟已自行筑基了|筑基了\？|《青元剑诀》/.test(oE.text), 'E：播放「被发现已筑基」台词，省略突破剧情');
+  ok((await st()).unlocked.indexOf('yanjia') >= 0, 'E：已筑基 → 燕家堡（下一章）解锁');
+}
+
+// ---- C. 地火之屋：已备齐破境之物 → 询问是否突破；选「突破」且成功 → 筑基已成 + 解锁 ----
+{
+  await run(`F.clearProgress();F.setLevel(35);F.toTitle();F.god(true);F.breakLuck(null);`);
   await run(`F.enterMap('zhuji');`);
   await settleDialogs();
   await wait(200);
   // 备齐：筑基丹×1、三味主药各×3、灵石≥300，并强制冲关必成
   await run(`F.addItem('zhuji',1);F.addItem('m_yusuizhi',3);F.addItem('m_zihua',3);F.addItem('m_tianling',3);F.setStones(999);F.breakLuck(true);`);
-  const inPlayC = (await st()).state === 'play' && !!(await page.evaluate(() => window.__FR.info().boss));
-  ok(inPlayC, 'C：地火之屋已进入战斗且 Boss 在场');
+  ok((await st()).state === 'play' && !!(await page.evaluate(() => window.__FR.info().boss)), 'C：地火之屋已进入战斗且 Boss 在场');
   await run(`F.killBoss();`);
-  const capC = await captureZhujiOutro();
-  ok(!!capC, 'C：地火之屋击败 Boss 后触发了收尾对话');
+  const oC = await playOutro();
+  ok(oC.choiceSeen, 'C：已备齐破境之物 → 弹出「是否突破」抉择');
+  ok((oC.choiceOpts || []).join(',') === '就此突破,暂不突破·回洞府', 'C：抉择选项为「突破 / 暂不突破」');
+  console.log('  [debug C] before pick: breakForce=', await page.evaluate(() => window.__FR.G.breakForce), 'choice=', await page.evaluate(() => window.__FR.dialogState().choice));
+  await run(`F.pickChoice('yes');`);
+  const aC = await playOutro();
+  console.log('  [debug C] after pick aC.text=', aC.text.slice(0, 200), '| level=', await page.evaluate(() => window.__FR.info().cultivate.level), '| yanjia=', (await st()).unlocked.indexOf('yanjia') >= 0);
+  ok(/筑基了\？|《青元剑诀》/.test(aC.text), 'C：选「突破」成功 → 播放正常「筑基已成」台词');
+  ok((await st()).unlocked.indexOf('yanjia') >= 0, 'C：突破成功 → 燕家堡（下一章）解锁');
+  ok((await page.evaluate(() => window.__FR.info().cultivate.level)) >= 36, 'C：突破成功 → 修为到筑基（≥36）');
+}
+
+// ---- F. 地火之屋：已备齐破境之物 → 选「暂不突破」→ 回洞府继续修行，不解锁、丹药不消耗 ----
+{
+  await run(`F.clearProgress();F.setLevel(35);F.toTitle();F.god(true);F.breakLuck(null);`);
+  await run(`F.enterMap('zhuji');`);
   await settleDialogs();
+  await wait(200);
+  await run(`F.addItem('zhuji',1);F.addItem('m_yusuizhi',3);F.addItem('m_zihua',3);F.addItem('m_tianling',3);F.setStones(999);`);
+  await run(`F.killBoss();`);
+  const oF = await playOutro();
+  ok(oF.choiceSeen, 'F：已备齐破境之物 → 弹出「是否突破」抉择');
+  await run(`F.pickChoice('no');`);
   await wait(150);
-  const normalBranchC = /筑基了\？|《青元剑诀》/.test(capC || '');
-  const lockBranchC = /石门没有开|燕家堡那章进不去|差一样，这关就过不去/.test(capC || '');
-  ok(normalBranchC && !lockBranchC, 'C：已备齐破境之物 → 播放正常「筑基已成」台词');
-  const unlockedC = (await st()).unlocked;
-  ok(unlockedC.indexOf('yanjia') >= 0, 'C：破境成功 → 燕家堡（下一章）已解锁');
-  ok((await page.evaluate(() => window.__FR.info().cultivate.level)) >= 36, 'C：破境后修为已到筑基（≥36）');
+  const sF = await st();
+  eq(sF.state, 'cave', 'F：选「暂不突破」→ 回到洞府界面');
+  eq(await page.evaluate(() => window.__FR.G.caveId), 'cuiping', 'F：回到的是翠屏山洞府');
+  ok(sF.unlocked.indexOf('yanjia') < 0, 'F：暂不突破 → 燕家堡仍锁定');
+  eq(await bag('zhuji'), 1, 'F：暂不突破 → 筑基丹未消耗（继续备取破境之物）');
+}
+
+// ---- G. 地火之屋：选「突破」但失败 → 勉励厚实根基 + 退回洞府，不解锁 ----
+{
+  await run(`F.clearProgress();F.setLevel(35);F.toTitle();F.god(true);F.breakLuck(null);`);
+  await run(`F.enterMap('zhuji');`);
+  await settleDialogs();
+  await wait(200);
+  await run(`F.addItem('zhuji',1);F.addItem('m_yusuizhi',3);F.addItem('m_zihua',3);F.addItem('m_tianling',3);F.setStones(999);F.breakLuck(false);`);
+  await run(`F.killBoss();`);
+  const oG = await playOutro();
+  ok(oG.choiceSeen, 'G：已备齐破境之物 → 弹出「是否突破」抉择');
+  await run(`F.pickChoice('yes');`);
+  const aG = await playOutro();
+  ok(/功亏一篑|厚实根基|再炼几炉/.test(aG.text), 'G：选「突破」失败 → 播放勉励「厚实根基、下次再战」台词');
+  await wait(150);
+  const sG = await st();
+  eq(sG.state, 'cave', 'G：失败 → 退出到洞府界面');
+  ok(sG.unlocked.indexOf('yanjia') < 0, 'G：失败 → 燕家堡仍锁定');
+  ok((await page.evaluate(() => window.__FR.info().cultivate.level)) < 36, 'G：失败 → 修为仍为练气（未筑基）');
+}
+
+// ---- H. 原著洞府突破额外 +30% 成功率（翠屏山洞府=筑基原著洞府；七玄门药庐=其它洞府）----
+{
+  await run(`F.clearProgress();F.setLevel(35);F.addItem('zhuji',1);F.breakLuck(null);`);
+  await run(`F.cave('cuiping');`);
+  const rCave = (await page.evaluate(() => window.__FR.breakRate(36))).rate;
+  await run(`F.cave('qixuan');`);
+  const rOther = (await page.evaluate(() => window.__FR.breakRate(36))).rate;
+  ok(Math.abs(rCave - rOther - 0.3) < 0.001, 'H：原著洞府筑基成功率比其他洞府高约 30%（' + Math.round(rCave * 100) + '% vs ' + Math.round(rOther * 100) + '%）');
+  ok(rCave > rOther, 'H：原著洞府加成确实生效');
 }
 
 // ---- D. 七派弟子遗体（e_yihai）：对话说收下筑基丹，储物袋真 +1，且际遇只触发一次 ----
