@@ -40,6 +40,11 @@
   // ========================= 二、仙界篇敌人（灵寰界档） =========================
   // 卷一韩立带伤藏拙，打的都是灵寰界本土的东西：化神级宗门弟子、妖修、一只天鬼。
   Object.assign(window.ENEMY_TYPES, {
+    // 仙界档（卷二往后）：仙元石级的东西，量级远高于灵寰界
+    xj_lunhui:   { name: '轮回殿要犯', hp: 240000, spd: 82, dmg: 300, r: 24, xp: 900, spr: 'assassin', drop: 0.4, tier: 2, mats: ['m_xianyuanshi'] },
+    xj_tianwei:  { name: '天庭金仙道主', hp: 210000, spd: 86, dmg: 275, r: 23, xp: 850, spr: 'fashi', drop: 0.4, tier: 2, mats: ['m_xianyuanshi', 'm_xuanhuang'] },
+    xj_daozhu:   { name: '烛龙道长老', hp: 190000, spd: 76, dmg: 260, r: 23, xp: 760, spr: 'disciple', drop: 0.35, tier: 1, mats: ['m_xianyuanshi'] },
+    xj_yizhou:   { name: '灰界石傀', hp: 180000, spd: 70, dmg: 250, r: 24, xp: 700, spr: 'kui', drop: 0.35, tier: 1, mats: ['m_xianyuanshi'] },
     lh_xiongshou: { name: '灵寰凶兽', hp: 9000, spd: 46, dmg: 120, r: 15, xp: 40, spr: 'wolf', drop: 0.10, tier: 0, mats: ['m_xianyuanshi'] },
     lh_hanbing:   { name: '冷焰宗弟子', hp: 13000, spd: 54, dmg: 155, r: 15, xp: 55, spr: 'fashi', drop: 0.12, tier: 0, mats: ['m_xianyuanshi'] },
     lh_lingzhu:   { name: '灵寰灵族', hp: 17000, spd: 60, dmg: 185, r: 16, xp: 70, spr: 'yaoshou2', drop: 0.12, tier: 0, mats: ['m_xianyuanshi', 'm_xuanhuang'] },
@@ -110,6 +115,48 @@
       clearDesc: '玄黄之索缠上去，百目天鬼不再挣扎。连同那具大乘傀儡，一起收进了袖里。'
     },
     {
+      // 卷二《重回仙界》最密的一段（X2C315–C345）：烛龙道第一道主百里炎闭关不出，
+      // 宗门实际由欧阳奎山等十位金仙道主掌控；天庭的人（银须男子萧晋寒）借内乱插手，
+      // 而韩立恰好站在白玉峰顶。轮回殿要犯、烛龙道、天庭三股势力挤在一处。
+      id: 'chulong', name: '烛龙道·第一道主', pos: '仙界·烛龙道 白玉峰', arc: 'M',
+      type: 'boss', tag: '剧情战',
+      desc: '白玉峰顶站着十位金仙道主。峰外又来了一位银须男子——天庭的人，比道主更讲规矩。',
+      startLevel: 460, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'wumengdao', next: 'huijie',
+      diff: 5.1, bossAt: 0, intro: 'chulong', outro: 'chulong_out',
+      enemies: ['xj_lunhui', 'xj_tianwei', 'xj_daozhu'],
+      elites: ['烛龙道·长老', '轮回殿·影卫'],
+      mats: ['m_xianyuanshi', 'm_xuanhuang'],
+      boss: { kind: 'mo', name: '萧晋寒·天庭使者', hp: 330000, spd: 92, dmg: 360, r: 28, spr: 'mo', scale: 7.4 },
+      reward: { stones: 320000, mats: [['m_xianyuanshi', 8], ['m_xuanhuang', 4]] },
+      clearTitle: '烛龙道',
+      clearDesc: '第一道主还在，天庭与道主们还在互相掣肘。他从峰顶退出去时，谁也没多看他一眼。'
+    },
+    {
+      // 灰界（X2C454 噬金仙 / X2C464《天纵之才》）：一界皆石，尽是雕像；
+      // 最深处坐着一位寸发不生的金色小人——噬金仙。
+      id: 'huijie', name: '灰界·石中坐客', pos: '仙界·灰界', arc: 'M',
+      type: 'story', tag: '剧情',
+      desc: '灰界里没有风，也没有光。到处是石头雕像，最深处坐着一位寸发不生的小人。',
+      startLevel: 460, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'chulong', next: 'taiyi',
+      reward: { stones: 340000, mats: [['m_xianyuanshi', 8], ['m_xuanhuang', 5]] },
+      clearTitle: '灰界',
+      clearDesc: '整座灰界静得能听见石头的声音。那位小人说，它等了很久。'
+    },
+    {
+      // 太乙破境图（后传 X3C775《进阶太乙》）：青黑山谷遍地铁兽残尸，血汇成湖；
+      // 湖心漂着精纯仙灵力凝成的白色莲苞，里面的人要拿它硬扛一劫。
+      id: 'taiyi', name: '进阶太乙', pos: '仙界·青黑山谷', arc: 'M',
+      type: 'story', tag: '破境',
+      desc: '遍地异兽残尸，血液汇成近百里的湖。湖心漂着一朵合拢的白色莲苞。',
+      startLevel: 460, endLevel: 520, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'huijie', next: null,
+      reward: { stones: 400000, mats: [['m_xianyuanshi', 10], ['m_xuanhuang', 6]] },
+      clearTitle: '太乙',
+      clearDesc: '莲苞开的时候，谷外最后一只雪蟾也倒下了。这一关不是打出来的，是熬出来的。'
+    },
+    {
       // 金仙破境图（后传 X2C93–C100）：乌蒙岛，承认身份 + 三十六仙窍 + 天人有五衰。
       // 原著里韩立是在乌蒙岛外被三人围住、对方按黑风海域规矩「承认他对乌蒙岛的控制权」，
       // 他才借这个台阶不再藏；随后三十六仙窍点亮的第三十四个，天色暗了——五衰来了。
@@ -117,7 +164,7 @@
       type: 'story', tag: '破境',
       desc: '气泡散尽时，他已站在一片陌生的海上。岛外站着三个人，等他给一个说法。',
       startLevel: 420, endLevel: 460, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'poxu', next: null,
+      unlock: 'poxu', next: 'chulong',
       reward: { stones: 260000, mats: [['m_xianyuanshi', 6], ['m_xuanhuang', 3]] },
       clearTitle: '金仙',
       clearDesc: '三十六仙窍尽亮，五衰扛过去了。从今往后，他不叫柳石。'
@@ -137,8 +184,33 @@
   // ========================= 四、境界层与破境关 =========================
   // 金仙：仙界第一层。原著口径是「打通周身三十六仙窍」，且每次大境界要历「天人有五衰」。
   window.REALM_LAYERS.push(
-    { lv: 460, name: '金仙', hp: 72000, dmg: 3.00, atk: 1.60, spd: 0.22, skill: 'nova', note: '仙界第一层，三十六仙窍' }
+    { lv: 460, name: '金仙', hp: 72000, dmg: 3.00, atk: 1.60, spd: 0.22, skill: 'nova', note: '仙界第一层，三十六仙窍' },
+    { lv: 520, name: '太乙', hp: 118000, dmg: 3.60, atk: 1.90, spd: 0.24, skill: 'sword', note: '法则入门，仙灵莲苞护体' }
   );
+
+  window.BREAKTHROUGH.push({
+    lv: 520, realm: '太乙', from: '金仙期',
+    tip: '从金仙到太乙，靠的是「法则」二字——不是把力量堆上去，是让力量有形（X2C464 灰界《天纵之才》）。' +
+      '原著里这一关是熬出来的：精纯仙灵力凝成的白色莲苞裹着人身，谷外几百头异兽轮番冲击（X3C775《进阶太乙》）。' +
+      '五衰照旧躲不掉——上一次躲开了，这一次未必。',
+    items: [],
+    mats: [['m_xianyuanshi', 10], ['m_xuanhuang', 6]],
+    stones: 420000,
+    chance: { min: 1 },
+    story: [{ id: 'huijie', name: '仙界·灰界' }],
+    lines: [
+      ['旁白', '青黑山谷里，遍地是支离破碎的异兽残尸。'],
+      ['旁白', '乌黑的血液到处横流，汇成一片方圆近百里的血湖，浮尸无数。'],
+      ['旁白', '湖心漂着一朵白色莲苞，叶瓣合拢。精纯的仙灵力在瓣上流转。'],
+      ['韩立', '（要用它硬扛一劫。扛过去，就是太乙。）'],
+      ['旁白', '谷外，蟹道人的长刀还滴着血。石穿空浑身浴血，符箓与阵盘都已耗尽。'],
+      ['石穿空', '（还能撑多久。）'],
+      ['旁白', '一只百丈之巨的白色雪蟾跃入高空，螺旋状的极寒风暴喷涌而出。'],
+      ['旁白', '莲苞一瓣一瓣地开。血湖在抖，山谷在响。'],
+      ['韩立', '（这一关不是打出来的，是熬出来的。）'],
+      ['旁白', '莲苞完全绽开时，谷外最后一只雪蟾也倒了下去。']
+    ]
+  });
 
   window.BREAKTHROUGH.push({
     lv: 460, realm: '金仙', from: '真仙期',
@@ -273,6 +345,38 @@
     ['旁白', '他没时间细看。天上已经裂了。']
   ];
 
+  window.MAP_STORIES.chulong = [
+    ['旁白', '白玉峰顶，十名金仙道主分坐两侧。呼言道人与云霓站在人群里，脸色都变了。'],
+    ['旁白', '一个银须男子从虚空里走了出来，身后还跟着人。'],
+    ['萧晋寒', '烛龙道第一道主，百里炎。仙界的秩序，不该由你们来破。'],
+    ['旁白', '百里炎被困在阵中，看着狼狈，底子却一点没伤——他只是闭关太久，出来时天庭的人已经站在峰顶。'],
+    ['韩立', '（十位金仙道主，加一个天庭的。烛龙道这是内乱，被人顺手插了一脚。）'],
+    ['旁白', '更远处有影卫在动，来路很杂——轮回殿的悬赏，烛龙道的人，天庭的差，最后全搅到了一座峰上。'],
+    ['韩立', '（我认得这股气息。轮回殿，那伙被天庭追着跑的人。）'],
+    ['旁白', '百里炎是烛龙道第一道主，修为最高，却常年闭关不管事；真正掌控宗门和资源的是那十位道主。'],
+    ['萧晋寒', '今日之事，与道友无关，站远些。'],
+    ['韩立', '（我站哪儿都不要紧。要紧的是——别挡我的路。）']
+  ];
+  window.MAP_STORIES.chulong_out = [
+    ['旁白', '第一道主还在，阵还在，天庭的人还在。'],
+    ['旁白', '他从峰顶退出去的时候，没有一个人多看他一眼。'],
+    ['韩立', '（烛龙道欠下的账，自有人来收。我只记住谁在峰上、谁没在峰上。）'],
+    ['韩立', '（灰界。该去见见那位坐客了。）']
+  ];
+  window.MAP_STORIES.huijie = [
+    ['旁白', '灰界里没有风，也没有光。到处是石头雕像，一动不动。'],
+    ['旁白', '一尊老年道士，颌下一缕山羊胡须，道袍褶皱，衣袂飘摇。'],
+    ['旁白', '一尊宫装女子，身形竟比男子还高，面容不俗，只是线条硬朗，英姿勃发。'],
+    ['韩立', '（换上合体甲胄，倒更衬这身段。）'],
+    ['旁白', '他随手一掌，罡气把一具莹白如玉的骨架打得散架，摔在墙上。'],
+    ['旁白', '越往里，雕像越静。静得能听见石头自己的声音。'],
+    ['旁白', '最深处的石台上，盘膝坐着一个人。寸发不生，口鼻全无，只有双目晶莹闪动。'],
+    ['噬金仙', '（你终于来了。）'],
+    ['韩立', '（噬金仙。虫王一脉的那位。它在灰界里，等了多久。）'],
+    ['旁白', '整座灰界一动不动。'],
+    ['韩立', '（这一界没有法则之言，全靠自身悟。这才是太乙要的东西。）'],
+    ['旁白', '石台上的小人站了起来，没有发出一点声音。']
+  ];
   window.MAP_STORIES.wumengdao = [
     ['旁白', '气泡散尽时，他已站在一片陌生的海上。海风很咸，天很低。'],
     ['旁白', '乌蒙岛。岛外水幕垂下，站着三个人——陆坤老祖、鹄骨夫人、寒丘。'],
@@ -315,9 +419,12 @@
   window.MAP_SCENERY.tiangui  = { bg: { base: '#221d28', a: '#2b2532', b: '#17131c' }, decor: [['rock', 0.24], ['tuft', 0.04]] };
   window.MAP_SCENERY.poxu     = { bg: { base: '#1c2430', a: '#242e3c', b: '#131a23' }, decor: [['rock', 0.08], ['tuft', 0.02]] };
   window.MAP_SCENERY.wumengdao= { bg: { base: '#1f2c38', a: '#283744', b: '#161f28' }, decor: [['rock', 0.12], ['tuft', 0.04]] };
+  window.MAP_SCENERY.chulong  = { bg: { base: '#2a3040', a: '#343b4d', b: '#1d222e' }, decor: [['rock', 0.16], ['tuft', 0.06]] };
+  window.MAP_SCENERY.huijie   = { bg: { base: '#2e2f2c', a: '#383935', b: '#20211f' }, decor: [['rock', 0.24], ['tuft', 0.02]] };
+  window.MAP_SCENERY.taiyi    = { bg: { base: '#3a2020', a: '#452727', b: '#2a1616' }, decor: [['rock', 0.20], ['tuft', 0.02]] };
 
   // 底色套到图上（合底色名单在后）
-  for (const id of ['linghuan', 'suxing', 'lingyan', 'xiaoping', 'tiangui', 'poxu', 'wumengdao']) {
+  for (const id of ['linghuan', 'suxing', 'lingyan', 'xiaoping', 'tiangui', 'poxu', 'wumengdao', 'chulong', 'huijie', 'taiyi']) {
     const m = window.MAPS.find(x => x.id === id);
     const sc = window.MAP_SCENERY[id];
     if (m && sc) { m.bg = sc.bg; m.decorScheme = sc.decor; }

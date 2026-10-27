@@ -31,7 +31,7 @@ page.on('pageerror', e => errors.push(e.message));
 await page.goto('http://127.0.0.1:' + PORT + '/index.html?test=1');
 await page.waitForTimeout(1200);
 
-const IDS = ['linghuan', 'suxing', 'lingyan', 'xiaoping', 'tiangui', 'poxu', 'wumengdao'];
+const IDS = ['linghuan', 'suxing', 'lingyan', 'xiaoping', 'tiangui', 'poxu', 'wumengdao', 'chulong', 'huijie', 'taiyi'];
 
 // ---- 1) 六图注册与链条 ----
 console.log('\n== 1. 卷一六图与链条 ==');
@@ -46,12 +46,13 @@ const M1 = await page.evaluate((ids) => {
     prevClear: M('xianjie').clearDesc
   };
 }, IDS);
-ok(M1.maps.length === 7 && M1.maps.every(m => m.arc === 'M'), '卷一七图已注册且都在 arc M（仙界篇）', M1.maps);
+ok(M1.maps.length === 10 && M1.maps.every(m => m.arc === 'M'), '仙界篇十图已注册且都在 arc M', M1.maps);
 ok(M1.prevNext === 'linghuan', '前传终点「飞升仙界」接上灵寰界（不再是终点）', M1.prevNext);
 const chain = M1.maps.map(m => m.next);
 ok(chain[0] === 'suxing' && chain[1] === 'lingyan' && chain[2] === 'xiaoping'
-  && chain[3] === 'tiangui' && chain[4] === 'poxu' && chain[5] === 'wumengdao' && chain[6] === null,
-  '链条完整：灵寰界→苏醒→冷焰宗→掌天瓶→天鬼→破碎虚空→乌蒙岛（金仙破境图）', chain);
+  && chain[3] === 'tiangui' && chain[4] === 'poxu' && chain[5] === 'wumengdao'
+  && chain[6] === 'chulong' && chain[7] === 'huijie' && chain[8] === 'taiyi' && chain[9] === null,
+  '链条完整：灵寰界→…→乌蒙岛→烛龙道→灰界→进阶太乙', chain);
 ok(M1.maps.every(m => m.unlock), '每张图都有解锁前驱', M1.maps.map(m => m.unlock));
 
 // ---- 2) 密度是波形，不是连排剧情 ----
@@ -60,12 +61,18 @@ const T2 = await page.evaluate((ids) => {
   const W = window;
   return {
     types: ids.map(id => (W.MAPS.find(m => m.id === id) || {}).type),
-    lines: ids.map(id => ((W.MAP_STORIES[id] || []).length)),
+    // 破境图（wumengdao / taiyi）的演出在 BREAKTHROUGH.lines 里，不在 MAP_STORIES
+    lines: ids.map(id => {
+      const m = W.MAPS.find(x => x.id === id) || {};
+      // 破境图（endLevel = 关卡等级）的演出在同等级那道 BREAKTHROUGH 的 lines 里
+      const br = (W.BREAKTHROUGH || []).find(b => b.lv === m.endLevel);
+      return (W.MAP_STORIES[id] || []).length + (br ? (br.lines || []).length : 0);
+    }),
     texts: ids.map(id => (W.MAP_STORIES[id] || []).map(x => x[1]).join(''))
   };
 }, IDS);
-ok(T2.types.join(',') === 'story,story,boss,story,boss,story,story',
-  '卷一也是波形（剧情→剧情→战斗→剧情→战斗→剧情→破境）', T2.types);
+ok(T2.types.join(',') === 'story,story,boss,story,boss,story,story,boss,story,story',
+  '仙界篇也是波形（静—打—静—大打—收）', T2.types);
 ok(T2.lines.every(n => n >= 9), '每张图对白都不少于 9 行', T2.lines);
 ok(/石头哥哥/.test(T2.texts[0]) && /拨浪鼓/.test(T2.texts[0]), '灵寰界写的是「石头哥哥」与拨浪鼓（X1C1-C3）', T2.texts[0].slice(0, 20));
 ok(/人族第一修士/.test(T2.texts[1]) && /灵界第一大乘/.test(T2.texts[1]), '苏醒那张写回「人族第一修士，灵界第一大乘」（X1C12 原句）', '');
@@ -106,6 +113,19 @@ ok(G3.story.length === 1 && G3.story[0] === 'poxu', '金仙关的剧情前置是
 ok(/五衰/.test(G3.text) && /三十六仙窍/.test(G3.text), '关卡对白用原著口径：五衰 + 三十六仙窍（X2C151/C327）', G3.text.slice(0, 24));
 ok(G3.mats.some(x => x[0] === 'm_xianyuanshi') && G3.mats.some(x => x[0] === 'm_xuanhuang'), '金仙关消耗仙元石与玄黄之气', G3.mats);
 ok(G3.layer === '金仙' && G3.layerLv === 460, '境界层已加金仙档', G3);
+const TY = await page.evaluate(() => {
+  const W = window;
+  const g = W.BREAKTHROUGH.find(x => x.lv === 520) || {};
+  const m = W.MAPS.find(x => x.id === 'taiyi') || {};
+  const rl = W.REALM_LAYERS.filter(r => r.lv <= 520).pop() || {};
+  return { realm: g.realm, mats: g.mats, story: (g.story || []).map(s => s.id),
+    text: (g.lines || []).map(x => x[1]).join(''), endLevel: m.endLevel, type: m.type,
+    layer: rl.name, slots: W.skillSlots(520), cap: W.realmSkillCap(520) };
+});
+ok(TY.realm === '太乙' && TY.endLevel === 520 && TY.type === 'story', '太乙破境关已立（460→520，破境图进阶太乙）', TY);
+ok(TY.story[0] === 'huijie', '太乙关的剧情前置是灰界', TY.story);
+ok(/莲苞/.test(TY.text) && /异兽/.test(TY.text), '太乙关用原著口径：仙灵莲苞硬扛异兽围攻', TY.text.slice(0, 24));
+ok(TY.layer === '太乙' && TY.slots === 10 && TY.cap === 12, '太乙档已进境界层（功法位 10 / 上限 12）', TY);
 ok(G3.slots === 9 && G3.cap === 11, '金仙功法位 9、层数上限 11', { slots: G3.slots, cap: G3.cap });
 
 // ---- 4) 仙界材料 / 成品 / 功法 / 敌人 ----
@@ -182,7 +202,8 @@ const R6 = await page.evaluate(async (ids) => {
 ok(R6.allCleared, '卷一六图可依次通关', R6.steps.filter(s => !s.cleared));
 ok(R6.bag.xianyuanshi >= 1, '仙元石进背包（仙界关的消耗来源）', R6.bag);
 ok(R6.bag.xuanhuangs >= 1 && R6.bag.tianwaifeidou >= 1, '玄黄之索 / 天外飞豆进背包', R6.bag);
-ok(R6.steps.every(s => s.lv <= 420), '全程不越真仙档（≤420）', R6.steps.map(s => s.lv));
+ok(R6.steps.slice(0, 7).every(s => s.lv <= 420) && R6.steps.slice(7).every(s => s.lv <= 520),
+  '全程不越档：卷一七图 ≤420（真仙），卷二三图 ≤520（太乙）', R6.steps.map(s => s.lv));
 
 console.log('\n--------------------------------');
 console.log(`结果: ${pass} 通过 / ${fail} 失败`);

@@ -36,10 +36,10 @@ const run = (body) => page.evaluate(`(()=>{const F=window.__FR;${body}})()`);
 // ---- 1) 地图存在与 chain ----
 const ALL_IDS = ['anyuan', 'tianyuan', 'heifeng', 'lianxu', 'fengyuan', 'shisan', 'guanghan', 'heti_guan',
   'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling',
-  'modajie', 'sanjie', 'jiujie', 'zhenxian', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie'];
+  'modajie', 'sanjie', 'jiujie', 'qunqiang', 'zhenxian', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie'];
 const maps = await page.evaluate((ids) => window.MAPS.filter(m => ids.includes(m.id))
   .map(m => ({ id: m.id, type: m.type, unlock: m.unlock, next: m.next, startLevel: m.startLevel, endLevel: m.endLevel })), ALL_IDS);
-ok(maps.length === 26, '灵界二十六张主线图已注册', maps);
+ok(maps.length === 27, '灵界二十七张主线图已注册', maps);
 const chain = await page.evaluate((ids) => {
   const g = id => window.MAPS.find(m => m.id === id) || {};
   const o = { fs: g('feisheng').next };
@@ -65,7 +65,8 @@ const LINKS = [
   ['mojie', 'moban', null], ['moban', 'yitian', null], ['yitian', 'huangquan', null],
   ['huangquan', 'moyuan', null], ['moyuan', 'xiaoling', null], ['xiaoling', 'modajie', null],
   ['modajie', 'sanjie', null],
-  ['sanjie', 'jiujie', 260], ['jiujie', 'zhenxian', 330], ['zhenxian', 'zhanxian', 420],
+  ['sanjie', 'jiujie', 260], ['jiujie', 'qunqiang', null], ['qunqiang', 'zhenxian', null],
+  ['zhenxian', 'zhanxian', 420],
   ['zhanxian', 'huimoyuan', null],
   ['huimoyuan', 'daoguo', null], ['daoguo', 'renzu', null], ['renzu', 'fsjie', null], ['fsjie', 'xianjie', null]
 ];
@@ -198,7 +199,7 @@ ok(i3.state === 'dialog', '炼虚关开场对白已播', i3.state);
 
 for (const mid of ['tianyuan', 'fengyuan', 'shisan', 'guanghan', 'heti_guan',
   'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling',
-  'modajie', 'sanjie', 'jiujie', 'zhenxian', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie']) {
+  'modajie', 'sanjie', 'jiujie', 'qunqiang', 'zhenxian', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie']) {
   await run(`F.clearProgress();F.setLevel(419);F.god(true);F.enterMap('${mid}');`);
   await page.waitForTimeout(200);
   const im = await page.evaluate(() => window.__FR.info());
@@ -328,6 +329,41 @@ ok(SSN.speakers.indexOf('沙老夫人') >= 0, '大乘沙老夫人登场（V9C167
 ok(/渡劫/.test(SSN.text) && /大乘/.test(SSN.text), '会盟点出「大乘之上还有渡劫」这条线索', SSN.text.slice(-40));
 ok(SSN.state0 === 'dialog', '进场即播会盟对白', SSN.state0);
 ok(SSN.cleared && SSN.nextOpen, '走完会盟 → 通关并开出广寒界', { cleared: SSN.cleared, nextOpen: SSN.nextOpen });
+
+// ---- 5b·3·4) 群强之陨（V12C2423）+ 420 段成品池 ----
+const QQ = await page.evaluate(() => {
+  const W = window, F = W.__FR;
+  const M = id => W.MAPS.find(m => m.id === id) || {};
+  const get = id => (W.ALL_ITEMS || []).find(x => x.id === id) || null;
+  F.clearProgress(); F.setLevel(329); F.god(true); F.unlockAll();
+  F.enterMap('qunqiang');
+  for (let k = 0; k < 24; k++) { F.skipStory(); F.tickFrames(2); if (F.info().state === 'levelup') F.insightAuto(); }
+  const bag = F.bag();
+  const text = (W.MAP_STORIES['qunqiang'] || []).map(x => x[1]).join('');
+  // 420 段成品池
+  F.enterMap('zhanxian');
+  for (let k = 0; k < 12; k++) { F.skipStory(); F.tickFrames(2); if (F.info().state === 'levelup') F.insightAuto(); }
+  const floor = F.lootFloor();
+  const pool = [0, 1, 2, 3, 4].flatMap(r => F.dropPool(r).map(i => i.req));
+  return {
+    type: M('qunqiang').type, lv: M('qunqiang').startLevel,
+    unlock: M('qunqiang').unlock, next: M('qunqiang').next, text,
+    cleared: F.info().cleared.indexOf('qunqiang') >= 0,
+    spoils: ['t_yuanhejiwu', 't_liangyiwuchen'].map(id => ({ id, n: bag[id] || 0, item: get(id) ? get(id).name : null })),
+    zhihun: get('dan_zhihun') ? get('dan_zhihun').name : null,
+    jingling: get('t_jinglinglian') ? get('t_jinglinglian').name : null,
+    floor, poolMin: pool.length ? Math.min(...pool) : null, poolMax: pool.length ? Math.max(...pool) : null
+  };
+});
+ok(QQ.type === 'story' && QQ.lv === 330 && QQ.unlock === 'jiujie' && QQ.next === 'zhenxian',
+  '群强之陨串在九劫现与真仙之身之间（V12C2423）', QQ);
+ok(/仗已经打完了/.test(QQ.text) && /明尊/.test(QQ.text) && /九劫真焰/.test(QQ.text) && /元合五极山/.test(QQ.text),
+  '群强之陨是「赶到时仗已打完」（原著韩立不在现场），写的是明尊/九劫真焰/元合五极山', QQ.text.slice(0, 24));
+ok(QQ.spoils.every(s => s.n >= 1 && s.item), '群强之陨给出元合五极山与两仪微尘阵', QQ.spoils);
+ok(QQ.cleared, '群强之陨能通关', { cleared: QQ.cleared });
+ok(!!QQ.zhihun && !!QQ.jingling, '真魂丹与净灵莲已入库（斩仙 / 洗灵池出处）', { zhihun: QQ.zhihun, jingling: QQ.jingling });
+ok(QQ.floor === 360, '420 段成品门槛从 160 抬到 360', QQ.floor);
+ok(QQ.poolMin === null || QQ.poolMin >= 360, '420 段成品池里没有 req<360 的东西', { min: QQ.poolMin, max: QQ.poolMax });
 
 // ---- 5b·3·5) 斩仙（V12C2426–C2429）：前传最后一战 ----
 const ZX = await page.evaluate(() => {

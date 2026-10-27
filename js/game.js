@@ -652,7 +652,10 @@
     if (inXianjie()) return 420;          // 仙界档：真仙级往上，灵寰界的破烂一件不出
     if (!inLingjie()) return 0;
     const base = (G.map && G.map.startLevel) || 132;
-    return Math.min(160, Math.max(72, base - 60));
+    // 420 段（真仙关）封顶抬到 360：此前封在 160，终局首领只能掉化神旧宝。
+    // 前提是先补足 360+ 的可掉成品（元合五极山/净灵莲/两仪微尘阵/万年金桑液），
+    // 否则这一档的池子会空、只剩材料掉。
+    return Math.min(360, Math.max(72, base - 60));
   }
 
   function dropLoot(x, y, tier) {

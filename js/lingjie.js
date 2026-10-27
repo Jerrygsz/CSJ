@@ -34,6 +34,7 @@
     { id: 'm_zhenlingxue', name: '真灵之血', icon: '🩸', rarity: 4, desc: '真灵遗血。炼虚之后淬体凝元的上品灵物（V9C1359）。' },
     { id: 'm_zhenlinglin', name: '真灵鳞片', icon: '🐲', rarity: 3, desc: '真灵身上的一片鳞，坚胜寻常法宝（V8C1341）。' },
     { id: 'm_xuantianteng', name: '玄天仙藤', icon: '🌿', rarity: 4, desc: '玄天仙藤的一截，可炼玄天之宝（V5C633）。' },
+    { id: 'm_beijiyuanjing', name: '北极元晶', icon: '💎', rarity: 4, desc: '重回人界时才能取到的元晶（V12C2442《重回人界》，7 次）；据说是炼制元合五极山的必需之物' },
     { id: 'm_daopai', name: '道牌', icon: '🪧', rarity: 4, desc: '道果大会的信物。交出道牌，便是认输（V12C2440）。' }
   );
   window.ALL_ITEMS = window.ITEMS.concat(window.MATERIALS);
@@ -164,7 +165,7 @@
       type: 'story', tag: '剧情',
       desc: '飞升灵界，落在一片陌生荒原。最近的城叫安远，城里有家天东商号。',
       startLevel: 132, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'feisheng', next: 'heifeng',
+      unlock: 'feisheng', next: 'tianyuan',
       reward: { stones: 12000, mats: [['m_zhenlinglin', 1]] },
       clearTitle: '灵界第一课',
       clearDesc: '天东商号的掌柜收了灵石，才肯告诉他：灵界不认人界那一套，这里讲族、讲坊市、讲灵石。'
@@ -359,7 +360,7 @@
       elites: ['圣祖魔卫', '苦灵岛守'],
       mats: ['m_zhenlingxue', 'm_zhenlinglin', 'm_yaodan'],
       boss: { kind: 'mo', name: '元魇圣祖·化身', hp: 118000, spd: 74, dmg: 158, r: 25, spr: 'mo', scale: 6.6 },
-      reward: { stones: 78000, mats: [['m_zhenlingxue', 3], ['m_zhenlinglin', 2]] },
+      reward: { stones: 78000, items: ['t_jinglinglian'], mats: [['m_zhenlingxue', 3], ['m_zhenlinglin', 2]] },
       clearTitle: '苦灵岛·洗灵池',
       clearDesc: '三日洗灵池，抵外面三年苦修。炼魔草交出去，换一条活着离开魔界的路。'
     },
@@ -380,17 +381,31 @@
       type: 'story', tag: '剧情',
       desc: '九道仙劫压顶。过得去，才谈得上飞升。',
       startLevel: 260, endLevel: 330, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'sanjie', next: 'zhenxian',
+      unlock: 'sanjie', next: 'qunqiang',
       reward: { stones: 120000 },
       clearTitle: '九劫已过',
       clearDesc: '第九道劫雷落下又散去。天地间，再没有什么能压住他了。'
+    },
+    {
+      // V12C2423《群强之陨》：轩九灵以「九劫灭灵大法」的九劫真焰击杀了明尊，
+      // 随后七座血玺落下，三人大乘连同四头真兽化为飞灰；银色巨人被八座金色火山困杀。
+      // **原著里韩立不在现场**（C2423 全章 0 次出现「韩立」）——所以这一图是「赶到时仗已打完」，
+      // 由旁白与战后现场还原，不能写成他亲自动手。
+      id: 'qunqiang', name: '群强之陨', pos: '灵界·金色世界', arc: 'L',
+      type: 'story', tag: '剧情',
+      desc: '他赶到的时候，仗已经打完了。金色世界塌了一半，坑底还立着一个金色巨人。',
+      startLevel: 330, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'jiujie', next: 'zhenxian',
+      reward: { stones: 150000, items: ['t_yuanhejiwu', 't_liangyiwuchen'], mats: [['m_zhenlingxue', 3]] },
+      clearTitle: '群强之陨',
+      clearDesc: '赢是赢了，赢得一个都不剩。坑底只剩两样东西：元合五极山，和一座两仪微尘阵。'
     },
     {
       id: 'zhenxian', name: '真仙之身', pos: '灵界·荒原 雷光中', arc: 'L',
       type: 'story', tag: '剧情',
       desc: '渡劫之后，铸真仙之身。',
       startLevel: 330, endLevel: 420, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'jiujie', next: 'zhanxian',
+      unlock: 'qunqiang', next: 'zhanxian',
       reward: { stones: 160000 },
       clearTitle: '真仙',
       clearDesc: '一身不再是凡胎。眉眼还是那眉眼，气息已不在此界。'
@@ -412,7 +427,7 @@
       elites: ['万灵血龙', '九元观随侍'],
       mats: ['m_zhenlingxue', 'm_xuantianteng'],
       boss: { kind: 'mo', name: '马良·九元观真仙', hp: 300000, spd: 88, dmg: 320, r: 28, spr: 'mo', scale: 7.2 },
-      reward: { stones: 240000, items: ['t_wanlingxueyi', 't_moguang', 't_huoxuzi'], mats: [['m_xuantianteng', 2], ['m_zhenlingxue', 4]] },
+      reward: { stones: 240000, items: ['t_wanlingxueyi', 't_moguang', 't_huoxuzi', 'dan_zhihun'], mats: [['m_xuantianteng', 2], ['m_zhenlingxue', 4]] },
       clearTitle: '斩仙',
       clearDesc: '墨绿细线从脖颈一闪而过，一颗头颅滚落下来。灵界最后一场硬仗，打完了。'
     },
@@ -443,7 +458,7 @@
       elites: ['化木为灵·树巨人', '异界大乘'],
       mats: ['m_zhenlingxue', 'm_zhenlinglin'],   // 道牌只走通关奖励，不进材料池（信物不该被刷）
       boss: { kind: 'mo', name: '天象尊者', hp: 200000, spd: 80, dmg: 210, r: 27, spr: 'haishou', scale: 6.8 },
-      reward: { stones: 210000, items: ['dan_guangling'], mats: [['m_daopai', 1], ['m_zhenlingxue', 2]] },
+      reward: { stones: 210000, items: ['dan_guangling', 't_wannianjingsang', 't_zhenlinliuying'], mats: [['m_daopai', 1], ['m_zhenlingxue', 2]] },
       clearTitle: '得果',
       clearDesc: '掌天瓶一压，天象尊者认输，道牌交了出来。道果到手——他当场就吞了。'
     },
@@ -586,7 +601,7 @@
       desc: '飞升之前，回一趟人界。村口那棵老树还在。',
       startLevel: 420, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
       unlock: null, next: null,
-      reward: { stones: 40000 },
+      reward: { stones: 40000, mats: [['m_beijiyuanjing', 2]] },
       clearTitle: '尘缘已了',
       clearDesc: '父母坟上添了新土。韩家如今是越国的望族，没人认得他。'
     }
@@ -834,6 +849,21 @@
       ['旁白', '白光里，他听见自己的骨头一寸寸碎，又一寸寸长回去。'],
       ['韩立', '（再来。）'],
       ['旁白', '第九道劫雷散尽。天地静得能听见血滴在石头上的声音。']
+    ],
+    qunqiang: [
+      ['旁白', '他赶到的时候，仗已经打完了。'],
+      ['旁白', '金色世界的边缘还在往下塌。血雾一缕一缕挂在空中，散得很慢。'],
+      ['旁白', '坑底立着一个金色巨人，身上没有一处伤。'],
+      ['韩立', '（明尊。三名大乘、七头真兽，加上那头老怪，都死了。）'],
+      ['旁白', '轩九灵自爆了一条手臂，代价是九劫真焰——九种火属性真灵的本命之火，掺着九种法则之力。'],
+      ['韩立', '（九劫灭灵大法。一击就烧掉了一个真仙。）'],
+      ['旁白', '七座血玺落下时，三人大乘连同四头真兽只来得及闪了一下，就化成了飞灰。'],
+      ['旁白', '银色巨人被八座金色火山困在中心，熔岩一喷，就再没有声音了。'],
+      ['韩立', '（群强赢了。赢得干净，也赢得一个都不剩。）'],
+      ['旁白', '最后，那金色巨人从虚空里一把捞出个尺许高的小人：寸发不生，口鼻全无，只有一双晶莹的双眼。'],
+      ['韩立', '（噬金仙。虫王一脉的？它怎么会在这里。）'],
+      ['旁白', '坑底只剩两样东西：一面小小的山岳，与一座两仪微尘般的小阵。'],
+      ['韩立', '（元合五极山。它和掌天瓶，是一对。）']
     ],
     zhenxian: [
       ['旁白', '玄天仙藤三截化开，真灵之血五滴入骨。雷光里，他的影子变了形状。'],
@@ -1231,6 +1261,26 @@
     { id: 't_huoxuzi', name: '火须子', rarity: 5, icon: '🦎', req: 420, unique: true, noDrop: true,
       desc: '火中之圣，本体是一条百余丈的怪蛟（V12C2418《斩鹿（下）》，27 次）。要拿回本命晶珠回仙界，只好认韩立为主',
       effect: { dmg: 0.20, atkSpd: 0.08 } },
+    // 420 段（真仙级）可掉成品——此前这一段只有「化神旧宝」可掉，
+    // 补足这些之后，掉落门槛才敢从 160 抬到 360。
+    { id: 't_yuanhejiwu', name: '元合五极山', rarity: 4, icon: '⛰', req: 420,
+      desc: '与掌天瓶成对的重宝（V9C1663《璃水珠和元合五极山》，25 次）。据传需北极元晶方能炼制（V12C2444）',
+      effect: { maxhp: 380, dmg: 0.14 } },
+    { id: 't_jinglinglian', name: '净灵莲', rarity: 4, icon: '🪷', req: 380,
+      desc: '洗灵池里长出来的灵物（V10C1835《洗灵池和净灵莲》，59 次）。洗灵池一日抵外面一年',
+      effect: { maxhp: 300, regen: 0.8 } },
+    { id: 't_liangyiwuchen', name: '两仪微尘阵', rarity: 4, icon: '🔯', req: 360,
+      desc: '一座能困住大乘的小阵（V11C2412《阵眼》，11 次）。有人为它盯上过真仙的丹',
+      effect: { armor: 0.12, atkSpd: 0.10 } },
+    { id: 't_wannianjingsang', name: '万年金桑液', rarity: 4, icon: '🧪', req: 400,
+      desc: '龙岛上的灵液，炼制数种传闻中丹药的必需品（V12C2439《交易、大会》，2 次）',
+      effect: { maxhp: 260, xpMul: 0.08 } },
+    { id: 't_zhenlinliuying', name: '真麟留影', rarity: 5, icon: '🐉', req: 430, unique: true, noDrop: true,
+      desc: '龙族以真龙之鳞封存的渡劫留影（V12C2439《交易、大会》，1 次）。一枚只能用三次',
+      effect: { maxhp: 400, crit: 0.06 } },
+    { id: 'dan_zhihun', name: '真魂丹', rarity: 5, icon: '🟣', req: 420, unique: true, noDrop: true,
+      desc: '凝出真仙之魂的丹药（V11C2400《法则之链》，37 次）。斩仙后从马良身上搜得余留的一颗（V12C2430）',
+      effect: { maxhp: 420, crit: 0.08 } },
     { id: 'dan_guangling', name: '广灵道果', rarity: 5, icon: '🍇', req: 420, unique: true,
       desc: '真龙之岛上的道果（V11C2190 / V12C2441）。服下可凝广灵道体，神念之力有了落脚处。',
       effect: { maxhp: 400, xpMul: 0.15 } }
@@ -1310,6 +1360,7 @@
     modajie:  { bg: { base: '#1e2430', a: '#263040', b: '#161b24' }, decor: [['rock', 0.30], ['tuft', 0.02]] },
     sanjie:   { bg: { base: '#242a36', a: '#2c3443', b: '#1a1f28' }, decor: [['rock', 0.26], ['tuft', 0.04]] },
     jiujie:   { bg: { base: '#2a2f3a', a: '#343a47', b: '#1f232c' }, decor: [['rock', 0.24], ['tuft', 0.03]] },
+    qunqiang: { bg: { base: '#4a4132', a: '#564c3a', b: '#332d23' }, decor: [['rock', 0.30], ['tuft', 0.04]] },
     zhenxian: { bg: { base: '#2f3542', a: '#3a4253', b: '#232833' }, decor: [['rock', 0.22], ['tuft', 0.03]] },
     zhanxian: { bg: { base: '#3a1f22', a: '#45262a', b: '#2a1618' }, decor: [['rock', 0.26], ['tuft', 0.02]] },
     huimoyuan:{ bg: { base: '#1b2830', a: '#22333c', b: '#131d24' }, decor: [['rock', 0.16], ['tuft', 0.03]] },
@@ -1329,7 +1380,7 @@
   // late.js 合底色时还没有这些图，这里手动补上
   for (const id of ['anyuan', 'tianyuan', 'heifeng', 'lianxu', 'fengyuan', 'shisan', 'guanghan', 'heti_guan',
                     'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling', 'modajie',
-                    'sanjie', 'jiujie', 'zhenxian', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie',
+                    'sanjie', 'jiujie', 'qunqiang', 'zhenxian', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie',
                     'linghuang', 'zhandacheng', 'shengshi', 'heihu', 'baiguang', 'tianmo', 'diyi', 'huirenjie']) {
     const m = window.MAPS.find(x => x.id === id);
     const sc = window.MAP_SCENERY[id];
