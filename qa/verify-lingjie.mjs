@@ -36,10 +36,10 @@ const run = (body) => page.evaluate(`(()=>{const F=window.__FR;${body}})()`);
 // ---- 1) 地图存在与 chain ----
 const ALL_IDS = ['anyuan', 'tianyuan', 'heifeng', 'lianxu', 'fengyuan', 'guanghan', 'heti_guan',
   'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling',
-  'sanjie', 'jiujie', 'zhenxian', 'fsjie', 'xianjie'];
+  'modajie', 'sanjie', 'jiujie', 'zhenxian', 'fsjie', 'xianjie'];
 const maps = await page.evaluate((ids) => window.MAPS.filter(m => ids.includes(m.id))
   .map(m => ({ id: m.id, type: m.type, unlock: m.unlock, next: m.next, startLevel: m.startLevel, endLevel: m.endLevel })), ALL_IDS);
-ok(maps.length === 20, '灵界二十张主线图已注册', maps);
+ok(maps.length === 21, '灵界二十一张主线图已注册', maps);
 const chain = await page.evaluate((ids) => {
   const g = id => window.MAPS.find(m => m.id === id) || {};
   const o = { fs: g('feisheng').next };
@@ -63,7 +63,8 @@ ok(chain.hg && chain.hg.endLevel === 200, '破境图 heti_guan 的 endLevel=200�
 const LINKS = [
   ['heti_guan', 'liangzu', 200], ['liangzu', 'shengdao', null], ['shengdao', 'mojie', null],
   ['mojie', 'moban', null], ['moban', 'yitian', null], ['yitian', 'huangquan', null],
-  ['huangquan', 'moyuan', null], ['moyuan', 'xiaoling', null], ['xiaoling', 'sanjie', null],
+  ['huangquan', 'moyuan', null], ['moyuan', 'xiaoling', null], ['xiaoling', 'modajie', null],
+  ['modajie', 'sanjie', null],
   ['sanjie', 'jiujie', 260], ['jiujie', 'zhenxian', 330], ['zhenxian', 'fsjie', 420],
   ['fsjie', 'xianjie', null]
 ];
@@ -121,7 +122,7 @@ ok(high[0] && high[0].realm === '大乘期', 'lv260 = 大乘期', high[0]);
 ok(high[1] && high[1].realm === '渡劫期', 'lv330 = 渡劫期', high[1]);
 ok(high[2] && high[2].realm === '真仙', 'lv420 = 真仙', high[2]);
 ok(high[0] && high[0].mats.some(m => m[0] === 'm_xuantianteng') && high[0].mats.some(m => m[0] === 'm_zhenlingxue'), '大乘关需玄天仙藤 + 真灵之血', high[0]);
-ok(high[0] && high[0].story[0].id === 'xiaoling', '大乘关需已通小灵天', high[0]);
+ok(high[0] && high[0].story[0].id === 'modajie', '大乘关需已通魔界大劫（洗灵池）', high[0]);
 ok(high[1] && high[1].story[0].id === 'sanjie', '渡劫关需已通三劫', high[1]);
 ok(high[2] && high[2].story[0].id === 'jiujie', '真仙关需已通九劫', high[2]);
 ok(await page.evaluate(() => (window.BREAKTHROUGH || []).some(x => x.lv === 260) &&
@@ -160,9 +161,9 @@ await run(`F.clearProgress();F.setLevel(190);F.clearMap('guanghan');F.addItem('h
 ok(await page.evaluate(() => window.__FR.breakCan(200)) === false, '修为未到炼虚后期(199) → breakCan(200)=false');
 
 // ---- 4c) 260 / 330 / 420 备齐判定 ----
-await run(`F.clearProgress();F.setLevel(259);F.god(true);F.clearMap('xiaoling');F.addItem('m_xuantianteng',1);F.addItem('m_zhenlingxue',3);F.setStones(65000);`);
-ok(await page.evaluate(() => window.__FR.breakCan(260)) === true, '260 备齐（仙藤+真灵血+通小灵天）→ true');
-await run(`F.clearProgress();F.setLevel(259);F.clearMap('xiaoling');F.addItem('m_zhenlingxue',3);F.setStones(65000);`);
+await run(`F.clearProgress();F.setLevel(259);F.god(true);F.clearMap('modajie');F.addItem('m_xuantianteng',1);F.addItem('m_zhenlingxue',3);F.setStones(65000);`);
+ok(await page.evaluate(() => window.__FR.breakCan(260)) === true, '260 备齐（仙藤+真灵血+通魔界大劫）→ true');
+await run(`F.clearProgress();F.setLevel(259);F.clearMap('modajie');F.addItem('m_zhenlingxue',3);F.setStones(65000);`);
 ok(await page.evaluate(() => window.__FR.breakCan(260)) === false, '260 缺玄天仙藤 → false');
 
 await run(`F.clearProgress();F.setLevel(329);F.god(true);F.clearMap('sanjie');F.addItem('m_xuantianteng',2);F.addItem('m_zhenlingxue',4);F.setStones(110000);`);
@@ -196,7 +197,7 @@ ok(i3.state === 'dialog', '炼虚关开场对白已播', i3.state);
 
 for (const mid of ['tianyuan', 'fengyuan', 'guanghan', 'heti_guan',
   'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling',
-  'sanjie', 'jiujie', 'zhenxian', 'fsjie', 'xianjie']) {
+  'modajie', 'sanjie', 'jiujie', 'zhenxian', 'fsjie', 'xianjie']) {
   await run(`F.clearProgress();F.setLevel(419);F.god(true);F.enterMap('${mid}');`);
   await page.waitForTimeout(200);
   const im = await page.evaluate(() => window.__FR.info());
@@ -270,6 +271,35 @@ await run(`F.enterMap('shengshi');`);
 await page.waitForTimeout(200);
 const iSS = await page.evaluate(() => window.__FR.info());
 ok(iSS.mapId === 'shengshi', '可进入圣岛使者线', iSS.mapId);
+
+// ---- 5b·2) V10 收束图「魔界大劫」（苦灵岛·洗灵池） ----
+const MDJ = await page.evaluate(() => {
+  const W = window, F = W.__FR;
+  const m = W.MAPS.find(x => x.id === 'modajie') || {};
+  const g = W.BREAKTHROUGH.find(x => x.lv === 260) || {};
+  F.clearProgress(); F.setLevel(259); F.god(true); F.unlockAll();
+  F.enterMap('modajie', 'easy');
+  for (let k = 0; k < 20; k++) { F.skipStory(); F.tickFrames(2); }
+  const boss = F.boss();
+  F.killBoss();
+  for (let k = 0; k < 40; k++) { F.skipStory(); F.tickFrames(3); }
+  const info = F.info();
+  return {
+    id: m.id, name: m.name, type: m.type, unlock: m.unlock, next: m.next,
+    bossName: (m.boss && m.boss.name) || null, startLevel: m.startLevel,
+    gateStage: (g.story && g.story[0] && g.story[0].id) || null,
+    lineCount: (W.MAP_STORIES['modajie'] || []).length + (W.MAP_STORIES['modajie_out'] || []).length,
+    boss: boss, cleared: info.cleared.indexOf('modajie') >= 0, unlockedNext: info.unlocked.indexOf('sanjie') >= 0
+  };
+});
+ok(MDJ.type === 'boss' && MDJ.startLevel === 220, '魔界大劫是 220 级剧情战', MDJ);
+ok(MDJ.unlock === 'xiaoling' && MDJ.next === 'sanjie', '魔界大劫串在小灵天与三劫之间', MDJ);
+ok(/元魇圣祖/.test(MDJ.bossName || ''), '对手是元魇圣祖（V10C2100 原著在位者）', MDJ.bossName);
+ok(MDJ.lineCount >= 12, '魔界大劫开场+收尾对白齐备', MDJ.lineCount);
+ok(MDJ.gateStage === 'modajie', '大乘关的剧情前置改成了魔界大劫', MDJ.gateStage);
+ok(!!MDJ.boss, '魔界大劫首领能刷出来', MDJ.boss);
+ok(MDJ.cleared, '魔界大劫能打通并记入已通关', { cleared: MDJ.cleared });
+ok(MDJ.unlockedNext, '打通魔界大劫 → 三劫显现', { unlockedNext: MDJ.unlockedNext });
 
 // ---- 5c) 灵界功法线（req 150→420）+ 天渊坊市 ----
 const FX = await page.evaluate(() => {
@@ -433,7 +463,7 @@ const br2 = await page.evaluate(() => window.__FR.breakNow(200));
 ok(br2 && br2.cult === 200, 'breakNow(200) 成功推进到合体（cultivate=200）', br2);
 
 const HIGH = [
-  { lv: 260, map: 'sanjie', lvBefore: 259, story: 'xiaoling', teng: 1, xue: 3, stones: 65000 },
+  { lv: 260, map: 'sanjie', lvBefore: 259, story: 'modajie', teng: 1, xue: 3, stones: 65000 },
   { lv: 330, map: 'jiujie', lvBefore: 329, story: 'sanjie', teng: 2, xue: 4, stones: 110000 },
   { lv: 420, map: 'zhenxian', lvBefore: 419, story: 'jiujie', teng: 3, xue: 5, stones: 190000 }
 ];

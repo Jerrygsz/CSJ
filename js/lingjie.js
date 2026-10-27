@@ -101,7 +101,7 @@
       mats: [['m_xuantianteng', 1], ['m_zhenlingxue', 3]],
       stones: 60000,
       chance: { min: 1 },
-      story: [{ id: 'xiaoling', name: '灵界·小灵天' }],
+      story: [{ id: 'modajie', name: '魔界·苦灵岛 洗灵池' }],
       lines: [
         ['韩立', '（合体之上，是大乘。原著里大乘不分几层，只有一道坎。）'],
         ['旁白', '三劫自天顶压下：五行之劫裂体，真雷劫焚脉，心魔之劫照见心底最怕的东西。'],
@@ -320,7 +320,7 @@
       type: 'boss', tag: '剧情战',
       desc: '魔界里藏着一方小世界。小灵天的主人，守着一炉不该有的火。',
       startLevel: 220, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'moyuan', next: 'sanjie',
+      unlock: 'moyuan', next: 'modajie',
       diff: 4.1, bossAt: 0, intro: 'xiaoling', outro: 'xiaoling_out',
       enemies: ['kui2', 'dajinxiu', 'zhengdao'],
       elites: ['小灵天守', '灵天傀'],
@@ -330,6 +330,25 @@
       clearTitle: '小灵天开',
       clearDesc: '一方小世界落到手里。合体后期到此为止，再往上，是大乘。'
     },
+    {
+      // V10 卷的收束（原著 C2100《魔界大劫》）：苦灵岛下锁着洗灵池，
+      // 元魇圣祖与宝花圣祖守在那里，等着一株炼魔草。
+      // 原著里韩立打不过圣祖，靠「涅盘圣体 + 手中灵药」跟两位圣祖谈条件，换洗灵池三日。
+      // 所以这一图不能编成「斩杀圣祖」——而是打穿魔族围杀、走到阵前谈成这笔交易。
+      id: 'modajie', name: '魔界大劫', pos: '魔界·苦灵岛', arc: 'K',
+      type: 'boss', tag: '剧情战',
+      desc: '魔界深处的苦灵岛。岛下锁着洗灵池，池里一天抵外面一年；岛外守着两位圣祖，和一座岛的魔物。',
+      startLevel: 220, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'xiaoling', next: 'sanjie',
+      diff: 4.15, bossAt: 0, intro: 'modajie', outro: 'modajie_out',
+      enemies: ['gui2', 'moxiu2', 'guixiu'],
+      elites: ['圣祖魔卫', '苦灵岛守'],
+      mats: ['m_zhenlingxue', 'm_zhenlinglin', 'm_yaodan'],
+      boss: { kind: 'mo', name: '元魇圣祖·化身', hp: 118000, spd: 74, dmg: 158, r: 25, spr: 'mo', scale: 6.6 },
+      reward: { stones: 78000, mats: [['m_zhenlingxue', 3], ['m_zhenlinglin', 2]] },
+      clearTitle: '苦灵岛·洗灵池',
+      clearDesc: '三日洗灵池，抵外面三年苦修。炼魔草交出去，换一条活着离开魔界的路。'
+    },
 
     // ---------------- V11 / V12 大乘 · 渡劫 · 真仙 ----------------
     {
@@ -337,7 +356,7 @@
       type: 'story', tag: '剧情',
       desc: '五行之劫、真雷劫、心魔之劫。三劫过尽，才是大乘。',
       startLevel: 220, endLevel: 260, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'xiaoling', next: 'jiujie',
+      unlock: 'modajie', next: 'jiujie',
       reward: { stones: 80000, mats: [['m_zhenlingxue', 2]] },
       clearTitle: '大乘已成',
       clearDesc: '三劫散尽，真元沉成一片海。大乘。'
@@ -684,6 +703,26 @@
       ['旁白', '小灵天的主人散了，一炉火落到韩立手里。火里有两截玄天仙藤。'],
       ['韩立', '（合体后期。再往上，是大乘。）'],
       ['旁白', '他抬头看天。小灵天的天很低，低得能看见劫云在聚。']
+    ],
+
+    modajie: [
+      ['旁白', '苦灵岛在魔界最深处，雾是灰的，海面下透出一线青光。岛上没有草木，只有一座石阵。'],
+      ['韩立', '（洗灵池就在这底下。守在这儿的，是两位圣祖。）'],
+      ['旁白', '石阵前站着两个人。一个黑袍青年，气息压得四周的海都不敢起浪；一个白衣女子，始终在笑。'],
+      ['元魇圣祖', '灵界的合体修士，也敢闯苦灵岛。'],
+      ['韩立', '（两位圣祖。硬拼是死路——只能谈。）'],
+      ['宝花圣祖', '他身上有炼魔草。'],
+      ['韩立', '炼魔草在我手里。我要洗灵池三日。'],
+      ['元魇圣祖', '十分之一的机会而已。你赌得起？'],
+      ['韩立', '赌得起。'],
+      ['旁白', '二涅变身的金光散去。石阵之上，只剩一纸口头之约，和一个不肯后退的人。']
+    ],
+    modajie_out: [
+      ['旁白', '三日后，韩立从池中起身。经脉里的真元沉下去，沉成一片海，不再翻涌。'],
+      ['韩立', '（洗灵池一天，抵外面一年。三日，够了。）'],
+      ['旁白', '炼魔草交了出去。两位圣祖没有出手——不是因为心善，是因为不值当。'],
+      ['韩立', '（不过这一次，是我侥幸。下次再遇上，未必还有灵药可以押。）'],
+      ['旁白', '苦灵岛在身后沉进雾里。再往上，只剩大乘那一道门。']
     ],
 
     sanjie: [
@@ -1065,6 +1104,7 @@
     huangquan:{ bg: { base: '#1d2f2c', a: '#243b37', b: '#152421' }, decor: [['rock', 0.34], ['tuft', 0.03]] },
     moyuan:   { bg: { base: '#1b2830', a: '#22333c', b: '#131d24' }, decor: [['rock', 0.14], ['tuft', 0.03]] },
     xiaoling: { bg: { base: '#3a2626', a: '#462e2e', b: '#2b1c1c' }, decor: [['rock', 0.24], ['tuft', 0.06]] },
+    modajie:  { bg: { base: '#1e2430', a: '#263040', b: '#161b24' }, decor: [['rock', 0.30], ['tuft', 0.02]] },
     sanjie:   { bg: { base: '#242a36', a: '#2c3443', b: '#1a1f28' }, decor: [['rock', 0.26], ['tuft', 0.04]] },
     jiujie:   { bg: { base: '#2a2f3a', a: '#343a47', b: '#1f232c' }, decor: [['rock', 0.24], ['tuft', 0.03]] },
     zhenxian: { bg: { base: '#2f3542', a: '#3a4253', b: '#232833' }, decor: [['rock', 0.22], ['tuft', 0.03]] },
@@ -1081,7 +1121,7 @@
   });
   // late.js 合底色时还没有这些图，这里手动补上
   for (const id of ['anyuan', 'tianyuan', 'heifeng', 'lianxu', 'fengyuan', 'guanghan', 'heti_guan',
-                    'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling',
+                    'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling', 'modajie',
                     'sanjie', 'jiujie', 'zhenxian', 'fsjie', 'xianjie',
                     'linghuang', 'zhandacheng', 'shengshi', 'heihu', 'baiguang', 'tianmo', 'diyi', 'huirenjie']) {
     const m = window.MAPS.find(x => x.id === id);
