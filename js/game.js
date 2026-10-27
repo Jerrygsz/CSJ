@@ -17,7 +17,7 @@
   };
 })();
 
-// 《凡人·长生劫》—— 主逻辑（多地图 / 练气十三层 / 太南小会坊市）
+// 《凡人·长生劫》—— 主逻辑（多地图 / 炼气期十三层 / 太南小会坊市）
 (function () {
   'use strict';
 
@@ -435,7 +435,7 @@
     if (!window.buildHeroSprite) return;
     const look = heroLook();
     Sprites.hanli = window.buildHeroSprite(look);
-    // 四类手绘帧一起换色：只换立绘不换帧，人一跑起来袍子就闪一下回练气期的绿
+    // 四类手绘帧一起换色：只换立绘不换帧，人一跑起来袍子就闪一下回炼气期的绿
     for (const action of ['run', 'idle', 'strike', 'hurt']) {
       const fr = window.buildHeroFrames ? window.buildHeroFrames(look, action) : null;
       if (fr) for (let i = 0; i < fr.length; i++) Sprites['hanli_' + action + i] = fr[i];
@@ -528,7 +528,7 @@
   // 当前修为（战斗中取角色等级，否则取存档长期修为）
   function curLevel() { return G.player ? G.player.level : (save.cultivate.level || 1); }
   // req 存的是等级值，对外显示成境界。判定也按「那一层的起始等级」算，
-  // 否则会出现「需练气二层」而人已在练气二层却按不动的情况。
+  // 否则会出现「需炼气期二层」而人已在炼气期二层却按不动的情况。
   function reqLv(n) {
     if (!n) return 1;
     let lv = 1;
@@ -1227,7 +1227,7 @@
       notify('此格空着 · 去洞府装'); Sfx.warn(); return false;
     }
     if ((G.quickCd[i] || 0) > 0) {
-      // 冷却中给个明确回音，否则玩家以为又坏了
+      // 间隔中给个明确回音，否则玩家以为又坏了
       const t = Math.ceil(G.quickCd[i]);
       if (pl) spawnText(pl.x, pl.y - 34, '回气中 · ' + t, '#9aa7b8', 12);
       Sfx.warn(); return false;
@@ -1490,7 +1490,7 @@
     for (const b of (window.BREAKTHROUGH || [])) if (b.lv === nextLv) return b;
     return null;
   }
-  // 修为是否已达「下一道门的前一层」（当前境界巅峰）：筑基需炼气十三层(35)、结丹需筑基后期(55)…
+  // 修为是否已达「下一道门的前一层」（当前境界巅峰）：筑基需炼气期十三层(35)、结丹需筑基后期(55)…
   function breakLevelOk(b) { return !b || (save.cultivate.level || 1) >= ((b.lv || 0) - 1); }
   function breakMissing(b) {
     if (!b) return [];
@@ -1522,7 +1522,7 @@
   // 看「修为是否已达当前境界巅峰」且「丹 / 材 / 石」是否齐，用来判断玩家此刻是否已具备筑基条件（决定地火之屋结局台词）。
   function breakReadyNow(b) {
     if (!b) return true;
-    if (!breakLevelOk(b)) return false;   // 修为未到门槛（如尚未炼气十三层），即便物事齐了也不能算「备齐」
+    if (!breakLevelOk(b)) return false;   // 修为未到门槛（如尚未炼气期十三层），即便物事齐了也不能算「备齐」
     for (const it of (b.items || [])) if ((save.inventory[it[0]] || 0) < it[1]) return false;
     for (const it of (b.needs || [])) if ((save.inventory[it[0]] || 0) < it[1]) return false;
     for (const mt of (b.mats || [])) if ((save.inventory[mt[0]] || 0) < mt[1]) return false;
@@ -1612,7 +1612,7 @@
     const raw = breakSuccessRate0(b);
     if (raw <= 0) return 0;                        // 没丹就是没丹，不给保底
     let r = Math.max(0.05, raw * (1 - shaDanPenalty()));
-    // 原著洞府加成：在小说点名的那座洞府突破（如筑基→翠屏山洞府），成功率额外 +30%；
+    // 原著洞府加成：在小说点名的那座洞府突破（如筑基→内门洞府），成功率额外 +30%；
     // 在其它地方（别的洞府 / 地火之屋当场冲关等）按正常标准计算。
     if (b && G.breakCaveId && b.canonCave && G.breakCaveId === b.canonCave) {
       r = Math.min(1, r + 0.3);
@@ -1640,9 +1640,9 @@
     { lv: 72, realm: '结丹后期', item: 'biyanjiu', tip: '原著里韩立卡在结丹中期瓶颈，是借裂风兽一族酿的碧焰酒冲过去的。' }
   ];
   // 修为受创后的重修：原著里韩立在小寰岛闭关、大量服食丹药——
-  // 一年回到练气九层，再一年重回筑基，又六年修成大衍诀第二层与身外化身，51 岁筑基后期。
+  // 一年回到炼气期九层，再一年重回筑基，又六年修成大衍诀第二层与身外化身，51 岁筑基后期。
   window.REBUILD_STAGES = window.REBUILD_STAGES || [
-    { lv: 19, label: '闭关一年', to: '练气九层', stones: 600, canon: '一年，丹药不断，气感一层层接回来。' },
+    { lv: 19, label: '闭关一年', to: '炼气期九层', stones: 600, canon: '一年，丹药不断，气感一层层接回来。' },
     { lv: 36, label: '再闭关一年', to: '筑基初期', stones: 1600, canon: '又一年。灵液重新凝作真元，筑基那道坎第二次跨过去。' },
     { lv: 48, label: '闭关六年', to: '筑基后期', stones: 3600, canon: '六年。大衍诀第二层成了，身外化身也立住了。' }
   ];
@@ -2748,7 +2748,7 @@
     if (!p) return;
     for (const npc of G.npcs) {
       npc.t += dt; npc.bob += dt * 2.2;
-      if (npc.retryT > 0) npc.retryT -= dt;   // 客机被支线挡下后的冷却，别一直弹提示
+      if (npc.retryT > 0) npc.retryT -= dt;   // 客机被支线挡下后的间隔，别一直弹提示
     }
     if (G.vacuumT > 0 || G.pendingEnding) return;
     // 触碰即开口
@@ -2866,7 +2866,7 @@
     renderWorldMap();
   }
 
-  // ---------- 境界（练气一至十三层，每层都有实感提升） ----------
+  // ---------- 境界（炼气一至十三层，每层都有实感提升） ----------
   function checkRealm(silent) {
     const p = G.player; if (!p) return null;
     let fired = null;
@@ -2951,7 +2951,7 @@
     '灵气入体，化作星屑。', '不争一时，只争那一线。', '这道坎，早晚要自己迈。',
     '若无今日之苦，何来他年之远。', '心静则气顺，气顺则法成。', '一息尚存，便未到头。'
   ];
-  // 段位：练气期照旧「练气X层」；筑基以上换成「境界·小成/大成/圆满」
+  // 段位：炼气期照旧「炼气X层」；筑基以上换成「境界·小成/大成/圆满」
   function stageLabel(p) {
     if (!p) return '';
     const base = realmName(p.level);
@@ -2980,7 +2980,7 @@
   // 只靠击杀的话，清怪慢的图会卡在 5~6 次
   const SHA_DRIP = 5;
   // boss 型剧情战（单挑）没有小怪可刷，一局只有 40~60 秒：
-  // 改用「打掉的血量」换煞气，一场打完约 1200 点，照样够 9 次
+  // 改用「打掉的气血」换煞气，一场打完约 1200 点，照样够 9 次
   const SHA_BOSS_DUEL = 250;
   const SHA_DRIP_BOSS = 2;
   function ownSkills() { return SKILLS.filter(s => (G.player.skills[s.id] || 0) > 0); }
@@ -3376,7 +3376,7 @@
 
     updateBullets(dt);
     updateFxBullets(dt);   // 队友攻击特效（纯视觉，不判伤害）
-    // 共斗中（同图 + 双方都在战斗/倒地）才由房主权威；不在同一张图时各打各的，本地照常刷怪
+    // 共斗中（同图 + 双方都在战斗/倒地）才由房主权威；不在同一张图时各打各的，本地照常遇敌
     if (G.coopRole === 'client' && G.coopShared) {
       // 客机：怪 / 弹幕由房主权威驱动，本地不跑 AI 与碰撞（伤害判定全在房主侧）
     } else {
@@ -4162,7 +4162,7 @@
     if (!save.cultivate) save.cultivate = { level: 1, xp: 0, skills: {} };
     const c = save.cultivate;
     if (!c.skills) c.skills = {};
-    // 破境图（地火之屋等）设有 startLevel 下限：进图会把战斗等级 p.level 抬到底线（如炼气十三层），
+    // 破境图（地火之屋等）设有 startLevel 下限：进图会把战斗等级 p.level 抬到底线（如炼气期十三层），
     // 这只为战斗平衡，不代表玩家真修到了这一层。若把这条「夹逼」回写进存档修为，
     // 突破门槛就会只认被地图抬高的 level、而不是玩家真实修为 —— 即「以 level 论、不以修为论」。
     // 故：p.level 恰好等于本图下限、且存档修为本就低于该下限时，视为夹逼，不回写存档修为。
@@ -4281,7 +4281,7 @@
     resetRun();
 
     // 境界继承：取「存档永久修为」与「本图起点」的较高者 —— 回刷低级图不会倒退
-    // 但「修为受创」期间不吃图的下限：跌回练气四层，就是练气四层，得自己修回来
+    // 但「修为受创」期间不吃图的下限：跌回炼气期四层，就是炼气期四层，得自己修回来
     const p = G.player;
     const cult = save.cultivate || { level: 1, skills: {} };
     // 记下「进来之前」的境界：有些人进图就会被图的下限抬上去（筑基 / 结丹）
@@ -4390,10 +4390,10 @@
         // 提前已筑基：省略突破剧情，直接进「被发现已筑基」的对白（原著里李化元当场点破）
         key = 'zhuji_out_ready';
       } else if (breakReadyNow(bg)) {
-        // 已备齐（修为已达炼气十三层 + 破境之物齐）：先问玩家是否就此突破（成败各凭把握）
+        // 已备齐（修为已达炼气期十三层 + 破境之物齐）：先问玩家是否就此突破（成败各凭把握）
         key = 'zhuji_out_ask';
       } else if (bg && !breakLevelOk(bg)) {
-        // 修为未达当前境界巅峰（如尚未炼气十三层）：丹药齐了也冲不动 → 勉励厚实根基 + 锁后章
+        // 修为未达当前境界巅峰（如尚未炼气期十三层）：丹药齐了也冲不动 → 勉励厚实根基 + 锁后章
         key = 'zhuji_out_lock_lv';
       } else {
         // 修为到了但破境之物不齐：勉励备齐 + 锁后章
@@ -4440,7 +4440,7 @@
       G.breakCaveId = null;   // 破境结算后清空「出关洞府」上下文
     });
   }
-  // 退回翠屏山洞府（地火之屋的归属洞府）；若尚未开启则一并开通，保证「回到洞府界面」可达
+  // 退回内门洞府（地火之屋的归属洞府）；若尚未开启则一并开通，保证「回到洞府界面」可达
   function gotoZhujiCave() {
     const c = 'cuiping';
     if ((save.caves || []).indexOf(c) < 0) { save.caves.push(c); writeSave(); }
@@ -4550,20 +4550,20 @@
       save.caves.push(m.cave);
       cave = CAVES[m.cave];
     }
-    // 古传送阵：为南宫婉疗伤，修为被吸干 —— 原著第403章左右：跌回「练气四层」。
-    // 照原著照抄：真跌到练气四层。恢复不走打怪，走「回洞府闭关 + 大量服食丹药」，见 REBUILD_STAGES。
+    // 古传送阵：为南宫婉疗伤，修为被吸干 —— 原著第403章左右：跌回「炼气期四层」。
+    // 照原著照抄：真跌到炼气期四层。恢复不走打怪，走「回洞府闭关 + 大量服食丹药」，见 REBUILD_STAGES。
     if (m.id === 'guchuan' && !save.wounded) {
       const lv0 = save.cultivate.level || 1;
       if (lv0 > 7) {
         save.wounded = { to: lv0, mult: 1 };
-        // 练气四层在境界表里是 Lv7（Lv4 只是「练气二层」），别按数字直觉写 4
+        // 炼气期四层在境界表里是 Lv7（Lv4 只是「炼气期二层」），别按数字直觉写 4
         save.cultivate.level = 7;
         save.cultivate.xp = 0;
         // 「历史最高」也一并压下去：洞府与属性面板都是取 max(修为, 最高) 显示境界，
         // 不压的话跌了也看不出来，还会被当成本境去算功法位与装配。
         save.best.level = 7;
         if (G.player) { G.player.level = 7; G.player.next = xpNeed(7); checkRealm(true); recalcMaxhp(); G.player.hp = G.player.maxhp; }
-        G.woundedNote = '修为受创 · 跌回练气四层（原著如此）。回小寰岛洞府闭关重修，方能一层层补回';
+        G.woundedNote = '修为受创 · 跌回炼气期四层（原著如此）。回小寰岛洞府闭关重修，方能一层层补回';
       }
     }
     // 太南小会散场后，后巷才会有人（原著那两个散修际遇挂在小会上，坊市里刷不出人）
@@ -4734,7 +4734,7 @@
   function banner(text) {
     if (!elBanner) return;
     // 落点按「HUD 在不在」决定，而不是枚举状态名（规格 §2.11）：
-    // 152 这个高度本来就是为了让开顶栏与 boss 血条；HUD 不在时它纯属浪费，
+    // 152 这个高度本来就是为了让开顶栏与 boss 气血；HUD 不在时它纯属浪费，
     // 还会砸在面板上部 —— 坊市里正好压住页签，两秒多里看不见自己在点哪。
     // 判断必须看真实可见性：#hud 的隐藏写在 CSS 里，内联 style.display 是空串，
     // 拿 '' !== 'none' 去比会恒为真，等于永远走战斗态（已实测踩过）。
@@ -4862,7 +4862,7 @@
   }
   // ================= 大境界分组：功法按境界收纳 =================
   window.REALM_TIERS = [
-    { id: 'lianqi',   name: '练气', min: 1,   max: 35 },
+    { id: 'lianqi',   name: '炼气', min: 1,   max: 35 },
     { id: 'zhuji',    name: '筑基', min: 36,  max: 55 },
     { id: 'jiedan',   name: '结丹', min: 56,  max: 81 },
     { id: 'yuanying', name: '元婴', min: 82,  max: 111 },
@@ -5043,7 +5043,7 @@
       ['伤害倍率', '×' + dmg.toFixed(2)],
       ['出手间隔', '×' + atk.toFixed(2)],
       ['移动速度', '×' + spd.toFixed(2)],
-      ['暴击', Math.round(crit * 100) + '%'],
+      ['重击', Math.round(crit * 100) + '%'],
       ['减伤', Math.round(armor * 100) + '%'],
       ['每秒回血', ((0.7 * ((save.cultivate.skills || {}).regen || 0)) + rb('regen') + (save.bonuses.regen || 0) + (g.regen || 0)).toFixed(1)],
       ['拾取范围', '×' + (1 + rb('pickup') + (save.bonuses.pickup || 0) + (g.pickup || 0)).toFixed(2)],
@@ -5341,11 +5341,11 @@
   function renderCaveBreak(lv) {
     const list = window.BREAKTHROUGH || [];
     let html = '';
-    // 修为受创：原著里跌回练气四层，靠在小寰岛闭关、大量服食丹药一层层修回来
+    // 修为受创：原著里跌回炼气期四层，靠在小寰岛闭关、大量服食丹药一层层修回来
     if (save.wounded) {
       html += '<div class="cave-sec"><div class="cs-title">重修 · 修为受创</div>' +
-        '<div class="cs-note">被南宫婉吸干修为，跌回 <b>练气四层</b>（原著如此）。' +
-        '原著里他在小寰岛闭府，大量服食丹药：<b>一年</b>回到练气九层，<b>再一年</b>重回筑基，' +
+        '<div class="cs-note">被南宫婉吸干修为，跌回 <b>炼气期四层</b>（原著如此）。' +
+        '原著里他在小寰岛闭府，大量服食丹药：<b>一年</b>回到炼气期九层，<b>再一年</b>重回筑基，' +
         '<b>又六年</b>修成大衍诀第二层与身外化身，五十一岁筑基后期。眼下修到 <b>' + realmName(lv) + '</b>。</div>';
       for (const st of (window.REBUILD_STAGES || [])) {
         const done = lv >= st.lv;
@@ -5705,7 +5705,7 @@
           '</div></div>');
       }
     } else {
-      // 每张图各卖各的：太南小会是练气散修的摊子，天星城是乱星海的市面
+      // 每张图各卖各的：太南小会是炼气散修的摊子，天星城是乱星海的市面
       const stock = (G.map && G.map.shop) ? SHOP_STOCK.filter(s => G.map.shop.indexOf(s.id) >= 0) : SHOP_STOCK;
       // 晶龙阁拍卖（原著：阗天城交易会期间，天晶真人主持，入场赠面具掩身份）
       if (G.map && G.map.auction && G.map.auction.length) {
@@ -5915,7 +5915,7 @@
     while (lv < 140 && guard++ < 400) {
       const need = xpNeed(lv);
       if (c.xp < need) break;
-      // 大境界门：丹药材料剧情齐了也得回洞府「突破」冲关，打坐/刷怪过不去
+      // 大境界门：丹药材料剧情齐了也得回洞府「突破」冲关，打坐/遇敌过不去
       const blk = breakReqFor(lv + 1);
       if (blk) { c.xp = Math.min(c.xp, need - 1); G.breakPending = blk; break; }
       // 小境界门（原著点名处）：物事没备齐就顶在关口
@@ -6203,7 +6203,7 @@
   }
   function openRebirth() {
     const p = rebirthPreview();
-    const names = { maxhp: '生命', dmg: '伤害', atkSpd: '攻速', spd: '移速', regen: '回血', crit: '暴击', armor: '减伤', pickup: '拾取', xpMul: '修为' };
+    const names = { maxhp: '生命', dmg: '伤害', atkSpd: '攻速', spd: '移速', regen: '回血', crit: '重击', armor: '减伤', pickup: '拾取', xpMul: '修为' };
     const bits = [];
     for (const k of REBIRTH_KEYS) {
       const v = (p.add[k] || 0) / REBIRTH_DIV;

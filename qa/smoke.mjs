@@ -456,7 +456,7 @@ eq(W.MAIN_MAP_COUNT, 48, 'MAIN_MAP_COUNT 跟着变');
 const RL = W.REALM_LAYERS;
 eq(RL.length, 25, '境界 25 层（练气十三 + 筑基三 + 结丹三 + 元婴三 + 化神三）');
 const rn = lv => { let n = RL[0].name; for (const r of RL) { if (lv >= r.lv) n = r.name; else break; } return n; };
-eq(rn(35), '练气十三层', 'lv35 仍在练气十三层（筑基丹门前）');
+eq(rn(35), '炼气期十三层', 'lv35 仍在炼气期十三层（筑基丹门前）');
 eq(rn(36), '筑基初期', 'lv36 跨入筑基');
 eq(rn(48), '筑基后期', 'lv48 筑基后期');
 eq(rn(56), '结丹初期', 'lv56 跨入结丹');

@@ -1,5 +1,5 @@
 // 道具体系：材料 / 丹药符箓 / 装备，按《凡人修仙传》筑基前风物命名
-// req = 使用或佩戴所需的最低角色等级（对应练气层数，见 REALM_LAYERS）
+// req = 使用或佩戴所需的最低角色等级（对应炼气层数，见 REALM_LAYERS）
 
 window.RARITY = [
   { name: '凡品', color: '#cfd6e2', glow: 'rgba(207,214,226,0.75)' },
@@ -24,8 +24,8 @@ window.MATERIALS = [
   { id: 'm_huangjing',name: '黄精',     icon: '🌿', rarity: 0, desc: '山阴处挖的老黄精，补气。凡人也吃，修士也吃。' },
   { id: 'm_zihua',    name: '紫猴花',   icon: '🌸', rarity: 1, desc: '花开如猴面，紫得发乌。筑基丹三味主药之一。' },
   { id: 'm_tianling', name: '天灵果',   icon: '🍒', rarity: 2, desc: '生于灵气汇聚处，果皮薄得能看见里面的光。筑基丹主药。' },
-  { id: 'f_peiyuan',  name: '培元丹方', icon: '📜', rarity: 3, req: 1,
-    desc: '墨大夫那本药书里夹的一页，写着培元丹的君臣佐使。有了它，炉子才认得这味药。', unique: true },
+  { id: 'f_peiyuan',  name: '养精丹方', icon: '📜', rarity: 3, req: 1,
+    desc: '墨大夫那本药书里夹的一页，写着养精丹的君臣佐使。有了它，炉子才认得这味药。', unique: true },
   { id: 'f_huanglong', name: '黄龙丹方', icon: '📜', rarity: 3, req: 1,
     desc: '太南小会上一个散修出手的玉简，边角已经磨花了。', unique: true },
   { id: 'f_zhuji',   name: '筑基丹方', icon: '📜', rarity: 4, req: 1,
@@ -67,10 +67,10 @@ window.ITEMS = [
     effect: { healPct: 0.30 }, buffs: [{ stat: 'regen', amount: 2.0, dur: 12 }] },
   { id: 'lingzhi',  name: '辟谷丹',   rarity: 0, icon: '🍄', req: 1, desc: '服下 20 息不思饮食，气血自回。赶路闭关都靠它', craftOnly: 'alchemy',
     effect: { healPct: 0.12 }, buffs: [{ stat: 'regen', amount: 1.5, dur: 20 }] },
-  { id: 'lingshi',  name: '下品灵石', rarity: 0, icon: '💎', req: 1, desc: '捏碎了吞吐灵气，得 8 点修为', effect: { xp: 8 } },
-  { id: 'peiyuan',  name: '疗元丹',   rarity: 2, icon: '🟠', req: 56, desc: '回血 45%，其后 15 息持续回血。结丹修士随身的家底', craftOnly: 'alchemy',
+  { id: 'lingshi',  name: '低阶灵石', rarity: 0, icon: '💎', req: 1, desc: '捏碎了吞吐灵气，得 8 点修为', effect: { xp: 8 } },
+  { id: 'peiyuan',  name: '养精丹',   rarity: 2, icon: '🟠', req: 56, desc: '回血 45%，其后 15 息持续回血。结丹修士随身的家底', craftOnly: 'alchemy',
     effect: { healPct: 0.45 }, buffs: [{ stat: 'regen', amount: 2.5, dur: 15 }] },
-  { id: 'huanglong',name: '黄龙丹',   rarity: 2, icon: '🟡', req: 8, desc: '30 息内所得修为 +25%。练气期最实在的一味', craftOnly: 'alchemy',
+  { id: 'huanglong',name: '黄龙丹',   rarity: 2, icon: '🟡', req: 8, desc: '30 息内所得修为 +25%。炼气期最实在的一味', craftOnly: 'alchemy',
     buffs: [{ stat: 'xpMul', amount: 0.25, dur: 30 }] },
   { id: 'jinsui',   name: '金髓丸',   rarity: 3, icon: '🟤', req: 12, desc: '25 息内伤害 +20%、出手更急。丹成色如金髓，入口滚烫', craftOnly: 'alchemy',
     buffs: [{ stat: 'dmg', amount: 0.20, dur: 25 }, { stat: 'atkSpd', amount: 0.10, dur: 25 }] },
@@ -80,9 +80,9 @@ window.ITEMS = [
   { id: 'qingyan',  name: '轻身符',   rarity: 1, icon: '📜', req: 1,  desc: '身轻如燕，18 息内移速 +22%', buffs: [{ stat: 'spd', amount: 0.22, dur: 18 }] },
   { id: 'xueshen',  name: '火弹符',   rarity: 1, icon: '🔥', req: 3,  desc: '催动即一团火，15 息内伤害 +28%', buffs: [{ stat: 'dmg', amount: 0.28, dur: 15 }] },
   { id: 'shenxing', name: '神行符',   rarity: 1, icon: '📜', req: 36, desc: '贴腿即走，22 息内移速 +30%。筑基修士赶路逃命都靠它', buffs: [{ stat: 'spd', amount: 0.30, dur: 22 }] },
-  { id: 'jifeng',   name: '爆裂符',   rarity: 2, icon: '💥', req: 36, desc: '15 息内暴击 +15%、伤害 +15%。符成带煞气', buffs: [{ stat: 'crit', amount: 0.15, dur: 15 }, { stat: 'dmg', amount: 0.15, dur: 15 }] },
+  { id: 'jifeng',   name: '爆裂符',   rarity: 2, icon: '💥', req: 36, desc: '15 息内重击 +15%、伤害 +15%。符成带煞气', buffs: [{ stat: 'crit', amount: 0.15, dur: 15 }, { stat: 'dmg', amount: 0.15, dur: 15 }] },
   { id: 'qiannian', name: '清心符',   rarity: 3, icon: '🪷', req: 36, desc: '清心明神，20 息内减伤 +12%、缓缓回血', buffs: [{ stat: 'armor', amount: 0.12, dur: 20 }, { stat: 'regen', amount: 1.0, dur: 20 }] },
-  { id: 'lianqi',   name: '破禁符',   rarity: 3, icon: '📕', req: 56, desc: '专破禁制屏障，18 息内伤害 +30%、暴击 +10%', buffs: [{ stat: 'dmg', amount: 0.30, dur: 18 }, { stat: 'crit', amount: 0.10, dur: 18 }] },
+  { id: 'lianqi',   name: '破禁符',   rarity: 3, icon: '📕', req: 56, desc: '专破禁制屏障，18 息内伤害 +30%、重击 +10%', buffs: [{ stat: 'dmg', amount: 0.30, dur: 18 }, { stat: 'crit', amount: 0.10, dur: 18 }] },
   { id: 'bichen',   name: '避尘符',   rarity: 3, icon: '🛡', req: 56, desc: '尘垢不侵，25 息内减伤 +18%', buffs: [{ stat: 'armor', amount: 0.18, dur: 25 }] },
   { id: 'chuansong',name: '空间传送符', rarity: 4, icon: '🌀', req: 82, desc: '撕开空间就走，8 息内移速 +55%。元婴修士的保命底牌', buffs: [{ stat: 'spd', amount: 0.55, dur: 8 }] },
   { id: 'tishen',   name: '替身傀儡', rarity: 4, icon: '🪆', req: 82, desc: '替你挨这一下，20 息内减伤 +25%', buffs: [{ stat: 'armor', amount: 0.25, dur: 20 }] },
@@ -98,7 +98,7 @@ window.ITEMS = [
   { id: 'money_sword', name: '金钱剑',  rarity: 2, icon: '🪙', slot: 'weapon', req: 5,  desc: '伤害 +16%，攻速 +3%。一串铜钱炼成的飞剑，韩立早年第一件本命法器', effect: { dmg: 0.16, atkSpd: 0.03 } },
   { id: 'chitong',  name: '赤铜短戟',   rarity: 2, icon: '🔱', slot: 'weapon', req: 9,  desc: '伤害 +14%，上限 +10。赤铜导灵，斩妖不卷刃', effect: { dmg: 0.14, maxhp: 10 } },
   { id: 'qingzhu',  name: '青竹剑',     rarity: 2, icon: '⚔', slot: 'weapon', req: 7,  desc: '伤害 +18%，移速 +3%。竹中取青，轻而不飘', effect: { dmg: 0.18, spd: 0.03 } },
-  { id: 'moyu',     name: '墨玉飞刀',   rarity: 3, icon: '🔪', slot: 'weapon', req: 12, desc: '伤害 +22%，暴击 +6%。飞出无声，回手带血', effect: { dmg: 0.22, crit: 0.06 } },
+  { id: 'moyu',     name: '墨玉飞刀',   rarity: 3, icon: '🔪', slot: 'weapon', req: 12, desc: '伤害 +22%，重击 +6%。飞出无声，回手带血', effect: { dmg: 0.22, crit: 0.06 } },
   { id: 'xuantie',  name: '玄铁重剑',   rarity: 3, icon: '🗡', slot: 'weapon', req: 16, desc: '伤害 +34%。重得压手，一剑下去山石开裂', effect: { dmg: 0.34 } },
 
   // ==== 护甲（装备）====
@@ -112,11 +112,11 @@ window.ITEMS = [
   { id: 't_mupai',  name: '旧木牌',     rarity: 0, icon: '🪵', slot: 'trinket', req: 1,  desc: '修为 +3%。三叔给的，说是保平安', effect: { xpMul: 0.03 } },
   { id: 'juling',   name: '聚灵珠',     rarity: 2, icon: '🔮', slot: 'trinket', req: 6,  desc: '拾取 +30%，修为 +8%。灵气自己往身上靠', effect: { pickup: 0.3, xpMul: 0.08 } },
   { id: 't_xuanyu', name: '玄玉珠',     rarity: 3, icon: '⚪', slot: 'trinket', req: 13, desc: '每秒回血 +0.8，上限 +20。玉里像有水在走', effect: { regen: 0.8, maxhp: 20 } },
-  { id: 't_tianlei',name: '天雷子',     rarity: 4, icon: '🟣', slot: 'trinket', req: 22, desc: '暴击 +12%，伤害 +15%。摸上去指尖发麻', effect: { crit: 0.12, dmg: 0.15 } },
+  { id: 't_tianlei',name: '天雷子',     rarity: 4, icon: '🟣', slot: 'trinket', req: 22, desc: '重击 +12%，伤害 +15%。摸上去指尖发麻', effect: { crit: 0.12, dmg: 0.15 } },
   { id: 't_zhangtie',name: '张铁的铁牌', rarity: 2, icon: '🪙', slot: 'trinket', req: 5, desc: '上限 +22，减伤 4%。铁牌边角磨得发亮，背面刻着一个「铁」字', effect: { maxhp: 22, armor: 0.04 }, unique: true },
 
   // ==== 符宝（装备）====
-  { id: 'fb_huo',   name: '火球符宝',   rarity: 2, icon: '🔥', slot: 'talisman', req: 5,  desc: '伤害 +12%，暴击 +3%。贴在袖里，出手就是一团火', effect: { dmg: 0.12, crit: 0.03 } },
+  { id: 'fb_huo',   name: '火球符宝',   rarity: 2, icon: '🔥', slot: 'talisman', req: 5,  desc: '伤害 +12%，重击 +3%。贴在袖里，出手就是一团火', effect: { dmg: 0.12, crit: 0.03 } },
   { id: 'fb_bing',  name: '冰锥符宝',   rarity: 2, icon: '❄', slot: 'talisman', req: 8,  desc: '伤害 +10%，移速 +3%。锥出成线，落地成霜', effect: { dmg: 0.10, spd: 0.03 } },
   { id: 'huyu',     name: '护身玉符',   rarity: 3, icon: '🛡', slot: 'talisman', req: 10, desc: '减伤 10%，上限 +25。三道灵纹，替他挨过一刀', effect: { armor: 0.10, maxhp: 25 } },
   { id: 'fb_feng',  name: '风刃符宝',   rarity: 3, icon: '🌀', slot: 'talisman', req: 12, desc: '攻速 +14%，伤害 +8%。刃过之处风声先到', effect: { atkSpd: 0.14, dmg: 0.08 } }

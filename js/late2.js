@@ -52,17 +52,17 @@
     // 造化丹的定义与丹方统一收在 value.js（造化果炼），此处不再重复定义（曾致 id 重复）。
     { id: 'moyuan',   name: '魔元丹',       rarity: 4, icon: '😈', req: 108, desc: '伤害 +45%，上限 +160。魔陀山秘丹，原著里韩立拿玄玉换了三枚，化神那一炉的主药', effect: { dmg: 0.45, maxhp: 160 } },
     // ---- 兵器 / 护甲 ----
-    { id: 'w_xuemo',  name: '血魔剑',       rarity: 4, icon: '🗡', slot: 'weapon', req: 82, desc: '伤害 +42%，暴击 +10%。掩月宗大长老的佩剑，剑身有血色纹路', effect: { dmg: 0.42, crit: 0.10 }, unique: true },
+    { id: 'w_xuemo',  name: '血魔剑',       rarity: 4, icon: '🗡', slot: 'weapon', req: 82, desc: '伤害 +42%，重击 +10%。掩月宗大长老的佩剑，剑身有血色纹路', effect: { dmg: 0.42, crit: 0.10 }, unique: true },
     { id: 'a_xuemo',  name: '血魔甲',       rarity: 4, icon: '🥷', slot: 'armor', req: 82, desc: '上限 +130，减伤 18%。血魔剑的配套甲衣，穿上人显小一圈', effect: { maxhp: 130, armor: 0.18 }, unique: true },
     { id: 'a_jiaolong', name: '蛟龙甲',     rarity: 4, icon: '🐉', slot: 'armor', req: 92, desc: '上限 +160，减伤 20%。坠魔谷蟒兽的皮，水火都咬不穿', effect: { maxhp: 160, armor: 0.20 }, unique: true },
     { id: 'a_tiancan', name: '天蚕衣',      rarity: 4, icon: '👘', slot: 'armor', req: 102, desc: '上限 +190，减伤 22%。大晋天蚕丝织的，刀过不留痕', effect: { maxhp: 190, armor: 0.22 }, unique: true },
     // ---- 法宝 ----
-    { id: 't_yanghuan', name: '阳环',       rarity: 4, icon: '💍', slot: 'trinket', req: 82, desc: '伤害 +20%，暴击 +8%。两仪环的阳面，压得住北极元光', effect: { dmg: 0.20, crit: 0.08 }, unique: true },
+    { id: 't_yanghuan', name: '阳环',       rarity: 4, icon: '💍', slot: 'trinket', req: 82, desc: '伤害 +20%，重击 +8%。两仪环的阳面，压得住北极元光', effect: { dmg: 0.20, crit: 0.08 }, unique: true },
     { id: 't_guiluo', name: '鬼罗幡',       rarity: 4, icon: '🏴', slot: 'trinket', req: 92, desc: '伤害 +24%，拾取 +30%。阴罗宗四长老的幡，幡下养着鬼', effect: { dmg: 0.24, pickup: 0.3 }, unique: true },
     { id: 't_yinluo', name: '阴罗蟠',       rarity: 4, icon: '🪢', slot: 'trinket', req: 92, desc: '上限 +120，减伤 12%。阴罗宗至宝，缠上就挣不开', effect: { maxhp: 120, armor: 0.12 }, unique: true },
-    { id: 't_wuzi',   name: '五子同心魔',   rarity: 4, icon: '👥', slot: 'talisman', req: 102, desc: '伤害 +30%，暴击 +10%。五个元婴级魔头，认主之后只认一个', effect: { dmg: 0.30, crit: 0.10 }, unique: true },
+    { id: 't_wuzi',   name: '五子同心魔',   rarity: 4, icon: '👥', slot: 'talisman', req: 102, desc: '伤害 +30%，重击 +10%。五个元婴级魔头，认主之后只认一个', effect: { dmg: 0.30, crit: 0.10 }, unique: true },
     { id: 't_yuanci', name: '元磁山',       rarity: 4, icon: '⛰', slot: 'talisman', req: 112, desc: '减伤 20%，上限 +200。整座山炼化了收在体内，压得人喘不过气', effect: { armor: 0.20, maxhp: 200 }, unique: true },
-    { id: 'fb_sanyan', name: '三焰扇',      rarity: 4, icon: '🪭', slot: 'talisman', req: 96, desc: '伤害 +34%，暴击 +8%。七焰扇的仿品，三味真火轮着扇', effect: { dmg: 0.34, crit: 0.08 }, craftOnly: 'forge' },
+    { id: 'fb_sanyan', name: '三焰扇',      rarity: 4, icon: '🪭', slot: 'talisman', req: 96, desc: '伤害 +34%，重击 +8%。七焰扇的仿品，三味真火轮着扇', effect: { dmg: 0.34, crit: 0.08 }, craftOnly: 'forge' },
     { id: 't_pojie',  name: '破界符',       rarity: 4, icon: '📜', slot: 'trinket', req: 112, desc: '移速 +18%，减伤 8%。玲珑留下的，撕开空间就走', effect: { spd: 0.18, armor: 0.08 }, unique: true }
   );
 
@@ -376,7 +376,7 @@
     ],
     jieying: [
       ['旁白', '云梦山洞府，石门落下。灵脉从脚底往上顶，一层一层撞在丹田上。'],
-      ['韩立', '（二百一十七岁。练气那段日子像是上辈子的事。）'],
+      ['韩立', '（二百一十七岁。炼气那段日子像是上辈子的事。）'],
       ['旁白', '一年，三年，七年。丹田里那团灵气越转越急，最后缩成一个点。'],
       ['韩立', '（要成了。）'],
       ['旁白', '那一点炸开的时候，一个巴掌大的小人从里面坐了起来，睁眼看他。'],
@@ -1059,7 +1059,7 @@
     { id: 'sk_frost',  name: '冰冻术·法诀', rarity: 3, icon: '📕', req: 20, teach: 'frost',  desc: '习得《冰冻术》第一层。韩立参悟的冰霜符箓，减速近身之敌。' },
     { id: 'sk_gourd',  name: '灵葫诀·炼法', rarity: 3, icon: '📕', req: 25, teach: 'gourd', desc: '习得《灵葫诀》第一层。本命灵葫在身，生命上限提升。' },
     // ---- 按原著补的各境界功法：买到或搜出来，回去逐个学 ----
-    { id: 'sk_changchun', name: '长春功·法诀',     rarity: 2, icon: '📕', req: 1,   teach: 'changchun', desc: '习得《长春功》。墨大夫传授的引气吐纳根基，韩立练气期的根本功法' },
+    { id: 'sk_changchun', name: '长春功·法诀',     rarity: 2, icon: '📕', req: 1,   teach: 'changchun', desc: '习得《长春功》。墨大夫传授的引气吐纳根基，韩立炼气期的根本功法' },
     { id: 'sk_sanyan',    name: '三焰扇·扇法',     rarity: 4, icon: '📕', req: 82,  teach: 'sanyan',    desc: '习得《三焰扇》。仿七焰扇而制，大衍神君改制三十一种材料，韩立元婴后期才炼成' },
     { id: 'sk_jianfen',   name: '剑影分光术·法诀', rarity: 4, icon: '📕', req: 56,  teach: 'jianfen', desc: '习得《剑影分光术》。青元剑诀第三层神通，一剑化数影' },
     { id: 'sk_shayao',    name: '煞妖诀·法诀',     rarity: 4, icon: '📕', req: 56,  teach: 'shayao',  desc: '习得《煞妖诀》。玄阴经里炼煞气为攻杀的一路，煞气绕身触者即伤' },
@@ -1115,7 +1115,7 @@
     { id: 'sk_pojie',     price: 8800, cat: 'skill' }
   );
 
-  // 太南小会是练气散修的摊子，只卖低阶法诀
+  // 太南小会是炼气散修的摊子，只卖低阶法诀
   const TN = window.MAPS.find(m => m.id === 'tainan');
   // 散修摊子上有的是低阶法诀；**长春功不在此列**——那是墨大夫私下传给韩立的，摊子上不该有
   if (TN) TN.shop = TN.shop.concat(['sk_swift', 'sk_fire', 'sk_orb', 'sk_regen']);
@@ -1125,7 +1125,7 @@
 
   // 天南交易会（九国盟·阗天城）：原著里百年一届、元婴老怪戴面具置换宝物的地方，
   // 「珍稀灵药、法宝、功法及情报」都在这流通，晶龙阁内另有拍卖（天晶真人主持，入场赠面具掩身份）。
-  // 练气期那些符箓法器，不会摆到这种台面上来。
+  // 炼气期那些符箓法器，不会摆到这种台面上来。
   const JY = window.MAPS.find(m => m.id === 'jiaoyihui');
   if (JY) {
     JY.shopSub = '九国盟阗天城，百年一届。元婴老怪戴面具换物，晶龙阁里另有拍卖。';

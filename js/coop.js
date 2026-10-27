@@ -274,7 +274,7 @@
     window.Net.sendGame({
       t: 'enemy', list: list, eb: eb, dmgs: dmgs, drops: drops, vac: g.vacuumT > 0 ? 1 : 0,
       tm: Math.round(g.time * 10) / 10,      // 房主当前地图时间
-      sp: Math.round(g.spawnT * 10) / 10,    // 下次刷怪倒计时
+      sp: Math.round(g.spawnT * 10) / 10,    // 下次遇敌倒计时
       el: g.eliteIdx || 0,                   // 已出的精英数
       ne: Math.round(g.nextEliteT || 0),     // 下一个精英的时间点
       bs: g.bossSpawned ? 1 : 0,             // Boss 是否已登场
@@ -470,7 +470,7 @@
     // 否则双方都以为自己是房主时，会互相用对方的快照覆盖自己的怪，场上怪直接错乱。
     if (g.coopRole === 'host') return;
     // 对齐房主的时间进度：后进图的人本地时间从 0 起算，会和房主各刷各的怪。
-    // 直接采用房主的时钟与刷怪进度，双方才在同一条时间线上共同打。
+    // 直接采用房主的时钟与遇敌进度，双方才在同一条时间线上共同打。
     if (data.tm != null) {
       // 追进度（后进图一次性跳到房主时间）时，把已经错过的定时剧情标成已过：
       // 否则 checkStory 会按新时间把过去那些对话一次性全弹出来，人就被钉在对话里打不了。
@@ -610,7 +610,7 @@
       if (pt.dir < 0) ctx.scale(-1, 1);
       ctx.drawImage(c, -w / 2, -h / 2, w, h); ctx.restore();
     }
-    // 血条（在名牌上方，一眼看见队友还剩多少）
+    // 气血（在名牌上方，一眼看见队友还剩多少）
     const ratio = Math.max(0, Math.min(1, (pt.hp || 0) / (pt.maxhp || 1)));
     const bw = 36, bh = 4;
     ctx.fillStyle = 'rgba(10,20,30,0.72)';
@@ -641,7 +641,7 @@
   }
 
   // ---------- 渲染：屏幕空间角标（P2 / P5 强化）----------
-  // P5：角标原来画在 (8,8)，一直被 DOM 血条压着看不见。改为按 #hud 实际底边
+  // P5：角标原来画在 (8,8)，一直被 DOM 气血压着看不见。改为按 #hud 实际底边
   // 动态下移（换算成逻辑坐标，1 秒缓存一次，别每帧 getBoundingClientRect）。
   let hudTop = 96, hudTopAt = 0;
   function hudTopY() {
@@ -649,7 +649,7 @@
     if (now - hudTopAt > 1000) {
       hudTopAt = now;
       try {
-        // #hud 是 inset:0 的全屏容器，量不得；要量里面的 #topbar（血条/状态那一条）
+        // #hud 是 inset:0 的全屏容器，量不得；要量里面的 #topbar（气血/状态那一条）
         const el = document.getElementById('topbar') || document.getElementById('hud');
         const r = el ? el.getBoundingClientRect() : null;
         const cv = document.querySelector('canvas');

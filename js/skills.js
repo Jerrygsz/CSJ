@@ -9,7 +9,7 @@
 // atk   = 进攻参数（只有 ranged / ranged_aoe / aura 用得上）
 //   kind      beam 定向多段 | homing 追踪 | spread 扇形 | burst 中心爆发 | thunder 天落雷 | orbit 环绕 | field 领域
 //   base/perLv      伤害 = base + perLv × 层数
-//   cd              冷却秒数；cdBase/cdPerLv/cdMin 用于随层数缩短的冷却
+//   cd              间隔秒数；cdBase/cdPerLv/cdMin 用于随层数缩短的间隔
 //   countBase/countPerLv 弹数 / 落雷数；pierceBase/piercePerLv 穿透
 //   range      锁敌范围；home 是否追踪；life 弹寿命；spread 扇形张角
 //   rad        环绕轨道半径；radBase/radPerLv 爆发/领域半径
@@ -18,12 +18,12 @@
 //   spd atkSpd pickup regen xpMul dmg crit maxhp armor herb
 //
 // minLv: 入门最低境界等级 —— 境界不到，连门都入不了
-// 层数上限另受境界封顶（realmSkillCap）：练气 3、筑基 4、结丹 5、元婴 6、化神 7
+// 层数上限另受境界封顶（realmSkillCap）：炼气 3、筑基 4、结丹 5、元婴 6、化神 7
 // 学过 ≠ 身上在用：ipher actives 要装到身上才起效；passive 学会即常驻。
 // 大境界一破，身上的旧功法自动卸下，只留一门主力。
 
 window.SKILLS = [
-  // ============ 练气期：七玄门根基 → 太南小会 → 血色禁地 → 天星城 ============
+  // ============ 炼气期：七玄门根基 → 太南小会 → 血色禁地 → 天星城 ============
   { id: 'sword', name: '控物术', icon: '🗡', max: 6, minLv: 1, main: true, type: 'ranged',
     atk: { kind: 'beam', base: 8, perLv: 3, cd: 0.85, countBase: 1, countPerLv: 0.5, pierceBase: 1, piercePerLv: 1 / 3, range: 360, home: false, life: 1.4, vfx: 'qingmang' },
     desc: '以神念御物，一道青光直取最近的敌人。长春功所含的基础法术，韩立起步就靠它' },
@@ -41,7 +41,7 @@ window.SKILLS = [
     desc: '长春功所含冰冻术：身周五丈寒气凝结，踏入者行动迟滞' },
   { id: 'changchun', name: '长春功', icon: '🌱', max: 6, minLv: 1, type: 'passive',
     effect: { regen: 0.5, xpMul: 0.05 },
-    desc: '墨大夫传授的引气吐纳根基，韩立练气期的根本功法。缓缓回血，修为略进' },
+    desc: '墨大夫传授的引气吐纳根基，韩立炼气期的根本功法。缓缓回血，修为略进' },
   { id: 'swift', name: '罗烟步', icon: '💨', max: 5, minLv: 1, type: 'passive',
     effect: { spd: 0.09 },
     desc: '血色禁地所得身法真传，步法如烟，移速大增' },
@@ -163,7 +163,7 @@ window.realmSkillCap = function (lv) {
   if (lv >= 82) return 6;    // 元婴
   if (lv >= 56) return 5;    // 结丹
   if (lv >= 36) return 4;    // 筑基
-  return 3;                  // 练气
+  return 3;                  // 炼气
 };
 window.skillCapById = function (id, lv) {
   const s = window.SKILLS.find(x => x.id === id);
@@ -178,7 +178,7 @@ window.skillSlots = function (lv) {
   if (lv >= 82) return 4;    // 元婴
   if (lv >= 56) return 3;    // 结丹
   if (lv >= 36) return 2;    // 筑基
-  return 1;                  // 练气：只运得动一门
+  return 1;                  // 炼气：只运得动一门
 };
 window.skillById = function (id) { return window.SKILLS.find(x => x.id === id) || null; };
 window.isPassiveSkill = function (id) {

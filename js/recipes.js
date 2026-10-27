@@ -12,13 +12,13 @@ window.RECIPE_KINDS = {
 window.RECIPES = [
   // ================= 炼丹 =================
   { id: 'r_huiqi', kind: 'alchemy', name: '回气丹', out: 'huiqi', outN: 2, cost: 8, req: 1, rate: 0.92,
-    mats: [['m_chijing', 2]], desc: '最粗浅的疗伤丹。一炉出两颗，够用一路。' },
+    mats: [['m_chijing', 2]], desc: '最粗浅的养精丹。一炉出两颗，够用一路。' },
   { id: 'r_lingzhi', kind: 'alchemy', name: '灵芝', out: 'lingzhi', outN: 2, cost: 6, req: 1, rate: 0.92,
     mats: [['m_huangjing', 2], ['m_chijing', 1]], desc: '老黄精配赤精草，蒸出来的药膏。' },
-  { book: 'f_peiyuan', id: 'r_peiyuan', kind: 'alchemy', name: '培元丹', out: 'peiyuan', outN: 1, cost: 34, req: 3, rate: 0.85,
+  { book: 'f_peiyuan', id: 'r_peiyuan', kind: 'alchemy', name: '养精丹', out: 'peiyuan', outN: 1, cost: 34, req: 3, rate: 0.85,
     mats: [['m_chijing', 3], ['m_huangjing', 2]], desc: '药庐的看家方子，墨大夫只教过一次。' },
   { book: 'f_huanglong', id: 'r_huanglong', kind: 'alchemy', name: '黄龙丹', out: 'huanglong', outN: 1, cost: 95, req: 8, rate: 0.78,
-    mats: [['m_zihua', 2], ['m_tianling', 1], ['m_wolfdan', 1]], desc: '练气期最实在的一味，增进修为不伤本。' },
+    mats: [['m_zihua', 2], ['m_tianling', 1], ['m_wolfdan', 1]], desc: '炼气期最实在的一味，增进修为不伤本。' },
   { book: 'f_jinsui', id: 'r_jinsui', kind: 'alchemy', name: '金髓丸', out: 'jinsui', outN: 1, cost: 170, req: 12, rate: 0.7,
     mats: [['m_tianling', 2], ['m_chongjing', 1], ['m_yusui', 1]], desc: '丹成色如金髓，入口滚烫。' },
   { book: 'f_zhuji', id: 'r_zhuji', kind: 'alchemy', name: '筑基丹', out: 'zhuji', outN: 1, cost: 820, req: 35, rate: 0.55,

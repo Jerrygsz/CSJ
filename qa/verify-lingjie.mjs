@@ -180,6 +180,37 @@ for (const mid of ['fengyuan', 'guanghan', 'heti_guan',
   ok(im.mapId === mid, '可进入 ' + mid, im.mapId);
 }
 
+// ---- 7) 后期支线（side 图 + 奇遇解锁） ----
+const SIDE = [
+  { id: 'linghuang', e: 'e_linghuang', lv: 200 },
+  { id: 'zhandacheng', e: 'e_zhandacheng', lv: 260 },
+  { id: 'heihu', e: 'e_heihu', lv: 260 },
+  { id: 'baiguang', e: 'e_baiguang', lv: 260 },
+  { id: 'tianmo', e: 'e_tianmo', lv: 330 },
+  { id: 'diyi', e: 'e_diyi', lv: 330 },
+  { id: 'huirenjie', e: 'e_huirenjie', lv: 420 }
+];
+const sides = await page.evaluate((ids) => ids.map(id => {
+  const m = window.MAPS.find(x => x.id === id);
+  return m ? { id, side: !!m.side, unlockBy: m.unlockBy, type: m.type } : null;
+}), SIDE.map(s => s.id));
+ok(sides.every(x => x && x.side), '七条后期支线已注册为 side 图', sides);
+const encs = await page.evaluate((pairs) => pairs.map(p => {
+  const e = (window.ENCOUNTERS || []).find(x => x.id === p.e);
+  return { e: p.e, ok: !!e, unlock: e && e.unlock, map: e && e.map };
+}), SIDE);
+ok(encs.every(x => x.ok && x.unlock === SIDE.find(s => s.e === x.e).id),
+  '七条奇遇均指向对应支线图', encs);
+for (const s of SIDE) {
+  await run(`F.clearProgress();F.setLevel(${s.lv});F.god(true);`);
+  const u = await page.evaluate((id) => window.__FR.unlockSide(id), s.id);
+  ok(u === s.id, '支线可由奇遇式解锁 ' + s.id, u);
+  await run(`F.enterMap('${s.id}');`);
+  await page.waitForTimeout(200);
+  const im = await page.evaluate(() => window.__FR.info());
+  ok(im.mapId === s.id, '可进入支线 ' + s.id, im.mapId);
+}
+
 // ---- 6) 洞府冲关入口 + 真实突破 ----
 await run(`F.clearProgress();F.setLevel(149);F.god(true);F.clearMap('heifeng');F.addItem('tenglong',1);F.setStones(20000);`);
 const st = await page.evaluate(() => window.__FR.startBreak(150));

@@ -303,7 +303,7 @@
     return c;
   };
   // 手绘跑步帧也要跟着换色。主角的袍色随境界、甲色随护甲变（上面那个函数），
-  // 帧要是还用练气期的绿，人一跑起来袍子就会闪一下回绿 —— 这个坑只有真穿上护甲才看得见。
+  // 帧要是还用炼气期的绿，人一跑起来袍子就会闪一下回绿 —— 这个坑只有真穿上护甲才看得见。
   const heroRunCache = {};
   window.buildHeroRun = function (opt) {
     opt = opt || {};
@@ -330,14 +330,14 @@
   // 目前只有 run 帧是手绘的，其余动作（idle/strike/hurt）没有手绘帧时返回 null，
   // 让 game.js 的 for 循环安全地跳过（不会把跑步帧误挂到其它动作上）。
   // 之前的版本漏了这个函数，导致 applyHeroSprite 只换了立绘、没换帧，
-  // 主角一跑起来袍子就闪回练气期的绿（verify-anim 第 8 节 firstDiff=7 的根因）。
+  // 主角一跑起来袍子就闪回炼气期的绿（verify-anim 第 8 节 firstDiff=7 的根因）。
   window.buildHeroFrames = function (look, action) {
     if (action !== 'run') return null;
     return window.buildHeroRun(look);
   };
   // 境界基准配色（没穿护甲时用它）
   window.HERO_ROBE = [
-    { robe: '#3e8e4f', shade: '#27613a', belt: '#8a6a2a' }, // 练气 · 外门绿
+    { robe: '#3e8e4f', shade: '#27613a', belt: '#8a6a2a' }, // 炼气 · 外门绿
     { robe: '#2f6f7d', shade: '#1e4d57', belt: '#9a8a5a' }, // 筑基 · 青
     { robe: '#c2cad6', shade: '#8b95a4', belt: '#b99a55' }, // 结丹 · 月白
     { robe: '#5b4780', shade: '#3a2c56', belt: '#d4af37' }, // 元婴 · 紫金

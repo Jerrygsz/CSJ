@@ -331,6 +331,98 @@
       reward: { stones: 200000 },
       clearTitle: '飞升仙界',
       clearDesc: '一道白光冲天而起。凡人韩立的故事，到此为止。'
+    },
+
+    // ================= 后期支线（奇遇开启，side 图） =================
+    {
+      id: 'linghuang', side: true, sorder: 21, name: '灵皇大比', pos: '灵界·圣岛 擂场', arc: 'K',
+      type: 'boss', tag: '支线', unlockBy: 'e_linghuang',
+      desc: '灵皇大比，灵界百族抢名分的地方。台上只认胜负，不认来历。',
+      startLevel: 200, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: null, next: null,
+      diff: 3.8, bossAt: 0, intro: 'linghuang', outro: 'linghuang_out',
+      enemies: ['zhengdao', 'moxiu2', 'dajinxiu'],
+      elites: ['他族擂主', '灵将'],
+      mats: ['m_zhenlinglin', 'm_yaodan', 'm_gengjing'],
+      boss: { kind: 'mo', name: '灵皇大比·擂主', hp: 80000, spd: 68, dmg: 125, r: 23, spr: 'neimen', scale: 6.2 },
+      reward: { stones: 45000, mats: [['m_zhenlingxue', 1], ['m_zhenlinglin', 2]] },
+      clearTitle: '擂主已下',
+      clearDesc: '台上只剩他一个人。名分这种东西，打出来比求来快。'
+    },
+    {
+      id: 'zhandacheng', side: true, sorder: 22, name: '斩大乘', pos: '灵界·荒原', arc: 'L',
+      type: 'boss', tag: '支线', unlockBy: 'e_zhandacheng',
+      desc: '一名大乘修士拦路，说是要试试「新晋大乘」的斤两。',
+      startLevel: 260, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: null, next: null,
+      diff: 4.2, bossAt: 0, intro: 'zhandacheng', outro: 'zhandacheng_out',
+      enemies: ['kui2', 'dajinxiu', 'moxiu2'],
+      elites: ['大乘随侍', '护道傀儡'],
+      mats: ['m_xuantianteng', 'm_zhenlingxue', 'm_yaodan'],
+      boss: { kind: 'mo', name: '拦路大乘·赫连', hp: 130000, spd: 74, dmg: 175, r: 25, spr: 'mo', scale: 6.6 },
+      reward: { stones: 80000, mats: [['m_xuantianteng', 1], ['m_zhenlingxue', 2]] },
+      clearTitle: '大乘之血',
+      clearDesc: '同为大乘，他输在准备不足。玄天仙藤落了一截。'
+    },
+    {
+      id: 'heihu', side: true, sorder: 23, name: '黑葫城', pos: '魔界·黑葫城', arc: 'L',
+      type: 'story', tag: '支线', unlockBy: 'e_heihu',
+      desc: '魔界边城，黑葫城里什么都卖，什么都不问来路。',
+      startLevel: 260, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: null, next: null,
+      reward: { stones: 30000, mats: [['m_xuantianteng', 1]] },
+      clearTitle: '黑葫一游',
+      clearDesc: '城里的规矩：付得起灵石，就没人问你从哪来。'
+    },
+    {
+      id: 'baiguang', side: true, sorder: 24, name: '白光界', pos: '魔界·白光界', arc: 'L',
+      type: 'boss', tag: '支线', unlockBy: 'e_baiguang',
+      desc: '魔界夹缝里的一方白光小界，界里钉着一枚土皇钉。',
+      startLevel: 260, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: null, next: null,
+      diff: 4.3, bossAt: 0, intro: 'baiguang', outro: 'baiguang_out',
+      enemies: ['gui2', 'guixiu', 'dajinxiu'],
+      elites: ['白光守界', '土皇钉傀'],
+      mats: ['m_xuantianteng', 'm_zhenlingxue', 'm_yaodan'],
+      boss: { kind: 'mo', name: '白光界·土皇钉', hp: 120000, spd: 72, dmg: 165, r: 24, spr: 'guixiu', scale: 6.4 },
+      reward: { stones: 85000, mats: [['m_xuantianteng', 1], ['m_zhenlingxue', 2]] },
+      clearTitle: '白光已散',
+      clearDesc: '土皇钉被拔出来，白光界开始塌。最后一刻退出来，手里多了一截仙藤。'
+    },
+    {
+      id: 'tianmo', side: true, sorder: 25, name: '天魔契约', pos: '魔界·天魔殿', arc: 'L',
+      type: 'story', tag: '支线', unlockBy: 'e_tianmo',
+      desc: '天魔殿里摆着一纸契约。签了，力量来得快；代价写在最后一行。',
+      startLevel: 330, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: null, next: null,
+      reward: { stones: 90000, mats: [['m_zhenlingxue', 2]] },
+      clearTitle: '契约未签',
+      clearDesc: '他把契约放回案上。韩立这一路，从不拿命换捷径。'
+    },
+    {
+      id: 'diyi', side: true, sorder: 26, name: '第一大乘', pos: '灵界·荒原', arc: 'L',
+      type: 'boss', tag: '支线', unlockBy: 'e_diyi',
+      desc: '灵界「第一大乘」的名号，得有人来接。来的人，不打算让。',
+      startLevel: 330, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: null, next: null,
+      diff: 4.5, bossAt: 0, intro: 'diyi', outro: 'diyi_out',
+      enemies: ['zhengdao', 'kui2', 'dajinxiu'],
+      elites: ['第一大乘护法', '大乘傀儡'],
+      mats: ['m_xuantianteng', 'm_zhenlingxue', 'm_yaodan'],
+      boss: { kind: 'mo', name: '第一大乘·玄清', hp: 160000, spd: 78, dmg: 200, r: 26, spr: 'neimen', scale: 6.8 },
+      reward: { stones: 120000, mats: [['m_xuantianteng', 2]] },
+      clearTitle: '第一大乘',
+      clearDesc: '玄清退了半步。灵界「第一大乘」这四个字，从此换了人。'
+    },
+    {
+      id: 'huirenjie', side: true, sorder: 27, name: '重回人界', pos: '人界·越国 山边小村', arc: 'L',
+      type: 'story', tag: '支线', unlockBy: 'e_huirenjie',
+      desc: '飞升之前，回一趟人界。村口那棵老树还在。',
+      startLevel: 420, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: null, next: null,
+      reward: { stones: 40000 },
+      clearTitle: '尘缘已了',
+      clearDesc: '父母坟上添了新土。韩家如今是越国的望族，没人认得他。'
     }
   );
 
@@ -507,8 +599,162 @@
       ['旁白', '台上没有接引的人，只有一道门。门后是光。'],
       ['韩立', '（走了。）'],
       ['旁白', '他跨进门里。身后的三界，一下子远了。']
+    ],
+
+    // ---- 后期支线对白 ----
+    linghuang: [
+      ['旁白', '灵皇大比的擂场，四周围着百族的旗。台上没有规矩，只有胜负。'],
+      ['他族擂主', '人族？这些年人族的名分，都是靠嘴争的。'],
+      ['韩立', '（台上只认胜负。那就用胜负说话。）'],
+      ['旁白', '擂主先动，一道灵光直取面门。']
+    ],
+    linghuang_out: [
+      ['旁白', '擂主倒下去的时候，四周静了一瞬，接着是压不住的议论声。'],
+      ['圣岛使者', '名分，有了。'],
+      ['韩立', '（名分这种东西，打出来比求来快。）'],
+      ['旁白', '他把剑收回鞘里，没看台下的旗。']
+    ],
+    zhandacheng: [
+      ['旁白', '荒原上站着一个青袍人，气息沉得像一座山。'],
+      ['赫连', '新晋的大乘？我来试试。'],
+      ['韩立', '（同为大乘。这一战，躲不过。）'],
+      ['韩立', '出手吧。']
+    ],
+    zhandacheng_out: [
+      ['旁白', '青袍人退了三步，血从袖口滴下来。他看了韩立很久，转身走了。'],
+      ['韩立', '（同为大乘，他输在准备不足。）'],
+      ['旁白', '地上落着一截玄天仙藤，是他随身带的。']
+    ],
+    heihu: [
+      ['旁白', '黑葫城没有城墙，只有一圈黑石。城门口没人盘问，也没人抬眼。'],
+      ['韩立', '（魔界的边城。什么都卖，什么都不问来路。）'],
+      ['旁白', '他在城里走了一圈，买到一截玄天仙藤，代价是一笔不小的灵石。'],
+      ['韩立', '（这地方的规矩简单：付得起，就没人问你从哪来。）']
+    ],
+    baiguang: [
+      ['旁白', '白光界不大，天是白的，地也是白的。界心钉着一枚土黄色的长钉。'],
+      ['韩立', '（土皇钉。钉住这一界的，就是它。）'],
+      ['旁白', '长钉忽然自己转了一下，四周的白光凝成一个人形。'],
+      ['土皇钉傀', '……出去。'],
+      ['韩立', '（拔了钉子，这一界就塌。得快。）']
+    ],
+    baiguang_out: [
+      ['旁白', '土皇钉被拔出来，白光界开始塌。韩立退出来的最后一刻，手里多了一截仙藤。'],
+      ['韩立', '（险。）'],
+      ['旁白', '身后的裂缝合上了，像什么都没发生过。']
+    ],
+    tianmo: [
+      ['旁白', '天魔殿的门自己开了。案上摆着一纸契约，墨还是湿的。'],
+      ['天魔', '签了它，你想要的我都能给。'],
+      ['韩立', '（代价在最后一行。这种字，我见过太多。）'],
+      ['韩立', '不签。'],
+      ['旁白', '契约自己烧了。天魔殿里的笑声，很久才停。']
+    ],
+    diyi: [
+      ['旁白', '一个白发老者拦在路中央，手里没有法宝，气息却压得荒原发沉。'],
+      ['玄清', '灵界第一大乘，玄清。你若要往上走，先过我这关。'],
+      ['韩立', '（第一大乘。这一战，是他等我。）'],
+      ['韩立', '请。']
+    ],
+    diyi_out: [
+      ['旁白', '玄清退了半步，抬手止住还想再上的护法。'],
+      ['玄清', '……名号归你。'],
+      ['韩立', '（他输得不服，可他不赖。）'],
+      ['旁白', '荒原上的风重新吹起来。灵界第一大乘，换了人。']
+    ],
+    huirenjie: [
+      ['旁白', '山边小村。村口那棵老树还在，树下的石墩换了新的。'],
+      ['韩立', '（走了这么多年，村子反倒比记忆里小。）'],
+      ['旁白', '村人只当他是过路的散修。没人认出一个姓韩的。'],
+      ['韩立', '（父母坟上，添一把新土吧。）'],
+      ['旁白', '他在坟前站了很久。走的时候，没有回头。']
     ]
   });
+
+  // ========================= 五(2)、后期支线奇遇 =========================
+  // 解锁条件一律卡在「对应境界已达成」，避免进支线图被 startLevel 抬级跳境界。
+  window.ENCOUNTERS.push(
+    {
+      id: 'e_linghuang', map: 'yitian', name: '圣岛使者', spr: 'hermit', scale: 1.9,
+      cond: { level: 200 },
+      lines: [
+        ['旁白', '倚天城的茶棚里，一个穿白袍的使者坐着，面前的茶一口没动。'],
+        ['圣岛使者', '灵皇大比要开了。圣岛缺一个人。'],
+        ['韩立', '（缺人，不是请人。）'],
+        ['韩立', '赢了有什么？'],
+        ['圣岛使者', '名分。灵界办事，名分比灵石管用。'],
+        ['韩立', '带路。']
+      ],
+      unlock: 'linghuang', reward: { stones: 500 }
+    },
+    {
+      id: 'e_zhandacheng', map: 'xiaoling', name: '拦路的青袍人', spr: 'rogue', scale: 1.9,
+      cond: { level: 260, cleared: ['sanjie'] },
+      lines: [
+        ['旁白', '小灵天外的荒原上，一个青袍人负手站着，气息沉得像一座山。'],
+        ['赫连', '新晋的大乘？我来试试。'],
+        ['韩立', '（同为大乘。这一战，躲不过。）'],
+        ['韩立', '出手吧。']
+      ],
+      unlock: 'zhandacheng', reward: { stones: 0 }
+    },
+    {
+      id: 'e_heihu', map: 'xiaoling', name: '魔界商队', spr: 'hermit', scale: 1.9,
+      cond: { level: 260, cleared: ['sanjie'] },
+      lines: [
+        ['旁白', '一支魔界商队停在荒原边上，领头的指了指身后的黑城。'],
+        ['商队首领', '黑葫城，什么都卖。去不去？'],
+        ['韩立', '（魔界的城。去看看也好。）'],
+        ['韩立', '去。']
+      ],
+      unlock: 'heihu', reward: { stones: 300 }
+    },
+    {
+      id: 'e_baiguang', map: 'xiaoling', name: '荒原上的白光', spr: 'grave', scale: 2.0,
+      cond: { level: 260, cleared: ['sanjie'] },
+      lines: [
+        ['旁白', '荒原裂缝里透出一线白光，白得不像魔界的东西。'],
+        ['韩立', '（白光界。原著里，土皇钉就在这种地方。）'],
+        ['韩立', '进去看看。']
+      ],
+      unlock: 'baiguang', reward: { stones: 0 }
+    },
+    {
+      id: 'e_tianmo', map: 'xiaoling', name: '天魔殿来客', spr: 'mo', scale: 1.9,
+      cond: { level: 330, cleared: ['jiujie'] },
+      lines: [
+        ['旁白', '一个没有影子的人立在荒原上，递来一纸契约。'],
+        ['天魔', '天魔殿的门，为你开着。'],
+        ['韩立', '（天魔契约。签了，力量来得快；代价写在最后一行。）'],
+        ['韩立', '不去。'],
+        ['旁白', '那人笑了笑，把契约收了回去。']
+      ],
+      unlock: 'tianmo', reward: { stones: 0 }
+    },
+    {
+      id: 'e_diyi', map: 'xiaoling', name: '灵界第一大乘', spr: 'neimen', scale: 2.0,
+      cond: { level: 330, cleared: ['jiujie'] },
+      lines: [
+        ['旁白', '一个白发老者拦在路中央，手里没有法宝，气息却压得荒原发沉。'],
+        ['玄清', '灵界第一大乘，玄清。你若要往上走，先过我这关。'],
+        ['韩立', '（第一大乘。这一战，是他等我。）'],
+        ['韩立', '请。']
+      ],
+      unlock: 'diyi', reward: { stones: 0 }
+    },
+    {
+      id: 'e_huirenjie', map: 'xiaoling', name: '越国口音的老妇人', spr: 'rogue', scale: 1.8,
+      cond: { level: 420, cleared: ['zhenxian'] },
+      lines: [
+        ['旁白', '一个越国口音的老妇人，说起镜州出了个韩家，如今是当地的望族。'],
+        ['老妇人', '韩家？祖上出过一个修仙的，再没回来过。'],
+        ['韩立', '（韩家。我家。）'],
+        ['韩立', '（父母走的时候，我没在。）'],
+        ['韩立', '（该回去一趟了。）']
+      ],
+      unlock: 'huirenjie', reward: { stones: 0 }
+    }
+  );
 
   // ========================= 六、场景底色 =========================
   Object.assign(window.MAP_SCENERY, {
@@ -526,11 +772,19 @@
     sanjie:   { bg: { base: '#242a36', a: '#2c3443', b: '#1a1f28' }, decor: [['rock', 0.26], ['tuft', 0.04]] },
     jiujie:   { bg: { base: '#2a2f3a', a: '#343a47', b: '#1f232c' }, decor: [['rock', 0.24], ['tuft', 0.03]] },
     zhenxian: { bg: { base: '#2f3542', a: '#3a4253', b: '#232833' }, decor: [['rock', 0.22], ['tuft', 0.03]] },
-    xianjie:  { bg: { base: '#39434f', a: '#46525f', b: '#2b333d' }, decor: [['rock', 0.10], ['tuft', 0.02]] }
+    xianjie:  { bg: { base: '#39434f', a: '#46525f', b: '#2b333d' }, decor: [['rock', 0.10], ['tuft', 0.02]] },
+    linghuang: { bg: { base: '#3a3230', a: '#463c39', b: '#2b2623' }, decor: [['rock', 0.16], ['tuft', 0.05]] },
+    zhandacheng: { bg: { base: '#2b2f38', a: '#343945', b: '#1f232b' }, decor: [['rock', 0.30], ['tuft', 0.04]] },
+    heihu:    { bg: { base: '#241f26', a: '#2d2731', b: '#1a161c' }, decor: [['rock', 0.26], ['tuft', 0.03]] },
+    baiguang: { bg: { base: '#4a4f57', a: '#575d66', b: '#3a3f46' }, decor: [['rock', 0.18], ['tuft', 0.02]] },
+    tianmo:   { bg: { base: '#231c26', a: '#2c2331', b: '#19131c' }, decor: [['rock', 0.28], ['tuft', 0.02]] },
+    diyi:     { bg: { base: '#2d3038', a: '#373b45', b: '#21242b' }, decor: [['rock', 0.28], ['tuft', 0.04]] },
+    huirenjie:{ bg: { base: '#2f3a2b', a: '#384634', b: '#243023' }, decor: [['tree', 0.20], ['tuft', 0.20]] }
   });
-  // late.js 合底色时还没有这几张图，这里手动补上
+  // late.js 合底色时还没有这些图，这里手动补上
   for (const id of ['anyuan', 'heifeng', 'lianxu', 'fengyuan', 'guanghan', 'heti_guan',
-                    'shengdao', 'mojie', 'yitian', 'huangquan', 'xiaoling', 'sanjie', 'jiujie', 'zhenxian', 'xianjie']) {
+                    'shengdao', 'mojie', 'yitian', 'huangquan', 'xiaoling', 'sanjie', 'jiujie', 'zhenxian', 'xianjie',
+                    'linghuang', 'zhandacheng', 'heihu', 'baiguang', 'tianmo', 'diyi', 'huirenjie']) {
     const m = window.MAPS.find(x => x.id === id);
     const sc = window.MAP_SCENERY[id];
     if (m && sc) { m.bg = sc.bg; m.decorScheme = sc.decor; }

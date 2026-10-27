@@ -88,7 +88,7 @@
   // ---------- 三、器物：该谁给就谁给 ----------
   // 旧木牌：七玄门记名弟子的牌子，山门开局就有
   addTo('qixuan', { items: ['t_mupai'] });
-  // 玄玉珠、粗布道袍、鹿皮软甲：太南小会就能置办的散修行头（Lv1~13，练气档）
+  // 玄玉珠、粗布道袍、鹿皮软甲：太南小会就能置办的散修行头（Lv1~13，炼气档）
   addShop('tainan', ['a_bu', 'a_lupi', 't_xuanyu']);
   // 灵兽袋 / 灵兽环：乱星海大城才有这种养兽的家什
   addShop('tianxing', ['bag_ling2', 'ring_ling']);
@@ -97,7 +97,7 @@
   addShop('tianxing', ['m_siling', 'm_silingcao']);
 
   // ---------- 三·五、丹方：谁给的方子，就在哪里得到 ----------
-  // 没有丹方，炉子不认这味药（筑基丹/培元丹/黄龙丹/金髓丸 四张）
+  // 没有丹方，炉子不认这味药（筑基丹/养精丹/黄龙丹/金髓丸 四张）
   addTo('houshan', { items: ['f_peiyuan'] });    // 墨大夫药书里的一页
   addTo('tainan',  { items: ['f_huanglong'] });  // 散修出手的玉简
   addTo('yaoyuan', { items: ['f_zhuji'] });      // 百药园抄的筑基丹方

@@ -410,7 +410,7 @@
     '#hpwrap': '生命条',
     '#stats': '属性行',
     '#pauseBtn': '暂停键',
-    '#bosswrap': 'Boss 血条',
+    '#bosswrap': 'Boss 气血',
     '#skillrow': '技能栏',
     '#combo': '连斩提示',
     '#itemToast': '拾取提示',
