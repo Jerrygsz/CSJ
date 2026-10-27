@@ -599,16 +599,24 @@ F.addItem('zhuji', 13);
 for (const id of ['m_yusuizhi', 'm_zihua', 'm_tianling']) F.addItem(id, 3);
 F.setStones(5000);
 // 筑基闭关打通 → 燕家堡解锁
+F.breakLuck(true);   // 冲关成败固定为「成」，回归不吃随机
 F.enterMap('zhuji', 'easy');
 frames(10);
 for (let k = 0; k < 12; k++) { F.skipStory(); frames(2); }
 F.boss(); frames(2); F.killBoss(); frames(220);
 for (let k = 0; k < 12; k++) { F.skipStory(); frames(2); }
+// 破境之物齐了：地火之屋不替玩家做主，先问「是否就此冲关」
+eq(F.info().state, 'dialog', '地火之屋打完先停在抉择（不直接宣布筑基）');
+const zjOpts = F.dialogState().choiceOpts || [];
+ok(zjOpts.some(t => t.indexOf('就此突破') >= 0), '地火之屋给出「就此突破 / 暂不突破」', zjOpts);
+eq(F.pickChoice('yes'), true, '选了「就此突破」');
+frames(4);
+for (let k = 0; k < 30; k++) { F.skipStory(); frames(6); }
 ok(F.info().unlocked.includes('yanjia'), '打通筑基闭关 → 燕家堡显现');
 ok(F.info().caves.includes('cuiping'), '筑基闭关通关 → 翠屏山洞府到手');
 eq(F.info().realm, '筑基初期', '筑基是打完这一炉丹才落的（endLevel 生效）');
 
-// 进燕家堡时跨境界：练气十三层 → 筑基初期
+// 进燕家堡时跨境界：炼气期十三层 → 筑基初期
 F.setLevel(35);
 F.enterMap('yanjia', 'easy');
 frames(4);
