@@ -35,10 +35,11 @@ const run = (body) => page.evaluate(`(()=>{const F=window.__FR;${body}})()`);
 
 // ---- 1) 地图存在与 chain ----
 const ALL_IDS = ['anyuan', 'heifeng', 'lianxu', 'fengyuan', 'guanghan', 'heti_guan',
-  'shengdao', 'mojie', 'yitian', 'huangquan', 'xiaoling', 'sanjie', 'jiujie', 'zhenxian', 'xianjie'];
+  'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling',
+  'sanjie', 'jiujie', 'zhenxian', 'fsjie', 'xianjie'];
 const maps = await page.evaluate((ids) => window.MAPS.filter(m => ids.includes(m.id))
   .map(m => ({ id: m.id, type: m.type, unlock: m.unlock, next: m.next, startLevel: m.startLevel, endLevel: m.endLevel })), ALL_IDS);
-ok(maps.length === 15, '灵界十五张图已注册', maps);
+ok(maps.length === 19, '灵界十九张主线图已注册', maps);
 const chain = await page.evaluate((ids) => {
   const g = id => window.MAPS.find(m => m.id === id) || {};
   const o = { fs: g('feisheng').next };
@@ -58,17 +59,38 @@ ok(chain.gh && chain.gh.unlock === 'fengyuan' && chain.gh.next === 'heti_guan', 
 ok(chain.hg && chain.hg.unlock === 'guanghan', '合体关 unlock=广寒界', chain.hg);
 ok(chain.hg && chain.hg.endLevel === 200, '破境图 heti_guan 的 endLevel=200（洞府突破可反查）', chain.hg);
 
-// V10–V12 链
+// V10–V12 链（含「两族大乘 / 魔斑降世 / 魔源海 / 飞升之劫」四个过场节点）
 const LINKS = [
-  ['heti_guan', 'shengdao', 200], ['shengdao', 'mojie', null], ['mojie', 'yitian', null],
-  ['yitian', 'huangquan', null], ['huangquan', 'xiaoling', null], ['xiaoling', 'sanjie', null],
-  ['sanjie', 'jiujie', 260], ['jiujie', 'zhenxian', 330], ['zhenxian', 'xianjie', 420]
+  ['heti_guan', 'liangzu', 200], ['liangzu', 'shengdao', null], ['shengdao', 'mojie', null],
+  ['mojie', 'moban', null], ['moban', 'yitian', null], ['yitian', 'huangquan', null],
+  ['huangquan', 'moyuan', null], ['moyuan', 'xiaoling', null], ['xiaoling', 'sanjie', null],
+  ['sanjie', 'jiujie', 260], ['jiujie', 'zhenxian', 330], ['zhenxian', 'fsjie', 420],
+  ['fsjie', 'xianjie', null]
 ];
 for (const [from, to, endLv] of LINKS) {
   ok(chain[from] && chain[from].next === to, `${from} next=${to}`, chain[from]);
   if (endLv) ok(chain[from].endLevel === endLv, `破境图 ${from} endLevel=${endLv}`, chain[from]);
+  ok(chain[to] && chain[to].unlock === from, `${to} unlock=${from}（入口与前驱对齐）`, chain[to]);
 }
 ok(chain.xianjie && chain.xianjie.next === null, '飞升仙界为终点（next=null）', chain.xianjie);
+
+// 过场节点：都是 story 图，且都有对白（没有对白就是空图，等于白走一趟）
+const PASSING = ['liangzu', 'moban', 'moyuan'];
+const passInfo = await page.evaluate((ids) => {
+  const o = {};
+  for (const id of ids) {
+    const m = window.MAPS.find(x => x.id === id) || {};
+    o[id] = { type: m.type, name: m.name, lines: (window.MAP_STORIES[id] || []).length };
+  }
+  const fs = window.MAPS.find(x => x.id === 'fsjie') || {};
+  o.fsjie = { type: fs.type, name: fs.name, lines: (window.MAP_STORIES['fsjie'] || []).length, boss: fs.boss && fs.boss.name };
+  return o;
+}, PASSING);
+for (const id of PASSING) {
+  ok(passInfo[id].type === 'story' && passInfo[id].lines >= 6, `过场节点 ${id} 有完整对白`, passInfo[id]);
+}
+ok(passInfo.fsjie.type === 'boss' && passInfo.fsjie.lines >= 6, '飞升之劫是独立关卡（boss 图 + 开场对白）', passInfo.fsjie);
+ok(/天外魔君/.test(passInfo.fsjie.boss || ''), '飞升之劫的对手是天外魔君（原著 C2445 阻劫）', passInfo.fsjie.boss);
 
 // ---- 2) 炼虚突破关 ----
 const b150 = await page.evaluate(() => {
@@ -173,12 +195,33 @@ ok(i3.mapId === 'lianxu', '可进入炼虚破境图', i3.mapId);
 ok(i3.state === 'dialog', '炼虚关开场对白已播', i3.state);
 
 for (const mid of ['fengyuan', 'guanghan', 'heti_guan',
-  'shengdao', 'mojie', 'yitian', 'huangquan', 'xiaoling', 'sanjie', 'jiujie', 'zhenxian', 'xianjie']) {
+  'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling',
+  'sanjie', 'jiujie', 'zhenxian', 'fsjie', 'xianjie']) {
   await run(`F.clearProgress();F.setLevel(419);F.god(true);F.enterMap('${mid}');`);
   await page.waitForTimeout(200);
   const im = await page.evaluate(() => window.__FR.info());
   ok(im.mapId === mid, '可进入 ' + mid, im.mapId);
 }
+
+// ---- 5b) 新增过场节点：不是摆设，真的能走完 ----
+for (const mid of ['liangzu', 'moban', 'moyuan']) {
+  await run(`F.clearProgress();F.setLevel(419);F.god(true);F.enterMap('${mid}');`);
+  await page.waitForTimeout(200);
+  await run(`for(let k=0;k<12;k++){F.skipStory();F.tickFrames(2);}`);
+  const done = await page.evaluate((id) => window.__FR.info().cleared.indexOf(id) >= 0, mid);
+  ok(done, '过场节点 ' + mid + ' 能走完并记入已通关');
+}
+
+// 飞升之劫是独立战斗关：开场对白 → 天外魔君 → 打完结算
+await run(`F.clearProgress();F.setLevel(419);F.god(true);F.setStones(300000);F.enterMap('fsjie','easy');`);
+await page.waitForTimeout(300);
+await run(`for(let k=0;k<14;k++){F.skipStory();F.tickFrames(2);}`);
+const fboss = await page.evaluate(() => { const F = window.__FR; const b = F.boss(); return b && b !== 'fail' ? b : null; });
+ok(!!fboss, '飞升之劫里天外魔君会现身', fboss);
+await run(`window.__FR.killBoss();for(let k=0;k<40;k++){F.skipStory();F.tickFrames(3);}`);
+const fdone = await page.evaluate(() => ({ cleared: window.__FR.info().cleared.indexOf('fsjie') >= 0, unlocked: window.__FR.info().unlocked.indexOf('xianjie') >= 0 }));
+ok(fdone.cleared, '飞升之劫打完记入已通关', fdone);
+ok(fdone.unlocked, '飞升之劫通关后飞升仙界显现', fdone);
 
 // ---- 7) 后期支线（side 图 + 奇遇解锁） ----
 const SIDE = [
@@ -210,6 +253,23 @@ for (const s of SIDE) {
   const im = await page.evaluate(() => window.__FR.info());
   ok(im.mapId === s.id, '可进入支线 ' + s.id, im.mapId);
 }
+
+// ---- 7b) 斩大乘 → 圣岛使者线（不靠奇遇，靠上一张支线的 next 接出来） ----
+const ss = await page.evaluate(() => {
+  const m = window.MAPS.find(x => x.id === 'shengshi') || {};
+  const z = window.MAPS.find(x => x.id === 'zhandacheng') || {};
+  return { side: !!m.side, type: m.type, next: z.next, lines: (window.MAP_STORIES['shengshi'] || []).length };
+});
+ok(ss.side && ss.type === 'story', '圣岛使者线是 side 剧情图', ss);
+ok(ss.next === 'shengshi', '斩大乘打通后接出圣岛使者线（zhandacheng.next）', ss);
+ok(ss.lines >= 6, '圣岛使者线有完整对白', ss);
+await run(`F.clearProgress();F.setLevel(260);F.god(true);F.unlockSide('zhandacheng');F.enterMap('zhandacheng');F.finishMapNow();`);
+const afterZ = await page.evaluate(() => window.__FR.info());
+ok(afterZ.unlocked.indexOf('shengshi') >= 0, '斩大乘通关后圣岛使者线自动显现', afterZ.unlocked.slice(-4));
+await run(`F.enterMap('shengshi');`);
+await page.waitForTimeout(200);
+const iSS = await page.evaluate(() => window.__FR.info());
+ok(iSS.mapId === 'shengshi', '可进入圣岛使者线', iSS.mapId);
 
 // ---- 6) 洞府冲关入口 + 真实突破 ----
 await run(`F.clearProgress();F.setLevel(149);F.god(true);F.clearMap('heifeng');F.addItem('tenglong',1);F.setStones(20000);`);

@@ -218,7 +218,7 @@
       type: 'story', tag: '剧情',
       desc: '合体丹在手，真灵之血也够了。三千年一次的大天劫，就在这寒玉台上过。',
       startLevel: 150, endLevel: 200, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'guanghan', next: 'shengdao',
+      unlock: 'guanghan', next: 'liangzu',
       reward: { stones: 30000, mats: [['m_zhenlingxue', 1]] },
       clearTitle: '合体已成',
       clearDesc: '肉身与真元合一。灵界的第二道大关，过去了。'
@@ -226,11 +226,22 @@
 
     // ---------------- V10 魔界之战 ----------------
     {
+      // 过场：原著 C1766。天渊城长老会招人，招不动韩立；真正的消息是「魔劫数百年内降临」。
+      id: 'liangzu', name: '两族大乘', pos: '灵界·天渊城', arc: 'K',
+      type: 'story', tag: '剧情',
+      desc: '天渊城长老会。人妖两族凑不齐十个合体长老，谁都不肯把手里的人放出来。',
+      startLevel: 200, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'heti_guan', next: 'shengdao',
+      reward: { stones: 32000, mats: [['m_zhenlinglin', 2]] },
+      clearTitle: '长老会一席',
+      clearDesc: '他没进长老会。可那天听到的话，比进长老会值钱——莫简离亲入真魔界，魔界在整军。'
+    },
+    {
       id: 'shengdao', name: '圣岛', pos: '灵界·圣岛', arc: 'K',
       type: 'story', tag: '剧情',
       desc: '人族圣地。两族大乘在此议事，灵皇大比的名分也从这里出。',
       startLevel: 200, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'heti_guan', next: 'mojie',
+      unlock: 'liangzu', next: 'mojie',
       reward: { stones: 35000, mats: [['m_zhenlinglin', 3]] },
       clearTitle: '圣岛一行',
       clearDesc: '圣岛的使者只说了一句话：魔界的门，快开了。'
@@ -240,17 +251,28 @@
       type: 'story', tag: '剧情',
       desc: '荒原尽头裂开一道黑口。魔界的约，得有人去赴。',
       startLevel: 200, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'shengdao', next: 'yitian',
+      unlock: 'shengdao', next: 'moban',
       reward: { stones: 40000, mats: [['m_zhenlingxue', 1]] },
       clearTitle: '魔界之约',
       clearDesc: '约定了。倚天城那边，魔族已经动了。'
+    },
+    {
+      // 过场：原著 C1869「魔斑降世」。魔斑一出，魔劫的时间表就提前了。
+      id: 'moban', name: '魔斑降世', pos: '灵界·天渊城外 荒原', arc: 'K',
+      type: 'story', tag: '剧情',
+      desc: '荒原上空裂出一块黑斑，不散，也不动。天渊城的人还没来，懂行的人已经脸白了。',
+      startLevel: 200, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'mojie', next: 'yitian',
+      reward: { stones: 38000, mats: [['m_zhenlingxue', 1]] },
+      clearTitle: '魔斑已现',
+      clearDesc: '魔斑出现了，就不止这一处。半年、一年，魔界总会从这里挤进来。'
     },
     {
       id: 'yitian', name: '倚天城·人魔之战', pos: '灵界·倚天城', arc: 'K',
       type: 'boss', tag: '剧情战',
       desc: '魔族大军压到倚天城下。城墙上站满了人，也站满了不敢退的人。',
       startLevel: 200, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'mojie', next: 'huangquan',
+      unlock: 'moban', next: 'huangquan',
       diff: 3.9, bossAt: 0, intro: 'yitian', outro: 'yitian_out',
       enemies: ['gui2', 'moxiu2', 'dajinxiu'],
       elites: ['魔族魔将', '血魔卫'],
@@ -265,7 +287,7 @@
       type: 'boss', tag: '剧情战',
       desc: '魔界深处的地火，烧的是魂魄。镇魔锁锁着的东西，比地火更烫。',
       startLevel: 210, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'yitian', next: 'xiaoling',
+      unlock: 'yitian', next: 'moyuan',
       diff: 4.0, bossAt: 0, intro: 'huangquan', outro: 'huangquan_out',
       enemies: ['gui2', 'moxiu2', 'guixiu'],
       elites: ['镇魔锁守灵', '黄泉鬼将'],
@@ -276,11 +298,22 @@
       clearDesc: '镇魔锁断了。一段玄天仙藤落在灰里，还带着地火的温度。'
     },
     {
+      // 过场：原著 C2018「魔源海」。洗灵池与净灵莲在魔界最东边的岛上，三条路，都要走一次。
+      id: 'moyuan', name: '魔源海', pos: '魔界·魔源海', arc: 'K',
+      type: 'story', tag: '剧情',
+      desc: '魔界最东边的一片海，海上没有岛，只有雾。伪魔珠压着气息，压不住海里的东西。',
+      startLevel: 215, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'huangquan', next: 'xiaoling',
+      reward: { stones: 65000, mats: [['m_zhenlingxue', 2], ['m_zhenlinglin', 2]] },
+      clearTitle: '魔源海已过',
+      clearDesc: '洗灵池没找到，净灵莲也没开。可魔源海这一趟，把合体后期的心境走实了。'
+    },
+    {
       id: 'xiaoling', name: '小灵天', pos: '灵界·小灵天', arc: 'K',
       type: 'boss', tag: '剧情战',
       desc: '魔界里藏着一方小世界。小灵天的主人，守着一炉不该有的火。',
       startLevel: 220, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'huangquan', next: 'sanjie',
+      unlock: 'moyuan', next: 'sanjie',
       diff: 4.1, bossAt: 0, intro: 'xiaoling', outro: 'xiaoling_out',
       enemies: ['kui2', 'dajinxiu', 'zhengdao'],
       elites: ['小灵天守', '灵天傀'],
@@ -317,17 +350,34 @@
       type: 'story', tag: '剧情',
       desc: '渡劫之后，铸真仙之身。',
       startLevel: 330, endLevel: 420, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'jiujie', next: 'xianjie',
+      unlock: 'jiujie', next: 'fsjie',
       reward: { stones: 160000 },
       clearTitle: '真仙',
       clearDesc: '一身不再是凡胎。眉眼还是那眉眼，气息已不在此界。'
+    },
+    {
+      // 独立关卡（原著 C2445）：九劫只是前奏，真正的飞升之劫在正午阳气最浓时落下。
+      // 天外魔君当年放过话——「你渡那飞升之劫之时，本座一定邀遍附近界面所有魔君前来阻你飞升」。
+      id: 'fsjie', name: '飞升之劫', pos: '灵界·荒原 劫云下', arc: 'L',
+      type: 'boss', tag: '终局',
+      desc: '正午，阳气最浓的时候。劫云压到头顶百丈，云里还有别的东西在等。',
+      startLevel: 420, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'zhenxian', next: 'xianjie',
+      diff: 4.8, bossAt: 0, intro: 'fsjie', outro: 'fsjie_out',
+      enemies: ['gui2', 'moxiu2', 'guixiu'],
+      elites: ['魔君化影', '劫雷凝形'],
+      mats: ['m_zhenlingxue', 'm_xuantianteng', 'm_zhenlinglin'],
+      boss: { kind: 'mo', name: '天外魔君·化身', hp: 240000, spd: 86, dmg: 260, r: 27, spr: 'mo', scale: 7.0 },
+      reward: { stones: 180000, mats: [['m_xuantianteng', 1]] },
+      clearTitle: '劫已过',
+      clearDesc: '魔君退去，劫雷散尽。天上裂开一道真真正正的门——那不是劫，是路。'
     },
     {
       id: 'xianjie', name: '飞升仙界', pos: '仙界·接引台', arc: 'L',
       type: 'story', tag: '剧情',
       desc: '接引台在前。人界、灵界、魔界，都留在身后了。',
       startLevel: 420, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'zhenxian', next: null,
+      unlock: 'fsjie', next: null,
       reward: { stones: 200000 },
       clearTitle: '飞升仙界',
       clearDesc: '一道白光冲天而起。凡人韩立的故事，到此为止。'
@@ -354,7 +404,7 @@
       type: 'boss', tag: '支线', unlockBy: 'e_zhandacheng',
       desc: '一名大乘修士拦路，说是要试试「新晋大乘」的斤两。',
       startLevel: 260, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: null, next: null,
+      unlock: null, next: 'shengshi',
       diff: 4.2, bossAt: 0, intro: 'zhandacheng', outro: 'zhandacheng_out',
       enemies: ['kui2', 'dajinxiu', 'moxiu2'],
       elites: ['大乘随侍', '护道傀儡'],
@@ -363,6 +413,17 @@
       reward: { stones: 80000, mats: [['m_xuantianteng', 1], ['m_zhenlingxue', 2]] },
       clearTitle: '大乘之血',
       clearDesc: '同为大乘，他输在准备不足。玄天仙藤落了一截。'
+    },
+    {
+      // 斩大乘的后续：圣岛不会白看着一位大乘死在外面。只能由「斩大乘」打通后接出。
+      id: 'shengshi', side: true, sorder: 28, name: '圣岛使者再来', pos: '灵界·荒原', arc: 'L',
+      type: 'story', tag: '支线',
+      desc: '斩了大乘的第三天，荒原上来了一位白袍使者。他没带剑，只带了一句话。',
+      startLevel: 260, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: null, next: null,
+      reward: { stones: 50000, mats: [['m_zhenlingxue', 1]] },
+      clearTitle: '圣岛的问话',
+      clearDesc: '圣岛不问对错，只问一句：「你还要往上走吗。」答了这句，飞升之劫就躲不掉了。'
     },
     {
       id: 'heihu', side: true, sorder: 23, name: '黑葫城', pos: '魔界·黑葫城', arc: 'L',
@@ -513,6 +574,18 @@
       ['旁白', '雷云散尽。广寒界的寒气，第一次退开了。']
     ],
 
+    liangzu: [
+      ['旁白', '天渊城偏殿。几位合体修士围坐，桌上摊着一卷名册，空着三个名字。'],
+      ['谷长老', '韩道友，长老会还差三人。你肯入城，位置给你留着。'],
+      ['韩立', '（十个长老凑不齐。这城里的事，比荒原上的妖还难缠。）'],
+      ['韩立', '在下一心求道，入不得会。'],
+      ['金越禅师', '那老夫直说。圣岛传了预警，莫简离大人亲入真魔界走了一趟。'],
+      ['韩立', '（莫简离。人族唯一的大乘。）'],
+      ['金越禅师', '魔界在整军备战。用不了千年，数百年内，就要挤进来。'],
+      ['旁白', '殿里静了一瞬。没人反驳，也没人接话。'],
+      ['韩立', '（魔劫。灵界几万年一回的大劫，让我赶上了。）']
+    ],
+
     shengdao: [
       ['旁白', '圣岛在海中央，白得晃眼。岛上的建筑没有一面墙是直的。'],
       ['韩立', '（人族圣地。两族大乘在这里议事，我一个初入合体的，连坐的位置都没有。）'],
@@ -528,6 +601,17 @@
       ['旁白', '裂缝前立着一块碑，碑上刻着两个字：倚天。'],
       ['韩立', '（先去倚天城。魔界的约，得在那里赴。）'],
       ['旁白', '他抬脚跨进裂缝。身后的荒原，一下子远了。']
+    ],
+    moban: [
+      ['旁白', '出城三日，荒原上空裂出一块黑斑。不散，也不动，像一块贴在天空上的疤。'],
+      ['海大少', '魔斑！不会错的，这是魔劫降临前的魔斑！'],
+      ['韩立', '（海大少。他脸都白了。）'],
+      ['白果儿', '魔斑出现只是说明侵蚀刚开始。据记载，到界面之力弱到魔族能进来，起码还有半年。'],
+      ['韩立', '（半年。这半年，是给人准备的，也是给魔族准备的。）'],
+      ['器灵子', '是不是真的魔斑，还得等天渊城的人来正式确认。'],
+      ['海大少', '不用确认。真要是魔斑，整个地域就不会只有这一处。'],
+      ['旁白', '韩立抬头看了很久。那道黑斑悬着的位置，正好在倚天城的方向。'],
+      ['韩立', '（倚天城。那就先去倚天城。）']
     ],
 
     yitian: [
@@ -556,6 +640,16 @@
       ['旁白', '锁断了，人影散了。灰里落下一截青藤，还带着地火的温度。'],
       ['韩立', '（玄天仙藤。原著里，这是炼玄天之宝的东西。）'],
       ['旁白', '他把仙藤收好，转身往小灵天的方向走。']
+    ],
+    moyuan: [
+      ['旁白', '魔界最东边是海。海上没有岛，只有雾。船是抢来的，珠是伪魔珠，压得住气息，压不住海里的东西。'],
+      ['千秋圣女', '洗灵池与净灵莲，按上界灵王留下的遗言，就在魔源海的一座岛上。'],
+      ['韩立', '（千秋圣女。她要的是净灵莲，我要的是那条路。）'],
+      ['陇家老祖', '三条路：借魔族巨城的传送阵，沿第五魔河入海，或者穿幻啸沙漠。'],
+      ['韩立', '（三条路，各有各的死法。）'],
+      ['千秋圣女', '陇道友筹划多年，总有一条走得通。'],
+      ['旁白', '海雾散开一线。远处的水面下，浮起一片比岛还大的背脊。'],
+      ['韩立', '（先过海。路的事，活着再商量。）']
     ],
 
     xiaoling: [
@@ -593,6 +687,22 @@
       ['旁白', '雷光散尽，荒原上立着一个人。眉眼还是那眉眼，气息却已不在此界之中。'],
       ['韩立', '（真仙。）']
     ],
+    fsjie: [
+      ['旁白', '正午。阳气最浓的那一刻，劫云压到头顶百丈。'],
+      ['韩立', '（九劫都过了。这一劫，不一样。）'],
+      ['旁白', '云里翻出一张脸。不是雷，是魔。'],
+      ['天外魔君', '本座说过——你渡飞升之劫，本座必来。'],
+      ['韩立', '（天外魔君。当年那句话，他记到今天。）'],
+      ['韩立', '来了，就别走了。'],
+      ['旁白', '劫雷与魔气一齐落下。荒原上，只剩一个人还站着。']
+    ],
+    fsjie_out: [
+      ['旁白', '魔君的化身散了，最后一道劫雷也散了。荒原安静得不像刚打过一场。'],
+      ['韩立', '（金罡灭魔神雷还剩三成。够了。）'],
+      ['旁白', '天上裂开一道门。门里没有雷，也没有魔，只有光。'],
+      ['韩立', '（接引台。原来在这里。）'],
+      ['旁白', '他抬脚往光里走。身后，灵界的风第一次没有跟上来。']
+    ],
     xianjie: [
       ['旁白', '接引台在云上，白得像一块没有字的碑。'],
       ['韩立', '（人界、灵界、魔界。走了一辈子，原来只是为了站到这里。）'],
@@ -624,6 +734,16 @@
       ['旁白', '青袍人退了三步，血从袖口滴下来。他看了韩立很久，转身走了。'],
       ['韩立', '（同为大乘，他输在准备不足。）'],
       ['旁白', '地上落着一截玄天仙藤，是他随身带的。']
+    ],
+    shengshi: [
+      ['旁白', '荒原上，白袍使者站在赫连倒下的地方，看了很久那滩血。'],
+      ['圣岛使者', '死的是大乘。灵界的大乘，一只手数得过来。'],
+      ['韩立', '（他不是来问罪的。他是来称我的斤两。）'],
+      ['韩立', '他要试我，我奉陪。'],
+      ['圣岛使者', '圣岛不问对错，只问一句——你还要往上走吗。'],
+      ['韩立', '（往上。往上是什么，他比我清楚。）'],
+      ['韩立', '走。'],
+      ['旁白', '使者点了下头，转身走进风里。走前留了一句：飞升那日，天外魔君会来。']
     ],
     heihu: [
       ['旁白', '黑葫城没有城墙，只有一圈黑石。城门口没人盘问，也没人抬眼。'],
@@ -764,17 +884,22 @@
     fengyuan: { bg: { base: '#2f3a2e', a: '#384633', b: '#242e23' }, decor: [['rock', 0.28], ['tuft', 0.16]] },
     guanghan: { bg: { base: '#26343d', a: '#2e4049', b: '#1c2830' }, decor: [['rock', 0.34], ['tuft', 0.04]] },
     heti_guan: { bg: { base: '#1f2a36', a: '#273443', b: '#18212b' }, decor: [['rock', 0.30], ['tuft', 0.03]] },
+    liangzu:  { bg: { base: '#2a3441', a: '#33404f', b: '#1e2731' }, decor: [['rock', 0.12], ['tuft', 0.04]] },
     shengdao: { bg: { base: '#2c3a45', a: '#354755', b: '#222d36' }, decor: [['rock', 0.18], ['tuft', 0.06]] },
     mojie:    { bg: { base: '#241f2a', a: '#2d2634', b: '#1a161f' }, decor: [['rock', 0.38], ['tuft', 0.03]] },
+    moban:    { bg: { base: '#2b2733', a: '#342f3d', b: '#1d1a24' }, decor: [['rock', 0.30], ['tuft', 0.04]] },
     yitian:   { bg: { base: '#3a2a26', a: '#45322d', b: '#2b1f1c' }, decor: [['rock', 0.30], ['tuft', 0.04]] },
     huangquan:{ bg: { base: '#1d2f2c', a: '#243b37', b: '#152421' }, decor: [['rock', 0.34], ['tuft', 0.03]] },
+    moyuan:   { bg: { base: '#1b2830', a: '#22333c', b: '#131d24' }, decor: [['rock', 0.14], ['tuft', 0.03]] },
     xiaoling: { bg: { base: '#3a2626', a: '#462e2e', b: '#2b1c1c' }, decor: [['rock', 0.24], ['tuft', 0.06]] },
     sanjie:   { bg: { base: '#242a36', a: '#2c3443', b: '#1a1f28' }, decor: [['rock', 0.26], ['tuft', 0.04]] },
     jiujie:   { bg: { base: '#2a2f3a', a: '#343a47', b: '#1f232c' }, decor: [['rock', 0.24], ['tuft', 0.03]] },
     zhenxian: { bg: { base: '#2f3542', a: '#3a4253', b: '#232833' }, decor: [['rock', 0.22], ['tuft', 0.03]] },
+    fsjie:    { bg: { base: '#232733', a: '#2c3140', b: '#191c25' }, decor: [['rock', 0.20], ['tuft', 0.02]] },
     xianjie:  { bg: { base: '#39434f', a: '#46525f', b: '#2b333d' }, decor: [['rock', 0.10], ['tuft', 0.02]] },
     linghuang: { bg: { base: '#3a3230', a: '#463c39', b: '#2b2623' }, decor: [['rock', 0.16], ['tuft', 0.05]] },
     zhandacheng: { bg: { base: '#2b2f38', a: '#343945', b: '#1f232b' }, decor: [['rock', 0.30], ['tuft', 0.04]] },
+    shengshi: { bg: { base: '#2b2f38', a: '#343945', b: '#1f232b' }, decor: [['rock', 0.30], ['tuft', 0.04]] },
     heihu:    { bg: { base: '#241f26', a: '#2d2731', b: '#1a161c' }, decor: [['rock', 0.26], ['tuft', 0.03]] },
     baiguang: { bg: { base: '#4a4f57', a: '#575d66', b: '#3a3f46' }, decor: [['rock', 0.18], ['tuft', 0.02]] },
     tianmo:   { bg: { base: '#231c26', a: '#2c2331', b: '#19131c' }, decor: [['rock', 0.28], ['tuft', 0.02]] },
@@ -783,8 +908,9 @@
   });
   // late.js 合底色时还没有这些图，这里手动补上
   for (const id of ['anyuan', 'heifeng', 'lianxu', 'fengyuan', 'guanghan', 'heti_guan',
-                    'shengdao', 'mojie', 'yitian', 'huangquan', 'xiaoling', 'sanjie', 'jiujie', 'zhenxian', 'xianjie',
-                    'linghuang', 'zhandacheng', 'heihu', 'baiguang', 'tianmo', 'diyi', 'huirenjie']) {
+                    'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling',
+                    'sanjie', 'jiujie', 'zhenxian', 'fsjie', 'xianjie',
+                    'linghuang', 'zhandacheng', 'shengshi', 'heihu', 'baiguang', 'tianmo', 'diyi', 'huirenjie']) {
     const m = window.MAPS.find(x => x.id === id);
     const sc = window.MAP_SCENERY[id];
     if (m && sc) { m.bg = sc.bg; m.decorScheme = sc.decor; }
