@@ -18,10 +18,12 @@
   // 玄天斩灵剑 V8C1328；玄天仙藤 V5C633。
   // 禁用：炼虚丹 / 大乘丹 / 渡劫丹（原著 0 次）。
   window.ITEMS.push(
-    { id: 'tenglong', name: '腾龙丹', rarity: 4, icon: '🐉', req: 150,
+    // noDrop：破境丹只该在剧情节点给一枚，任何怪都不随机爆 ——
+    // 否则人界 82 级的 Boss 就能爆出灵界的腾龙丹，等于把炼虚关的门槛提前拆了。
+    { id: 'tenglong', name: '腾龙丹', rarity: 4, icon: '🐉', req: 150, noDrop: true,
       desc: '芝龙果为主药，三万年一结果。炼虚级灵药，生服也能凭空涨六十年苦修（V9C1364）。',
       effect: { xpMul: 0.2 } },
-    { id: 'heti', name: '合体丹', rarity: 4, icon: '💊', req: 200,
+    { id: 'heti', name: '合体丹', rarity: 4, icon: '💊', req: 200, noDrop: true,
       desc: '炼虚后期冲击合体的丹药（V10C1770）。',
       effect: { maxhp: 240 } },
     { id: 't_xuantianjian', name: '玄天斩灵剑', rarity: 5, icon: '⚔', slot: 'weapon', req: 260,

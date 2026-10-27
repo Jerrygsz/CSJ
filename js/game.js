@@ -639,8 +639,27 @@
       if (item.rarity >= 2) Sfx.buff(); else Sfx.gem();
     }
   }
+  // 灵界（V8 之后的四篇）：战利品池要与灵界的「修为段」对齐。
+  // 不这么分的话，炼虚修士在魔界砍死一头魔兽，地上能躺一把精铁短剑 —— 这是硬伤。
+  const LINGJIE_ARCS = ['I', 'J', 'K', 'L'];
+  function inLingjie() { return !!(G.map && LINGJIE_ARCS.indexOf(G.map.arc) >= 0); }
+  // 灵界成品池最低门槛：72 = 化神期，即「飞升时随身带下来的旧宝」。
+  // 原著里韩立初入灵界确实还在用青竹蜂云剑、元磁神光这些老底子，不是一落地就换新装；
+  // 但也不会拎着炼气期的精铁短剑 —— 门槛就卡在化神这一档。
+  function lootMinReq() { return inLingjie() ? 72 : 0; }
+
   function dropLoot(x, y, tier) {
     const d = curDiff();
+    if (inLingjie()) {
+      // 灵界的小怪身上没有法器，只有灵物 —— 这不是数值妥协，是原著逻辑：
+      // 灵界讲族、讲灵物、讲灵石，修士之间靠换与抢，不靠杀怪爆装备。
+      if (tier < 2) { dropMat(x, y, 1); return; }
+      // 首领才带得动法宝级的旧物；且绝不降到元婴以下的破烂
+      const item = Items.roll(2, d.rarity || 0, { minReq: 72, hardMinReq: 72 });
+      if (item) G.loot.push({ x, y, r: 9, bob: Math.random() * 6.28, item });
+      else dropMat(x, y, 1);
+      return;
+    }
     const item = Items.roll(tier, d.rarity || 0);
     if (item) G.loot.push({ x, y, r: 9, bob: Math.random() * 6.28, item });
   }
@@ -1951,9 +1970,11 @@
     // 灵石与道具洒落，稍后随结局对话自动收取
     for (let i = 0; i < 34; i++) { const a = Math.random() * 6.28, dd = U.rand(20, 150); G.gems.push({ x: G.player.x + Math.cos(a) * dd, y: G.player.y + Math.sin(a) * dd, r: 5, val: 5 }); }
     for (let i = 0; i < 6; i++) { const a = Math.random() * 6.28, dd = U.rand(30, 180); dropStone(G.player.x + Math.cos(a) * dd, G.player.y + Math.sin(a) * dd, 4); }
-    const lootN = 8 + (G.diff && G.diff.rarity ? G.diff.rarity * 2 : 0);
+    // 灵界抢的是灵物，不是法器：成品洒落减半，材料相应补上
+    const ling = inLingjie();
+    const lootN = Math.round((8 + (G.diff && G.diff.rarity ? G.diff.rarity * 2 : 0)) * (ling ? 0.5 : 1));
     for (let i = 0; i < lootN; i++) { const a = Math.random() * 6.28, dd = U.rand(30, 190); dropLoot(G.player.x + Math.cos(a) * dd, G.player.y + Math.sin(a) * dd, 2); }
-    dropMat(G.player.x, G.player.y, 5 + (G.diff && G.diff.rarity ? 2 : 0));
+    dropMat(G.player.x, G.player.y, Math.round((5 + (G.diff && G.diff.rarity ? 2 : 0)) * (ling ? 1.8 : 1)));
     G.enemies.length = 0;
     G.vacuumT = 1.7; G.pendingEnding = true;
     banner(name + ' 已伏诛 · 收取战利品'); Sfx.levelup();
@@ -6753,6 +6774,26 @@
     hostDrops() {
       const a = G.gems.length + G.herbs.length + G.loot.length;
       return { gems: G.gems.length, herbs: G.herbs.length, loot: G.loot.length, total: a };
+    },
+    // 掉落池探针：验证「灵界不掉人界低阶成品」与「破境丹不进随机池」
+    lootEra() { return inLingjie() ? 'lingjie' : 'renjie'; },
+    lootFloor() { return lootMinReq(); },
+    simDrop(tier) {
+      if (!G.player) return null;
+      const n0 = G.loot.length;
+      dropLoot(G.player.x, G.player.y, tier == null ? 0 : tier);
+      const d = G.loot[G.loot.length - 1];
+      return {
+        grew: G.loot.length - n0,
+        mat: !!(d && d.mat),
+        item: (d && d.item) ? d.item.id : null,
+        req: (d && d.item) ? (d.item.req || 1) : null
+      };
+    },
+    dropPool(r, minReq) {
+      const floor = (minReq == null) ? lootMinReq() : minReq;   // 不传就按当前地图的档位
+      return Items.dropPool(r == null ? 4 : r, { minReq: floor })
+        .map(i => ({ id: i.id, name: i.name, req: i.req || 1, rarity: i.rarity }));
     },
     dropList() {
       const out = [];

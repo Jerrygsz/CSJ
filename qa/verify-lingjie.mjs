@@ -314,6 +314,50 @@ ok(buy.ok, '「功法」柜里能点出百脉炼宝诀', buy);
 ok(buy.learned === true, '买下即习得百脉炼宝诀', buy);
 ok(buy.stones === 174000, '买功法扣灵石（200000−26000）', buy.stones);
 
+// ---- 5d) 掉落池按 arc 分段：灵界不掉人界低阶成品 ----
+const L1 = await page.evaluate(() => {
+  const F = window.__FR;
+  const tally = (n, tier) => {
+    const a = { mats: 0, items: 0, reqs: [], ids: [] };
+    for (let i = 0; i < n; i++) {
+      const d = F.simDrop(tier); if (!d) continue;
+      if (d.mat) { a.mats++; continue; }
+      a.items++; if (d.item) { a.ids.push(d.item); a.reqs.push(d.req); }
+    }
+    a.uniq = [...new Set(a.ids)];
+    a.minReq = a.reqs.length ? Math.min(...a.reqs) : null;
+    return a;
+  };
+  F.clearProgress(); F.setLevel(150); F.unlockAll(); F.god(true);
+  F.enterMap('heifeng');
+  const era = F.lootEra(), floor = F.lootFloor();
+  const small = tally(12, 0), boss = tally(12, 2);
+  return {
+    era, floor, small: { mats: small.mats, items: small.items }, boss,
+    pools: [0, 1, 2, 3, 4].map(r => F.dropPool(r).map(i => i.req)),
+    tenglong: [0, 1, 2, 3, 4].some(r => F.dropPool(r, 0).some(i => i.id === 'tenglong')),
+    heti: [0, 1, 2, 3, 4].some(r => F.dropPool(r, 0).some(i => i.id === 'heti'))
+  };
+});
+ok(L1.era === 'lingjie' && L1.floor === 72, '灵界图判定为 lingjie 且门槛 72（化神旧宝）', { era: L1.era, floor: L1.floor });
+ok(L1.small.items === 0 && L1.small.mats > 0, '灵界小怪只掉灵物，不再掉人界成品', L1.small);
+ok(L1.boss.items > 0 && L1.boss.minReq >= 72, '灵界首领只掉化神以上的旧宝', { minReq: L1.boss.minReq, uniq: L1.boss.uniq });
+const flatReq = [].concat.apply([], L1.pools);
+ok(flatReq.every(r => r >= 72), '灵界成品池里没有低于 72 的东西（精铁短剑/粗布道袍已排除）', flatReq.sort((a, b) => a - b).slice(0, 5));
+ok(!L1.tenglong && !L1.heti, '腾龙丹/合体丹不进任何随机池（破境丹只走剧情）', { tenglong: L1.tenglong, heti: L1.heti });
+
+const RB = await page.evaluate(() => {
+  const F = window.__FR;
+  F.clearProgress(); F.setLevel(66); F.unlockAll(); F.god(true);
+  F.enterMap('yanwu');
+  const era = F.lootEra(), floor = F.lootFloor();
+  let items = 0;
+  for (let i = 0; i < 12; i++) { const d = F.simDrop(0); if (d && !d.mat && d.item) items++; }
+  return { era, floor, items };
+});
+ok(RB.era === 'renjie' && RB.floor === 0, '人界图仍是 renjie、门槛 0（旧行为不变）', RB);
+ok(RB.items > 0, '人界小怪照常掉成品', RB.items);
+
 // ---- 6) 洞府冲关入口 + 真实突破 ----
 await run(`F.clearProgress();F.setLevel(149);F.god(true);F.clearMap('heifeng');F.addItem('tenglong',1);F.setStones(20000);`);
 const st = await page.evaluate(() => window.__FR.startBreak(150));

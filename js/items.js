@@ -159,7 +159,15 @@ window.Items = {
   byRarityAll(r) { return ITEMS.filter(i => i.rarity === r); },
   // 掉落池：排除「必须炼制才有」的丹药、支线专属物，以及法诀 ——
   // 法诀只走「剧情奖励 / 坊市购买 / 特定身怀此功者掉落」，不进随机掉落 pool
-  dropPool(r) { return ITEMS.filter(i => i.rarity === r && !i.craftOnly && !i.unique && !i.teach); },
+  //
+  // opt.minReq：按修为门槛过滤。灵界的怪不该掉精铁短剑/粗布道袍这类人界低阶成品，
+  //            所以灵界图传 96（化神级起步）。人界图不传，行为与从前完全一致。
+  // noDrop：破境丹这类「一炉只该有一枚」的东西，任何怪都不该随机爆。
+  dropPool(r, opt) {
+    const minReq = (opt && opt.minReq) || 0;
+    return ITEMS.filter(i => i.rarity === r && !i.craftOnly && !i.unique && !i.teach && !i.noDrop
+      && (i.req || 1) >= minReq);
+  },
   droppable(id) { const it = this.get(id); return !!(it && !it.craftOnly && !it.unique && !it.mat && !it.teach); },
   gearOfSlot(slot) { return ITEMS.filter(i => i.slot === slot); },
   get(id) { return ALL_ITEMS.find(i => i.id === id) || null; },
@@ -179,15 +187,30 @@ window.Items = {
     for (let k = 0; k < (boost || 0); k++) if (Math.random() < 0.34) out = Math.min(4, out + 1);
     return out;
   },
-  roll(tier, boost) {
+  roll(tier, boost, opt) {
     // Boss 本就在高稀有度池里，难度加权减半，避免死境一掉全是至宝
     let b = boost || 0;
     if (tier >= 2) b = Math.max(0, b - 1);
     const r = this.rollRarity(tier, b);
-    const pool = this.dropPool(r);
-    if (pool.length) return U.pick(pool);
-    // 兜底：该稀有度全是炼制物时，往下找一件可掉的
-    for (let k = r; k >= 0; k--) { const p2 = this.dropPool(k); if (p2.length) return U.pick(p2); }
+    const o = opt || {};
+    const minReq = o.minReq || 0;
+    // hardMinReq：允许在门槛附近放宽，但**不许降到这条线以下**
+    const hard = (o.hardMinReq != null) ? o.hardMinReq : minReq;
+    for (const floor of [minReq, Math.max(hard, minReq - 24), Math.max(hard, minReq - 48)]) {
+      const pool = this.dropPool(r, { minReq: floor });
+      if (pool.length) return U.pick(pool);
+    }
+    if (minReq > 0) {
+      // 有门槛时只许往**上**借一档（灵界的珍品池空着 → 借至宝池），
+      // 绝不顺着往下找，否则「灵界不掉人界垃圾」立刻就破了。
+      for (let k = r + 1; k <= 4; k++) {
+        const p3 = this.dropPool(k, { minReq: hard });
+        if (p3.length) return U.pick(p3);
+      }
+      return null;   // 真的没有：交回调用方（灵界那边会改掉一份灵物）
+    }
+    // 人界原有兜底：该稀有度全是炼制物时，往下找一件可掉的
+    for (let k = r; k >= 0; k--) { const p2 = this.dropPool(k, { minReq: 0 }); if (p2.length) return U.pick(p2); }
     return ITEMS[0];
   }
 };
