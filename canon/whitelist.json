@@ -1,0 +1,2866 @@
+{
+ "meta": {
+  "source": "凡人修仙传.txt",
+  "totalChars": 7468833,
+  "totalLines": 144886,
+  "volumes": 12,
+  "chapters": 2451,
+  "note": "count=原文出现次数; first=首次出现的卷/章; absent 表示原著无此词"
+ },
+ "terms": {
+  "境界": [
+   {
+    "term": "筑基期",
+    "count": 642,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 127,
+     "title": "灵根之说"
+    }
+   },
+   {
+    "term": "结丹期",
+    "count": 635,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 127,
+     "title": "灵根之说"
+    }
+   },
+   {
+    "term": "元婴期",
+    "count": 584,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 127,
+     "title": "灵根之说"
+    }
+   },
+   {
+    "term": "元婴后期",
+    "count": 363,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 389,
+     "title": "天星城与星宫"
+    }
+   },
+   {
+    "term": "炼气期",
+    "count": 360,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 127,
+     "title": "灵根之说"
+    }
+   },
+   {
+    "term": "合体期",
+    "count": 323,
+    "first": {
+     "vol": 8,
+     "volTitle": "初入灵界",
+     "ch": 1296,
+     "title": "黄粱灵君"
+    }
+   },
+   {
+    "term": "元婴中期",
+    "count": 286,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 382,
+     "title": "乌丑"
+    }
+   },
+   {
+    "term": "真仙",
+    "count": 283,
+    "first": {
+     "vol": 6,
+     "volTitle": "通天灵宝",
+     "ch": 875,
+     "title": "魔气之渊"
+    }
+   },
+   {
+    "term": "化神期",
+    "count": 228,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 127,
+     "title": "灵根之说"
+    }
+   },
+   {
+    "term": "大乘期",
+    "count": 207,
+    "first": {
+     "vol": 7,
+     "volTitle": "纵横人界",
+     "ch": 1219,
+     "title": "灵根与五行合一"
+    }
+   },
+   {
+    "term": "炼虚期",
+    "count": 144,
+    "first": {
+     "vol": 6,
+     "volTitle": "通天灵宝",
+     "ch": 1039,
+     "title": "化神修士"
+    }
+   },
+   {
+    "term": "元婴初期",
+    "count": 134,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 434,
+     "title": "聚集"
+    }
+   },
+   {
+    "term": "结丹后期",
+    "count": 107,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 403,
+     "title": "赤火老怪"
+    }
+   },
+   {
+    "term": "结丹初期",
+    "count": 84,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 176,
+     "title": "赌约"
+    }
+   },
+   {
+    "term": "筑基后期",
+    "count": 76,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 218,
+     "title": "缺陷与优势"
+    }
+   },
+   {
+    "term": "筑基中期",
+    "count": 75,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 176,
+     "title": "赌约"
+    }
+   },
+   {
+    "term": "结丹中期",
+    "count": 58,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 371,
+     "title": "登仙阁"
+    }
+   },
+   {
+    "term": "化神后期",
+    "count": 58,
+    "first": {
+     "vol": 6,
+     "volTitle": "通天灵宝",
+     "ch": 1039,
+     "title": "化神修士"
+    }
+   },
+   {
+    "term": "化神中期",
+    "count": 45,
+    "first": {
+     "vol": 6,
+     "volTitle": "通天灵宝",
+     "ch": 1068,
+     "title": "黑洞"
+    }
+   },
+   {
+    "term": "筑基初期",
+    "count": 43,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 230,
+     "title": "圈套"
+    }
+   },
+   {
+    "term": "化神初期",
+    "count": 39,
+    "first": {
+     "vol": 5,
+     "volTitle": "名震一方",
+     "ch": 710,
+     "title": "南宫之讯"
+    }
+   },
+   {
+    "term": "渡劫期",
+    "count": 5,
+    "first": {
+     "vol": 9,
+     "volTitle": "灵界百族",
+     "ch": 1518,
+     "title": "天阴之体"
+    }
+   },
+   {
+    "term": "炼气八层",
+    "count": 1,
+    "first": {
+     "vol": 5,
+     "volTitle": "名震一方",
+     "ch": 599,
+     "title": "入门（上）"
+    }
+   }
+  ],
+  "人物": [
+   {
+    "term": "韩立",
+    "count": 51451,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 1,
+     "title": "山边小村"
+    }
+   },
+   {
+    "term": "银月",
+    "count": 1082,
+    "first": {
+     "vol": 5,
+     "volTitle": "名震一方",
+     "ch": 615,
+     "title": "银月狼族"
+    }
+   },
+   {
+    "term": "紫灵",
+    "count": 678,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 403,
+     "title": "赤火老怪"
+    }
+   },
+   {
+    "term": "墨大夫",
+    "count": 665,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 5,
+     "title": "墨大夫"
+    }
+   },
+   {
+    "term": "曲魂",
+    "count": 609,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 64,
+     "title": "曲魂"
+    }
+   },
+   {
+    "term": "元瑶",
+    "count": 524,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 375,
+     "title": "双娇"
+    }
+   },
+   {
+    "term": "南宫婉",
+    "count": 468,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 209,
+     "title": "回归"
+    }
+   },
+   {
+    "term": "妍丽",
+    "count": 279,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 375,
+     "title": "双娇"
+    }
+   },
+   {
+    "term": "厉飞雨",
+    "count": 266,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 21,
+     "title": "止痛药"
+    }
+   },
+   {
+    "term": "孙二狗",
+    "count": 204,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 100,
+     "title": "嘉元城"
+    }
+   },
+   {
+    "term": "严氏",
+    "count": 193,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 104,
+     "title": "情报"
+    }
+   },
+   {
+    "term": "李化元",
+    "count": 184,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 212,
+     "title": "恍然"
+    }
+   },
+   {
+    "term": "梅凝",
+    "count": 165,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 580,
+     "title": "高墙村落"
+    }
+   },
+   {
+    "term": "董萱儿",
+    "count": 156,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 245,
+     "title": "远行与意外"
+    }
+   },
+   {
+    "term": "墨彩环",
+    "count": 109,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 104,
+     "title": "情报"
+    }
+   },
+   {
+    "term": "陈巧倩",
+    "count": 93,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 273,
+     "title": "巧遇"
+    }
+   },
+   {
+    "term": "张铁",
+    "count": 84,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 5,
+     "title": "墨大夫"
+    }
+   },
+   {
+    "term": "厉师兄",
+    "count": 76,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 17,
+     "title": "厉师兄（1）"
+    }
+   },
+   {
+    "term": "王门主",
+    "count": 69,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 6,
+     "title": "无名口诀"
+    }
+   },
+   {
+    "term": "三叔",
+    "count": 44,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 1,
+     "title": "山边小村"
+    }
+   },
+   {
+    "term": "张袖儿",
+    "count": 31,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 70,
+     "title": "挑拨"
+    }
+   },
+   {
+    "term": "马荣",
+    "count": 27,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 68,
+     "title": "中毒"
+    }
+   },
+   {
+    "term": "叶师叔",
+    "count": 23,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 145,
+     "title": "不速之客"
+    }
+   },
+   {
+    "term": "云露老魔",
+    "count": 20,
+    "first": {
+     "vol": 5,
+     "volTitle": "名震一方",
+     "ch": 756,
+     "title": "云露老魔"
+    }
+   },
+   {
+    "term": "墨居仁",
+    "count": 11,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 29,
+     "title": "冲突起"
+    }
+   },
+   {
+    "term": "二愣子",
+    "count": 8,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 1,
+     "title": "山边小村"
+    }
+   },
+   {
+    "term": "陈师姐",
+    "count": 6,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 315,
+     "title": "后手、怀疑"
+    }
+   },
+   {
+    "term": "田不缺",
+    "count": 5,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 262,
+     "title": "脱身"
+    }
+   },
+   {
+    "term": "燕柱",
+    "count": 4,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 251,
+     "title": "毁灭"
+    }
+   },
+   {
+    "term": "韩铸",
+    "count": 3,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 1,
+     "title": "山边小村"
+    }
+   },
+   {
+    "term": "韩母",
+    "count": 3,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 1,
+     "title": "山边小村"
+    }
+   },
+   {
+    "term": "王陆",
+    "count": 2,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 6,
+     "title": "无名口诀"
+    }
+   }
+  ],
+  "宗门势力": [
+   {
+    "term": "鬼灵门",
+    "count": 484,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 249,
+     "title": "比试"
+    }
+   },
+   {
+    "term": "落云宗",
+    "count": 425,
+    "first": {
+     "vol": 5,
+     "volTitle": "名震一方",
+     "ch": 597,
+     "title": "落云宗"
+    }
+   },
+   {
+    "term": "星宫",
+    "count": 415,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 389,
+     "title": "天星城与星宫"
+    }
+   },
+   {
+    "term": "黄枫谷",
+    "count": 329,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 127,
+     "title": "灵根之说"
+    }
+   },
+   {
+    "term": "掩月宗",
+    "count": 208,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 127,
+     "title": "灵根之说"
+    }
+   },
+   {
+    "term": "七玄门",
+    "count": 185,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 1,
+     "title": "山边小村"
+    }
+   },
+   {
+    "term": "御灵宗",
+    "count": 135,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 265,
+     "title": "战况"
+    }
+   },
+   {
+    "term": "古剑门",
+    "count": 96,
+    "first": {
+     "vol": 5,
+     "volTitle": "名震一方",
+     "ch": 597,
+     "title": "落云宗"
+    }
+   },
+   {
+    "term": "灵兽山",
+    "count": 71,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 127,
+     "title": "灵根之说"
+    }
+   },
+   {
+    "term": "魔道六宗",
+    "count": 55,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 253,
+     "title": "鬼灵门"
+    }
+   },
+   {
+    "term": "合欢宗",
+    "count": 54,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 262,
+     "title": "脱身"
+    }
+   },
+   {
+    "term": "天阙堡",
+    "count": 39,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 127,
+     "title": "灵根之说"
+    }
+   },
+   {
+    "term": "清虚门",
+    "count": 25,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 127,
+     "title": "灵根之说"
+    }
+   },
+   {
+    "term": "天星宗",
+    "count": 24,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 220,
+     "title": "灵眼之泉"
+    }
+   },
+   {
+    "term": "化刀坞",
+    "count": 23,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 127,
+     "title": "灵根之说"
+    }
+   },
+   {
+    "term": "万宝楼",
+    "count": 18,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 162,
+     "title": "万宝楼"
+    }
+   },
+   {
+    "term": "越国七派",
+    "count": 10,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 253,
+     "title": "鬼灵门"
+    }
+   }
+  ],
+  "地理": [
+   {
+    "term": "灵界",
+    "count": 1064,
+    "first": {
+     "vol": 5,
+     "volTitle": "名震一方",
+     "ch": 641,
+     "title": "虚天鼎、小瓶、通天灵宝"
+    }
+   },
+   {
+    "term": "天渊城",
+    "count": 685,
+    "first": {
+     "vol": 8,
+     "volTitle": "初入灵界",
+     "ch": 1315,
+     "title": "金庭舟与天渊卫"
+    }
+   },
+   {
+    "term": "魔界",
+    "count": 587,
+    "first": {
+     "vol": 6,
+     "volTitle": "通天灵宝",
+     "ch": 800,
+     "title": "上古魔界"
+    }
+   },
+   {
+    "term": "天南",
+    "count": 528,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 253,
+     "title": "鬼灵门"
+    }
+   },
+   {
+    "term": "人界",
+    "count": 488,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 583,
+     "title": "罗睺与大晋皇朝"
+    }
+   },
+   {
+    "term": "星宫",
+    "count": 415,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 389,
+     "title": "天星城与星宫"
+    }
+   },
+   {
+    "term": "大晋",
+    "count": 364,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 583,
+     "title": "罗睺与大晋皇朝"
+    }
+   },
+   {
+    "term": "黄枫谷",
+    "count": 329,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 127,
+     "title": "灵根之说"
+    }
+   },
+   {
+    "term": "坠魔谷",
+    "count": 320,
+    "first": {
+     "vol": 5,
+     "volTitle": "名震一方",
+     "ch": 680,
+     "title": "坠魔谷"
+    }
+   },
+   {
+    "term": "乱星海",
+    "count": 263,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 365,
+     "title": "王长青"
+    }
+   },
+   {
+    "term": "越国",
+    "count": 252,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 2,
+     "title": "青牛镇"
+    }
+   },
+   {
+    "term": "虚天殿",
+    "count": 179,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 405,
+     "title": "附身大法"
+    }
+   },
+   {
+    "term": "天星城",
+    "count": 174,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 389,
+     "title": "天星城与星宫"
+    }
+   },
+   {
+    "term": "倚天城",
+    "count": 131,
+    "first": {
+     "vol": 10,
+     "volTitle": "魔界之战",
+     "ch": 1886,
+     "title": "人魔之战（五）"
+    }
+   },
+   {
+    "term": "昆吾山",
+    "count": 118,
+    "first": {
+     "vol": 6,
+     "volTitle": "通天灵宝",
+     "ch": 979,
+     "title": "灵山昆吾"
+    }
+   },
+   {
+    "term": "外海",
+    "count": 77,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 389,
+     "title": "天星城与星宫"
+    }
+   },
+   {
+    "term": "越京",
+    "count": 44,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 278,
+     "title": "半年之约"
+    }
+   },
+   {
+    "term": "极西之地",
+    "count": 44,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 214,
+     "title": "地火之屋"
+    }
+   },
+   {
+    "term": "燕翎堡",
+    "count": 39,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 246,
+     "title": "董萱儿"
+    }
+   },
+   {
+    "term": "内海",
+    "count": 37,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 507,
+     "title": "柳暗花明"
+    }
+   },
+   {
+    "term": "太南谷",
+    "count": 29,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 125,
+     "title": "安排"
+    }
+   },
+   {
+    "term": "彩霞山",
+    "count": 21,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 2,
+     "title": "青牛镇"
+    }
+   },
+   {
+    "term": "万宝楼",
+    "count": 18,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 162,
+     "title": "万宝楼"
+    }
+   },
+   {
+    "term": "太南小会",
+    "count": 12,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 128,
+     "title": "太南小会"
+    }
+   },
+   {
+    "term": "青牛镇",
+    "count": 11,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 2,
+     "title": "青牛镇"
+    }
+   },
+   {
+    "term": "血色禁地",
+    "count": 6,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 177,
+     "title": "修仙界与正邪"
+    }
+   },
+   {
+    "term": "山边小村",
+    "count": 3,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 1,
+     "title": "山边小村"
+    }
+   },
+   {
+    "term": "燕家堡",
+    "count": 2,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 251,
+     "title": "毁灭"
+    }
+   },
+   {
+    "term": "地火之屋",
+    "count": 1,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 214,
+     "title": "地火之屋"
+    }
+   },
+   {
+    "term": "越国京城",
+    "count": 1,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 274,
+     "title": "赴约"
+    }
+   }
+  ],
+  "丹药": [
+   {
+    "term": "筑基丹",
+    "count": 229,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 106,
+     "title": "蓝衣人"
+    }
+   },
+   {
+    "term": "万年灵药",
+    "count": 29,
+    "first": {
+     "vol": 8,
+     "volTitle": "初入灵界",
+     "ch": 1335,
+     "title": "天雷成木"
+    }
+   },
+   {
+    "term": "龙鳞果",
+    "count": 27,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 173,
+     "title": "聚集"
+    }
+   },
+   {
+    "term": "定颜丹",
+    "count": 23,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 155,
+     "title": "郁闷"
+    }
+   },
+   {
+    "term": "千年灵药",
+    "count": 21,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 161,
+     "title": "坊市"
+    }
+   },
+   {
+    "term": "降尘丹",
+    "count": 15,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 377,
+     "title": "丹方与妖丹"
+    }
+   },
+   {
+    "term": "血参",
+    "count": 13,
+    "first": {
+     "vol": 10,
+     "volTitle": "魔界之战",
+     "ch": 1778,
+     "title": "白果儿"
+    }
+   },
+   {
+    "term": "紫猴花",
+    "count": 10,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 158,
+     "title": "蓝衣女子"
+    }
+   },
+   {
+    "term": "聚灵丹",
+    "count": 8,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 236,
+     "title": "古方"
+    }
+   },
+   {
+    "term": "养精丹",
+    "count": 8,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 27,
+     "title": "配灵药"
+    }
+   },
+   {
+    "term": "天灵果",
+    "count": 6,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 158,
+     "title": "蓝衣女子"
+    }
+   },
+   {
+    "term": "玉髓芝",
+    "count": 5,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 158,
+     "title": "蓝衣女子"
+    }
+   },
+   {
+    "term": "解毒丹",
+    "count": 4,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 125,
+     "title": "安排"
+    }
+   },
+   {
+    "term": "辟谷丹",
+    "count": 2,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 215,
+     "title": "炼丹与筑基"
+    }
+   },
+   {
+    "term": "太岁",
+    "count": 1,
+    "first": {
+     "vol": 11,
+     "volTitle": "真仙降世",
+     "ch": 2332,
+     "title": "劫宝"
+    }
+   }
+  ],
+  "功法秘术": [
+   {
+    "term": "元磁神光",
+    "count": 229,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 408,
+     "title": "妖尸"
+    }
+   },
+   {
+    "term": "三头六臂",
+    "count": 204,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 541,
+     "title": "三头六臂"
+    }
+   },
+   {
+    "term": "大衍诀",
+    "count": 200,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 230,
+     "title": "圈套"
+    }
+   },
+   {
+    "term": "青元剑诀",
+    "count": 108,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 213,
+     "title": "准备"
+    }
+   },
+   {
+    "term": "梵圣真魔功",
+    "count": 97,
+    "first": {
+     "vol": 8,
+     "volTitle": "初入灵界",
+     "ch": 1351,
+     "title": "百脉炼宝诀"
+    }
+   },
+   {
+    "term": "傀儡术",
+    "count": 85,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 264,
+     "title": "机关傀儡与大衍诀"
+    }
+   },
+   {
+    "term": "天雷竹",
+    "count": 81,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 401,
+     "title": "天雷竹"
+    }
+   },
+   {
+    "term": "长春功",
+    "count": 74,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 30,
+     "title": "枭雄末路"
+    }
+   },
+   {
+    "term": "玄天斩灵剑",
+    "count": 40,
+    "first": {
+     "vol": 8,
+     "volTitle": "初入灵界",
+     "ch": 1328,
+     "title": "混沌万灵榜"
+    }
+   },
+   {
+    "term": "通宝诀",
+    "count": 34,
+    "first": {
+     "vol": 6,
+     "volTitle": "通天灵宝",
+     "ch": 872,
+     "title": "通宝诀"
+    }
+   },
+   {
+    "term": "炼器术",
+    "count": 31,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 227,
+     "title": "结交之心"
+    }
+   },
+   {
+    "term": "炼丹术",
+    "count": 19,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 215,
+     "title": "炼丹与筑基"
+    }
+   },
+   {
+    "term": "媚术",
+    "count": 18,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 118,
+     "title": "二选一"
+    }
+   },
+   {
+    "term": "大衍决",
+    "count": 14,
+    "first": {
+     "vol": 7,
+     "volTitle": "纵横人界",
+     "ch": 1185,
+     "title": "重临七灵"
+    }
+   },
+   {
+    "term": "制符术",
+    "count": 13,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 591,
+     "title": "降灵符"
+    }
+   },
+   {
+    "term": "炼尸术",
+    "count": 4,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 64,
+     "title": "曲魂"
+    }
+   },
+   {
+    "term": "飞剑术",
+    "count": 2,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 82,
+     "title": "金光上人"
+    }
+   },
+   {
+    "term": "奕梦决",
+    "count": 1,
+    "first": {
+     "vol": 7,
+     "volTitle": "纵横人界",
+     "ch": 1201,
+     "title": "二女"
+    }
+   },
+   {
+    "term": "御剑术",
+    "count": 1,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 319,
+     "title": "四大血侍"
+    }
+   }
+  ],
+  "法宝器物": [
+   {
+    "term": "飞剑",
+    "count": 1136,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 82,
+     "title": "金光上人"
+    }
+   },
+   {
+    "term": "噬金虫",
+    "count": 968,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 387,
+     "title": "噬金虫"
+    }
+   },
+   {
+    "term": "符箓",
+    "count": 962,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 92,
+     "title": "剑符"
+    }
+   },
+   {
+    "term": "玉简",
+    "count": 896,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 193,
+     "title": "敌友之分"
+    }
+   },
+   {
+    "term": "储物袋",
+    "count": 826,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 148,
+     "title": "灰衣老者"
+    }
+   },
+   {
+    "term": "小瓶",
+    "count": 504,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 10,
+     "title": "神秘瓶子"
+    }
+   },
+   {
+    "term": "虚天鼎",
+    "count": 420,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 434,
+     "title": "聚集"
+    }
+   },
+   {
+    "term": "阵盘",
+    "count": 316,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 221,
+     "title": "天星宗与法阵"
+    }
+   },
+   {
+    "term": "储物镯",
+    "count": 253,
+    "first": {
+     "vol": 8,
+     "volTitle": "初入灵界",
+     "ch": 1289,
+     "title": "九玄明玉潭"
+    }
+   },
+   {
+    "term": "灵兽袋",
+    "count": 217,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 387,
+     "title": "噬金虫"
+    }
+   },
+   {
+    "term": "符宝",
+    "count": 206,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 143,
+     "title": "斩杀"
+    }
+   },
+   {
+    "term": "青竹蜂云剑",
+    "count": 204,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 241,
+     "title": "三转重元功"
+    }
+   },
+   {
+    "term": "虚天殿",
+    "count": 179,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 405,
+     "title": "附身大法"
+    }
+   },
+   {
+    "term": "绿液",
+    "count": 142,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 14,
+     "title": "神秘液"
+    }
+   },
+   {
+    "term": "地火",
+    "count": 140,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 156,
+     "title": "地肺之火"
+    }
+   },
+   {
+    "term": "血玉蜘蛛",
+    "count": 139,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 345,
+     "title": "小老头与钟声"
+    }
+   },
+   {
+    "term": "金砖",
+    "count": 21,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 184,
+     "title": "金光砖之威"
+    }
+   },
+   {
+    "term": "丹炉",
+    "count": 20,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 156,
+     "title": "地肺之火"
+    }
+   },
+   {
+    "term": "掌天瓶",
+    "count": 13,
+    "first": {
+     "vol": 12,
+     "volTitle": "真仙降临",
+     "ch": 2425,
+     "title": "掌天瓶"
+    }
+   },
+   {
+    "term": "白色玉牌",
+    "count": 13,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 510,
+     "title": "要挟"
+    }
+   },
+   {
+    "term": "坞石",
+    "count": 7,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 214,
+     "title": "地火之屋"
+    }
+   },
+   {
+    "term": "紫色令箭",
+    "count": 2,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 214,
+     "title": "地火之屋"
+    }
+   },
+   {
+    "term": "火星砂",
+    "count": 1,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 214,
+     "title": "地火之屋"
+    }
+   },
+   {
+    "term": "五彩石门",
+    "count": 1,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 214,
+     "title": "地火之屋"
+    }
+   }
+  ],
+  "灵兽妖物": [
+   {
+    "term": "妖兽",
+    "count": 1636,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 128,
+     "title": "太南小会"
+    }
+   },
+   {
+    "term": "噬金虫",
+    "count": 968,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 387,
+     "title": "噬金虫"
+    }
+   },
+   {
+    "term": "灵兽",
+    "count": 838,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 127,
+     "title": "灵根之说"
+    }
+   },
+   {
+    "term": "妖丹",
+    "count": 277,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 344,
+     "title": "大阵灭妖"
+    }
+   },
+   {
+    "term": "银翅夜叉",
+    "count": 265,
+    "first": {
+     "vol": 6,
+     "volTitle": "通天灵宝",
+     "ch": 986,
+     "title": "银翅夜叉"
+    }
+   },
+   {
+    "term": "蛟龙",
+    "count": 221,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 143,
+     "title": "斩杀"
+    }
+   },
+   {
+    "term": "血玉蜘蛛",
+    "count": 139,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 345,
+     "title": "小老头与钟声"
+    }
+   },
+   {
+    "term": "毒蛟",
+    "count": 108,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 521,
+     "title": "毒蛟"
+    }
+   },
+   {
+    "term": "内丹",
+    "count": 96,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 176,
+     "title": "赌约"
+    }
+   },
+   {
+    "term": "元婴老怪",
+    "count": 35,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 434,
+     "title": "聚集"
+    }
+   },
+   {
+    "term": "尸王",
+    "count": 28,
+    "first": {
+     "vol": 5,
+     "volTitle": "名震一方",
+     "ch": 778,
+     "title": "巨猿现"
+    }
+   },
+   {
+    "term": "兽卵",
+    "count": 20,
+    "first": {
+     "vol": 3,
+     "volTitle": "魔道入侵",
+     "ch": 272,
+     "title": "一年"
+    }
+   },
+   {
+    "term": "金蚕",
+    "count": 5,
+    "first": {
+     "vol": 4,
+     "volTitle": "风起海外",
+     "ch": 478,
+     "title": "金蚕取宝"
+    }
+   },
+   {
+    "term": "铁甲尸",
+    "count": 3,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 64,
+     "title": "曲魂"
+    }
+   }
+  ],
+  "货币": [
+   {
+    "term": "灵石",
+    "count": 1419,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 131,
+     "title": "灵石与灵符"
+    }
+   },
+   {
+    "term": "极品灵石",
+    "count": 83,
+    "first": {
+     "vol": 7,
+     "volTitle": "纵横人界",
+     "ch": 1151,
+     "title": "乱起"
+    }
+   },
+   {
+    "term": "中阶灵石",
+    "count": 67,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 131,
+     "title": "灵石与灵符"
+    }
+   },
+   {
+    "term": "高阶灵石",
+    "count": 66,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 131,
+     "title": "灵石与灵符"
+    }
+   },
+   {
+    "term": "低阶灵石",
+    "count": 46,
+    "first": {
+     "vol": 2,
+     "volTitle": "初踏修仙路",
+     "ch": 131,
+     "title": "灵石与灵符"
+    }
+   },
+   {
+    "term": "上品灵石",
+    "count": 3,
+    "first": {
+     "vol": 11,
+     "volTitle": "真仙降世",
+     "ch": 2322,
+     "title": "黑焦峰"
+    }
+   },
+   {
+    "term": "铜板",
+    "count": 1,
+    "first": {
+     "vol": 1,
+     "volTitle": "七玄门风云",
+     "ch": 1,
+     "title": "山边小村"
+    }
+   }
+  ]
+ },
+ "absent": {
+  "境界": [
+   "散仙",
+   "炼气一层",
+   "炼气二层",
+   "炼气三层",
+   "炼气四层",
+   "炼气五层",
+   "炼气六层",
+   "炼气七层",
+   "炼气九层",
+   "炼气十层",
+   "炼气十一层",
+   "炼气十二层",
+   "炼气十三层"
+  ],
+  "人物": [
+   "石穿空"
+  ],
+  "宗门势力": [
+   "天鬼宗",
+   "化血宗",
+   "血鬼门"
+  ],
+  "地理": [
+   "星海禁地",
+   "大衍神君洞府"
+  ],
+  "丹药": [
+   "洗髓丹",
+   "培元丹",
+   "凝元丹",
+   "大还丹",
+   "回春丹",
+   "疗伤丹"
+  ],
+  "功法秘术": [
+   "阵道"
+  ],
+  "法宝器物": [],
+  "灵兽妖物": [
+   "天蝎"
+  ],
+  "货币": []
+ },
+ "suspect_game_terms": [
+  {
+   "term": "练气",
+   "count": 13,
+   "first": {
+    "vol": 1,
+    "volTitle": "七玄门风云",
+    "ch": 16,
+    "title": "小算盘"
+   }
+  },
+  {
+   "term": "练气期",
+   "count": 2,
+   "first": {
+    "vol": 6,
+    "volTitle": "通天灵宝",
+    "ch": 1080,
+    "title": "冰城"
+   }
+  },
+  {
+   "term": "练气一层",
+   "count": 0,
+   "first": null
+  },
+  {
+   "term": "练气十三层",
+   "count": 0,
+   "first": null
+  },
+  {
+   "term": "下品灵石",
+   "count": 0,
+   "first": null
+  },
+  {
+   "term": "中品灵石",
+   "count": 2,
+   "first": {
+    "vol": 4,
+    "volTitle": "风起海外",
+    "ch": 390,
+    "title": "巨城"
+   }
+  },
+  {
+   "term": "上品灵石",
+   "count": 3,
+   "first": {
+    "vol": 11,
+    "volTitle": "真仙降世",
+    "ch": 2322,
+    "title": "黑焦峰"
+   }
+  },
+  {
+   "term": "翠屏山",
+   "count": 0,
+   "first": null
+  },
+  {
+   "term": "地火之屋",
+   "count": 1,
+   "first": {
+    "vol": 3,
+    "volTitle": "魔道入侵",
+    "ch": 214,
+    "title": "地火之屋"
+   }
+  },
+  {
+   "term": "黄枫谷",
+   "count": 329,
+   "first": {
+    "vol": 2,
+    "volTitle": "初踏修仙路",
+    "ch": 127,
+    "title": "灵根之说"
+   }
+  },
+  {
+   "term": "燕家堡",
+   "count": 2,
+   "first": {
+    "vol": 3,
+    "volTitle": "魔道入侵",
+    "ch": 251,
+    "title": "毁灭"
+   }
+  },
+  {
+   "term": "升仙令",
+   "count": 25,
+   "first": {
+    "vol": 2,
+    "volTitle": "初踏修仙路",
+    "ch": 141,
+    "title": "升仙令"
+   }
+  },
+  {
+   "term": "筑基丹",
+   "count": 229,
+   "first": {
+    "vol": 2,
+    "volTitle": "初踏修仙路",
+    "ch": 106,
+    "title": "蓝衣人"
+   }
+  },
+  {
+   "term": "虚天鼎",
+   "count": 420,
+   "first": {
+    "vol": 4,
+    "volTitle": "风起海外",
+    "ch": 434,
+    "title": "聚集"
+   }
+  },
+  {
+   "term": "掌天瓶",
+   "count": 13,
+   "first": {
+    "vol": 12,
+    "volTitle": "真仙降临",
+    "ch": 2425,
+    "title": "掌天瓶"
+   }
+  },
+  {
+   "term": "大衍诀",
+   "count": 200,
+   "first": {
+    "vol": 3,
+    "volTitle": "魔道入侵",
+    "ch": 230,
+    "title": "圈套"
+   }
+  },
+  {
+   "term": "大衍决",
+   "count": 14,
+   "first": {
+    "vol": 7,
+    "volTitle": "纵横人界",
+    "ch": 1185,
+    "title": "重临七灵"
+   }
+  }
+ ],
+ "volume_ranges": [
+  {
+   "vol": 1,
+   "title": "七玄门风云",
+   "chFrom": 1,
+   "chTo": 99,
+   "count": 99
+  },
+  {
+   "vol": 2,
+   "title": "初踏修仙路",
+   "chFrom": 100,
+   "chTo": 171,
+   "count": 72
+  },
+  {
+   "vol": 3,
+   "title": "魔道入侵",
+   "chFrom": 172,
+   "chTo": 363,
+   "count": 192
+  },
+  {
+   "vol": 4,
+   "title": "风起海外",
+   "chFrom": 364,
+   "chTo": 595,
+   "count": 232
+  },
+  {
+   "vol": 5,
+   "title": "名震一方",
+   "chFrom": 596,
+   "chTo": 795,
+   "count": 200
+  },
+  {
+   "vol": 6,
+   "title": "通天灵宝",
+   "chFrom": 796,
+   "chTo": 1124,
+   "count": 329
+  },
+  {
+   "vol": 7,
+   "title": "纵横人界",
+   "chFrom": 1125,
+   "chTo": 1265,
+   "count": 141
+  },
+  {
+   "vol": 8,
+   "title": "初入灵界",
+   "chFrom": 1266,
+   "chTo": 1357,
+   "count": 92
+  },
+  {
+   "vol": 9,
+   "title": "灵界百族",
+   "chFrom": 1358,
+   "chTo": 1754,
+   "count": 397
+  },
+  {
+   "vol": 10,
+   "title": "魔界之战",
+   "chFrom": 1747,
+   "chTo": 2170,
+   "count": 421
+  },
+  {
+   "vol": 11,
+   "title": "真仙降世",
+   "chFrom": 2171,
+   "chTo": 2415,
+   "count": 245
+  },
+  {
+   "vol": 12,
+   "title": "真仙降临",
+   "chFrom": 2416,
+   "chTo": 2446,
+   "count": 31
+  }
+ ],
+ "aliases": {
+  "炼气期": [
+   "炼气"
+  ],
+  "小瓶": [
+   "神秘小瓶",
+   "掌天瓶"
+  ],
+  "大衍诀": [
+   "大衍决"
+  ],
+  "低阶灵石": [
+   "低阶灵石"
+  ],
+  "中阶灵石": [
+   "中阶灵石"
+  ],
+  "高阶灵石": [
+   "高阶灵石",
+   "上阶灵石"
+  ],
+  "极品灵石": [
+   "极品灵石"
+  ],
+  "地火之屋": [
+   "地火间",
+   "地火房"
+  ],
+  "黄枫谷": [
+   "黄枫谷"
+  ]
+ },
+ "forbidden": [
+  {
+   "term": "练气期",
+   "reason": "境界正名为『炼气期』；『练气』是动词(练气打坐)，原作境界名不用练气",
+   "replacement": "炼气期",
+   "evidence": "炼气期 360 次 / 练气期 2 次 / 练气一层·练气十三层 0 次"
+  },
+  {
+   "term": "练气一层/练气十三层",
+   "reason": "原著境界层数写作『炼气X层』",
+   "replacement": "炼气X层",
+   "evidence": "练气X层 0 次"
+  },
+  {
+   "term": "下品灵石",
+   "reason": "原作用『低阶灵石』，无『下品』说法",
+   "replacement": "低阶灵石",
+   "evidence": "下品灵石 0 次"
+  },
+  {
+   "term": "中品灵石",
+   "reason": "标准为『中阶灵石』；中品仅 2 次非规范",
+   "replacement": "中阶灵石",
+   "evidence": "中阶灵石 67 次"
+  },
+  {
+   "term": "上品灵石",
+   "reason": "标准为『高阶灵石』；上品仅 3 次",
+   "replacement": "高阶灵石",
+   "evidence": "高阶灵石 66 次 / 上阶灵石 1 次"
+  },
+  {
+   "term": "大衍决",
+   "reason": "正名为『大衍诀』",
+   "replacement": "大衍诀",
+   "evidence": "大衍诀 200 次 / 大衍决 14 次"
+  },
+  {
+   "term": "翠屏山",
+   "reason": "原著全文 0 次，属游戏自造地名，须替换为原著真实地名或改写",
+   "replacement": "（待定，须用原著地名）",
+   "evidence": "翠屏山 0 次"
+  },
+  {
+   "term": "练气X层",
+   "reason": "境界层数正名为『炼气期X层』（须带期）",
+   "replacement": "炼气期X层",
+   "evidence": "练气X层 0 次；炼气期九层 V2C147"
+  },
+  {
+   "term": "炼气X层（缺期）",
+   "reason": "层数须带『期』：炼气期X层",
+   "replacement": "炼气期X层",
+   "evidence": "V2C147「炼气期九层」、V3C216「炼气期的顶层」"
+  },
+  {
+   "term": "阵道",
+   "reason": "原著查无此词",
+   "replacement": "阵法/禁制",
+   "evidence": "阵道 0 次"
+  }
+ ],
+ "anchors": {
+  "灵石兑率": {
+   "text": "一百块低阶灵石兑换一块中阶灵石",
+   "chapter": "第3卷 第214章 地火之屋"
+  },
+  "地火之屋": {
+   "text": "越国某派炼丹炼器地，坞石砌建，五彩石门+紫色令箭，内设36间地火间，18/19号丹房最佳，用火星砂增温，玉牌开门",
+   "chapter": "第3卷 第214章"
+  },
+  "黄枫谷": {
+   "text": "韩立入的越国宗门，首次出现在第2卷第127章《灵根之说》",
+   "chapter": "第2卷 第127章"
+  },
+  "升仙令": {
+   "text": "第2卷第141章《升仙令》，入黄枫谷相关信物",
+   "chapter": "第2卷第141章"
+  },
+  "筑基丹": {
+   "text": "筑基核心丹药，全文229次",
+   "chapter": "第2卷 第106章 首次出现"
+  },
+  "结丹寿元": {
+   "text": "结丹期寿元五六百年",
+   "chapter": "第4卷 第398章《结丹与法宝》"
+  },
+  "元婴寿元": {
+   "text": "元婴期寿元千余年",
+   "chapter": "第5卷 第639章《结婴（下）》"
+  },
+  "凝婴奇物": {
+   "text": "九曲灵参使凝结元婴几率倍增；补天丹对结丹修士凝练元婴有益",
+   "chapter": "第4卷 第433章《九曲灵参》/第486章"
+  },
+  "化神丹药": {
+   "text": "造化丹(灵烛果炼制)，一生只能服一次，限化神以下，催化神识提前体验下一层",
+   "chapter": "第5卷 第752章《灵烛果与造化丹》"
+  },
+  "符箓物价": {
+   "text": "初级下阶符箓1-2低阶灵石；中阶灵符6-10；金刚符9；飞天符30；《五行初级咒决大全》90；《水咒符法基础》60",
+   "chapter": "第2卷 第131章《灵石与灵符》"
+  }
+ },
+ "non_canon_game_items": [
+  {
+   "term": "培元丹",
+   "novel_count": 0,
+   "game_count": 4,
+   "action": "替换为原著丹药（如养精丹/聚灵丹），或标 [原创] 待批"
+  },
+  {
+   "term": "疗伤丹",
+   "novel_count": 0,
+   "game_count": 1,
+   "action": "同上"
+  },
+  {
+   "term": "洗髓丹",
+   "novel_count": 0,
+   "game_count": 0,
+   "action": "未使用，禁入"
+  },
+  {
+   "term": "凝元丹",
+   "novel_count": 0,
+   "game_count": 0,
+   "action": "未使用，禁入"
+  },
+  {
+   "term": "大还丹",
+   "novel_count": 0,
+   "game_count": 0,
+   "action": "未使用，禁入"
+  },
+  {
+   "term": "回春丹",
+   "novel_count": 0,
+   "game_count": 0,
+   "action": "未使用，禁入"
+  }
+ ],
+ "post_huashen_terms": {
+  "境界": {
+   "verified": [
+    {
+     "term": "炼虚期",
+     "count": 144,
+     "first": {
+      "vol": 6,
+      "ch": 1039,
+      "title": "化神修士"
+     }
+    },
+    {
+     "term": "炼虚初期",
+     "count": 37,
+     "first": {
+      "vol": 6,
+      "ch": 1068,
+      "title": "黑洞"
+     }
+    },
+    {
+     "term": "炼虚中期",
+     "count": 32,
+     "first": {
+      "vol": 8,
+      "ch": 1309,
+      "title": "巨人之战"
+     }
+    },
+    {
+     "term": "炼虚后期",
+     "count": 78,
+     "first": {
+      "vol": 9,
+      "ch": 1361,
+      "title": "诧灵琵琶"
+     }
+    },
+    {
+     "term": "合体期",
+     "count": 323,
+     "first": {
+      "vol": 8,
+      "ch": 1296,
+      "title": "黄粱灵君"
+     }
+    },
+    {
+     "term": "合体初期",
+     "count": 81,
+     "first": {
+      "vol": 9,
+      "ch": 1423,
+      "title": "鲲鹏舍利与天鹏之誓"
+     }
+    },
+    {
+     "term": "合体中期",
+     "count": 105,
+     "first": {
+      "vol": 9,
+      "ch": 1381,
+      "title": "真灵之魄"
+     }
+    },
+    {
+     "term": "合体后期",
+     "count": 196,
+     "first": {
+      "vol": 8,
+      "ch": 1339,
+      "title": "意外的拍卖物"
+     }
+    },
+    {
+     "term": "大乘期",
+     "count": 207,
+     "first": {
+      "vol": 7,
+      "ch": 1219,
+      "title": "灵根与五行合一"
+     }
+    },
+    {
+     "term": "大乘初期",
+     "count": 4,
+     "first": {
+      "vol": 9,
+      "ch": 1518,
+      "title": "天阴之体"
+     }
+    },
+    {
+     "term": "大乘后期",
+     "count": 1,
+     "first": {
+      "vol": 9,
+      "ch": 1518,
+      "title": "天阴之体"
+     }
+    },
+    {
+     "term": "渡劫期",
+     "count": 5,
+     "first": {
+      "vol": 9,
+      "ch": 1518,
+      "title": "天阴之体"
+     }
+    },
+    {
+     "term": "渡劫",
+     "count": 83,
+     "first": {
+      "vol": 2,
+      "ch": 127,
+      "title": "灵根之说"
+     }
+    },
+    {
+     "term": "真仙",
+     "count": 283,
+     "first": {
+      "vol": 6,
+      "ch": 875,
+      "title": "魔气之渊"
+     }
+    },
+    {
+     "term": "真仙之身",
+     "count": 8,
+     "first": {
+      "vol": 11,
+      "ch": 2411,
+      "title": "轩九灵"
+     }
+    },
+    {
+     "term": "真仙界",
+     "count": 77,
+     "first": {
+      "vol": 7,
+      "ch": 1166,
+      "title": "金阙玉书"
+     }
+    },
+    {
+     "term": "仙劫",
+     "count": 2,
+     "first": {
+      "vol": 7,
+      "ch": 1219,
+      "title": "灵根与五行合一"
+     }
+    }
+   ],
+   "absent": [
+    "大乘中期"
+   ]
+  },
+  "地理": {
+   "verified": [
+    {
+     "term": "天渊城",
+     "count": 685,
+     "first": {
+      "vol": 8,
+      "ch": 1315,
+      "title": "金庭舟与天渊卫"
+     }
+    },
+    {
+     "term": "天渊坊市",
+     "count": 1,
+     "first": {
+      "vol": 8,
+      "ch": 1333,
+      "title": "天渊坊市"
+     }
+    },
+    {
+     "term": "安远城",
+     "count": 81,
+     "first": {
+      "vol": 8,
+      "ch": 1268,
+      "title": "天东商号"
+     }
+    },
+    {
+     "term": "虞阳城",
+     "count": 20,
+     "first": {
+      "vol": 8,
+      "ch": 1292,
+      "title": "虞阳城"
+     }
+    },
+    {
+     "term": "风元大陆",
+     "count": 107,
+     "first": {
+      "vol": 9,
+      "ch": 1360,
+      "title": "紫影、圣皇"
+     }
+    },
+    {
+     "term": "广寒界",
+     "count": 206,
+     "first": {
+      "vol": 9,
+      "ch": 1593,
+      "title": "千机子"
+     }
+    },
+    {
+     "term": "小灵天",
+     "count": 98,
+     "first": {
+      "vol": 10,
+      "ch": 2050,
+      "title": "小灵天"
+     }
+    },
+    {
+     "term": "圣岛",
+     "count": 276,
+     "first": {
+      "vol": 10,
+      "ch": 1766,
+      "title": "两族大乘"
+     }
+    },
+    {
+     "term": "倚天城",
+     "count": 131,
+     "first": {
+      "vol": 10,
+      "ch": 1886,
+      "title": "人魔之战（五）"
+     }
+    },
+    {
+     "term": "玉皇顶",
+     "count": 8,
+     "first": {
+      "vol": 9,
+      "ch": 1434,
+      "title": "玉皇顶"
+     }
+    },
+    {
+     "term": "黄泉地火",
+     "count": 31,
+     "first": {
+      "vol": 10,
+      "ch": 1907,
+      "title": "镇魔锁与车骑恭"
+     }
+    },
+    {
+     "term": "魔源海",
+     "count": 41,
+     "first": {
+      "vol": 10,
+      "ch": 2018,
+      "title": "魔源海"
+     }
+    },
+    {
+     "term": "魔界荒地",
+     "count": 3,
+     "first": {
+      "vol": 10,
+      "ch": 2018,
+      "title": "魔源海"
+     }
+    },
+    {
+     "term": "黑葫城",
+     "count": 19,
+     "first": {
+      "vol": 11,
+      "ch": 2211,
+      "title": "黑葫城"
+     }
+    },
+    {
+     "term": "白光界",
+     "count": 8,
+     "first": {
+      "vol": 11,
+      "ch": 2214,
+      "title": "白光界"
+     }
+    },
+    {
+     "term": "飞灵台",
+     "count": 6,
+     "first": {
+      "vol": 8,
+      "ch": 1315,
+      "title": "金庭舟与天渊卫"
+     }
+    }
+   ],
+   "absent": []
+  },
+  "势力": {
+   "verified": [
+    {
+     "term": "人族",
+     "count": 1246,
+     "first": {
+      "vol": 4,
+      "ch": 581,
+      "title": "巨兽来袭"
+     }
+    },
+    {
+     "term": "妖族",
+     "count": 362,
+     "first": {
+      "vol": 4,
+      "ch": 542,
+      "title": "九级妖修"
+     }
+    },
+    {
+     "term": "魔族",
+     "count": 2403,
+     "first": {
+      "vol": 6,
+      "ch": 915,
+      "title": "明王诀"
+     }
+    },
+    {
+     "term": "灵族",
+     "count": 668,
+     "first": {
+      "vol": 4,
+      "ch": 544,
+      "title": "后期大成"
+     }
+    },
+    {
+     "term": "十三族",
+     "count": 65,
+     "first": {
+      "vol": 9,
+      "ch": 1562,
+      "title": "困境"
+     }
+    },
+    {
+     "term": "四大妖王",
+     "count": 35,
+     "first": {
+      "vol": 6,
+      "ch": 1064,
+      "title": "敖啸老祖"
+     }
+    },
+    {
+     "term": "七妖王",
+     "count": 20,
+     "first": {
+      "vol": 8,
+      "ch": 1275,
+      "title": "地蛟筋"
+     }
+    },
+    {
+     "term": "三皇",
+     "count": 72,
+     "first": {
+      "vol": 6,
+      "ch": 925,
+      "title": "噬真合元诀"
+     }
+    },
+    {
+     "term": "天元圣皇",
+     "count": 61,
+     "first": {
+      "vol": 7,
+      "ch": 1196,
+      "title": "金刚诀和帝流浆"
+     }
+    },
+    {
+     "term": "酒皇",
+     "count": 2,
+     "first": {
+      "vol": 10,
+      "ch": 1782,
+      "title": "酒皇"
+     }
+    },
+    {
+     "term": "天渊卫",
+     "count": 19,
+     "first": {
+      "vol": 8,
+      "ch": 1315,
+      "title": "金庭舟与天渊卫"
+     }
+    },
+    {
+     "term": "青冥卫",
+     "count": 59,
+     "first": {
+      "vol": 8,
+      "ch": 1316,
+      "title": "青冥卫"
+     }
+    }
+   ],
+   "absent": []
+  },
+  "灵物": {
+   "verified": [
+    {
+     "term": "腾龙丹",
+     "count": 18,
+     "first": {
+      "vol": 9,
+      "ch": 1364,
+      "title": "芝龙果"
+     }
+    },
+    {
+     "term": "合体丹",
+     "count": 2,
+     "first": {
+      "vol": 10,
+      "ch": 1770,
+      "title": "血魂"
+     }
+    },
+    {
+     "term": "真灵之血",
+     "count": 76,
+     "first": {
+      "vol": 9,
+      "ch": 1359,
+      "title": "暗流"
+     }
+    },
+    {
+     "term": "真灵鳞片",
+     "count": 14,
+     "first": {
+      "vol": 8,
+      "ch": 1341,
+      "title": "真灵鳞片"
+     }
+    },
+    {
+     "term": "玄天之宝",
+     "count": 204,
+     "first": {
+      "vol": 7,
+      "ch": 1252,
+      "title": "玄天之宝"
+     }
+    },
+    {
+     "term": "玄天斩灵剑",
+     "count": 40,
+     "first": {
+      "vol": 8,
+      "ch": 1328,
+      "title": "混沌万灵榜"
+     }
+    },
+    {
+     "term": "玄天仙藤",
+     "count": 39,
+     "first": {
+      "vol": 5,
+      "ch": 633,
+      "title": "大罗千幻诀与天狐迷灵大法"
+     }
+    },
+    {
+     "term": "混沌万灵榜",
+     "count": 39,
+     "first": {
+      "vol": 7,
+      "ch": 1165,
+      "title": "鲲鹏之羽"
+     }
+    },
+    {
+     "term": "仙丹",
+     "count": 8,
+     "first": {
+      "vol": 6,
+      "ch": 889,
+      "title": "昊元丹"
+     }
+    }
+   ],
+   "absent": []
+  },
+  "事件": {
+   "verified": [
+    {
+     "term": "大天劫",
+     "count": 69,
+     "first": {
+      "vol": 7,
+      "ch": 1219,
+      "title": "灵根与五行合一"
+     }
+    },
+    {
+     "term": "小天劫",
+     "count": 28,
+     "first": {
+      "vol": 7,
+      "ch": 1219,
+      "title": "灵根与五行合一"
+     }
+    },
+    {
+     "term": "魔斑",
+     "count": 31,
+     "first": {
+      "vol": 10,
+      "ch": 1869,
+      "title": "魔斑降世"
+     }
+    },
+    {
+     "term": "真雷劫",
+     "count": 19,
+     "first": {
+      "vol": 11,
+      "ch": 2178,
+      "title": "真雷劫"
+     }
+    },
+    {
+     "term": "九劫",
+     "count": 9,
+     "first": {
+      "vol": 11,
+      "ch": 2411,
+      "title": "轩九灵"
+     }
+    },
+    {
+     "term": "天魔契约",
+     "count": 14,
+     "first": {
+      "vol": 12,
+      "ch": 2429,
+      "title": "天魔契约"
+     }
+    }
+   ],
+   "absent": []
+  }
+ }
+}
