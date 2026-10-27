@@ -36,10 +36,10 @@ const run = (body) => page.evaluate(`(()=>{const F=window.__FR;${body}})()`);
 // ---- 1) 地图存在与 chain ----
 const ALL_IDS = ['anyuan', 'tianyuan', 'heifeng', 'lianxu', 'fengyuan', 'shisan', 'guanghan', 'heti_guan',
   'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling',
-  'modajie', 'sanjie', 'jiujie', 'zhenxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie'];
+  'modajie', 'sanjie', 'jiujie', 'zhenxian', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie'];
 const maps = await page.evaluate((ids) => window.MAPS.filter(m => ids.includes(m.id))
   .map(m => ({ id: m.id, type: m.type, unlock: m.unlock, next: m.next, startLevel: m.startLevel, endLevel: m.endLevel })), ALL_IDS);
-ok(maps.length === 25, '灵界二十五张主线图已注册', maps);
+ok(maps.length === 26, '灵界二十六张主线图已注册', maps);
 const chain = await page.evaluate((ids) => {
   const g = id => window.MAPS.find(m => m.id === id) || {};
   const o = { fs: g('feisheng').next };
@@ -65,7 +65,8 @@ const LINKS = [
   ['mojie', 'moban', null], ['moban', 'yitian', null], ['yitian', 'huangquan', null],
   ['huangquan', 'moyuan', null], ['moyuan', 'xiaoling', null], ['xiaoling', 'modajie', null],
   ['modajie', 'sanjie', null],
-  ['sanjie', 'jiujie', 260], ['jiujie', 'zhenxian', 330], ['zhenxian', 'huimoyuan', 420],
+  ['sanjie', 'jiujie', 260], ['jiujie', 'zhenxian', 330], ['zhenxian', 'zhanxian', 420],
+  ['zhanxian', 'huimoyuan', null],
   ['huimoyuan', 'daoguo', null], ['daoguo', 'renzu', null], ['renzu', 'fsjie', null], ['fsjie', 'xianjie', null]
 ];
 for (const [from, to, endLv] of LINKS) {
@@ -197,7 +198,7 @@ ok(i3.state === 'dialog', '炼虚关开场对白已播', i3.state);
 
 for (const mid of ['tianyuan', 'fengyuan', 'shisan', 'guanghan', 'heti_guan',
   'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling',
-  'modajie', 'sanjie', 'jiujie', 'zhenxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie']) {
+  'modajie', 'sanjie', 'jiujie', 'zhenxian', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie']) {
   await run(`F.clearProgress();F.setLevel(419);F.god(true);F.enterMap('${mid}');`);
   await page.waitForTimeout(200);
   const im = await page.evaluate(() => window.__FR.info());
@@ -328,6 +329,48 @@ ok(/渡劫/.test(SSN.text) && /大乘/.test(SSN.text), '会盟点出「大乘之
 ok(SSN.state0 === 'dialog', '进场即播会盟对白', SSN.state0);
 ok(SSN.cleared && SSN.nextOpen, '走完会盟 → 通关并开出广寒界', { cleared: SSN.cleared, nextOpen: SSN.nextOpen });
 
+// ---- 5b·3·5) 斩仙（V12C2426–C2429）：前传最后一战 ----
+const ZX = await page.evaluate(() => {
+  const W = window, F = W.__FR;
+  const M = id => W.MAPS.find(m => m.id === id) || {};
+  const get = id => (W.ALL_ITEMS || []).find(x => x.id === id) || null;
+  F.clearProgress(); F.setLevel(419); F.god(true); F.unlockAll();
+  F.enterMap('zhanxian', 'easy');
+  for (let k = 0; k < 24; k++) { F.skipStory(); F.tickFrames(2); if (F.info().state === 'levelup') F.insightAuto(); }
+  const boss = F.boss();
+  F.killBoss();
+  for (let k = 0; k < 60; k++) { F.skipStory(); F.tickFrames(3); if (F.info().state === 'levelup') F.insightAuto(); }
+  for (let k = 0; k < 12; k++) { F.skipStory(); F.tickFrames(2); if (F.info().state === 'levelup') F.insightAuto(); }
+  const bag = F.bag();
+  const intro = (W.MAP_STORIES['zhanxian'] || []).map(x => x[1]).join('');
+  const outro = (W.MAP_STORIES['zhanxian_out'] || []).map(x => x[1]).join('');
+  return {
+    type: M('zhanxian').type, arc: M('zhanxian').arc, lv: M('zhanxian').startLevel,
+    unlock: M('zhanxian').unlock, next: M('zhanxian').next,
+    bossName: (M('zhanxian').boss || {}).name, bossHp: (M('zhanxian').boss || {}).hp,
+    diff: M('zhanxian').diff,
+    intro, outro,
+    cleared: F.info().cleared.indexOf('zhanxian') >= 0,
+    nextOpen: F.info().unlocked.indexOf('huimoyuan') >= 0,
+    spoils: ['t_wanlingxueyi', 't_moguang', 't_huoxuzi'].map(id => ({ id, n: bag[id] || 0, item: get(id) ? get(id).name : null, noDrop: get(id) ? !!get(id).noDrop : null })),
+    sword: !!get('t_xuantianjian'),
+    tianmoText: (W.MAP_STORIES['tianmo'] || []).map(x => x[1]).join('')
+  };
+});
+ok(ZX.type === 'boss' && ZX.arc === 'L' && ZX.lv === 420, '斩仙是前传 420 级终局战（arc L，不进仙界篇）', ZX);
+ok(ZX.unlock === 'zhenxian' && ZX.next === 'huimoyuan', '斩仙串在真仙之身与再回魔源之间（V12C2426–2429）', ZX);
+ok(ZX.bossName === '马良·九元观真仙', '对手是九元观真仙马良', ZX.bossName);
+ok(ZX.bossHp >= 300000 && ZX.diff >= 5, '斩仙是前传血量最高的 Boss（不低于飞升之劫）', { hp: ZX.bossHp, diff: ZX.diff });
+ok(/万灵血玺|血龙/.test(ZX.intro) && /梵圣魔神/.test(ZX.intro) && /洞漩金光/.test(ZX.intro) && /墨绿细线/.test(ZX.intro),
+  '斩仙对白用原著实词：万灵血玺/血龙、梵圣魔神、洞漩金光、墨绿细线', ZX.intro.slice(0, 26));
+ok(/头颅滚落/.test(ZX.intro) && /元婴/.test(ZX.outro), '斩首与元婴被震碎都写进去了', '');
+ok(/天魔契约/.test(ZX.outro) && /火须子/.test(ZX.outro) && /储物镯/.test(ZX.outro),
+  '战后收尾按原著：储物镯、魔光天魔契约、火须子认主', ZX.outro.slice(0, 24));
+ok(ZX.spoils.every(s => s.n >= 1 && s.item && s.noDrop), '三件战利品入库且不落随机池', ZX.spoils);
+ok(ZX.sword, '玄天斩灵剑仍在册（斩首就靠它）', ZX.sword);
+ok(ZX.cleared && ZX.nextOpen, '斩仙能打通并开出再回魔源', { cleared: ZX.cleared, nextOpen: ZX.nextOpen });
+ok(/签。/.test(ZX.tianmoText) && !/不签。/.test(ZX.tianmoText), '天魔契约支线按原著改为「签了」（原来写成不签）', '');
+
 // ---- 5b·4) V12 终局段：再回魔源 → 道果大会 → 人族之变 → 飞升之劫（波浪节奏）----
 const END2 = await page.evaluate(() => {
   const W = window, F = W.__FR;
@@ -383,7 +426,7 @@ const END2 = await page.evaluate(() => {
 ok(END2.wave.join(',') === 'story,boss,story,boss,story',
   '终局段是波浪节奏（剧情→战斗→剧情→战斗→收尾），不是「4 张空白再塞战斗」', END2.wave);
 ok(END2.hui.type === 'story' && /苦灵谷/.test(END2.hui.pos), '再回魔源是苦灵谷剧情图（V12C2434-2435）', END2.hui);
-ok(END2.hui.unlock === 'zhenxian' && END2.hui.next === 'daoguo', '再回魔源接在真仙之身后、指向道果大会', END2.hui);
+ok(END2.hui.unlock === 'zhanxian' && END2.hui.next === 'daoguo', '再回魔源接在斩仙之后、指向道果大会', END2.hui);
 ok(/瓶灵|灵霄天柱/.test(END2.hui.text) && /元魇/.test(END2.hui.text) && /蟹道人/.test(END2.hui.text),
   '再回魔源写进了「灵霄天柱 / 瓶灵 / 元魇被蟹道人挡下」的原著实际内容', END2.hui.text.slice(-30));
 ok(END2.dao.type === 'boss' && END2.dao.lv === 420 && END2.dao.unlock === 'huimoyuan' && END2.dao.next === 'renzu',

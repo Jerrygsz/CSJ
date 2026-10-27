@@ -220,7 +220,8 @@ let r6 = await E(`(() => {
   const M = window.MAPS || [];
   const chain = [];
   let cur = 'qixuan', g = 0;
-  while (cur && g++ < 80) { const m = M.find(x => x.id === cur); if (!m) break; chain.push(cur); cur = m.next || null; }
+  // 上限要跟着主线长度走：原来写死 80，链一超过 80 张就被截断（断言说 81、实得 80）
+  while (cur && g++ < 200) { const m = M.find(x => x.id === cur); if (!m) break; chain.push(cur); cur = m.next || null; }
   return chain;
 })()`);
 // 七玄门 → 太南小会 → 黄枫谷 → 血色禁地 → 地火之屋 → 燕家堡 → 金鼓原 → 古传送阵 → 魁星岛 →
@@ -234,7 +235,7 @@ const want6 = ['qixuan', 'houshan', 'mishi', 'tainan', 'huangfeng', 'yaoyuan', '
   'xutian2', 'xinggong', 'kunpeng', 'luoyun2', 'tianlan', 'liudao', 'jiezi', 'feisheng',
   // 灵界篇（V8–V12）：飞升 → 炼虚 → 合体 → 大乘 → 渡劫 → 真仙 → 飞升仙界
   'anyuan', 'tianyuan', 'heifeng', 'lianxu', 'fengyuan', 'shisan', 'guanghan', 'heti_guan', 'liangzu', 'shengdao', 'mojie', 'moban',
-  'yitian', 'huangquan', 'moyuan', 'xiaoling', 'modajie', 'sanjie', 'jiujie', 'zhenxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie',
+  'yitian', 'huangquan', 'moyuan', 'xiaoling', 'modajie', 'sanjie', 'jiujie', 'zhenxian', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie',
   // 仙界篇（X1 风起灵寰）：飞升仙界 → 灵寰界 → 苏醒 → 冷焰宗 → 掌天瓶 → 天鬼 → 破碎虚空
   'linghuan', 'suxing', 'lingyan', 'xiaoping', 'tiangui', 'poxu', 'wumengdao'];
 ok(JSON.stringify(r6) === JSON.stringify(want6), '主线 ' + want6.length + ' 张图顺序与原著一致', { got: r6.length, want: want6.length });
