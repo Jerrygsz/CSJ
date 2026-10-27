@@ -5,7 +5,8 @@
   "totalLines": 144886,
   "volumes": 12,
   "chapters": 2451,
-  "note": "count=原文出现次数; first=首次出现的卷/章; absent 表示原著无此词"
+  "note": "count=原文出现次数; first=首次出现的卷/章; absent 表示原著无此词",
+  "updated": "2026-10-27"
  },
  "terms": {
   "境界": [
@@ -2212,6 +2213,42 @@
    "reason": "原著查无此词",
    "replacement": "阵法/禁制",
    "evidence": "阵道 0 次"
+  },
+  {
+   "term": "大乘中期",
+   "reason": "原著大乘不分阶；『大乘中期』0 次",
+   "replacement": "大乘期",
+   "evidence": "大乘期 207 次 / 大乘中期 0 次 / 大乘后期 1 次"
+  },
+  {
+   "term": "渡劫初期",
+   "reason": "渡劫是关口不是境界层，原著无『渡劫初期』",
+   "replacement": "渡劫 / 渡劫期",
+   "evidence": "渡劫 83 次 / 渡劫期 5 次"
+  },
+  {
+   "term": "天魔殿",
+   "reason": "自造地名，原著 0 次",
+   "replacement": "荒原（或原著实地名）",
+   "evidence": "天魔殿 0 次"
+  },
+  {
+   "term": "炼虚丹",
+   "reason": "自造丹药，原著 0 次",
+   "replacement": "腾龙丹 + 五行合一",
+   "evidence": "炼虚丹 0 次 / 腾龙丹 18 次"
+  },
+  {
+   "term": "大乘丹",
+   "reason": "自造丹药，原著 0 次",
+   "replacement": "（大乘靠渡劫 + 玄天之宝）",
+   "evidence": "大乘丹 0 次"
+  },
+  {
+   "term": "渡劫丹",
+   "reason": "自造丹药，原著 0 次",
+   "replacement": "（渡劫靠渡劫本身）",
+   "evidence": "渡劫丹 0 次"
   }
  ],
  "anchors": {
