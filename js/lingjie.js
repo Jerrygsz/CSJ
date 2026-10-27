@@ -37,6 +37,49 @@
     { id: 'm_beijiyuanjing', name: '北极元晶', icon: '💎', rarity: 4, desc: '重回人界时才能取到的元晶（V12C2442《重回人界》，7 次）；据说是炼制元合五极山的必需之物' },
     { id: 'm_daopai', name: '道牌', icon: '🪧', rarity: 4, desc: '道果大会的信物。交出道牌，便是认输（V12C2440）。' }
   );
+
+  // ========================= 一(1)、未实装原著灵物（本轮补入） =========================
+  // 把《道具总表》§10.2 里列了却没做成游戏内真实物品的原著器物补上。
+  // 出处逐条对过 raw 原文：V9C1364 芝龙果 / V9C1381 真灵之魄 / V10C1835 洗灵池液·伪魔珠 /
+  //   V9C1522·V10C1866 噬金虫王 / V11C2229 土皇钉 / V10C1867 万灵伞 / V10C1863 蚀仙丹 / V7C1252 玄天之宝。
+  // 全部 noDrop+unique（或材料），只走地图 reward，绝不进随机掉落池。
+  window.MATERIALS.push(
+    { id: 'm_zhilongguo', name: '芝龙果', icon: '🍄', rarity: 4,
+      desc: '三万年才结一次果的灵药，腾龙丹的主药；即便生服，也能凭空添几十年苦修（V9C1364）。' },
+    { id: 'm_zhenlingpo', name: '真灵之魄', icon: '🔮', rarity: 4,
+      desc: '真灵陨落后凝而不散的一缕"魄"。两团之魄战到一处，声势已堪比真龙天凤（V9C1381）。' },
+    { id: 'm_xilingchi', name: '洗灵池液', icon: '💧', rarity: 4,
+      desc: '魔界最深处洗灵池的池水。池中一日抵外界一年，取其液可洗髓易骨（V10C1835）。' }
+  );
+  window.ITEMS.push(
+    // 伪魔珠：叶仙子以死去古魔魔核炼化，吞入体内逼出真魔气，高阶古魔亦难看破（V10C1835）。
+    { id: 't_weimozhu', name: '伪魔珠', rarity: 4, icon: '🟤', slot: 'trinket', req: 215, noDrop: true,
+      desc: '以死去古魔的魔核炼化而成，吞入体内逼出藏在其中的真魔气，寻常高阶古魔绝难看破（V10C1835）。',
+      effect: { dmg: 0.12, armor: 0.08 } },
+    // 土皇钉：宝花用以钉住螟虫之母的乾土法则之宝（V11C2229）。
+    { id: 't_tuhuangding', name: '土皇钉', rarity: 5, icon: '📌', slot: 'weapon', req: 260, unique: true, noDrop: true,
+      desc: '蕴含一界乾土法则的奇宝。一旦钉中人身，被钉者一身土属性神通便再难施展分毫（V11C2229）。',
+      effect: { dmg: 0.18, atk: 0.10 } },
+    // 万灵伞：虚灵老者以数千成熟体噬金虫炼成的渡劫之宝（V10C1867）。
+    { id: 't_wanlingsan', name: '万灵伞', rarity: 5, icon: '🌂', slot: 'trinket', req: 330, unique: true, noDrop: true,
+      desc: '以成熟体噬金虫（近乎金刚不坏之体）炼成的伞宝，专御飞升之劫。撑开时万虫环护，劫雷亦难破（V10C1867）。',
+      effect: { armor: 0.15, maxhp: 300, dmg: 0.06 } },
+    // 蚀仙丹：以早已灭绝的蚀毒仙草炼成，丹力远超寻常灵药，即将渡劫的大乘亦视若至宝（V10C1863）。
+    { id: 'dan_shixian', name: '蚀仙丹', rarity: 5, icon: '🟠', req: 330, unique: true, noDrop: true,
+      desc: '以早已灭绝的蚀毒仙草炼成的仙丹，丹力远超寻常灵药；即将渡劫的老怪物见了也忍不住动心（V10C1863）。',
+      effect: { maxhp: 380, dmg: 0.08 } },
+    // 玄天之宝：内蕴法则之力的先天灵宝，以玄天仙藤炼成，非人力所能为（V7C1252）。
+    { id: 't_xuantianzhibao', name: '玄天之宝', rarity: 5, icon: '🗡', slot: 'weapon', req: 260, unique: true, noDrop: true,
+      desc: '内蕴天地法则的先天灵宝，以玄天仙藤炼成，非人力所能锻造。圣岛一脉所得，与玄天斩灵剑同源而异形（V7C1252）。',
+      effect: { dmg: 0.24, atk: 0.12, crit: 0.05 } }
+  );
+  // 噬金虫王：以数千成熟体噬金虫育化而成的虫王，传闻一成连真仙也要退避三尺（V9C1522 / V10C1866）。
+  window.PETS.push(
+    { id: 'p_shijinwang', icon: '🐛', name: '噬金虫王', spr: 'shijin', scale: 1.9, dmg: 1.2, rate: 1.4, cat: 'pet',
+      desc: '以数千成熟体噬金虫育化而成的虫王（V9C1522 / V10C1866）。传闻一成，连真仙也要退避三尺。',
+      from: '魔源海' }
+  );
+
   window.ALL_ITEMS = window.ITEMS.concat(window.MATERIALS);
 
   // ========================= 一(2)、化神之后的境界层 =========================
@@ -181,9 +224,9 @@
       elites: ['黑凤族长老', '荒岭妖将'],
       mats: ['m_zhenlinglin', 'm_yaodan', 'm_gengjing'],
       boss: { kind: 'beast', name: '黑凤族三妖', hp: 52000, spd: 66, dmg: 96, r: 23, spr: 'haishou', scale: 6.2 },
-      reward: { stones: 18000, items: ['tenglong'], mats: [['m_zhenlingxue', 1], ['m_zhenlinglin', 3]] },
+      reward: { stones: 18000, items: ['tenglong'], mats: [['m_zhilongguo', 1], ['m_zhenlingxue', 1], ['m_zhenlinglin', 3]] },
       clearTitle: '荒岭已清',
-      clearDesc: '三妖伏诛，鳞片与一滴真灵之血到手。腾龙丹的炉子，有着落了。'
+      clearDesc: '三妖伏诛，鳞片、一滴真灵之血、一枚芝龙果到手。腾龙丹的炉子，有着落了。'
     },
     {
       // 破境图：endLevel 必须等于炼虚关 lv150，洞府「突破」靠它进场（同 jieying / jiezi）
@@ -264,9 +307,9 @@
       desc: '人族圣地。两族大乘在此议事，灵皇大比的名分也从这里出。',
       startLevel: 200, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
       unlock: 'liangzu', next: 'mojie',
-      reward: { stones: 35000, mats: [['m_zhenlinglin', 3]] },
+      reward: { stones: 35000, items: ['t_xuantianzhibao'], mats: [['m_zhenlinglin', 3], ['m_zhenlingpo', 1]] },
       clearTitle: '圣岛一行',
-      clearDesc: '圣岛的使者只说了一句话：魔界的门，快开了。'
+      clearDesc: '圣岛的使者只说了一句话：魔界的门，快开了。临行，一截真灵之魄与一件玄天之宝落进了袖里。'
     },
     {
       id: 'mojie', name: '魔界之约', pos: '灵界·魔界入口', arc: 'K',
@@ -326,9 +369,9 @@
       desc: '魔界最东边的一片海，海上没有岛，只有雾。伪魔珠压着气息，压不住海里的东西。',
       startLevel: 215, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
       unlock: 'huangquan', next: 'xiaoling',
-      reward: { stones: 65000, mats: [['m_zhenlingxue', 2], ['m_zhenlinglin', 2]] },
+      reward: { stones: 65000, items: ['t_weimozhu'], mats: [['m_xilingchi', 1], ['m_zhenlingxue', 2], ['m_zhenlinglin', 2]], pets: ['p_shijinwang'] },
       clearTitle: '魔源海已过',
-      clearDesc: '洗灵池没找到，净灵莲也没开。可魔源海这一趟，把合体后期的心境走实了。'
+      clearDesc: '洗灵池没找到，净灵莲也没开。可一枚伪魔珠、一壶洗灵池液、还有那窝育成了虫王的噬金虫，都落到了手里。'
     },
     {
       id: 'xiaoling', name: '小灵天', pos: '灵界·小灵天', arc: 'K',
@@ -382,9 +425,9 @@
       desc: '九道仙劫压顶。过得去，才谈得上飞升。',
       startLevel: 260, endLevel: 330, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
       unlock: 'sanjie', next: 'qunqiang',
-      reward: { stones: 120000 },
+      reward: { stones: 120000, items: ['t_wanlingsan', 'dan_shixian'] },
       clearTitle: '九劫已过',
-      clearDesc: '第九道劫雷落下又散去。天地间，再没有什么能压住他了。'
+      clearDesc: '第九道劫雷落下又散去。撑劫的万灵伞收进袖里，一枚蚀仙丹滚落掌心——天地间，再没有什么能压住他了。'
     },
     {
       // V12C2423《群强之陨》：轩九灵以「九劫灭灵大法」的九劫真焰击杀了明尊，
@@ -599,9 +642,9 @@
       elites: ['白光守界', '土皇钉傀'],
       mats: ['m_xuantianteng', 'm_zhenlingxue', 'm_yaodan'],
       boss: { kind: 'mo', name: '白光界·土皇钉', hp: 120000, spd: 72, dmg: 165, r: 24, spr: 'guixiu', scale: 6.4 },
-      reward: { stones: 85000, mats: [['m_xuantianteng', 1], ['m_zhenlingxue', 2]] },
+      reward: { stones: 85000, items: ['t_tuhuangding'], mats: [['m_xuantianteng', 1], ['m_zhenlingxue', 2]] },
       clearTitle: '白光已散',
-      clearDesc: '土皇钉被拔出来，白光界开始塌。最后一刻退出来，手里多了一截仙藤。'
+      clearDesc: '土皇钉被拔出来，白光界开始塌。最后一刻退出来，手里多了一截仙藤——还有那枚钉着一界乾土法则的土皇钉。'
     },
     {
       id: 'tianmo', side: true, sorder: 25, name: '天魔契约', pos: '灵界·荒原', arc: 'L',
