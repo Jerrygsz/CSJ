@@ -4248,6 +4248,7 @@
     if (elCave) elCave.style.display = 'none';
     if (elPf) elPf.style.display = 'none';
     if (elRebirth) elRebirth.style.display = 'none';
+    if (elWanling) elWanling.style.display = 'none';
   }
   function resetRun() {
     if (window.Coop) window.Coop.reset();
@@ -4943,6 +4944,44 @@
     renderWorldMap();
     if (elWorldmap) elWorldmap.style.display = 'flex';
     refreshTitle();
+  }
+
+  // ---------- 混沌万灵榜（图鉴 / 收藏系统） ----------
+  // 榜上诸物 = 全部 仙品 / 玄天之宝（rarity===5 && unique）。按 req 排「榜序」，
+  // 已入储物袋者标「已收录」，未见者存位以待。数据直接取自 window.ALL_ITEMS，
+  // 灵界/仙界两线宝物自动同榜，新增宝物无需再改这里。
+  function renderWanling() {
+    if (!elWanlingList) return;
+    const all = (window.ALL_ITEMS || []).filter(i => i && i.rarity === 5 && i.unique);
+    all.sort((a, b) => (a.req || 9999) - (b.req || 9999) || (a.name || '').localeCompare(b.name || ''));
+    const inv = (save && save.inventory) || {};
+    const total = all.length;
+    let collected = 0;
+    const rows = all.map((it, idx) => {
+      const got = !!inv[it.id];
+      if (got) collected++;
+      const reqTxt = it.req ? ('门槛 Lv.' + it.req) : '无门槛';
+      const note = got ? (it.desc || '（无备注）') : '尚未入手，榜上留位以待。';
+      return '<div class="wl-row' + (got ? ' got' : '') + '">' +
+        '<div class="wl-rank">' + (idx + 1) + '</div>' +
+        '<div class="wl-icon">' + (it.icon || '◆') + '</div>' +
+        '<div class="wl-main"><div class="wl-name">' + it.name +
+          (got ? '' : '<span class="wl-lock">· 未见</span>') + '</div>' +
+          '<div class="wl-note">' + note + '</div></div>' +
+        '<div class="wl-meta"><span class="wl-req">' + reqTxt + '</span>' +
+          '<span class="wl-status">' + (got ? '已收录' : '待收录') + '</span></div>' +
+        '</div>';
+    }).join('');
+    elWanlingList.innerHTML = total ? rows : '<div class="wl-empty">榜上暂无名录。</div>';
+    if (elWlCollected) elWlCollected.textContent = '已收录 ' + collected + ' / ' + total;
+    if (elWlRealm) elWlRealm.textContent = realmName(Math.max(save.cultivate.level || 1, save.best.level || 1));
+  }
+  function openWanling() {
+    G.state = 'wanling';
+    hideAllOverlays();
+    renderWanling();
+    if (elWanling) elWanling.style.display = 'flex';
+    if (Sfx && Sfx.buff) Sfx.buff();
   }
   function mapCardHtml(m, numTxt) {
     const unlocked = save.unlocked.indexOf(m.id) >= 0;
@@ -6297,6 +6336,12 @@
   const elSaveHint = document.getElementById('saveHint');
   const elWorldmap = document.getElementById('worldmap');
   const elWmList = document.getElementById('wmList');
+  const elWmCodex = document.getElementById('wmCodex');
+  const elWanling = document.getElementById('wanling');
+  const elWanlingList = document.getElementById('wanlingList');
+  const elWlCollected = document.getElementById('wlCollected');
+  const elWlRealm = document.getElementById('wlRealm');
+  const elWanlingClose = document.getElementById('wanlingClose');
   const elWmStones = document.getElementById('wmStones');
   const elWmRealm = document.getElementById('wmRealm');
   const elWmBag = document.getElementById('wmBag');
@@ -6382,6 +6427,8 @@
   document.getElementById('restartBtn').addEventListener('click', () => startMap(G.mapId || save.mapId || 'qixuan'));
   document.getElementById('pauseBack').addEventListener('click', () => { elPause.style.display = 'none'; openWorldMap(); });
   document.getElementById('wmClose').addEventListener('click', () => { hideAllOverlays(); G.state = 'title'; elTitle.style.display = 'flex'; refreshTitle(); });
+  if (elWmCodex) elWmCodex.addEventListener('click', openWanling);
+  if (elWanlingClose) elWanlingClose.addEventListener('click', openWorldMap);
   document.getElementById('shopClose').addEventListener('click', () => {
     const m = G.map;
     hideAllOverlays();

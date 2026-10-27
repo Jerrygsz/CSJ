@@ -112,7 +112,7 @@ ok(SIM.dou.banyao >= 2 && SIM.dou.yaodan >= 1, '城斗场奖励(伴妖草×2+妖
 
 // ============ 5) 版本串 ============
 const VER = await page.evaluate(() => { const el = document.getElementById('ver'); return el ? el.textContent : null; });
-ok(VER === 'v20261028b', '页面版本串已升到 v20261028b', VER);
+ok(VER === 'v20261028c', '页面版本串已升到 v20261028c', VER);
 
 ok(errors.length === 0, '页面无 JS 报错', errors);
 

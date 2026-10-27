@@ -162,7 +162,7 @@ ok(SIM.jiujie.cleared && SIM.jiujie.itemsGot, '打通九劫现 → 万灵伞+蚀
 
 // ============ 5) 版本串 ============
 const VER = await page.evaluate(() => { const el = document.getElementById('ver'); return el ? el.textContent : null; });
-ok(VER === 'v20261028b', '页面版本串已升到 v20261028b', VER);
+ok(VER === 'v20261028c', '页面版本串已升到 v20261028c', VER);
 
 ok(errors.length === 0, '页面无 JS 报错', errors);
 

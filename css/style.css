@@ -141,7 +141,7 @@ body.fs #wrap { background: #000; }
 #dialog { z-index: var(--z-dialog); }
 #pause, #victory, #gameover, #levelup { z-index: var(--z-modal); }
 /* 覆盖层默认 display:flex，凡是「不该一进页面就露出」的都要列进这里 */
-#dialog, #levelup, #pause, #gameover, #victory, #worldmap, #shop, #difficulty, #cave, #prefight, #coop, #break { display: none; }
+#dialog, #levelup, #pause, #gameover, #victory, #worldmap, #shop, #difficulty, #cave, #prefight, #coop, #break, #wanling { display: none; }
 
 /* 突破清单：一样一行，齐了打勾 */
 .brk-list { display: flex; flex-direction: column; gap: var(--sp-2); margin: 8px 0 4px; }
@@ -353,6 +353,22 @@ body.fs #wrap { background: #000; }
 .sr-main i { display: block; font-style: normal; color: var(--text-3); font-size: var(--fs-micro); line-height: 1.45; margin-top: 0; }
 .sr-right { display: flex; align-items: center; gap: var(--sp-2); flex: 0 0 auto; }
 .shoprow .sr-right { flex-direction: column; align-items: flex-end; gap: var(--sp-1); }
+
+/* 混沌万灵榜（图鉴 / 收藏） */
+#wanlingList { flex: 1 1 auto; overflow-y: auto; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); display: flex; flex-direction: column; gap: var(--sp-2); -webkit-overflow-scrolling: touch; padding-bottom: var(--sp-2); }
+.wl-row { display: grid; grid-template-columns: 30px 26px 1fr auto; gap: 8px; align-items: center; text-align: left; background: rgba(0,0,0,0.32); border: 1px solid rgba(201,162,74,0.18); border-radius: var(--r-sm); padding: 8px 10px; }
+.wl-row.got { border-color: rgba(201,162,74,0.55); background: rgba(40,32,16,0.5); }
+.wl-rank { font-weight: bold; color: var(--accent-soft); font-size: var(--fs-cap); text-align: center; }
+.wl-icon { font-size: 20px; text-align: center; }
+.wl-main { min-width: 0; }
+.wl-name { font-size: var(--fs-cap); color: var(--ink); font-weight: 600; }
+.wl-name .wl-lock { color: var(--text-4); font-weight: 400; font-size: var(--fs-micro); margin-left: 4px; }
+.wl-note { font-size: var(--fs-micro); color: var(--text-4); margin-top: 2px; line-height: 1.4; }
+.wl-meta { text-align: right; display: flex; flex-direction: column; gap: 2px; flex: 0 0 auto; }
+.wl-req { font-size: var(--fs-micro); color: var(--ok-soft); }
+.wl-status { font-size: var(--fs-micro); color: var(--accent-soft); }
+.wl-row:not(.got) .wl-status { color: var(--text-4); }
+.wl-empty { margin: auto 0; padding: 0; color: var(--text-4); font-size: var(--fs-micro); }
 .sr-own { color: var(--text-3); font-size: var(--fs-micro); }
 /* 列表内按钮：视觉 36，命中补到 44。
    取 -6 而不是理论值 -4：边界像素有取整，实测 -4 只能扩出 3/2px（合计 41），够不到 44。

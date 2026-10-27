@@ -9,7 +9,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <title>凡人·长生劫 — 炼气期 · 筑基 · 结丹 · 元婴 · 化神</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%23131821%22/%3E%3Ctext x=%2216%22 y=%2223%22 font-size=%2220%22 text-anchor=%22middle%22 fill=%22%23ffd24a%22%3E凡%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="css/style.css?v=20261028b">
+  <link rel="stylesheet" href="css/style.css?v=20261028c">
 </head>
 <body>
   <div id="wrap">
@@ -188,6 +188,7 @@
               </div>
             </div>
             <div id="wmList"></div>
+            <button id="wmCodex" class="btn small">📜 混沌万灵榜</button>
             <button id="wmClose" class="btn small">返回标题</button>
           </div>
         </div>
@@ -264,6 +265,19 @@
           </div>
         </div>
 
+        <!-- 混沌万灵榜（图鉴 / 收藏系统） -->
+        <div id="wanling" class="overlay">
+          <div class="wm-panel">
+            <div class="wm-head">
+              <h2>混沌万灵榜</h2>
+              <p class="wm-sub">玄天之宝，列于混沌万灵之榜。榜上诸物，皆天地一等一的造化——已入你手者录其名，未见者存其位以待。</p>
+              <div class="wm-stats"><span id="wlCollected">已收录 0 / 0</span><span id="wlRealm">炼气期一层</span></div>
+            </div>
+            <div id="wanlingList"></div>
+            <button id="wanlingClose" class="btn small">收榜 · 回修行图</button>
+          </div>
+        </div>
+
         <!-- 双人联机：P1 只做接通（SDK 在点进来时才懒加载，不拖慢单人） -->
         <div id="coop" class="overlay">
           <div class="wm-panel">
@@ -300,29 +314,29 @@
     </div>
   </div>
 
-  <div id="ver">v20261028b</div>
+  <div id="ver">v20261028c</div>
 
-  <script src="js/utils.js?v=20261028b"></script>
-  <script src="js/audio.js?v=20261028b"></script>
-  <script src="js/sprites.js?v=20261028b"></script>
-  <script src="js/skills.js?v=20261028b"></script>
-  <script src="js/enemies.js?v=20261028b"></script>
-  <script src="js/story.js?v=20261028b"></script>
-  <script src="js/items.js?v=20261028b"></script>
-  <script src="js/maps.js?v=20261028b"></script>
-  <script src="js/recipes.js?v=20261028b"></script>
-  <script src="js/encounters.js?v=20261028b"></script>
-  <script src="js/late.js?v=20261028b"></script>
-  <script src="js/late2.js?v=20261028b"></script>
-  <script src="js/late3.js?v=20261028b"></script>
-  <script src="js/lingjie.js?v=20261028b"></script>
-  <script src="js/xianjie.js?v=20261028b"></script>
-  <script src="js/sources.js?v=20261028b"></script>
-  <script src="js/value.js?v=20261028b"></script>
-  <script src="js/game.js?v=20261028b"></script>
-  <script src="js/debugapi.js?v=20261028b"></script>
-  <script src="js/net.js?v=20261028b"></script>
-  <script src="js/coop.js?v=20261028b"></script>
-  <script src="js/chat.js?v=20261028b"></script>
+  <script src="js/utils.js?v=20261028c"></script>
+  <script src="js/audio.js?v=20261028c"></script>
+  <script src="js/sprites.js?v=20261028c"></script>
+  <script src="js/skills.js?v=20261028c"></script>
+  <script src="js/enemies.js?v=20261028c"></script>
+  <script src="js/story.js?v=20261028c"></script>
+  <script src="js/items.js?v=20261028c"></script>
+  <script src="js/maps.js?v=20261028c"></script>
+  <script src="js/recipes.js?v=20261028c"></script>
+  <script src="js/encounters.js?v=20261028c"></script>
+  <script src="js/late.js?v=20261028c"></script>
+  <script src="js/late2.js?v=20261028c"></script>
+  <script src="js/late3.js?v=20261028c"></script>
+  <script src="js/lingjie.js?v=20261028c"></script>
+  <script src="js/xianjie.js?v=20261028c"></script>
+  <script src="js/sources.js?v=20261028c"></script>
+  <script src="js/value.js?v=20261028c"></script>
+  <script src="js/game.js?v=20261028c"></script>
+  <script src="js/debugapi.js?v=20261028c"></script>
+  <script src="js/net.js?v=20261028c"></script>
+  <script src="js/coop.js?v=20261028c"></script>
+  <script src="js/chat.js?v=20261028c"></script>
 </body>
 </html>
