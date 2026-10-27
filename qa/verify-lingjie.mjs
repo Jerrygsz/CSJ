@@ -34,18 +34,24 @@ await page.waitForTimeout(1200);
 const run = (body) => page.evaluate(`(()=>{const F=window.__FR;${body}})()`);
 
 // ---- 1) 地图存在与 chain ----
-const maps = await page.evaluate(() => window.MAPS.filter(m => ['anyuan', 'heifeng', 'lianxu'].includes(m.id))
+const maps = await page.evaluate(() => window.MAPS.filter(m => ['anyuan', 'heifeng', 'lianxu', 'fengyuan', 'guanghan', 'heti_guan'].includes(m.id))
   .map(m => ({ id: m.id, type: m.type, unlock: m.unlock, next: m.next, startLevel: m.startLevel, endLevel: m.endLevel })));
-ok(maps.length === 3, '灵界三张图已注册（anyuan / heifeng / lianxu）', maps);
+ok(maps.length === 6, '灵界六张图已注册（anyuan/heifeng/lianxu/fengyuan/guanghan/heti_guan）', maps);
 const chain = await page.evaluate(() => {
   const g = id => window.MAPS.find(m => m.id === id) || {};
-  return { fs: g('feisheng').next, ay: g('anyuan'), hf: g('heifeng'), lx: g('lianxu') };
+  return { fs: g('feisheng').next, ay: g('anyuan'), hf: g('heifeng'), lx: g('lianxu'),
+           fy: g('fengyuan'), gh: g('guanghan'), hg: g('heti_guan') };
 });
 ok(chain.fs === 'anyuan', '飞升图 next 已接安远城', chain.fs);
 ok(chain.ay.unlock === 'feisheng' && chain.ay.next === 'heifeng', '安远城 unlock=feisheng / next=heifeng', chain.ay);
 ok(chain.hf.unlock === 'anyuan' && chain.hf.next === 'lianxu', '黑凤族 unlock=安远城 / next=炼虚关', chain.hf);
 ok(chain.lx && chain.lx.unlock === 'heifeng', '炼虚关 unlock=黑凤族', chain.lx);
 ok(chain.lx && chain.lx.endLevel === 150, '破境图 lianxu 的 endLevel=150（洞府突破可反查）', chain.lx);
+ok(chain.lx && chain.lx.next === 'fengyuan', '炼虚关 next=风元大陆', chain.lx);
+ok(chain.fy && chain.fy.next === 'guanghan', '风元大陆 next=广寒界', chain.fy);
+ok(chain.gh && chain.gh.unlock === 'fengyuan' && chain.gh.next === 'heti_guan', '广寒界 unlock=风元 / next=合体关', chain.gh);
+ok(chain.hg && chain.hg.unlock === 'guanghan', '合体关 unlock=广寒界', chain.hg);
+ok(chain.hg && chain.hg.endLevel === 200, '破境图 heti_guan 的 endLevel=200（洞府突破可反查）', chain.hg);
 
 // ---- 2) 炼虚突破关 ----
 const b150 = await page.evaluate(() => {
@@ -56,6 +62,16 @@ ok(!!b150, 'BREAKTHROUGH 含 lv150', b150);
 ok(b150 && b150.realm === '炼虚初期', 'lv150 = 炼虚初期', b150 && b150.realm);
 ok(b150 && b150.items && b150.items[0] && b150.items[0][0] === 'tenglong', '炼虚关需要腾龙丹', b150 && b150.items);
 ok(b150 && b150.story && b150.story[0] && b150.story[0].id === 'heifeng', '炼虚关需已通黑凤族', b150 && b150.story);
+
+const b200 = await page.evaluate(() => {
+  const b = (window.BREAKTHROUGH || []).find(x => x.lv === 200);
+  return b ? { realm: b.realm, items: b.items, mats: b.mats, story: b.story, stones: b.stones } : null;
+});
+ok(!!b200, 'BREAKTHROUGH 含 lv200', b200);
+ok(b200 && b200.realm === '合体初期', 'lv200 = 合体初期', b200 && b200.realm);
+ok(b200 && b200.items && b200.items[0] && b200.items[0][0] === 'heti', '合体关需要合体丹', b200 && b200.items);
+ok(b200 && b200.mats && b200.mats[0] && b200.mats[0][0] === 'm_zhenlingxue', '合体关需要真灵之血', b200 && b200.mats);
+ok(b200 && b200.story && b200.story[0] && b200.story[0].id === 'guanghan', '合体关需已通广寒界', b200 && b200.story);
 
 // ---- 3) 原著灵物 ----
 const its = await page.evaluate(() => ['tenglong', 'm_zhenlingxue', 'm_zhenlinglin', 'heti', 't_xuantianjian']
@@ -74,6 +90,19 @@ ok(await page.evaluate(() => window.__FR.breakCan(150)) === false, '未通黑凤
 
 await run(`F.clearProgress();F.setLevel(140);F.clearMap('heifeng');F.addItem('tenglong',1);F.setStones(20000);`);
 ok(await page.evaluate(() => window.__FR.breakCan(150)) === false, '修为未到化神后期(149) → breakCan(150)=false');
+
+// ---- 4b) 合体关（200）备齐判定 ----
+await run(`F.clearProgress();F.setLevel(199);F.god(true);F.clearMap('guanghan');F.addItem('heti',1);F.addItem('m_zhenlingxue',2);F.setStones(35000);`);
+ok(await page.evaluate(() => window.__FR.breakCan(200)) === true, '修为199 + 合体丹 + 真灵之血×2 + 已通广寒界 → breakCan(200)=true');
+
+await run(`F.clearProgress();F.setLevel(199);F.clearMap('guanghan');F.addItem('m_zhenlingxue',2);F.setStones(35000);`);
+ok(await page.evaluate(() => window.__FR.breakCan(200)) === false, '缺合体丹 → breakCan(200)=false');
+
+await run(`F.clearProgress();F.setLevel(199);F.addItem('heti',1);F.addItem('m_zhenlingxue',2);F.setStones(35000);`);
+ok(await page.evaluate(() => window.__FR.breakCan(200)) === false, '未通广寒界 → breakCan(200)=false');
+
+await run(`F.clearProgress();F.setLevel(190);F.clearMap('guanghan');F.addItem('heti',1);F.addItem('m_zhenlingxue',2);F.setStones(35000);`);
+ok(await page.evaluate(() => window.__FR.breakCan(200)) === false, '修为未到炼虚后期(199) → breakCan(200)=false');
 
 // ---- 5) 地图可进入 ----
 await run(`F.clearProgress();F.setLevel(132);F.god(true);F.enterMap('anyuan');`);
@@ -94,6 +123,13 @@ const i3 = await page.evaluate(() => window.__FR.info());
 ok(i3.mapId === 'lianxu', '可进入炼虚破境图', i3.mapId);
 ok(i3.state === 'dialog', '炼虚关开场对白已播', i3.state);
 
+for (const mid of ['fengyuan', 'guanghan', 'heti_guan']) {
+  await run(`F.clearProgress();F.setLevel(199);F.god(true);F.enterMap('${mid}');`);
+  await page.waitForTimeout(250);
+  const im = await page.evaluate(() => window.__FR.info());
+  ok(im.mapId === mid, '可进入 ' + mid, im.mapId);
+}
+
 // ---- 6) 洞府冲关入口 + 真实突破 ----
 await run(`F.clearProgress();F.setLevel(149);F.god(true);F.clearMap('heifeng');F.addItem('tenglong',1);F.setStones(20000);`);
 const st = await page.evaluate(() => window.__FR.startBreak(150));
@@ -102,6 +138,14 @@ ok(st && st.map === 'lianxu', '洞府「突破」入口反查到炼虚关（lian
 await run(`F.clearProgress();F.setLevel(149);F.god(true);F.clearMap('heifeng');F.addItem('tenglong',3);F.setStones(20000);`);
 const br = await page.evaluate(() => window.__FR.breakNow(150));
 ok(br && br.cult === 150, 'breakNow(150) 成功推进到炼虚（cultivate=150）', br);
+
+await run(`F.clearProgress();F.setLevel(199);F.god(true);F.clearMap('guanghan');F.addItem('heti',1);F.addItem('m_zhenlingxue',2);F.setStones(35000);`);
+const st2 = await page.evaluate(() => window.__FR.startBreak(200));
+ok(st2 && st2.map === 'heti_guan', '洞府「突破」入口反查到合体关（heti_guan）', st2);
+
+await run(`F.clearProgress();F.setLevel(199);F.god(true);F.clearMap('guanghan');F.addItem('heti',3);F.addItem('m_zhenlingxue',2);F.setStones(35000);`);
+const br2 = await page.evaluate(() => window.__FR.breakNow(200));
+ok(br2 && br2.cult === 200, 'breakNow(200) 成功推进到合体（cultivate=200）', br2);
 
 ok(errors.length === 0, '页面无 JS 报错', errors);
 
