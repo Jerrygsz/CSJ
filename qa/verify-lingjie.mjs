@@ -36,10 +36,10 @@ const run = (body) => page.evaluate(`(()=>{const F=window.__FR;${body}})()`);
 // ---- 1) 地图存在与 chain ----
 const ALL_IDS = ['anyuan', 'tianyuan', 'heifeng', 'lianxu', 'fengyuan', 'shisan', 'guanghan', 'heti_guan',
   'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling',
-  'modajie', 'sanjie', 'jiujie', 'zhenxian', 'fsjie', 'xianjie'];
+  'modajie', 'sanjie', 'jiujie', 'zhenxian', 'huimoyuan', 'renzu', 'fsjie', 'xianjie'];
 const maps = await page.evaluate((ids) => window.MAPS.filter(m => ids.includes(m.id))
   .map(m => ({ id: m.id, type: m.type, unlock: m.unlock, next: m.next, startLevel: m.startLevel, endLevel: m.endLevel })), ALL_IDS);
-ok(maps.length === 22, '灵界二十二张主线图已注册', maps);
+ok(maps.length === 24, '灵界二十四张主线图已注册', maps);
 const chain = await page.evaluate((ids) => {
   const g = id => window.MAPS.find(m => m.id === id) || {};
   const o = { fs: g('feisheng').next };
@@ -65,8 +65,8 @@ const LINKS = [
   ['mojie', 'moban', null], ['moban', 'yitian', null], ['yitian', 'huangquan', null],
   ['huangquan', 'moyuan', null], ['moyuan', 'xiaoling', null], ['xiaoling', 'modajie', null],
   ['modajie', 'sanjie', null],
-  ['sanjie', 'jiujie', 260], ['jiujie', 'zhenxian', 330], ['zhenxian', 'fsjie', 420],
-  ['fsjie', 'xianjie', null]
+  ['sanjie', 'jiujie', 260], ['jiujie', 'zhenxian', 330], ['zhenxian', 'huimoyuan', 420],
+  ['huimoyuan', 'renzu', null], ['renzu', 'fsjie', null], ['fsjie', 'xianjie', null]
 ];
 for (const [from, to, endLv] of LINKS) {
   ok(chain[from] && chain[from].next === to, `${from} next=${to}`, chain[from]);
@@ -197,7 +197,7 @@ ok(i3.state === 'dialog', '炼虚关开场对白已播', i3.state);
 
 for (const mid of ['tianyuan', 'fengyuan', 'shisan', 'guanghan', 'heti_guan',
   'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling',
-  'modajie', 'sanjie', 'jiujie', 'zhenxian', 'fsjie', 'xianjie']) {
+  'modajie', 'sanjie', 'jiujie', 'zhenxian', 'huimoyuan', 'renzu', 'fsjie', 'xianjie']) {
   await run(`F.clearProgress();F.setLevel(419);F.god(true);F.enterMap('${mid}');`);
   await page.waitForTimeout(200);
   const im = await page.evaluate(() => window.__FR.info());
@@ -327,6 +327,46 @@ ok(SSN.speakers.indexOf('沙老夫人') >= 0, '大乘沙老夫人登场（V9C167
 ok(/渡劫/.test(SSN.text) && /大乘/.test(SSN.text), '会盟点出「大乘之上还有渡劫」这条线索', SSN.text.slice(-40));
 ok(SSN.state0 === 'dialog', '进场即播会盟对白', SSN.state0);
 ok(SSN.cleared && SSN.nextOpen, '走完会盟 → 通关并开出广寒界', { cleared: SSN.cleared, nextOpen: SSN.nextOpen });
+
+// ---- 5b·4) V12 终局段：再回魔源 → 人族之变 → 飞升之劫 ----
+const END2 = await page.evaluate(() => {
+  const W = window, F = W.__FR;
+  const M = id => W.MAPS.find(m => m.id === id) || {};
+  const it = (W.ALL_ITEMS || []).find(x => x.id === 'dan_guangling');
+  const inPool = [0, 1, 2, 3, 4].some(r => W.Items.dropPool(r, { minReq: 0 }).some(x => x.id === 'dan_guangling'));
+  F.clearProgress(); F.setLevel(419); F.god(true); F.unlockAll();
+  F.enterMap('huimoyuan');
+  const s1 = F.info().state;
+  for (let k = 0; k < 20; k++) { F.skipStory(); F.tickFrames(2); }
+  const c1 = F.info().cleared.indexOf('huimoyuan') >= 0, o1 = F.info().unlocked.indexOf('renzu') >= 0;
+  F.enterMap('renzu');
+  for (let k = 0; k < 24; k++) { F.skipStory(); F.tickFrames(2); }
+  const bag = F.bag();
+  return {
+    hui: { type: M('huimoyuan').type, pos: M('huimoyuan').pos, unlock: M('huimoyuan').unlock, next: M('huimoyuan').next,
+      lines: (W.MAP_STORIES['huimoyuan'] || []).length },
+    ren: { type: M('renzu').type, pos: M('renzu').pos, unlock: M('renzu').unlock, next: M('renzu').next,
+      lines: (W.MAP_STORIES['renzu'] || []).length,
+      text: (W.MAP_STORIES['renzu'] || []).map(x => x[1]).join('') },
+    item: it ? { id: it.id, name: it.name, req: it.req, rarity: it.rarity, unique: !!it.unique } : null,
+    inPool, s1, c1, o1,
+    gotFruit: (bag.dan_guangling || 0) >= 1,
+    fsjieOpen: F.info().unlocked.indexOf('fsjie') >= 0
+  };
+});
+ok(END2.hui.type === 'story' && END2.hui.pos === '魔界·魔源海', '再回魔源是魔源海的剧情图（V12C2434）', END2.hui);
+ok(END2.hui.unlock === 'zhenxian' && END2.hui.next === 'renzu', '再回魔源接在真仙之身后', END2.hui);
+ok(END2.ren.type === 'story' && END2.ren.unlock === 'huimoyuan' && END2.ren.next === 'fsjie',
+  '人族之变接在再回魔源之后、飞升之劫之前（V12C2441）', END2.ren);
+ok(END2.ren.lines >= 10, '人族之变对白够一段（道果大会 + 闭关两百年 + 劫云）', END2.ren.lines);
+ok(/神识|神念/.test(END2.ren.text) && /闭关/.test(END2.ren.text) && /劫云/.test(END2.ren.text),
+  '人族之变把「神念隐患 → 闭关 → 劫云」这条线走完', END2.ren.text.slice(0, 30));
+ok(!!END2.item && END2.item.unique && END2.item.req === 420 && END2.item.rarity === 5,
+  '广灵道果已入库（unique / req420 / 仙品）', END2.item);
+ok(END2.inPool === false, '广灵道果不进随机池', END2.inPool);
+ok(END2.s1 === 'dialog', '再回魔源进场即播对白', END2.s1);
+ok(END2.c1 && END2.o1, '走完再回魔源 → 通关并开出人族之变', { c1: END2.c1, o1: END2.o1 });
+ok(END2.gotFruit && END2.fsjieOpen, '走完人族之变 → 得广灵道果 + 开出飞升之劫', { fruit: END2.gotFruit, next: END2.fsjieOpen });
 
 // ---- 5c) 灵界功法线（req 150→420）+ 天渊坊市 ----
 const FX = await page.evaluate(() => {

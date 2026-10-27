@@ -389,10 +389,34 @@
       type: 'story', tag: '剧情',
       desc: '渡劫之后，铸真仙之身。',
       startLevel: 330, endLevel: 420, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'jiujie', next: 'fsjie',
+      unlock: 'jiujie', next: 'huimoyuan',
       reward: { stones: 160000 },
       clearTitle: '真仙',
       clearDesc: '一身不再是凡胎。眉眼还是那眉眼，气息已不在此界。'
+    },
+    {
+      // V12 终局段（原著 C2434《再回魔源》）：银色鳞片传来「两年后·真龙之岛·广灵道果大会」，
+      // 赴会之前，他先回魔界走了一个来回 —— 魔劫过后空下来的地方，才找得到想要的东西。
+      id: 'huimoyuan', name: '再回魔源', pos: '魔界·魔源海', arc: 'L',
+      type: 'story', tag: '剧情',
+      desc: '银色鳞片上浮出一行古文：两年后，真龙之岛，广灵道果大会。赴会之前，先回魔界走一个来回。',
+      startLevel: 420, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'zhenxian', next: 'renzu',
+      reward: { stones: 190000, mats: [['m_zhenlingxue', 2], ['m_zhenlinglin', 3]] },
+      clearTitle: '魔源海·空了的魔界',
+      clearDesc: '魔劫之后，魔界空了大半。该拿的东西拿到了，该走的路也走完了。'
+    },
+    {
+      // 原著 C2441《人族之变》：真龙之岛广灵道果大会 → 金长老点破神念隐患 → 回青元宫闭关两百年
+      // → 出关时人族已换了一副模样，天上劫云已聚。这一图是飞升之劫的「引信」。
+      id: 'renzu', name: '人族之变', pos: '灵界·真龙之岛', arc: 'L',
+      type: 'story', tag: '剧情',
+      desc: '真龙之岛的高台上，龙族把一枚广灵道果推到他面前。金长老看的不是果子，是他的神念。',
+      startLevel: 420, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'huimoyuan', next: 'fsjie',
+      reward: { stones: 200000, items: ['dan_guangling'] },
+      clearTitle: '出关·劫云已聚',
+      clearDesc: '两百年闭关，外面已经换了一个人族。出关那日，天上劫云在聚——飞升之劫，来了。'
     },
     {
       // 独立关卡（原著 C2445）：九劫只是前奏，真正的飞升之劫在正午阳气最浓时落下。
@@ -401,7 +425,7 @@
       type: 'boss', tag: '终局',
       desc: '正午，阳气最浓的时候。劫云压到头顶百丈，云里还有别的东西在等。',
       startLevel: 420, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'zhenxian', next: 'xianjie',
+      unlock: 'renzu', next: 'xianjie',
       diff: 4.8, bossAt: 0, intro: 'fsjie', outro: 'fsjie_out',
       enemies: ['gui2', 'moxiu2', 'guixiu'],
       elites: ['魔君化影', '劫雷凝形'],
@@ -775,6 +799,30 @@
       ['旁白', '雷光散尽，荒原上立着一个人。眉眼还是那眉眼，气息却已不在此界之中。'],
       ['韩立', '（真仙。）']
     ],
+    huimoyuan: [
+      ['旁白', '一片银色鳞片上浮出一行银色古文：两年后，真龙之岛，广灵道果大会。'],
+      ['韩立', '（广灵道果。服下可暂时凝出广灵道体，那几门神通正缺这个。）'],
+      ['旁白', '他抬手一招，一面青色古镜浮在身前，把行程划给南宫婉。'],
+      ['南宫婉', '……小心。'],
+      ['韩立', '（她从不劝我别去。只说小心。）'],
+      ['旁白', '两年时间，足够先去魔界走一个来回。黑舟提速，往魔源海去。'],
+      ['韩立', '（魔劫之后，魔界空了大半。可有些东西，只有空下来的地方才找得到。）'],
+      ['旁白', '海雾散开一线，远处的岛只剩半截，另一半塌进了海里。']
+    ],
+    renzu: [
+      ['旁白', '真龙之岛的高台上，龙族长老分坐两侧。金长老把一个玉盒推过来，盒里是一枚广灵道果。'],
+      ['金长老', '韩道友，此果可凝广灵道体。只是……'],
+      ['韩立', '（只是他看我的眼神不对。看的不是果子。）'],
+      ['金长老', '你的神念之力，早已超出这一界生灵能承受的极限。根基已经裂了。'],
+      ['韩立', '（裂了。我知道。只是没想到龙族能一眼看出来。）'],
+      ['金长老', '若无妥当之法，几百年内，性命难保。'],
+      ['韩立', '多谢前辈直言。'],
+      ['旁白', '他把道果当场服下。广灵道体一成，那股撑得发疼的神念，终于被压回了经脉里。'],
+      ['旁白', '一年后回到人族无涯海，他进青元宫密室闭关，两百年没有出来。'],
+      ['旁白', '这两百年里人族变了：冰魄仙子以大乘身份归来，木族来附，夜叉几族退入蛮荒，飞灵诸族递来结盟的文书；顶阶功法与天材地宝一起冒出来，卡在瓶颈上的修士接连破境。'],
+      ['韩立', '（我在关里坐着，外面已经换了一个人族。）'],
+      ['旁白', '出关那日，天上有劫云在聚。飞升之劫，来了。']
+    ],
     fsjie: [
       ['旁白', '正午。阳气最浓的那一刻，劫云压到头顶百丈。'],
       ['韩立', '（九劫都过了。这一劫，不一样。）'],
@@ -1060,7 +1108,11 @@
       effect: { spd: 0.10, maxhp: 120 } },
     { id: 'dan_kunpeng', name: '鲲鹏舍利', rarity: 4, icon: '🦅', req: 260,
       desc: '鲲鹏遗下的舍利（V9C1423）。含着它吐纳，气血与真元一起长，像被一只大鸟驮着往上飞。',
-      effect: { maxhp: 300, xpMul: 0.12 } }
+      effect: { maxhp: 300, xpMul: 0.12 } },
+    // 终局段的唯一灵物（V12C2441）：服下可凝「广灵道体」，把撑得发疼的神念压回经脉里。
+    { id: 'dan_guangling', name: '广灵道果', rarity: 5, icon: '🍇', req: 420, unique: true,
+      desc: '真龙之岛上的道果（V11C2190 / V12C2441）。服下可凝广灵道体，神念之力有了落脚处。',
+      effect: { maxhp: 400, xpMul: 0.15 } }
   );
 
   // ========================= 五(4·3)、灵界洞府（原著地点，让灵界破境也吃得到洞府加成） =========================
@@ -1138,6 +1190,8 @@
     sanjie:   { bg: { base: '#242a36', a: '#2c3443', b: '#1a1f28' }, decor: [['rock', 0.26], ['tuft', 0.04]] },
     jiujie:   { bg: { base: '#2a2f3a', a: '#343a47', b: '#1f232c' }, decor: [['rock', 0.24], ['tuft', 0.03]] },
     zhenxian: { bg: { base: '#2f3542', a: '#3a4253', b: '#232833' }, decor: [['rock', 0.22], ['tuft', 0.03]] },
+    huimoyuan:{ bg: { base: '#1b2830', a: '#22333c', b: '#131d24' }, decor: [['rock', 0.16], ['tuft', 0.03]] },
+    renzu:    { bg: { base: '#2e333d', a: '#373d48', b: '#212530' }, decor: [['rock', 0.14], ['tuft', 0.05]] },
     fsjie:    { bg: { base: '#232733', a: '#2c3140', b: '#191c25' }, decor: [['rock', 0.20], ['tuft', 0.02]] },
     xianjie:  { bg: { base: '#39434f', a: '#46525f', b: '#2b333d' }, decor: [['rock', 0.10], ['tuft', 0.02]] },
     linghuang: { bg: { base: '#3a3230', a: '#463c39', b: '#2b2623' }, decor: [['rock', 0.16], ['tuft', 0.05]] },
@@ -1152,7 +1206,7 @@
   // late.js 合底色时还没有这些图，这里手动补上
   for (const id of ['anyuan', 'tianyuan', 'heifeng', 'lianxu', 'fengyuan', 'shisan', 'guanghan', 'heti_guan',
                     'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling', 'modajie',
-                    'sanjie', 'jiujie', 'zhenxian', 'fsjie', 'xianjie',
+                    'sanjie', 'jiujie', 'zhenxian', 'huimoyuan', 'renzu', 'fsjie', 'xianjie',
                     'linghuang', 'zhandacheng', 'shengshi', 'heihu', 'baiguang', 'tianmo', 'diyi', 'huirenjie']) {
     const m = window.MAPS.find(x => x.id === id);
     const sc = window.MAP_SCENERY[id];
