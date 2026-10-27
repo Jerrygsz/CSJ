@@ -22,7 +22,10 @@
   // 玄黄之索 / 灵婴剑符 / 天外飞豆 均为卷一一次性宝物。
   window.MATERIALS.push(
     { id: 'm_xianyuanshi', name: '仙元石', icon: '💠', rarity: 4, desc: '仙界通用之物。催动仙傀儡、买符买丹都用它（X2C138，627 次）。' },
-    { id: 'm_xuanhuang', name: '玄黄之气', icon: '🌀', rarity: 4, desc: '玄黄法则凝出的一缕气机（X1C65《玄黄之索》，5 次）。' }
+    { id: 'm_xuanhuang', name: '玄黄之气', icon: '🌀', rarity: 4, desc: '玄黄法则凝出的一缕气机（X1C65《玄黄之索》，5 次）。' },
+    // 时间法则之物（X3C515《暴富》，43 次）——仙界卷三的主角：有了它，
+    // 《大五行幻世诀》（198 次）才不必一点一滴慢慢磨。
+    { id: 'm_shijian', name: '时间法则之物', icon: '⏳', rarity: 5, desc: '蕴含时间法则之力之物（X3C515《暴富》，43 次）。修大五行幻世诀的辅物，坊市上一枚就要天价' }
   );
 
   window.ITEMS.push(
@@ -34,7 +37,25 @@
       effect: { dmg: 0.30, atkSpd: 0.08 } },
     { id: 't_tianwaifeidou', name: '天外飞豆', rarity: 5, icon: '🫘', req: 440, noDrop: true,
       desc: '一把撒出去便能挪走的豆子（X1C70《天外飞豆》）。逃命比杀人好用',
-      effect: { spd: 0.14, regen: 0.6 } }
+      effect: { spd: 0.14, regen: 0.6 } },
+    // 太蜚独目（X3C831《寻医问药》）：韩立在帝江坊买到的。
+    // 原著原句：「这眼球绝对不是普通太蜚独目，其中蕴含的时间力量，是他最早得到的那颗的数倍都不止」。
+    { id: 't_taifeidumu', name: '太蜚独目', rarity: 5, icon: '👁', req: 520, unique: true, noDrop: true,
+      desc: '一枚眼球，瞳孔处有一圈极细的金环（X3C831《寻医问药》）。其中蕴含的时间力量，是他最早得到的那颗的数倍',
+      effect: { xpMul: 0.20, crit: 0.08 } },
+    // 星斗盾（X3C909《星器》，21 次）：六花夫人以玄城星辰之力炼制的最高级武器，
+    // 原著原句：「所谓星器，是六花夫人利用此地的星辰之力，炼制出来的一种最高级别的武器」。
+    { id: 't_xingqidun', name: '星斗盾', rarity: 5, icon: '🛡', req: 520, unique: true, noDrop: true,
+      desc: '一件星器（X3C909《星器》）。六花夫人以星辰之力炼制，威力极强，更有增幅自身实力的效果',
+      effect: { armor: 0.22, maxhp: 460 } },
+    // 卷三档可随机掉的成品：仙界档（arc M）首领的池子原先只有灵界那几件，
+    // 补这两件之后，520 段才掉得出「这一档该掉的东西」。
+    { id: 't_zhongshuileizhu', name: '重水雷珠', rarity: 4, icon: '🔮', req: 520,
+      desc: '以黑海重水凝成的雷珠（X2C151《重水雷珠》，27 次）。仙界里少见的雷属性重器',
+      effect: { dmg: 0.24, atkSpd: 0.08 } },
+    { id: 't_gengyuanfalian', name: '隔元法链', rarity: 4, icon: '⛓', req: 540,
+      desc: '一条隔开元气的法链（X2C202《重水真轮》，50 次）。链一缠上，遁速就先去了三分',
+      effect: { armor: 0.16, spd: 0.10 } }
   );
 
   // ========================= 二、仙界篇敌人（灵寰界档） =========================
@@ -44,6 +65,10 @@
     xj_lunhui:   { name: '轮回殿要犯', hp: 240000, spd: 82, dmg: 300, r: 24, xp: 900, spr: 'assassin', drop: 0.4, tier: 2, mats: ['m_xianyuanshi'] },
     xj_tianwei:  { name: '天庭金仙道主', hp: 210000, spd: 86, dmg: 275, r: 23, xp: 850, spr: 'fashi', drop: 0.4, tier: 2, mats: ['m_xianyuanshi', 'm_xuanhuang'] },
     xj_daozhu:   { name: '烛龙道长老', hp: 190000, spd: 76, dmg: 260, r: 23, xp: 760, spr: 'disciple', drop: 0.35, tier: 1, mats: ['m_xianyuanshi'] },
+    // 卷三档（大墟 / 五城会武 / 魔域）
+    xj_shimei:   { name: '尸魅', hp: 240000, spd: 84, dmg: 290, r: 23, xp: 880, spr: 'ghost', drop: 0.35, tier: 1, mats: ['m_xianyuanshi'] },
+    xj_xuechi:   { name: '血池守灵', hp: 260000, spd: 80, dmg: 305, r: 24, xp: 940, spr: 'assassin', drop: 0.4, tier: 2, mats: ['m_xianyuanshi', 'm_shijian'] },
+    xj_linv:     { name: '鳞犼守门', hp: 300000, spd: 78, dmg: 330, r: 26, xp: 1100, spr: 'beast', drop: 0.45, tier: 2, mats: ['m_xianyuanshi', 'm_shijian'] },
     xj_yizhou:   { name: '灰界石傀', hp: 180000, spd: 70, dmg: 250, r: 24, xp: 700, spr: 'kui', drop: 0.35, tier: 1, mats: ['m_xianyuanshi'] },
     lh_xiongshou: { name: '灵寰凶兽', hp: 9000, spd: 46, dmg: 120, r: 15, xp: 40, spr: 'wolf', drop: 0.10, tier: 0, mats: ['m_xianyuanshi'] },
     lh_hanbing:   { name: '冷焰宗弟子', hp: 13000, spd: 54, dmg: 155, r: 15, xp: 55, spr: 'fashi', drop: 0.12, tier: 0, mats: ['m_xianyuanshi'] },
@@ -151,10 +176,72 @@
       type: 'story', tag: '破境',
       desc: '遍地异兽残尸，血液汇成近百里的湖。湖心漂着一朵合拢的白色莲苞。',
       startLevel: 460, endLevel: 520, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'huijie', next: null,
+      unlock: 'huijie', next: 'dijiang',
       reward: { stones: 400000, mats: [['m_xianyuanshi', 10], ['m_xuanhuang', 6]] },
       clearTitle: '太乙',
       clearDesc: '莲苞开的时候，谷外最后一只雪蟾也倒下了。这一关不是打出来的，是熬出来的。'
+    },
+    {
+      // 卷三《时空迷踪》前半（X3C776–C831）：韩立入魔域，入夜阳城。
+      // 帝江坊是摩诃区内八座最大的坊市之一；城内所有坊市都不许驾车入内（大皇子定的规矩）。
+      // 仙灵阁的采购目录上记的东西，十有八九都是时间法则之物——他在为《大五行幻世诀》备料。
+      // 原著原句：「这眼球绝对不是普通太蜚独目，其中蕴含的时间力量，是他最早得到的那颗的数倍都不止」。
+      id: 'dijiang', name: '帝江坊·夜阳城', pos: '仙界·魔域 摩诃区 夜阳城', arc: 'M',
+      type: 'market', tag: '坊市',
+      // shop 列表必须显式给：没有它 renderShop 会回退到全局 SHOP_STOCK，
+      // 玩家在仙界坊市里就能买到人界的精铁短剑。
+      shop: ['m_xianyuanshi', 'm_shijian', 'm_xuanhuang', 'jipin', 'huiqi', 'qiannian', 'sk_dawuxing', 'sk_zhenyan'],
+      desc: '魔域最大的一座坊市。城里的坊市不许驾车入内，十四分岔的街，全是丹药灵材与法则之物。',
+      shopSub: '时间法则之物在这儿论价论斤地摆着。魔域的货，比烛龙道宗门坊市还杂。',
+      startLevel: 520, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'taiyi', next: 'xingqi',
+      reward: { stones: 0, items: ['t_taifeidumu'] },
+      clearTitle: '帝江坊',
+      clearDesc: '一枚独目到手。魔域的规矩多，但货也真。'
+    },
+    {
+      // 卷三中段（X3C892–C913）：五城会武、玄城、修罗场。
+      // 厄脍城主停下五城会武，带进入十六强的人同探积鳞空境深处的秘境。
+      // 风无尘手中有一对星器；韩立拿到的星斗盾还要用精血祭炼才认得了。
+      id: 'xingqi', name: '星器·五城会武', pos: '仙界·玄城 玄斗场', arc: 'M',
+      type: 'story', tag: '剧情',
+      desc: '玄斗场上的号角响过三遍。厄脍城主叫停了会武，宣布带人进积鳞空境深处的秘境。',
+      startLevel: 520, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'dijiang', next: 'dadi',
+      reward: { stones: 460000, items: ['t_xingqidun'], mats: [['m_xianyuanshi', 10], ['m_shijian', 2]] },
+      clearTitle: '星器',
+      clearDesc: '星器认主要用精血。刀还在鞘里，得先祭炼几天。'
+    },
+    {
+      // 卷三高潮（X3C917–C943）：大墟。
+      // 厄脍城主带队进的秘境：一进去就是无边无际的昏黄戈壁，遍地黑黄碎石。
+      // 往里有血门、五角深坑、埋骨之地、泣血阵图，还有守门的鳞犼。
+      id: 'dadi', name: '大墟', pos: '仙界·积鳞空境 大墟', arc: 'M',
+      type: 'boss', tag: '秘境战',
+      desc: '一脚踏进去，五感全失，眼前漆黑。等恢复过来，脚下已是无边无际的昏黄戈壁。',
+      startLevel: 520, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'xingqi', next: 'daotian',
+      diff: 5.4, bossAt: 0, intro: 'dadi', outro: 'dadi_out',
+      enemies: ['xj_shimei', 'xj_xuechi', 'xj_linv'],
+      elites: ['大墟尸修', '血门守者'],
+      mats: ['m_xianyuanshi', 'm_shijian'],
+      boss: { kind: 'mo', name: '鳞犼·守门', hp: 420000, spd: 94, dmg: 400, r: 29, spr: 'beast', scale: 7.8 },
+      reward: { stones: 560000, mats: [['m_xianyuanshi', 14], ['m_shijian', 4]] },
+      clearTitle: '大墟',
+      clearDesc: '埋骨之地的白骨里，还埋着上一个进来的人。'
+    },
+    {
+      // 卷三收尾 + 大罗破境图（X3C989《道天大劫》）：
+      // 蟹道人消失在一座地底大殿里；金光散去时，天空由黄云转为灰黑，
+      // 原著原句：「这股压力高如皇天，重如厚土，浩浩荡荡，无可抵挡」。
+      id: 'daotian', name: '道天大劫', pos: '仙界·地底大殿', arc: 'M',
+      type: 'story', tag: '破境',
+      desc: '地底大殿里，夺目的金光忽然散尽。抬头一看，原本黄云密布的天空正在变成灰黑。',
+      startLevel: 520, endLevel: 580, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'dadi', next: null,
+      reward: { stones: 640000, mats: [['m_xianyuanshi', 16], ['m_shijian', 6]] },
+      clearTitle: '大罗',
+      clearDesc: '压力压下来，像被万丈巨峰压在身上。从这一刻起，他不再只是仙界的一个名字。'
     },
     {
       // 金仙破境图（后传 X2C93–C100）：乌蒙岛，承认身份 + 三十六仙窍 + 天人有五衰。
@@ -185,8 +272,32 @@
   // 金仙：仙界第一层。原著口径是「打通周身三十六仙窍」，且每次大境界要历「天人有五衰」。
   window.REALM_LAYERS.push(
     { lv: 460, name: '金仙', hp: 72000, dmg: 3.00, atk: 1.60, spd: 0.22, skill: 'nova', note: '仙界第一层，三十六仙窍' },
-    { lv: 520, name: '太乙', hp: 118000, dmg: 3.60, atk: 1.90, spd: 0.24, skill: 'sword', note: '法则入门，仙灵莲苞护体' }
+    { lv: 520, name: '太乙', hp: 118000, dmg: 3.60, atk: 1.90, spd: 0.24, skill: 'sword', note: '法则入门，仙灵莲苞护体' },
+    { lv: 580, name: '大罗', hp: 186000, dmg: 4.30, atk: 2.30, spd: 0.26, skill: 'nova', note: '时间法则成形，天地之间有了一处属于自己的位置' }
   );
+
+  window.BREAKTHROUGH.push({
+    lv: 580, realm: '大罗', from: '太乙期',
+    tip: '从太乙到大罗，靠的是「时间法则」——不是把力量堆上去，是让力量有形（X3C642《不凑热闹》）。' +
+      '原著里这一关是压下来的：地底大殿金光散尽，天空由黄云转灰黑，「压力高如皇天，重如厚土」（X3C989《道天大劫》）。' +
+      '五衰照旧躲不掉——上一次躲开了，这一次未必。',
+    items: [],
+    mats: [['m_xianyuanshi', 16], ['m_shijian', 6]],
+    stones: 560000,
+    chance: { min: 1 },
+    story: [{ id: 'dadi', name: '仙界·积鳞空境 大墟' }],
+    lines: [
+      ['旁白', '地底大殿内，蟹道人的身影消失，充斥整座殿内的夺目金光也随之消失无踪。'],
+      ['旁白', '原本明亮的天空，突然变得阴沉。原本密布的黄云以肉眼可见的速度变成灰黑之色。'],
+      ['旁白', '这股压力高如皇天，重如厚土，浩浩荡荡，无可抵挡。'],
+      ['旁白', '韩立悬浮在半空的身体一重，仿佛被万丈巨峰压身，"扑通"一声跌落到了地上。'],
+      ['韩立', '（这不是五衰。五衰是劫，这是——）'],
+      ['旁白', '三十六仙窍一个接一个亮起来。亮得比以往任何一次都快。'],
+      ['韩立', '（那就接住。）'],
+      ['旁白', '压力达到顶点的那一刻，它停住了。然后开始退。'],
+      ['旁白', '仙窍圆满。天地之间第一次有了一处，属于他自己的位置。']
+    ]
+  });
 
   window.BREAKTHROUGH.push({
     lv: 520, realm: '太乙', from: '金仙期',
@@ -239,7 +350,15 @@
       desc: '逆丹诀：把丹力倒着逼回经脉。在灵寰界偷来的这一门，救过一次命' },
     { id: 'nuoyi', name: '小挪移空间术', icon: '🌀', max: 6, minLv: 440, type: 'passive',
       effect: { spd: 0.14, armor: 0.05 },
-      desc: '小挪移空间术：短距挪移。打不过就跑——卷一这一路，他跑得比打得多' }
+      desc: '小挪移空间术：短距挪移。打不过就跑——卷一这一路，他跑得比打得多' },
+    // 大五行幻世诀（X3C642，198 次）：卷三主角功法。有时间法则之物相助，修炼速度能快上数倍。
+    { id: 'dawuxing', name: '大五行幻世诀', icon: '☯', max: 6, minLv: 520, type: 'passive',
+      effect: { dmg: 0.22, maxhp: 260 },
+      desc: '大五行幻世诀：以五行演幻化万象。没有时间法则之物相助时，磨上千年也未必能进一层' },
+    // 真言化轮经（X2C197，1218 次）：仙界最常见也最重的根本经文。
+    { id: 'zhenyan', name: '真言化轮经', icon: '📿', max: 6, minLv: 540, type: 'passive',
+      effect: { maxhp: 340, armor: 0.12 },
+      desc: '真言化轮经：一字一句都能转成法则。修得越深，经文越难念' }
   );
 
   window.ITEMS.push(
@@ -247,6 +366,13 @@
       desc: '习得《逆丹诀》（X1C32《逆丹诀》）。冷焰宗藏经阁里偷出来的' },
     { id: 'sk_nuoyi', name: '小挪移空间术·法诀', rarity: 4, icon: '📕', req: 440, teach: 'nuoyi',
       desc: '习得《小挪移空间术》（X1C51《小挪移空间术》）。挪一步，换个地方' }
+  );
+
+  window.ITEMS.push(
+    { id: 'sk_dawuxing', name: '大五行幻世诀·法诀', rarity: 5, icon: '📜', req: 520, teach: 'dawuxing',
+      desc: '习得《大五行幻世诀》（X3C642《不凑热闹》，198 次）。卷三魔域之行的目标' },
+    { id: 'sk_zhenyan', name: '真言化轮经·法诀', rarity: 5, icon: '📕', req: 540, teach: 'zhenyan',
+      desc: '习得《真言化轮经》（X2C197《真言化轮经》，1218 次）。仙界人人都念的那部经' }
   );
 
   // 功法出处：卷一通关给
@@ -377,6 +503,60 @@
     ['韩立', '（这一界没有法则之言，全靠自身悟。这才是太乙要的东西。）'],
     ['旁白', '石台上的小人站了起来，没有发出一点声音。']
   ];
+  window.MAP_STORIES.dijiang = [
+    ['旁白', '夜阳城的坊市不许驾车入内——这是大皇子定下的规矩，城内所有坊市全都适用。'],
+    ['旁白', '帝江坊是摩诃区内八座最大的坊市之一，也是离得最近的一处。'],
+    ['韩立', '（摩诃区。魔域的地界。异国他乡，先把规矩摸清。）'],
+    ['旁白', '高大的石质牌楼立在坊口。往里是一条横一条纵的街，十四道岔口。'],
+    ['旁白', '仙灵阁的伙计捧来一份采购目录。上头记的物件，十有八九都是时间法则之物。'],
+    ['韩立', '（大五行幻世诀。若有法则之物相助，修炼速度能快上数倍。）'],
+    ['旁白', '角落里一只木匣。匣中一枚眼球，瞳孔处有一圈极细的金环。'],
+    ['旁白', '这眼球绝不是普通太蜚独目，其中蕴含的时间力量，是他最早得到的那颗的数倍都不止。'],
+    ['韩立', '（慧眼识珠。这一枚，够用很久了。）'],
+    ['旁白', '他没有再问价——问价就等于承认自己不懂。']
+  ];
+  window.MAP_STORIES.xingqi = [
+    ['旁白', '玄斗场的号角响过三遍。厄脍城主站在高处，抬手往下压了压。'],
+    ['厄脍城主', '五城会武，到此为止。'],
+    ['旁白', '台下数千人一静。'],
+    ['旁白', '「积鳞空境深处有一处秘境现世，秘境内珍宝无数，乃是百万年难得一遇的大机缘。厄脍城主决定停下五城会武，带领进入十六强的人一同探索此地。」'],
+    ['韩立', '（百万年难得一遇。这是把刀递到我们手里，还是把刀架到脖子上。）'],
+    ['旁白', '别苑偏厅里，晨阳把一枚东西推过来。'],
+    ['晨阳', '此物名为星斗盾，也是一件星器。星器需要用精血长时间温养才能逐步掌握。你马上用精血祭炼，这几日好好温养一下。'],
+    ['韩立', '（所谓星器，是六花夫人利用此地的星辰之力，炼制出来的一种最高级别的武器。威力极其强大，更有增幅我等实力的效果。）'],
+    ['旁白', '精血滴上盾面。一道极细的星光纹路亮了起来，然后沉寂下去。'],
+    ['韩立', '（刀还在鞘里，得先祭炼几天。）']
+  ];
+  window.MAP_STORIES.dadi = [
+    ['旁白', '一脚踏进去，两耳嗡鸣乱响，无数古怪声音朝脑子里钻。五感全失，眼前漆黑。'],
+    ['旁白', '等他恢复过来，身体已重重砸在一处坚硬之地，半边身子剧痛。'],
+    ['旁白', '入眼的，是一片昏黄的地面。无数大大小小的黑黄碎石凌乱散落，四面八方都是一望无际的荒原。'],
+    ['韩立', '（戈壁。这地方大得没有边。）'],
+    ['旁白', '碎石堆里埋着白骨。有些骨头上还带着牙印，有些已经风化成了粉。'],
+    ['韩立', '（埋骨之地。上一个进来的人，就埋在下面。）'],
+    ['旁白', '前方地平线上立着一道血色的门。门后传来鳞片摩擦的细响。'],
+    ['旁白', '守门的东西抬起头。一头鳞犼，喉间滚动，像在掂量来人的分量。'],
+    ['韩立', '（这一趟不是来寻宝的。是来开路的。）']
+  ];
+  window.MAP_STORIES.dadi_out = [
+    ['旁白', '泣血阵图的最后一笔落下，血色光幕终于合拢。'],
+    ['旁白', '戈壁尽头，一座祭坛的轮廓在昏黄的天光下露出来。'],
+    ['韩立', '（第二把钥匙。前面那座祭坛，是要靠它开的。）'],
+    ['旁白', '天色沉下来。他抬头看了看——云是黄的，可云层深处，隐隐有灰在动。']
+  ];
+  window.MAP_STORIES.daotian = [
+    ['旁白', '地底大殿内，蟹道人的身影消失，充斥整座殿内的夺目金光也随之消失无踪。'],
+    ['旁白', '韩立只觉丹田内的仙灵力流转再次变得迟滞，不过并未完全凝固。'],
+    ['旁白', '蟹道人双手垂于身体两侧，仰头望天，眼中透出些许激动，也带着些许期待。'],
+    ['旁白', '原本明亮的天空，突然变得阴沉。原本密布的黄云以肉眼可见的速度变成灰黑之色。'],
+    ['旁白', '这股压力高如皇天，重如厚土，浩浩荡荡，无可抵挡。'],
+    ['旁白', '韩立悬浮在半空的身体一重，仿佛被万丈巨峰压身，"扑通"一声，直接从半空跌落到了地上。'],
+    ['韩立', '（这不是五衰。五衰是劫，这是——）'],
+    ['旁白', '三十六仙窍一个接一个亮起来。亮得比以往任何一次都快。'],
+    ['韩立', '（那就接住。）'],
+    ['旁白', '压力达到顶点的那一刻，它停住了。然后开始退。'],
+    ['旁白', '仙窍圆满。天地之间第一次有了一处，属于他自己的位置。']
+  ];
   window.MAP_STORIES.wumengdao = [
     ['旁白', '气泡散尽时，他已站在一片陌生的海上。海风很咸，天很低。'],
     ['旁白', '乌蒙岛。岛外水幕垂下，站着三个人——陆坤老祖、鹄骨夫人、寒丘。'],
@@ -422,9 +602,13 @@
   window.MAP_SCENERY.chulong  = { bg: { base: '#2a3040', a: '#343b4d', b: '#1d222e' }, decor: [['rock', 0.16], ['tuft', 0.06]] };
   window.MAP_SCENERY.huijie   = { bg: { base: '#2e2f2c', a: '#383935', b: '#20211f' }, decor: [['rock', 0.24], ['tuft', 0.02]] };
   window.MAP_SCENERY.taiyi    = { bg: { base: '#3a2020', a: '#452727', b: '#2a1616' }, decor: [['rock', 0.20], ['tuft', 0.02]] };
+  window.MAP_SCENERY.dijiang  = { bg: { base: '#39323f', a: '#443c4b', b: '#28222d' }, decor: [['rock', 0.10], ['tuft', 0.08]] };
+  window.MAP_SCENERY.xingqi   = { bg: { base: '#2b3340', a: '#353e4d', b: '#1e242e' }, decor: [['rock', 0.14], ['tuft', 0.06]] };
+  window.MAP_SCENERY.dadi     = { bg: { base: '#3f3527', a: '#4b4030', b: '#2c251b' }, decor: [['rock', 0.30], ['tuft', 0.03]] };
+  window.MAP_SCENERY.daotian  = { bg: { base: '#2a2a30', a: '#33333a', b: '#1d1d21' }, decor: [['rock', 0.18], ['tuft', 0.03]] };
 
   // 底色套到图上（合底色名单在后）
-  for (const id of ['linghuan', 'suxing', 'lingyan', 'xiaoping', 'tiangui', 'poxu', 'wumengdao', 'chulong', 'huijie', 'taiyi']) {
+  for (const id of ['linghuan', 'suxing', 'lingyan', 'xiaoping', 'tiangui', 'poxu', 'wumengdao', 'chulong', 'huijie', 'taiyi', 'dijiang', 'xingqi', 'dadi', 'daotian']) {
     const m = window.MAPS.find(x => x.id === id);
     const sc = window.MAP_SCENERY[id];
     if (m && sc) { m.bg = sc.bg; m.decorScheme = sc.decor; }
@@ -436,6 +620,25 @@
     xj.next = 'linghuan';
     xj.clearTitle = '飞升';
     xj.clearDesc = '门开了。他一脚迈过去，脚下不是仙界——是灵寰界的一片荒地。他连自己是谁，都还没记起来。';
+  }
+
+  // ========================= 七(2)、仙界坊市「帝江坊」货架 =========================
+  // 后传的坊市与前传不同：这里卖的是「法则之物」与魔族特有的灵材丹药，
+  // 计价用仙元石（X2C138，627 次）。
+  // 天东商号是前传的（安远城），后传 0 次——这里的商号叫仙灵阁（X3C829）。
+  const DJ_SHOP = ['m_xianyuanshi', 'm_shijian', 'm_xuanhuang', 'jipin', 'huiqi', 'qiannian', 'sk_dawuxing', 'sk_zhenyan'];
+  // 地图上的 shop 列表与货架常量必须一致（地图那处是硬编码的同一份内容）
+  const DJ_PRICE = {
+    m_xianyuanshi: 80000, m_shijian: 260000, m_xuanhuang: 90000,
+    jipin: 120000, huiqi: 26000, qiannian: 95000, sk_dawuxing: 380000, sk_zhenyan: 420000
+  };
+  const DJ_CAT = {
+    m_xianyuanshi: 'cai', m_shijian: 'cai', m_xuanhuang: 'cai',
+    jipin: 'dan', huiqi: 'dan', qiannian: 'fu', sk_dawuxing: 'skill', sk_zhenyan: 'skill'
+  };
+  for (const id of DJ_SHOP) {
+    if (window.SHOP_STOCK.some(s => s.id === id)) continue;   // 已被别处上架的不重复挂
+    window.SHOP_STOCK.push({ id: id, price: DJ_PRICE[id], cat: DJ_CAT[id] });
   }
 
   // 仙界篇物品是后加的，索引要重建一次

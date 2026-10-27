@@ -31,7 +31,7 @@ page.on('pageerror', e => errors.push(e.message));
 await page.goto('http://127.0.0.1:' + PORT + '/index.html?test=1');
 await page.waitForTimeout(1200);
 
-const IDS = ['linghuan', 'suxing', 'lingyan', 'xiaoping', 'tiangui', 'poxu', 'wumengdao', 'chulong', 'huijie', 'taiyi'];
+const IDS = ['linghuan', 'suxing', 'lingyan', 'xiaoping', 'tiangui', 'poxu', 'wumengdao', 'chulong', 'huijie', 'taiyi', 'dijiang', 'xingqi', 'dadi', 'daotian'];
 
 // ---- 1) 六图注册与链条 ----
 console.log('\n== 1. 卷一六图与链条 ==');
@@ -46,13 +46,14 @@ const M1 = await page.evaluate((ids) => {
     prevClear: M('xianjie').clearDesc
   };
 }, IDS);
-ok(M1.maps.length === 10 && M1.maps.every(m => m.arc === 'M'), '仙界篇十图已注册且都在 arc M', M1.maps);
+ok(M1.maps.length === 14 && M1.maps.every(m => m.arc === 'M'), '仙界篇十四图已注册且都在 arc M', M1.maps);
 ok(M1.prevNext === 'linghuan', '前传终点「飞升仙界」接上灵寰界（不再是终点）', M1.prevNext);
 const chain = M1.maps.map(m => m.next);
 ok(chain[0] === 'suxing' && chain[1] === 'lingyan' && chain[2] === 'xiaoping'
   && chain[3] === 'tiangui' && chain[4] === 'poxu' && chain[5] === 'wumengdao'
-  && chain[6] === 'chulong' && chain[7] === 'huijie' && chain[8] === 'taiyi' && chain[9] === null,
-  '链条完整：灵寰界→…→乌蒙岛→烛龙道→灰界→进阶太乙', chain);
+  && chain[6] === 'chulong' && chain[7] === 'huijie' && chain[8] === 'taiyi'
+  && chain[9] === 'dijiang' && chain[10] === 'xingqi' && chain[11] === 'dadi' && chain[12] === 'daotian' && chain[13] === null,
+  '链条完整：灵寰界→…→进阶太乙→帝江坊→五城会武→大墟→道天大劫', chain);
 ok(M1.maps.every(m => m.unlock), '每张图都有解锁前驱', M1.maps.map(m => m.unlock));
 
 // ---- 2) 密度是波形，不是连排剧情 ----
@@ -71,8 +72,8 @@ const T2 = await page.evaluate((ids) => {
     texts: ids.map(id => (W.MAP_STORIES[id] || []).map(x => x[1]).join(''))
   };
 }, IDS);
-ok(T2.types.join(',') === 'story,story,boss,story,boss,story,story,boss,story,story',
-  '仙界篇也是波形（静—打—静—大打—收）', T2.types);
+ok(T2.types.join(',') === 'story,story,boss,story,boss,story,story,boss,story,story,market,story,boss,story',
+  '仙界篇也是波形（静—打—静—大打—收—坊市—静—打—静）', T2.types);
 ok(T2.lines.every(n => n >= 9), '每张图对白都不少于 9 行', T2.lines);
 ok(/石头哥哥/.test(T2.texts[0]) && /拨浪鼓/.test(T2.texts[0]), '灵寰界写的是「石头哥哥」与拨浪鼓（X1C1-C3）', T2.texts[0].slice(0, 20));
 ok(/人族第一修士/.test(T2.texts[1]) && /灵界第一大乘/.test(T2.texts[1]), '苏醒那张写回「人族第一修士，灵界第一大乘」（X1C12 原句）', '');
@@ -127,6 +128,100 @@ ok(TY.story[0] === 'huijie', '太乙关的剧情前置是灰界', TY.story);
 ok(/莲苞/.test(TY.text) && /异兽/.test(TY.text), '太乙关用原著口径：仙灵莲苞硬扛异兽围攻', TY.text.slice(0, 24));
 ok(TY.layer === '太乙' && TY.slots === 10 && TY.cap === 12, '太乙档已进境界层（功法位 10 / 上限 12）', TY);
 ok(G3.slots === 9 && G3.cap === 11, '金仙功法位 9、层数上限 11', { slots: G3.slots, cap: G3.cap });
+
+// ---- 3·b) 后传卷三《时空迷踪》四图 + 帝江坊货架 + 大罗关 ----
+console.log('\n== 3b. 卷三《时空迷踪》 ==');
+const V3 = await page.evaluate(() => {
+  const W = window, F = W.__FR;
+  const M = id => W.MAPS.find(m => m.id === id) || {};
+  const get = id => (W.ALL_ITEMS || []).find(x => x.id === id) || null;
+  F.clearProgress(); F.setLevel(519); F.god(true); F.unlockAll();
+
+  // ① 帝江坊（market）
+  // 注意：market 图的 reward 与 cleared 都在「关掉商店」时的 finishMap 里发，
+  // 所以必须点一次 shopClose，否则拿到的是空袋子。
+  F.enterMap('dijiang');
+  const djState = F.info().state;
+  for (let k = 0; k < 20; k++) { F.skipStory(); F.tickFrames(2); if (F.info().state === 'levelup') F.insightAuto(); }
+  const djShopState = F.info().state;
+  const sc = document.getElementById('shopClose');
+  if (sc) sc.click();
+  for (let k = 0; k < 8; k++) { F.skipStory(); F.tickFrames(2); if (F.info().state === 'levelup') F.insightAuto(); }
+  const djBag = F.bag();
+  const djCleared = F.info().cleared.indexOf('dijiang') >= 0;
+
+  // ② 星器·五城会武（story）
+  F.enterMap('xingqi');
+  for (let k = 0; k < 20; k++) { F.skipStory(); F.tickFrames(2); if (F.info().state === 'levelup') F.insightAuto(); }
+  const xqBag = F.bag();
+
+  // ③ 大墟（boss）
+  F.enterMap('dadi', 'easy');
+  for (let k = 0; k < 24; k++) { F.skipStory(); F.tickFrames(2); if (F.info().state === 'levelup') F.insightAuto(); }
+  const boss = F.boss();
+  F.killBoss();
+  for (let k = 0; k < 60; k++) { F.skipStory(); F.tickFrames(3); if (F.info().state === 'levelup') F.insightAuto(); }
+  const ddCleared = F.info().cleared.indexOf('dadi') >= 0;
+
+  // ④ 道天大劫（破境图 520→580）
+  F.enterMap('daotian');
+  for (let k = 0; k < 24; k++) { F.skipStory(); F.tickFrames(2); if (F.info().state === 'levelup') F.insightAuto(); }
+
+  const g580 = W.BREAKTHROUGH.find(x => x.lv === 580) || {};
+  const rl = W.REALM_LAYERS.filter(r => r.lv <= 580).pop() || {};
+  const djText = (W.MAP_STORIES['dijiang'] || []).map(x => x[1]).join('');
+  const xqText = (W.MAP_STORIES['xingqi'] || []).map(x => x[1]).join('');
+  const ddText = (W.MAP_STORIES['dadi'] || []).map(x => x[1]).join('');
+  const dtText = (W.MAP_STORIES['daotian'] || []).map(x => x[1]).join('');
+  const stock = (W.SHOP_STOCK || []).filter(s => ['m_shijian', 'sk_dawuxing', 'sk_zhenyan'].indexOf(s.id) >= 0);
+
+  return {
+    dj: { type: M('dijiang').type, pos: M('dijiang').pos, unlock: M('dijiang').unlock, next: M('dijiang').next,
+      text: djText, state: djState, shopState: djShopState, cleared: djCleared,
+      item: get('t_taifeidumu') ? get('t_taifeidumu').name : null,
+      gotFruit: (djBag.t_taifeidumu || 0) },
+    xq: { type: M('xingqi').type, pos: M('xingqi').pos, unlock: M('xingqi').unlock, next: M('xingqi').next,
+      text: xqText, gotShield: (xqBag.t_xingqidun || 0) },
+    dd: { type: M('dadi').type, lv: M('dadi').startLevel, unlock: M('dadi').unlock, next: M('dadi').next,
+      bossName: (M('dadi').boss || {}).name, bossHp: (M('dadi').boss || {}).hp, text: ddText, cleared: ddCleared },
+    dt: { type: M('daotian').type, endLevel: M('daotian').endLevel, unlock: M('daotian').unlock,
+      next: M('daotian').next, text: dtText },
+    g580: { realm: g580.realm, mats: g580.mats, story: (g580.story || []).map(s2 => s2.id),
+      text: (g580.lines || []).map(x => x[1]).join('') },
+    realm: rl.name, slots: W.skillSlots(580), cap: W.realmSkillCap(580),
+    skills: W.SKILLS.filter(s2 => s2.minLv >= 520).map(s2 => s2.id),
+    stock: stock.map(s2 => s2.id + '@' + s2.price),
+    boss
+  };
+});
+ok(V3.dj.type === 'market' && /夜阳城/.test(V3.dj.pos) && V3.dj.unlock === 'taiyi' && V3.dj.next === 'xingqi',
+  '帝江坊是仙界唯一 market 图，挂在进阶太乙之后（X3C828）', V3.dj);
+ok(/不许驾车入内/.test(V3.dj.text) && /摩诃区/.test(V3.dj.text) && /太蜚独目/.test(V3.dj.text)
+  && /时间法则/.test(V3.dj.text),
+  '帝江坊对白用原著实词：夜阳城/摩诃区/太蜚独目/时间法则之物', V3.dj.text.slice(0, 24));
+ok(V3.dj.shopState === 'shop', '帝江坊进得去（摆摊状态）', V3.dj.shopState);
+ok(!!V3.dj.item && V3.dj.gotFruit >= 1 && V3.dj.cleared, '太蜚独目入库并由帝江坊结算给出',
+  { item: V3.dj.item, n: V3.dj.gotFruit, cleared: V3.dj.cleared });
+ok(V3.xq.type === 'story' && V3.xq.unlock === 'dijiang' && V3.xq.next === 'dadi',
+  '星器·五城会武串在帝江坊与大墟之间（X3C892–C913）', V3.xq);
+ok(/星器/.test(V3.xq.text) && /星斗盾/.test(V3.xq.text) && /五城会武/.test(V3.xq.text)
+  && /精血/.test(V3.xq.text),
+  '星器对白用原著实词：星器/星斗盾/五城会武/精血祭炼', V3.xq.text.slice(0, 24));
+ok(V3.xq.gotShield >= 1, '星斗盾由五城会武给出', { n: V3.xq.gotShield });
+ok(V3.dd.type === 'boss' && V3.dd.lv === 520 && V3.dd.unlock === 'xingqi' && V3.dd.next === 'daotian',
+  '大墟串在五城会武与道天大劫之间（X3C917–C943）', V3.dd);
+ok(/昏黄/.test(V3.dd.text) && /戈壁/.test(V3.dd.text) && /鳞犼/.test(V3.dd.text) && /埋骨/.test(V3.dd.text),
+  '大墟对白用原著实词：昏黄戈壁/鳞犼/埋骨之地', V3.dd.text.slice(0, 24));
+ok(!!V3.boss && V3.dd.cleared, '大墟首领能刷出来且能通关', { boss: V3.boss, cleared: V3.dd.cleared });
+ok(V3.dt.type === 'story' && V3.dt.endLevel === 580 && V3.dt.unlock === 'dadi' && V3.dt.next === null,
+  '道天大劫是大罗破境图（520→580）', V3.dt);
+ok(/高如皇天/.test(V3.dt.text) && /灰黑/.test(V3.dt.text) && /三十六仙窍/.test(V3.dt.text),
+  '道天大劫用原著实词：高如皇天/灰黑/三十六仙窍', V3.dt.text.slice(0, 24));
+ok(V3.g580.realm === '大罗' && V3.g580.story[0] === 'dadi', '大罗破境关已立（lv580），前置大墟', V3.g580);
+ok(/高如皇天/.test(V3.g580.text), '大罗关演出用原著口径', V3.g580.text.slice(0, 20));
+ok(V3.realm === '大罗' && V3.slots === 11 && V3.cap === 13, '大罗档已进境界层（功法位 11 / 上限 13）', V3);
+ok(V3.skills.indexOf('dawuxing') >= 0 && V3.skills.indexOf('zhenyan') >= 0, '卷三两门功法已入库', V3.skills);
+ok(V3.stock.length === 3, '帝江坊货架上架了时间法则之物与两门卷三功法', V3.stock);
 
 // ---- 4) 仙界材料 / 成品 / 功法 / 敌人 ----
 console.log('\n== 4. 仙界条目 ==');
@@ -183,6 +278,12 @@ const R6 = await page.evaluate(async (ids) => {
     F.enterMap(id, 'easy');
     for (let k = 0; k < 24; k++) { F.skipStory(); F.tickFrames(2); }
     const m = W.MAPS.find(x => x.id === id);
+    if (m.type === 'market') {
+      // 坊市不靠打架通关：得把摊关掉（shopClose）才会结算并记入已通关
+      const sc = document.getElementById('shopClose');
+      if (sc) sc.click();
+      for (let k = 0; k < 12; k++) { F.skipStory(); F.tickFrames(2); if (F.info().state === 'levelup') F.insightAuto(); }
+    }
     if (m.boss) {
       F.boss(); F.killBoss();
       // 升级的三选一面板会挡住结算流程，必须在推进过程中顺手点掉
@@ -202,8 +303,9 @@ const R6 = await page.evaluate(async (ids) => {
 ok(R6.allCleared, '卷一六图可依次通关', R6.steps.filter(s => !s.cleared));
 ok(R6.bag.xianyuanshi >= 1, '仙元石进背包（仙界关的消耗来源）', R6.bag);
 ok(R6.bag.xuanhuangs >= 1 && R6.bag.tianwaifeidou >= 1, '玄黄之索 / 天外飞豆进背包', R6.bag);
-ok(R6.steps.slice(0, 7).every(s => s.lv <= 420) && R6.steps.slice(7).every(s => s.lv <= 520),
-  '全程不越档：卷一七图 ≤420（真仙），卷二三图 ≤520（太乙）', R6.steps.map(s => s.lv));
+ok(R6.steps.slice(0, 7).every(s => s.lv <= 420) && R6.steps.slice(7, 10).every(s => s.lv <= 520)
+  && R6.steps.slice(10).every(s => s.lv <= 580),
+  '全程不越档：卷一七图 ≤420，卷二三图 ≤520，卷三四图 ≤580', R6.steps.map(s => s.lv));
 
 console.log('\n--------------------------------');
 console.log(`结果: ${pass} 通过 / ${fail} 失败`);

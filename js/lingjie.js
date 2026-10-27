@@ -395,17 +395,50 @@
       type: 'story', tag: '剧情',
       desc: '他赶到的时候，仗已经打完了。金色世界塌了一半，坑底还立着一个金色巨人。',
       startLevel: 330, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'jiujie', next: 'zhenxian',
+      unlock: 'jiujie', next: 'xianshi',
       reward: { stones: 150000, items: ['t_yuanhejiwu', 't_liangyiwuchen'], mats: [['m_zhenlingxue', 3]] },
       clearTitle: '群强之陨',
       clearDesc: '赢是赢了，赢得一个都不剩。坑底只剩两样东西：元合五极山，和一座两仪微尘阵。'
+    },
+    {
+      // V12C2424《献祭》：明尊要用整个风元大陆换一座两仪微尘阵（残品）来对付马良。
+      // 云淡、月梳这两位大乘被安排在「阵眼」，其实是明尊给他们设的绝地——
+      // 原著原话：「明尊根本没有在这里留下什么玄天之宝，他恐怕是想让我兄妹当玄天之宝的替代之物」。
+      // 韩立这一段不是旁观者：他事先暗中吩咐噬金虫王去牵制马良，好看清那边的情形；
+      // 银色法盘往下灌符文时，他也没有喊停。
+      id: 'xianshi', name: '献祭·风元大陆', pos: '灵界·鸣煞之地', arc: 'L',
+      type: 'story', tag: '剧情',
+      desc: '祭坛下方，一面青色古镜悬在半空。镜里是噬金虫王，正和金甲士缠斗。银色法盘还在往法阵里灌符文。',
+      startLevel: 330, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'qunqiang', next: 'zhenxian',
+      reward: { stones: 130000, mats: [['m_zhenlingxue', 3], ['m_xuantianteng', 1]] },
+      clearTitle: '献祭',
+      clearDesc: '风元大陆元气大伤。他没喊停——这一局，本来就不只是他一个人在打。'
+    },
+    {
+      // V12C2425《掌天瓶》：两仪微尘阵自爆 → 巨大盆地 → 马良重伤显形 →
+      // 韩立胸前瓶形青光浮现，马良袖中飞出墨绿小瓶。
+      // **「掌天瓶」这个名字就是在这一章由马良说出来的**（原著全 13 次，首现即此章）。
+      id: 'zhangtianping', name: '掌天瓶·盗天瓶', pos: '灵界·鸣煞之地 盆地', arc: 'L',
+      type: 'boss', tag: '剧情战',
+      desc: '两仪微尘阵炸成一个万里大坑。马良赤身裸体地立在坑心，胸口起伏。然后两只瓶子，隔着空气互相叫了起来。',
+      startLevel: 420, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'zhenxian', next: 'zhanxian',
+      diff: 5.2, bossAt: 0, intro: 'zhangtianping', outro: 'zhangtianping_out',
+      enemies: ['gui2', 'moxiu2', 'guixiu'],
+      elites: ['九元观随侍', '金色甲士'],
+      mats: ['m_zhenlingxue', 'm_xuantianteng'],
+      boss: { kind: 'mo', name: '马良·重伤显形', hp: 260000, spd: 86, dmg: 300, r: 27, spr: 'mo', scale: 7.0 },
+      reward: { stones: 220000, items: ['t_zhangtianping', 't_daotianping'], mats: [['m_xuantianteng', 1], ['m_zhenlingxue', 3]] },
+      clearTitle: '掌天瓶',
+      clearDesc: '青瓶与墨绿瓶之间的嗡鸣声越来越响，像两头隔着水面互相呼唤的兽。原来它有名字。'
     },
     {
       id: 'zhenxian', name: '真仙之身', pos: '灵界·荒原 雷光中', arc: 'L',
       type: 'story', tag: '剧情',
       desc: '渡劫之后，铸真仙之身。',
       startLevel: 330, endLevel: 420, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'qunqiang', next: 'zhanxian',
+      unlock: 'xianshi', next: 'zhangtianping',
       reward: { stones: 160000 },
       clearTitle: '真仙',
       clearDesc: '一身不再是凡胎。眉眼还是那眉眼，气息已不在此界。'
@@ -421,7 +454,7 @@
       type: 'boss', tag: '终局战',
       desc: '八条五爪血龙从血河里爬出来。仙界来的真仙，被界面之力压着，还是大乘的威压。',
       startLevel: 420, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'zhenxian', next: 'huimoyuan',
+      unlock: 'zhangtianping', next: 'huimoyuan',
       diff: 5.0, bossAt: 0, intro: 'zhanxian', outro: 'zhanxian_out',
       enemies: ['gui2', 'moxiu2', 'guixiu'],
       elites: ['万灵血龙', '九元观随侍'],
@@ -865,6 +898,50 @@
       ['旁白', '坑底只剩两样东西：一面小小的山岳，与一座两仪微尘般的小阵。'],
       ['韩立', '（元合五极山。它和掌天瓶，是一对。）']
     ],
+    xianshi: [
+      ['旁白', '鸣煞之地外不知多少万里，祭坛下方。一面青色古镜悬在半空。'],
+      ['旁白', '镜中，一头数十丈长的巨大金虫正目喷晶光，与那些面无表情的金色甲士缠斗。'],
+      ['韩立', '（这只虫王是我暗中吩咐过去的。不是去帮马良，是去看清那边的情形。）'],
+      ['旁白', '天上，一座昏暗的大殿里，一名端坐法阵的人影叹了口气，手腕一抖。'],
+      ['旁白', '巴掌大的银色法盘光芒大放，无数银色符文从中飘出，往法阵里狂涌而入。'],
+      ['旁白', '“该出手了。风元大陆算是元气大伤了，但为了整个灵界又不得不如此。”'],
+      ['韩立', '（明尊要拿整个风元大陆，换一座阵。）'],
+      ['旁白', '八只圆柱与巨大祭坛同时爆发法则波动，五色光柱冲天而起。高空中聚起一个直径十几里的光阵。'],
+      ['旁白', '血光一闪，半圆状的血色光幕骤然形成，像一只巨碗，把云淡、月梳和上千商盟卫士全困在下面。'],
+      ['云淡', '不好，从地下走！'],
+      ['旁白', '金色长戈往下一扎，地表青色符文闪动不已，一副完好无损的样子。'],
+      ['月梳', '怎么可能！大哥你的灵光戈，可是无坚不摧的。'],
+      ['云淡', '还不明白吗，我们都上了明尊那老匹夫的大当了。这里哪是什么阵眼，分明是专门对我们兄妹设下的绝地。'],
+      ['月梳', '他真敢如此做！'],
+      ['旁白', '镜面那头，虫王在掉皮，甲士在碎裂。银色法盘上的符文还在往下涌。'],
+      ['韩立', '（云淡、月梳……这两位大乘，是被当作玄天之宝的替代之物了。）'],
+      ['旁白', '韩立没有喊停。古镜也没有灭。']
+    ],
+    zhangtianping: [
+      ['旁白', '晶丝一闪，化为一道白炙光柱爆裂开来。滚滚白光疯狂向四面八方狂卷，淹没方圆万里。'],
+      ['旁白', '金色甲士在白光里溃散而灭。被围在其中的金虫就地一滚，现出巨大甲虫本体，蜷成一颗金灿灿圆球。'],
+      ['旁白', '“砰”的一声，韩立面前的青色古镜爆裂而开。'],
+      ['旁白', '鸣煞之地低矮了十几丈，凭空形成一个巨大的盆地。地面平滑如镜，连一丝凹凸都没有。'],
+      ['旁白', '盆地上空只剩两样东西：一颗烤得焦黑的圆球，和一枚紫金色巨晶。'],
+      ['旁白', '巨晶寸寸碎裂。马良赤身裸体地显现出来，寸缕没有，脸色苍白得没有一点血色。'],
+      ['韩立', '不愧为仙界之人，如此轻易看破了蟹兄的身份。不过看阁下样子，灵界的反噬之力不轻吧。'],
+      ['旁白', '金色甲虫双翅一抖，化为一团金光射进韩立袖中不见了踪影。'],
+      ['旁白', '忽然，韩立只觉胸前一热。一团瓶形青濛濛幽光洞穿衣物的浮现而出，一股清鸣之音从中传出，直冲九霄云外。'],
+      ['旁白', '几乎同一时间，对面的马良袖中也是青光一闪，一个墨绿小瓶一飞而出，微微一颤，就要冲韩立飞来。'],
+      ['马良', '掌天瓶！此瓶竟然在你手中。哈哈，这可真是踏破铁鞋无觅处，得来全不费工夫，我何必再去找那叛徒，现在竟然直接就找到了此宝！'],
+      ['韩立', '掌天瓶？你在说什么！'],
+      ['马良', '不要说你没有这种同样的小瓶。我这件盗天瓶虽然只是掌天瓶的仿制之物，但是互相感应之下，却绝对不会错的。'],
+      ['旁白', '韩立脸色接连变化了数次，才抬手往胸前虚空一抓，另一个翠盈盈的青色小瓶凭空浮现。'],
+      ['旁白', '无论式样外形，此瓶居然都和马良手中的墨绿小瓶一般无二，只是颜色稍浅一些，看起来更加的不起眼几分。'],
+      ['马良', '对，就是……咦，不对。你手中的好像只是一个外壳，竟然没有瓶灵。你将瓶灵藏在何处了？'],
+      ['韩立', '瓶灵？这又是什么？']
+    ],
+    zhangtianping_out: [
+      ['旁白', '两瓶之间的嗡鸣声越来越响，像两头隔着水面互相呼唤的兽。'],
+      ['韩立', '（原来它有名字。掌天瓶。）'],
+      ['韩立', '（他要找的东西，就在我身上。这一战躲不过去了。）'],
+      ['旁白', '盆地上空，两个人，一黑一青，谁都没有先动。']
+    ],
     zhenxian: [
       ['旁白', '玄天仙藤三截化开，真灵之血五滴入骨。雷光里，他的影子变了形状。'],
       ['韩立', '（这一身，不再是凡胎。）'],
@@ -1281,6 +1358,14 @@
     { id: 'dan_zhihun', name: '真魂丹', rarity: 5, icon: '🟣', req: 420, unique: true, noDrop: true,
       desc: '凝出真仙之魂的丹药（V11C2400《法则之链》，37 次）。斩仙后从马良身上搜得余留的一颗（V12C2430）',
       effect: { maxhp: 420, crit: 0.08 } },
+    // 「掌天瓶」这个名字在原著里是马良叫出来的（V12C2425《掌天瓶》）。
+    // 韩立手里的青瓶只有外壳，瓶灵被他藏了起来——所以马良一眼看出「只是个外壳」。
+    { id: 't_zhangtianping', name: '掌天瓶', rarity: 5, icon: '🫙', req: 430, unique: true, noDrop: true,
+      desc: '翠盈盈的青色小瓶（V12C2425《掌天瓶》，13 次）。外观与马良的盗天瓶一般无二，只是颜色稍浅；瓶灵被藏了起来，只剩外壳',
+      effect: { maxhp: 500, xpMul: 0.10, crit: 0.05 } },
+    { id: 't_daotianping', name: '盗天瓶', rarity: 5, icon: '🍶', req: 430, unique: true, noDrop: true,
+      desc: '马良袖中的墨绿小瓶（V12C2425）。「我这件盗天瓶虽然只是掌天瓶的仿制之物，但是互相感应之下，却绝对不会错的」',
+      effect: { dmg: 0.18, atkSpd: 0.10 } },
     { id: 'dan_guangling', name: '广灵道果', rarity: 5, icon: '🍇', req: 420, unique: true,
       desc: '真龙之岛上的道果（V11C2190 / V12C2441）。服下可凝广灵道体，神念之力有了落脚处。',
       effect: { maxhp: 400, xpMul: 0.15 } }
@@ -1361,6 +1446,8 @@
     sanjie:   { bg: { base: '#242a36', a: '#2c3443', b: '#1a1f28' }, decor: [['rock', 0.26], ['tuft', 0.04]] },
     jiujie:   { bg: { base: '#2a2f3a', a: '#343a47', b: '#1f232c' }, decor: [['rock', 0.24], ['tuft', 0.03]] },
     qunqiang: { bg: { base: '#4a4132', a: '#564c3a', b: '#332d23' }, decor: [['rock', 0.30], ['tuft', 0.04]] },
+    xianshi:  { bg: { base: '#2b2438', a: '#342c43', b: '#1e1929' }, decor: [['rock', 0.20], ['tuft', 0.04]] },
+    zhangtianping: { bg: { base: '#3c3a2c', a: '#484635', b: '#2a2920' }, decor: [['rock', 0.22], ['tuft', 0.05]] },
     zhenxian: { bg: { base: '#2f3542', a: '#3a4253', b: '#232833' }, decor: [['rock', 0.22], ['tuft', 0.03]] },
     zhanxian: { bg: { base: '#3a1f22', a: '#45262a', b: '#2a1618' }, decor: [['rock', 0.26], ['tuft', 0.02]] },
     huimoyuan:{ bg: { base: '#1b2830', a: '#22333c', b: '#131d24' }, decor: [['rock', 0.16], ['tuft', 0.03]] },
@@ -1380,7 +1467,7 @@
   // late.js 合底色时还没有这些图，这里手动补上
   for (const id of ['anyuan', 'tianyuan', 'heifeng', 'lianxu', 'fengyuan', 'shisan', 'guanghan', 'heti_guan',
                     'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling', 'modajie',
-                    'sanjie', 'jiujie', 'qunqiang', 'zhenxian', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie',
+                    'sanjie', 'jiujie', 'qunqiang', 'xianshi', 'zhenxian', 'zhangtianping', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie',
                     'linghuang', 'zhandacheng', 'shengshi', 'heihu', 'baiguang', 'tianmo', 'diyi', 'huirenjie']) {
     const m = window.MAPS.find(x => x.id === id);
     const sc = window.MAP_SCENERY[id];
