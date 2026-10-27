@@ -642,10 +642,14 @@
   // 灵界（V8 之后的四篇）：战利品池要与灵界的「修为段」对齐。
   // 不这么分的话，炼虚修士在魔界砍死一头魔兽，地上能躺一把精铁短剑 —— 这是硬伤。
   const LINGJIE_ARCS = ['I', 'J', 'K', 'L'];
+  const XIANJIE_ARCS = ['M'];
   function inLingjie() { return !!(G.map && LINGJIE_ARCS.indexOf(G.map.arc) >= 0); }
+  // 仙界篇（arc M）：卷一在灵寰界，韩立带伤藏拙，成品只出真仙级往上的东西。
+  function inXianjie() { return !!(G.map && XIANJIE_ARCS.indexOf(G.map.arc) >= 0); }
   // 灵界成品池最低门槛：跟着地图修为段走 —— 黑凤族 72（化神旧宝），越往魔界/魔源海越往上抬，
   // 到小灵天之后封顶 160。这样黑凤族掉的是飞升带下来的旧宝，魔界深处掉的才是灵界本地器物。
   function lootMinReq() {
+    if (inXianjie()) return 420;          // 仙界档：真仙级往上，灵寰界的破烂一件不出
     if (!inLingjie()) return 0;
     const base = (G.map && G.map.startLevel) || 132;
     return Math.min(160, Math.max(72, base - 60));
@@ -653,7 +657,7 @@
 
   function dropLoot(x, y, tier) {
     const d = curDiff();
-    if (inLingjie()) {
+    if (inLingjie() || inXianjie()) {
       // 灵界的小怪身上没有法器，只有灵物 —— 这不是数值妥协，是原著逻辑：
       // 灵界讲族、讲灵物、讲灵石，修士之间靠换与抢，不靠杀怪爆装备。
       if (tier < 2) { dropMat(x, y, 1); return; }

@@ -1,79 +1,68 @@
 {
  "source": "凡人修仙传.txt",
+ "book": "main",
  "totalChars": 7468833,
  "totalLines": 144886,
  "volumes": [
   {
    "vol": 1,
    "title": "七玄门风云",
-   "line": 12,
-   "startLine": 12
+   "line": 12
   },
   {
    "vol": 2,
    "title": "初踏修仙路",
-   "line": 3480,
-   "startLine": 3480
+   "line": 3480
   },
   {
    "vol": 3,
    "title": "魔道入侵",
-   "line": 6599,
-   "startLine": 6599
+   "line": 6599
   },
   {
    "vol": 4,
    "title": "风起海外",
-   "line": 16596,
-   "startLine": 16596
+   "line": 16596
   },
   {
    "vol": 5,
    "title": "名震一方",
-   "line": 28234,
-   "startLine": 28234
+   "line": 28234
   },
   {
    "vol": 6,
    "title": "通天灵宝",
-   "line": 37047,
-   "startLine": 37047
+   "line": 37047
   },
   {
    "vol": 7,
    "title": "纵横人界",
-   "line": 54809,
-   "startLine": 54809
+   "line": 54809
   },
   {
    "vol": 8,
    "title": "初入灵界",
-   "line": 63793,
-   "startLine": 63793
+   "line": 63793
   },
   {
    "vol": 9,
    "title": "灵界百族",
-   "line": 70255,
-   "startLine": 70255
+   "line": 70255
   },
   {
    "vol": 10,
    "title": "魔界之战",
-   "line": 98404,
-   "startLine": 98404
+   "line": 98404
   },
   {
    "vol": 11,
    "title": "真仙降世",
-   "line": 125898,
-   "startLine": 125898
+   "line": 125898
   },
   {
    "vol": 12,
    "title": "真仙降临",
-   "line": 142517,
-   "startLine": 142517
+   "line": 142517
   }
  ],
  "chapters": [

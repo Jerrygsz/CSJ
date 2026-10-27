@@ -18,7 +18,7 @@
 //   spd atkSpd pickup regen xpMul dmg crit maxhp armor herb
 //
 // minLv: 入门最低境界等级 —— 境界不到，连门都入不了
-// 层数上限另受境界封顶（realmSkillCap）：炼气 3、筑基 4、结丹 5、元婴 6、化神 7、炼虚/合体 8、大乘/渡劫 9、真仙 10
+// 层数上限另受境界封顶（realmSkillCap）：炼气 3、筑基 4、结丹 5、元婴 6、化神 7、炼虚/合体 8、大乘/渡劫 9、真仙 10、金仙 11
 // 学过 ≠ 身上在用：ipher actives 要装到身上才起效；passive 学会即常驻。
 // 大境界一破，身上的旧功法自动卸下，只留一门主力。
 
@@ -159,6 +159,7 @@ window.SKILLS = [
 
 // 境界封顶：一门功法能练到第几层，看人在哪一层
 window.realmSkillCap = function (lv) {
+  if (lv >= 460) return 11;  // 金仙（仙界篇）
   if (lv >= 420) return 10;  // 真仙
   if (lv >= 330) return 9;   // 渡劫
   if (lv >= 260) return 9;   // 大乘
@@ -179,6 +180,7 @@ window.skillCapById = function (id, lv) {
 // 身上能同时运几门「进攻型」功法：境界越高，能同时运转的越多
 // 被动功法不占槽，学会即在身上运转
 window.skillSlots = function (lv) {
+  if (lv >= 460) return 9;   // 金仙（仙界篇）
   if (lv >= 330) return 8;   // 渡劫
   if (lv >= 260) return 7;   // 大乘
   if (lv >= 200) return 7;   // 合体

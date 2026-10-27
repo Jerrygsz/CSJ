@@ -73,7 +73,7 @@ for (const [from, to, endLv] of LINKS) {
   if (endLv) ok(chain[from].endLevel === endLv, `破境图 ${from} endLevel=${endLv}`, chain[from]);
   ok(chain[to] && chain[to].unlock === from, `${to} unlock=${from}（入口与前驱对齐）`, chain[to]);
 }
-ok(chain.xianjie && chain.xianjie.next === null, '飞升仙界为终点（next=null）', chain.xianjie);
+ok(chain.xianjie && chain.xianjie.next === 'linghuan', '飞升仙界不是终点：接仙界篇·灵寰界', chain.xianjie);
 
 // 过场节点：都是 story 图，且都有对白（没有对白就是空图，等于白走一趟）
 const PASSING = ['liangzu', 'moban', 'moyuan'];
@@ -540,7 +540,10 @@ const CAVE = await page.evaluate(() => {
 });
 ok(CAVE.caves.every(c => c && c.crafts >= 2), '两座灵界洞府已建（天渊城洞府 / 小灵天洞府）', CAVE.caves);
 ok(CAVE.mapCave.liangzu === 'tycave' && CAVE.mapCave.xiaoling === 'xlcave', '洞府挂在对应剧情图上', CAVE.mapCave);
-ok(CAVE.br.every(x => x.cave && ['tycave', 'xlcave'].indexOf(x.cave) >= 0), '五道灵界关都指到了洞府（不再吃不到 +30%）', CAVE.br);
+ok(CAVE.br.filter(x => x.lv <= 420).every(x => x.cave && ['tycave', 'xlcave'].indexOf(x.cave) >= 0),
+  '五道灵界关都指到了洞府（不再吃不到 +30%）', CAVE.br.filter(x => x.lv <= 420));
+ok(CAVE.br.filter(x => x.lv > 420).every(x => !x.cave),
+  '仙界关（460）不吃洞府 +30%：灵寰界没有原著洞府，韩立只是借住', CAVE.br.filter(x => x.lv > 420));
 ok(CAVE.got1 && CAVE.got2, '打通两族大乘/小灵天即得洞府', { got1: CAVE.got1, got2: CAVE.got2 });
 
 const BONUS = await page.evaluate(() => {
