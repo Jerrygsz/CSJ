@@ -1184,6 +1184,17 @@
       ['旁白', '村人只当他是过路的散修。没人认出一个姓韩的。'],
       ['韩立', '（父母坟上，添一把新土吧。）'],
       ['旁白', '他在坟前站了很久。走的时候，没有回头。']
+    ],
+    yuyang_dou: [
+      ['旁白', '斗场中央立着个赤膊的妖族大汉，臂上缠着两道兽筋，脚下石砖被他踩出裂纹。'],
+      ['城斗魁首', '外乡人，下场？'],
+      ['韩立', '（妖族城里，拳头比名帖好使。下一回场，省的生分。）'],
+      ['韩立', '下。']
+    ],
+    yuyang_dou_out: [
+      ['旁白', '大汉被一记重拳掀翻，半天没爬起来。围观的妖族先静了一息，随即哄一声散了。'],
+      ['韩立', '（没人赖账，也没人围上来——妖族城里，输赢比人族讲规矩。）'],
+      ['旁白', '斗场的彩头归了他。城西的坊市还开着，伴妖草的气味顺风飘过来。']
     ]
   });
 
@@ -1234,6 +1245,17 @@
         ['韩立', '进去看看。']
       ],
       unlock: 'baiguang', reward: { stones: 0 }
+    },
+    {
+      id: 'e_yuyang', map: 'liangzu', name: '妖族商客', spr: 'hermit', scale: 1.9,
+      cond: { level: 132 },
+      lines: [
+        ['旁白', '天渊城的墙根下，一个披兽皮的妖族商客蹲着，脚边两篓伴妖草还带着土。'],
+        ['妖族商客', '虞阳城，妖族自己的坊市。人族去也欢迎——只要灵石够。'],
+        ['韩立', '（妖族城池，城里还有斗场，胜负说话。去看看也好。）'],
+        ['韩立', '带路。']
+      ],
+      unlock: 'yuyang', reward: { stones: 300 }
     },
     {
       id: 'e_tianmo', map: 'xiaoling', name: '魔焰里的来客', spr: 'mo', scale: 1.9,
@@ -1344,6 +1366,47 @@
     if (window.SHOP_STOCK.some(s => s.id === id)) continue;   // 已被别处上架的不重复挂
     window.SHOP_STOCK.push({ id: id, price: TY_PRICE[id], cat: TY_CAT[id] });
   }
+
+  // ========================= 五(4·1·2)、虞阳城·妖族坊市 + 城斗场（本轮回加厚，V8C1292《虞阳城》） =========================
+  // 第二座坊市：妖族城池，卖的是妖族自己的货。伴妖草论把、妖丹按颗，真灵材料也收，就是价高。
+  // 城斗场（yuyang_dou）挂在坊市之后——妖族城里有斗场，输赢自己认，正合「城斗」二字（蓝图：妖族城池·城斗）。
+  // 注：raw 文本中「第一千二百九十二章 虞阳城」一节的字面内容与原著设定对不上（混入了天元境/炼体士等陌生设定），
+  //     此处以项目 canon（geography.md 标「妖族城」、灵界篇蓝图标「妖族城池·城斗·灵界货币/材料」）为准来落地。
+  const YY_SHOP = ['m_banyao', 'm_yaodan', 'm_zhenlinglin', 'm_zhenlingxue', 'sk_xueying'];
+  const YY_PRICE = { m_banyao: 1500, m_yaodan: 6000, m_zhenlinglin: 9000, m_zhenlingxue: 30000, sk_xueying: 22000 };
+  const YY_CAT = { m_banyao: 'cai', m_yaodan: 'cai', m_zhenlinglin: 'cai', m_zhenlingxue: 'cai', sk_xueying: 'skill' };
+  for (const id of YY_SHOP) {
+    if (window.SHOP_STOCK.some(s => s.id === id)) continue;   // 已被别处上架的不重复挂
+    window.SHOP_STOCK.push({ id: id, price: YY_PRICE[id], cat: YY_CAT[id] });
+  }
+  window.MAPS.push(
+    {
+      id: 'yuyang', side: true, sorder: 28, name: '虞阳城', pos: '灵界·虞阳城', arc: 'L',
+      type: 'market', tag: '坊市', unlockBy: 'e_yuyang',
+      desc: '妖族自己的城。墙是兽骨夯的，坊市里卖的货和人族坊市不是一路——伴妖草论把抓，妖丹按颗数。',
+      shopSub: '妖族坊市。伴妖草、妖丹是这里的硬通货，真灵材料也收，就是价高些。',
+      startLevel: 132, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: null, next: 'yuyang_dou',
+      shop: YY_SHOP,
+      reward: { stones: 0 },
+      clearTitle: '坊市一行',
+      clearDesc: '灵石换了几把伴妖草、几颗妖丹。城西斗场还在嚷，说今日有外乡人下场。'
+    },
+    {
+      id: 'yuyang_dou', side: true, sorder: 29, name: '虞阳城·城斗场', pos: '灵界·虞阳城 斗场', arc: 'L',
+      type: 'boss', tag: '支线', unlock: null, next: null,
+      desc: '妖族城里的斗场，规矩只有一条：下场的人，输赢自己认。今日压了外乡人的彩头，堆得比石桌还高。',
+      startLevel: 132, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      diff: 3.6, bossAt: 0, intro: 'yuyang_dou', outro: 'yuyang_dou_out',
+      enemies: ['yaoshou2', 'kui2', 'moxiu2'],
+      elites: ['妖族斗者', '城斗老手'],
+      mats: ['m_banyao', 'm_yaodan'],
+      boss: { kind: 'mo', name: '虞阳城·城斗魁首', hp: 75000, spd: 66, dmg: 120, r: 22, spr: 'haishou', scale: 6.0 },
+      reward: { stones: 50000, mats: [['m_banyao', 2], ['m_yaodan', 1]] },
+      clearTitle: '城斗已了',
+      clearDesc: '魁首认了输。围观的妖族哄一声散了，没人赖账——妖族城里，输赢比人族讲规矩。'
+    }
+  );
 
   // ========================= 五(4·2)、灵界成品（可供首领掉落的化神~大乘级物件） =========================
   // 灵界一改「小怪只掉灵物」之后，首领的成品池只剩下人界 82 级那几件旧宝 —— 太少也太低。
@@ -1505,13 +1568,15 @@
     baiguang: { bg: { base: '#4a4f57', a: '#575d66', b: '#3a3f46' }, decor: [['rock', 0.18], ['tuft', 0.02]] },
     tianmo:   { bg: { base: '#231c26', a: '#2c2331', b: '#19131c' }, decor: [['rock', 0.28], ['tuft', 0.02]] },
     diyi:     { bg: { base: '#2d3038', a: '#373b45', b: '#21242b' }, decor: [['rock', 0.28], ['tuft', 0.04]] },
-    huirenjie:{ bg: { base: '#2f3a2b', a: '#384634', b: '#243023' }, decor: [['tree', 0.20], ['tuft', 0.20]] }
+    huirenjie:{ bg: { base: '#2f3a2b', a: '#384634', b: '#243023' }, decor: [['tree', 0.20], ['tuft', 0.20]] },
+    yuyang:    { bg: { base: '#3a2f24', a: '#473a2d', b: '#2b231b' }, decor: [['rock', 0.20], ['tuft', 0.10]] },
+    yuyang_dou:{ bg: { base: '#3d2a22', a: '#4a3329', b: '#2c1e18' }, decor: [['rock', 0.26], ['tuft', 0.04]] }
   });
   // late.js 合底色时还没有这些图，这里手动补上
   for (const id of ['anyuan', 'tianyuan', 'heifeng', 'lianxu', 'fengyuan', 'shisan', 'guanghan', 'heti_guan',
                     'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling', 'modajie',
                     'sanjie', 'jiujie', 'qunqiang', 'xianshi', 'zhenxian', 'zhangtianping', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie',
-                    'linghuang', 'zhandacheng', 'shengshi', 'heihu', 'baiguang', 'tianmo', 'diyi', 'huirenjie']) {
+                    'linghuang', 'zhandacheng', 'shengshi', 'heihu', 'baiguang', 'tianmo', 'diyi', 'huirenjie', 'yuyang', 'yuyang_dou']) {
     const m = window.MAPS.find(x => x.id === id);
     const sc = window.MAP_SCENERY[id];
     if (m && sc) { m.bg = sc.bg; m.decorScheme = sc.decor; }
