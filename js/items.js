@@ -6,7 +6,10 @@ window.RARITY = [
   { name: '良品', color: '#6fe08a', glow: 'rgba(111,224,138,0.8)' },
   { name: '上品', color: '#6db6ff', glow: 'rgba(109,182,255,0.85)' },
   { name: '珍品', color: '#c48cff', glow: 'rgba(196,140,255,0.9)' },
-  { name: '至宝', color: '#ffd24a', glow: 'rgba(255,210,74,1)' }
+  { name: '至宝', color: '#ffd24a', glow: 'rgba(255,210,74,1)' },
+  // 仙品：灵界之上的那一档（玄天之宝、真仙级物事）。不进随机池 —— rollRarity 封顶 4，
+  // 所以这档只能靠剧情/破境固定发放，正合「玄天之宝不落凡手」的原著设定。
+  { name: '仙品', color: '#8ff0e0', glow: 'rgba(143,240,224,1)' }
 ];
 
 // 装备槽位

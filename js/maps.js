@@ -381,7 +381,7 @@ window.SHOP_STOCK = [
 ];
 
 // 卖价：货架物品四折，其余按稀有度
-window.SELL_PRICE = [6, 14, 30, 70, 160];
+window.SELL_PRICE = [6, 14, 30, 70, 160, 400];   // 仙品（rarity 5）折价更高
 window.sellPriceOf = function (item) {
   if (!item) return 0;
   const s = SHOP_STOCK.find(x => x.id === item.id);

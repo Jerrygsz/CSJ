@@ -508,6 +508,19 @@
       ['旁白', '出了城往北，荒岭的轮廓在天边压着，像一道黑色的墙。']
     ],
 
+    tianyuan: [
+      ['旁白', '天渊城的坊市没有摊子，一层层石阁往上叠，阁前挂着各家旗号。'],
+      ['韩立', '（天渊城。人妖两族共守的边城，坊市里百族的货都在过手。）'],
+      ['旁白', '一家阁子里摆着两片真灵鳞，标价九千灵石。掌柜是个妖族老妪，指甲是青的。'],
+      ['妖族掌柜', '人族的？鳞片你拿走，血不卖。血要等大主顾。'],
+      ['韩立', '（血不卖。是真没有，还是她不卖我。）'],
+      ['韩立', '那功法呢。'],
+      ['妖族掌柜', '有。百脉炼宝诀、惊蛰十二变，都在后头柜上。价我写在牌上，不还价。'],
+      ['韩立', '（两万六、四万二。灵界的价钱，比人界狠十倍，可这些东西人界根本没有。）'],
+      ['旁白', '他把灵石数出去，换来两册功法和几片鳞，出门时回头看了一眼那层石阁。'],
+      ['韩立', '（灵石在这儿才算钱。往后打出来的东西，也有地方折了。）']
+    ],
+
     // 黑凤族领地：boss 图，intro 播完刷 boss
     heifeng: [
       ['旁白', '荒岭上风硬如刀。三头妖修拦在石道中央，为首的额上有一道黑羽纹。'],
@@ -876,9 +889,111 @@
     }
   );
 
+  // ========================= 五(3)、灵界功法线（V8–V12，req 150→420） =========================
+  // 原著依据（均已核次数与首现章）：
+  //   百脉炼宝诀 V8C1351（26 次）、惊蛰十二变 V9C1425（5）、三炼风雷翅 V9C1392（章名）、
+  //   念剑诀 V10C1755（7）、金罡灭魔神雷 V10C1861（6）、忘情诀 V10C1970（47）、逆灵真阴大法 V10C1824（5）
+  // 人界那 44 门功法最晚到 req112（化神）就断了；灵界这一段补 7 门，一路铺到真仙。
+  window.SKILLS.push(
+    { id: 'baimai', name: '百脉炼宝诀', icon: '🦴', max: 6, minLv: 150, type: 'passive',
+      effect: { maxhp: 150, armor: 0.05 },
+      desc: '百脉炼宝诀：把经脉、筋骨当法宝一件件炼过去。炼成的不是法术，是身子本身' },
+    { id: 'jingzhe', name: '惊蛰十二变', icon: '🐛', max: 6, minLv: 165, type: 'passive',
+      effect: { spd: 0.10, atkSpd: 0.05 },
+      desc: '惊蛰十二变：一身可化十二形，起落之间只留一道残影。灵界顶层的遁法' },
+    { id: 'fenglei3', name: '三炼风雷翅', icon: '🪽', max: 6, minLv: 200, type: 'passive',
+      effect: { atkSpd: 0.10, spd: 0.06 },
+      desc: '风雷翅三炼之后，翅上风雷自成一头。出手比从前快了一线，这一线就是生死' },
+    { id: 'nianjian', name: '念剑诀', icon: '🗡', max: 6, minLv: 220, type: 'ranged',
+      atk: { kind: 'beam', base: 60, perLv: 22, cd: 1.4, countBase: 3, countPerLv: 0.5, spread: 0.2, pierceBase: 3, piercePerLv: 1 / 3, range: 520, life: 1.3, vfx: 'swordarray' },
+      desc: '念剑诀：不掐诀、不抬手，一念起处三道剑光已在人前。念有多快，剑有多快' },
+    { id: 'jingang2', name: '金罡灭魔神雷', icon: '⚡', max: 6, minLv: 260, type: 'ranged_aoe',
+      atk: { kind: 'thunder', base: 90, perLv: 32, cd: 2.6, countBase: 2, countPerLv: 0.34, range: 640, vfx: 'thunder' },
+      desc: '金罡灭魔神雷：专克魔气的神雷。魔修挨这一下，护体魔气先散三分' },
+    { id: 'wangqing', name: '忘情诀', icon: '🌙', max: 5, minLv: 330, type: 'passive',
+      effect: { xpMul: 0.10, crit: 0.04 },
+      desc: '忘情诀：斩的不是情，是心里那点挂碍。心静了，修为与出手都不再晃' },
+    { id: 'niling', name: '逆灵真阴大法', icon: '🌀', max: 6, minLv: 420, type: 'aura',
+      atk: { kind: 'field', base: 24, perLv: 10, radBase: 120, radPerLv: 14, slow: 0.35, cdHit: 0.5, vfx: 'gravity' },
+      desc: '逆灵真阴大法：真阴之气倒卷成域。进了这丈许方圆，法力运转先被压住半截' }
+  );
+
+  // 法诀道具（teach 类：拿到要回洞府学，学了才进功法位）
+  window.ITEMS.push(
+    { id: 'sk_baimai', name: '百脉炼宝诀·法诀', rarity: 4, icon: '📕', req: 150, teach: 'baimai',
+      desc: '习得《百脉炼宝诀》。V8C1351 天渊城所得，炼的是身上这一副皮囊' },
+    { id: 'sk_jingzhe', name: '惊蛰十二变·法诀', rarity: 4, icon: '📕', req: 165, teach: 'jingzhe',
+      desc: '习得《惊蛰十二变》。V9C1425 风元大陆所得，十二形轮转，身形如蛰虫乍醒' },
+    { id: 'sk_fenglei3', name: '三炼风雷翅·炼法', rarity: 4, icon: '📕', req: 200, teach: 'fenglei3',
+      desc: '风雷翅第三次重炼的法门（V9C1392）。翅上风雷合一，快过从前' },
+    { id: 'sk_nianjian', name: '念剑诀·法诀', rarity: 4, icon: '📕', req: 220, teach: 'nianjian',
+      desc: '习得《念剑诀》。V10C1755 魔界所得，念起剑出，不必抬手' },
+    { id: 'sk_jingang2', name: '金罡灭魔神雷·雷诀', rarity: 5, icon: '📕', req: 260, teach: 'jingang2',
+      desc: '习得金罡灭魔神雷（V10C1861）。原著里韩立拿来对付魔君的手段之一' },
+    { id: 'sk_wangqing', name: '忘情诀·法诀', rarity: 5, icon: '📕', req: 330, teach: 'wangqing',
+      desc: '习得《忘情诀》。V10C1970 银月与七星月体一线所得，斩的是心里的挂碍' },
+    { id: 'sk_niling', name: '逆灵真阴大法·法诀', rarity: 5, icon: '📕', req: 420, teach: 'niling',
+      desc: '习得《逆灵真阴大法》（V10C1824）。真阴倒卷成域，是韩立压箱底的那一层' }
+  );
+
+  // 灵界的功法出处：坊市买两门（入门），其余随剧情给
+  const GIVE = { guanghan: 'sk_jingzhe', yitian: 'sk_fenglei3', xiaoling: 'sk_nianjian', sanjie: 'sk_jingang2', jiujie: 'sk_wangqing', fsjie: 'sk_niling' };
+  for (const mid in GIVE) {
+    const m = window.MAPS.find(x => x.id === mid);
+    if (!m) continue;
+    m.reward = m.reward || {};
+    m.reward.items = (m.reward.items || []).concat([GIVE[mid]]);
+  }
+
+  // ========================= 五(4)、天渊坊市（灵界唯一的 market 图） =========================
+  // 原著 V8C1333《天渊坊市》。灵界段此前「能打不能买」——灵石一路只进不出，这里给它开个口子。
+  // 注意：玄天仙藤**不上货架**。260/330/420 三关要它，能买就等于把大乘之后的进度变成攒钱。
+  const TY_SHOP = ['m_zhenlinglin', 'm_zhenlingxue', 'huiqi', 'qiannian', 'jipin', 'sk_baimai', 'sk_jingzhe'];
+  const TY_PRICE = {
+    m_zhenlinglin: 9000, m_zhenlingxue: 30000, huiqi: 800, qiannian: 3000, jipin: 45000,
+    sk_baimai: 26000, sk_jingzhe: 42000
+  };
+  const TY_CAT = {
+    m_zhenlinglin: 'cai', m_zhenlingxue: 'cai', huiqi: 'dan', qiannian: 'fu', jipin: 'dan',
+    sk_baimai: 'skill', sk_jingzhe: 'skill'
+  };
+  for (const id of TY_SHOP) {
+    if (window.SHOP_STOCK.some(s => s.id === id)) continue;   // 已被别处上架的不重复挂
+    window.SHOP_STOCK.push({ id: id, price: TY_PRICE[id], cat: TY_CAT[id] });
+  }
+
+  // ========================= 五(5)、坊市「功法」柜 =========================
+  // 原来 SHOP_STOCK 里有 24 条 cat:'skill' 的法诀，但 SHOP_CATS 只有 丹药/符箓/法器/杂材 四个页签，
+  // 玩家永远点不到「功法」这一柜 —— 这些法诀等于白挂。补上页签才真正买得到。
+  if (!window.SHOP_CATS.some(c => c.id === 'skill')) {
+    window.SHOP_CATS.push({ id: 'skill', name: '功法' });
+  }
+
+  // 灵界商店的招牌（坊市图示与副标题）
+  if (!window.MAPS.some(m => m.id === 'tianyuan')) {
+    window.MAPS.push({
+      id: 'tianyuan', name: '天渊坊市', pos: '灵界·天渊城', arc: 'I',
+      type: 'market', tag: '坊市', shop: TY_SHOP,
+      desc: '天渊城的坊市。灵界的货以真灵材料与人界见不到的功法为主，灵石在这里才花得出去。',
+      shopSub: '灵界百族的货都在这儿过一手。真灵鳞片、真灵之血，还有几门人界听不到名字的功法。',
+      startLevel: 132, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'anyuan', next: 'heifeng',
+      reward: { stones: 0, mats: [['m_zhenlinglin', 1]] },
+      clearTitle: '坊市一行',
+      clearDesc: '灵石换成了鳞片与法诀。灵界的规矩，从这里才算摸着。'
+    });
+  }
+
+  // 安远城 → 天渊坊市 → 黑凤族
+  const ANY = window.MAPS.find(m => m.id === 'anyuan');
+  const HF = window.MAPS.find(m => m.id === 'heifeng');
+  if (ANY) ANY.next = 'tianyuan';
+  if (HF) HF.unlock = 'tianyuan';
+
   // ========================= 六、场景底色 =========================
   Object.assign(window.MAP_SCENERY, {
     anyuan: { bg: { base: '#2b3348', a: '#333d55', b: '#222a3c' }, decor: [['rock', 0.22], ['tuft', 0.10]] },
+    tianyuan: { bg: { base: '#31333f', a: '#3b3e4c', b: '#242631' }, decor: [['rock', 0.12], ['tuft', 0.05]] },
     heifeng: { bg: { base: '#3a2f2a', a: '#463830', b: '#2c241f' }, decor: [['rock', 0.36], ['tree', 0.10]] },
     lianxu: { bg: { base: '#26303f', a: '#2e3a4b', b: '#1d2532' }, decor: [['rock', 0.30], ['tuft', 0.08]] },
     fengyuan: { bg: { base: '#2f3a2e', a: '#384633', b: '#242e23' }, decor: [['rock', 0.28], ['tuft', 0.16]] },
@@ -907,7 +1022,7 @@
     huirenjie:{ bg: { base: '#2f3a2b', a: '#384634', b: '#243023' }, decor: [['tree', 0.20], ['tuft', 0.20]] }
   });
   // late.js 合底色时还没有这些图，这里手动补上
-  for (const id of ['anyuan', 'heifeng', 'lianxu', 'fengyuan', 'guanghan', 'heti_guan',
+  for (const id of ['anyuan', 'tianyuan', 'heifeng', 'lianxu', 'fengyuan', 'guanghan', 'heti_guan',
                     'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling',
                     'sanjie', 'jiujie', 'zhenxian', 'fsjie', 'xianjie',
                     'linghuang', 'zhandacheng', 'shengshi', 'heihu', 'baiguang', 'tianmo', 'diyi', 'huirenjie']) {
@@ -915,6 +1030,9 @@
     const sc = window.MAP_SCENERY[id];
     if (m && sc) { m.bg = sc.bg; m.decorScheme = sc.decor; }
   }
+
+  // 灵界功法与法诀是后加的，索引要重建一次（Items.get 查的是这份快照）
+  window.ALL_ITEMS = window.ITEMS.concat(window.MATERIALS);
 
   // 新图计入主线数
   window.MAIN_MAP_COUNT = window.MAPS.filter(m => !m.side).length;

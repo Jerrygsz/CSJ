@@ -34,12 +34,12 @@ await page.waitForTimeout(1200);
 const run = (body) => page.evaluate(`(()=>{const F=window.__FR;${body}})()`);
 
 // ---- 1) 地图存在与 chain ----
-const ALL_IDS = ['anyuan', 'heifeng', 'lianxu', 'fengyuan', 'guanghan', 'heti_guan',
+const ALL_IDS = ['anyuan', 'tianyuan', 'heifeng', 'lianxu', 'fengyuan', 'guanghan', 'heti_guan',
   'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling',
   'sanjie', 'jiujie', 'zhenxian', 'fsjie', 'xianjie'];
 const maps = await page.evaluate((ids) => window.MAPS.filter(m => ids.includes(m.id))
   .map(m => ({ id: m.id, type: m.type, unlock: m.unlock, next: m.next, startLevel: m.startLevel, endLevel: m.endLevel })), ALL_IDS);
-ok(maps.length === 19, '灵界十九张主线图已注册', maps);
+ok(maps.length === 20, '灵界二十张主线图已注册', maps);
 const chain = await page.evaluate((ids) => {
   const g = id => window.MAPS.find(m => m.id === id) || {};
   const o = { fs: g('feisheng').next };
@@ -49,8 +49,8 @@ const chain = await page.evaluate((ids) => {
   return o;
 }, ALL_IDS);
 ok(chain.fs === 'anyuan', '飞升图 next 已接安远城', chain.fs);
-ok(chain.ay.unlock === 'feisheng' && chain.ay.next === 'heifeng', '安远城 unlock=feisheng / next=heifeng', chain.ay);
-ok(chain.hf.unlock === 'anyuan' && chain.hf.next === 'lianxu', '黑凤族 unlock=安远城 / next=炼虚关', chain.hf);
+ok(chain.ay.unlock === 'feisheng' && chain.ay.next === 'tianyuan', '安远城 unlock=feisheng / next=天渊坊市', chain.ay);
+ok(chain.hf.unlock === 'tianyuan' && chain.hf.next === 'lianxu', '黑凤族 unlock=天渊坊市 / next=炼虚关', chain.hf);
 ok(chain.lx && chain.lx.unlock === 'heifeng', '炼虚关 unlock=黑凤族', chain.lx);
 ok(chain.lx && chain.lx.endLevel === 150, '破境图 lianxu 的 endLevel=150（洞府突破可反查）', chain.lx);
 ok(chain.lx && chain.lx.next === 'fengyuan', '炼虚关 next=风元大陆', chain.lx);
@@ -194,7 +194,7 @@ const i3 = await page.evaluate(() => window.__FR.info());
 ok(i3.mapId === 'lianxu', '可进入炼虚破境图', i3.mapId);
 ok(i3.state === 'dialog', '炼虚关开场对白已播', i3.state);
 
-for (const mid of ['fengyuan', 'guanghan', 'heti_guan',
+for (const mid of ['tianyuan', 'fengyuan', 'guanghan', 'heti_guan',
   'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling',
   'sanjie', 'jiujie', 'zhenxian', 'fsjie', 'xianjie']) {
   await run(`F.clearProgress();F.setLevel(419);F.god(true);F.enterMap('${mid}');`);
@@ -270,6 +270,49 @@ await run(`F.enterMap('shengshi');`);
 await page.waitForTimeout(200);
 const iSS = await page.evaluate(() => window.__FR.info());
 ok(iSS.mapId === 'shengshi', '可进入圣岛使者线', iSS.mapId);
+
+// ---- 5c) 灵界功法线（req 150→420）+ 天渊坊市 ----
+const FX = await page.evaluate(() => {
+  const W = window;
+  const ids = ['baimai', 'jingzhe', 'fenglei3', 'nianjian', 'jingang2', 'wangqing', 'niling'];
+  const skills = ids.map(id => { const s = W.SKILLS.find(x => x.id === id); return s ? { id, minLv: s.minLv, type: s.type } : null; });
+  const items = ids.map(id => { const it = (W.ALL_ITEMS || []).find(x => x.id === 'sk_' + id); return it ? { id, req: it.req, teach: it.teach } : null; });
+  return {
+    skills, items,
+    slots: [W.skillSlots(112), W.skillSlots(150), W.skillSlots(200), W.skillSlots(260), W.skillSlots(420)],
+    caps: [W.realmSkillCap(112), W.realmSkillCap(150), W.realmSkillCap(420)],
+    cats: (W.SHOP_CATS || []).map(c => c.id),
+    tyShop: (W.MAPS.find(m => m.id === 'tianyuan') || {}).shop || [],
+    hasTeng: ((W.MAPS.find(m => m.id === 'tianyuan') || {}).shop || []).indexOf('m_xuantianteng') >= 0
+  };
+});
+ok(FX.skills.every(Boolean), '灵界七门功法已注册', FX.skills);
+ok(FX.skills.map(s => s && s.minLv).join(',') === '150,165,200,220,260,330,420', '灵界功法等级铺满 150→420', FX.skills.map(s => s && s.minLv));
+ok(FX.items.every(x => x && x.req && x.teach), '七门功法都有对应法诀道具', FX.items);
+ok(FX.slots.join(',') === '5,6,7,7,8', '功法位随境界扩到 8（化神5→炼虚6→合体7→渡劫8）', FX.slots);
+ok(FX.caps.join(',') === '7,8,10', '功法层数上限随境界放开（化神7→炼虚8→真仙10）', FX.caps);
+ok(FX.cats.indexOf('skill') >= 0, '坊市有「功法」柜（此前 24 条法诀无页签可点）', FX.cats);
+ok(FX.tyShop.length >= 6 && !FX.hasTeng, '天渊坊市上架灵界货，但玄天仙藤不上架', FX.tyShop);
+
+await run(`F.clearProgress();F.setLevel(150);F.setStones(200000);F.unlockAll();F.enterMap('tianyuan');`);
+await page.waitForTimeout(300);
+await run(`for(let i=0;i<30;i++){F.skipStory();}`);
+await page.waitForTimeout(300);
+const sh = await page.evaluate(() => ({ state: window.__FR.info().state, tabs: [...document.querySelectorAll('#shopCats button')].map(b => b.textContent) }));
+ok(sh.state === 'shop', '天渊坊市进得去（摆摊状态）', sh.state);
+ok(sh.tabs.indexOf('功法') >= 0, '坊市页签里有「功法」', sh.tabs);
+await page.evaluate(() => { const b = [...document.querySelectorAll('#shopCats button')].find(x => x.textContent === '功法'); if (b) b.click(); });
+await page.waitForTimeout(250);
+const buy = await page.evaluate(() => {
+  const btn = [...document.querySelectorAll('#shopList button[data-buy]')].find(b => b.getAttribute('data-buy') === 'sk_baimai');
+  if (!btn) return { ok: false, rows: document.querySelectorAll('#shopList .shoprow').length };
+  btn.click();
+  const F = window.__FR;
+  return { ok: true, learned: !!(F.skillState().learned || {}).baimai, stones: F.info().stones };
+});
+ok(buy.ok, '「功法」柜里能点出百脉炼宝诀', buy);
+ok(buy.learned === true, '买下即习得百脉炼宝诀', buy);
+ok(buy.stones === 174000, '买功法扣灵石（200000−26000）', buy.stones);
 
 // ---- 6) 洞府冲关入口 + 真实突破 ----
 await run(`F.clearProgress();F.setLevel(149);F.god(true);F.clearMap('heifeng');F.addItem('tenglong',1);F.setStones(20000);`);
