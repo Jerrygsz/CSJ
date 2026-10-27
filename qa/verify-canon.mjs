@@ -236,8 +236,10 @@ const want6 = ['qixuan', 'houshan', 'mishi', 'tainan', 'huangfeng', 'yaoyuan', '
   // 灵界篇（V8–V12）：飞升 → 炼虚 → 合体 → 大乘 → 渡劫 → 真仙 → 飞升仙界
   'anyuan', 'tianyuan', 'heifeng', 'lianxu', 'fengyuan', 'shisan', 'guanghan', 'heti_guan', 'liangzu', 'shengdao', 'mojie', 'moban',
   'yitian', 'huangquan', 'moyuan', 'xiaoling', 'modajie', 'sanjie', 'jiujie', 'qunqiang', 'xianshi', 'zhenxian', 'zhangtianping', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie',
-  // 仙界篇（X1 风起灵寰）：飞升仙界 → 灵寰界 → 苏醒 → 冷焰宗 → 掌天瓶 → 天鬼 → 破碎虚空
-  'linghuan', 'suxing', 'lingyan', 'xiaoping', 'tiangui', 'poxu', 'wumengdao', 'chulong', 'huijie', 'taiyi', 'dijiang', 'xingqi', 'dadi', 'daotian'];
+  // 仙界篇（X1–X5）：风起灵寰 → 重回仙界 → 时空迷踪 → 大罗之争 → 大道归一 → 飞羽
+  'linghuan', 'suxing', 'lingyan', 'xiaoping', 'tiangui', 'poxu', 'wumengdao', 'chulong', 'huijie', 'taiyi',
+  'dijiang', 'xingqi', 'dadi', 'xiedao', 'jingong', 'taisui', 'chongchao', 'suidian', 'daluo', 'wubao',
+  'jiuyuan', 'zaimiao', 'zhanshi', 'youming', 'leihai', 'fuyao', 'shifang', 'daotian', 'daoyi', 'feiyu'];
 ok(JSON.stringify(r6) === JSON.stringify(want6), '主线 ' + want6.length + ' 张图顺序与原著一致', { got: r6.length, want: want6.length });
 
 // ===== 7. 坊市货架对版原著 =====

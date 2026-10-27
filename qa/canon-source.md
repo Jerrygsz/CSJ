@@ -1,6 +1,6 @@
 # 功法 / 配方 / 道具来源底稿
 
-## 一、功法（42）
+## 一、功法（54）
 
 | id | 名称 | 解锁 | 满层 | 类型 | 特效 |
 |---|---|---:|---:|---|---|
@@ -46,6 +46,18 @@
 | wuzi | 五子同心魔 | Lv102 | 7 | passive/passive | — |
 | pojie | 破界符·空间诀 | Lv112 | 7 | passive/passive | — |
 | sanzhong | 三转重元功 | Lv50 | 3 | passive/passive | — |
+| baimai | 百脉炼宝诀 | Lv150 | 6 | passive/passive | — |
+| jingzhe | 惊蛰十二变 | Lv165 | 6 | passive/passive | — |
+| fenglei3 | 三炼风雷翅 | Lv200 | 6 | passive/passive | — |
+| nianjian | 念剑诀 | Lv220 | 6 | beam/ranged | swordarray |
+| jingang2 | 金罡灭魔神雷 | Lv260 | 6 | thunder/ranged_aoe | thunder |
+| wangqing | 忘情诀 | Lv330 | 5 | passive/passive | — |
+| niling | 逆灵真阴大法 | Lv420 | 6 | field/aura | gravity |
+| niandan | 逆丹诀 | Lv430 | 6 | passive/passive | — |
+| nuoyi | 小挪移空间术 | Lv440 | 6 | passive/passive | — |
+| dawuxing | 大五行幻世诀 | Lv520 | 6 | passive/passive | — |
+| zhenyan | 真言化轮经 | Lv540 | 6 | passive/passive | — |
+| tiansha | 天煞镇狱功 | Lv560 | 6 | passive/passive | — |
 
 ## 二、配方（34）
 
@@ -53,7 +65,7 @@
 |---|---|---|---|
 | 回气丹 | alchemy | Lv1 | m_chijing |
 | 灵芝 | alchemy | Lv1 | m_huangjing、m_chijing |
-| 培元丹 | alchemy | Lv3 | m_chijing、m_huangjing |
+| 养精丹 | alchemy | Lv3 | m_chijing、m_huangjing |
 | 黄龙丹 | alchemy | Lv8 | m_zihua、m_tianling、m_wolfdan |
 | 金髓丸 | alchemy | Lv12 | m_tianling、m_chongjing、m_yusui |
 | 筑基丹 | alchemy | Lv35 | m_yusuizhi、m_zihua、m_tianling、m_longlin、m_xuesha |
@@ -90,7 +102,14 @@
 
 | 道具 | req |
 |---|---|
-| 下品灵石（lingshi） | 1 |
+| 低阶灵石（lingshi） | 1 |
+| 五龙铡（w_wulongzha） | 150 |
+| 血晶摩诃剑（w_xuejing） | 200 |
+| 万森法盘（t_wansen） | 220 |
+| 擎天巨舟（t_qingtian） | 260 |
+| 鲲鹏舍利（dan_kunpeng） | 260 |
+| 重水雷珠（t_zhongshuileizhu） | 520 |
+| 隔元法链（t_gengyuanfalian） | 540 |
 
 ## 四、坊市越级售卖（商品境界 > 该图推荐等级 +8）
 
@@ -98,3 +117,6 @@
 |---|---:|---|---:|
 | 天星城 | 50 | 碧焰酒 | Lv60 |
 | 天南交易会 | 82 | 极品灵石 | Lv112 |
+| 天渊坊市 | 132 | 百脉炼宝诀·法诀 | Lv150 |
+| 天渊坊市 | 132 | 惊蛰十二变·法诀 | Lv165 |
+| 帝江坊·夜阳城 | 520 | 真言化轮经·法诀 | Lv540 |
