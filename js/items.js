@@ -165,8 +165,10 @@ window.Items = {
   // noDrop：破境丹这类「一炉只该有一枚」的东西，任何怪都不该随机爆。
   dropPool(r, opt) {
     const minReq = (opt && opt.minReq) || 0;
+    const maxReq = (opt && opt.maxReq) || 0;   // 上限：别让炼虚修士在第二张灵界图就捡到大乘器物
     return ITEMS.filter(i => i.rarity === r && !i.craftOnly && !i.unique && !i.teach && !i.noDrop
-      && (i.req || 1) >= minReq);
+      && (i.req || 1) >= minReq
+      && (!maxReq || (i.req || 1) <= maxReq));
   },
   droppable(id) { const it = this.get(id); return !!(it && !it.craftOnly && !it.unique && !it.mat && !it.teach); },
   gearOfSlot(slot) { return ITEMS.filter(i => i.slot === slot); },
@@ -197,14 +199,14 @@ window.Items = {
     // hardMinReq：允许在门槛附近放宽，但**不许降到这条线以下**
     const hard = (o.hardMinReq != null) ? o.hardMinReq : minReq;
     for (const floor of [minReq, Math.max(hard, minReq - 24), Math.max(hard, minReq - 48)]) {
-      const pool = this.dropPool(r, { minReq: floor });
+      const pool = this.dropPool(r, { minReq: floor, maxReq: o.maxReq });
       if (pool.length) return U.pick(pool);
     }
     if (minReq > 0) {
       // 有门槛时只许往**上**借一档（灵界的珍品池空着 → 借至宝池），
       // 绝不顺着往下找，否则「灵界不掉人界垃圾」立刻就破了。
       for (let k = r + 1; k <= 4; k++) {
-        const p3 = this.dropPool(k, { minReq: hard });
+        const p3 = this.dropPool(k, { minReq: hard, maxReq: o.maxReq });
         if (p3.length) return U.pick(p3);
       }
       return null;   // 真的没有：交回调用方（灵界那边会改掉一份灵物）

@@ -59,6 +59,7 @@
   // 腾龙丹为炼虚级灵药（V9C1364）。修为门槛沿用 breakLevelOk：lv-1 = 149（化神后期）。
   window.BREAKTHROUGH.push({
     lv: 150, realm: '炼虚初期', from: '化神后期',
+    canonCave: 'tycave',
     tip: '进阶炼虚的关键是「五行合一」——须兼修多属性功法，单一属性难成（V7C1219）。再以一炉腾龙丹压住灵压，才敢在灵界冲这一关（V9C1364）。',
     items: [['tenglong', 1]],
     mats: [],
@@ -76,6 +77,7 @@
     },
     {
       lv: 200, realm: '合体初期', from: '炼虚后期',
+      canonCave: 'tycave',
       tip: '炼虚之上是合体。合体丹一枚、真灵之血两滴，再渡三千年一次的大天劫，才谈得上合体（V10C1770 / V9C1359 / V7C1219）。',
       items: [['heti', 1]],
       mats: [['m_zhenlingxue', 2]],
@@ -93,6 +95,7 @@
     },
     {
       lv: 260, realm: '大乘期', from: '合体后期',
+      canonCave: 'xlcave',
       tip: '合体之后是大乘。原著里这一步不吃丹——须过五行之劫、真雷劫、心魔之劫三关，以玄天仙藤护身、真灵之血续命（V11C2176–2186）。',
       items: [],
       mats: [['m_xuantianteng', 1], ['m_zhenlingxue', 3]],
@@ -109,6 +112,7 @@
     },
     {
       lv: 330, realm: '渡劫期', from: '大乘期',
+      canonCave: 'xlcave',
       tip: '飞升之前最后一关是仙劫。九劫压顶，玄天仙藤护身、真灵之血续命（V12C2422 / V7C1219）。',
       items: [],
       mats: [['m_xuantianteng', 2], ['m_zhenlingxue', 4]],
@@ -125,6 +129,7 @@
     },
     {
       lv: 420, realm: '真仙', from: '渡劫期',
+      canonCave: 'xlcave',
       tip: '渡过九劫，铸成真仙之身。玄天仙藤三截、真灵之血五滴，缺一样都撑不到最后（V12C2419–2422）。',
       items: [],
       mats: [['m_xuantianteng', 3], ['m_zhenlingxue', 5]],
@@ -963,6 +968,57 @@
     if (window.SHOP_STOCK.some(s => s.id === id)) continue;   // 已被别处上架的不重复挂
     window.SHOP_STOCK.push({ id: id, price: TY_PRICE[id], cat: TY_CAT[id] });
   }
+
+  // ========================= 五(4·2)、灵界成品（可供首领掉落的化神~大乘级物件） =========================
+  // 灵界一改「小怪只掉灵物」之后，首领的成品池只剩下人界 82 级那几件旧宝 —— 太少也太低。
+  // 这里按原著补五件灵界本地器物，全部 rarity 4（可随机）、不带 unique/craftOnly，专供首领掉落与坊市外的获取。
+  //   w_wulongzha  五龙铡   V9C1491《阴水葵精与五龙铡》40 次
+  //   w_xuejing    血晶摩诃剑 V9C1382《血晶摩诃剑》8 次
+  //   t_wansen     万森法盘 V10C1800《万森法盘与擎天巨舟》2 次
+  //   t_qingtian   擎天巨舟 V10C1800 15 次
+  //   dan_kunpeng  鲲鹏舍利 V9C1423《鲲鹏舍利与天鹏之誓》7 次
+  window.ITEMS.push(
+    { id: 'w_wulongzha', name: '五龙铡', rarity: 4, icon: '🗡', slot: 'weapon', req: 150,
+      desc: '阴水葵精养出来的重铡，刃上盘着五条龙纹（V9C1491）。灵气灌进去，龙纹会走。',
+      effect: { dmg: 0.55, maxhp: 100 } },
+    { id: 'w_xuejing', name: '血晶摩诃剑', rarity: 4, icon: '🗡', slot: 'weapon', req: 200,
+      desc: '血晶凝成的长剑，出鞘带一线血色（V9C1382）。斩人不沾血，血都被剑吃了。',
+      effect: { dmg: 0.70, atkSpd: 0.06 } },
+    { id: 't_wansen', name: '万森法盘', rarity: 4, icon: '🧭', slot: 'trinket', req: 220,
+      desc: '圣岛一线上流通的法盘，盘面刻满林木之纹（V10C1800）。护身、聚气，都是它。',
+      effect: { maxhp: 180, regen: 0.9 } },
+    { id: 't_qingtian', name: '擎天巨舟', rarity: 4, icon: '🛶', slot: 'trinket', req: 260,
+      desc: '一整艘能缩进袖里的巨舟（V10C1800）。舟行于天，人在舟中坐，赶路比遁光还稳。',
+      effect: { spd: 0.10, maxhp: 120 } },
+    { id: 'dan_kunpeng', name: '鲲鹏舍利', rarity: 4, icon: '🦅', req: 260,
+      desc: '鲲鹏遗下的舍利（V9C1423）。含着它吐纳，气血与真元一起长，像被一只大鸟驮着往上飞。',
+      effect: { maxhp: 300, xpMul: 0.12 } }
+  );
+
+  // ========================= 五(4·3)、灵界洞府（原著地点，让灵界破境也吃得到洞府加成） =========================
+  // 之前五道灵界关的 canonCave 全空，等于灵界破境永远吃不到「原著洞府 +30%」。
+  // 原著里韩立飞升后先落脚天渊城，后来把小灵天收成自己的小世界 —— 这两处就是他在灵界的家。
+  Object.assign(window.CAVES, {
+    tycave: {
+      id: 'tycave', name: '天渊城洞府', pos: '灵界·天渊城', from: 'liangzu',
+      desc: '天渊城东面石壁里凿出来的一处洞府，一室一厅，窗外是人妖两族共守的城墙。',
+      quote: '在灵界有个能关门的地方，比什么法宝都难得。',
+      capLevel: 220, restStone: 2600, restXp: 0.14,
+      crafts: ['alchemy', 'forge', 'talisman'],
+      restTip: '天渊城的地脉是人族几万年经营出来的，坐一日抵荒原十日。'
+    },
+    xlcave: {
+      id: 'xlcave', name: '小灵天洞府', pos: '灵界·小灵天', from: 'xiaoling',
+      desc: '一方小世界，收在袖里。天很低，一口井，一炉火，谁也找不进来。',
+      quote: '打下来的小世界，比买来的洞府踏实。',
+      capLevel: 400, restStone: 5200, restXp: 0.10,
+      crafts: ['alchemy', 'forge', 'talisman'],
+      restTip: '小灵天的灵气自成一界，闭门坐一年，外面的事一件都不知道。'
+    }
+  });
+  // 打通这两张图即得洞府（与其它剧情图一个机制：finishMap 认 m.cave）
+  { const m = window.MAPS.find(x => x.id === 'liangzu'); if (m) m.cave = 'tycave'; }
+  { const m = window.MAPS.find(x => x.id === 'xiaoling'); if (m) m.cave = 'xlcave'; }
 
   // ========================= 五(5)、坊市「功法」柜 =========================
   // 原来 SHOP_STOCK 里有 24 条 cat:'skill' 的法诀，但 SHOP_CATS 只有 丹药/符箓/法器/杂材 四个页签，

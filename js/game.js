@@ -643,10 +643,13 @@
   // 不这么分的话，炼虚修士在魔界砍死一头魔兽，地上能躺一把精铁短剑 —— 这是硬伤。
   const LINGJIE_ARCS = ['I', 'J', 'K', 'L'];
   function inLingjie() { return !!(G.map && LINGJIE_ARCS.indexOf(G.map.arc) >= 0); }
-  // 灵界成品池最低门槛：72 = 化神期，即「飞升时随身带下来的旧宝」。
-  // 原著里韩立初入灵界确实还在用青竹蜂云剑、元磁神光这些老底子，不是一落地就换新装；
-  // 但也不会拎着炼气期的精铁短剑 —— 门槛就卡在化神这一档。
-  function lootMinReq() { return inLingjie() ? 72 : 0; }
+  // 灵界成品池最低门槛：跟着地图修为段走 —— 黑凤族 72（化神旧宝），越往魔界/魔源海越往上抬，
+  // 到小灵天之后封顶 160。这样黑凤族掉的是飞升带下来的旧宝，魔界深处掉的才是灵界本地器物。
+  function lootMinReq() {
+    if (!inLingjie()) return 0;
+    const base = (G.map && G.map.startLevel) || 132;
+    return Math.min(160, Math.max(72, base - 60));
+  }
 
   function dropLoot(x, y, tier) {
     const d = curDiff();
@@ -655,7 +658,9 @@
       // 灵界讲族、讲灵物、讲灵石，修士之间靠换与抢，不靠杀怪爆装备。
       if (tier < 2) { dropMat(x, y, 1); return; }
       // 首领才带得动法宝级的旧物；且绝不降到元婴以下的破烂
-      const item = Items.roll(2, d.rarity || 0, { minReq: 72, hardMinReq: 72 });
+      const floor = lootMinReq();
+      const cap = ((G.map && G.map.startLevel) || 132) + 40;   // 上限：别提前爆出高一个大境界的东西
+      const item = Items.roll(2, d.rarity || 0, { minReq: floor, hardMinReq: floor, maxReq: cap });
       if (item) G.loot.push({ x, y, r: 9, bob: Math.random() * 6.28, item });
       else dropMat(x, y, 1);
       return;
@@ -6790,9 +6795,10 @@
         req: (d && d.item) ? (d.item.req || 1) : null
       };
     },
-    dropPool(r, minReq) {
+    dropPool(r, minReq, maxReq) {
       const floor = (minReq == null) ? lootMinReq() : minReq;   // 不传就按当前地图的档位
-      return Items.dropPool(r == null ? 4 : r, { minReq: floor })
+      const cap = (maxReq == null) ? (inLingjie() ? (((G.map && G.map.startLevel) || 132) + 40) : 0) : maxReq;
+      return Items.dropPool(r == null ? 4 : r, { minReq: floor, maxReq: cap })
         .map(i => ({ id: i.id, name: i.name, req: i.req || 1, rarity: i.rarity }));
     },
     dropList() {

@@ -358,6 +358,63 @@ const RB = await page.evaluate(() => {
 ok(RB.era === 'renjie' && RB.floor === 0, '人界图仍是 renjie、门槛 0（旧行为不变）', RB);
 ok(RB.items > 0, '人界小怪照常掉成品', RB.items);
 
+// ---- 5e) 灵界成品 + 灵界洞府 ----
+const GEAR = await page.evaluate(() => {
+  const W = window, F = W.__FR;
+  const ids = ['w_wulongzha', 'w_xuejing', 't_wansen', 't_qingtian', 'dan_kunpeng'];
+  const rows = ids.map(id => {
+    const it = (W.ALL_ITEMS || []).find(x => x.id === id);
+    return it ? { id, name: it.name, req: it.req, rarity: it.rarity, slot: it.slot || null,
+      droppable: !it.unique && !it.craftOnly && !it.noDrop && !it.teach } : null;
+  });
+  // 上下限：黑凤族不该出大乘器物，小灵天不该再出化神旧宝
+  const pool = (mid, lv) => {
+    F.clearProgress(); F.setLevel(lv); F.god(true); F.unlockAll(); F.enterMap(mid);
+    return [0, 1, 2, 3, 4].flatMap(r => F.dropPool(r)).map(x => x.req);
+  };
+  const hei = pool('heifeng', 150), xiao = pool('xiaoling', 220);
+  return { rows, hei: { min: Math.min.apply(null, hei), max: Math.max.apply(null, hei) },
+    xiao: { min: Math.min.apply(null, xiao), max: Math.max.apply(null, xiao) } };
+});
+ok(GEAR.rows.every(x => x && x.req >= 150 && x.rarity === 4 && x.droppable),
+  '五件灵界成品已入库且可随机掉（五龙铡/血晶摩诃剑/万森法盘/擎天巨舟/鲲鹏舍利）', GEAR.rows);
+ok(GEAR.hei.max <= 172, '黑凤族不会掉出高一个大境界的东西（池子上限 172）', GEAR.hei);
+ok(GEAR.xiao.min >= 160, '小灵天之后不再掉化神旧宝（池子下限 160）', GEAR.xiao);
+
+const CAVE = await page.evaluate(() => {
+  const W = window, F = W.__FR;
+  const c1 = W.CAVES.tycave, c2 = W.CAVES.xlcave;
+  const br = W.BREAKTHROUGH.filter(x => x.lv >= 150).map(x => ({ lv: x.lv, cave: x.canonCave || null }));
+  // 打通两族大乘 → 得洞府
+  F.clearProgress(); F.setLevel(200); F.god(true); F.unlockAll();
+  F.enterMap('liangzu'); F.finishMapNow();
+  const got1 = F.info().caves.indexOf('tycave') >= 0;
+  F.enterMap('xiaoling'); F.finishMapNow();
+  const got2 = F.info().caves.indexOf('xlcave') >= 0;
+  return {
+    caves: [c1 && { id: c1.id, name: c1.name, pos: c1.pos, cap: c1.capLevel, crafts: c1.crafts.length },
+      c2 && { id: c2.id, name: c2.name, pos: c2.pos, cap: c2.capLevel, crafts: c2.crafts.length }],
+    br, got1, got2,
+    mapCave: { liangzu: (W.MAPS.find(m => m.id === 'liangzu') || {}).cave, xiaoling: (W.MAPS.find(m => m.id === 'xiaoling') || {}).cave }
+  };
+});
+ok(CAVE.caves.every(c => c && c.crafts >= 2), '两座灵界洞府已建（天渊城洞府 / 小灵天洞府）', CAVE.caves);
+ok(CAVE.mapCave.liangzu === 'tycave' && CAVE.mapCave.xiaoling === 'xlcave', '洞府挂在对应剧情图上', CAVE.mapCave);
+ok(CAVE.br.every(x => x.cave && ['tycave', 'xlcave'].indexOf(x.cave) >= 0), '五道灵界关都指到了洞府（不再吃不到 +30%）', CAVE.br);
+ok(CAVE.got1 && CAVE.got2, '打通两族大乘/小灵天即得洞府', { got1: CAVE.got1, got2: CAVE.got2 });
+
+const BONUS = await page.evaluate(() => {
+  const F = window.__FR;
+  F.clearProgress(); F.setLevel(149); F.god(true);
+  F.clearMap('heifeng'); F.addItem('tenglong', 1); F.setStones(20000);
+  const plain = F.breakRate(150).rate;      // 别处冲关
+  F.cave('tycave');                          // 从天渊城洞府出关
+  const inCave = F.breakRate(150).rate;
+  return { plain, inCave };
+});
+ok(Math.abs(BONUS.plain - 0.5) < 0.001, '腾龙丹一枚：炼虚关基础把握五成', BONUS.plain);
+ok(Math.abs(BONUS.inCave - 0.8) < 0.001, '在天渊城洞府冲关：把握 +30%（0.5→0.8）', BONUS.inCave);
+
 // ---- 6) 洞府冲关入口 + 真实突破 ----
 await run(`F.clearProgress();F.setLevel(149);F.god(true);F.clearMap('heifeng');F.addItem('tenglong',1);F.setStones(20000);`);
 const st = await page.evaluate(() => window.__FR.startBreak(150));
