@@ -84,7 +84,10 @@
       sealed: null,
       // 厉飞雨·双身份化名系统（P0-1）：韩立干脏活让「厉飞雨」背锅（黑），好事以「韩天尊」留名（白）
       repBlack: 0, repWhite: 0, identity: 'han', liUnlocked: false,
-      ach: {}, greenLiquid: 0
+      ach: {}, greenLiquid: 0,
+      // 天人有五衰（后传 X2C327，24 次）：n = 还压在身上的衰有几层；
+      // log[境界] = { early: 衰提前降临过几次, taken: 累计扛过几道 }
+      wushuai: { n: 0, log: {} }
     };
   }
   // 厉飞雨·双身份化名系统（P0-1）辅助函数
@@ -212,7 +215,11 @@
         ach: (s.ach && typeof s.ach === 'object') ? s.ach : {},
         greenLiquid: s.greenLiquid || 0,
         gift_zhuji: !!s.gift_zhuji,
-        wounded: (s.wounded && typeof s.wounded === 'object') ? s.wounded : null
+        wounded: (s.wounded && typeof s.wounded === 'object') ? s.wounded : null,
+        // 天人有五衰：老存档没有这个字段，读进来补成空账（压在身上的衰为 0）
+        wushuai: (s.wushuai && typeof s.wushuai === 'object')
+          ? { n: Math.max(0, (s.wushuai.n || 0) | 0), log: (s.wushuai.log && typeof s.wushuai.log === 'object') ? s.wushuai.log : {} }
+          : { n: 0, log: {} }
       };
       // 老存档：已通关的剧情图自动补成洞府
       for (const id of save.cleared) { const m = MAPS.find(x => x.id === id); if (m && m.cave && save.caves.indexOf(m.cave) < 0) save.caves.push(m.cave); }
@@ -449,6 +456,9 @@
     p.maxhp = 100 + rb('maxhp') + (G.bonus.maxhp || 0) + (G.realmHp || 0) + gb('maxhp') + passiveSum('maxhp');
     // 五鬼锁魂这类封印：人被压着，气血也翻不上去
     if (save.sealed) p.maxhp = Math.round(p.maxhp * (save.sealed.hp || 0.5));
+    // 天人有五衰：扛过来的衰还压在身上，气血先削一截
+    const wu = wuPenalty();
+    if (wu) p.maxhp = Math.round(p.maxhp * wu.hp);
     if (ratio >= 0) p.hp = p.maxhp * ratio;
     else p.hp = Math.min(p.hp, p.maxhp);
   }
@@ -1639,7 +1649,84 @@
   // 吃过几颗煞丹，破境就多险几分（最多扣三成）
   function shaDanPenalty() { return Math.min(0.3, (save.shaDan || 0) * 0.15); }
 
+  // ==========================================================================
+  // 天人有五衰（后传 X2C327《天人有五衰》，24 次）——仙界四道大境界关独有
+  //
+  // 原著口径：每逢大境界，天人都要历一次五衰；且「前面两衰的降临与修行时间有关」
+  // （X2C328）——**躲不掉，只能扛**。
+  //
+  // 所以这条不是概率题，是一道取舍题。破境前先问「押多少」：
+  //   押得越多 → 仙窍稳得住（把握越高），但 **能避开的衰越少**（力气都用在稳住上了）。
+  // 失败不写「运气不好」，写「五衰提前降临」；扛过来的衰压在身上，通关一张图消一层。
+  // ==========================================================================
+  function wuState() {
+    if (!save.wushuai || typeof save.wushuai !== 'object') save.wushuai = { n: 0, log: {} };
+    if (typeof save.wushuai.n !== 'number') save.wushuai.n = 0;
+    if (!save.wushuai.log || typeof save.wushuai.log !== 'object') save.wushuai.log = {};
+    return save.wushuai;
+  }
+  function wuLayers() { return Math.max(0, wuState().n || 0); }
+  function wuRec(lv) {
+    const st = wuState();
+    if (!st.log[lv]) st.log[lv] = { early: 0, taken: 0 };
+    return st.log[lv];
+  }
+  function wuEarly(lv) { return (wuRec(lv).early || 0); }
+  // 可避开的衰：五道里前两道与修行时间有关，天生躲不掉，只剩三道谈得上「避」。
+  // 每提前降临过一次，可避的就再少一道——衰只会来得更早，不会更晚。
+  function wuCanAvoid(b) {
+    if (!b || !b.wushuai) return 0;
+    const cap = (b.wushuai.canAvoid != null) ? b.wushuai.canAvoid : 3;
+    return Math.max(0, cap - wuEarly(b.lv));
+  }
+  function wuMaxStake(b) { return wuCanAvoid(b); }          // 最多押到「一道也避不开」
+  function wuRate(b, k) {
+    const w = (b && b.wushuai) || {};
+    const base = (w.base != null) ? w.base : 0.55;
+    const step = (w.step != null) ? w.step : 0.15;
+    return Math.max(0, Math.min(1, base + (k || 0) * step));
+  }
+  function wuTake(b, k) { return 5 - Math.max(0, wuCanAvoid(b) - (k || 0)); }   // 这一炉要扛几道
+  function wuPayId(b) { return ((b && b.wushuai) && b.wushuai.pay) || 'm_xianyuanshi'; }
+  function wuStakeCost(b, k) { return (k || 0) * (((b && b.wushuai) && b.wushuai.per) || 4); }
+  function wuHave(b) { return save.inventory[wuPayId(b)] || 0; }
+  function wuName(b) { return (Items.get(wuPayId(b)) || {}).name || wuPayId(b); }
+  function payWuStake(b, k) {
+    const id = wuPayId(b), n = Math.min(wuHave(b), wuStakeCost(b, k));
+    if (n <= 0) return 0;
+    save.inventory[id] -= n;
+    save.totalItems = Math.max(0, (save.totalItems || 1) - n);
+    if (save.inventory[id] <= 0) delete save.inventory[id];
+    return n;
+  }
+  // 压在身上的衰：每道削一截气血、出手与遁速（不降等级——修为只增不减是硬线）
+  function wuPenalty() {
+    const n = wuLayers();
+    if (n <= 0) return null;
+    return { hp: Math.max(0.65, 1 - n * 0.05), dmg: Math.max(0.70, 1 - n * 0.05), spd: Math.max(0.82, 1 - n * 0.02) };
+  }
+  // 破境成败之后各有一段：败 → 衰提前降临；成 → 该扛的一道都少不了
+  function settleWushuai(b, ok, k) {
+    if (!b || !b.wushuai) return 0;
+    const rec = wuRec(b.lv);
+    if (!ok) { rec.early = (rec.early || 0) + 1; return 0; }
+    const take = wuTake(b, k);
+    rec.taken = (rec.taken || 0) + take;
+    const id = wuPayId(b), per = (b.wushuai.cost != null) ? b.wushuai.cost : 3;
+    const burn = Math.min(save.inventory[id] || 0, take * per);
+    if (burn > 0) {
+      save.inventory[id] -= burn;
+      save.totalItems = Math.max(0, (save.totalItems || 1) - burn);
+      if (save.inventory[id] <= 0) delete save.inventory[id];
+    }
+    const st = wuState();
+    st.n = Math.min(5, (st.n || 0) + take);
+    return take;
+  }
+
   function breakSuccessRate(b) {
+    // 天人有五衰的关：把握由「押了几档」决定，不走丹药那套（押注取舍见 wuRate）
+    if (b && b.wushuai) return wuRate(b, G.wuStake || 0);
     const raw = breakSuccessRate0(b);
     if (raw <= 0) return 0;                        // 没丹就是没丹，不给保底
     let r = Math.max(0.05, raw * (1 - shaDanPenalty()));
@@ -4333,6 +4420,9 @@
       const k = save.sealed.dmg || 0.45;
       G.realm.dmg *= k; G.realm.atk *= k; G.realm.spd *= 0.7;
     }
+    // 天人有五衰：出手、遁速同样要打折，通关一张图消一层（见 finishMap）
+    const wu = wuPenalty();
+    if (wu) { G.realm.dmg *= wu.dmg; G.realm.atk *= wu.dmg; G.realm.spd *= wu.spd; }
     applyHeroSprite();
     // 灵宠：有就带出来
     G.pet = save.pet ? { id: save.pet, x: p.x - 24, y: p.y + 10, cd: 0.6, bob: 0 } : null;
@@ -4489,6 +4579,13 @@
   }
   function finishMap(m) {
     if (!m) return;
+    // 天人有五衰：每打通一张图，压在身上的衰消一层（X2C327「只能扛」——扛完才过去）
+    if (wuLayers() > 0) {
+      const st = wuState();
+      st.n = Math.max(0, st.n - 1);
+      if (st.n === 0) banner('五衰尽去 · 这一层总算熬过去了');
+      writeSave();
+    }
     syncCultivate();
     // 这张图是不是「大境界破境图」：endLevel 恰好是一道大境界门（地火之屋筑基 / 天星城结丹 …）
     const breakGate = m.endLevel ? breakReqFor(m.endLevel) : null;
@@ -5414,7 +5511,12 @@
         const c = b.chance || {};
         const pills = breakGatePills(b), rate = breakSuccessRate(b);
         let odds;
-        if (c.booster) {
+        if (b.wushuai) {
+          // 五衰关：把握不是这里定的 —— 押几档、扛几道衰，进图之后才问
+          odds = '天人有五衰 · 可避开 <b>' + wuCanAvoid(b) + '</b> 道（前两道躲不掉）· ' +
+            wuName(b) + ' <b>' + wuHave(b) + '</b> 枚 · 每押一档 <b>' + wuStakeCost(b, 1) + '</b> 枚换 +' +
+            Math.round(((b.wushuai.step != null) ? b.wushuai.step : 0.15) * 100) + '% 把握，可避开的衰少一道';
+        } else if (c.booster) {
           const bn = Items.get(c.booster) || { name: '助丹' };
           const n = save.inventory[c.booster] || 0;
           odds = '持丹 <b>' + pills + '</b> 套 · ' + bn.name + ' <b>' + n + '</b> 枚 · 冲关把握 <b>' + Math.round(rate * 100) + '%</b>'
@@ -5474,7 +5576,13 @@
   function renderBreakBody(b) {
     if (!b) return '<div class="cs-empty">眼前没有要破的关。<br>修为满了，自然会来。</div>';
     let html = '<div class="cs-title">' + (b.from || '') + ' → ' + b.realm + '</div>' +
-      '<div class="cs-note">' + (b.tip || '') + '</div><div class="brk-list">';
+      '<div class="cs-note">' + (b.tip || '') + '</div>';
+    // 天人有五衰：这一关不是凑齐就必成，先把「躲不掉的那两道」摆出来
+    if (b.wushuai) {
+      html += '<div class="cs-note">天人有五衰（X2C327）：此番可避开 <b>' + wuCanAvoid(b) + '</b> 道，' +
+        '余下 <b>' + wuTake(b, 0) + '</b> 道只能扛 —— 押' + wuName(b) + '越多，把握越高，可避开的衰越少。</div>';
+    }
+    html += '<div class="brk-list">';
     for (const it of (b.items || [])) {
       const have = save.inventory[it[0]] || 0;
       html += breakRow(have >= it[1], '丹', breakNameOf(it[0]) + '　' + have + ' / ' + it[1]);
@@ -5529,6 +5637,16 @@
     const lines = [['　' + scene + '　', (gate.from || '') + ' → ' + gate.realm]];
     const novel = (gate.lines && gate.lines.length) ? gate.lines : [['旁白', gate.tip || '']];
     for (const l of novel) lines.push(l);
+    // 天人有五衰的关：先演原文，再问「这一炉押几档」——把握与要扛的衰都在那一刻定下来
+    if (gate.wushuai) {
+      G.breakScene = gate.lv;
+      if (elDialog) elDialog.classList.add('break-scene');
+      showLines(lines, () => {
+        if (elDialog) elDialog.classList.remove('break-scene');
+        askWushuai(gate, onDone);
+      }, 'break:' + gate.lv);
+      return;
+    }
     // 幕落之前把这一炉的底牌摆明：押几枚丹、几分把握
     const pills = breakGatePills(gate);
     const rate = breakSuccessRate(gate);
@@ -5546,39 +5664,101 @@
     if (elDialog) elDialog.classList.add('break-scene');
     showLines(lines, () => {
       if (elDialog) elDialog.classList.remove('break-scene');
-      if (breakMissingGoods(gate).length) {              // 结算前料被别处吃掉（极端情况）：不硬破
-        G.breakPending = gate; G.breakCur = null; G.breakScene = null;
-        if (onDone) onDone(gate, false);
-        return;
-      }
-      payBreak(gate);                                    // 押丹：手上几枚全押
-      const ok = (G.breakForce != null) ? !!G.breakForce : (Math.random() < rate);
-      G.breakCur = null; G.breakScene = null;
-      if (!ok) {
-        // 失败时先看煞丹术能不能兜一手（有这个法门、灵石也够）
-        if (applyShaDan(gate)) { if (onDone) onDone(gate, true); return; }
-        // 冲关失败：丹毁炉炸，修为退回门口，可以再备丹药重来
+      settleBreakScene(gate, onDone, null);
+    }, 'break:' + gate.lv);
+  }
+  // 天人有五衰：破境前先问押几档。
+  // 押得越多 → 仙窍越稳（把握越高），**能避开的衰却越少**——力气都用在稳住上了。
+  // 五道衰里前两道与修行时间有关，天生躲不掉（X2C328），所以最多只能避三道。
+  function askWushuai(gate, onDone) {
+    const maxK = wuMaxStake(gate);
+    const nm = wuName(gate), have = wuHave(gate);
+    const opts = [];
+    for (let k = 0; k <= maxK; k++) {
+      const cost = wuStakeCost(gate, k);
+      const t = (k === 0 ? '不押' : ('押 ' + cost + ' 枚'))
+        + ' · 把握 ' + Math.round(wuRate(gate, k) * 100) + '%'
+        + ' / 扛 ' + wuTake(gate, k) + ' 衰'
+        + (cost > have ? '（' + nm + '不够）' : '');
+      opts.push({ v: String(k), t: t });
+    }
+    const avoid = wuCanAvoid(gate);
+    const prompt = '天人有五衰（X2C327《天人有五衰》，24 次）：五道衰里，前两道与修行时间有关，躲不掉，只能扛。'
+      + '押得越多，仙窍越稳，能避开的衰就越少。此刻可避开 ' + avoid + ' 道，手上有' + nm + ' ' + have + ' 枚 —— 这一炉押几档？';
+    showChoice(prompt, opts, function (v) {
+      const k = Math.max(0, Math.min(maxK, parseInt(v, 10) || 0));
+      G.wuStake = k;
+      const paid = payWuStake(gate, k);          // 押注：仙元石当场烧掉，不够就烧到见底
+      const rate = wuRate(gate, k), take = wuTake(gate, k);
+      const lines2 = [
+        ['旁白', '（' + (k === 0 ? '不押 —— 仙窍由它自己稳。' : ('押' + nm + ' ' + paid + ' 枚，压住' + (k * 1) + '重仙窍。'))
+          + '冲关把握 ' + Math.round(rate * 100) + '%，可避开的衰还剩 ' + Math.max(0, avoid - k) + ' 道 —— 这一趟要扛 ' + take + ' 道。）'],
+        ['旁白', '（躲不掉的那两道，跟修行时间有关。修得越久，来得越早。）']
+      ];
+      settleBreakScene(gate, onDone, lines2);
+    });
+  }
+  // 破境结算：押丹（押注已在前一步付过）→ 掷一次 → 成则抬境界，败则衰提前降临
+  function settleBreakScene(gate, onDone, extra) {
+    if (breakMissingGoods(gate).length) {              // 结算前料被别处吃掉：不硬破
+      G.breakPending = gate; G.breakCur = null; G.breakScene = null;
+      if (onDone) onDone(gate, false);
+      return;
+    }
+    // 把握必须在押丹「之前」算：押丹是按「手上有几枚」算把握的，丹一入炉就没了。
+    // （这行放错位置会让 rate 永远算成 0 —— 破境必定失败。）
+    const isWu = !!gate.wushuai, k = isWu ? (G.wuStake || 0) : 0;
+    const rate = breakSuccessRate(gate);
+    payBreak(gate);                                        // 押丹：手上几枚全押
+    const ok = (G.breakForce != null) ? !!G.breakForce : (Math.random() < rate);
+    G.breakCur = null; G.breakScene = null;
+    if (!ok) {
+      if (isWu) {
+        // 失败不是「运气不好」——是衰提前降临。这次没扛住，下次衰只会来得更早。
+        settleWushuai(gate, false, k);
         G.breakPending = gate;
         writeSave();
-        banner('冲关失败 · 丹药散尽，另备丹药再来');
         Sfx.warn();
-        if (onDone) onDone(gate, false);
+        showLines([['旁白', '仙窍没稳住。'],
+          ['旁白', '天空暗了一下，又亮回来——那不是天在变，是衰提前来了。'],
+          ['旁白', '（五衰提前降临。下一次再来，可避开的衰又少一道。）']], function () {
+          banner('五衰提前降临 · 可避开的衰少了一道');
+          if (onDone) onDone(gate, false);
+        }, 'break:wu:fail:' + gate.lv);
         return;
       }
-      const newLv = Math.max(save.cultivate.level || 1, gate.lv);
-      save.cultivate.level = newLv;
-      save.cultivate.xp = 0;
-      syncBestLevel();
-      if (G.player) {
-        G.player.level = Math.max(G.player.level || 1, newLv);
-        G.player.next = xpNeed(newLv);
-        checkRealm(true); recalcMaxhp();
-        G.player.hp = G.player.maxhp;
-      }
-      G.breakPending = null;
+      if (applyShaDan(gate)) { if (onDone) onDone(gate, true); return; }
+      G.breakPending = gate;
       writeSave();
-      if (onDone) onDone(gate, true);
-    }, 'break:' + gate.lv);
+      banner('冲关失败 · 丹药散尽，另备丹药再来');
+      Sfx.warn();
+      if (onDone) onDone(gate, false);
+      return;
+    }
+    const newLv = Math.max(save.cultivate.level || 1, gate.lv);
+    save.cultivate.level = newLv;
+    save.cultivate.xp = 0;
+    syncBestLevel();
+    const take = isWu ? settleWushuai(gate, true, k) : 0;
+    if (G.player) {
+      G.player.level = Math.max(G.player.level || 1, newLv);
+      G.player.next = xpNeed(newLv);
+      checkRealm(true); recalcMaxhp();
+      G.player.hp = G.player.maxhp;
+    }
+    G.breakPending = null;
+    writeSave();
+    if (isWu) {
+      const tail = [['旁白', '境界是上去了。可天上那几道还没走完。'],
+        ['旁白', '（这一炉扛了 ' + take + ' 道衰，压在身上：气血、出手、遁速都削一截。每打通一张图消一层。）']];
+      showLines((extra || []).concat(tail), function () {
+        banner('破境 · ' + gate.realm + ' · 扛衰 ' + take + ' 道');
+        Sfx.levelup();
+        if (onDone) onDone(gate, true);
+      }, 'break:wu:ok:' + gate.lv);
+      return;
+    }
+    if (onDone) onDone(gate, true);
   }
   // 洞府「突破」按钮：物事齐了 → 进这张门对应的破境地图，走完剧情/打完，就地在剧情里破境
   function enterBreakMap(gate) {
@@ -5617,19 +5797,29 @@
       Sfx.warn(); return false;
     }
     const rate = breakSuccessRate(b);
+    const isWu = !!b.wushuai, k = isWu ? (G.wuStake || 0) : 0;
+    if (isWu) payWuStake(b, k);     // 五衰关的押注（仙元石）在此扣，与押丹分开
     payBreak(b);
     G.breakCur = null;
     closeBreak();
     const ok = (G.breakForce != null) ? !!G.breakForce : (Math.random() < rate);
     if (!ok) {
+      if (isWu) {                    // 败的不是运气，是衰提前降临
+        settleWushuai(b, false, k);
+        G.breakPending = b;
+        banner('五衰提前降临 · 可避开的衰少了一道'); Sfx.warn();
+        writeSave(); renderCave(); refreshTitle();
+        return false;
+      }
       if (applyShaDan(b)) { renderCave(); refreshTitle(); return true; }
       G.breakPending = b;
       banner('冲关失败 · 丹药散尽，另备丹药再来'); Sfx.warn();
       writeSave(); renderCave(); refreshTitle();
       return false;
     }
+    const take = isWu ? settleWushuai(b, true, k) : 0;
     G.breakPending = null;
-    banner('冲关 · ' + b.realm); Sfx.levelup();
+    banner(isWu ? ('冲关 · ' + b.realm + ' · 扛衰 ' + take + ' 道') : ('冲关 · ' + b.realm)); Sfx.levelup();
     if (G.player && (G.state === 'play' || G.state === 'down')) {
       const p = G.player;
       p.xp = Math.max(p.xp, p.next);
@@ -7170,6 +7360,33 @@
       return { count: save.shaDan || 0, penalty: shaDanPenalty(), cost: b ? shaDanCost(b) : null, ready: shaDanReady(b) };
     },
     sealed() { return save.sealed ? Object.assign({}, save.sealed) : null; },
+    // 天人有五衰（后传 X2C327）：查账 / 押注 / 直接结算，供测试用
+    wu(lv) {
+      const b = lv ? breakReqFor(lv) : null;
+      const st = wuState();
+      return {
+        layers: wuLayers(), penalty: wuPenalty(),
+        log: JSON.parse(JSON.stringify(st.log || {})),
+        gate: b && b.wushuai ? {
+          lv: b.lv, canAvoid: wuCanAvoid(b), maxStake: wuMaxStake(b),
+          pay: wuPayId(b), have: wuHave(b),
+          per: wuStakeCost(b, 1), cost: (b.wushuai.cost != null) ? b.wushuai.cost : 3,
+          rates: [0, 1, 2, 3].map(k => ({ k: k, rate: wuRate(b, k), take: wuTake(b, k) }))
+        } : null
+      };
+    },
+    wuStake(lv, k) {
+      const b = breakReqFor(lv); if (!b || !b.wushuai) return 'no wushuai gate';
+      const maxK = wuMaxStake(b);
+      G.wuStake = Math.max(0, Math.min(maxK, k | 0));
+      return { k: G.wuStake, rate: wuRate(b, G.wuStake), take: wuTake(b, G.wuStake), paid: payWuStake(b, G.wuStake) };
+    },
+    wuSettle(lv, ok, k) {
+      const b = breakReqFor(lv); if (!b || !b.wushuai) return 'no wushuai gate';
+      const take = settleWushuai(b, !!ok, k | 0);
+      return { take: take, layers: wuLayers(), early: wuEarly(lv) };
+    },
+    wuClear() { const st = wuState(); st.n = 0; st.log = {}; G.wuStake = 0; writeSave(); return wuLayers(); },
     warp(sec) { G.time += (sec || 0); return +G.time.toFixed(1); },
     skillState() { return { learned: Object.assign({}, cultObj().skills), equipped: equippedOf().slice(), slots: slotCapOf(Math.max(save.cultivate.level || 1, save.best.level || 1)) }; },
     // 身上正在生效的限时增益（服丹 / 催符所得），t 是剩余时间
