@@ -34,12 +34,12 @@ await page.waitForTimeout(1200);
 const run = (body) => page.evaluate(`(()=>{const F=window.__FR;${body}})()`);
 
 // ---- 1) 地图存在与 chain ----
-const ALL_IDS = ['anyuan', 'tianyuan', 'heifeng', 'lianxu', 'fengyuan', 'guanghan', 'heti_guan',
+const ALL_IDS = ['anyuan', 'tianyuan', 'heifeng', 'lianxu', 'fengyuan', 'shisan', 'guanghan', 'heti_guan',
   'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling',
   'modajie', 'sanjie', 'jiujie', 'zhenxian', 'fsjie', 'xianjie'];
 const maps = await page.evaluate((ids) => window.MAPS.filter(m => ids.includes(m.id))
   .map(m => ({ id: m.id, type: m.type, unlock: m.unlock, next: m.next, startLevel: m.startLevel, endLevel: m.endLevel })), ALL_IDS);
-ok(maps.length === 21, '灵界二十一张主线图已注册', maps);
+ok(maps.length === 22, '灵界二十二张主线图已注册', maps);
 const chain = await page.evaluate((ids) => {
   const g = id => window.MAPS.find(m => m.id === id) || {};
   const o = { fs: g('feisheng').next };
@@ -54,8 +54,8 @@ ok(chain.hf.unlock === 'tianyuan' && chain.hf.next === 'lianxu', '黑凤族 unlo
 ok(chain.lx && chain.lx.unlock === 'heifeng', '炼虚关 unlock=黑凤族', chain.lx);
 ok(chain.lx && chain.lx.endLevel === 150, '破境图 lianxu 的 endLevel=150（洞府突破可反查）', chain.lx);
 ok(chain.lx && chain.lx.next === 'fengyuan', '炼虚关 next=风元大陆', chain.lx);
-ok(chain.fy && chain.fy.next === 'guanghan', '风元大陆 next=广寒界', chain.fy);
-ok(chain.gh && chain.gh.unlock === 'fengyuan' && chain.gh.next === 'heti_guan', '广寒界 unlock=风元 / next=合体关', chain.gh);
+ok(chain.fy && chain.fy.next === 'shisan', '风元大陆 next=十三族会盟', chain.fy);
+ok(chain.gh && chain.gh.unlock === 'shisan' && chain.gh.next === 'heti_guan', '广寒界 unlock=十三族会盟 / next=合体关', chain.gh);
 ok(chain.hg && chain.hg.unlock === 'guanghan', '合体关 unlock=广寒界', chain.hg);
 ok(chain.hg && chain.hg.endLevel === 200, '破境图 heti_guan 的 endLevel=200（洞府突破可反查）', chain.hg);
 
@@ -195,7 +195,7 @@ const i3 = await page.evaluate(() => window.__FR.info());
 ok(i3.mapId === 'lianxu', '可进入炼虚破境图', i3.mapId);
 ok(i3.state === 'dialog', '炼虚关开场对白已播', i3.state);
 
-for (const mid of ['tianyuan', 'fengyuan', 'guanghan', 'heti_guan',
+for (const mid of ['tianyuan', 'fengyuan', 'shisan', 'guanghan', 'heti_guan',
   'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling',
   'modajie', 'sanjie', 'jiujie', 'zhenxian', 'fsjie', 'xianjie']) {
   await run(`F.clearProgress();F.setLevel(419);F.god(true);F.enterMap('${mid}');`);
@@ -300,6 +300,33 @@ ok(MDJ.gateStage === 'modajie', '大乘关的剧情前置改成了魔界大劫',
 ok(!!MDJ.boss, '魔界大劫首领能刷出来', MDJ.boss);
 ok(MDJ.cleared, '魔界大劫能打通并记入已通关', { cleared: MDJ.cleared });
 ok(MDJ.unlockedNext, '打通魔界大劫 → 三劫显现', { unlockedNext: MDJ.unlockedNext });
+
+// ---- 5b·3) 十三族会盟（V9C1434/1562/1673，无战斗的政治图） ----
+const SSN = await page.evaluate(() => {
+  const W = window, F = W.__FR;
+  const m = W.MAPS.find(x => x.id === 'shisan') || {};
+  const lines = (W.MAP_STORIES['shisan'] || []);
+  F.clearProgress(); F.setLevel(150); F.god(true); F.unlockAll();
+  F.enterMap('shisan');
+  const state0 = F.info().state;
+  for (let k = 0; k < 20; k++) { F.skipStory(); F.tickFrames(2); }
+  return {
+    type: m.type, pos: m.pos, unlock: m.unlock, next: m.next, boss: !!m.boss,
+    lines: lines.length,
+    speakers: [...new Set(lines.map(x => x[0]))],
+    text: lines.map(x => x[1]).join(''),
+    state0, cleared: F.info().cleared.indexOf('shisan') >= 0,
+    nextOpen: F.info().unlocked.indexOf('guanghan') >= 0
+  };
+});
+ok(SSN.type === 'story' && !SSN.boss, '十三族会盟是无战斗的剧情图（会盟不是打架）', SSN);
+ok(SSN.pos === '灵界·玉皇顶' && SSN.unlock === 'fengyuan' && SSN.next === 'guanghan',
+  '会盟串在风元大陆与广寒界之间（V9C1434 玉皇顶）', SSN);
+ok(SSN.lines >= 12, '会盟对白够一段（13 行）', SSN.lines);
+ok(SSN.speakers.indexOf('沙老夫人') >= 0, '大乘沙老夫人登场（V9C1673）', SSN.speakers);
+ok(/渡劫/.test(SSN.text) && /大乘/.test(SSN.text), '会盟点出「大乘之上还有渡劫」这条线索', SSN.text.slice(-40));
+ok(SSN.state0 === 'dialog', '进场即播会盟对白', SSN.state0);
+ok(SSN.cleared && SSN.nextOpen, '走完会盟 → 通关并开出广寒界', { cleared: SSN.cleared, nextOpen: SSN.nextOpen });
 
 // ---- 5c) 灵界功法线（req 150→420）+ 天渊坊市 ----
 const FX = await page.evaluate(() => {

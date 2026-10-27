@@ -199,17 +199,30 @@
       type: 'story', tag: '剧情',
       desc: '已知三片大陆里最小的一块，种族却最多。玄天斩灵剑的卦象，就落在这片大陆的西北角。',
       startLevel: 150, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'lianxu', next: 'guanghan',
+      unlock: 'lianxu', next: 'shisan',
       reward: { stones: 24000, items: ['t_xuantianjian'], mats: [['m_zhenlinglin', 2]] },
       clearTitle: '西北角',
       clearDesc: '玄天斩灵剑出世。剑身上的灵纹还未认主，却已让周围的灵气退了半尺。'
+    },
+    {
+      // 原著 V9C1434《玉皇顶》（会盟场）/ V9C1562《困境》（十三族齐聚绿光城）/ V9C1673《沙老夫人》。
+      // 这一章是「会盟」，不是打架：诸族都被魔斑吓住了，谁都不肯先出头。
+      // 韩立在这里听到的不是盟约，是「大乘之上还有渡劫」这条线索 —— 正好接住 260 的大乘关。
+      id: 'shisan', name: '十三族会盟', pos: '灵界·玉皇顶', arc: 'J',
+      type: 'story', tag: '剧情',
+      desc: '玉皇顶摆了十三把石椅。十二把坐满了，第十三把空着——那是人族的位子。',
+      startLevel: 150, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'fengyuan', next: 'guanghan',
+      reward: { stones: 26000, mats: [['m_zhenlingxue', 2], ['m_zhenlinglin', 2]] },
+      clearTitle: '会盟无盟',
+      clearDesc: '散会时没有盟约，只有一肚子各自的心思。但他记下了一句话：大乘之上，还有一道渡劫的坎。'
     },
     {
       id: 'guanghan', name: '广寒界', pos: '灵界·广寒界', arc: 'J',
       type: 'boss', tag: '剧情战',
       desc: '灵界有名的大秘境，寒气三千年不散。界里守着的东西，比寒气更难缠。',
       startLevel: 150, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'fengyuan', next: 'heti_guan',
+      unlock: 'shisan', next: 'heti_guan',
       diff: 3.7, bossAt: 0, intro: 'guanghan', outro: 'guanghan_out',
       enemies: ['kui2', 'dajinxiu', 'zhengdao'],
       elites: ['广寒界守灵', '寒魄傀儡'],
@@ -584,6 +597,22 @@
       ['旁白', '断壁中央插着一柄剑，剑身无光，周围的灵气却绕着它退开半尺。'],
       ['韩立', '（玄天斩灵剑。剑是好剑，可惜我现在的修为还压不住它。）'],
       ['旁白', '他把剑收进储物袋。西北的风里，远处浮着一座白得发冷的山谷——广寒界。']
+    ],
+
+    shisan: [
+      ['旁白', '玉皇顶是一片削平的石台，台上摆了十三把石椅。十二把坐满了，第十三把空着。'],
+      ['韩立', '（十三族会盟。人族只来了我一个合体修士，坐的还是末尾那把。）'],
+      ['旁白', '各族长老低声说话，说的其实是同一件事：魔斑多了，魔界的门快开了。'],
+      ['飞灵族长老', '各家都愿意出力，只是出多少、谁来领头，还得再议。'],
+      ['韩立', '（再议。议了三百年，魔斑都议成一片了。）'],
+      ['沙老夫人', '都怕。都等着别人先出头。'],
+      ['韩立', '（大乘。她一开口，满场的灵压都轻了三分。）'],
+      ['沙老夫人', '人族的，你坐在那儿半天没说话。你怎么看。'],
+      ['韩立', '诸位想等谁先死。'],
+      ['旁白', '场上静了一瞬。有人咳嗽，有人转开了脸，石椅上一片袍角翻动的声音。'],
+      ['沙老夫人', '胆子不小。'],
+      ['韩立', '（会盟开不出结果。可我听清了——大乘之上，还有一道渡劫的坎。）'],
+      ['旁白', '散会时没有盟约。他下山的路上，把听到的每一句都记在了心里。']
     ],
 
     guanghan: [
@@ -1094,6 +1123,7 @@
     heifeng: { bg: { base: '#3a2f2a', a: '#463830', b: '#2c241f' }, decor: [['rock', 0.36], ['tree', 0.10]] },
     lianxu: { bg: { base: '#26303f', a: '#2e3a4b', b: '#1d2532' }, decor: [['rock', 0.30], ['tuft', 0.08]] },
     fengyuan: { bg: { base: '#2f3a2e', a: '#384633', b: '#242e23' }, decor: [['rock', 0.28], ['tuft', 0.16]] },
+    shisan:   { bg: { base: '#3a3d45', a: '#454952', b: '#2b2e35' }, decor: [['rock', 0.22], ['tuft', 0.06]] },
     guanghan: { bg: { base: '#26343d', a: '#2e4049', b: '#1c2830' }, decor: [['rock', 0.34], ['tuft', 0.04]] },
     heti_guan: { bg: { base: '#1f2a36', a: '#273443', b: '#18212b' }, decor: [['rock', 0.30], ['tuft', 0.03]] },
     liangzu:  { bg: { base: '#2a3441', a: '#33404f', b: '#1e2731' }, decor: [['rock', 0.12], ['tuft', 0.04]] },
@@ -1120,7 +1150,7 @@
     huirenjie:{ bg: { base: '#2f3a2b', a: '#384634', b: '#243023' }, decor: [['tree', 0.20], ['tuft', 0.20]] }
   });
   // late.js 合底色时还没有这些图，这里手动补上
-  for (const id of ['anyuan', 'tianyuan', 'heifeng', 'lianxu', 'fengyuan', 'guanghan', 'heti_guan',
+  for (const id of ['anyuan', 'tianyuan', 'heifeng', 'lianxu', 'fengyuan', 'shisan', 'guanghan', 'heti_guan',
                     'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling', 'modajie',
                     'sanjie', 'jiujie', 'zhenxian', 'fsjie', 'xianjie',
                     'linghuang', 'zhandacheng', 'shengshi', 'heihu', 'baiguang', 'tianmo', 'diyi', 'huirenjie']) {
