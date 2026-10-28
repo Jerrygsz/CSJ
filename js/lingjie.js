@@ -1301,25 +1301,25 @@
   //   念剑诀 V10C1755（7）、金罡灭魔神雷 V10C1861（6）、忘情诀 V10C1970（47）、逆灵真阴大法 V10C1824（5）
   // 人界那 44 门功法最晚到 req112（化神）就断了；灵界这一段补 7 门，一路铺到真仙。
   window.SKILLS.push(
-    { id: 'baimai', name: '百脉炼宝诀', icon: '🦴', max: 6, minLv: 150, type: 'passive',
+    { id: 'baimai', name: '百脉炼宝诀', icon: '🫀', max: 6, minLv: 150, type: 'passive',
       effect: { maxhp: 150, armor: 0.05 },
       desc: '百脉炼宝诀：把经脉、筋骨当法宝一件件炼过去。炼成的不是法术，是身子本身' },
-    { id: 'jingzhe', name: '惊蛰十二变', icon: '🐛', max: 6, minLv: 165, type: 'passive',
+    { id: 'jingzhe', name: '惊蛰十二变', icon: '🐲', max: 6, minLv: 165, type: 'passive',
       effect: { spd: 0.10, atkSpd: 0.05 },
       desc: '惊蛰十二变：一身可化十二形，起落之间只留一道残影。灵界顶层的遁法' },
     { id: 'fenglei3', name: '三炼风雷翅', icon: '🪽', max: 6, minLv: 200, type: 'passive',
       effect: { atkSpd: 0.10, spd: 0.06 },
       desc: '风雷翅三炼之后，翅上风雷自成一头。出手比从前快了一线，这一线就是生死' },
-    { id: 'nianjian', name: '念剑诀', icon: '🗡', max: 6, minLv: 220, type: 'ranged',
+    { id: 'nianjian', name: '念剑诀', icon: '💠', max: 6, minLv: 220, type: 'ranged',
       atk: { kind: 'beam', base: 60, perLv: 22, cd: 1.4, countBase: 3, countPerLv: 0.5, spread: 0.2, pierceBase: 3, piercePerLv: 1 / 3, range: 520, life: 1.3, vfx: 'swordarray' },
       desc: '念剑诀：不掐诀、不抬手，一念起处三道剑光已在人前。念有多快，剑有多快' },
-    { id: 'jingang2', name: '金罡灭魔神雷', icon: '⚡', max: 6, minLv: 260, type: 'ranged_aoe',
+    { id: 'jingang2', name: '金罡灭魔神雷', icon: '💥', max: 6, minLv: 260, type: 'ranged_aoe',
       atk: { kind: 'thunder', base: 90, perLv: 32, cd: 2.6, countBase: 2, countPerLv: 0.34, range: 640, vfx: 'thunder' },
       desc: '金罡灭魔神雷：专克魔气的神雷。魔修挨这一下，护体魔气先散三分' },
     { id: 'wangqing', name: '忘情诀', icon: '🌙', max: 5, minLv: 330, type: 'passive',
       effect: { xpMul: 0.10, crit: 0.04 },
       desc: '忘情诀：斩的不是情，是心里那点挂碍。心静了，修为与出手都不再晃' },
-    { id: 'niling', name: '逆灵真阴大法', icon: '🌀', max: 6, minLv: 420, type: 'aura',
+    { id: 'niling', name: '逆灵真阴大法', icon: '🌑', max: 6, minLv: 420, type: 'aura',
       atk: { kind: 'field', base: 24, perLv: 10, radBase: 120, radPerLv: 14, slow: 0.35, cdHit: 0.5, vfx: 'gravity' },
       desc: '逆灵真阴大法：真阴之气倒卷成域。进了这丈许方圆，法力运转先被压住半截' }
   );

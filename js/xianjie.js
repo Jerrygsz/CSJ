@@ -669,20 +669,20 @@
     { id: 'niandan', name: '逆丹诀', icon: '🔄', max: 6, minLv: 430, type: 'passive',
       effect: { dmg: 0.16, crit: 0.05 },
       desc: '逆丹诀：把丹力倒着逼回经脉。在灵寰界偷来的这一门，救过一次命' },
-    { id: 'nuoyi', name: '小挪移空间术', icon: '🌀', max: 6, minLv: 440, type: 'passive',
+    { id: 'nuoyi', name: '小挪移空间术', icon: '✨', max: 6, minLv: 440, type: 'passive',
       effect: { spd: 0.14, armor: 0.05 },
       desc: '小挪移空间术：短距挪移。打不过就跑——卷一这一路，他跑得比打得多' },
     // 大五行幻世诀（X3C642，198 次）：卷三主角功法。有时间法则之物相助，修炼速度能快上数倍。
-    { id: 'dawuxing', name: '大五行幻世诀', icon: '☯', max: 6, minLv: 520, type: 'passive',
+    { id: 'dawuxing', name: '大五行幻世诀', icon: '☯️', max: 6, minLv: 520, type: 'passive',
       effect: { dmg: 0.22, maxhp: 260 },
       desc: '大五行幻世诀：以五行演幻化万象。没有时间法则之物相助时，磨上千年也未必能进一层' },
     // 真言化轮经（X2C197，1218 次）：仙界最常见也最重的根本经文。
-    { id: 'zhenyan', name: '真言化轮经', icon: '📿', max: 6, minLv: 540, type: 'passive',
+    { id: 'zhenyan', name: '真言化轮经', icon: '☸️', max: 6, minLv: 540, type: 'passive',
       effect: { maxhp: 340, armor: 0.12 },
       desc: '真言化轮经：一字一句都能转成法则。修得越深，经文越难念' },
     // 天煞镇狱功（150 次）：五件时间法则具象之物融成一记五色融光之后，
     // 韩立就是凭着它与真灵血脉同转，变作三头六臂的神魔形态，一拳一爪取了奇摩子（X4C1128）。
-    { id: 'tiansha', name: '天煞镇狱功', icon: '🔥', max: 6, minLv: 560, type: 'passive',
+    { id: 'tiansha', name: '天煞镇狱功', icon: '⛓️', max: 6, minLv: 560, type: 'passive',
       effect: { dmg: 0.26, maxhp: 320 },
       desc: '天煞镇狱功：真灵血脉与它同时运转，人身便化作三头六臂的神魔之相' }
   );
