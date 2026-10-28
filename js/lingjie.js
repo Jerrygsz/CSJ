@@ -613,6 +613,7 @@
     {
       // 斩大乘的后续：圣岛不会白看着一位大乘死在外面。只能由「斩大乘」打通后接出。
       id: 'shengshi', side: true, sorder: 28, name: '圣岛使者再来', pos: '灵界·荒原', arc: 'L',
+      sideOf: 'zhandacheng',   // 支线挂支线：斩了大乘，圣岛才派人来问
       type: 'story', tag: '支线',
       desc: '斩了大乘的第三天，荒原上来了一位白袍使者。他没带剑，只带了一句话。',
       startLevel: 260, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
@@ -1394,6 +1395,7 @@
     },
     {
       id: 'yuyang_dou', side: true, sorder: 29, name: '虞阳城·城斗场', pos: '灵界·虞阳城 斗场', arc: 'L',
+      sideOf: 'yuyang',        // 支线挂支线：斗场就在虞阳城里
       type: 'boss', tag: '支线', unlock: null, next: null,
       desc: '妖族城里的斗场，规矩只有一条：下场的人，输赢自己认。今日压了外乡人的彩头，堆得比石桌还高。',
       startLevel: 132, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },

@@ -3,7 +3,8 @@
 // 本脚本钉住几件容易改坏的事：
 //   ① 下山岔道挂黄枫谷·山门（山门外那条路），不挂百药园；
 //   ② 但陆师兄际遇仍要在百药园触发（山门通关后成洞府，际遇刷不出来）；
-//   ③ 每张已解锁的支线都找得到宿主，不掉进「支线·因缘」的孤儿堆。
+//   ③ 每张已解锁的支线都找得到宿主，不掉进「支线·因缘」的孤儿堆；
+//   ④ 支线挂支线：城斗场挂虞阳城卡下、圣岛使者挂斩大乘卡下（嵌套牌堆）。
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -71,13 +72,21 @@ const dom = await page.evaluate(() => {
   const host = id => {
     const card = document.querySelector('.mapcard[data-map="' + id + '"]');
     if (!card) return '(未渲染)';
-    const deck = card.closest('.mapdeck');
+    // 嵌套牌堆：支线卡自己也可能包着一层 .mapdeck，宿主查找要跳过自己这层
+    let deck = card.closest('.mapdeck');
+    while (deck && deck.getAttribute('data-deck') === id) {
+      const p = deck.parentElement ? deck.parentElement.closest('.mapdeck') : null;
+      deck = p;
+    }
     return deck ? deck.getAttribute('data-deck') : '(孤牌)';
   };
   return {
     huangfengDeck: deckOf('huangfeng'),
     yaoyuanDeck: deckOf('yaoyuan'),
     luxiongHost: host('luxiong'),
+    douHost: host('yuyang_dou'),
+    shengshiHost: host('shengshi'),
+    nestCount: document.querySelectorAll('.mapdeck-nest').length,
     deckCount: document.querySelectorAll('.mapdeck').length
   };
 });
@@ -86,6 +95,22 @@ ok(Array.isArray(dom.huangfengDeck) && dom.huangfengDeck.includes('luxiong'),
 ok(Array.isArray(dom.yaoyuanDeck) ? !dom.yaoyuanDeck.includes('luxiong') : true,
   '旧园卡下不再挂下山岔道', dom.yaoyuanDeck);
 ok(dom.luxiongHost === 'huangfeng', 'DOM 上它的宿主是黄枫谷·山门', dom.luxiongHost);
+ok(dom.douHost === 'yuyang', '城斗场挂在虞阳城（支线）卡下', dom.douHost);
+ok(dom.shengshiHost === 'zhandacheng', '圣岛使者再来挂在斩大乘（支线）卡下', dom.shengshiHost);
+ok(dom.nestCount >= 2, '嵌套牌堆已渲染（' + dom.nestCount + ' 个）', dom.nestCount);
+
+// 点虞阳城支线卡：先展开其下的城斗场，再点才是进坊市
+const nestFlow = await page.evaluate(() => {
+  const F = window.__FR;
+  const card = document.querySelector('.mapcard[data-map="yuyang"]');
+  if (!card) return { noCard: true };
+  const openBefore = !!document.querySelector('.mapdeck[data-deck="yuyang"].open');
+  card.click();
+  return { openBefore, openAfter: !!document.querySelector('.mapdeck[data-deck="yuyang"].open'), state: F.info().state };
+});
+ok(nestFlow.noCard !== true, '虞阳城支线卡存在', nestFlow);
+ok(nestFlow.openBefore === false && nestFlow.openAfter === true,
+  '点支线卡也是先展开其下因缘，不直接进坊市', nestFlow);
 
 // 点山门卡：先展开支线，再点才进洞府
 const clickFlow = await page.evaluate(() => {
@@ -112,7 +137,11 @@ const hosts = await page.evaluate(() => {
     const id = card.getAttribute('data-map');
     const m = window.MAPS.find(x => x.id === id);
     if (!m || !m.side) continue;
-    const deck = card.closest('.mapdeck');
+    let deck = card.closest('.mapdeck');
+    while (deck && deck.getAttribute('data-deck') === id) {
+      const p = deck.parentElement ? deck.parentElement.closest('.mapdeck') : null;
+      deck = p;
+    }
     out.push({
       id: id, host: deck ? deck.getAttribute('data-deck') : null,
       hasTrigger: !!(m.sideOf || m.unlockBy || m.unlock)
@@ -124,10 +153,9 @@ const hosts = await page.evaluate(() => {
 // 没有引出的（纯剧情节点开的）本就散在「支线·因缘」里，不算漏挂。
 const shouldHost = hosts.filter(h => h.hasTrigger);
 const orphans = shouldHost.filter(h => !h.host);
-ok(orphans.length === 0, `有引出的支线全部挂在主线卡下（${shouldHost.length} 张）`, orphans);
+ok(orphans.length === 0, `有引出的支线全部挂在宿主卡下（${shouldHost.length} 张）`, orphans);
 const loose = hosts.filter(h => !h.hasTrigger).map(h => h.id);
-ok(loose.every(id => !hosts.find(h => h.id === id).host),
-  `无引出的散牌只有 ${loose.length} 张，落在「支线·因缘」：${loose.join(' / ')}`, loose);
+ok(loose.length === 0, '没有无引出的散牌（都给了 sideOf 归位）', loose);
 ok(hosts.every(h => h.host !== h.id), '没有支线挂到自己身上', hosts.filter(h => h.host === h.id));
 
 ok(errs.length === 0, '全程无 JS 报错', errs.slice(0, 3));

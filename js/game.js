@@ -5157,8 +5157,9 @@
     if (enc && enc.map) return enc.map;
     return MAPS.some(x => !x.side && x.id === eid) ? eid : null;
   }
-  // 主线卡 + 挂在它后面的支线牌：默认收起，点主线展开，主线支线一起挑
-  function deckHtml(m, numTxt, sideList) {
+  // 主线卡 + 挂在它后面的支线牌：默认收起，点主线展开，主线支线一起挑。
+  // 支线也可以再挂支线（如城斗场挂在虞阳城那张支线卡下），展开层层嵌套。
+  function deckHtml(m, numTxt, sideList, sidesBySide) {
     if (!sideList || !sideList.length) return mapCardHtml(m, numTxt);
     const open = !!(G.wmDeck && G.wmDeck[m.id]);
     return '<div class="mapdeck' + (open ? ' open' : '') + '" data-deck="' + m.id + '">' +
@@ -5168,7 +5169,22 @@
       '<span>' + (open ? '收起' : '展开') + '　其下 ' + sideList.length + ' 段因缘</span>' +
       '<span class="deck-peek">' + sideList.map(() => '<i></i>').join('') + '</span>' +
       '</div>' +
-      '<div class="deck-side">' + sideList.map((s, i) => mapCardHtml(s, '缘' + (i + 1))).join('') + '</div>' +
+      '<div class="deck-side">' + sideList.map((s, i) => sideDeckHtml(s, '缘' + (i + 1), sidesBySide)).join('') + '</div>' +
+      '</div>';
+  }
+  // 支线卡本身也可能有下一层支线（sideOf 指向支线），有就包一层可展开的牌堆
+  function sideDeckHtml(s, label, sidesBySide) {
+    const kids = (sidesBySide && sidesBySide[s.id]) || [];
+    if (!kids.length) return mapCardHtml(s, label);
+    const open = !!(G.wmDeck && G.wmDeck[s.id]);
+    return '<div class="mapdeck mapdeck-nest' + (open ? ' open' : '') + '" data-deck="' + s.id + '">' +
+      mapCardHtml(s, label) +
+      '<div class="deck-toggle" data-decktog="' + s.id + '">' +
+      '<span class="caret">' + (open ? '▾' : '▸') + '</span>' +
+      '<span>' + (open ? '收起' : '展开') + '　其下 ' + kids.length + ' 段因缘</span>' +
+      '<span class="deck-peek">' + kids.map(() => '<i></i>').join('') + '</span>' +
+      '</div>' +
+      '<div class="deck-side">' + kids.map((k, i) => mapCardHtml(k, '缘' + (i + 1))).join('') + '</div>' +
       '</div>';
   }
 
@@ -5191,11 +5207,13 @@
     const arcIdx = id => { const i = arcs.findIndex(a => a.id === id); return i < 0 ? 99 : i; };
     groups.sort((x, y) => arcIdx(x.id) - arcIdx(y.id));
 
-    // 支线不再挤在最后：按「引出它的那张主线卡」归堆，像叠牌一样挂在主线卡后
-    const sidesByMain = {}, orphans = [];
+    // 支线不再挤在最后：按「引出它的那张主线卡」归堆，像叠牌一样挂在主线卡后。
+    // 支线挂支线（sideOf 指向另一张已解锁支线）则收进宿主支线的展开层。
+    const sidesByMain = {}, sidesBySide = {}, orphans = [];
     for (const s of sides) {
       const host = sideTriggerOf(s);
       if (host && mains.some(x => x.id === host)) (sidesByMain[host] = sidesByMain[host] || []).push(s);
+      else if (host && sides.some(x => x.id === host)) (sidesBySide[host] = sidesBySide[host] || []).push(s);
       else orphans.push(s);
     }
     let rows = '';
@@ -5204,7 +5222,7 @@
       const doneN = g.maps.filter(m => save.cleared.indexOf(m.id) >= 0).length;
       rows += '<div class="wm-sec"><b>' + (meta ? meta.name : '其余行迹') + '</b><span>' +
         (meta ? meta.note + '　' : '') + doneN + ' / ' + g.maps.length + '</span></div>';
-      rows += g.maps.map(m => deckHtml(m, cnNum(mains.indexOf(m) + 1), sidesByMain[m.id] || [])).join('');
+      rows += g.maps.map(m => deckHtml(m, cnNum(mains.indexOf(m) + 1), sidesByMain[m.id] || [], sidesBySide)).join('');
     }
     if (orphans.length) {
       rows += '<div class="wm-sec"><b>支线 · 因缘</b><span>遇人遇事而开　' + orphans.length + ' / ' + MAPS.filter(m => m.side).length + '</span></div>';
@@ -6732,8 +6750,8 @@
     const m = MAPS.find(x => x.id === id);
     if (!m) return;
     if (save.unlocked.indexOf(id) < 0) { notify('前图未了，此路不通'); Sfx.warn(); return; }
-    // 主线卡后面挂着支线牌：先展开，展开之后点主线才是进去
-    if (!m.side) {
+    // 卡片后面挂着支线牌（主线或已解锁支线下挂的都算）：先展开，展开之后点它才是进去
+    {
       const deckSides = MAPS.filter(x => x.side && save.unlocked.indexOf(x.id) >= 0 && sideTriggerOf(x) === id);
       if (deckSides.length && !(G.wmDeck && G.wmDeck[id])) {
         G.wmDeck = G.wmDeck || {};
