@@ -1086,7 +1086,7 @@
     { id: 'sk_fenglei',   name: '风雷翅·炼法',     rarity: 4, icon: '📕', req: 56,  teach: 'fenglei',   desc: '习得《风雷翅》。乱星海炼器所得飞行翼，移速大增' },
     { id: 'sk_tongbao',   name: '洞漩金光·法诀',   rarity: 4, icon: '📕', req: 82,  teach: 'tongbao',   desc: '习得《洞漩金光》。金光绕体，专伤神魂、破魔驱邪——韩立自乱星海后打磨出的金光神通' },
     { id: 'sk_leishen',   name: '辟邪神雷·雷诀',   rarity: 4, icon: '📕', req: 56,  teach: 'leishen',   desc: '习得《辟邪神雷》。青竹蜂云剑以金雷竹炼成，剑身自蕴此雷，专克魔道鬼道' },
-    { id: 'sk_qinxian',   name: '大庚剑阵·阵图',   rarity: 4, icon: '📕', req: 82,  teach: 'qinxian',   desc: '习得《大庚剑阵》。青元剑诀第十层，以本命飞剑布阵，剑光成网' },
+    { id: 'sk_qinxian',   name: '惊神刺·阵图',   rarity: 4, icon: '📕', req: 82,  teach: 'qinxian',   desc: '习得《惊神刺》。元婴音攻，环形波纹，神识化刺直扰敌之元神' },
     { id: 'sk_xuanyin',   name: '玄阴经·残卷',     rarity: 4, icon: '📕', req: 56,  teach: 'xuanyin',   desc: '习得《玄阴经》。乱星海顶级魔道功法，玄骨、极阴一脉所修' },
     { id: 'sk_wuzi',      name: '五子同心魔·魔诀', rarity: 4, icon: '📕', req: 102, teach: 'wuzi',      desc: '习得《五子同心魔》。昆吾山所得子母魔头操控法' },
     { id: 'sk_pojie',     name: '破界符·空间诀',   rarity: 4, icon: '📕', req: 112, teach: 'pojie',     desc: '习得《破界符·空间诀》。玲珑所留的飞升之凭' }

@@ -160,7 +160,7 @@
     { id: 'sanzhong', name: '三转重元功', rarity: 3, icon: '📗', req: 50, teach: 'sanzhong', desc: '散功重修三次，每重修回境界再结丹。结丹可选前置，修习后结丹品质更佳。', unique: true },
 
     // ---- 金雷竹降级为法宝材料：青竹蜂云剑（P1-8） ----
-    { id: 't_qingzhu', name: '青竹蜂云剑', rarity: 4, icon: '🎍', slot: 'weapon', req: 92, desc: '伤害 +40%，攻速 +12%。金雷竹为本命剑骨，雷光绕竹。', effect: { dmg: 0.40, atk: 0.12 }, unique: true, craftOnly: 'forge' },
+    { id: 't_qingzhu', name: '青竹蜂云剑·金雷', rarity: 4, icon: '🎍', slot: 'weapon', req: 92, desc: '伤害 +40%，攻速 +12%。金雷竹为本命剑骨，雷光绕竹。', effect: { dmg: 0.40, atk: 0.12 }, unique: true, craftOnly: 'forge' },
 
     // ---- 墨大夫夺舍战掉落（P0-2） ----
     { id: 'lianzhi', name: '炼尸术残卷', rarity: 3, icon: '📜', req: 7, desc: '墨大夫留下的炼尸残卷。铁奴一脉由此而来——日后凝煞丹、炼曲魂，都从这一页起。', unique: true },
@@ -211,7 +211,7 @@
     { id: 'r_moyuan', kind: 'alchemy', name: '魔元丹', out: 'moyuan', outN: 1, cost: 3600, req: 108, rate: 0.4,
       mats: [['m_yaodan', 3], ['m_xuesha', 2]],
       desc: '魔陀山秘法：妖丹为骨，血煞凝元。原著里韩立以玄玉换丹，此处折作玄玉灵材自炼 —— 三枚押上，化神才稳。' },
-    { id: 'r_t_qingzhu', kind: 'forge', name: '青竹蜂云剑', out: 't_qingzhu', outN: 1, cost: 4800, req: 92, rate: 0.45,
+    { id: 'r_t_qingzhu', kind: 'forge', name: '青竹蜂云剑·金雷', out: 't_qingzhu', outN: 1, cost: 4800, req: 92, rate: 0.45,
       mats: [['m_jinlei', 1], ['m_gengjing', 2], ['m_yusui', 4]],
       desc: '金雷竹为本命剑骨，庚精为锋，玉髓刻符。韩立本命法宝之路的开端。' }
   );
