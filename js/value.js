@@ -23,6 +23,7 @@
     { id: 'r_siling', kind: 'alchemy', name: '饲灵丸', out: 'm_siling', outN: 1, cost: 120, req: 12, rate: 0.30,
       mats: [['m_lingzhi', 2], ['m_chijing', 1]], desc: '灵芝配人参，捣成药泥搓成丸。古修士调教灵兽，用的就是这一味。' },
     { id: 'r_zaohua', kind: 'alchemy', name: '造化丹', out: 'zaohua', outN: 1, cost: 400, req: 24, rate: 0.12,
-      mats: [['m_lingzhu', 2], ['m_baihezhi', 1], ['m_huangjingzhi', 1], ['m_hualongcao', 1]], desc: '灵烛果为主，白鹤芝凉血、黄精芝补元、化龙草固本。灵烛果这灵物，生服也能提升些许修为。' }
+      mats: [['m_lingzhu', 2], ['m_longlin', 1], ['m_baihezhi', 1], ['m_huangjingzhi', 1], ['m_hualongcao', 1]],
+      desc: '灵烛果为主，白鹤芝凉血、黄精芝补元、化龙草固本，再以一枚龙鳞果引药性——世间传说此果服之可以脱胎换骨，正合「造化」二字。灵烛果这灵物，生服也能提升些许修为。' }
   );
 })();

@@ -69,10 +69,27 @@ const garden = await page.evaluate(() => {
 });
 for (const n of ['子夜花', '黄球草', '白鹤芝', '望月草', '化龙草'])
   ok(garden.old.includes(n), `旧园可采 ${n}`, garden.old);
-for (const n of ['黄龙草', '苦莲花', '忘忧果', '三乌草', '七星草', '千结花', '黑芍草', '金精参', '黄精芝'])
+for (const n of ['黄龙草', '苦莲花', '忘忧果', '三乌草', '七星草', '千结花', '黑芍草', '金精参',
+  '筑基丹辅药包', '黄精芝'])
   ok(garden.wet.includes(n), `绿液区可采 ${n}`, garden.wet);
 for (const n of ['玉髓芝', '紫猴花', '天灵果'])
   ok(!garden.old.includes(n), `旧园不长主药 ${n}（原著：园里一株都没有）`, garden.old);
+ok(!garden.old.includes('筑基丹辅药包'),
+  '旧园不出筑基丹辅药包（原著：园里辅药年份不足，最老的化龙草才百余年）', garden.old);
+
+// 筑基丹丹方：主药三味 + 辅药三十一种（三味具名 + 廿八味归一包）
+const zj = await page.evaluate(() => {
+  const r = window.Recipes.get('r_zhuji');
+  return r.mats.map(m => ({ id: m[0], n: m[1], name: (window.Items.get(m[0]) || {}).name }));
+});
+const main = ['玉髓芝', '紫猴花', '天灵果'];
+const named = ['千结花', '黑芍草', '金精参'];
+ok(zj.length === 7, `筑基丹用料条目 7 项（3 主药 + 3 具名辅药 + 1 辅药包），实为 ${zj.length}`, zj);
+ok(main.every(n => zj.some(m => m.name === n)), '丹方备齐三味主药', zj);
+ok(named.every(n => zj.some(m => m.name === n)), '丹方备齐千结花 / 黑芍草 / 金精参', zj);
+ok(zj.some(m => m.name === '筑基丹辅药包'), '余下廿八味辅药收作一包', zj);
+ok(!zj.some(m => ['龙鳞果', '血煞珠'].includes(m.name)),
+  '龙鳞果 / 血煞珠不在筑基丹方内（原著丹方只有三主药 + 三十一辅药）', zj);
 // 灵润：绿液区滴一滴绿液，这一趟多催一套
 const wet = await page.evaluate(() => {
   const F = window.__FR, G = F.G;
@@ -113,7 +130,7 @@ for (const [map, diff] of [['xuese', 'easy'], ['xuese', 'hard'], ['xuese', 'nigh
     if (st.given >= plan.total || ['settle', 'victory', 'over'].includes(st.state)) break;
   }
   const isZhuji = map === 'xuese';
-  const expect = isZhuji ? 12 * setsOf[diff] : null;   // 禁地只出主药那一半：5 味共 12 份／炉
+  const expect = isZhuji ? 9 * setsOf[diff] : null;   // 禁地只出三味主药：共 9 份／炉（辅药在绿液区）
   ok(given >= plan.total, `${map}/${diff} 配额发满（${plan.total} 份，实发 ${given}）`, { given, total: plan.total });
   if (expect) ok(plan.total === expect, `筑基丹 ${setsOf[diff]} 套 = ${expect} 味料`, plan.total);
 }

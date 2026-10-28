@@ -201,7 +201,7 @@ window.MAPS = [
     elites: ['守药灵猿'],
     // 绿液区：韩立埋瓶催熟的那一角，滴过绿液的高年份药只在这里出
     mats: ['m_huanglongcao', 'm_kulianhua', 'm_wangyouguo', 'm_sanwucao', 'm_qixingcao',
-      'm_qianjiehua', 'm_heishaocao', 'm_jinjingshen', 'm_huangjingzhi'],
+      'm_qianjiehua', 'm_heishaocao', 'm_jinjingshen', 'm_fuyaobao', 'm_huangjingzhi'],
     boss: { kind: 'beast', name: '守药灵猿', hp: 2400, spd: 54, dmg: 16, r: 20, spr: 'ape', scale: 3.0 },
     reward: { stones: 180, items: [], mats: [['m_huanglongcao', 2], ['m_sanwucao', 1], ['m_huangjingzhi', 1]] },
     clearTitle: '药圃已安',

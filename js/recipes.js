@@ -22,9 +22,13 @@ window.RECIPES = [
   { book: 'f_jinsui', id: 'r_jinsui', kind: 'alchemy', name: '金髓丸', out: 'jinsui', outN: 1, cost: 170, req: 12, rate: 0.24,
     mats: [['m_huangqiucao', 1], ['m_wangyouguo', 2], ['m_sanwucao', 1], ['m_chongjing', 1], ['m_yusui', 1]], desc: '丹成色如金髓，入口滚烫。黄球草先养一身血肉，忘忧果定神、三乌草补元——脱胎换骨的一味。' },
   { book: 'f_zhuji', id: 'r_zhuji', kind: 'alchemy', name: '筑基丹', out: 'zhuji', outN: 1, cost: 820, req: 35, rate: 0.10,
-    mats: [['m_yusuizhi', 3], ['m_zihua', 3], ['m_tianling', 3], ['m_longlin', 2], ['m_xuesha', 1],
-      ['m_qianjiehua', 1], ['m_heishaocao', 1], ['m_jinjingshen', 1]],
-    desc: '玉髓芝、紫猴花、天灵果三味主药缺一不可，另有千结花、黑芍草、金精参等三十一味辅药——辅药园里就有，主药只能在血色禁地里采。大门派把持，外面一颗难求，开炉十次九空也不希奇。' },
+    // 原著丹方：主药三味 + 辅药三十一种。辅药里千结花、黑芍草、金精参有名字，
+    // 余下廿八味收作一包（m_fuyaobao）；龙鳞果、血煞珠原著不是筑基丹用料，已移出。
+    mats: [['m_yusuizhi', 3], ['m_zihua', 3], ['m_tianling', 3],
+      ['m_qianjiehua', 1], ['m_heishaocao', 1], ['m_jinjingshen', 1], ['m_fuyaobao', 1]],
+    desc: '主药三味：玉髓芝、紫猴花、天灵果。辅药三十一味：千结花、黑芍草、金精参之外，还有廿八味药收在一只青布包里。' +
+      '药书写得明白，辅药味味都要数百年的火候——园里最老的化龙草也不过百余年，差得远；三味主药又是天地灵气幻化、天生自长，园中一株都无。' +
+      '所以整个越国七大派联手，也要十年才出得一鼎，区区千余颗。' },
 
   // ================= 炼器 =================
   { id: 'r_jingtie', kind: 'forge', name: '精铁短剑', out: 'jingtie', outN: 1, cost: 22, req: 3, rate: 0.9,

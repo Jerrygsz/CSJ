@@ -161,14 +161,16 @@
       why: '黄龙草、苦莲花、忘忧果正是原著中韩立滴过绿液、当场笑出声的那三味' },
     { map: 'yaopu', rec: 'r_jinsui', sets: [2, 3, 5],
       why: '忘忧果定神、三乌草可反复滴液叠出千年老药——韩立就是拿它试出掌天瓶的底' },
-    { map: 'yaopu', rec: 'r_zhuji', only: ['m_qianjiehua', 'm_heishaocao', 'm_jinjingshen'], sets: [3, 5, 8],
-      why: '原著明列这三味为筑基丹辅药（三十一种辅药材），绿液养着，随时可采' },
+    // 筑基丹辅药三十一味：三味有名的 + 廿八味归一包。原著「只是要求年份长久一些，
+    // 要有数百年的火候罢了」—— 园里最老的化龙草才百余年，只有滴过绿液这一角够数
+    { map: 'yaopu', rec: 'r_zhuji', only: ['m_qianjiehua', 'm_heishaocao', 'm_jinjingshen', 'm_fuyaobao'], sets: [3, 5, 8],
+      why: '原著明列这三味为筑基丹辅药（三十一种辅药材），余下廿八味收作辅药包；绿液养着，年份才够数百年' },
     { map: 'yaopu', rec: 'r_zhuji', only: ['m_yusuizhi', 'm_zihua', 'm_tianling'], sets: [1, 2, 3],
       why: '血色禁地带回的三株主药苗，绿液温养、低概率结鲜果——能摘，但产量远不及禁地' },
     // 血色禁地 / 血池 —— 筑基丹三主药只长在禁地里，五年一开
-    { map: 'xuese', rec: 'r_zhuji', only: ['m_yusuizhi', 'm_zihua', 'm_tianling', 'm_longlin', 'm_xuesha'], sets: [3, 5, 8],
-      why: '原著：玉髓芝、紫猴花、天灵果「药园内一株都没有」，只产于血色禁地' },
-    { map: 'xuechi', rec: 'r_zhuji', only: ['m_yusuizhi', 'm_zihua', 'm_tianling', 'm_longlin', 'm_xuesha'], sets: [3, 5, 8],
+    { map: 'xuese', rec: 'r_zhuji', only: ['m_yusuizhi', 'm_zihua', 'm_tianling'], sets: [3, 5, 8],
+      why: '原著：玉髓芝、紫猴花、天灵果「药园内一株都没有」，主药只产于血色禁地' },
+    { map: 'xuechi', rec: 'r_zhuji', only: ['m_yusuizhi', 'm_zihua', 'm_tianling'], sets: [3, 5, 8],
       why: '血池同在血色禁地之内，池边石缝里长玉髓芝' },
     // 坠魔谷 —— 火蟾古兽只此一只，天火液的主药就在这儿
     { map: 'zhuimo', rec: 'r_tianhuo', sets: [3, 5, 8],
