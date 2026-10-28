@@ -110,21 +110,24 @@ window.MAPS = [
     clearDesc: '丹给了叶师叔，换来青石岭百药园这个差事。灵根差，丹也没了，好在没人来扰。'
   },
   {
-    id: 'yaoyuan', order: 6, name: '黄枫谷·药园', pos: '黄枫谷后山药田',
+    id: 'yaoyuan', order: 6, name: '黄枫谷·百药园（旧园）', pos: '青石岭背阴处',
     type: 'combat', tag: '战斗',
-    desc: '灵虫妖鼠啃食药苗，需在药田守夜驱除。药园灵气稀薄，夜里却不太平。',
+    desc: '青石岭背阴处，雾气常年不散。竹篱歪斜，茅屋一间，四周是整齐的灵田沟垄。' +
+      '泥土里混着陈年药渣气，风一吹，苦香、甘香、涩香搅在一起。' +
+      '这里本是黄枫谷马师伯的私园，如今交到一个沉默寡言的管园弟子手里。' +
+      '药田东南角是马老头留了几十年的老底：子夜花、黄球草、白鹤芝、望月草，最老的一株化龙草已百余年份；角落还散着些没名字的俗世药苗，懒得拔，留着遮土气。',
     startLevel: 13, startSkills: { sword: 4, fire: 2, orb: 1 },
     unlock: 'huangfeng', next: 'xuese',
     diff: 1.35, bossAt: 140,
     enemies: ['bat', 'snake', 'assassin', 'ghoul', 'bandit'],
     elites: ['噬灵虫王', '妖鼠精'],
-    // 原著（百药园一节）：园里只有「千结花、黑芍草、金精参等三十一种辅药材」，
-    // 玉髓芝 / 紫猴花 / 天灵果「竟然一株都没有」—— 故药园不再产这三味主药
-    mats: ['m_chongjing', 'm_fuzhi', 'm_huangjing', 'm_lingzhi', 'm_chijing'],
+    // 旧园只长马师伯留下的那几畦：子夜花/黄球草/白鹤芝/望月草/化龙草。
+    // 原著明写主药三味「园里一株都没有」，故不在旧园池里。
+    mats: ['m_ziyehua', 'm_huangqiucao', 'm_baihezhi', 'm_wangyuecao', 'm_hualongcao', 'm_lingzhi', 'm_chongjing', 'm_fuzhi'],
     boss: { kind: 'swarm', name: '噬灵虫母', hp: 2100, spd: 38, dmg: 15, r: 18, spr: 'blacklord', scale: 3.0 },
     reward: { stones: 200, items: ['qiannian'] },
     clearTitle: '守夜已毕',
-    clearDesc: '药苗保住了。虫母的甲壳底下，藏着一枚聚灵的珠子。'
+    clearDesc: '药苗保住了。虫母的甲壳底下藏着一枚聚灵的珠子。管园弟子把钥匙往土里一插：西北角那半畦，往后归你。'
   },
   {
     id: 'xuese', order: 7, name: '血色禁地', pos: '越国·七派共管秘境',
@@ -185,19 +188,24 @@ window.MAPS = [
     clearDesc: '木剑断了三根。厉飞雨把剑一扔，只说了一句：还行。'
   },
   {
-    id: 'yaopu', side: true, sorder: 4, name: '黄枫谷·灵药圃深处', pos: '黄枫谷后山 最里一畦',
+    id: 'yaopu', side: true, sorder: 4, name: '百药园·绿液区（西北角）', pos: '百药园 西北角',
     type: 'combat', tag: '支线', unlockBy: 'e_yaotong',
-    desc: '田埂尽头的木门后，灵药长得比人高。啃药的东西，就伏在里面。',
+    desc: '药田西北角，一只旧瓶埋在土里，上面压着半片法宝残片遮灵气。' +
+      '绿液一滴下去，草木一夜变样：黄龙草叶子翻紫，苦莲花开齐九瓣，忘忧果的皮黑得发亮。' +
+      '神手谷带过来的底料、太南小会换回的七星草种子、按筑基丹方补种的辅药，都挤在这一角；' +
+      '血色禁地带回的三株主药苗也在绿液里温养着，低概率结鲜果，摘了再催。',
     startLevel: 15, startSkills: { sword: 4, fire: 2, orb: 1 },
     unlock: null, next: null,
     diff: 1.3, bossAt: 120,
     enemies: ['snake', 'bat', 'ghoul', 'assassin'],
     elites: ['守药灵猿'],
-    mats: ['m_huangjing', 'm_lingzhi', 'm_chijing', 'm_chongjing'],
+    // 绿液区：韩立埋瓶催熟的那一角，滴过绿液的高年份药只在这里出
+    mats: ['m_huanglongcao', 'm_kulianhua', 'm_wangyouguo', 'm_sanwucao', 'm_qixingcao',
+      'm_qianjiehua', 'm_heishaocao', 'm_jinjingshen', 'm_huangjingzhi'],
     boss: { kind: 'beast', name: '守药灵猿', hp: 2400, spd: 54, dmg: 16, r: 20, spr: 'ape', scale: 3.0 },
-    reward: { stones: 180, items: [], mats: [['m_huangjing', 2], ['m_lingzhi', 2], ['m_chongjing', 1]] },
+    reward: { stones: 180, items: [], mats: [['m_huanglongcao', 2], ['m_sanwucao', 1], ['m_huangjingzhi', 1]] },
     clearTitle: '药圃已安',
-    clearDesc: '灵猿伏地。最里那畦剩下的药，够炼一炉好丹。'
+    clearDesc: '灵猿伏地。绿液浇过的那一角，草木比人还高——这一畦剩下的药，够开好几炉。'
   },
   {
     id: 'heixiang', side: true, sorder: 5, name: '太南小会·后巷', pos: '太南山 小会后巷',

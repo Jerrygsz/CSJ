@@ -40,16 +40,28 @@ const d = await page.evaluate(() => {
   }));
   // 每件道具的获取途径
   const src = {};
-  const note = (id, s) => { (src[id] = src[id] || []).push(s); };
+  const note = (id, s) => { const a = (src[id] = src[id] || []); if (a.indexOf(s) < 0) a.push(s); };
   for (const r of (W.RECIPES || [])) note(r.out, '炼:' + r.name + '(Lv' + (r.req || 1) + ')');
   for (const r of (W.RECIPES || [])) if (r.book) note(r.book, '丹方(' + r.name + ')');
   for (const m of (W.MAPS || [])) {
     for (const id of (m.shop || [])) note(id, '坊:' + m.name);
     for (const a of (m.auction || [])) note(a.id, '拍:' + m.name);
+    // 地图物产池：以前漏扫，导致「只在地里长的草」全被标成无来源
+    for (const id of (m.mats || [])) note(id, '产:' + m.name);
     const rw = m.reward || {};
     for (const id of (rw.items || [])) note(id, '剧情:' + m.name);
     for (const g of (rw.grants || [])) note(g[0], '剧情:' + m.name);
     for (const mm of (rw.mats || [])) note(mm[0], '剧情:' + m.name);
+  }
+  // 破境药材保底：一局地图按配额发，等同上架货源
+  for (const z of (W.ALCH_ZONES || [])) {
+    const mp = (W.MAPS || []).find(x => x.id === z.map);
+    const r = W.Recipes && W.Recipes.get(z.rec);
+    if (!mp || !r) continue;
+    for (const mm of (r.mats || [])) {
+      if (z.only && z.only.indexOf(mm[0]) < 0) continue;
+      note(mm[0], '产:' + mp.name);
+    }
   }
   for (const e of (W.ENCOUNTERS || [])) {
     const rw = e.reward || {};

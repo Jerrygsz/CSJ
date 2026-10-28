@@ -61,7 +61,34 @@ ok(!place['m_zhuguo'], '已删的「朱果」不再有任何出处', place['m_zh
 ok(!(place['m_huodan'] || []).some(s => s.startsWith('map:') && s !== 'map:zhuimo'),
   '火蟾兽内丹只在坠魔谷', place['m_huodan']);
 
-// ---------- 2) 保底：一局凡境发满 3 套 ----------
+// ---------- 2) 百药园两层：旧园 / 绿液区 各长各的药 ----------
+console.log('\n【百药园两层】');
+const garden = await page.evaluate(() => {
+  const pool = id => ((window.MAPS.find(m => m.id === id) || {}).mats || []).map(x => window.Items.get(x).name);
+  return { old: pool('yaoyuan'), wet: pool('yaopu') };
+});
+for (const n of ['子夜花', '黄球草', '白鹤芝', '望月草', '化龙草'])
+  ok(garden.old.includes(n), `旧园可采 ${n}`, garden.old);
+for (const n of ['黄龙草', '苦莲花', '忘忧果', '三乌草', '七星草', '千结花', '黑芍草', '金精参', '黄精芝'])
+  ok(garden.wet.includes(n), `绿液区可采 ${n}`, garden.wet);
+for (const n of ['玉髓芝', '紫猴花', '天灵果'])
+  ok(!garden.old.includes(n), `旧园不长主药 ${n}（原著：园里一株都没有）`, garden.old);
+// 灵润：绿液区滴一滴绿液，这一趟多催一套
+const wet = await page.evaluate(() => {
+  const F = window.__FR, G = F.G;
+  F.setGreen(0);
+  F.enterMap('yaopu', 'easy'); if (G.state === 'dialog') F.skipStory();
+  const dry = G.alch ? G.alch.total : 0;
+  F.setGreen(1);
+  F.enterMap('yaopu', 'easy'); if (G.state === 'dialog') F.skipStory();
+  const wetN = G.alch ? G.alch.total : 0;
+  return { dry, wetN, left: F.greenLiquid(), flag: !!G.alchWet };
+});
+ok(wet.wetN > wet.dry, `灵润：滴绿液后配额增加（${wet.dry} → ${wet.wetN}）`, wet);
+ok(wet.left === 0, '进绿液区消耗 1 滴绿液', wet.left);
+ok(wet.flag, '进绿液区标出「灵润」状态', wet.flag);
+
+// ---------- 3) 保底：一局凡境发满 3 套 ----------
 console.log('\n【保底产量】');
 const setsOf = { easy: 3, hard: 5, nightmare: 8 };
 for (const [map, diff] of [['xuese', 'easy'], ['xuese', 'hard'], ['xuese', 'nightmare'], ['xutian', 'easy'], ['zhuimo', 'easy']]) {
@@ -86,7 +113,7 @@ for (const [map, diff] of [['xuese', 'easy'], ['xuese', 'hard'], ['xuese', 'nigh
     if (st.given >= plan.total || ['settle', 'victory', 'over'].includes(st.state)) break;
   }
   const isZhuji = map === 'xuese';
-  const expect = isZhuji ? 12 * setsOf[diff] : null;
+  const expect = isZhuji ? 12 * setsOf[diff] : null;   // 禁地只出主药那一半：5 味共 12 份／炉
   ok(given >= plan.total, `${map}/${diff} 配额发满（${plan.total} 份，实发 ${given}）`, { given, total: plan.total });
   if (expect) ok(plan.total === expect, `筑基丹 ${setsOf[diff]} 套 = ${expect} 味料`, plan.total);
 }

@@ -724,12 +724,17 @@
   }
   function setupAlchQuota() {
     G.alch = null;
+    G.alchWet = false;
     const zones = (window.ALCH_ZONES || []).filter(z => z.map === G.mapId);
     if (!zones.length || !window.Recipes) return;
+    // 绿液区（百药园西北角）：进门先滴一滴绿液，这一畦进「灵润」，高年份药多催一套。
+    // 原著里绿液就是这么用的 —— 滴一次，草木一夜变样。
+    let wet = 0;
+    if (G.mapId === 'yaopu' && (save.greenLiquid || 0) > 0) { save.greenLiquid--; wet = 1; G.alchWet = true; }
     const di = Math.max(0, DIFFICULTIES.indexOf(curDiff()));
     const plan = [];
     for (const z of zones) {
-      const sn = (z.sets && z.sets[Math.min(di, z.sets.length - 1)]) || 0;
+      const sn = ((z.sets && z.sets[Math.min(di, z.sets.length - 1)]) || 0) + wet;
       if (sn <= 0) continue;
       const r = Recipes.get(z.rec);
       if (!r || !r.mats) continue;
@@ -4335,7 +4340,7 @@
     G.fieldSlow = []; G.shake = 0; G.flash = 0; G.hitStop = 0;
     G.decor = []; G.chunkMap = {}; G.cam = { x: -W / 2, y: -H / 2 }; G.orbPos = [];
     G.vacuumT = 0; G.pendingEnding = false; G.runLoot = []; G.matGain = 0; G.lastAutoSave = 0;
-    G.alch = null;           // 破境药材配额，进图时按图重算
+    G.alch = null; G.alchWet = false;   // 破境药材配额，进图时按图重算
     G.breakHinted = false;   // 瓶颈弹幕每图只提一次
     G.minorHint = 0;         // 小境界关口弹幕也每图只提一次
     G.victoryNote = '';
@@ -4518,6 +4523,8 @@
     G._claimedDrops = new Set(); G._hostVacuum = false; G._endSent = false;
     // 一进门就跨了大境界（筑基 / 结丹）：这一声得给，别让人不知道自己现在在哪一层
     if (realmName(p.level) !== realmBefore) banner('境界 · ' + realmName(p.level));
+    // 绿液区：进门那一滴绿液已经入土，这一畦「灵润」，草木正催
+    if (G.alchWet) setTimeout(function () { if (G.state === 'play') banner('灵润 · 绿液入土，这一畦可采高年份'); }, 700);
     // 破境图：物事未齐时进门就提醒一句 —— 此图可打可拾，破不了境
     if (m.endLevel) {
       const g = breakReqFor(m.endLevel);

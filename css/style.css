@@ -168,6 +168,9 @@ body.fs #wrap { background: #000; }
 #title h1 { font-size: var(--fs-display); color: var(--accent); letter-spacing: 4px; text-shadow: 0 2px 8px #000; margin-bottom: 4px; }
 .sub { color: var(--accent-soft); font-size: var(--fs-body); margin-bottom: var(--sp-3); letter-spacing: 1px; }
 .desc { color: var(--text-2); font-size: var(--fs-body); line-height: 1.7; margin-bottom: 16px; }
+/* 百药园园门题字：两行，落款压一行，别抢标题 */
+.cite { color: var(--accent-soft); font-size: var(--fs-cap); line-height: 1.9; letter-spacing: 2px; margin: 2px 0 14px; opacity: .82; }
+.cite i { display: block; font-style: normal; color: var(--text-3); font-size: var(--fs-cap); letter-spacing: 1px; margin-top: 2px; }
 .hint { color: var(--text-3); font-size: var(--fs-cap); line-height: 1.7; margin-top: 12px; }
 .btn { background: linear-gradient(180deg,var(--accent-lite),var(--accent-deep)); color: var(--ink); border: none; border-radius: var(--r-md); padding: 12px 24px; min-height: 48px; font-size: var(--fs-body); font-family: inherit; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 var(--accent-shadow); margin-top: 4px; }
 .btn:not(.small) { min-width: 160px; }

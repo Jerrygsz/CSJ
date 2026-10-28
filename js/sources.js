@@ -150,15 +150,25 @@
     // 后山采药 —— 韩立替药庐采药，人参、黄精是后山常物
     { map: 'houshan', rec: 'r_peiyuan', sets: [3, 5, 8],
       why: '原著开篇韩立在后山采药换灵石，人参、黄精皆为山中所产' },
-    // 黄枫谷药园 —— 园里三十一种辅药材俱全（黄龙丹：黄精、人参配妖丹）
-    { map: 'yaoyuan', rec: 'r_huanglong', sets: [3, 5, 8],
-      why: '百药园一节：园内辅药材俱全，只缺玉髓芝、紫猴花、天灵果三味主药' },
-    { map: 'yaopu', rec: 'r_jinsui', sets: [3, 5, 8],
-      why: '灵药圃深处是同片药田，辅药更足' },
+    // 百药园·旧园 —— 马师伯留下的东南角几畦：子夜花镇心魔、望月草安神（定灵丹辅药）；
+    // 白鹤芝凉血、化龙草固本（造化丹辅药）。原著：园里三十一种辅药材俱全，只缺三味主药。
+    { map: 'yaoyuan', rec: 'r_dianling', only: ['m_ziyehua', 'm_wangyuecao'], sets: [3, 5, 8],
+      why: '百药园一节：子夜花、黄球草、白鹤芝、望月草皆为园中旧物；定灵丹又名安魂丹，取此二味镇心安神' },
+    { map: 'yaoyuan', rec: 'r_zaohua', only: ['m_baihezhi', 'm_hualongcao'], sets: [3, 5, 8],
+      why: '白鹤芝凉血解毒、化龙草为园中最老的百余年老药，正合造化丹固本之用' },
+    // 百药园·绿液区 —— 韩立埋瓶催熟的那一角，滴过绿液的高年份药只在这里出
+    { map: 'yaopu', rec: 'r_huanglong', sets: [3, 5, 8],
+      why: '黄龙草、苦莲花、忘忧果正是原著中韩立滴过绿液、当场笑出声的那三味' },
+    { map: 'yaopu', rec: 'r_jinsui', sets: [2, 3, 5],
+      why: '忘忧果定神、三乌草可反复滴液叠出千年老药——韩立就是拿它试出掌天瓶的底' },
+    { map: 'yaopu', rec: 'r_zhuji', only: ['m_qianjiehua', 'm_heishaocao', 'm_jinjingshen'], sets: [3, 5, 8],
+      why: '原著明列这三味为筑基丹辅药（三十一种辅药材），绿液养着，随时可采' },
+    { map: 'yaopu', rec: 'r_zhuji', only: ['m_yusuizhi', 'm_zihua', 'm_tianling'], sets: [1, 2, 3],
+      why: '血色禁地带回的三株主药苗，绿液温养、低概率结鲜果——能摘，但产量远不及禁地' },
     // 血色禁地 / 血池 —— 筑基丹三主药只长在禁地里，五年一开
-    { map: 'xuese', rec: 'r_zhuji', sets: [3, 5, 8],
+    { map: 'xuese', rec: 'r_zhuji', only: ['m_yusuizhi', 'm_zihua', 'm_tianling', 'm_longlin', 'm_xuesha'], sets: [3, 5, 8],
       why: '原著：玉髓芝、紫猴花、天灵果「药园内一株都没有」，只产于血色禁地' },
-    { map: 'xuechi', rec: 'r_zhuji', sets: [3, 5, 8],
+    { map: 'xuechi', rec: 'r_zhuji', only: ['m_yusuizhi', 'm_zihua', 'm_tianling', 'm_longlin', 'm_xuesha'], sets: [3, 5, 8],
       why: '血池同在血色禁地之内，池边石缝里长玉髓芝' },
     // 坠魔谷 —— 火蟾古兽只此一只，天火液的主药就在这儿
     { map: 'zhuimo', rec: 'r_tianhuo', sets: [3, 5, 8],
@@ -166,12 +176,12 @@
     // 虚天殿 —— 九曲灵参、养魂木、玛瑙角都在殿中
     { map: 'xutian', rec: 'r_jiuqu', sets: [3, 5, 8],
       why: '第 433 章：九曲灵参即在虚天殿中，会幻化成鸟兽自行逃走' },
-    { map: 'xutian', rec: 'r_dianling', sets: [3, 5, 8],
-      why: '第 497 章「灵乳与养魂木」：殿中藏有养魂木' },
+    { map: 'xutian', rec: 'r_dianling', only: ['m_yanghun', 'm_lingzhi'], sets: [3, 5, 8],
+      why: '第 497 章「灵乳与养魂木」：殿中藏有养魂木（子夜花、望月草两味辅药回百药园旧园采）' },
     // 阴冥之地 / 昆吾山 / 镇魔塔 —— 阴气重处才有养魂木（定灵丹的备选产地）
-    { map: 'yinming', rec: 'r_dianling', sets: [2, 4, 6], why: '阴冥之地聚阴，产养魂木' },
-    { map: 'kunwu', rec: 'r_dianling', sets: [2, 4, 6], why: '昆吾山产阴芝马与养魂木' },
-    { map: 'zhenmo', rec: 'r_dianling', sets: [2, 4, 6], why: '镇魔塔封魔之地，养魂木出于此' },
+    { map: 'yinming', rec: 'r_dianling', only: ['m_yanghun', 'm_lingzhi'], sets: [2, 4, 6], why: '阴冥之地聚阴，产养魂木' },
+    { map: 'kunwu', rec: 'r_dianling', only: ['m_yanghun', 'm_lingzhi'], sets: [2, 4, 6], why: '昆吾山产阴芝马与养魂木' },
+    { map: 'zhenmo', rec: 'r_dianling', only: ['m_yanghun', 'm_lingzhi'], sets: [2, 4, 6], why: '镇魔塔封魔之地，养魂木出于此' },
     // 外星海 / 六连殿 / 凝翠岛 —— 伴妖草只长在八级妖兽身畔（九曲灵参丹的辅药）
     { map: 'waihai', rec: 'r_jiuqu', only: ['m_banyao'], sets: [5, 8, 12],
       why: '第 516 章：伴妖草须生在八级妖兽身畔，外星海猎妖方得' },
