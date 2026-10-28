@@ -66,7 +66,7 @@
   // 上架的货得有价钱（坊市按 SHOP_STOCK 报价，缺价就上不了柜）
   window.SHOP_STOCK.push(
     { id: 'a_bu',        price: 40,   cat: 'qi' },   // 粗布道袍
-    { id: 'a_lupi',      price: 120,  cat: 'qi' },   // 鹿皮软甲
+    { id: 'a_lupi',      price: 120,  cat: 'qi' },   // 兽皮软甲
     { id: 't_xuanyu',    price: 260,  cat: 'qi' },   // 玄玉珠
     { id: 'bag_ling2',   price: 1800, cat: 'qi' },   // 特制灵兽袋
     { id: 'ring_ling',   price: 2600, cat: 'qi' },   // 灵兽环
@@ -88,7 +88,7 @@
   // ---------- 三、器物：该谁给就谁给 ----------
   // 旧木牌：七玄门记名弟子的牌子，山门开局就有
   addTo('qixuan', { items: ['t_mupai'] });
-  // 玄玉珠、粗布道袍、鹿皮软甲：太南小会就能置办的散修行头（Lv1~13，炼气档）
+  // 玄玉珠、粗布道袍、兽皮软甲：太南小会就能置办的散修行头（Lv1~13，炼气档）
   addShop('tainan', ['a_bu', 'a_lupi', 't_xuanyu']);
   // 灵兽袋 / 灵兽环：乱星海大城才有这种养兽的家什
   addShop('tianxing', ['bag_ling2', 'ring_ling']);

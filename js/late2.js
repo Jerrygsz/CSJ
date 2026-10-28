@@ -55,7 +55,7 @@
     { id: 'w_xuemo',  name: '血魔剑',       rarity: 4, icon: '🗡', slot: 'weapon', req: 82, desc: '伤害 +42%，重击 +10%。掩月宗大长老的佩剑，剑身有血色纹路', effect: { dmg: 0.42, crit: 0.10 }, unique: true },
     { id: 'a_xuemo',  name: '血魔甲',       rarity: 4, icon: '🥷', slot: 'armor', req: 82, desc: '上限 +130，减伤 18%。血魔剑的配套甲衣，穿上人显小一圈', effect: { maxhp: 130, armor: 0.18 }, unique: true },
     { id: 'a_jiaolong', name: '蛟龙甲',     rarity: 4, icon: '🐉', slot: 'armor', req: 92, desc: '上限 +160，减伤 20%。坠魔谷蟒兽的皮，水火都咬不穿', effect: { maxhp: 160, armor: 0.20 }, unique: true },
-    { id: 'a_tiancan', name: '天蚕衣',      rarity: 4, icon: '👘', slot: 'armor', req: 102, desc: '上限 +190，减伤 22%。大晋天蚕丝织的，刀过不留痕', effect: { maxhp: 190, armor: 0.22 }, unique: true },
+    { id: 'a_tiancan', name: '冰蚕衣',      rarity: 4, icon: '👘', slot: 'armor', req: 102, desc: '上限 +190，减伤 22%。大晋冰蚕丝织的，刀过不留痕', effect: { maxhp: 190, armor: 0.22 }, unique: true },
     // ---- 法宝 ----
     { id: 't_yanghuan', name: '阳环',       rarity: 4, icon: '💍', slot: 'trinket', req: 82, desc: '伤害 +20%，重击 +8%。两仪环的阳面，压得住北极元光', effect: { dmg: 0.20, crit: 0.08 }, unique: true },
     { id: 't_guiluo', name: '鬼罗幡',       rarity: 4, icon: '🏴', slot: 'trinket', req: 92, desc: '伤害 +24%，拾取 +30%。阴罗宗四长老的幡，幡下养着鬼', effect: { dmg: 0.24, pickup: 0.3 }, unique: true },

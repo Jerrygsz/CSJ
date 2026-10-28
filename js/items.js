@@ -106,8 +106,8 @@ window.ITEMS = [
 
   // ==== 护甲（装备）====
   { id: 'a_bu',     name: '粗布道袍',   rarity: 0, icon: '👕', slot: 'armor', req: 1,  desc: '上限 +10，减伤 2%。杂役发的，洗得发白', effect: { maxhp: 10, armor: 0.02 } },
-  { id: 'a_lupi',   name: '鹿皮软甲',   rarity: 1, icon: '🥋', slot: 'armor', req: 4,  desc: '上限 +18，减伤 5%。山里猎户的手艺', effect: { maxhp: 18, armor: 0.05 } },
-  { id: 'a_ruanwei',name: '软猬甲',     rarity: 2, icon: '🦔', slot: 'armor', req: 9,  desc: '上限 +30，减伤 8%。刺在外，软在内', effect: { maxhp: 30, armor: 0.08 } },
+  { id: 'a_lupi',   name: '兽皮软甲',   rarity: 1, icon: '🥋', slot: 'armor', req: 4,  desc: '上限 +18，减伤 5%。山里猎户的手艺', effect: { maxhp: 18, armor: 0.05 } },
+  { id: 'a_ruanwei',name: '金丝软甲',     rarity: 2, icon: '🥋', slot: 'armor', req: 9,  desc: '上限 +30，减伤 8%。金丝密织，轻软护身', effect: { maxhp: 30, armor: 0.08 } },
   { id: 'a_hanyu',  name: '寒玉甲',     rarity: 3, icon: '🧊', slot: 'armor', req: 14, desc: '上限 +45，减伤 11%。贴在身上，血都是凉的', effect: { maxhp: 45, armor: 0.11 } },
   { id: 'a_xuangui',name: '玄龟甲',     rarity: 4, icon: '🐢', slot: 'armor', req: 20, desc: '上限 +70，减伤 15%。龟甲磨的，压在身上像背了口井', effect: { maxhp: 70, armor: 0.15 } },
 

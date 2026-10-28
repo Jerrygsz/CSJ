@@ -32,7 +32,7 @@ window.RECIPES = [
     mats: [['m_chitong', 2], ['m_jingtie', 2]], desc: '赤铜导灵，戟身比剑沉，劈得开兽甲。' },
   { id: 'r_qingzhu', kind: 'forge', name: '青竹剑', out: 'qingzhu', outN: 1, cost: 130, req: 7, rate: 0.82,
     mats: [['m_jingtie', 2], ['m_yusui', 1], ['m_huangjing', 2]], desc: '以精铁为骨、玉髓为引，仿青竹之形，轻而不飘。' },
-  { id: 'r_ruanwei', kind: 'forge', name: '软猬甲', out: 'a_ruanwei', outN: 1, cost: 110, req: 9, rate: 0.84,
+  { id: 'r_ruanwei', kind: 'forge', name: '金丝软甲', out: 'a_ruanwei', outN: 1, cost: 110, req: 9, rate: 0.84,
     mats: [['m_jingtie', 2], ['m_shihui', 2]], desc: '铁片缝在软皮里，刺在外，软在内。' },
   { id: 'r_moyu', kind: 'forge', name: '墨玉飞刀', out: 'moyu', outN: 1, cost: 230, req: 12, rate: 0.74,
     mats: [['m_xuantie', 1], ['m_yusui', 2], ['m_shihui', 1]], desc: '刀薄如叶，飞出无声。' },
