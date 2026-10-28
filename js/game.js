@@ -54,7 +54,10 @@
   let REBIRTH = rebirthPool();           // 常驻内存的轮回余荫，删档不清
   function rb(k) { return (REBIRTH.stats && REBIRTH.stats[k]) || 0; }
   // 永久加成上限：留出后期成长空间，避免一次刷满
-  const BONUS_CAP = { dmg: 1.2, atkSpd: 0.6, spd: 0.4, pickup: 1.5, regen: 3, armor: 0.35, xpMul: 0.5, crit: 0.25, maxhp: 300 };
+  // 上限只卡「永久丹药/剧情」给的加成（装备走 passiveSum，另一套）。
+  // maxhp 原来封在 300：可灵界之后那几味丹（蚀仙丹 380、广灵道果 400、真魂丹 420）
+  // 单项就超了，吃下去也拿不满 —— 故抬到 500，让每一味丹上写的数真能到手。
+  const BONUS_CAP = { dmg: 1.2, atkSpd: 0.6, spd: 0.4, pickup: 1.5, regen: 3, armor: 0.35, xpMul: 0.5, crit: 0.25, maxhp: 500 };
   const BONUS_KEYS = ['dmg', 'atkSpd', 'spd', 'pickup', 'regen', 'armor', 'xpMul', 'crit'];
 
   function defaultSave() {
@@ -85,6 +88,8 @@
       // 厉飞雨·双身份化名系统（P0-1）：韩立干脏活让「厉飞雨」背锅（黑），好事以「韩天尊」留名（白）
       repBlack: 0, repWhite: 0, identity: 'han', liUnlocked: false,
       ach: {}, greenLiquid: 0,
+      // 炼丹炉数：原著「炼丹次数越多，成丹几率越大」——每开一炉 +0.4%，至多 +12%
+      alchemy: { n: 0 },
       // 天人有五衰（后传 X2C327，24 次）：n = 还压在身上的衰有几层；
       // log[境界] = { early: 衰提前降临过几次, taken: 累计扛过几道 }
       wushuai: { n: 0, log: {} }
@@ -787,7 +792,7 @@
       const base = Math.atan2(tgt.y - p.y, tgt.x - p.x);
       for (let i = 0; i < cnt; i++) {
         const ang = base + (i - (cnt - 1) / 2) * (a.spread || 0.18);
-        pushBullet({ x: p.x, y: p.y, vx: Math.cos(ang) * 360, vy: Math.sin(ang) * 360, r: 6, dmg, life: a.life || 1.4, pierce, hit: new Set(), home: false, fx: a.vfx || 'sword', vfx: a.vfx || 'sword', ang: ang, stun: a.stun || 0 });
+        pushBullet({ x: p.x, y: p.y, vx: Math.cos(ang) * 360, vy: Math.sin(ang) * 360, r: 6, dmg, life: a.life || 1.4, pierce, hit: new Set(), home: false, fx: a.vfx || 'sword', vfx: a.vfx || 'sword', ang: ang, stun: a.stun || 0, leech: a.leech || 0 });
       }
       // 剑系出手：身前一道弯月。法术系不出刃，改成脚下起一圈符文（读作「在运气」）
       const vfx = a.vfx || 'sword';
@@ -1132,6 +1137,8 @@
           }
           damageEnemy(e, b.dmg); b.hit.add(e);
           if (b.stun) e.stunT = Math.max(e.stunT || 0, b.stun);   // 失神刺：硬直
+          // 血炼神光：血光吞了对方的精血，按伤害的定比回补己身（原著「伤人亦自补」）
+          if (b.leech && G.player && G.player.hp > 0) G.player.hp = Math.min(G.player.maxhp, G.player.hp + b.dmg * b.leech);
           // 命中处溅出的火花沿着子弹来向的反面飞：一眼看得出是从哪边打过来的
           spawnHit(b.x, b.y, VFX_HIT_COLOR[b.vfx || b.fx] || '#fff', Math.atan2(b.vy, b.vx));
           if (b.pierce <= 0) { hit = true; break; }
@@ -3384,7 +3391,7 @@
     pool.sort(() => Math.random() - 0.5);
     const picks = pool.slice(0, 3);
     const fillers = [
-      { kind: 'heal', name: '回气丹', icon: '❤', desc: '立即回复50%生命' },
+      { kind: 'heal', name: '止血丹', icon: '❤', desc: '立即回复50%生命' },
       { kind: 'rain', name: '灵石雨', icon: '💎', desc: '散落一把灵石与修为' },
       { kind: 'fortune', name: '福缘', icon: '🍀', desc: '随机功法+1级' }
     ];
@@ -5301,10 +5308,12 @@
       }).join('');
       const can = okReq && okBook && okStone && okMat;
       // 火候几成，先让人看见。炼坏了材料是不退的
-      const ratePct = Math.round(((typeof r.rate === 'number') ? r.rate : 0.85) * 100);
+      const effRate = craftRateOf(r);
+      const ratePct = Math.round(effRate * 100);
+      const profTip = (r.kind === 'alchemy' && alchemyCount() > 0) ? '（含熟手 ' + Math.round(alchemyProf() * 100) + '%）' : '';
       html += '<div class="recrow' + (can ? ' can' : '') + '">' +
         '<div class="rr-main"><b style="color:' + rar.color + '">' + r.name + (r.outN > 1 ? ' ×' + r.outN : '') + '</b>' +
-        '<span class="rr-rate">成算 ' + ratePct + '%' + (ratePct < 100 ? ' · 败则料尽' : '') + '</span>' +
+        '<span class="rr-rate">成算 ' + ratePct + '%' + profTip + (ratePct < 100 ? ' · 败则料尽' : '') + '</span>' +
         '<div class="rr-mats">' + mats + '<span class="mat stone' + (okStone ? ' ok' : '') + '">灵石 ' + r.cost + '</span></div>' +
         '<em>' + r.desc + '</em></div>' +
         '<div class="rr-right">' +
@@ -6000,11 +6009,11 @@
           '<button class="sr-btn ' + (learned ? 'ghost' : 'buy') + '" data-buy="' + s.id + '"' +
           (buyable ? '' : ' data-cant="1"') + '>' + (learned ? '已学' : s.price) + '</button></div></div>');
       }
-      // 丹药柜本来就不卖现成丹（成丹只能自家开炉）。空柜时把话说清楚，
-      // 有货时（如极品灵石）正常显示 —— 别让说明文字压在货上面
+      // 丹药柜有货了（黄龙丹/金髓丸/养精丹/昊元丹 这些原著里真在坊市流通的），
+      // 空柜时只留一句通用说明，不再断言「坊市不售丹」—— 原著里明明卖。
       if (!rows.length) {
         rows.push(G.shopCat === 'dan'
-          ? '<div class="shopempty">成丹须自家开炉。<br>坊市不售现成丹药 —— 药材在「杂材」柜，丹炉在你洞府。</div>'
+          ? '<div class="shopempty">此柜今日无货。<br>筑基丹这类大门派把持的东西，坊市上从来见不到一颗 —— 只能自家开炉。</div>'
           : '<div class="shopempty">此柜今日无货。</div>');
       }
     }
@@ -6127,6 +6136,21 @@
     if (!r || !r.book) return true;
     return (save.inventory[r.book] || 0) > 0;
   }
+  // ---------------- 炼丹成功率（按原著设定） ----------------
+  // 原著口径（第 x 卷「筑基丹」一节）：就是当世最盛名的几位炼丹宗师亲自出手，
+  // 成丹的概率也不会太高，约只有一半；而且炼的还得是他们最拿手的那味丹。
+  // 另：炼丹次数越多，成丹几率越大；地火比先天真火成丹率高许多（同一节）。
+  // 所以：丹方基准率（data.rate，扮「丹师火候」）+ 熟练加成（炼得越多越高）+ 地火加成（洞府药炉）
+  // 三者相加，但总封顶五成半——再熟的手也不该把丹炉当成聚宝盆。
+  const ALCHEMY_CAP = 0.55;
+  const ALCHEMY_FIRE = 0.04;      // 洞府引地火／药炉，比野修真火稳
+  function alchemyCount() { return (save.alchemy && save.alchemy.n) || 0; }
+  function alchemyProf() { return Math.min(0.12, alchemyCount() * 0.004); }   // 每开一炉 +0.4%，至多 +12%
+  function craftRateOf(r) {
+    const base = (typeof r.rate === 'number') ? r.rate : 0.85;
+    if (r.kind !== 'alchemy') return base;                 // 炼器／制符另有一套火候，不并进这套
+    return Math.min(ALCHEMY_CAP, base + alchemyProf() + ALCHEMY_FIRE);
+  }
   function craftRecipe(rid) {
     const r = Recipes.get(rid), c = CAVES[G.caveId];
     if (!r || !c || c.crafts.indexOf(r.kind) < 0) return;
@@ -6142,8 +6166,9 @@
       save.totalItems = Math.max(0, (save.totalItems || 1) - m[1]);
     }
     // 火候不会每次都听话。材料进了炉，出不出得来是另一回事 ——
-    // 这才是「必须炼制」的分量：筑基丹、补天丹这种，谁也没有十成把握。
-    const rate = (typeof r.rate === 'number') ? r.rate : 0.85;
+    // 这才是「必须炼制」的分量：筑基丹这种，宗师也只有几成把握。
+    const rate = craftRateOf(r);
+    if (r.kind === 'alchemy') { save.alchemy = save.alchemy || { n: 0 }; save.alchemy.n = (save.alchemy.n || 0) + 1; }
     if (Math.random() >= rate) {
       const back = Math.round(r.cost * 0.5);
       save.stones += back;

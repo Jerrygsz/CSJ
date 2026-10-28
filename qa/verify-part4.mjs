@@ -419,7 +419,7 @@ ok(gates.huashen.story.includes('jixi') && gates.huashen.story.includes('tianxin
 
 // 新丹药/功法/材料都真实存在且可炼
 const newItems = await page.evaluate(() => {
-  const want = ['tianhuo', 'jiuqu', 'dianling', 'sanzhong', 'gupu', 'lianzhi', 't_qingzhu', 'm_yuanci', 'm_jiuqu', 'm_dingling', 'm_zhuguo', 'm_huoling'];
+  const want = ['tianhuo', 'jiuqu', 'dianling', 'sanzhong', 'gupu', 'lianzhi', 't_qingzhu', 'm_yuanci', 'm_jiuqu', 'm_manaojiao', 'm_zhuguo', 'm_huoling'];
   const missing = want.filter(id => !window.Items.get(id));
   const recOk = ['r_tianhuo', 'r_jiuqu', 'r_dianling', 'r_qingzhu'].every(id => window.RECIPES.some(r => r.id === id));
   return { missing, recOk };

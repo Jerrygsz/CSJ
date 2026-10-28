@@ -1,31 +1,28 @@
 // 炼制配方补充（第四部·灵兽/丹道）：饲灵丸 / 造化丹
-// 说明：本文件随 game.js 一并载入，向 window.RECIPES 增补 2 条炼丹方，
-// 并登记其对应的成品丹药与材料，使「炼丹方 11 条」成立。
+// 说明：本文件随 game.js 一并载入，向 window.RECIPES 增补 2 条炼丹方。
 // 注：原备份中本文件内容已丢失（仅余空快照），此处按原著设定重建其结构与效果。
+//
+// 20261028h 校对：
+//   · 删「饲灵草」「造化果」两个原著作没有的材料名（前传/仙界篇 0 命中）；
+//   · 饲灵丸改由灵芝配人参炼成（原著只说「炼制饲灵丸的一些药材种子」，未点名），
+//     产出直接并入罐里的饲灵丸（m_siling），否则炼出来的丸子喂不了灵兽；
+//   · 造化丹按原著改用灵烛果为主药——「此灵果除了可炼制造化丹外，即使生服也另有妙用」。
 (function () {
-  // 1) 材料
-  window.MATERIALS = window.MATERIALS || [];
-  window.MATERIALS.push(
-    { id: 'm_silingcao', name: '饲灵草', icon: '🌿', rarity: 1, desc: '叶脉流光，喂灵兽最养神的一味。饲灵丸主药。' },
-    { id: 'm_zaohuacao', name: '造化果', icon: '🍇', rarity: 2, desc: '生于灵脉尽头，三百年一结。造化丹主引果。' }
-  );
-
-  // 2) 成品丹药
+  // 1) 成品丹药
   window.ITEMS = window.ITEMS || [];
   window.ITEMS.push(
-    { id: 'siling', name: '饲灵丸', rarity: 2, icon: '💊', req: 12, desc: '以饲灵草炼成，喂灵宠可短时增其神识。', craftOnly: true },
-    { id: 'zaohua', name: '造化丹', rarity: 4, icon: '🌠', req: 84, desc: '造化果为核，辅以灵草。修为 +35%，服下可先尝一口下一层境界。', craftOnly: true, effect: { xpMul: 0.35 } }
+    { id: 'zaohua', name: '造化丹', rarity: 4, icon: '🌠', req: 84, desc: '灵烛果为核，辅以灵草。修为 +35%，服下可先尝一口下一层境界——原著里是四族拍卖会上的「圣药」', craftOnly: true, effect: { xpMul: 0.35 } }
   );
 
-  // 3) 刷新索引（items.js 在载入时已将 ALL_ITEMS 固化为快照，追加后需重建）
+  // 2) 刷新索引（items.js 在载入时已将 ALL_ITEMS 固化为快照，追加后需重建）
   window.ALL_ITEMS = window.ITEMS.concat(window.MATERIALS);
 
-  // 4) 配方
+  // 3) 配方
   window.RECIPES = window.RECIPES || [];
   window.RECIPES.push(
-    { id: 'r_siling', kind: 'alchemy', name: '饲灵丸', out: 'siling', outN: 1, cost: 120, req: 12, rate: 0.78,
-      mats: [['m_silingcao', 2], ['m_chijing', 1]], desc: '饲灵草配赤精草，喂灵宠提神。' },
-    { id: 'r_zaohua', kind: 'alchemy', name: '造化丹', out: 'zaohua', outN: 1, cost: 400, req: 24, rate: 0.6,
-      mats: [['m_zaohuacao', 2], ['m_zihua', 1]], desc: '造化果辅以紫猴花，丹成有造化之机。' }
+    { id: 'r_siling', kind: 'alchemy', name: '饲灵丸', out: 'm_siling', outN: 1, cost: 120, req: 12, rate: 0.30,
+      mats: [['m_lingzhi', 2], ['m_chijing', 1]], desc: '灵芝配人参，捣成药泥搓成丸。古修士调教灵兽，用的就是这一味。' },
+    { id: 'r_zaohua', kind: 'alchemy', name: '造化丹', out: 'zaohua', outN: 1, cost: 400, req: 24, rate: 0.12,
+      mats: [['m_lingzhu', 2], ['m_lingzhi', 2]], desc: '灵烛果为主，灵芝温养。灵烛果这灵物，生服也能提升些许修为。' }
   );
 })();

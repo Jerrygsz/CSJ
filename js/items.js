@@ -23,7 +23,7 @@ window.SLOTS = [
 // ---------- 材料（不进成品掉落池，按地图 mats 配置掉落，也可用于炼制） ----------
 window.MATERIALS = [
   // 灵草
-  { id: 'm_chijing',  name: '赤精草',   icon: '🌾', rarity: 0, desc: '后山岩缝里长的低阶灵草，止血生肌，最寻常的一味药。' },
+  { id: 'm_chijing',  name: '人参',     icon: '🌾', rarity: 0, desc: '后山挖的野参，年头不长，药性尚浅。止血生肌最寻常的一味药——滴一滴绿液，隔夜就能催成百年参。' },
   { id: 'm_huangjing',name: '黄精',     icon: '🌿', rarity: 0, desc: '山阴处挖的老黄精，补气。凡人也吃，修士也吃。' },
   { id: 'm_zihua',    name: '紫猴花',   icon: '🌸', rarity: 1, desc: '花开如猴面，紫得发乌。筑基丹三味主药之一。' },
   { id: 'm_tianling', name: '天灵果',   icon: '🍒', rarity: 2, desc: '生于灵气汇聚处，果皮薄得能看见里面的光。筑基丹主药。' },
@@ -68,16 +68,16 @@ window.ITEMS = [
   // 只掉材料，丹要自己炼 —— 筑基丹如此，止血丹亦如此
   { id: 'huiqi',    name: '止血丹',   rarity: 0, icon: '🔴', req: 1, desc: '回血 30%，其后 12 息持续回血。七玄门药庐最寻常的一味，止血生肌', craftOnly: 'alchemy',
     effect: { healPct: 0.30 }, buffs: [{ stat: 'regen', amount: 2.0, dur: 12 }] },
-  { id: 'lingzhi',  name: '辟谷丹',   rarity: 0, icon: '🍄', req: 1, desc: '服下 20 息不思饮食，气血自回。赶路闭关都靠它', craftOnly: 'alchemy',
+  { id: 'lingzhi',  name: '辟谷丹',   rarity: 0, icon: '🍄', req: 1, desc: '服下 20 息不思饮食，气血自回。韩立当年是拿几株百年草药从人手里换来的一瓶', craftOnly: 'alchemy',
     effect: { healPct: 0.12 }, buffs: [{ stat: 'regen', amount: 1.5, dur: 20 }] },
   { id: 'lingshi',  name: '低阶灵石', rarity: 0, icon: '💎', req: 1, desc: '捏碎了吞吐灵气，得 8 点修为', effect: { xp: 8 } },
-  { id: 'peiyuan',  name: '养精丹',   rarity: 2, icon: '🟠', req: 56, desc: '回血 45%，其后 15 息持续回血。结丹修士随身的家底', craftOnly: 'alchemy',
-    effect: { healPct: 0.45 }, buffs: [{ stat: 'regen', amount: 2.5, dur: 15 }] },
-  { id: 'huanglong',name: '黄龙丹',   rarity: 2, icon: '🟡', req: 8, desc: '30 息内所得修为 +25%。炼气期最实在的一味', craftOnly: 'alchemy',
+  { id: 'peiyuan',  name: '养精丹',   rarity: 2, icon: '🟠', req: 8, desc: '回血 32%，其后 15 息持续回血。墨大夫药书四味之一——内外伤不论多重，一粒下去总能保住性命', craftOnly: 'alchemy',
+    effect: { healPct: 0.32 }, buffs: [{ stat: 'regen', amount: 2.0, dur: 15 }] },
+  { id: 'huanglong',name: '黄龙丹',   rarity: 2, icon: '🟡', req: 8, desc: '30 息内所得修为 +25%。墨大夫药书四味之一，增加功力、脱胎换骨；炼气期最实在的一味', craftOnly: 'alchemy',
     buffs: [{ stat: 'xpMul', amount: 0.25, dur: 30 }] },
-  { id: 'jinsui',   name: '金髓丸',   rarity: 3, icon: '🟤', req: 12, desc: '25 息内伤害 +20%、出手更急。丹成色如金髓，入口滚烫', craftOnly: 'alchemy',
-    buffs: [{ stat: 'dmg', amount: 0.20, dur: 25 }, { stat: 'atkSpd', amount: 0.10, dur: 25 }] },
-  { id: 'zhuji',    name: '筑基丹',   rarity: 4, icon: '🟣', req: 35, desc: '伤害 +25%，上限 +60，回血 +1.2。服下可窥筑基之门', craftOnly: 'alchemy', effect: { dmg: 0.25, maxhp: 60, regen: 1.2 } },
+  { id: 'jinsui',   name: '金髓丸',   rarity: 3, icon: '🟤', req: 12, desc: '脱胎换骨：上限 +22；另 25 息内伤害 +15%。与黄龙丹并列的两位主药，丹成色如金髓，入口滚烫', craftOnly: 'alchemy',
+    effect: { maxhp: 22 }, buffs: [{ stat: 'dmg', amount: 0.15, dur: 25 }] },
+  { id: 'zhuji',    name: '筑基丹',   rarity: 4, icon: '🟣', req: 35, desc: '伤害 +25%，上限 +60，回血 +1.2。大门派把持之物，外界一颗难求；韩立自己也知道，光凭一枚就想筑基，几率微乎其微', craftOnly: 'alchemy', effect: { dmg: 0.25, maxhp: 60, regen: 1.2 } },
 
   // ==== 符箓：催动即见效，限时增益 ====
   { id: 'qingyan',  name: '轻身符',   rarity: 1, icon: '📜', req: 1,  desc: '身轻如燕，18 息内移速 +22%', buffs: [{ stat: 'spd', amount: 0.22, dur: 18 }] },
@@ -87,7 +87,7 @@ window.ITEMS = [
   { id: 'qiannian', name: '清心符',   rarity: 3, icon: '🪷', req: 36, desc: '清心明神，20 息内减伤 +12%、缓缓回血', buffs: [{ stat: 'armor', amount: 0.12, dur: 20 }, { stat: 'regen', amount: 1.0, dur: 20 }] },
   { id: 'lianqi',   name: '破禁符',   rarity: 3, icon: '📕', req: 56, desc: '专破禁制屏障，18 息内伤害 +30%、重击 +10%', buffs: [{ stat: 'dmg', amount: 0.30, dur: 18 }, { stat: 'crit', amount: 0.10, dur: 18 }] },
   { id: 'bichen',   name: '避尘符',   rarity: 3, icon: '🛡', req: 56, desc: '尘垢不侵，25 息内减伤 +18%', buffs: [{ stat: 'armor', amount: 0.18, dur: 25 }] },
-  { id: 'chuansong',name: '空间传送符', rarity: 4, icon: '🌀', req: 82, desc: '撕开空间就走，8 息内移速 +55%。元婴修士的保命底牌', buffs: [{ stat: 'spd', amount: 0.55, dur: 8 }] },
+  { id: 'chuansong',name: '传送符',   rarity: 4, icon: '🌀', req: 82, desc: '撕开空间就走，8 息内移速 +55%。元婴修士的保命底牌', buffs: [{ stat: 'spd', amount: 0.55, dur: 8 }] },
   { id: 'tishen',   name: '替身傀儡', rarity: 4, icon: '🪆', req: 82, desc: '替你挨这一下，20 息内减伤 +25%', buffs: [{ stat: 'armor', amount: 0.25, dur: 20 }] },
   { id: 'baoliebao',name: '爆裂符宝', rarity: 4, icon: '💥', req: 82, desc: '符宝催动，20 息内伤害 +40%。用一次少一次', buffs: [{ stat: 'dmg', amount: 0.40, dur: 20 }] },
 
@@ -98,7 +98,7 @@ window.ITEMS = [
 
   // ==== 兵器（装备）====
   { id: 'jingtie',  name: '精铁短剑',   rarity: 1, icon: '🗡', slot: 'weapon', req: 3,  desc: '伤害 +10%，攻速 +4%。七玄门铁匠打的制式短剑', effect: { dmg: 0.10, atkSpd: 0.04 } },
-  { id: 'money_sword', name: '金钱剑',  rarity: 2, icon: '🪙', slot: 'weapon', req: 5,  desc: '伤害 +16%，攻速 +3%。一串铜钱炼成的飞剑，韩立早年第一件本命法器', effect: { dmg: 0.16, atkSpd: 0.03 } },
+  { id: 'money_sword', name: '金蚨子母刃', rarity: 2, icon: '🪙', slot: 'weapon', req: 5,  desc: '伤害 +16%，攻速 +3%。母刃一把、子刃八把，精铁精金所炼；手持母刃便可同时驱使八把子刃。韩立早年在万宝楼用它换来的第一套趁手法器', effect: { dmg: 0.16, atkSpd: 0.03 } },
   { id: 'chitong',  name: '赤铜短戟',   rarity: 2, icon: '🔱', slot: 'weapon', req: 9,  desc: '伤害 +14%，上限 +10。赤铜导灵，斩妖不卷刃', effect: { dmg: 0.14, maxhp: 10 } },
   { id: 'qingzhu',  name: '青竹剑',     rarity: 2, icon: '⚔', slot: 'weapon', req: 7,  desc: '伤害 +18%，移速 +3%。竹中取青，轻而不飘', effect: { dmg: 0.18, spd: 0.03 } },
   { id: 'moyu',     name: '墨玉飞刀',   rarity: 3, icon: '🔪', slot: 'weapon', req: 12, desc: '伤害 +22%，重击 +6%。飞出无声，回手带血', effect: { dmg: 0.22, crit: 0.06 } },
@@ -115,7 +115,7 @@ window.ITEMS = [
   { id: 't_mupai',  name: '旧木牌',     rarity: 0, icon: '🪵', slot: 'trinket', req: 1,  desc: '修为 +3%。三叔给的，说是保平安', effect: { xpMul: 0.03 } },
   { id: 'juling',   name: '聚灵珠',     rarity: 2, icon: '🔮', slot: 'trinket', req: 6,  desc: '拾取 +30%，修为 +8%。灵气自己往身上靠', effect: { pickup: 0.3, xpMul: 0.08 } },
   { id: 't_xuanyu', name: '玄玉珠',     rarity: 3, icon: '⚪', slot: 'trinket', req: 13, desc: '每秒回血 +0.8，上限 +20。玉里像有水在走', effect: { regen: 0.8, maxhp: 20 } },
-  { id: 't_tianlei',name: '天雷子',     rarity: 4, icon: '🟣', slot: 'trinket', req: 22, desc: '重击 +12%，伤害 +15%。摸上去指尖发麻', effect: { crit: 0.12, dmg: 0.15 } },
+  { id: 't_tianlei',name: '天雷子',     rarity: 4, icon: '🟣', slot: 'trinket', req: 22, desc: '重击 +12%，伤害 +15%。截取天地雷电凝成的雷珠，原本共七十三粒，如今所剩无几——据说筑基修士正面硬抗也会灰飞烟灭', effect: { crit: 0.12, dmg: 0.15 } },
   { id: 't_zhangtie',name: '张铁的铁牌', rarity: 2, icon: '🪙', slot: 'trinket', req: 5, desc: '上限 +22，减伤 4%。铁牌边角磨得发亮，背面刻着一个「铁」字', effect: { maxhp: 22, armor: 0.04 }, unique: true },
 
   // ==== 符宝（装备）====

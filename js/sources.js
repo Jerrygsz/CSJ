@@ -43,10 +43,10 @@
   }
 
   // ---------- 一、灵草：跟着「哪座山长什么草」走 ----------
-  // 黄枫谷药园：韩立当药童伺弄的那片药圃，凝神花、灵芝都是园里的常物
+  // 黄枫谷药园：韩立当药童伺弄的那片药圃，灵芝、赤精芝都是园里的常物
   addDrop('bandit', ['m_lingzhi']);
-  addDrop('ghoul', ['m_ningshen']);
-  addTo('yaoyuan', { mats: [['m_lingzhi', 2], ['m_ningshen', 1]] });
+  addDrop('ghoul', ['m_chijing']);
+  addTo('yaoyuan', { mats: [['m_lingzhi', 3]] });
   // 噬灵虫母：虫母体内的晶核
   addTo('yaoyuan', { items: [], mats: [['m_chongjing', 1]] });
   // 地火之屋：地肺之火边上长的火灵草
@@ -56,10 +56,13 @@
   addDrop('haishou', ['m_nishang']);
   // 虚天殿：九曲灵参在殿里（玄谷拿它换韩立出手）
   addTo('xutian', { items: [], mats: [['m_jiuqu', 1]] });
-  // 灵渺园：上古修士的灵草园，造化果就在这里
-  addTo('lingmiao', { mats: [['m_zaohuacao', 1], ['m_zhuguo', 1]] });
-  // 昆吾山：阴芝马、定灵玉
-  addTo('kunwu', { mats: [['m_yinzhi', 1], ['m_dingling', 1]] });
+  // 玛瑙角：炼九曲灵参丹的另一味主药，跟着九曲灵参一起在虚天殿一路
+  addTo('xutian', { mats: [['m_manaojiao', 2]] });
+  addDrop('guixiu', ['m_manaojiao']);
+  // 灵渺园：上古修士的灵草园，灵烛果（造化丹的主药）就长在这里
+  addTo('lingmiao', { mats: [['m_lingzhu', 2], ['m_zhuguo', 1]] });
+  // 昆吾山：阴芝马、养魂木
+  addTo('kunwu', { mats: [['m_yinzhi', 1], ['m_yanghun', 1]] });
   // 星宫：元磁神山的核心
   addTo('xinggong', { items: [], mats: [['m_yuanci', 1]] });
 
@@ -71,12 +74,14 @@
     { id: 'bag_ling2',   price: 1800, cat: 'qi' },   // 特制灵兽袋
     { id: 'ring_ling',   price: 2600, cat: 'qi' },   // 灵兽环
     { id: 'm_siling',    price: 40,   cat: 'cai' },  // 饲灵丸
-    { id: 'm_silingcao', price: 20,   cat: 'cai' },  // 饲灵草
-    { id: 'sk_jianfen',  price: 4800, cat: 'skill' },
-    { id: 'sk_shayao',   price: 4600, cat: 'skill' },
-    { id: 'sk_xueling',  price: 5200, cat: 'skill' },
-    { id: 'sk_mingwang', price: 5600, cat: 'skill' },
-    { id: 'sk_jifeng',   price: 5000, cat: 'skill' }
+    // 丹药价：按原著里那几句实打实的数来算——
+    // 一块中阶灵石换一百块低阶（原著明写的公认兑率），韩立当年身上是「两块中阶加近百块低阶」；
+    // 昊元丹「每一颗都价值数千灵石」；降尘丹抵一颗丹再加一千灵石；千年灵药起拍五百。
+    // 另：坊市卖成丹一定比自家开炉贵 —— 否则丹炉就白摆了。
+    { id: 'lingzhi',     price: 30,   cat: 'dan' },  // 辟谷丹（几株百年草药换一瓶）
+    { id: 'huanglong',   price: 400,  cat: 'dan' },  // 黄龙丹
+    { id: 'jinsui',      price: 800,  cat: 'dan' },  // 金髓丸
+    { id: 'peiyuan',     price: 130,  cat: 'dan' }   // 养精丹
   );
 
   // ---------- 二、灵兽：卵跟着「哪里孵出来的」走 ----------
@@ -92,9 +97,13 @@
   addShop('tainan', ['a_bu', 'a_lupi', 't_xuanyu']);
   // 灵兽袋 / 灵兽环：乱星海大城才有这种养兽的家什
   addShop('tianxing', ['bag_ling2', 'ring_ling']);
-  // 饲灵丸 / 饲灵草：喂灵宠的，两座坊市都卖
-  addShop('tainan', ['m_siling', 'm_silingcao']);
-  addShop('tianxing', ['m_siling', 'm_silingcao']);
+  // 饲灵丸：喂灵宠的，两座坊市都卖
+  addShop('tainan', ['m_siling']);
+  addShop('tianxing', ['m_siling']);
+  // 丹药：原著里这两座坊市摆得出来的成丹。
+  // （筑基丹不在此列 —— 原著「在外界找不到一颗」，只能自家开炉）
+  addShop('tainan', ['huanglong', 'jinsui', 'peiyuan', 'lingzhi']);
+  addShop('tianxing', ['huanglong', 'jinsui', 'peiyuan']);
 
   // ---------- 三·五、丹方：谁给的方子，就在哪里得到 ----------
   // 没有丹方，炉子不认这味药（筑基丹/养精丹/黄龙丹/金髓丸 四张）

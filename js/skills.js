@@ -24,11 +24,11 @@
 
 window.SKILLS = [
   // ============ 炼气期：七玄门根基 → 太南小会 → 血色禁地 → 天星城 ============
-  { id: 'sword', name: '控物术', icon: '🗡', max: 6, minLv: 1, main: true, type: 'ranged',
-    atk: { kind: 'beam', base: 8, perLv: 3, cd: 0.85, countBase: 1, countPerLv: 0.5, pierceBase: 1, piercePerLv: 1 / 3, range: 360, home: false, life: 1.4, vfx: 'qingmang' },
-    desc: '以神念御物，一道青光直取最近的敌人。长春功所含的基础法术，韩立起步就靠它' },
+  { id: 'sword', name: '驱物术', icon: '🗡', max: 6, minLv: 1, main: true, type: 'ranged',
+    atk: { kind: 'beam', base: 8, perLv: 3, cd: 0.85, countBase: 1, countPerLv: 0.34, pierceBase: 1, piercePerLv: 1 / 3, range: 360, home: false, life: 1.4, vfx: 'qingmang' },
+    desc: '以神念御物，一道青光直取最近的敌人。与御风诀、定神符同属长春功所含的三门基础法术，韩立起步就靠它' },
   { id: 'fire', name: '火弹术', icon: '🔥', max: 5, minLv: 5, type: 'ranged_aoe',
-    atk: { kind: 'beam', base: 9, perLv: 4, cd: 2.0, countBase: 1, countPerLv: 0.5, range: 520, home: false, life: 1.5, pierceBase: 1, vfx: 'fire' },
+    atk: { kind: 'beam', base: 14, perLv: 6, cd: 1.5, countBase: 1, countPerLv: 0.5, range: 520, home: false, life: 1.5, pierceBase: 1, vfx: 'fire' },
     desc: '长春功所含的基础法术：一团火球直直打出去，撞上就炸。韩立最早会的攻击手段' },
   { id: 'orb', name: '金光罩', icon: '🛡', max: 5, minLv: 8, type: 'aura',
     atk: { kind: 'orbit', base: 5, perLv: 2, rad: 36, countBase: 0, countPerLv: 1, cdHit: 0.4, vfx: 'gang' },
@@ -74,8 +74,8 @@ window.SKILLS = [
     effect: { spd: 0.07, atkSpd: 0.04 },
     desc: '妖族禽修的身法：九转之间身形如风，配风雷翅可再快一线' },
   { id: 'xuelian', name: '血炼神光', icon: '🩸', max: 6, minLv: 56, type: 'ranged',
-    atk: { kind: 'beam', base: 12, perLv: 5, cd: 1.8, countBase: 1, countPerLv: 0.34, range: 480, pierceBase: 2, life: 1.3, vfx: 'blood' },
-    desc: '玄阴经附属的血炼之法：一道血光打出去，吞了对方的精血再回来养自己' },
+    atk: { kind: 'beam', base: 18, perLv: 7, cd: 1.8, countBase: 1, countPerLv: 0.34, range: 480, pierceBase: 2, life: 1.3, leech: 0.35, vfx: 'blood' },
+    desc: '玄阴经附属的血炼之法：一道血光打出去，吞了对方的精血再回来养自己——伤人的三成五化回己身' },
   { id: 'sanyan', name: '三焰扇', icon: '🪭', max: 6, minLv: 56, type: 'ranged_aoe',
     atk: { kind: 'spread', base: 11, perLv: 4, cd: 2.6, countBase: 3, countPerLv: 0.5, range: 480, home: false, life: 1.2, spread: 0.5, pierceBase: 1, vfx: 'fan' },
     desc: '虚天殿所得古宝扇形仿法，三色火扇一扇到底，正面一片都过不去' },

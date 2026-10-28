@@ -46,7 +46,7 @@
     // ---- 丹药（杀人越货 / 殿中所得，不是丹方） ----
     // 降尘丹是六连殿拿命换的东西，古长老身上那几枚就是全部来历；
     // 补天丹是虚天殿二层的存货。这两味原著里都不是韩立炼出来的，所以不给丹方。
-    { id: 'jiangchen', name: '降尘丹', rarity: 4, icon: '🌫', req: 40, desc: '修为 +22%，上限 +50。古长老袖里那五枚，六连殿拿它换散修的命；原著里只能「有一定几率」助结丹', effect: { xpMul: 0.22, maxhp: 50 } },
+    { id: 'jiangchen', name: '降尘丹', rarity: 4, icon: '🌫', req: 40, desc: '修为 +22%，上限 +50。六连殿请一位假丹修士出手，就赠一颗——原著里此丹只「有一定几率」助结丹', effect: { xpMul: 0.22, maxhp: 50 } },
     // 雪灵水：第376章，透明清水样液体，启盖一股奇寒阴气 —— 结丹「必须服用」的灵物，六连殿白水楼重金求得
     { id: 'xueling', name: '雪灵水', rarity: 4, icon: '💧', req: 48, desc: '透明清水样液体，启盖便有一股奇寒阴气扑面。辅助结丹、增加结丹几率必须服用的灵物，世间难求', effect: { maxhp: 40, regen: 1 } },
     // 碧焰酒：裂风兽一族以化形阶妖丹酿的灵酒，原著里韩立借它冲过结丹中期这道瓶颈
@@ -54,7 +54,7 @@
     // 原著只把它们写成「有助突破瓶颈」的辅助灵丹，没点名是哪一道关卡 —— 故只作修行辅助，不设门槛
     { id: 'haoyuan', name: '昊元丹', rarity: 3, icon: '🔵', req: 56, desc: '结丹期修士突破瓶颈、增进修为的灵丹。服下进境快上几分', effect: { xpMul: 0.12 } },
     { id: 'peiyin',  name: '培婴丹', rarity: 4, icon: '💊', req: 82, desc: '上古宗门镇宗的绿色灵丹，洗筋易髓、壮大元婴，使人更易破修炼瓶颈', effect: { xpMul: 0.18 } },
-    { id: 'butian',    name: '补天丹', rarity: 4, icon: '☀', req: 52, desc: '伤害 +30%，上限 +80，回血 +1.5。虚天殿二层带出来的，世上没有第二炉', effect: { dmg: 0.30, maxhp: 80, regen: 1.5 }, unique: true },
+    { id: 'butian',    name: '补天丹', rarity: 4, icon: '☀', req: 52, desc: '伤害 +30%，上限 +80，回血 +1.5。从虚天鼎里取出来的那一颗——鼎没取出，丹只现世一枚', effect: { dmg: 0.30, maxhp: 80, regen: 1.5 }, unique: true },
     // ---- 兵器 / 护甲 ----
     { id: 'w_qingzhu', name: '青竹蜂云剑', rarity: 4, icon: '⚔', slot: 'weapon', req: 56, desc: '伤害 +45%，重击 +8%。本命飞剑，七十二口，化蜂成云', effect: { dmg: 0.45, crit: 0.08 }, craftOnly: 'forge' },
     { id: 'a_yunwen',  name: '云纹法衣',   rarity: 4, icon: '👘', slot: 'armor', req: 44, desc: '上限 +90，减伤 16%。云纹自生，水火不侵', effect: { maxhp: 90, armor: 0.16 }, craftOnly: 'forge' },
@@ -878,11 +878,14 @@
   // 金雷竹、万年灵乳、养魂木这种万年灵物，也没人摆在摊上卖。
   window.SHOP_STOCK.push(
     { id: 'moyu',       price: 680,  cat: 'qi' },
-    // 乱星海大城才有的两味灵物（原著：白水楼卖雪灵水、碧焰酒则是裂风兽一族所酿）
+    // 乱星海大城才有的几味灵物（原著：白水楼卖雪灵水/天火液，六连殿拿降尘丹当报酬，
+    // 裂风兽风希自酿的碧焰酒）。昊元丹原著「每一颗都价值数千灵石」，按三千挂。
     { id: 'xueling',    price: 2600, cat: 'dan' },
+    { id: 'tianhuo',    price: 3800, cat: 'dan' },
+    { id: 'jiangchen',  price: 1200, cat: 'dan' },
     { id: 'biyanjiu',   price: 1800, cat: 'dan' },
-    { id: 'haoyuan',    price: 900,  cat: 'dan' },
-    { id: 'peiyin',     price: 1900, cat: 'dan' },
+    { id: 'haoyuan',    price: 3000, cat: 'dan' },
+    { id: 'peiyin',     price: 3600, cat: 'dan' },
     { id: 'a_xuangui',  price: 1400, cat: 'qi' },
     { id: 't_tianlei',  price: 1800, cat: 'qi' },
     { id: 'fb_feng',    price: 620,  cat: 'qi' },
@@ -915,9 +918,9 @@
       'moyu', 'xuantie', 'a_xuangui', 't_tianlei',
       'm_yaodan', 'm_banyao', 'm_xueyu',
       'm_xuantie', 'm_hantie', 'm_yusui', 'm_fuzhi', 'm_lingmo',
-      // 结丹那一炉要用的：雪灵水（六连殿白水楼一路的硬货）、碧焰酒（裂风兽所酿，外星海无坊市，故在此流通）、
-      // 昊元丹（结丹期增进修为的灵丹）。这三味原著里都不是随便哪个摊子都有，所以只挂乱星海这一处。
-      'xueling', 'biyanjiu', 'haoyuan'];
+      // 结丹那一炉要用的：雪灵水、天火液（六连殿白水楼一路的硬货）、
+      // 降尘丹（六连殿给假丹修士的报酬，丹一颗）、昊元丹（结丹期增进修为的灵丹）。
+      'xueling', 'tianhuo', 'jiangchen', 'biyanjiu', 'haoyuan'];
     TX.shopSub = '正、魔、星宫三方同街摆摊，谁也不问谁的来历。';
   }
 

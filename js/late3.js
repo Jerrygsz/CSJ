@@ -153,20 +153,20 @@
 
     // ---- 突破系统新增丹药（依原著：可炼数枚，「押丹」越多把握越大） ----
     { id: 'tianhuo', name: '天火液', rarity: 3, icon: '🔥', req: 56, desc: '火属性妖丹为基，火灵草引火，朱果定火性。结丹主药，闭死关前服下（韩立服的是雪灵水与天火液）。', effect: { xpMul: 0.12 } },
-    { id: 'jiuqu',   name: '九曲灵参丹', rarity: 4, icon: '💊', req: 82, desc: '三百年九曲灵参炼成，碎丹成婴几率大增。结婴第一圣药。', effect: { maxhp: 90, regen: 1.5 } },
-    { id: 'dianling', name: '定灵丹', rarity: 4, icon: '💊', req: 82, desc: '定灵玉为核，安魂定神。碎丹成婴必备——少了它神识溃散。', effect: { maxhp: 60, regen: 1.2 } },
+    { id: 'jiuqu',   name: '九曲灵参丹', rarity: 4, icon: '💊', req: 82, desc: '九曲灵参炼成，助凝元婴。玄骨手里那张方子，只他一人知道。', effect: { maxhp: 90, regen: 1.5 } },
+    { id: 'dianling', name: '定灵丹', rarity: 4, icon: '💊', req: 82, desc: '又名安魂丹。增进修为、定心安魂，能减轻心魔入侵——结婴前服一枚，那一道关口会好过得多。', effect: { maxhp: 60, regen: 1.2, xpMul: 0.08 } },
 
     // ---- 结丹可选前置功法（P1-9） ----
     { id: 'sanzhong', name: '三转重元功', rarity: 3, icon: '📗', req: 50, teach: 'sanzhong', desc: '散功重修三次，每重修回境界再结丹。结丹可选前置，修习后结丹品质更佳。', unique: true },
 
     // ---- 金雷竹降级为法宝材料：青竹蜂云剑（P1-8） ----
-    { id: 't_qingzhu', name: '青竹蜂云剑·金雷', rarity: 4, icon: '🎍', slot: 'weapon', req: 92, desc: '伤害 +40%，攻速 +12%。金雷竹为本命剑骨，雷光绕竹。', effect: { dmg: 0.40, atk: 0.12 }, unique: true, craftOnly: 'forge' },
+    { id: 't_qingzhu', name: '青竹蜂云剑·金雷', rarity: 4, icon: '🎍', slot: 'weapon', req: 92, desc: '伤害 +40%，攻速 +12%。金雷竹为本命剑骨，雷光绕竹。', effect: { dmg: 0.40, atkSpd: 0.12 }, unique: true, craftOnly: 'forge' },
 
     // ---- 墨大夫夺舍战掉落（P0-2） ----
     { id: 'lianzhi', name: '炼尸术残卷', rarity: 3, icon: '📜', req: 7, desc: '墨大夫留下的炼尸残卷。铁奴一脉由此而来——日后凝煞丹、炼曲魂，都从这一页起。', unique: true },
 
-    // ---- 掌天瓶（P0-3）：七玄门获得，此时只是古朴小瓶，未激活 ----
-    { id: 'gupu', name: '古朴小瓶', rarity: 4, icon: '🍶', req: 1, desc: '墨大夫误认的普通小瓶。瓶底似有绿痕，却还滴不出东西 —— 炼气后期方能激活。', unique: true }
+    // ---- 掌天瓶（P0-3）：七玄门获得，此时只是神秘小瓶，未激活 ----
+    { id: 'gupu', name: '神秘小瓶', rarity: 4, icon: '🍶', req: 1, desc: '墨大夫误认的普通小瓶。瓶底似有绿痕，却还滴不出东西 —— 炼气后期方能激活。', unique: true }
   );
 
   // 饲灵丸：喂灵兽的丸子（材料一类，怪物也会掉）
@@ -178,10 +178,9 @@
   window.MATERIALS.push(
     { id: 'm_zhuguo',  name: '朱果',     icon: '🍎', rarity: 1, desc: '火山脚下红的果，定火性，天火液辅药。' },
     { id: 'm_huoling', name: '火灵草',   icon: '🌶', rarity: 1, desc: '生于火脉旁，叶尖常年带火星。天火液主引火之草。' },
-    { id: 'm_jiuqu',   name: '九曲灵参', icon: '🪵', rarity: 3, desc: '根须九转如灵蛇，三百年以上方成。九曲灵参丹主药，增结婴几率。' },
-    { id: 'm_dingling', name: '定灵玉',   icon: '🧿', rarity: 4, desc: '天星城拍卖会流出的玉胎，安魂定神。定灵丹之核，碎丹必备。' },
-    { id: 'm_ningshen', name: '凝神花',   icon: '🪻', rarity: 2, desc: '夜开昼合，香气镇神。定灵丹辅药。' },
-    { id: 'm_lingzhi',  name: '灵芝',     icon: '🍄', rarity: 1, desc: '百年灵芝，温养神识。定灵丹/九曲灵参丹辅药。' },
+    { id: 'm_jiuqu',   name: '九曲灵参', icon: '🪵', rarity: 3, desc: '根须九转如灵蛇，三百年以上方成。会幻化成鸟兽自行逃走，极难捕。九曲灵参丹主药。' },
+    { id: 'm_manaojiao', name: '玛瑙角', icon: '🦄', rarity: 3, desc: '玛瑙质地的兽角。炼九曲灵参丹与伴妖草一样，都是吃不消的消耗。' },
+    { id: 'm_lingzhi',  name: '灵芝',     icon: '🍄', rarity: 1, desc: '百年灵芝，温养神识。定灵丹/造化丹的辅药。' },
     { id: 'm_yuanci',   name: '元磁神山核心', icon: '🌀', rarity: 4, desc: '元磁神山最深处的磁核，重得拿不动。化神前置——修元磁神光就靠它。' }
   );
 
@@ -199,18 +198,18 @@
 
   // ========================= 五、新增配方 =========================
   window.RECIPES.push(
-    { id: 'r_tianhuo', kind: 'alchemy', name: '天火液', out: 'tianhuo', outN: 1, cost: 600, req: 56, rate: 0.6,
+    { id: 'r_tianhuo', kind: 'alchemy', name: '天火液', out: 'tianhuo', outN: 1, cost: 600, req: 56, rate: 0.16,
       mats: [['m_huodan', 1], ['m_huoling', 2], ['m_zhuguo', 1]],
-      desc: '火蟾兽内丹为基（火属性妖丹），火灵草引火，朱果定火性。结丹辅助丹，闭死关前服下。' },
-    { id: 'r_jiuqu', kind: 'alchemy', name: '九曲灵参丹', out: 'jiuqu', outN: 1, cost: 2500, req: 82, rate: 0.5,
-      mats: [['m_jiuqu', 1], ['m_yusui', 1], ['m_lingzhi', 3]],
-      desc: '三百年九曲灵参为主，玉髓引灵，灵芝温养。碎丹成婴几率大增。' },
-    { id: 'r_dianling', kind: 'alchemy', name: '定灵丹', out: 'dianling', outN: 1, cost: 2200, req: 82, rate: 0.5,
-      mats: [['m_dingling', 1], ['m_ningshen', 2], ['m_lingzhi', 3]],
-      desc: '定灵玉为核，凝神花镇神，灵芝辅之。碎丹时安魂定神，防神识溃散（必备）。' },
-    { id: 'r_moyuan', kind: 'alchemy', name: '魔元丹', out: 'moyuan', outN: 1, cost: 3600, req: 108, rate: 0.4,
+      desc: '火蟾兽内丹为基（火属性妖丹），火灵草引火，朱果定火性。结丹辅助灵物，闭死关前服下。' },
+    { id: 'r_jiuqu', kind: 'alchemy', name: '九曲灵参丹', out: 'jiuqu', outN: 1, cost: 2500, req: 82, rate: 0.08,
+      mats: [['m_jiuqu', 1], ['m_manaojiao', 1], ['m_banyao', 2]],
+      desc: '九曲灵参为主，玛瑙角、伴妖草为辅。三味一样都耗不起——原著里一连败了数次才成丹。' },
+    { id: 'r_dianling', kind: 'alchemy', name: '定灵丹', out: 'dianling', outN: 1, cost: 2200, req: 82, rate: 0.10,
+      mats: [['m_yanghun', 1], ['m_lingzhi', 3]],
+      desc: '定灵丹又名安魂丹：养魂木为核，灵芝温养。结婴前服一枚，过心魔一关便轻松许多。' },
+    { id: 'r_moyuan', kind: 'alchemy', name: '魔元丹', out: 'moyuan', outN: 1, cost: 3600, req: 108, rate: 0.06,
       mats: [['m_yaodan', 3], ['m_xuesha', 2]],
-      desc: '魔陀山秘法：妖丹为骨，血煞凝元。原著里韩立以玄玉换丹，此处折作玄玉灵材自炼 —— 三枚押上，化神才稳。' },
+      desc: '上古魔道失传的「魔炼天元丹」：妖丹为骨，血煞凝元。原著里韩立以万年玄玉换丹，这里折作灵材自炼 —— 三枚押上，化神才稳。' },
     { id: 'r_t_qingzhu', kind: 'forge', name: '青竹蜂云剑·金雷', out: 't_qingzhu', outN: 1, cost: 4800, req: 92, rate: 0.45,
       mats: [['m_jinlei', 1], ['m_gengjing', 2], ['m_yusui', 4]],
       desc: '金雷竹为本命剑骨，庚精为锋，玉髓刻符。韩立本命法宝之路的开端。' }

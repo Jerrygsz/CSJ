@@ -1249,7 +1249,7 @@
   // 地图上的 shop 列表与货架常量必须一致（地图那处是硬编码的同一份内容）
   const DJ_PRICE = {
     m_xianyuanshi: 80000, m_shijian: 260000, m_xuanhuang: 90000,
-    jipin: 120000, huiqi: 26000, qiannian: 95000, sk_dawuxing: 380000, sk_zhenyan: 420000
+    jipin: 120000, huiqi: 2000, qiannian: 95000, sk_dawuxing: 380000, sk_zhenyan: 420000
   };
   const DJ_CAT = {
     m_xianyuanshi: 'cai', m_shijian: 'cai', m_xuanhuang: 'cai',
@@ -1266,7 +1266,7 @@
   const WB_SHOP = ['m_xianyuanshi', 'm_shijian', 'm_xuanhuang', 'jipin', 'huiqi', 'qiannian', 'sk_tiansha', 'sk_zhenyan'];
   const WB_PRICE = {
     m_xianyuanshi: 80000, m_shijian: 260000, m_xuanhuang: 90000,
-    jipin: 120000, huiqi: 26000, qiannian: 95000, sk_tiansha: 460000, sk_zhenyan: 420000
+    jipin: 120000, huiqi: 2000, qiannian: 95000, sk_tiansha: 460000, sk_zhenyan: 420000
   };
   const WB_CAT = {
     m_xianyuanshi: 'cai', m_shijian: 'cai', m_xuanhuang: 'cai',

@@ -30,7 +30,7 @@
   window.MATERIALS.push(
     { id: 'm_gengjing', name: '庚精',       icon: '⚙', rarity: 4, desc: '金气凝成的硬块，炼飞剑的骨。天道盟拿它当赌注。' },
     // 天南交易会（阗天城）上流通的东西：韩立此行要换庚精，换到三千年赤精芝、紫铖兜与上古傀儡
-    { id: 'm_chijingzhi', name: '三千年赤精芝', icon: '🍄', rarity: 4, desc: '赤精草长到三千年才成芝，仅次于化形的九曲灵参。元婴老怪拿它当硬通货。' },
+    { id: 'm_chijingzhi', name: '三千年赤精芝', icon: '🍄', rarity: 4, desc: '赤精芝里的极品，足有三千年道行，只长在熔岩地火之内，仅次于化形的九曲灵参。元婴老怪拿它当硬通货。' },
     { id: 'm_kuilei',   name: '上古傀儡核', icon: '⚫', rarity: 4, desc: '上古傀儡留下的核，附一份元婴傀儡的炼制之法。阗天城晶龙阁的拍卖品。' },
     { id: 'm_lingzhu',  name: '灵烛果',     icon: '🕯', rarity: 4, desc: '果身像一截白烛，点在暗处会自己亮。服之可预尝下一层境界。' },
     { id: 'm_yinzhi',   name: '阴芝马',     icon: '🐴', rarity: 3, desc: '长成马形的阴芝，跑得比人快。养元培元的一味好药。' },
@@ -50,12 +50,12 @@
     { id: 'yuanci',   name: '元磁神光',     rarity: 4, icon: '🌌', req: 102, teach: 'yuanci', desc: '习得《元磁神光》。元磁山炼化之后的神通，近身领域的极致', unique: true },
     // ---- 丹药（剧情所得，无丹方） ----
     // 造化丹的定义与丹方统一收在 value.js（造化果炼），此处不再重复定义（曾致 id 重复）。
-    { id: 'moyuan',   name: '魔元丹',       rarity: 4, icon: '😈', req: 108, desc: '伤害 +45%，上限 +160。魔陀山秘丹，原著里韩立拿玄玉换了三枚，化神那一炉的主药', effect: { dmg: 0.45, maxhp: 160 } },
+    { id: 'moyuan',   name: '魔元丹',       rarity: 4, icon: '😈', req: 108, desc: '伤害 +45%，上限 +160。上古失传的「魔炼天元丹」。韩立拿万年玄玉从呼老魔手里换来三颗——化神那一关就多一分希望', effect: { dmg: 0.45, maxhp: 160 } },
     // ---- 兵器 / 护甲 ----
     { id: 'w_xuemo',  name: '血魔剑',       rarity: 4, icon: '🗡', slot: 'weapon', req: 82, desc: '伤害 +42%，重击 +10%。掩月宗大长老的佩剑，剑身有血色纹路', effect: { dmg: 0.42, crit: 0.10 }, unique: true },
-    { id: 'a_xuemo',  name: '血魔甲',       rarity: 4, icon: '🥷', slot: 'armor', req: 82, desc: '上限 +130，减伤 18%。血魔剑的配套甲衣，穿上人显小一圈', effect: { maxhp: 130, armor: 0.18 }, unique: true },
+    { id: 'a_xuemo',  name: '玄玉甲',       rarity: 4, icon: '🥷', slot: 'armor', req: 82, desc: '上限 +130，减伤 18%。万年玄玉磨片缀成的内甲，寒气自里往外透。小极宫玄玉洞里取的料子', effect: { maxhp: 130, armor: 0.18 }, unique: true },
     { id: 'a_jiaolong', name: '蛟龙甲',     rarity: 4, icon: '🐉', slot: 'armor', req: 92, desc: '上限 +160，减伤 20%。坠魔谷蟒兽的皮，水火都咬不穿', effect: { maxhp: 160, armor: 0.20 }, unique: true },
-    { id: 'a_tiancan', name: '冰蚕衣',      rarity: 4, icon: '👘', slot: 'armor', req: 102, desc: '上限 +190，减伤 22%。大晋冰蚕丝织的，刀过不留痕', effect: { maxhp: 190, armor: 0.22 }, unique: true },
+    { id: 'a_tiancan', name: '冰蚕衣',      rarity: 4, icon: '👘', slot: 'armor', req: 102, desc: '上限 +190，减伤 22%。百年冰蚕丝织就，等闲火焰近不得身——原著里玉真人那件辟火宝衣就是这个路子', effect: { maxhp: 190, armor: 0.22 }, unique: true },
     // ---- 法宝 ----
     { id: 't_yanghuan', name: '阳环',       rarity: 4, icon: '💍', slot: 'trinket', req: 82, desc: '伤害 +20%，重击 +8%。两仪环的阳面，压得住北极元光', effect: { dmg: 0.20, crit: 0.08 }, unique: true },
     { id: 't_guiluo', name: '鬼罗幡',       rarity: 4, icon: '🏴', slot: 'trinket', req: 92, desc: '伤害 +24%，拾取 +30%。阴罗宗四长老的幡，幡下养着鬼', effect: { dmg: 0.24, pickup: 0.3 }, unique: true },

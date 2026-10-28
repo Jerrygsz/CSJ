@@ -27,8 +27,8 @@
       desc: '炼虚后期冲击合体的丹药（V10C1770）。',
       effect: { maxhp: 240 } },
     { id: 't_xuantianjian', name: '玄天斩灵剑', rarity: 5, icon: '⚔', slot: 'weapon', req: 260,
-      desc: '玄天之宝，风元大陆西北角出世（V8C1328）。斩灵之剑，非寻常法宝可比。',
-      effect: { dmg: 0.6, atk: 0.2 }, unique: true }
+      desc: '玄天之宝，风元大陆西北角出世（V8C1328）。斩灵之剑，非寻常法宝可比。伤害 +60%，出手快 +20%。',
+      effect: { dmg: 0.6, atkSpd: 0.2 }, unique: true }
   );
   window.MATERIALS.push(
     { id: 'm_zhenlingxue', name: '真灵之血', icon: '🩸', rarity: 4, desc: '真灵遗血。炼虚之后淬体凝元的上品灵物（V9C1359）。' },
@@ -58,8 +58,8 @@
       effect: { dmg: 0.12, armor: 0.08 } },
     // 土皇钉：宝花用以钉住螟虫之母的乾土法则之宝（V11C2229）。
     { id: 't_tuhuangding', name: '土皇钉', rarity: 5, icon: '📌', slot: 'weapon', req: 260, unique: true, noDrop: true,
-      desc: '蕴含一界乾土法则的奇宝。一旦钉中人身，被钉者一身土属性神通便再难施展分毫（V11C2229）。',
-      effect: { dmg: 0.18, atk: 0.10 } },
+      desc: '蕴含一界乾土法则的奇宝。一旦钉中人身，被钉者一身土属性神通便再难施展分毫（V11C2229）。伤害 +18%，出手快 +10%。',
+      effect: { dmg: 0.18, atkSpd: 0.10 } },
     // 万灵伞：虚灵老者以数千成熟体噬金虫炼成的渡劫之宝（V10C1867）。
     { id: 't_wanlingsan', name: '万灵伞', rarity: 5, icon: '🌂', slot: 'trinket', req: 330, unique: true, noDrop: true,
       desc: '以成熟体噬金虫（近乎金刚不坏之体）炼成的伞宝，专御飞升之劫。撑开时万虫环护，劫雷亦难破（V10C1867）。',
@@ -70,8 +70,8 @@
       effect: { maxhp: 380, dmg: 0.08 } },
     // 玄天之宝：内蕴法则之力的先天灵宝，以玄天仙藤炼成，非人力所能为（V7C1252）。
     { id: 't_xuantianzhibao', name: '玄天之宝', rarity: 5, icon: '🗡', slot: 'weapon', req: 260, unique: true, noDrop: true,
-      desc: '内蕴天地法则的先天灵宝，以玄天仙藤炼成，非人力所能锻造。圣岛一脉所得，与玄天斩灵剑同源而异形（V7C1252）。',
-      effect: { dmg: 0.24, atk: 0.12, crit: 0.05 } }
+      desc: '内蕴天地法则的先天灵宝，以玄天仙藤炼成，非人力所能锻造。圣岛一脉所得，与玄天斩灵剑同源而异形（V7C1252）。伤害 +24%，出手快 +12%，重击 +5%。',
+      effect: { dmg: 0.24, atkSpd: 0.12, crit: 0.05 } }
   );
   // 噬金虫王：以数千成熟体噬金虫育化而成的虫王，传闻一成连真仙也要退避三尺（V9C1522 / V10C1866）。
   window.PETS.push(
@@ -1355,7 +1355,7 @@
   // 注意：玄天仙藤**不上货架**。260/330/420 三关要它，能买就等于把大乘之后的进度变成攒钱。
   const TY_SHOP = ['m_zhenlinglin', 'm_zhenlingxue', 'huiqi', 'qiannian', 'jipin', 'sk_baimai', 'sk_jingzhe'];
   const TY_PRICE = {
-    m_zhenlinglin: 9000, m_zhenlingxue: 30000, huiqi: 800, qiannian: 3000, jipin: 45000,
+    m_zhenlinglin: 9000, m_zhenlingxue: 30000, huiqi: 150, qiannian: 3000, jipin: 45000,
     sk_baimai: 26000, sk_jingzhe: 42000
   };
   const TY_CAT = {
