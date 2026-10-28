@@ -307,6 +307,30 @@ body.fs #wrap { background: #000; }
   background: linear-gradient(180deg, var(--bg-card-a), var(--bg-card-b));
   cursor: pointer; transition: border-color .12s, transform .1s;
 }
+/* ---- 行脚折：行程线 + 折叠节点（大地图感：一屏看七八处地名） ---- */
+.wm-route { position: relative; padding-left: 15px; display: flex; flex-direction: column; gap: var(--sp-2); }
+.wm-route::before { content: ''; position: absolute; left: 4px; top: 14px; bottom: 14px;
+  border-left: 1px dashed rgba(201,162,74,0.30); }
+.wm-route .mapcard { position: relative; }
+.wm-route .mapcard::before { content: ''; position: absolute; left: -15px; top: 50%; margin-top: -5px;
+  width: 9px; height: 9px; border-radius: 50%; box-sizing: border-box;
+  background: rgba(201,162,74,0.18); border: 1.5px solid rgba(201,162,74,0.55); z-index: 1; }
+.wm-route .mapcard.done::before { background: var(--line-gold); border-color: var(--line-gold); box-shadow: 0 0 6px rgba(255,210,74,0.45); }
+.wm-route .mapcard.current::before { background: rgba(111,224,138,0.9); border-color: rgba(111,224,138,0.9);
+  box-shadow: 0 0 8px rgba(111,224,138,0.7); }
+.wm-route .mapcard.locked::before { background: rgba(70,74,86,0.9); border-color: rgba(120,126,140,0.5); box-shadow: none; }
+.mapcard.fold .mc-body { display: none; }
+.mapcard.open .mc-mini { visibility: hidden; }   /* 展开后底部已有状态字，右上那枚藏着 */
+.mapcard.fold { padding: 7px 8px; }
+.mc-row2 { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-2); margin-top: 3px; }
+.mc-mini { font-size: var(--fs-micro); flex: none; }
+.mc-mini.on { color: var(--ok); }
+.mc-mini.off { color: var(--text-4); }
+.mc-info { flex: none; font-size: var(--fs-micro); line-height: 1.5; padding: 0 6px;
+  border: 1px solid rgba(201,162,74,0.45); border-radius: var(--r-sm); color: var(--accent-soft); cursor: pointer; }
+.mc-info:hover { color: var(--accent); border-color: var(--accent); }
+.mapcard.open .mc-info { border-color: rgba(201,162,74,0.25); color: var(--text-3); }
+.mc-pos { color: var(--text-3); font-size: var(--fs-micro); letter-spacing: .5px; flex: 1 1 auto; min-width: 0; }
 .mapcard:active { transform: scale(var(--press-lg)); }
 .mapcard:hover { border-color: var(--accent); }
 .mapcard.current { border-color: rgba(111,224,138,0.55); box-shadow: inset 0 0 0 1px rgba(111,224,138,0.15); }
@@ -320,7 +344,7 @@ body.fs #wrap { background: #000; }
 .mc-tag.fight { color: var(--tag-orange); border-color: rgba(255,154,106,0.5); }
 .mc-tag.bossfight { color: var(--danger); border-color: rgba(255,122,122,0.55); }
 .mc-tag.market { color: var(--tag-blue); border-color: rgba(127,216,255,0.5); }
-.mc-pos { color: var(--text-3); font-size: var(--fs-micro); margin-top: 4px; letter-spacing: .5px; }
+
 .mc-desc { color: var(--text-2); font-size: var(--fs-cap); line-height: 1.55; margin-top: 4px; }
 .mc-meta { color: var(--text-3); font-size: var(--fs-micro); line-height: 1.5; margin-top: 4px; }
 .mc-boss { color: var(--danger); font-size: var(--fs-micro); margin-top: 4px; }
@@ -555,6 +579,7 @@ body.fs #wrap { background: #000; }
   color: var(--accent-soft); font-size: var(--fs-cap); letter-spacing: .5px;
 }
 .wm-sec b { color: var(--accent-soft); font-size: var(--fs-cap); letter-spacing: 2px; }
+.wm-sec b::first-letter { color: var(--accent); }
 .wm-sec span { color: var(--text-4); font-size: var(--fs-micro); }
 .wm-sec:first-child { border-top: none; padding-top: 0; margin-top: 0; }
 .wm-sec.empty {

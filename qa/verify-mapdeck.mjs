@@ -158,6 +158,30 @@ const loose = hosts.filter(h => !h.hasTrigger).map(h => h.id);
 ok(loose.length === 0, '没有无引出的散牌（都给了 sideOf 归位）', loose);
 ok(hosts.every(h => h.host !== h.id), '没有支线挂到自己身上', hosts.filter(h => h.host === h.id));
 
+// ---------- 4) 行脚折：默认折叠、详章展开 ----------
+console.log('\n【行脚折：折叠与详章】');
+const fold = await page.evaluate(() => {
+  const F = window.__FR;
+  F.worldmap();
+  const card = document.querySelector('.mapcard[data-map="houroshan"]') || document.querySelector('.mapcard:not(.locked)');
+  if (!card) return { noCard: true };
+  const id = card.getAttribute('data-map');
+  const folded = card.classList.contains('fold') && getComputedStyle(card.querySelector('.mc-body')).display === 'none';
+  const route = !!card.closest('.wm-route');
+  card.querySelector('.mc-info').click();
+  const card2 = document.querySelector('.mapcard[data-map="' + id + '"]');
+  const opened = card2.classList.contains('open') && getComputedStyle(card2.querySelector('.mc-body')).display !== 'none';
+  // 再点一次收回去
+  card2.querySelector('.mc-info').click();
+  const closed = document.querySelector('.mapcard[data-map="' + id + '"]').classList.contains('fold');
+  return { folded, route, opened, closed };
+});
+ok(fold.noCard !== true, '有卡可测', fold);
+ok(fold.folded, '卡片默认折叠（详情两行，正文隐藏）', fold);
+ok(fold.route, '卡片在行程线（wm-route）上', fold);
+ok(fold.opened, '点「详」章展开全文详情', fold);
+ok(fold.closed, '再点「收」章收回折叠', fold);
+
 ok(errs.length === 0, '全程无 JS 报错', errs.slice(0, 3));
 
 console.log('\n===================================');

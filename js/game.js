@@ -5098,6 +5098,10 @@
     let state = unlocked ? (done ? '已了' : '可入') : '未至';
     if (isCave) state = '可静修 · 可炼制';
     else if (m.id === save.mapId) state = '当前所在';
+    // 行脚折：默认只露两行（名/地点/状态），点「详」章才展开全文 ——
+    // 一屏能看七八处地名，才有「从青牛山一路走到五龙海」的大地图感。
+    const open = !!(G.wmOpen && G.wmOpen[m.id]);
+    cls.push(open ? 'open' : 'fold');
     const tagCls = isCave ? 'home' : m.side ? 'side' : m.type === 'story' ? 'story' : m.type === 'market' ? 'market' : m.type === 'boss' ? 'bossfight' : 'fight';
     const tagTxt = isCave ? '洞府' : m.tag;
     const caveDef = isCave ? CAVES[m.cave] : null;
@@ -5123,12 +5127,14 @@
     return '<div class="' + cls.join(' ') + '" data-map="' + m.id + '">' +
       '<div class="mc-top"><b class="mc-num">' + numTxt + '</b>' +
       '<span class="mc-name">' + m.name + '</span>' +
-      '<span class="mc-tag ' + tagCls + '">' + tagTxt + '</span></div>' +
-      '<div class="mc-pos">' + m.pos + (caveDef ? '　·　' + caveDef.name : '') + '</div>' +
-      '<div class="mc-desc">' + mainDesc + '</div>' +
+      '<span class="mc-tag ' + tagCls + '">' + tagTxt + '</span>' +
+      '<span class="mc-info" data-info="' + m.id + '">' + (open ? '收' : '详') + '</span></div>' +
+      '<div class="mc-row2"><span class="mc-pos">' + m.pos + (caveDef ? '　·　' + caveDef.name : '') + '</span>' +
+      '<span class="mc-mini ' + (unlocked ? 'on' : 'off') + '">' + state + '</span></div>' +
+      '<div class="mc-body"><div class="mc-desc">' + mainDesc + '</div>' +
       extra + bossLine +
       '<div class="mc-foot"><span class="mc-state ' + (unlocked ? 'on' : 'off') + '">' + state + '</span>' +
-      (unlocked ? go : '<span class="mc-lock">前图未了</span>') + '</div>' +
+      (unlocked ? go : '<span class="mc-lock">前图未了</span>') + '</div></div>' +
       '</div>';
   }
   // ================= 大境界分组：功法按境界收纳 =================
@@ -5220,13 +5226,14 @@
     for (const g of groups) {
       const meta = arcs.find(a => a.id === g.id);
       const doneN = g.maps.filter(m => save.cleared.indexOf(m.id) >= 0).length;
-      rows += '<div class="wm-sec"><b>' + (meta ? meta.name : '其余行迹') + '</b><span>' +
+      rows += '<div class="wm-sec"><b>❖ ' + (meta ? meta.name : '其余行迹') + '</b><span>' +
         (meta ? meta.note + '　' : '') + doneN + ' / ' + g.maps.length + '</span></div>';
-      rows += g.maps.map(m => deckHtml(m, cnNum(mains.indexOf(m) + 1), sidesByMain[m.id] || [], sidesBySide)).join('');
+      // 行程线：一卷一销金线，节点就是这一路的地名
+      rows += '<div class="wm-route">' + g.maps.map(m => deckHtml(m, cnNum(mains.indexOf(m) + 1), sidesByMain[m.id] || [], sidesBySide)).join('') + '</div>';
     }
     if (orphans.length) {
-      rows += '<div class="wm-sec"><b>支线 · 因缘</b><span>遇人遇事而开　' + orphans.length + ' / ' + MAPS.filter(m => m.side).length + '</span></div>';
-      rows += orphans.map((m, i) => mapCardHtml(m, '支' + (i + 1))).join('');
+      rows += '<div class="wm-sec"><b>❖ 支线 · 因缘</b><span>遇人遇事而开　' + orphans.length + ' / ' + MAPS.filter(m => m.side).length + '</span></div>';
+      rows += '<div class="wm-route">' + orphans.map((m, i) => mapCardHtml(m, '支' + (i + 1))).join('') + '</div>';
     } else if (!sides.length) {
       rows += '<div class="wm-sec empty">行迹之间，或遇旧人旧事。走近了，自会开口。</div>';
     }
@@ -6735,6 +6742,16 @@
   if (fswBtn2) fswBtn2.addEventListener('click', toggleFullscreen);
 
   if (elWmList) elWmList.addEventListener('click', e => {
+    // 「详」章：展开 / 收起这张卡的详情（不改变进入逻辑 —— 点卡片其余位置照旧直接进）
+    const inf = e.target.closest('[data-info]');
+    if (inf) {
+      e.stopPropagation();
+      const iid = inf.getAttribute('data-info');
+      G.wmOpen = G.wmOpen || {};
+      G.wmOpen[iid] = !G.wmOpen[iid];
+      renderWorldMap();
+      return;
+    }
     // 叠牌的展开 / 收起
     const tog = e.target.closest('[data-decktog]');
     if (tog) {
@@ -6756,6 +6773,8 @@
       if (deckSides.length && !(G.wmDeck && G.wmDeck[id])) {
         G.wmDeck = G.wmDeck || {};
         G.wmDeck[id] = true;
+        G.wmOpen = G.wmOpen || {};
+        G.wmOpen[id] = true;   // 顺手把这张卡也展开，读到它自己的详情
         renderWorldMap();
         return;
       }
