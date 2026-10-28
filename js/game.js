@@ -722,19 +722,15 @@
     const a = G.alch; if (!a) return 0;
     return a.plan.reduce((s, c) => s + c[1], 0);
   }
-  function setupAlchQuota() {
-    G.alch = null;
-    G.alchWet = false;
-    const zones = (window.ALCH_ZONES || []).filter(z => z.map === G.mapId);
-    if (!zones.length || !window.Recipes) return;
-    // 绿液区（百药园西北角）：进门先滴一滴绿液，这一畦进「灵润」，高年份药多催一套。
-    // 原著里绿液就是这么用的 —— 滴一次，草木一夜变样。
-    let wet = 0;
-    if (G.mapId === 'yaopu' && (save.greenLiquid || 0) > 0) { save.greenLiquid--; wet = 1; G.alchWet = true; }
-    const di = Math.max(0, DIFFICULTIES.indexOf(curDiff()));
+  // 破境药材的「基础配额」：按「本图 → 丹方」表算这一趟该有多少味料。
+  // 这个数就是保底 —— 随机增幅只往上走，从不往下扣。
+  function buildAlchPlan(mapId, diff, wet) {
+    const zones = (window.ALCH_ZONES || []).filter(z => z.map === mapId);
+    if (!zones.length || !window.Recipes) return null;
+    const di = Math.max(0, DIFFICULTIES.indexOf(diff || DIFFICULTIES[0]));
     const plan = [];
     for (const z of zones) {
-      const sn = ((z.sets && z.sets[Math.min(di, z.sets.length - 1)]) || 0) + wet;
+      const sn = ((z.sets && z.sets[Math.min(di, z.sets.length - 1)]) || 0) + (wet || 0);
       if (sn <= 0) continue;
       const r = Recipes.get(z.rec);
       if (!r || !r.mats) continue;
@@ -743,11 +739,32 @@
         plan.push([mm[0], Math.max(1, Math.round(mm[1] * sn))]);
       }
     }
-    if (!plan.length) return;
+    return plan.length ? plan : null;
+  }
+  // 随机增幅：1.0 ~ 3.0 倍（下界就是「基础配额」本身，永远不会低于保底），
+  // 再按进入难度叠一层：凡境 ×1.00、险境 ×1.25、死境 ×1.50。
+  // 也就是最差手气：凡 1.0× / 险 1.25× / 死 1.5×；最好手气：3.0 / 3.75 / 4.5。
+  const ALCH_DIFF_BONUS = [1.0, 1.25, 1.5];
+  function alchBonus(d) {
+    const di = Math.max(0, DIFFICULTIES.indexOf(d || DIFFICULTIES[0]));
+    const dm = ALCH_DIFF_BONUS[Math.min(di, ALCH_DIFF_BONUS.length - 1)];
+    return (1 + Math.random() * 2) * dm;
+  }
+  function setupAlchQuota() {
+    G.alch = null;
+    G.alchWet = false;
+    // 绿液区（百药园西北角）：进门先滴一滴绿液，这一畦进「灵润」，高年份药多催一套。
+    // 原著里绿液就是这么用的 —— 滴一次，草木一夜变样。
+    let wet = 0;
+    if (G.mapId === 'yaopu' && (save.greenLiquid || 0) > 0) { save.greenLiquid--; wet = 1; G.alchWet = true; }
+    const base = buildAlchPlan(G.mapId, curDiff(), wet);
+    if (!base) return;
+    const bonus = alchBonus(curDiff());
+    const plan = base.map(c => [c[0], Math.max(1, Math.round(c[1] * bonus))]);
     const total = plan.reduce((a, x) => a + x[1], 0);
     // 匀在一局的时长里（Boss 出来之前大致落完），Boss 一倒再补尾数
     const span = Math.max(40, (G.map && G.map.bossAt) || 120);
-    G.alch = { plan: plan, idx: 0, every: span / total, t: 0, given: 0, total: total };
+    G.alch = { plan: plan, idx: 0, every: span / total, t: 0, given: 0, total: total, bonus: bonus, base: base.reduce((a, x) => a + x[1], 0) };
   }
   // 从配额里轮转着取 n 份：几味药交替落，不会一局下来全是一种
   function alchGrant(n) {
@@ -4329,6 +4346,7 @@
     if (elPf) elPf.style.display = 'none';
     if (elRebirth) elRebirth.style.display = 'none';
     if (elWanling) elWanling.style.display = 'none';
+    if (elSweep) elSweep.style.display = 'none';
   }
   function resetRun() {
     if (window.Coop) window.Coop.reset();
@@ -5221,9 +5239,102 @@
         '<span>灵石 ×' + d.stone.toFixed(1) + '</span>' +
         '<span>修为 ×' + d.xp.toFixed(1) + '</span>' +
         '</div>' +
-        '<div class="dc-go">入山 →</div>' +
+        '<div class="dc-foot">' +
+        (cleared ? '<span class="dc-sweep" data-sweep="' + d.id + '" title="连走 ' + SWEEP_N +
+          ' 趟，费用按身上总灵石的 9% 抽，保底 ' + SWEEP_FLOOR + '">扫荡 ×' + SWEEP_N +
+          '<b>' + sweepCost().toLocaleString('en-US') + ' 灵石</b></span>' : '') +
+        '<span class="dc-go">入山 →</span></div>' +
         '</div>';
     }).join('');
+  }
+
+  // ---------- 扫荡：已破之境，一键连走 9 趟 ----------
+  // 破境丹的成算压到了原著口径（筑基丹一成、九曲灵参丹不足一成），一炉一炉去刷，
+  // 玩家只感到耗，不感到「修仙」。所以给已破之境开个口子：花一笔灵石，九趟收成一次算清。
+  // 费用按身上总灵石的 9% 抽，但保底 9999 —— 家底薄的时候也别想白拿。
+  const SWEEP_N = 9;
+  const SWEEP_RATE = 0.09;
+  const SWEEP_FLOOR = 9999;
+  function sweepCost() {
+    return Math.max(SWEEP_FLOOR, Math.round((save.stones || 0) * SWEEP_RATE));
+  }
+  let sweepLockT = 0;                        // 防连点：一秒多内只认一次
+  function sweepMap(mapId, diffId) {
+    const now = Date.now();
+    if (now - sweepLockT < 1200) return null;
+    const m = MAPS.find(x => x.id === mapId);
+    if (!m) return null;
+    const d = diffById(diffId);
+    const dc = save.diffClear[m.id] || {};
+    if (!dc[d.id]) { notify('此境未破 · 先亲自走一趟'); Sfx.warn(); return null; }
+    const cost = sweepCost();
+    if ((save.stones || 0) < cost) { notify('灵石不足 · 扫荡须 ' + cost + ' 灵石'); Sfx.warn(); return null; }
+    sweepLockT = now;
+    const stonesBefore = save.stones || 0;
+    save.stones -= cost;
+
+    const di = Math.max(0, DIFFICULTIES.indexOf(d));
+    const nr = m.reward || {};
+    // 杂材池：世上只此一件的东西不进扫荡（与野外掉落同一条规矩）
+    const pool = (m.mats || []).filter(id => { const it = Items.get(id); return it && !it.unique; });
+    const got = {};
+    let stoneGot = 0, bMin = 99, bMax = 0;
+    for (let k = 0; k < SWEEP_N; k++) {
+      stoneGot += Math.round((nr.stones || 0) * (d.stone || 1));
+      // 破境药材：每趟各掷一次手气（1.0~3.0 倍 × 难度），保底仍是不低于基础配额
+      const base = buildAlchPlan(m.id, d, 0);
+      if (base) {
+        const b = alchBonus(d);
+        bMin = Math.min(bMin, b); bMax = Math.max(bMax, b);
+        for (const c of base) got[c[0]] = (got[c[0]] || 0) + Math.max(1, Math.round(c[1] * b));
+      }
+      // 杂材：小怪、精英、首领一路的零碎
+      if (pool.length) {
+        const n = Math.round((10 + 6 * di) * (0.8 + Math.random() * 0.8) * (d.drop || 1));
+        for (let i = 0; i < n; i++) {
+          const id = pool[Math.floor(Math.random() * pool.length)];
+          got[id] = (got[id] || 0) + 1;      // 别用 ++ ：首次出现时 undefined++ 会变 NaN
+        }
+      }
+    }
+    save.stones += stoneGot;
+    let matN = 0;
+    for (const id in got) {
+      save.inventory[id] = (save.inventory[id] || 0) + got[id];
+      save.totalItems = (save.totalItems || 0) + got[id];
+      matN += got[id];
+    }
+    save.wins = (save.wins || 0) + SWEEP_N;
+    writeSave();
+    renderSweepResult(m, d, cost, stoneGot, got, matN, bMin === 99 ? 0 : bMin, bMax, stonesBefore);
+    return { cost: cost, stone: stoneGot, mats: got, matN: matN, stonesBefore: stonesBefore, stonesAfter: save.stones,
+             bMin: bMin === 99 ? 0 : bMin, bMax: bMax };
+  }
+  // 结果面板：扣了多少、拿回多少，一次摆清
+  function renderSweepResult(m, d, cost, stoneGot, got, matN, bMin, bMax, stonesBefore) {
+    if (!elSweep) return;
+    G.state = 'sweep';
+    if (elSweepTitle) elSweepTitle.textContent = '扫荡 · ' + m.name;
+    if (elSweepDesc) {
+      elSweepDesc.innerHTML = d.name + ' · 连走 ' + SWEEP_N + ' 趟' +
+        (bMax ? '　<span class="sw-bonus">药料手气 ×' + bMin.toFixed(1) + '~' + bMax.toFixed(1) + '</span>' : '');
+    }
+    const rows = Object.keys(got).map(id => {
+      const it = Items.get(id); if (!it) return '';
+      const r = RARITY[it.rarity] || RARITY[0];
+      return '<div class="lootrow"><b style="color:' + r.color + '">' + it.name + '</b><span>×' + got[id] + '</span></div>';
+    }).join('');
+    if (elSweepLoot) {
+      elSweepLoot.innerHTML =
+        (rows || '<div class="lootrow muted">此行未得药材</div>') +
+        '<div class="lootrow reward"><b>灵石入袋</b><span>+' + stoneGot + '</span></div>' +
+        '<div class="lootrow cost"><b>扫荡开销</b><span>−' + cost + '</span></div>' +
+        '<div class="loottotal">药材 ' + matN + ' 味　·　灵石 ' +
+        (stonesBefore || 0).toLocaleString('en-US') + ' → ' + (save.stones || 0).toLocaleString('en-US') +
+        '　·　储物袋累计 ' + (save.totalItems || 0) + ' 件</div>';
+    }
+    if (elSweep) elSweep.style.display = 'flex';
+    if (Sfx && Sfx.buff) Sfx.buff();
   }
 
   // ---------- 洞府（安全屋） ----------
@@ -6467,6 +6578,10 @@
   const elPfBody = document.getElementById('pfBody');
   const elDiffMapName = document.getElementById('diffMapName');
   const elDiffMapSub = document.getElementById('diffMapSub');
+  const elSweep = document.getElementById('sweep');
+  const elSweepTitle = document.getElementById('sweepTitle');
+  const elSweepDesc = document.getElementById('sweepDesc');
+  const elSweepLoot = document.getElementById('sweepLoot');
   const elCave = document.getElementById('cave');
   const elCaveName = document.getElementById('caveName');
   const elCaveDesc = document.getElementById('caveDesc');
@@ -6630,12 +6745,29 @@
     startMap(id);
   });
   if (elDiffList) elDiffList.addEventListener('click', e => {
+    // 扫荡按钮：先接住，别让它冒到 diffcard 上变成「入山」
+    const sw = e.target.closest('[data-sweep]');
+    if (sw) {
+      e.stopPropagation();
+      const id = G.diffPick;
+      if (id) sweepMap(id, sw.getAttribute('data-sweep'));
+      return;
+    }
     const c = e.target.closest('.diffcard');
     if (!c) return;
     const d = c.getAttribute('data-diff');
     const id = G.diffPick;
     if (!id) return;
     beginMap(id, d);
+  });
+  // 扫荡结果面板：收下，回到难度面板（还想再扫一趟就再点一次）
+  if (elSweep) elSweep.addEventListener('click', e => {
+    if (e.target.closest('#sweepBack') || e.target === elSweep) {
+      elSweep.style.display = 'none';
+      G.state = 'diff';
+      renderDiffPick();
+      if (elDifficulty) elDifficulty.style.display = 'flex';
+    }
   });
   if (elPfBody) elPfBody.addEventListener('click', e => {
     // 点档名：展开 / 收起这一档
@@ -7221,6 +7353,23 @@
     pickDiff(mapId) { openDiffPick(mapId); return G.diffPick; },
     takeDiff(id) { const m = G.diffPick; if (!m) return 'no map'; startMap(m, id); return id; },
     diffs() { return DIFFICULTIES.map(d => d.id); },
+    // ---- 扫荡 / 掉落增幅（qa/verify-alchdrop 用来核产量与扣费） ----
+    openDiff(mapId) { openDiffPick(mapId); return G.state; },
+    sweepChipText() { const el = document.querySelector('.dc-sweep'); return el ? el.innerText.replace(/\n/g, ' ') : null; },
+    sweepCost() { return sweepCost(); },
+    sweepFloor() { return SWEEP_FLOOR; },
+    sweepTimes() { return SWEEP_N; },
+    sweep(mapId, diffId) { return sweepMap(mapId, diffId); },
+    alchBase(mapId, diffId) {
+      const p = buildAlchPlan(mapId, diffById(diffId), 0);
+      return p ? p.reduce((a, x) => a + x[1], 0) : 0;
+    },
+    alchBonusRange(diffId) {
+      const di = Math.max(0, DIFFICULTIES.indexOf(diffById(diffId)));
+      const dm = ALCH_DIFF_BONUS[Math.min(di, ALCH_DIFF_BONUS.length - 1)];
+      return [dm, 3 * dm];
+    },
+    diffClearOf(mapId) { return Object.assign({}, save.diffClear[mapId] || {}); },
     // ---- 际遇 / 支线 ----
     encounterList() { return ENCOUNTERS.map(e => ({ id: e.id, map: e.map, name: e.name, unlock: e.unlock || null, repeat: !!e.repeat, cond: e.cond || null })); },
     encountersOnMap() { return G.npcs.map(x => ({ id: x.def.id, name: x.def.name, x: Math.round(x.x), y: Math.round(x.y) })); },

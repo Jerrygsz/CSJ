@@ -95,13 +95,13 @@ const wet = await page.evaluate(() => {
   const F = window.__FR, G = F.G;
   F.setGreen(0);
   F.enterMap('yaopu', 'easy'); if (G.state === 'dialog') F.skipStory();
-  const dry = G.alch ? G.alch.total : 0;
+  const dry = G.alch ? G.alch.base : 0;    // 比基础配额，躲开两次随机手气的波动
   F.setGreen(1);
   F.enterMap('yaopu', 'easy'); if (G.state === 'dialog') F.skipStory();
-  const wetN = G.alch ? G.alch.total : 0;
+  const wetN = G.alch ? G.alch.base : 0;
   return { dry, wetN, left: F.greenLiquid(), flag: !!G.alchWet };
 });
-ok(wet.wetN > wet.dry, `灵润：滴绿液后配额增加（${wet.dry} → ${wet.wetN}）`, wet);
+ok(wet.wetN > wet.dry, `灵润：滴绿液后保底配额增加（${wet.dry} → ${wet.wetN}）`, wet);
 ok(wet.left === 0, '进绿液区消耗 1 滴绿液', wet.left);
 ok(wet.flag, '进绿液区标出「灵润」状态', wet.flag);
 
@@ -113,7 +113,7 @@ for (const [map, diff] of [['xuese', 'easy'], ['xuese', 'hard'], ['xuese', 'nigh
     window.__FR.enterMap(m, d);
     const G = window.__FR.G;
     if (G.state === 'dialog') window.__FR.skipStory();
-    return G.alch ? { total: G.alch.total, plan: G.alch.plan.map(x => [x[0], x[1]]) } : null;
+    return G.alch ? { total: G.alch.total, base: G.alch.base, bonus: G.alch.bonus } : null;
   }, [map, diff]);
   if (!plan) { ok(false, `${map}/${diff} 应有配额`); continue; }
   let given = 0; const t0 = Date.now();
@@ -130,9 +130,10 @@ for (const [map, diff] of [['xuese', 'easy'], ['xuese', 'hard'], ['xuese', 'nigh
     if (st.given >= plan.total || ['settle', 'victory', 'over'].includes(st.state)) break;
   }
   const isZhuji = map === 'xuese';
-  const expect = isZhuji ? 9 * setsOf[diff] : null;   // 禁地只出三味主药：共 9 份／炉（辅药在绿液区）
+  const expectBase = isZhuji ? 9 * setsOf[diff] : null;   // 禁地只出三味主药：9 份／套（辅药在绿液区）
   ok(given >= plan.total, `${map}/${diff} 配额发满（${plan.total} 份，实发 ${given}）`, { given, total: plan.total });
-  if (expect) ok(plan.total === expect, `筑基丹 ${setsOf[diff]} 套 = ${expect} 味料`, plan.total);
+  ok(plan.total >= plan.base, `${map}/${diff} 实发 ${plan.total} 不低于保底 ${plan.base}（手气 ×${plan.bonus.toFixed(2)}）`, plan);
+  if (expectBase) ok(plan.base === expectBase, `筑基丹 ${setsOf[diff]} 套保底 = ${expectBase} 味料`, plan.base);
 }
 ok(errs.length === 0, '全程无 JS 报错', errs.slice(0, 3));
 

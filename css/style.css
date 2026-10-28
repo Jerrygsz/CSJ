@@ -426,6 +426,21 @@ body.fs #wrap { background: #000; }
 .dc-mul { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-2); margin-top: 4px; }
 .dc-mul span { font-size: var(--fs-micro); color: var(--text-3); }
 .dc-go { text-align: right; color: var(--dc); font-size: var(--fs-cap); margin-top: 4px; }
+.dc-foot { display: flex; align-items: center; justify-content: flex-end; gap: var(--sp-2); margin-top: 4px; }
+.dc-foot .dc-go { margin-top: 0; }
+/* 扫荡：已破之境才给的快手，价钱直接写在按钮上，点之前就看得见 */
+.dc-sweep {
+  cursor: pointer; display: inline-flex; align-items: baseline; gap: 4px;
+  font-size: var(--fs-cap); color: var(--accent); padding: 2px 8px;
+  border: 1px solid rgba(201,162,74,0.55); border-radius: var(--r-sm);
+  background: rgba(201,162,74,0.08); transition: background .12s, border-color .12s;
+}
+.dc-sweep:hover { background: rgba(201,162,74,0.18); border-color: var(--accent); }
+.dc-sweep:active { transform: scale(var(--press-sm, 0.97)); }
+.dc-sweep b { font-weight: 400; font-size: var(--fs-micro); color: var(--text-3); }
+.sw-desc { color: var(--text-2); font-size: var(--fs-cap); margin-bottom: 8px; }
+.sw-bonus { color: var(--accent-soft); }
+.lootrow.cost b { color: var(--danger, #ff8080); }
 
 /* ---------- 洞府 ---------- */
 .cave-quote { color: var(--accent-soft); font-size: var(--fs-cap); font-style: italic; line-height: 1.6; margin-top: 4px; }
