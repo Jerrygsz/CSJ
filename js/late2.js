@@ -59,7 +59,7 @@
     // ---- 法宝 ----
     { id: 't_yanghuan', name: '阳环',       rarity: 4, icon: '💍', slot: 'trinket', req: 82, desc: '伤害 +20%，重击 +8%。两仪环的阳面，压得住北极元光', effect: { dmg: 0.20, crit: 0.08 }, unique: true },
     { id: 't_guiluo', name: '鬼罗幡',       rarity: 4, icon: '🏴', slot: 'trinket', req: 92, desc: '伤害 +24%，拾取 +30%。阴罗宗四长老的幡，幡下养着鬼', effect: { dmg: 0.24, pickup: 0.3 }, unique: true },
-    { id: 't_yinluo', name: '阴罗蟠',       rarity: 4, icon: '🪢', slot: 'trinket', req: 92, desc: '上限 +120，减伤 12%。阴罗宗至宝，缠上就挣不开', effect: { maxhp: 120, armor: 0.12 }, unique: true },
+    { id: 't_yinluo', name: '阴罗幡',       rarity: 4, icon: '🪢', slot: 'trinket', req: 92, desc: '上限 +120，减伤 12%。阴罗宗至宝，缠上就挣不开', effect: { maxhp: 120, armor: 0.12 }, unique: true },
     { id: 't_wuzi',   name: '五子同心魔',   rarity: 4, icon: '👥', slot: 'talisman', req: 102, desc: '伤害 +30%，重击 +10%。五个元婴级魔头，认主之后只认一个', effect: { dmg: 0.30, crit: 0.10 }, unique: true },
     { id: 't_yuanci', name: '元磁山',       rarity: 4, icon: '⛰', slot: 'talisman', req: 112, desc: '减伤 20%，上限 +200。整座山炼化了收在体内，压得人喘不过气', effect: { armor: 0.20, maxhp: 200 }, unique: true },
     { id: 'fb_sanyan', name: '三焰扇',      rarity: 4, icon: '🪭', slot: 'talisman', req: 96, desc: '伤害 +34%，重击 +8%。七焰扇的仿品，三味真火轮着扇', effect: { dmg: 0.34, crit: 0.08 }, craftOnly: 'forge' },
@@ -1084,7 +1084,7 @@
     { id: 'sk_shadan',   name: '煞丹术·法诀',     rarity: 4, icon: '📕', req: 112, teach: 'shadan',   desc: '习得《煞丹术》。以煞凝丹的备用法门' },
     { id: 'sk_sanzhuan',  name: '三转重元功·法诀', rarity: 4, icon: '📕', req: 50,  teach: 'sanzhong',  desc: '习得《三转重元功》。青元剑诀附带的辅助法门，散功重修三轮，把真元压实' },
     { id: 'sk_fenglei',   name: '风雷翅·炼法',     rarity: 4, icon: '📕', req: 56,  teach: 'fenglei',   desc: '习得《风雷翅》。乱星海炼器所得飞行翼，移速大增' },
-    { id: 'sk_tongbao',   name: '明王诀·法诀',     rarity: 4, icon: '📕', req: 82,  teach: 'tongbao',   desc: '习得《明王诀》。佛门炼体功法，借煞气淬身，肉身渐如法宝' },
+    { id: 'sk_tongbao',   name: '洞漩金光·法诀',   rarity: 4, icon: '📕', req: 82,  teach: 'tongbao',   desc: '习得《洞漩金光》。金光绕体，专伤神魂、破魔驱邪——韩立自乱星海后打磨出的金光神通' },
     { id: 'sk_leishen',   name: '辟邪神雷·雷诀',   rarity: 4, icon: '📕', req: 56,  teach: 'leishen',   desc: '习得《辟邪神雷》。青竹蜂云剑以金雷竹炼成，剑身自蕴此雷，专克魔道鬼道' },
     { id: 'sk_qinxian',   name: '大庚剑阵·阵图',   rarity: 4, icon: '📕', req: 82,  teach: 'qinxian',   desc: '习得《大庚剑阵》。青元剑诀第十层，以本命飞剑布阵，剑光成网' },
     { id: 'sk_xuanyin',   name: '玄阴经·残卷',     rarity: 4, icon: '📕', req: 56,  teach: 'xuanyin',   desc: '习得《玄阴经》。乱星海顶级魔道功法，玄骨、极阴一脉所修' },
