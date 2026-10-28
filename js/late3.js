@@ -152,7 +152,7 @@
       desc: '潭底淤泥里挖出来的，沉得压手。蛟性凶，得从小养。' },
 
     // ---- 突破系统新增丹药（依原著：可炼数枚，「押丹」越多把握越大） ----
-    { id: 'tianhuo', name: '天火液', rarity: 3, icon: '🔥', req: 56, desc: '火属性妖丹为基，火灵草引火，朱果定火性。结丹主药，闭死关前服下（韩立服的是雪灵水与天火液）。', effect: { xpMul: 0.12 } },
+    { id: 'tianhuo', name: '天火液', rarity: 3, icon: '🔥', req: 56, desc: '火属性妖丹为基，火灵草引火，再以一枚妖丹定火性。结丹主药，闭死关前服下（韩立服的是雪灵水与天火液）。', effect: { xpMul: 0.12 } },
     { id: 'jiuqu',   name: '九曲灵参丹', rarity: 4, icon: '💊', req: 82, desc: '九曲灵参炼成，助凝元婴。玄骨手里那张方子，只他一人知道。', effect: { maxhp: 90, regen: 1.5 } },
     { id: 'dianling', name: '定灵丹', rarity: 4, icon: '💊', req: 82, desc: '又名安魂丹。增进修为、定心安魂，能减轻心魔入侵——结婴前服一枚，那一道关口会好过得多。', effect: { maxhp: 60, regen: 1.2, xpMul: 0.08 } },
 
@@ -176,7 +176,6 @@
 
   // 突破系统新增材料（依合规定稿：天火液/九曲灵参丹/定灵丹/元磁神光前置）
   window.MATERIALS.push(
-    { id: 'm_zhuguo',  name: '朱果',     icon: '🍎', rarity: 1, desc: '火山脚下红的果，定火性，天火液辅药。' },
     { id: 'm_huoling', name: '火灵草',   icon: '🌶', rarity: 1, desc: '生于火脉旁，叶尖常年带火星。天火液主引火之草。' },
     { id: 'm_jiuqu',   name: '九曲灵参', icon: '🪵', rarity: 3, desc: '根须九转如灵蛇，三百年以上方成。会幻化成鸟兽自行逃走，极难捕。九曲灵参丹主药。' },
     { id: 'm_manaojiao', name: '玛瑙角', icon: '🦄', rarity: 3, desc: '玛瑙质地的兽角。炼九曲灵参丹与伴妖草一样，都是吃不消的消耗。' },
@@ -199,8 +198,8 @@
   // ========================= 五、新增配方 =========================
   window.RECIPES.push(
     { id: 'r_tianhuo', kind: 'alchemy', name: '天火液', out: 'tianhuo', outN: 1, cost: 600, req: 56, rate: 0.16,
-      mats: [['m_huodan', 1], ['m_huoling', 2], ['m_zhuguo', 1]],
-      desc: '火蟾兽内丹为基（火属性妖丹），火灵草引火，朱果定火性。结丹辅助灵物，闭死关前服下。' },
+      mats: [['m_huodan', 1], ['m_huoling', 2], ['m_yaodan', 1]],
+      desc: '火蟾兽内丹为基（火属性妖丹），火灵草引火，再以一枚妖丹定火性。结丹辅助灵物，闭死关前服下。' },
     { id: 'r_jiuqu', kind: 'alchemy', name: '九曲灵参丹', out: 'jiuqu', outN: 1, cost: 2500, req: 82, rate: 0.08,
       mats: [['m_jiuqu', 1], ['m_manaojiao', 1], ['m_banyao', 2]],
       desc: '九曲灵参为主，玛瑙角、伴妖草为辅。三味一样都耗不起——原著里一连败了数次才成丹。' },

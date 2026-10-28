@@ -706,6 +706,72 @@
     }
     return n;
   }
+  // ---------- 破境药材保底 ----------
+  // 破境丹成算低（原著口径：宗师炼拿手的那味也只有一半，筑基丹这里定到一成），
+  // 若还靠零散掉率一粒粒凑料，一炉的料要刷好几遍图，玩着只剩耗时间。
+  // 所以按 sources.js 里的 ALCH_ZONES 发配额：一趟图按难度匀出 3/5/8 套丹料，
+  // 边打边落，Boss 倒时把剩下的补齐 —— 走一趟就够开几炉。
+  function dropOneMat(x, y, id) {
+    const m = Items.get(id);
+    if (!m) return false;
+    const a = Math.random() * 6.28, dd = U.rand(8, 30);
+    G.loot.push({ x: x + Math.cos(a) * dd, y: y + Math.sin(a) * dd, r: 8, bob: Math.random() * 6.28, mat: true, item: m });
+    return true;
+  }
+  function alchLeft() {
+    const a = G.alch; if (!a) return 0;
+    return a.plan.reduce((s, c) => s + c[1], 0);
+  }
+  function setupAlchQuota() {
+    G.alch = null;
+    const zones = (window.ALCH_ZONES || []).filter(z => z.map === G.mapId);
+    if (!zones.length || !window.Recipes) return;
+    const di = Math.max(0, DIFFICULTIES.indexOf(curDiff()));
+    const plan = [];
+    for (const z of zones) {
+      const sn = (z.sets && z.sets[Math.min(di, z.sets.length - 1)]) || 0;
+      if (sn <= 0) continue;
+      const r = Recipes.get(z.rec);
+      if (!r || !r.mats) continue;
+      for (const mm of r.mats) {
+        if (z.only && z.only.indexOf(mm[0]) < 0) continue;
+        plan.push([mm[0], Math.max(1, Math.round(mm[1] * sn))]);
+      }
+    }
+    if (!plan.length) return;
+    const total = plan.reduce((a, x) => a + x[1], 0);
+    // 匀在一局的时长里（Boss 出来之前大致落完），Boss 一倒再补尾数
+    const span = Math.max(40, (G.map && G.map.bossAt) || 120);
+    G.alch = { plan: plan, idx: 0, every: span / total, t: 0, given: 0, total: total };
+  }
+  // 从配额里轮转着取 n 份：几味药交替落，不会一局下来全是一种
+  function alchGrant(n) {
+    const a = G.alch;
+    if (!a || !n) return 0;
+    let got = 0;
+    for (let k = 0; k < n; k++) {
+      let picked = false;
+      for (let g = 0; g < a.plan.length; g++) {
+        if (a.idx >= a.plan.length) a.idx = 0;
+        const cell = a.plan[a.idx];
+        a.idx++;
+        if (cell[1] > 0) {
+          cell[1]--; a.given++; got++;
+          if (G.player) dropOneMat(G.player.x, G.player.y, cell[0]);
+          picked = true;
+          break;
+        }
+      }
+      if (!picked) break;
+    }
+    return got;
+  }
+  function tickAlchQuota(dt) {
+    const a = G.alch;
+    if (!a || alchLeft() <= 0) return;
+    a.t += dt;
+    while (a.t >= a.every && alchLeft() > 0) { a.t -= a.every; alchGrant(1); }
+  }
   function dropStone(x, y, n) {
     const d = curDiff();
     const cnt = Math.max(1, Math.round((n || 1) * (d.stone || 1)));
@@ -978,14 +1044,14 @@
     if (e === G.boss) { onBossDead(); }
     else if (e.elite) {
       if (Math.random() < Math.min(1, 0.55 * dr)) dropLoot(e.x, e.y, 1);
-      dropMat(e.x, e.y, 2 + (G.diff && G.diff.rarity ? 1 : 0), emats);
+      dropMat(e.x, e.y, 3 + (G.diff && G.diff.rarity ? 1 : 0), emats);
       dropStone(e.x, e.y, 3);
       G.hitStop = Math.max(G.hitStop, 0.04); G.shake = Math.max(G.shake, 7);
       banner('斩 ' + (e.name || '精英'));
     } else {
       const ch = (((edef && edef.drop) || 0.03) + passiveSum('drop')) * dr;
       if (Math.random() < ch) dropLoot(e.x, e.y, 0);
-      if (Math.random() < 0.13 * dr) dropMat(e.x, e.y, 1, emats);
+      if (Math.random() < 0.18 * dr) dropMat(e.x, e.y, 1, emats);
     }
     spawnShatter(e);   // 先把它自己劈碎（复用它的精灵切 3×3，不用另画碎尸）
     spawnDeath(e.x, e.y);
@@ -2080,7 +2146,9 @@
     const ling = inLingjie();
     const lootN = Math.round((8 + (G.diff && G.diff.rarity ? G.diff.rarity * 2 : 0)) * (ling ? 0.5 : 1));
     for (let i = 0; i < lootN; i++) { const a = Math.random() * 6.28, dd = U.rand(30, 190); dropLoot(G.player.x + Math.cos(a) * dd, G.player.y + Math.sin(a) * dd, 2); }
-    dropMat(G.player.x, G.player.y, Math.round((5 + (G.diff && G.diff.rarity ? 2 : 0)) * (ling ? 1.8 : 1)));
+    dropMat(G.player.x, G.player.y, Math.round((6 + (G.diff && G.diff.rarity ? 2 : 0)) * (ling ? 1.8 : 1)));
+    // 破境药材：这一趟没落完的，Boss 一倒全补齐 —— 打完就够开炉
+    if (alchLeft() > 0) alchGrant(alchLeft());
     G.enemies.length = 0;
     G.vacuumT = 1.7; G.pendingEnding = true;
     banner(name + ' 已伏诛 · 收取战利品'); Sfx.levelup();
@@ -3489,6 +3557,7 @@
 
     fireWeapons(dt);
     updateAuras(dt);
+    tickAlchQuota(dt);
 
     G.cam.x = p.x - W / 2; G.cam.y = p.y - H / 2;
     ensureDecor();
@@ -4266,6 +4335,7 @@
     G.fieldSlow = []; G.shake = 0; G.flash = 0; G.hitStop = 0;
     G.decor = []; G.chunkMap = {}; G.cam = { x: -W / 2, y: -H / 2 }; G.orbPos = [];
     G.vacuumT = 0; G.pendingEnding = false; G.runLoot = []; G.matGain = 0; G.lastAutoSave = 0;
+    G.alch = null;           // 破境药材配额，进图时按图重算
     G.breakHinted = false;   // 瓶颈弹幕每图只提一次
     G.minorHint = 0;         // 小境界关口弹幕也每图只提一次
     G.victoryNote = '';
@@ -4406,6 +4476,7 @@
     if (diffId) save.lastDiff = G.diff.id;
     save.mapId = id;
     resetRun();
+    setupAlchQuota();   // 破境药材：按本图 + 本难度定这一趟的产量
 
     // 境界继承：取「存档永久修为」与「本图起点」的较高者 —— 回刷低级图不会倒退
     // 但「修为受创」期间不吃图的下限：跌回炼气期四层，就是炼气期四层，得自己修回来

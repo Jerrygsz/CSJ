@@ -142,9 +142,10 @@
       unlock: 'xuese', next: 'yanjia', cave: 'cuiping',
       diff: 1.6, bossAt: 0, intro: 'zhuji', outro: 'zhuji_out',
       enemies: ['disciple', 'assassin'], elites: ['隔壁炉的执事', '地火火灵'],
-      mats: ['m_zihua', 'm_tianling', 'm_shihui', 'm_yusui'],
+      // 地火之屋是炼丹房，不出灵草；炉边只有尸傀骨粉、玉髓与地火边生的火灵草
+      mats: ['m_shihui', 'm_yusui', 'm_huoling', 'm_lingzhi'],
       boss: { kind: 'beast', name: '地火之灵', hp: 3600, spd: 54, dmg: 22, r: 18, spr: 'huoling', scale: 6.0 },
-      reward: { stones: 300, items: ['qingyuan'], mats: [['m_zihua', 2], ['m_tianling', 2]] },
+      reward: { stones: 300, items: ['qingyuan'], mats: [['m_huoling', 2], ['m_lingzhi', 2]] },
       clearTitle: '筑基已成',
       clearDesc: '地火退了，丹也成了。灵液化真元，炼气到筑基那道坎，跨过去了。'
     },
@@ -368,9 +369,9 @@
     diff: 1.45, bossAt: 90,
     enemies: ['disciple', 'assassin'],
     elites: ['陆师兄的随从', '丹房护卫'],
-    mats: ['m_zihua', 'm_tianling', 'm_yusui', 'm_hantie'],
+    mats: ['m_yusui', 'm_hantie', 'm_lingmo', 'm_fuzhi'],
     boss: { kind: 'mo', name: '同门 陆师兄', hp: 2800, spd: 56, dmg: 17, r: 18, spr: 'neimen', scale: 5.6 },
-    reward: { stones: 260, mats: [['m_zihua', 2], ['m_tianling', 2], ['m_yusuizhi', 1]] },
+    reward: { stones: 260, mats: [['m_yusui', 2], ['m_hantie', 2], ['m_lingmo', 2]] },
     outro: 'luxiong_out',
     clearTitle: '岔道已静',
     clearDesc: '人埋在岔道边的土里，剑收进储物袋。陈师姐醒来，什么都不记得。'

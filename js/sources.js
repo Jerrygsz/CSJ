@@ -60,7 +60,7 @@
   addTo('xutian', { mats: [['m_manaojiao', 2]] });
   addDrop('guixiu', ['m_manaojiao']);
   // 灵渺园：上古修士的灵草园，灵烛果（造化丹的主药）就长在这里
-  addTo('lingmiao', { mats: [['m_lingzhu', 2], ['m_zhuguo', 1]] });
+  addTo('lingmiao', { mats: [['m_lingzhu', 2], ['m_lingzhi', 2]] });
   // 昆吾山：阴芝马、养魂木
   addTo('kunwu', { mats: [['m_yinzhi', 1], ['m_yanghun', 1]] });
   // 星宫：元磁神山的核心
@@ -135,6 +135,58 @@
   addTo('yinming',  { items: ['sk_mengyin'] });
   addTo('yinluo',   { items: ['sk_huanxing'] });
   addTo('dajin',    { items: ['sk_fansheng'] });                   // 大晋佛魔同源
+
+  // ---------- 五、破境药材：一局地图的保底产量 ----------
+  // 为什么单开这一块：破境丹的成算本来就低（原著口径——宗师炼拿手的那味也只有一半，
+  // 筑基丹这里定到一成），若还靠普通怪 1/5 的零散掉率凑料，一炉的料得刷好几遍图，
+  // 玩着就只剩耗时间。所以给「产药图」挂一份配额：一次通关按难度匀出 3 / 5 / 8 套丹料，
+  // 边打边落，Boss 倒时把剩下的补齐 —— 打完这一趟，料就够开 3~8 炉。
+  // 只挂在原著写明产它的图上；原著没写产的地方，这颗药哪儿也不掉。
+  //   rec  : 引用哪张丹方（用量与配方同源，配方改了这里自动跟着改）
+  //   only : 只产这张方子里的某几味（一味药分两地出的场合）
+  //   sets : [凡境, 险境, 死境] 各给几套
+  //   why  : 原著依据，写在这儿是为了以后改的时候知道当初凭什么这么挂
+  window.ALCH_ZONES = [
+    // 后山采药 —— 韩立替药庐采药，人参、黄精是后山常物
+    { map: 'houshan', rec: 'r_peiyuan', sets: [3, 5, 8],
+      why: '原著开篇韩立在后山采药换灵石，人参、黄精皆为山中所产' },
+    // 黄枫谷药园 —— 园里三十一种辅药材俱全（黄龙丹：黄精、人参配妖丹）
+    { map: 'yaoyuan', rec: 'r_huanglong', sets: [3, 5, 8],
+      why: '百药园一节：园内辅药材俱全，只缺玉髓芝、紫猴花、天灵果三味主药' },
+    { map: 'yaopu', rec: 'r_jinsui', sets: [3, 5, 8],
+      why: '灵药圃深处是同片药田，辅药更足' },
+    // 血色禁地 / 血池 —— 筑基丹三主药只长在禁地里，五年一开
+    { map: 'xuese', rec: 'r_zhuji', sets: [3, 5, 8],
+      why: '原著：玉髓芝、紫猴花、天灵果「药园内一株都没有」，只产于血色禁地' },
+    { map: 'xuechi', rec: 'r_zhuji', sets: [3, 5, 8],
+      why: '血池同在血色禁地之内，池边石缝里长玉髓芝' },
+    // 坠魔谷 —— 火蟾古兽只此一只，天火液的主药就在这儿
+    { map: 'zhuimo', rec: 'r_tianhuo', sets: [3, 5, 8],
+      why: '第 727 章：火蟾古兽栖于坠魔谷，其内丹为天火液之基' },
+    // 虚天殿 —— 九曲灵参、养魂木、玛瑙角都在殿中
+    { map: 'xutian', rec: 'r_jiuqu', sets: [3, 5, 8],
+      why: '第 433 章：九曲灵参即在虚天殿中，会幻化成鸟兽自行逃走' },
+    { map: 'xutian', rec: 'r_dianling', sets: [3, 5, 8],
+      why: '第 497 章「灵乳与养魂木」：殿中藏有养魂木' },
+    // 阴冥之地 / 昆吾山 / 镇魔塔 —— 阴气重处才有养魂木（定灵丹的备选产地）
+    { map: 'yinming', rec: 'r_dianling', sets: [2, 4, 6], why: '阴冥之地聚阴，产养魂木' },
+    { map: 'kunwu', rec: 'r_dianling', sets: [2, 4, 6], why: '昆吾山产阴芝马与养魂木' },
+    { map: 'zhenmo', rec: 'r_dianling', sets: [2, 4, 6], why: '镇魔塔封魔之地，养魂木出于此' },
+    // 外星海 / 六连殿 / 凝翠岛 —— 伴妖草只长在八级妖兽身畔（九曲灵参丹的辅药）
+    { map: 'waihai', rec: 'r_jiuqu', only: ['m_banyao'], sets: [5, 8, 12],
+      why: '第 516 章：伴妖草须生在八级妖兽身畔，外星海猎妖方得' },
+    { map: 'liulian', rec: 'r_jiuqu', only: ['m_banyao'], sets: [5, 8, 12],
+      why: '同上，六连殿出海捕妖' },
+    { map: 'ningcui', rec: 'r_jiuqu', only: ['m_banyao'], sets: [5, 8, 12],
+      why: '同上，凝翠岛杀妖取丹' },
+    // 外星海 / 阴罗宗 —— 魔元丹的两味：妖丹出海取，血煞珠在魔宗血池
+    { map: 'waihai', rec: 'r_moyuan', only: ['m_yaodan'], sets: [4, 6, 9],
+      why: '妖丹出自海兽，外星海为原著猎妖之所' },
+    { map: 'yinluo', rec: 'r_moyuan', only: ['m_xuesha'], sets: [4, 6, 9],
+      why: '阴罗宗以血煞炼法，血煞珠出于魔宗' },
+    { map: 'jingu', rec: 'r_moyuan', only: ['m_xuesha'], sets: [4, 6, 9],
+      why: '金鼓原为魔道战场，血煞凝结成珠' }
+  ];
 
   // ---------- 四、功法：原著里「谁传给韩立」的，就该在哪张图学 ----------
   // 长春功：墨大夫在密室里硬塞给他的（不是坊市货）

@@ -104,7 +104,8 @@ window.MAPS = [
     startLevel: 10, startSkills: { sword: 4, fire: 2, orb: 1 },
     unlock: 'tainan', next: 'yaoyuan',
     cave: 'huangfeng',
-    reward: { stones: 100, mats: [['m_zihua', 1], ['m_tianling', 1]] },
+    // 入园当差，药庐给的见面礼只可能是园中常物 —— 紫猴花、天灵果这园里一株都没有
+    reward: { stones: 100, mats: [['m_chijing', 2], ['m_huangjing', 2]] },
     clearTitle: '入园为役',
     clearDesc: '丹给了叶师叔，换来青石岭百药园这个差事。灵根差，丹也没了，好在没人来扰。'
   },
@@ -117,7 +118,9 @@ window.MAPS = [
     diff: 1.35, bossAt: 140,
     enemies: ['bat', 'snake', 'assassin', 'ghoul', 'bandit'],
     elites: ['噬灵虫王', '妖鼠精'],
-    mats: ['m_zihua', 'm_tianling', 'm_longlin', 'm_chongjing', 'm_fuzhi', 'm_huangjing'],
+    // 原著（百药园一节）：园里只有「千结花、黑芍草、金精参等三十一种辅药材」，
+    // 玉髓芝 / 紫猴花 / 天灵果「竟然一株都没有」—— 故药园不再产这三味主药
+    mats: ['m_chongjing', 'm_fuzhi', 'm_huangjing', 'm_lingzhi', 'm_chijing'],
     boss: { kind: 'swarm', name: '噬灵虫母', hp: 2100, spd: 38, dmg: 15, r: 18, spr: 'blacklord', scale: 3.0 },
     reward: { stones: 200, items: ['qiannian'] },
     clearTitle: '守夜已毕',
@@ -190,9 +193,9 @@ window.MAPS = [
     diff: 1.3, bossAt: 120,
     enemies: ['snake', 'bat', 'ghoul', 'assassin'],
     elites: ['守药灵猿'],
-    mats: ['m_tianling', 'm_longlin', 'm_zihua', 'm_huangjing'],
+    mats: ['m_huangjing', 'm_lingzhi', 'm_chijing', 'm_chongjing'],
     boss: { kind: 'beast', name: '守药灵猿', hp: 2400, spd: 54, dmg: 16, r: 20, spr: 'ape', scale: 3.0 },
-    reward: { stones: 180, items: [], mats: [['m_tianling', 2], ['m_longlin', 1], ['m_zihua', 2]] },
+    reward: { stones: 180, items: [], mats: [['m_huangjing', 2], ['m_lingzhi', 2], ['m_chongjing', 1]] },
     clearTitle: '药圃已安',
     clearDesc: '灵猿伏地。最里那畦剩下的药，够炼一炉好丹。'
   },
@@ -215,7 +218,8 @@ window.MAPS = [
     diff: 1.5, bossAt: 150,
     enemies: ['assassin', 'ghoul', 'bandit'],
     elites: ['血傀儡'],
-    mats: ['m_xuesha', 'm_yusuizhi', 'm_hantie', 'm_yusui'],
+    // 血池同在血色禁地之内：筑基丹三主药此处亦有，与正图同源
+    mats: ['m_xuesha', 'm_yusuizhi', 'm_zihua', 'm_tianling', 'm_longlin', 'm_yusui'],
     boss: { kind: 'blood', name: '血傀儡', hp: 3200, spd: 46, dmg: 18, r: 19, spr: 'ghoul', scale: 3.0 },
     reward: { stones: 260, items: [], mats: [['m_xuesha', 2], ['m_yusuizhi', 1]] },
     clearTitle: '血池已涸',
