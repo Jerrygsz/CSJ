@@ -363,6 +363,8 @@
   window.MAPS.push({
     id: 'luxiong', side: true, sorder: 6.5, name: '黄枫谷·下山岔道', pos: '黄枫谷 山门外 岔道',
     type: 'combat', tag: '支线', unlockBy: 'e_luxiong', arc: 'B',
+    // 地点在山门外，故挂黄枫谷·山门那张卡下（际遇仍在百药园遇上，见 encounters.js e_luxiong）
+    sideOf: 'huangfeng',
     desc: '从坊市回谷的必经之路。两边的林子密得看不见人，喊一声也没人应。',
     startLevel: 18, startSkills: { sword: 5, fire: 3, orb: 2, nova: 1 },
     unlock: null, next: null,

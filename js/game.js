@@ -5147,6 +5147,10 @@
 
   // 支线图由哪张主线图的「际遇」引出：side.unlockBy → 际遇 → 际遇所在图
   function sideTriggerOf(sideMap) {
+    // 显式挂靠优先：一张支线「在地理上属于哪」和「际遇在哪触发」是两回事。
+    // 例：下山岔道在黄枫谷山门外，就该挂在山门那张卡下；
+    // 但陆师兄这个际遇是在百药园遇上的（山门通关后成了洞府，进去就是洞府面板，际遇根本刷不出来）。
+    if (sideMap && sideMap.sideOf) return sideMap.sideOf;
     const eid = sideMap && (sideMap.unlockBy || sideMap.unlock);
     if (!eid) return null;
     const enc = (window.ENCOUNTERS || []).find(x => x.id === eid);
