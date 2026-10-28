@@ -157,7 +157,7 @@ const expandLower = await page.evaluate(() => {
   return { id, open: after.classList.contains('open'), skills: [...after.querySelectorAll('[data-pfskill]')].map(b => b.getAttribute('data-pfskill')) };
 });
 ok(expandLower.open === true, '点档名能展开低境界档', expandLower);
-ok((expandLower.skills || []).indexOf('gourd') >= 0, '展开后能看到低境界的功法（灵葫诀）', expandLower.skills);
+ok((expandLower.skills || []).indexOf('fire') >= 0, '展开后能看到低境界的功法（火弹术）', expandLower.skills);
 
 // ---------- 展开再多也不能顶出屏幕 ----------
 const fit = await page.evaluate(() => {

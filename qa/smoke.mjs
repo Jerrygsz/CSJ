@@ -764,7 +764,7 @@ ok(hasLine('qixuan', null, '内门'), '两人都没进内门，才被墨大夫�
   const bad = allStory.filter(t => t.indexOf('青竹蜂云剑') >= 0);
   eq(bad.length, 0, '除青竹小轩与虚天殿闭关外，对白不再提青竹蜂云剑', bad.slice(0, 2));
 }
-eq(W.SKILLS.find(k => k.id === 'sword').name, '控物术', '剑技回归中性名「控物术」');
+eq(W.SKILLS.find(k => k.id === 'sword').name, '驱物术', '剑技用原著名「驱物术」（长春功三法术之一）');
 ok(!hasLine('hs_clue', null, '夺') && !(W.STORY || []).some(s => s.id === 'hs_clue' && s.lines.some(l => String(l[1]).includes('夺'))), '掌天瓶不再编造「瓶底夺字」');
 ok((W.STORY || []).some(s => s.id === 'hs_meet' && s.lines.some(l => String(l[1]).includes('罗烟步'))), '后山补上厉飞雨授眨眼剑法与罗烟步');
 
@@ -839,20 +839,22 @@ ok(!!W.Sprites.dujiao, '毒蛟立绘已注册');
   eq(leak.length, 0, '炼器产出全部标了 craftOnly（不掉落、买不到）', leak);
   // 杀人越货 / 殿中所得：降尘丹、补天丹、混元钵。既没有丹方，也不进坊市
   // （降尘丹按原著是古长老身上那「五枚」，可叠加，故不再算 unique）
-  const lootOnly = ['jiangchen', 'butian', 't_hunyuan'];
+  // 降尘丹按原著回流坊市（20261028q 坊市补价），这里只守「纯剧情所得」的两件
+  const lootOnly = ['butian', 't_hunyuan'];
   const badLoot = lootOnly.filter(id => {
     const it = W.Items.get(id);
     return !it || it.craftOnly || W.RECIPES.some(r => r.out === id) || (W.SHOP_STOCK || []).some(s => s.id === id);
   });
-  eq(badLoot.length, 0, '降尘丹 / 补天丹 / 混元钵 只靠剧情所得：无丹方、买不到', badLoot);
+  eq(badLoot.length, 0, '补天丹 / 混元钵 只靠剧情所得：无丹方、买不到', badLoot);
   // 坊市里一件 unique / craftOnly 的东西都不许有
   const shopBad = [];
   for (const m of ALLM) for (const sid of (m.shop || [])) {
     const it = W.Items.get(sid);
     if (!it) { shopBad.push(m.id + ':' + sid); continue; }
-    if (it.unique || it.craftOnly) shopBad.push(m.id + ':' + sid);
+    // 孤本 / 独苗绝不能上架；craftOnly 的基础丹药按原著可在坊市流通（20261028q）
+    if (it.unique) shopBad.push(m.id + ':' + sid);
   }
-  eq(shopBad.length, 0, '坊市不卖孤本、独苗与必须自炼之物', shopBad);
+  eq(shopBad.length, 0, '坊市不卖孤本与独苗（丹药可按原著流通）', shopBad);
   // 每条配方都有成算，且都在 (0,1) 之间 —— 没有「必定炼成」
   const badRate = W.RECIPES.filter(r => !(typeof r.rate === 'number' && r.rate > 0 && r.rate < 1));
   eq(badRate.length, 0, '每条配方都有成功率，没有必成的一炉', badRate.map(r => r.id));

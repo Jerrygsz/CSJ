@@ -884,7 +884,7 @@
       }
       // 剑系出手：身前一道弯月。法术系不出刃，改成脚下起一圈符文（读作「在运气」）
       const vfx = a.vfx || 'sword';
-      if (vfx === 'sword' || vfx === 'qingmang' || vfx === 'blood') {
+      if (vfx === 'sword' || vfx === 'qingmang' || vfx === 'blood' || vfx === 'gold') {
         if (struck) spawnSlash(p.x + Math.cos(base) * 13, p.y - 5 + Math.sin(base) * 13,
           base, VFX_HIT_COLOR[vfx] || '#eafcff', 22, 1.9);
       } else if (struck) spawnRune(p.x, p.y, 24, VFX_HIT_COLOR[vfx] || '#ffe98a');
@@ -974,7 +974,7 @@
           for (const en of allEnemies()) {
             if (!en._orbCd) en._orbCd = {};
             if ((en._orbCd[e.id] || 0) > 0) continue;
-            if (U.dist(ox, oy, en.x, en.y) < 8 + en.r) { damageEnemy(en, dmg); en._orbCd[e.id] = a.cdHit || 0.4; spawnHit(en.x, en.y, '#bfe'); }
+            if (U.dist(ox, oy, en.x, en.y) < 8 + en.r) { damageEnemy(en, dmg); en._orbCd[e.id] = a.cdHit || 0.4; spawnHit(en.x, en.y, VFX_HIT_COLOR[a.vfx] || '#bfe'); }
           }
         }
       } else if (a.kind === 'field') {
@@ -985,7 +985,7 @@
         for (const en of allEnemies()) {
           if (U.dist(p.x, p.y, en.x, en.y) < rad + en.r) {
             if (!en._fieldCd) en._fieldCd = {};
-            if ((en._fieldCd[e.id] || 0) <= 0) { damageEnemy(en, dmg); en._fieldCd[e.id] = a.cdHit || 0.5; spawnHit(en.x, en.y, '#9ad8ff'); }
+            if ((en._fieldCd[e.id] || 0) <= 0) { damageEnemy(en, dmg); en._fieldCd[e.id] = a.cdHit || 0.5; spawnHit(en.x, en.y, VFX_HIT_COLOR[a.vfx] || '#9ad8ff'); }
           }
         }
       }
@@ -2467,6 +2467,26 @@
       ctx.globalAlpha = 0.1; ctx.fillStyle = '#6a4fd0';
       ctx.beginPath(); ctx.arc(p.x, p.y, fd.rad, 0, 6.28); ctx.fill();
       ctx.globalAlpha = 1;
+    } else if (fd.vfx === 'gold') {
+      // 洞漩金光：原著“掌心一团金色涋涡，四周空气一紧”——
+      // 一圈圈向内收的金弧 + 中心一颗亮金涡心，读作“在往里吸”
+      ctx.save(); ctx.translate(p.x, p.y);
+      ctx.globalAlpha = 0.10; ctx.fillStyle = '#ffe98a';
+      ctx.beginPath(); ctx.arc(0, 0, fd.rad, 0, 6.28); ctx.fill();
+      for (let i = 0; i < 4; i++) {
+        const ph = (t * 0.85 + i / 4) % 1;
+        const r = fd.rad * (1 - ph * 0.85);
+        const a0 = t * 1.6 + i * 1.9;
+        ctx.globalAlpha = 0.55 * ph + 0.12;
+        ctx.strokeStyle = i % 2 ? '#fff3c0' : '#ffd76a'; ctx.lineWidth = 2.2;
+        ctx.beginPath(); ctx.arc(0, 0, r, a0, a0 + 1.5); ctx.stroke();
+        ctx.beginPath(); ctx.arc(0, 0, r, a0 + 3.14, a0 + 4.34); ctx.stroke();
+      }
+      ctx.globalAlpha = 0.9; ctx.fillStyle = '#fff6d0';
+      ctx.beginPath(); ctx.arc(0, 0, 6, 0, 6.28); ctx.fill();
+      ctx.globalAlpha = 0.35; ctx.strokeStyle = '#ffe98a'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.arc(0, 0, fd.rad * 0.98, 0, 6.28); ctx.stroke();
+      ctx.globalAlpha = 1; ctx.restore();
     } else {
       // 冰霜：冷色地盘 + 内圈冷雾，边缘一圈慢慢转的冰晶（不要白边，不然像个气泡）
       // 渐变按半径缓存、并且画在「以玩家为原点」的坐标系里 —— 否则每帧都要新建一个渐变对象
@@ -3263,17 +3283,30 @@
     { k: 'maxhp', v: 15, cap: 300, name: '气血上限 +15' },
     { k: 'shaGain', v: 0.15, cap: 1.2, name: '煞气 +15%' }
   ];
+  // 只抽「这门功法真吃得下」的加成：被动没有 atk，抽伤害是空转；
+  // burst/field 没有弹数与弹寿命，抽「多打一发 / 持续」也是空转。
+  function skillModsFor(s) {
+    const a = (s && s.atk) || null;
+    if (!a) return [];   // 被动没有施展参数：一张都不给，避免“伤害 +25%”空转
+    return SKILL_MODS.filter(m => {
+      if (m.k === 'count') return !!a && (a.kind === 'beam' || a.kind === 'homing' || a.kind === 'spread' || a.kind === 'thunder' || a.kind === 'orbit');
+      if (m.k === 'dur') return !!a && !!a.life;
+      return true;
+    });
+  }
   function optSkillUp() {
-    const own = ownSkills(); if (!own.length) return optNewSkill();
-    const s = U.pick(own), m = U.pick(SKILL_MODS);
+    // 被动功法没有施展参数，不该出现在「技能升级」牌里（否则“伤害 +25%”空转）
+    const own = ownSkills().filter(s => s.atk); if (!own.length) return optNewSkill();
+    const s = U.pick(own), m = U.pick(skillModsFor(s));
     return { key: 'A' + s.id + m.k, kind: 'A', id: s.id, icon: s.icon || '⚔', mod: m,
       name: s.name + ' · ' + m.name, desc: '本局内永久生效' };
   }
   function optNewSkill() {
     const pool = newSkills(); if (!pool.length) return optPassive();
     const s = U.pick(pool);
+    const passive = s.type === 'passive';
     return { key: 'B' + s.id, kind: 'B', id: s.id, icon: s.icon || '📜',
-      name: '悟得「' + s.name + '」', desc: '新神通 · 立刻就跟着打' };
+      name: '悟得「' + s.name + '」', desc: passive ? '新功法 · 学了就运在身上' : '新神通 · 立刻就跟着打' };
   }
   function optPassive() {
     const p = U.pick(PASSIVE_MODS);
@@ -3283,7 +3316,7 @@
     const pick = U.pick([
       { v: 30, name: '灵石 +30', desc: '立刻揣进袋里，能马上祭炼' },
       { v: 60, name: '灵石 +60', desc: '一大把，够祭炼两次' },
-      { v: 0.2, name: '煞气门槛 −20%', desc: '下次顿悟来得更快' }
+      { v: 0.2, name: '煞气门槛 −20%', desc: '此后每次顿悟都来得更快' }
     ]);
     return { key: 'D' + pick.name, kind: 'D', icon: '💎', pick: pick, name: pick.name, desc: pick.desc };
   }
@@ -3293,7 +3326,7 @@
       { k: 'x2dmg', name: '伤害翻倍 · 15 秒', desc: '这一口气够狠' },
       { k: 'heal', name: '气血全满', desc: '一口气吊回来' },
       { k: 'summon', name: '召灵宠助战 · 30 秒', desc: '跟在另一侧，替你打半分钟' },
-      { k: 'clear', name: '清场 · 屏内小怪尽灭', desc: '连煞气一起收' }
+      { k: 'clear', name: '清场 · 屏内小怪尽灭', desc: '屏内小怪一并抹去（这一下不计煞气）' }
     ]);
     return { key: 'E' + pick.k, kind: 'E', icon: '⚡', pick: pick, name: pick.name, desc: pick.desc };
   }
@@ -3372,7 +3405,7 @@
       save.stones -= cost; ins.refine++;
       writeSave();
       const cur = ins.skills[c.id] || (ins.skills[c.id] = {});
-      const m = U.pick(SKILL_MODS);
+      const m = U.pick(skillModsFor(window.skillById(c.id)));
       cur[m.k] = (cur[m.k] || 0) + m.v;
       banner('祭炼 ' + c.name + ' · ' + m.name); Sfx.forge ? Sfx.forge() : Sfx.buff();
     }
@@ -3391,13 +3424,13 @@
   function openRefine() {
     if (!G.player) return;
     const ins = insSt(), cost = REFINE_COST[ins.refine];
-    const own = ownSkills();
-    if (!own.length) { notify('还没有可祭炼的功法'); Sfx.warn(); return; }
+    const own = ownSkills().filter(s => s.atk);
+    if (!own.length) { notify('还没有可祭炼的进攻功法'); Sfx.warn(); return; }
     if (cost == null) { notify('本局祭炼已到顶'); Sfx.warn(); return; }
     if ((save.stones || 0) < cost) { notify('灵石不足 · 需 ' + cost); Sfx.warn(); return; }
     const cards = own.slice(0, 6).map(s => ({
       key: 'R' + s.id, kind: 'R', id: s.id, icon: s.icon || '⚔', name: s.name,
-      desc: '祭炼 ' + cost + ' 灵石 · 伤害/范围/攻速/多发，随机一条'
+      desc: '祭炼 ' + cost + ' 灵石 · 伤害/范围/攻速/多发/持续，随机一条'
     }));
     showCards('灵石祭炼 · 择一功法', cards);
   }
@@ -3495,6 +3528,11 @@
     while (st.v >= st.need) { st.v -= st.need; st.pending = (st.pending || 0) + 1; }
   }
   // 顿悟/祭炼对某门功法的加成（改的是这次出手用的那份配置，不动全局表）
+  // 必须按「施法形态」分派字段，否则会抽到空转的卡：
+  //   远程/追踪/扇形/天雷 → range 锁敌距、cd 出手间隔、count 弹数、life 持续
+  //   爆发 burst           → 范围是 radBase/rad，间隔是 cdBase
+  //   环绕 orbit           → 范围是 rad，命中间隔是 cdHit，count 是绕身器数
+  //   领域 field           → 范围是 rad，命中间隔是 cdHit，没有弹数/持续
   function insightAtk(id, a) {
     const ins = G.insight, st = G.sha;
     const m = (ins && ins.skills[id]) || null;
@@ -3503,10 +3541,17 @@
     const o = Object.assign({}, a);
     const dm = (1 + ((m && m.dmg) || 0)) * dmgT;
     if (dm !== 1) { o.base = (a.base || 0) * dm; o.perLv = (a.perLv || 0) * dm; }
-    if (m && m.range) o.range = (a.range || 320) * (1 + m.range);
+    // 范围：锁敌距离 / 爆发与领域的半径，各自归位
+    if (m && m.range) {
+      if (a.rad != null) o.rad = a.rad * (1 + m.range);
+      if (a.radBase != null) o.radBase = a.radBase * (1 + m.range);
+      if (a.range != null) o.range = a.range * (1 + m.range);
+    }
+    // 攻速：出手间隔 / 爆发间隔 / 领域命中间隔
     if (m && m.cd) {
       if (a.cd != null) o.cd = a.cd * (1 - m.cd);
       if (a.cdBase != null) o.cdBase = a.cdBase * (1 - m.cd);
+      if (a.cdHit != null) o.cdHit = a.cdHit * (1 - m.cd);
     }
     if (m && m.count) o.countBase = (a.countBase == null ? 1 : a.countBase) + m.count;
     if (m && m.dur && a.life) o.life = a.life * (1 + m.dur);
@@ -7820,6 +7865,18 @@
       return true;
     },
     refineCost() { const i = G.insight || {}; return REFINE_COST[i.refine || 0] == null ? null : REFINE_COST[i.refine || 0]; },
+    // 顿悟加成探针：给定功法 + mod，返回这门功法「这一次出手」的真实配置
+    // （用来验收「卡面描述」和「真实施法参数」是否一致）
+    atkProbe(id, mods) {
+      const s = window.skillById(id); if (!s || !s.atk) return null;
+      const bak = G.insight;
+      G.insight = { skills: {}, n: 0, refine: 0 };
+      if (mods) G.insight.skills[id] = mods;
+      const out = insightAtk(id, s.atk);
+      G.insight = bak;
+      return out;
+    },
+    modKeys(id) { const s = window.skillById(id); return skillModsFor(s).map(m => m.k); },
     openRefine() { openRefine(); return G.state; },
     stage() { return G.player ? stageLabel(G.player) : ''; },
     resetRunBuffs() { resetRunBuffs(); return true; },

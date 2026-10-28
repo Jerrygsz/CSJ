@@ -66,10 +66,10 @@ const S = await page.evaluate(() => {
   const get = id => SK.find(s => s.id === id);
   const map = {
     sword: 'qingmang', xueling: 'blood', fire: 'fire', sanyan: 'fan', jianfen: 'swordarray', shayao: 'blood',
-    dageng: 'swordarray', tiandu: 'fire', xuelian: 'blood',
+    dageng: 'swordarray', tiandu: 'corpsefire', xuelian: 'blood',
     jzhen: 'swordarray', heisha: 'blood', jinshen: 'gold',
-    nova: 'gold', qinxian: 'gold', frost: 'ice', yuanci: 'gravity',
-    orb: 'gang', leishen: 'thunder'
+    nova: 'gold', qinxian: 'soul', frost: 'ice', yuanci: 'magnet',
+    orb: 'gold', leishen: 'thunder'
   };
   for (const id in map) {
     const s = get(id);
@@ -84,7 +84,7 @@ ok(S.vfx_xueling, '血灵钻(xueling) → blood');
 ok(S.vfx_jianfen, '剑影分光术(jianfen) → swordarray');
 ok(S.vfx_shayao, '煞妖诀(shayao) → blood');
 ok(S.vfx_dageng, '大庚剑阵(dageng) → swordarray');
-ok(S.vfx_tiandu, '天都尸火(tiandu) → fire');
+ok(S.vfx_tiandu, '天都尸火(tiandu) → corpsefire（绿黑阴火）');
 ok(S.vfx_xuelian, '血炼神光(xuelian) → blood');
 ok(S.vfx_jzhen, '剑阵圆满(jzhen) → swordarray（飞剑绕身）');
 ok(S.vfx_heisha, '黑煞修罗功(heisha) → blood');
@@ -92,10 +92,10 @@ ok(S.vfx_jinshen, '禁神术(jinshen) → gold');
 ok(S.vfx_fire, '火弹术(fire) → fire（直线火球）');
 ok(S.vfx_sanyan, '三焰扇(sanyan) → fan');
 ok(S.vfx_nova, '定神符(nova) → gold');
-ok(S.vfx_qinxian, '惊神刺(qinxian) → gold');
+ok(S.vfx_qinxian, '惊神刺(qinxian) → soul（无形神识）');
 ok(S.vfx_frost, '冰冻术(frost) → ice');
-ok(S.vfx_yuanci, '元磁神光(yuanci) → gravity');
-ok(S.vfx_orb, '金光罩(orb) → gang');
+ok(S.vfx_yuanci, '元磁神光(yuanci) → magnet（灰金磁域）');
+ok(S.vfx_orb, '金光罩(orb) → gold（金光绕体）');
 ok(S.vfx_leishen, '辟邪神雷(leishen) → thunder');
 ok(S.active_count >= 10, '至少 10 门战斗功法带了 vfx（没被误降成被动）', S.active_count);
 
