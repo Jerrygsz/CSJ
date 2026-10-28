@@ -23,7 +23,7 @@
     { lv: 48, name: '筑基后期', hp: 120, dmg: 0.16, atk: 0.12, spd: 0.04, skill: 'nova',  note: '神识大进，御器成阵' },
     { lv: 56, name: '结丹初期', hp: 200, dmg: 0.22, atk: 0.14, spd: 0.04, skill: 'frost', note: '丹成之日，一方称尊' },
     { lv: 64, name: '结丹中期', hp: 240, dmg: 0.24, atk: 0.15, spd: 0.04, skill: 'fire',  note: '金丹运转，法力不绝' },
-    { lv: 72, name: '结丹后期', hp: 300, dmg: 0.26, atk: 0.16, spd: 0.05, skill: 'gourd', note: '金丹圆满，只待凝婴' }
+    { lv: 72, name: '结丹后期', hp: 300, dmg: 0.26, atk: 0.16, spd: 0.05, skill: 'mingwang', note: '金丹圆满，只待凝婴' }
   );
 
   // ========================= 二、材料 =========================

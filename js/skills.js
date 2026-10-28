@@ -48,9 +48,6 @@ window.SKILLS = [
   { id: 'haste', name: '雷遁术', icon: '⚡', max: 5, minLv: 15, type: 'passive',
     effect: { atkSpd: 0.08 },
     desc: '吐纳如雷，出手更急。所有攻击间隔随之缩短，韩立后期参悟的急攻之术' },
-  { id: 'gourd', name: '灵葫诀', icon: '🍶', max: 5, minLv: 25, type: 'passive',
-    effect: { maxhp: 18, herb: 0.04, drop: 0.012 },
-    desc: '本命灵葫在身，生命上限提升，灵草常落' },
 
   // ============ 筑基期：地火之屋 → 乱星海 ============
   { id: 'qingyuan', name: '青元剑诀', icon: '⚔', max: 7, minLv: 36, type: 'passive',
@@ -120,7 +117,7 @@ window.SKILLS = [
   { id: 'huashen', name: '身外化身', icon: '👤', max: 5, minLv: 110, type: 'passive',
     effect: { dmg: 0.04 }, avatar: true,
     desc: '玄阴经里的分神之法：以曲魂养出一具化身，替你出手。它打它的，你打你的' },
-  { id: 'jzhen', name: '剑阵圆满', icon: '🌀', max: 7, minLv: 112, type: 'aura',
+  { id: 'jzhen', name: '青蟠剑阵', icon: '🌀', max: 7, minLv: 112, type: 'aura',
     atk: { kind: 'orbit', base: 12, perLv: 5, rad: 78, countBase: 4, countPerLv: 0.5, cdHit: 0.35, vfx: 'swordarray' },
     desc: '青蟠剑阵成了：四柄飞剑绕身不急不缓，进圈的就挨剑。剑阵一圆，人便是一处绝地' },
   { id: 'heisha', name: '黑煞修罗功', icon: '👹', max: 7, minLv: 102, type: 'ranged_aoe',
@@ -150,9 +147,12 @@ window.SKILLS = [
   { id: 'wuzi', name: '五子同心魔', icon: '👁', max: 7, minLv: 102, type: 'passive',
     effect: { crit: 0.05, dmg: 0.05 },
     desc: '昆吾山所得子母魔头操控法，五魔分神助战，出手更毒' },
+  { id: 'xuanyin', name: '玄阴经', icon: '📕', max: 6, minLv: 56, type: 'passive',
+    effect: { dmg: 0.06, armor: 0.04 },
+    desc: '乱星海顶级魔道功法，玄骨、极阴一脉所修。出手更狠、护体更厚；煞妖诀、血炼神光、天都尸火皆由此经而出' },
 
   // ============ 化神期：人界之巅，只待飞升 ============
-  { id: 'pojie', name: '破界符·空间诀', icon: '🌀', max: 7, minLv: 112, type: 'passive',
+  { id: 'pojie', name: '破界符', icon: '🌀', max: 7, minLv: 112, type: 'passive',
     effect: { xpMul: 0.05, pickup: 0.25 },
     desc: '玲珑所留的飞升之凭，空间之力加身。握着它，才知道什么叫界外还有界' }
 ];

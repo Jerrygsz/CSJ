@@ -88,7 +88,7 @@
   "w": "他袖口露",
   "where": [
    "map:heixiang·太南小会·后巷",
-   "map:lin·翠屏山·洞府夜变"
+   "map:lin·内门·洞府夜变"
   ]
  },
  {
@@ -185,37 +185,37 @@
  {
   "w": "三间石",
   "where": [
-   "map:lin·翠屏山·洞府夜变"
+   "map:lin·内门·洞府夜变"
   ]
  },
  {
   "w": "着黄枫谷的道袍",
   "where": [
-   "map:lin·翠屏山·洞府夜变"
+   "map:lin·内门·洞府夜变"
   ]
  },
  {
   "w": "出的那卷玉",
   "where": [
-   "map:lin·翠屏山·洞府夜变"
+   "map:lin·内门·洞府夜变"
   ]
  },
  {
   "w": "的是千竹教的符",
   "where": [
-   "map:lin·翠屏山·洞府夜变"
+   "map:lin·内门·洞府夜变"
   ]
  },
  {
   "w": "输在一间石",
   "where": [
-   "map:lin_out·翠屏山·洞府夜变"
+   "map:lin_out·内门·洞府夜变"
   ]
  },
  {
   "w": "储物袋里一枚玉",
   "where": [
-   "map:lin_out·翠屏山·洞府夜变"
+   "map:lin_out·内门·洞府夜变"
   ]
  },
  {
@@ -234,6 +234,43 @@
   "w": "灵液在丹",
   "where": [
    "map:zhuji_out·黄枫谷·地火之屋"
+  ]
+ },
+ {
+  "w": "炉底那枚丹",
+  "where": [
+   "map:zhuji_out_lock·zhuji_out_lock"
+  ]
+ },
+ {
+  "w": "三百灵石",
+  "where": [
+   "map:zhuji_out_lock·zhuji_out_lock",
+   "map:zhuji_out_ask·zhuji_out_ask"
+  ]
+ },
+ {
+  "w": "强冲只会丹",
+  "where": [
+   "map:zhuji_out_lock_lv·zhuji_out_lock_lv"
+  ]
+ },
+ {
+  "w": "温润如玉",
+  "where": [
+   "map:zhuji_out_ask·zhuji_out_ask"
+  ]
+ },
+ {
+  "w": "败则丹",
+  "where": [
+   "map:zhuji_out_ask·zhuji_out_ask"
+  ]
+ },
+ {
+  "w": "韩立立于石",
+  "where": [
+   "map:zhuji_out_ready·zhuji_out_ready"
   ]
  },
  {
@@ -605,13 +642,742 @@
  {
   "w": "他把灵石",
   "where": [
-   "map:huixiang·越国·韩家村"
+   "map:huixiang·越国·韩家村",
+   "map:tianyuan·天渊坊市"
   ]
  },
  {
   "w": "她把一枚玉",
   "where": [
    "map:zijian·乱星海·紫灵"
+  ]
+ },
+ {
+  "w": "要换灵石",
+  "where": [
+   "map:anyuan·安远城"
+  ]
+ },
+ {
+  "w": "把几片鳞甲",
+  "where": [
+   "map:anyuan·安远城"
+  ]
+ },
+ {
+  "w": "阁前挂着各家旗",
+  "where": [
+   "map:tianyuan·天渊坊市"
+  ]
+ },
+ {
+  "w": "标价九千灵石",
+  "where": [
+   "map:tianyuan·天渊坊市"
+  ]
+ },
+ {
+  "w": "看了一眼那层石",
+  "where": [
+   "map:tianyuan·天渊坊市"
+  ]
+ },
+ {
+  "w": "三头妖修拦在石",
+  "where": [
+   "map:heifeng·黑凤族领地"
+  ]
+ },
+ {
+  "w": "还有一滴凝在石",
+  "where": [
+   "map:heifeng_out·黑凤族领地"
+  ]
+ },
+ {
+  "w": "鳞片收进储物袋",
+  "where": [
+   "map:heifeng_out·黑凤族领地"
+  ]
+ },
+ {
+  "w": "了一处背风的石",
+  "where": [
+   "map:lianxu·安远城外·五行合一"
+  ]
+ },
+ {
+  "w": "成一个缓慢的环",
+  "where": [
+   "map:lianxu·安远城外·五行合一"
+  ]
+ },
+ {
+  "w": "带着草木",
+  "where": [
+   "map:fengyuan·风元大陆"
+  ]
+ },
+ {
+  "w": "中央插着一柄剑",
+  "where": [
+   "map:fengyuan·风元大陆"
+  ]
+ },
+ {
+  "w": "绕着它退开半尺",
+  "where": [
+   "map:fengyuan·风元大陆"
+  ]
+ },
+ {
+  "w": "剑是好剑",
+  "where": [
+   "map:fengyuan·风元大陆"
+  ]
+ },
+ {
+  "w": "他把剑",
+  "where": [
+   "map:fengyuan·风元大陆",
+   "map:linghuang_out·灵皇大比"
+  ]
+ },
+ {
+  "w": "收进储物袋",
+  "where": [
+   "map:fengyuan·风元大陆"
+  ]
+ },
+ {
+  "w": "是一片削平的石",
+  "where": [
+   "map:shisan·十三族会盟"
+  ]
+ },
+ {
+  "w": "上摆了十三把石",
+  "where": [
+   "map:shisan·十三族会盟"
+  ]
+ },
+ {
+  "w": "石椅上一片袍",
+  "where": [
+   "map:shisan·十三族会盟"
+  ]
+ },
+ {
+  "w": "会盟开不出结果",
+  "where": [
+   "map:shisan·十三族会盟"
+  ]
+ },
+ {
+  "w": "在寒玉",
+  "where": [
+   "map:guanghan_out·广寒界"
+  ]
+ },
+ {
+  "w": "另一头钉在石",
+  "where": [
+   "map:huangquan·黄泉地火"
+  ]
+ },
+ {
+  "w": "岛上没有草木",
+  "where": [
+   "map:modajie·魔界大劫"
+  ]
+ },
+ {
+  "w": "只有一座石",
+  "where": [
+   "map:modajie·魔界大劫"
+  ]
+ },
+ {
+  "w": "他身上有炼魔草",
+  "where": [
+   "map:modajie·魔界大劫"
+  ]
+ },
+ {
+  "w": "炼魔草",
+  "where": [
+   "map:modajie·魔界大劫",
+   "map:modajie_out·魔界大劫"
+  ]
+ },
+ {
+  "w": "能听见血滴在石",
+  "where": [
+   "map:jiujie·九劫现"
+  ]
+ },
+ {
+  "w": "里一把捞出个尺",
+  "where": [
+   "map:qunqiang·群强之陨"
+  ]
+ },
+ {
+  "w": "无表情的金色甲",
+  "where": [
+   "map:xianshi·献祭·风元大陆"
+  ]
+ },
+ {
+  "w": "掌大的银色法盘",
+  "where": [
+   "map:xianshi·献祭·风元大陆"
+  ]
+ },
+ {
+  "w": "无数银色符",
+  "where": [
+   "map:xianshi·献祭·风元大陆"
+  ]
+ },
+ {
+  "w": "地表青色符",
+  "where": [
+   "map:xianshi·献祭·风元大陆"
+  ]
+ },
+ {
+  "w": "银色法盘上的符",
+  "where": [
+   "map:xianshi·献祭·风元大陆"
+  ]
+ },
+ {
+  "w": "金色甲",
+  "where": [
+   "map:zhangtianping·掌天瓶·盗天瓶"
+  ]
+ },
+ {
+  "w": "现出巨大甲",
+  "where": [
+   "map:zhangtianping·掌天瓶·盗天瓶"
+  ]
+ },
+ {
+  "w": "面前的青色古镜",
+  "where": [
+   "map:zhangtianping·掌天瓶·盗天瓶"
+  ]
+ },
+ {
+  "w": "地面平滑如镜",
+  "where": [
+   "map:zhangtianping·掌天瓶·盗天瓶"
+  ]
+ },
+ {
+  "w": "神魂味道果",
+  "where": [
+   "map:zhanxian_out·斩仙·万灵血玺"
+  ]
+ },
+ {
+  "w": "带走的本命晶珠",
+  "where": [
+   "map:zhanxian_out·斩仙·万灵血玺"
+  ]
+ },
+ {
+  "w": "豆粒大的黑眼珠",
+  "where": [
+   "map:huimoyuan·再回魔源"
+  ]
+ },
+ {
+  "w": "他给的那枚玉",
+  "where": [
+   "map:daoguo·道果大会"
+  ]
+ },
+ {
+  "w": "得有这一手化木",
+  "where": [
+   "map:daoguo·道果大会"
+  ]
+ },
+ {
+  "w": "从中露",
+  "where": [
+   "map:daoguo·道果大会"
+  ]
+ },
+ {
+  "w": "是这次参加道果",
+  "where": [
+   "map:renzu·人族之变"
+  ]
+ },
+ {
+  "w": "周围着百族的旗",
+  "where": [
+   "map:linghuang·灵皇大比"
+  ]
+ },
+ {
+  "w": "没看台下的旗",
+  "where": [
+   "map:linghuang_out·灵皇大比"
+  ]
+ },
+ {
+  "w": "上站着一个青袍",
+  "where": [
+   "map:zhandacheng·斩大乘"
+  ]
+ },
+ {
+  "w": "只有一圈黑石",
+  "where": [
+   "map:heihu·黑葫城"
+  ]
+ },
+ {
+  "w": "城门口没人盘",
+  "where": [
+   "map:heihu·黑葫城"
+  ]
+ },
+ {
+  "w": "味道果",
+  "where": [
+   "map:tianmo·天魔契约"
+  ]
+ },
+ {
+  "w": "树下的石",
+  "where": [
+   "map:huirenjie·重回人界"
+  ]
+ },
+ {
+  "w": "脚下石",
+  "where": [
+   "map:yuyang_dou·虞阳城·城斗场"
+  ]
+ },
+ {
+  "w": "遍地石",
+  "where": [
+   "map:linghuan·灵寰界·荒地"
+  ]
+ },
+ {
+  "w": "落在草",
+  "where": [
+   "map:linghuan·灵寰界·荒地"
+  ]
+ },
+ {
+  "w": "回头看了一眼草",
+  "where": [
+   "map:linghuan·灵寰界·荒地"
+  ]
+ },
+ {
+  "w": "记忆像碎掉的镜",
+  "where": [
+   "map:suxing·苏醒·我是韩立"
+  ]
+ },
+ {
+  "w": "她叫我石",
+  "where": [
+   "map:suxing·苏醒·我是韩立"
+  ]
+ },
+ {
+  "w": "阁里的玉",
+  "where": [
+   "map:lingyan·灵焰山脉·通易谷"
+  ]
+ },
+ {
+  "w": "简被换成废石",
+  "where": [
+   "map:lingyan·灵焰山脉·通易谷"
+  ]
+ },
+ {
+  "w": "宗的秘传功法玉",
+  "where": [
+   "map:lingyan·灵焰山脉·通易谷"
+  ]
+ },
+ {
+  "w": "又没有合适的丹",
+  "where": [
+   "map:lingyan·灵焰山脉·通易谷"
+  ]
+ },
+ {
+  "w": "三滴绿色液",
+  "where": [
+   "map:xiaoping·掌天瓶·失而复得"
+  ]
+ },
+ {
+  "w": "到处是石",
+  "where": [
+   "map:huijie·灰界·石中坐客"
+  ]
+ },
+ {
+  "w": "换上合体甲",
+  "where": [
+   "map:huijie·灰界·石中坐客"
+  ]
+ },
+ {
+  "w": "把一具莹白如玉",
+  "where": [
+   "map:huijie·灰界·石中坐客"
+  ]
+ },
+ {
+  "w": "静得能听见石",
+  "where": [
+   "map:huijie·灰界·石中坐客"
+  ]
+ },
+ {
+  "w": "最深处的石",
+  "where": [
+   "map:huijie·灰界·石中坐客"
+  ]
+ },
+ {
+  "w": "高大的石",
+  "where": [
+   "map:dijiang·帝江坊·夜阳城"
+  ]
+ },
+ {
+  "w": "角落里一只木",
+  "where": [
+   "map:dijiang·帝江坊·夜阳城"
+  ]
+ },
+ {
+  "w": "慧眼识珠",
+  "where": [
+   "map:dijiang·帝江坊·夜阳城"
+  ]
+ },
+ {
+  "w": "是六花",
+  "where": [
+   "map:xingqi·星器·五城会武"
+  ]
+ },
+ {
+  "w": "我等实力的效果",
+  "where": [
+   "map:xingqi·星器·五城会武"
+  ]
+ },
+ {
+  "w": "小小的黑黄碎石",
+  "where": [
+   "map:dadi·大墟"
+  ]
+ },
+ {
+  "w": "泣血阵图",
+  "where": [
+   "map:dadi_out·大墟"
+  ]
+ },
+ {
+  "w": "昏黄的天光下露",
+  "where": [
+   "map:dadi_out·大墟"
+  ]
+ },
+ {
+  "w": "便是方才透露",
+  "where": [
+   "map:xiedao·积鳞空境·天变了"
+  ]
+ },
+ {
+  "w": "便已令",
+  "where": [
+   "map:xiedao·积鳞空境·天变了"
+  ]
+ },
+ {
+  "w": "都戴着一枚黑玉",
+  "where": [
+   "map:jingong·独闯仙宫·诛五恶"
+  ]
+ },
+ {
+  "w": "乃是太岁仙尊花",
+  "where": [
+   "map:taisui·太岁府·各方云集"
+  ]
+ },
+ {
+  "w": "在洞外盘",
+  "where": [
+   "map:chongchao·虫巢·大罗鬼王"
+  ]
+ },
+ {
+  "w": "我和石",
+  "where": [
+   "map:chongchao·虫巢·大罗鬼王"
+  ]
+ },
+ {
+  "w": "双手直接环",
+  "where": [
+   "map:chongchao·虫巢·大罗鬼王"
+  ]
+ },
+ {
+  "w": "虫群还在原地盘",
+  "where": [
+   "map:chongchao_out·虫巢·大罗鬼王"
+  ]
+ },
+ {
+  "w": "三十六柄石剑",
+  "where": [
+   "map:suidian·岁月殿·夺灯"
+  ]
+ },
+ {
+  "w": "隐隐形成一个剑",
+  "where": [
+   "map:suidian·岁月殿·夺灯"
+  ]
+ },
+ {
+  "w": "里立着一片金甲",
+  "where": [
+   "map:suidian·岁月殿·夺灯"
+  ]
+ },
+ {
+  "w": "如朽木",
+  "where": [
+   "map:suidian_out·岁月殿·夺灯"
+  ]
+ },
+ {
+  "w": "与三大势力鼎",
+  "where": [
+   "map:wubao·鎏金城·万宝节"
+  ]
+ },
+ {
+  "w": "九层酒",
+  "where": [
+   "map:wubao·鎏金城·万宝节"
+  ]
+ },
+ {
+  "w": "数十丈高的黑石",
+  "where": [
+   "map:wubao·鎏金城·万宝节"
+  ]
+ },
+ {
+  "w": "我在鼎",
+  "where": [
+   "map:jiuyuan·九元城·鬼阵"
+  ]
+ },
+ {
+  "w": "前后珠玉",
+  "where": [
+   "map:jiuyuan·九元城·鬼阵"
+  ]
+ },
+ {
+  "w": "手里多了一只鼎",
+  "where": [
+   "map:jiuyuan_out·九元城·鬼阵"
+  ]
+ },
+ {
+  "w": "参天古木",
+  "where": [
+   "map:zaimiao·再战妙法"
+  ]
+ },
+ {
+  "w": "端坐在形如莲花",
+  "where": [
+   "map:zaimiao·再战妙法"
+  ]
+ },
+ {
+  "w": "他将盘",
+  "where": [
+   "map:zhanshi·斩尸"
+  ]
+ },
+ {
+  "w": "正中央的阴鱼图",
+  "where": [
+   "map:zhanshi·斩尸"
+  ]
+ },
+ {
+  "w": "位置稍稍与图",
+  "where": [
+   "map:zhanshi·斩尸"
+  ]
+ },
+ {
+  "w": "相对坐在阳鱼图",
+  "where": [
+   "map:zhanshi·斩尸"
+  ]
+ },
+ {
+  "w": "祭坛最外层的环",
+  "where": [
+   "map:zhanshi·斩尸"
+  ]
+ },
+ {
+  "w": "中层回形符",
+  "where": [
+   "map:zhanshi·斩尸"
+  ]
+ },
+ {
+  "w": "央的阴阳双鱼符",
+  "where": [
+   "map:zhanshi·斩尸"
+  ]
+ },
+ {
+  "w": "圆千丈的六角石",
+  "where": [
+   "map:youming·幽冥·骨皇"
+  ]
+ },
+ {
+  "w": "满暗红色的水液",
+  "where": [
+   "map:youming·幽冥·骨皇"
+  ]
+ },
+ {
+  "w": "巨大的六角轮盘",
+  "where": [
+   "map:youming·幽冥·骨皇"
+  ]
+ },
+ {
+  "w": "上面刻满符",
+  "where": [
+   "map:youming·幽冥·骨皇"
+  ]
+ },
+ {
+  "w": "高大男子站在石",
+  "where": [
+   "map:youming·幽冥·骨皇"
+  ]
+ },
+ {
+  "w": "却压过六角圆盘",
+  "where": [
+   "map:youming·幽冥·骨皇"
+  ]
+ },
+ {
+  "w": "踏上石",
+  "where": [
+   "map:youming·幽冥·骨皇"
+  ]
+ },
+ {
+  "w": "看向石",
+  "where": [
+   "map:youming_out·幽冥·骨皇"
+  ]
+ },
+ {
+  "w": "只剩磅礴到令",
+  "where": [
+   "map:leihai·雷海炼剑"
+  ]
+ },
+ {
+  "w": "们会叫它玄天剑",
+  "where": [
+   "map:leihai·雷海炼剑"
+  ]
+ },
+ {
+  "w": "眼下它还只是剑",
+  "where": [
+   "map:leihai·雷海炼剑"
+  ]
+ },
+ {
+  "w": "他掐诀",
+  "where": [
+   "map:fuyao·赴约·仙界大劫"
+  ]
+ },
+ {
+  "w": "了一件紫金道袍",
+  "where": [
+   "map:shifang·十方万仙·宴起"
+  ]
+ },
+ {
+  "w": "边那道裹在黑袍",
+  "where": [
+   "map:shifang·十方万仙·宴起"
+  ]
+ },
+ {
+  "w": "影连面容也不露",
+  "where": [
+   "map:shifang·十方万仙·宴起"
+  ]
+ },
+ {
+  "w": "猜到前辈有所图",
+  "where": [
+   "map:feiyu·飞羽"
+  ]
+ },
+ {
+  "w": "但却可图",
+  "where": [
+   "map:daotian·道天大劫"
+  ]
+ },
+ {
+  "w": "的口诀",
+  "where": [
+   "map:daotian·道天大劫"
+  ]
+ },
+ {
+  "w": "仿佛推开某扇",
+  "where": [
+   "map:daotian·道天大劫"
   ]
  },
  {
@@ -827,13 +1593,26 @@
  {
   "w": "说起镜",
   "where": [
-   "enc:e_huixiang·越国来的散修（三派试剑）"
+   "enc:e_huixiang·越国来的散修（三派试剑）",
+   "enc:e_huirenjie·越国口音的老妇人（小灵天）"
   ]
  },
  {
   "w": "坠魔谷外的石",
   "where": [
    "enc:e_zijian·妙音门 紫灵（坠魔谷）"
+  ]
+ },
+ {
+  "w": "名分比灵石",
+  "where": [
+   "enc:e_linghuang·圣岛使者（倚天城·人魔之战）"
+  ]
+ },
+ {
+  "w": "只要灵石",
+  "where": [
+   "enc:e_yuyang·妖族商客（两族大乘）"
   ]
  }
 ]

@@ -22,7 +22,7 @@
     { lv: 92,  name: '元婴中期', hp: 560,  dmg: 0.34, atk: 0.20, spd: 0.06, skill: 'nova',  note: '婴变日熟，神通渐成' },
     { lv: 102, name: '元婴后期', hp: 720,  dmg: 0.38, atk: 0.22, spd: 0.06, skill: 'frost', note: '大修士之列，一方称雄' },
     { lv: 112, name: '化神初期', hp: 1000, dmg: 0.45, atk: 0.26, spd: 0.07, skill: 'fire',  note: '可调天地元气，呼风唤雨' },
-    { lv: 122, name: '化神中期', hp: 1300, dmg: 0.50, atk: 0.28, spd: 0.07, skill: 'gourd', note: '神念化虚，隔空取物' },
+    { lv: 122, name: '化神中期', hp: 1300, dmg: 0.50, atk: 0.28, spd: 0.07, skill: 'fansheng', note: '神念化虚，隔空取物' },
     { lv: 132, name: '化神后期', hp: 1700, dmg: 0.56, atk: 0.30, spd: 0.08, skill: 'nova',  note: '人界之巅，只待飞升' }
   );
 
@@ -1053,11 +1053,9 @@
     { id: 'sk_swift',  name: '罗烟步·法诀', rarity: 1, icon: '📕', req: 1,  teach: 'swift',  desc: '习得《罗烟步》第一层。血色禁地所得身法真传，步法如烟，移速大增。' },
     { id: 'sk_fire',   name: '火弹术·法诀', rarity: 2, icon: '📕', req: 5,  teach: 'fire',   desc: '习得《火弹术》第一层。韩立早年期自炼符箓，放出追踪火蛇。' },
     { id: 'sk_orb',    name: '金光罩·法诀', rarity: 2, icon: '📕', req: 8, teach: 'orb',   desc: '习得《金光罩》第一层。庚金玄罡环绕周身，触敌即伤。' },
-    { id: 'sk_regen',  name: '长春续脉术·法诀', rarity: 2, icon: '📕', req: 10, teach: 'regen',  desc: '习得《长春续脉术》第一层。韩立借灵药丹力缓缓回血。' },
     { id: 'sk_nova',   name: '定神符·法诀', rarity: 3, icon: '📕', req: 12, teach: 'nova',   desc: '习得《定神符》第一层。韩立常用的金光类符箓，周期性金光爆发。' },
     { id: 'sk_haste',  name: '雷遁术·法诀', rarity: 3, icon: '📕', req: 15, teach: 'haste',  desc: '习得《雷遁术》第一层。吐纳如雷，出手更急。' },
     { id: 'sk_frost',  name: '冰冻术·法诀', rarity: 3, icon: '📕', req: 20, teach: 'frost',  desc: '习得《冰冻术》第一层。韩立参悟的冰霜符箓，减速近身之敌。' },
-    { id: 'sk_gourd',  name: '灵葫诀·炼法', rarity: 3, icon: '📕', req: 25, teach: 'gourd', desc: '习得《灵葫诀》第一层。本命灵葫在身，生命上限提升。' },
     // ---- 按原著补的各境界功法：买到或搜出来，回去逐个学 ----
     { id: 'sk_changchun', name: '长春功·法诀',     rarity: 2, icon: '📕', req: 1,   teach: 'changchun', desc: '习得《长春功》。墨大夫传授的引气吐纳根基，韩立炼气期的根本功法' },
     { id: 'sk_sanyan',    name: '三焰扇·扇法',     rarity: 4, icon: '📕', req: 82,  teach: 'sanyan',    desc: '习得《三焰扇》。仿七焰扇而制，大衍神君改制三十一种材料，韩立元婴后期才炼成' },
@@ -1074,7 +1072,7 @@
     { id: 'sk_xueying', name: '血影遁·法诀',   rarity: 4, icon: '📕', req: 86,  teach: 'xueying', desc: '习得《血影遁》。燃血一遁百里，逃命第一' },
     { id: 'sk_shishen', name: '失神刺·法诀', rarity: 4, icon: '📕', req: 102, teach: 'shishen', desc: '习得《失神刺》。大衍诀衍生，神念扎识海，中者僵立' },
     { id: 'sk_huashen', name: '身外化身·法诀', rarity: 4, icon: '📕', req: 110, teach: 'huashen', desc: '习得《身外化身》。玄阴经分神之法，养出一具化身替你出手' },
-    { id: 'sk_jzhen',    name: '剑阵圆满·法诀',   rarity: 4, icon: '📕', req: 112, teach: 'jzhen',    desc: '习得《剑阵圆满》。青蟠剑阵成了，飞剑绕身成绝地' },
+    { id: 'sk_jzhen',    name: '青蟠剑阵·法诀',   rarity: 4, icon: '📕', req: 112, teach: 'jzhen',    desc: '习得《青蟠剑阵》。青元剑诀最后一门剑阵，飞剑绕身成绝地' },
     { id: 'sk_heisha',   name: '黑煞修罗功·法诀', rarity: 4, icon: '📕', req: 102, teach: 'heisha',   desc: '习得《黑煞修罗功》。黑煞鼓到极处炸开，三尺内成血雾' },
     { id: 'sk_jinshen',  name: '禁神术·法诀',     rarity: 4, icon: '📕', req: 112, teach: 'jinshen',  desc: '习得《禁神术》。锁神不伤身，念头动不了' },
     { id: 'sk_lihun',    name: '离魂术·法诀',     rarity: 4, icon: '📕', req: 102, teach: 'lihun',    desc: '习得《离魂术》。勾魂一把，对方愣神' },
@@ -1089,7 +1087,7 @@
     { id: 'sk_qinxian',   name: '惊神刺·阵图',   rarity: 4, icon: '📕', req: 82,  teach: 'qinxian',   desc: '习得《惊神刺》。元婴音攻，环形波纹，神识化刺直扰敌之元神' },
     { id: 'sk_xuanyin',   name: '玄阴经·残卷',     rarity: 4, icon: '📕', req: 56,  teach: 'xuanyin',   desc: '习得《玄阴经》。乱星海顶级魔道功法，玄骨、极阴一脉所修' },
     { id: 'sk_wuzi',      name: '五子同心魔·魔诀', rarity: 4, icon: '📕', req: 102, teach: 'wuzi',      desc: '习得《五子同心魔》。昆吾山所得子母魔头操控法' },
-    { id: 'sk_pojie',     name: '破界符·空间诀',   rarity: 4, icon: '📕', req: 112, teach: 'pojie',     desc: '习得《破界符·空间诀》。玲珑所留的飞升之凭' }
+    { id: 'sk_pojie',     name: '破界符',   rarity: 4, icon: '📕', req: 112, teach: 'pojie',     desc: '习得《破界符》。玲珑所留的飞升之凭' }
   );
   window.ALL_ITEMS = window.ITEMS.concat(window.MATERIALS);
 
@@ -1097,11 +1095,9 @@
     { id: 'sk_swift',  price: 300,  cat: 'skill' },
     { id: 'sk_fire',   price: 420,  cat: 'skill' },
     { id: 'sk_orb',    price: 560,  cat: 'skill' },
-    { id: 'sk_regen',  price: 900,  cat: 'skill' },
     { id: 'sk_nova',   price: 1500, cat: 'skill' },
     { id: 'sk_haste',  price: 1600, cat: 'skill' },
     { id: 'sk_frost',  price: 2200, cat: 'skill' },
-    { id: 'sk_gourd',  price: 1800, cat: 'skill' },
     { id: 'sk_changchun', price: 260,  cat: 'skill' },
     { id: 'sk_sanyan',    price: 3000, cat: 'skill' },
     { id: 'sk_sanzhuan',  price: 3400, cat: 'skill' },
@@ -1118,10 +1114,10 @@
   // 太南小会是炼气散修的摊子，只卖低阶法诀
   const TN = window.MAPS.find(m => m.id === 'tainan');
   // 散修摊子上有的是低阶法诀；**长春功不在此列**——那是墨大夫私下传给韩立的，摊子上不该有
-  if (TN) TN.shop = TN.shop.concat(['sk_swift', 'sk_fire', 'sk_orb', 'sk_regen']);
+  if (TN) TN.shop = TN.shop.concat(['sk_swift', 'sk_fire', 'sk_orb']);
   // 天星城是乱星海第一大市，中高阶法诀也上摊
   const TX = window.MAPS.find(m => m.id === 'tianxing');
-  if (TX) TX.shop = TX.shop.concat(['sk_nova', 'sk_haste', 'sk_frost', 'sk_gourd', 'sk_regen']);
+  if (TX) TX.shop = TX.shop.concat(['sk_nova', 'sk_haste', 'sk_frost']);
 
   // 天南交易会（九国盟·阗天城）：原著里百年一届、元婴老怪戴面具置换宝物的地方，
   // 「珍稀灵药、法宝、功法及情报」都在这流通，晶龙阁内另有拍卖（天晶真人主持，入场赠面具掩身份）。

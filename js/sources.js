@@ -134,6 +134,6 @@
   addTo('jingu', { items: ['sanzhong'] });
   // 五子同心魔：昆吾山收的乾老魔魔功
   addTo('kunwu', { items: ['sk_wuzi'] });
-  // 破界符·空间诀：镇魔塔里玲珑留下的破界符
+  // 破界符：镇魔塔里玲珑留下的破界符
   addTo('zhenmo', { items: ['sk_pojie'] });
 })();

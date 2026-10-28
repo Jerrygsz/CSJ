@@ -3406,7 +3406,6 @@
   function chooseCard(c) {
     if (c.kind === 'skill') {
       G.player.skills[c.id] = (G.player.skills[c.id] || 0) + 1;
-      if (c.id === 'gourd') recalcMaxhp();
       syncCultivate();
     } else if (c.kind === 'heal') G.player.hp = Math.min(G.player.maxhp, G.player.hp + G.player.maxhp * 0.5);
     else if (c.kind === 'rain') {
@@ -7511,7 +7510,6 @@
       const def = SKILLS.find(s => s.id === id); if (!def || !G.player) return;
       const lv = Math.min(def.max, (G.player.skills[id] || 0) + (n || 1));
       G.player.skills[id] = lv;
-      if (id === 'gourd') recalcMaxhp();
       syncCultivate();
     },
     maxAll() {

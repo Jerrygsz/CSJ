@@ -1,1 +1,87 @@
-[]
+[
+ {
+  "where": "map:zhuji_out_ready",
+  "name": "zhuji_out_ready",
+  "type": "",
+  "given": [],
+  "hits": [
+   {
+    "id": "qingyuan",
+    "name": "青元剑诀",
+    "verb": "拿去",
+    "ctx": "福。 倒是省了我一番口舌。《青元剑诀》你拿去，内门那间洞府，也归",
+    "granted": false
+   }
+  ]
+ },
+ {
+  "where": "map:zhenmo_out",
+  "name": "镇魔塔",
+  "type": "boss",
+  "given": [
+   "t_pojie",
+   "sk_pojie",
+   "m_gangyin",
+   "m_yanghun"
+  ],
+  "hits": [
+   {
+    "id": "t_pojie",
+    "name": "破界符",
+    "verb": "给你",
+    "ctx": "字。） 空间节点的位置给你。破界符也给你。 飞升的时候，用得上",
+    "granted": true
+   },
+   {
+    "id": "sk_pojie",
+    "name": "破界符",
+    "verb": "给你",
+    "ctx": "字。） 空间节点的位置给你。破界符也给你。 飞升的时候，用得上",
+    "granted": true
+   },
+   {
+    "id": "pojie",
+    "name": "破界符",
+    "verb": "给你",
+    "ctx": "字。） 空间节点的位置给你。破界符也给你。 飞升的时候，用得上",
+    "granted": false
+   }
+  ]
+ },
+ {
+  "where": "map:huangquan_out",
+  "name": "黄泉地火",
+  "type": "boss",
+  "given": [
+   "m_xuantianteng",
+   "m_zhenlingxue"
+  ],
+  "hits": [
+   {
+    "id": "t_xuantianzhibao",
+    "name": "玄天之宝",
+    "verb": "收好",
+    "ctx": " （玄天仙藤。原著里，这是炼玄天之宝的东西。） 他把仙藤收好，转",
+    "granted": false
+   }
+  ]
+ },
+ {
+  "where": "map:huimoyuan",
+  "name": "再回魔源",
+  "type": "story",
+  "given": [
+   "m_zhenlingxue",
+   "m_zhenlinglin"
+  ],
+  "hits": [
+   {
+    "id": "dan_guangling",
+    "name": "广灵道果",
+    "verb": "服下",
+    "ctx": "银色古文：两年后，真龙之岛，广灵道果大会。 （广灵道果。服下可暂",
+    "granted": false
+   }
+  ]
+ }
+]
