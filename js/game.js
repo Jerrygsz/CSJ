@@ -943,7 +943,8 @@
     if (target) damageEnemy(target, evil ? dmg * 1.6 : dmg);
   }
   function novaBlast(x, y, rad, dmg, vfx) {
-    G.parts.push({ ring: true, x, y, r: 10, maxr: rad, life: 0.4, maxlife: 0.4, color: vfx === 'qingmang' ? '#9df0d0' : '#ffe98a' });
+    G.parts.push({ ring: true, x, y, r: 10, maxr: rad, life: 0.4, maxlife: 0.4,
+      color: vfx === 'qingmang' ? '#9df0d0' : vfx === 'corpsefire' ? '#5fe08a' : vfx === 'soul' ? '#c9a6ff' : '#ffe98a' });
     // 金光爆发：环之外再放一圈放射光条，像光从身上炸开
     if (vfx === 'gold') {
       for (let i = 0; i < 12; i++) {
@@ -2413,6 +2414,27 @@
         G.parts.push({ x: b.x - b.vx * 0.012 * (1 + t), y: b.y - b.vy * 0.012 * (1 + t),
           vx: -b.vx * 0.05, vy: -b.vy * 0.05, life: 0.22, maxlife: 0.22, r: 2.4 - t, color: '#ff8a3c' });
       }
+    } else if (vfx === 'corpsefire') {
+      // 天都尸火：原著“被绿焰迎头一罩”“黑色尸火”，极阴至寒的绿黑阴火 —— 不是寻常红火
+      ctx.fillStyle = 'rgba(40,200,110,0.5)';
+      ctx.beginPath(); ctx.arc(b.x, b.y, 9, 0, 6.28); ctx.fill();
+      ctx.fillStyle = 'rgba(20,30,26,0.85)';
+      ctx.beginPath(); ctx.arc(b.x, b.y, 5, 0, 6.28); ctx.fill();
+      ctx.fillStyle = 'rgba(170,255,200,0.95)';
+      ctx.beginPath(); ctx.arc(b.x, b.y, 2.2, 0, 6.28); ctx.fill();
+      for (let i = 0; i < 2; i++) {
+        const t = i / 2;
+        G.parts.push({ x: b.x - b.vx * 0.012 * (1 + t), y: b.y - b.vy * 0.012 * (1 + t),
+          vx: -b.vx * 0.05, vy: -b.vy * 0.05, life: 0.24, maxlife: 0.24, r: 2.6 - t, color: '#5fe08a' });
+      }
+    } else if (vfx === 'soul') {
+      // 神识类（惊神刺/失神刺/离魂术/梦引术/念剑诀）：原著里全是无形神念，
+      // 没有实体弹道 —— 半透明的紫魂光，核小影淡，像一眼看过去就“进了脑子”
+      ctx.fillStyle = 'rgba(190,150,255,0.4)';
+      ctx.beginPath(); ctx.arc(b.x, b.y, 7, 0, 6.28); ctx.fill();
+      ctx.fillStyle = 'rgba(232,220,255,0.9)';
+      ctx.beginPath(); ctx.arc(b.x, b.y, 2.6, 0, 6.28); ctx.fill();
+      vfxTrail(b.x, b.y, ang, 26, 'rgba(190,150,255,0.55)', a0 * 0.55);
     } else {
       drawSpr('sword', b.x, b.y, 1.25, false);
     }
@@ -2422,7 +2444,19 @@
   function drawField(fd) {
     const p = G.player; if (!p) return;
     const t = (G.time || 0);
-    if (fd.vfx === 'gravity') {
+    if (fd.vfx === 'magnet') {
+      // 元磁神光：克尽天下五行的磁域 —— 灰金重波一圈圈压下去，压得金属发沉
+      for (let i = 0; i < 3; i++) {
+        const ph = (t * 0.55 + i / 3) % 1;
+        const r = fd.rad * (0.35 + ph * 0.65);
+        ctx.globalAlpha = (1 - ph) * 0.3;
+        ctx.strokeStyle = '#e0d49a'; ctx.lineWidth = 2.4;
+        ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, 6.28); ctx.stroke();
+      }
+      ctx.globalAlpha = 0.09; ctx.fillStyle = '#8a8050';
+      ctx.beginPath(); ctx.arc(p.x, p.y, fd.rad, 0, 6.28); ctx.fill();
+      ctx.globalAlpha = 1;
+    } else if (fd.vfx === 'gravity') {
       for (let i = 0; i < 3; i++) {
         const ph = (t * 0.6 + i / 3) % 1;
         const r = fd.rad * (0.35 + ph * 0.65);
@@ -2475,6 +2509,15 @@
       ctx.restore();
       ctx.globalAlpha = 0.5; ctx.strokeStyle = '#8ef0cc'; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.arc(o.x, o.y, 9, 0, 6.28); ctx.stroke(); ctx.globalAlpha = 1;
+    } else if (o.vfx === 'gold') {
+      // 金光罩：原著“金光绕体”，罩体是一层亮金气泡般的护光，不是淡绿的罡气
+      ctx.globalAlpha = 0.3; ctx.fillStyle = '#ffe98a';
+      ctx.beginPath(); ctx.arc(o.x, o.y, 10, 0, 6.28); ctx.fill();
+      ctx.globalAlpha = 0.95; ctx.fillStyle = '#fff3c0';
+      ctx.beginPath(); ctx.arc(o.x, o.y, 4.4, 0, 6.28); ctx.fill();
+      ctx.globalAlpha = 0.55; ctx.strokeStyle = '#ffe98a'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.arc(o.x, o.y, 9.5, 0, 6.28); ctx.stroke();
+      ctx.globalAlpha = 1;
     } else {
       // 庚金玄罡：金青色的气团，外面一圈细光
       ctx.globalAlpha = 0.85;
@@ -2517,7 +2560,8 @@
   const VFX_HIT_COLOR = {
     sword: '#ffffff', qingmang: '#9df0d0', blood: '#ff6a7a',
     snake: '#ffb347', fan: '#ffd05a', gold: '#ffe98a', ice: '#9ad8ff',
-    gravity: '#b49cff', gang: '#dfefc0', thunder: '#ffe08a'
+    gravity: '#b49cff', gang: '#dfefc0', thunder: '#ffe08a',
+    corpsefire: '#7dff9e', soul: '#c9a6ff', magnet: '#e0d49a'
   };
 
   // 火花：沿来向拖一道细线。比方块贵一点（多一次 stroke），

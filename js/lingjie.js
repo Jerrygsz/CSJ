@@ -1311,7 +1311,7 @@
       effect: { atkSpd: 0.10, spd: 0.06 },
       desc: '风雷翅三炼之后，翅上风雷自成一头。出手比从前快了一线，这一线就是生死' },
     { id: 'nianjian', name: '念剑诀', icon: '💠', max: 6, minLv: 220, type: 'ranged',
-      atk: { kind: 'beam', base: 60, perLv: 22, cd: 1.4, countBase: 3, countPerLv: 0.5, spread: 0.2, pierceBase: 3, piercePerLv: 1 / 3, range: 520, life: 1.3, vfx: 'swordarray' },
+      atk: { kind: 'beam', base: 60, perLv: 22, cd: 1.4, countBase: 3, countPerLv: 0.5, spread: 0.2, pierceBase: 3, piercePerLv: 1 / 3, range: 520, life: 1.3, vfx: 'soul' },
       desc: '念剑诀：不掐诀、不抬手，一念起处三道剑光已在人前。念有多快，剑有多快' },
     { id: 'jingang2', name: '金罡灭魔神雷', icon: '💥', max: 6, minLv: 260, type: 'ranged_aoe',
       atk: { kind: 'thunder', base: 90, perLv: 32, cd: 2.6, countBase: 2, countPerLv: 0.34, range: 640, vfx: 'thunder' },
@@ -1320,7 +1320,7 @@
       effect: { xpMul: 0.10, crit: 0.04 },
       desc: '忘情诀：斩的不是情，是心里那点挂碍。心静了，修为与出手都不再晃' },
     { id: 'niling', name: '逆灵真阴大法', icon: '🌑', max: 6, minLv: 420, type: 'aura',
-      atk: { kind: 'field', base: 24, perLv: 10, radBase: 120, radPerLv: 14, slow: 0.35, cdHit: 0.5, vfx: 'gravity' },
+      atk: { kind: 'field', base: 24, perLv: 10, radBase: 120, radPerLv: 14, slow: 0.35, cdHit: 0.5, vfx: 'ice' },
       desc: '逆灵真阴大法：真阴之气倒卷成域。进了这丈许方圆，法力运转先被压住半截' }
   );
 
