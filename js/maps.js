@@ -103,8 +103,7 @@ window.MAPS = [
     desc: '凭升仙令入门，本应配发一枚筑基丹。叶师叔上门来换：丹归他，换来一门自择的差事。',
     startLevel: 10, startSkills: { sword: 4, fire: 2, orb: 1 },
     unlock: 'tainan', next: 'yaoyuan',
-    cave: 'huangfeng',
-    // 入园当差，药庐给的见面礼只可能是园中常物 —— 紫猴花、天灵果这园里一株都没有
+    // 此处只是「领了差事」：玉牌到手、人还没进园子，草庐得等旧园那一关跑完才开（见 yaoyuan 的 cave）
     reward: { stones: 100, mats: [['m_chijing', 2], ['m_huangjing', 2]] },
     clearTitle: '入园为役',
     clearDesc: '丹给了叶师叔，换来青石岭百药园这个差事。灵根差，丹也没了，好在没人来扰。'
@@ -118,6 +117,9 @@ window.MAPS = [
       '药田东南角是马老头留了几十年的老底：子夜花、黄球草、白鹤芝、望月草，最老的一株化龙草已百余年份；角落还散着些没名字的俗世药苗，懒得拔，留着遮土气。',
     startLevel: 13, startSkills: { sword: 4, fire: 2, orb: 1 },
     unlock: 'huangfeng', next: 'xuese',
+    // 原著第 151/157/213 章：园中央数间茅草屋，韩立「进了自己居住的屋子」「躺在百药园床上」——
+    // 接管百药园 = 入住草庐，此图通关后即为主角洞府
+    cave: 'huangfeng',
     diff: 1.35, bossAt: 140,
     enemies: ['bat', 'snake', 'assassin', 'ghoul', 'bandit'],
     elites: ['噬灵虫王', '妖鼠精'],
@@ -196,6 +198,8 @@ window.MAPS = [
       '血色禁地带回的三株主药苗也在绿液里温养着，低概率结鲜果，摘了再催。',
     startLevel: 15, startSkills: { sword: 4, fire: 2, orb: 1 },
     unlock: null, next: null,
+    // 西北角与旧园是同一片园子（同一个草庐），守药灵猿打退后这一角也归自己管 —— 通关即并入洞府
+    cave: 'huangfeng',
     diff: 1.3, bossAt: 120,
     enemies: ['snake', 'bat', 'ghoul', 'assassin'],
     elites: ['守药灵猿'],
@@ -415,12 +419,27 @@ window.CAVES = {
   },
   huangfeng: {
     id: 'huangfeng', name: '百药园草庐', pos: '黄枫谷·青石岭 百药园',
-    from: 'huangfeng',
+    // 原著第 151 章「数间用干草和竹子搭建而成的茅草屋位于园子的中央」、
+    // 第 157 章「进了自己居住的屋子」、第 213 章「躺在百药园床上」—— 韩立就是在这儿住下、闭关、炼丹。
+    // 来源记两张图：旧园（接管百药园）与绿液区（同一片园子的西北角，打退守药灵猿后并入）
+    from: 'yaoyuan',
+    froms: ['yaoyuan', 'yaopu'],
     desc: '药田尽头一间草庐，屋里一半是药架，一半是一张窄榻。窗外就是最里头那几畦。',
     quote: '灵根差，便用别的东西来补。',
     capLevel: 26, restStone: 60, restXp: 0.30,
     crafts: ['alchemy', 'forge', 'talisman'],
-    restTip: '百药园地脉不算厚，好在无人来扰，一炉灵石能换一夜清净。'
+    restTip: '百药园地脉不算厚，好在无人来扰，一炉灵石能换一夜清净。',
+    // 旧园与绿液区都已并进洞府、不再有妖物，药材不能就此断根。
+    // 按原著「人住在园子里」的意思，改成按季采收：园子自己长，人回来摘。
+    garden: {
+      name: '药圃',
+      tip: '园子就在窗外。东南角是马师伯留下的老底，西北角是那口小瓶催出来的一角。',
+      pool: ['m_ziyehua', 'm_wangyuecao', 'm_baihezhi', 'm_hualongcao',
+        'm_huanglongcao', 'm_kulianhua', 'm_wangyouguo', 'm_sanwucao', 'm_qixingcao',
+        'm_qianjiehua', 'm_heishaocao', 'm_jinjingshen', 'm_huangjingzhi', 'm_fuyaobao'],
+      take: 3,
+      cdMin: 3
+    }
   }
 };
 window.caveByMap = function (mapId) {

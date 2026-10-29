@@ -102,6 +102,72 @@ const restTest = await page.evaluate(() => {
   return { state: F.G.state };
 });
 ok(restTest.state === 'cave', '进入花枝洞天后处于洞府界面', restTest.state);
+
+// ---------- E 百药园：两片园区并入同一间草庐 ----------
+// 原著第 151/157/213 章：园中央数间茅草屋，韩立「进了自己居住的屋子」「躺在百药园床上」，
+// 闭关、炼丹、读丹方都在园里 —— 接管百药园即是入住草庐。
+console.log('\n【E · 百药园洞府归属】');
+const BY = await page.evaluate(() => {
+  const g = id => { const m = window.MAPS.find(x => x.id === id); return m ? { cave: m.cave || null, name: m.name } : null; };
+  const c = window.CAVES.huangfeng;
+  return {
+    gate: g('huangfeng'), old: g('yaoyuan'), green: g('yaopu'),
+    from: c.from, froms: (c.froms || []),
+    garden: c.garden ? { pool: c.garden.pool.slice(), take: c.garden.take, cdMin: c.garden.cdMin } : null
+  };
+});
+ok(BY.gate && BY.gate.cave === null, '黄枫谷·山门不再直接给洞府（那时只是领了差事，人还没进园子）', BY.gate);
+ok(BY.old && BY.old.cave === 'huangfeng', '百药园·旧园通关即成为洞府（接管百药园，就住园中茅屋）', BY.old);
+ok(BY.green && BY.green.cave === 'huangfeng', '百药园·绿液区打完怪也并入同一间草庐', BY.green);
+ok(BY.from === 'yaoyuan' && BY.froms.indexOf('yaopu') >= 0,
+  '草庐来源记两张图，洞府里能补演两图各自的未遇际遇', { from: BY.from, froms: BY.froms });
+ok(BY.garden && BY.garden.pool.length >= 10,
+  '草庐带药圃 —— 两片园区变洞府后药材不断供', BY.garden && BY.garden.pool.length);
+
+// 实机：打完旧园 → 洞府真的进档
+await page.evaluate(() => {
+  const F = window.__FR;
+  F.unlockAll(); F.G.god = true;
+  F.enterMap('yaoyuan', 'easy');
+});
+await page.waitForTimeout(400);
+const clr = await page.evaluate(() => {
+  const F = window.__FR, G = F.G;
+  if (!G.map) return { err: 'no map', state: G.state };
+  const r = F.finishMapNow();
+  const bag = JSON.parse(localStorage.getItem('fanren_save_v1') || '{}').inventory || {};
+  return { caves: r.caves || [], state: r.state, fang: bag['f_zhuji'] || 0 };
+});
+ok(clr.caves && clr.caves.indexOf('huangfeng') >= 0, '打完旧园，草庐进档（save.caves）', clr);
+// 旧园从此只打这一次，首通奖励里的东西必须一定到手，否则主线会断
+ok(clr.fang > 0, '首通旧园必得筑基丹方（此后此图成洞府、不再产出，漏了就永远拿不到）', clr.fang);
+
+// 实机：药圃能采、采完进冷却
+const gd = await page.evaluate(() => {
+  const F = window.__FR;
+  const snap = () => JSON.parse(localStorage.getItem('fanren_save_v1') || '{}');
+  const before = snap();
+  F.G.state = 'title';
+  F.cave('huangfeng');
+  const tabs = F.caveTabsOf('huangfeng');
+  const tb = document.querySelector('#caveTabs button[data-ctab="garden"]');
+  if (tb) tb.click();
+  const body = document.querySelector('#caveBody');
+  const txt0 = body ? body.innerText.replace(/\s+/g, ' ') : '';
+  const btn = document.querySelector('button[data-pickg]');
+  if (btn) btn.click();
+  const after = snap();
+  let gained = 0;
+  for (const k in (after.inventory || {})) gained += Math.max(0, (after.inventory[k] || 0) - ((before.inventory || {})[k] || 0));
+  const txt1 = body ? body.innerText.replace(/\s+/g, ' ') : '';
+  return { tabs, txt0, gained, gardenAt: !!(after.gardenAt && after.gardenAt.huangfeng), txt1 };
+});
+ok(gd.tabs.indexOf('garden') >= 0, '草庐多出「药圃」页签', gd.tabs);
+ok(gd.gained >= 3, '下园采收真的入库（一次 3 味）', gd.gained);
+ok(gd.gardenAt, '采收记下了冷却时刻', gd.gardenAt);
+ok(/还需/.test(gd.txt1) && /还需/.test(gd.txt1) === true && !/可采收/.test(gd.txt1),
+  '采完立刻转冷却，不能连点刷药', gd.txt1.slice(0, 60));
+
 ok(errs.length === 0, '全程无 JS 报错', errs.slice(0, 3));
 
 console.log('===================================');

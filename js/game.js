@@ -75,6 +75,8 @@
       // 已装备的槽位（id 需仍在储物袋中）
       equip: { weapon: null, armor: null, trinket: null, talisman: null },
       caves: [], diffClear: {}, lastDiff: 'easy',
+      // 药圃上次采收时刻（毫秒时间戳）：只对带 garden 的洞府有用，老存档缺这一项按「可采收」算
+      gardenAt: {},
       // 已遇过的际遇（一世只遇一次）；可重复的小事不入此列
       met: [],
       // 灵宠：拥有的（养在灵兽袋里）与出战的
@@ -5509,6 +5511,7 @@
                { id: 'pet', name: '灵宠' }, { id: 'mate', name: '同伴' }, { id: 'break', name: '突破' },
                { id: 'quick', name: '快捷' }];
     for (const k of c.crafts) t.push({ id: k, name: RECIPE_KINDS[k].name });
+    if (c.garden) t.push({ id: 'garden', name: c.garden.name || '药圃' });
     t.push({ id: 'rest', name: '静修' });
     return t;
   }
@@ -5551,6 +5554,7 @@
     else if (tab === 'pet') html = renderCavePet(lv);
     else if (tab === 'mate') html = renderCaveMate(lv);
     else if (tab === 'break') html = renderCaveBreak(lv);
+    else if (tab === 'garden') html = renderCaveGarden(c, lv);
     else if (tab === 'rest') html = renderCaveRest(c, lv);
     else html = renderCaveCraft(c, tab, lv);
     elCaveBody.innerHTML = html;
@@ -6244,13 +6248,62 @@
     return true;
   }
 
+  // ---------- 药圃：旧园与绿液区并入洞府之后，园子仍在窗外 ----------
+  // 这两张图通关后都成了安全屋、不再有妖物，原本挂在图上的药材产点随之失效。
+  // 按原著「人住在园子里」（第 213 章「躺在百药园床上」）改成按季采收：园子自己长，人回来摘。
+  function gardenLeft(c) {
+    if (!c || !c.garden) return 0;
+    const last = (save.gardenAt || {})[c.id] || 0;
+    return Math.max(0, last + (c.garden.cdMin || 3) * 60000 - Date.now());
+  }
+  function pickGarden(c) {
+    if (!c || !c.garden) return;
+    const left = gardenLeft(c);
+    if (left > 0) { notify('药圃还不到时候 · 还需 ' + fmtSpan(Math.ceil(left / 1000))); Sfx.warn(); return; }
+    const pool = c.garden.pool.slice(), got = [];
+    for (let i = 0; i < (c.garden.take || 3) && pool.length; i++) {
+      const id = pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
+      const mat = (window.MATERIALS || []).find(x => x.id === id);
+      if (!mat) continue;
+      const n = 1 + Math.floor(Math.random() * 2);
+      save.inventory[id] = (save.inventory[id] || 0) + n;
+      save.totalItems = (save.totalItems || 0) + n;
+      got.push(mat.name + ' ×' + n);
+    }
+    save.gardenAt = save.gardenAt || {};
+    save.gardenAt[c.id] = Date.now();
+    writeSave();
+    notify(got.length ? '药圃采收 · ' + got.join('、') : '园里这一季没可采的');
+    Sfx.gem();
+    renderCave();
+  }
+  function renderCaveGarden(c) {
+    const g = c.garden;
+    const left = gardenLeft(c), ready = left <= 0;
+    const names = g.pool.map(id => { const m = (window.MATERIALS || []).find(x => x.id === id); return m ? (m.icon || '🌿') + m.name : ''; }).filter(Boolean).join('　');
+    return '<div class="cave-sec"><div class="cs-title">' + g.name + '</div>' +
+      '<div class="cs-note">' + g.tip + '</div>' +
+      '<div class="restbox"><div class="statgrid">' +
+      '<div class="statcell"><i>这一季</i><b>' + (ready ? '可采收' : '还需 ' + fmtSpan(Math.ceil(left / 1000))) + '</b></div>' +
+      '<div class="statcell"><i>每季产出</i><b>' + (g.take || 3) + ' 味</b></div>' +
+      '<div class="statcell"><i>园中品种</i><b>' + g.pool.length + ' 味</b></div>' +
+      '</div>' +
+      '<div class="cs-note">园里：' + names + '</div>' +
+      '<div class="restbtns"><button class="btn small" data-pickg="' + c.id + '"' + (ready ? '' : ' disabled') + '>下园采收</button></div>' +
+      '</div></div>';
+  }
+
   function renderCaveRest(c, lv) {
     const capped = lv >= c.capLevel;
     const xp = Math.floor(save.cultivate.xp || 0), need = xpNeed(lv);
     // 这座洞府来历那张图上若还有没遇的人/事，给个按钮直接演（洞府里走不动）
+    // 一间草庐可能由多张图并来（百药园旧园 + 绿液区），逐张查，别漏了后并进来那张
+    const encSrc = (c && c.froms && c.froms.length) ? c.froms : ((c && c.from) ? [c.from] : []);
     let encBtn = '';
-    const pendCave = pendingEncOf(c && c.from);
-    if (pendCave) encBtn = '<button class="btn small" data-enc="' + pendCave.id + '">际遇 · ' + pendCave.name + '</button>';
+    for (const src of encSrc) {
+      const pend = pendingEncOf(src);
+      if (pend) encBtn += '<button class="btn small" data-enc="' + pend.id + '">际遇 · ' + pend.name + '</button>';
+    }
     return (encBtn ? '<div class="cave-sec">' + encBtn + '</div>' : '') +
       '<div class="cave-sec"><div class="cs-title">闭关静修</div>' +
       '<div class="cs-note">' + c.restTip + '</div>' +
@@ -7001,6 +7054,9 @@
     if (cr) { craftRecipe(cr.getAttribute('data-craft')); return; }
     const rs = e.target.closest('button[data-rest]');
     if (rs) { doRest(parseInt(rs.getAttribute('data-rest'), 10) || 1); return; }
+    // 药圃：下园采收（百药园草庐专有）
+    const pg = e.target.closest('button[data-pickg]');
+    if (pg) { pickGarden(CAVES[pg.getAttribute('data-pickg')]); return; }
     // 整行类只认点在行体上的点击，行内按钮一律不穿透（第二道防线，防以后新增按钮再踩同一个坑）
     const eq = e.target.closest('[data-equip]');
     if (eq && !e.target.closest('button')) { equipGear(eq.getAttribute('data-equip')); return; }
@@ -7832,7 +7888,7 @@
     breakRate(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); return b ? { pills: breakGatePills(b), rate: breakSuccessRate(b) } : null; },
     startBreak(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); if (!b) return 'no req'; enterBreakMap(b); return { map: G.mapId, state: G.state }; },
     breakScene(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); if (!b) return 'no req'; breakSceneThen(b, () => { G.state = 'cave'; if (elCave) elCave.style.display = 'flex'; renderCave(); }); return { scene: G.breakScene, dialog: G.state === 'dialog', lines: G.dialogLines ? G.dialogLines.length : 0 }; },
-    finishMapNow() { if (!G.map) return 'no map'; const m = G.map; finishMap(m); return { state: G.state, level: save.cultivate.level, cleared: save.cleared.slice(), unlocked: save.unlocked.slice() }; },
+    finishMapNow() { if (!G.map) return 'no map'; const m = G.map; finishMap(m); return { state: G.state, level: save.cultivate.level, cleared: save.cleared.slice(), unlocked: save.unlocked.slice(), caves: save.caves.slice() }; },
     breakOpen(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); openBreak(b); return !!(elBreak && elBreak.style.display === 'flex'); },
     breakShown() { return !!(elBreak && elBreak.style.display === 'flex'); },
     breakClose() { closeBreak(); return !!(elBreak && elBreak.style.display === 'flex'); },

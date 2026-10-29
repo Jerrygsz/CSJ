@@ -152,9 +152,11 @@
       why: '原著开篇韩立在后山采药换灵石，人参、黄精皆为山中所产' },
     // 百药园·旧园 —— 马师伯留下的东南角几畦：子夜花镇心魔、望月草安神（定灵丹辅药）；
     // 白鹤芝凉血、化龙草固本（造化丹辅药）。原著：园里三十一种辅药材俱全，只缺三味主药。
-    { map: 'yaoyuan', rec: 'r_dianling', only: ['m_ziyehua', 'm_wangyuecao'], sets: [3, 5, 8],
+    // 旧园通关后已成洞府（人住进园里），产点随两片园区一并归到西北角绿液区；
+    // 长期采收走草庐的「药圃」页签（见 CAVES.huangfeng.garden）。
+    { map: 'yaopu', rec: 'r_dianling', only: ['m_ziyehua', 'm_wangyuecao'], sets: [3, 5, 8],
       why: '百药园一节：子夜花、黄球草、白鹤芝、望月草皆为园中旧物；定灵丹又名安魂丹，取此二味镇心安神' },
-    { map: 'yaoyuan', rec: 'r_zaohua', only: ['m_baihezhi', 'm_hualongcao'], sets: [3, 5, 8],
+    { map: 'yaopu', rec: 'r_zaohua', only: ['m_baihezhi', 'm_hualongcao'], sets: [3, 5, 8],
       why: '白鹤芝凉血解毒、化龙草为园中最老的百余年老药，正合造化丹固本之用' },
     // 百药园·绿液区 —— 韩立埋瓶催熟的那一角，滴过绿液的高年份药只在这里出
     { map: 'yaopu', rec: 'r_huanglong', sets: [3, 5, 8],
