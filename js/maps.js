@@ -429,16 +429,21 @@ window.CAVES = {
     capLevel: 26, restStone: 60, restXp: 0.30,
     crafts: ['alchemy', 'forge', 'talisman'],
     restTip: '百药园地脉不算厚，好在无人来扰，一炉灵石能换一夜清净。',
-    // 旧园与绿液区都已并进洞府、不再有妖物，药材不能就此断根。
-    // 按原著「人住在园子里」的意思，改成园子跟着打图一起长：
-    // 在战斗图里每待 1 秒长 1 次，攒满 99 次停手，收一趟再重新长（GARDEN_CAP 见 game.js）。
-    garden: {
-      name: '药圃',
-      tip: '园子就在窗外。东南角是马师伯留下的老底，西北角是那口小瓶催出来的一角。',
-      pool: ['m_ziyehua', 'm_wangyuecao', 'm_baihezhi', 'm_hualongcao',
-        'm_huanglongcao', 'm_kulianhua', 'm_wangyouguo', 'm_sanwucao', 'm_qixingcao',
-        'm_qianjiehua', 'm_heishaocao', 'm_jinjingshen', 'm_huangjingzhi', 'm_fuyaobao']
-    }
+    // 两片园区是两块地，各长各的、各收各的：在战斗图里每待 1 秒两块地各长 1 次，
+    // 各攒满 99 次停手，收哪块清哪块（GARDEN_CAP 与累计逻辑见 game.js 的 tickGarden）。
+    gardens: [
+      {
+        id: 'yaoyuan', name: '旧园药圃', from: 'yaoyuan',
+        tip: '药田东南角，马师伯留了几十年的老底，年份最老的一株化龙草在这儿。',
+        pool: ['m_ziyehua', 'm_wangyuecao', 'm_baihezhi', 'm_hualongcao', 'm_huangqiucao']
+      },
+      {
+        id: 'yaopu', name: '绿液区药圃', from: 'yaopu',
+        tip: '西北角那一小片，一只旧瓶埋在土里，滴过绿液的药一夜就变样。',
+        pool: ['m_huanglongcao', 'm_kulianhua', 'm_wangyouguo', 'm_sanwucao', 'm_qixingcao',
+          'm_qianjiehua', 'm_heishaocao', 'm_jinjingshen', 'm_huangjingzhi', 'm_fuyaobao']
+      }
+    ]
   }
 };
 window.caveByMap = function (mapId) {

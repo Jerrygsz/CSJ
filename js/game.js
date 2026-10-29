@@ -75,8 +75,9 @@
       // 已装备的槽位（id 需仍在储物袋中）
       equip: { weapon: null, armor: null, trinket: null, talisman: null },
       caves: [], diffClear: {}, lastDiff: 'easy',
-      // 药圃：在战斗图里待 1 秒长 1 次，满 99 停，采收后归零（gardenTick 是不足 1 秒的零头）
-      gardenCharge: 0, gardenTick: 0,
+      // 药圃：按地块各记一份（{地块id: 已长成次数}），在战斗图里待 1 秒每块各长 1 次，满 99 停；
+      // gardenTick 是所有地块共用的、不足 1 秒的零头
+      gardenCharge: {}, gardenTick: 0,
       // 已遇过的际遇（一世只遇一次）；可重复的小事不入此列
       met: [],
       // 灵宠：拥有的（养在灵兽袋里）与出战的
@@ -5512,7 +5513,7 @@
                { id: 'pet', name: '灵宠' }, { id: 'mate', name: '同伴' }, { id: 'break', name: '突破' },
                { id: 'quick', name: '快捷' }];
     for (const k of c.crafts) t.push({ id: k, name: RECIPE_KINDS[k].name });
-    if (c.garden) t.push({ id: 'garden', name: c.garden.name || '药圃' });
+    if (c.gardens && c.gardens.length) t.push({ id: 'garden', name: '药圃' });
     t.push({ id: 'rest', name: '静修' });
     return t;
   }
@@ -6249,34 +6250,53 @@
     return true;
   }
 
-  // ---------- 药圃：旧园与绿液区并入洞府之后，园子仍在窗外 ----------
-  // 这两张图通关后都成了安全屋、不再有妖物，原本挂在图上的药材产点随之失效。
-  // 按原著「人住在园子里」（第 213 章「躺在百药园床上」）改成园子自己长：
-  // 在战斗地图里每待 1 秒，园里长 1 次；攒满 99 次就不再长，收一趟才重新开始。
-  // 这么设计是为了「爽感」——打得越久，回来一次收得越多，而不是干等真实时间。
+  // ---------- 药圃：一块地一畦，各长各的 ----------
+  // 旧园、绿液区、小寰岛、落云宗天泉峰、芥子空间 —— 原著里韩立确实开过药园的那几处。
+  // 规则：在战斗地图里每待 1 秒，每块地各长 1 次；每块地各自封顶 99；采收按地块分开，收哪块清哪块。
+  // 所以打一局能把几块地一起攒满，回来一趟全收 —— 这是「爽感」的来源。
   const GARDEN_CAP = 99;
-  function gardenCharge() { return Math.min(GARDEN_CAP, Math.floor(save.gardenCharge || 0)); }
+  function gardenList() {
+    const out = [];
+    for (const k in CAVES) {
+      const c = CAVES[k];
+      if (!c || !c.gardens || !c.gardens.length) continue;
+      for (const g of c.gardens) out.push({ cave: c, g: g });
+    }
+    return out;
+  }
+  function gardenCapOf(g) { return (g && g.cap) || GARDEN_CAP; }
+  function gardenChargeOf(g) { return Math.min(gardenCapOf(g), Math.floor(((save.gardenCharge || {})[g.id]) || 0)); }
   function tickGarden(dt) {
     // 只有真在打的图才算：坊市、洞府、结算界面里不长
     if (!(G.map && (G.map.type === 'combat' || G.map.type === 'boss' || G.map.type === 'chase'))) return;
-    if (gardenCharge() >= GARDEN_CAP) return;
+    const list = gardenList();
+    if (!list.length) return;
+    // 全部地块都长满了就不必再累计零头
+    if (list.every(x => gardenChargeOf(x.g) >= gardenCapOf(x.g))) { save.gardenTick = 0; return; }
+    save.gardenCharge = save.gardenCharge || {};
     save.gardenTick = (save.gardenTick || 0) + dt;
-    while (save.gardenTick >= 1 && gardenCharge() < GARDEN_CAP) {
+    while (save.gardenTick >= 1) {
       save.gardenTick -= 1;
-      save.gardenCharge = (save.gardenCharge || 0) + 1;
+      for (const x of list) {
+        const id = x.g.id, cap = gardenCapOf(x.g), cur = save.gardenCharge[id] || 0;
+        if (cur < cap) save.gardenCharge[id] = cur + 1;
+      }
     }
     if (save.gardenTick > 1) save.gardenTick = 0;
   }
-  // 按稀有度给权重：常见药多、老药少 —— 99 次不至于全是那几味贵重货
+  // 按稀有度给权重：常见药多，越稀有越少 —— 99 次不至于全落在贵重货上
   function gardenWeight(m) {
     const r = (m && m.rarity) || 1;
-    return r >= 3 ? 1 : (r === 2 ? 3 : 6);
+    if (r >= 4) return 0.2;
+    if (r === 3) return 1;
+    return r === 2 ? 3 : 6;
   }
-  function pickGarden(c) {
-    if (!c || !c.garden) return;
-    const n = gardenCharge();
-    if (n <= 0) { notify('园子还空着 · 先去图里打一场'); Sfx.warn(); return; }
-    const pool = c.garden.pool.map(id => (window.MATERIALS || []).find(x => x.id === id)).filter(Boolean);
+  function pickGarden(c, gid) {
+    if (!c || !c.gardens || !c.gardens.length) return;
+    const g = c.gardens.find(x => x.id === gid) || c.gardens[0];
+    const n = gardenChargeOf(g);
+    if (n <= 0) { notify('这块地还空着 · 先去图里打一场'); Sfx.warn(); return; }
+    const pool = g.pool.map(id => (window.MATERIALS || []).find(x => x.id === id)).filter(Boolean);
     if (!pool.length) return;
     const totalW = pool.reduce((s, m) => s + gardenWeight(m), 0);
     const got = {};
@@ -6287,30 +6307,31 @@
       save.inventory[pick.id] = (save.inventory[pick.id] || 0) + 1;
     }
     save.totalItems = (save.totalItems || 0) + n;
-    save.gardenCharge = 0; save.gardenTick = 0;   // 收完重新累计
+    save.gardenCharge = save.gardenCharge || {};
+    save.gardenCharge[g.id] = 0;   // 只清这一块，别的地照旧
     writeSave();
     const order = Object.keys(got).sort((a, b) => got[b] - got[a]);
     const brief = order.slice(0, 3).map(id => { const m = pool.find(x => x.id === id); return (m ? m.name : id) + '×' + got[id]; }).join('、');
-    notify('药圃采收 ' + n + ' 株 · ' + order.length + ' 味：' + brief + (order.length > 3 ? ' 等' : ''));
+    notify(g.name + ' 采收 ' + n + ' 株 · ' + order.length + ' 味：' + brief + (order.length > 3 ? ' 等' : ''));
     Sfx.gem();
     renderCave();
   }
   function renderCaveGarden(c) {
-    const g = c.garden;
-    const n = gardenCharge(), full = n >= GARDEN_CAP;
-    const names = g.pool.map(id => { const m = (window.MATERIALS || []).find(x => x.id === id); return m ? (m.icon || '🌿') + m.name : ''; }).filter(Boolean).join('　');
-    return '<div class="cave-sec"><div class="cs-title">' + g.name + '</div>' +
-      '<div class="cs-note">' + g.tip + '</div>' +
-      '<div class="restbox"><div class="statgrid">' +
-      '<div class="statcell"><i>已长成</i><b>' + n + ' / ' + GARDEN_CAP + '</b></div>' +
-      '<div class="statcell"><i>长势</i><b>' + (full ? '已长满' : '打一秒，长一寸') + '</b></div>' +
-      '<div class="statcell"><i>园中品种</i><b>' + g.pool.length + ' 味</b></div>' +
-      '</div>' +
-      '<div class="cs-note">' + (full ? '长满就不再多长了，收一趟再来。' : '在图里待一秒长一次，攒满 ' + GARDEN_CAP + ' 次就停。') + '</div>' +
-      '<div class="cs-note">园里：' + names + '</div>' +
-      '<div class="restbtns"><button class="btn small" data-pickg="' + c.id + '"' + (n > 0 ? '' : ' disabled') + '>' +
-        (n > 0 ? '采收 ' + n + ' 株' : '园中空着') + '</button></div>' +
-      '</div></div>';
+    return c.gardens.map(g => {
+      const n = gardenChargeOf(g), cap = gardenCapOf(g), full = n >= cap;
+      const names = g.pool.map(id => { const m = (window.MATERIALS || []).find(x => x.id === id); return m ? (m.icon || '🌿') + m.name : ''; }).filter(Boolean).join('　');
+      return '<div class="cave-sec"><div class="cs-title">' + g.name + '</div>' +
+        '<div class="cs-note">' + g.tip + '</div>' +
+        '<div class="restbox"><div class="statgrid">' +
+        '<div class="statcell"><i>已长成</i><b>' + n + ' / ' + cap + '</b></div>' +
+        '<div class="statcell"><i>长势</i><b>' + (full ? '已长满' : '每秒 +1') + '</b></div>' +
+        '<div class="statcell"><i>园中品种</i><b>' + g.pool.length + ' 味</b></div>' +
+        '</div>' +
+        '<div class="cs-note">园里：' + names + '</div>' +
+        '<div class="restbtns"><button class="btn small" data-pickg="' + c.id + '|' + g.id + '"' + (n > 0 ? '' : ' disabled') + '>' +
+          (n > 0 ? '采收 ' + n + ' 株' : '这块地空着') + '</button></div>' +
+        '</div></div>';
+    }).join('');
   }
 
   function renderCaveRest(c, lv) {
@@ -7074,9 +7095,13 @@
     if (cr) { craftRecipe(cr.getAttribute('data-craft')); return; }
     const rs = e.target.closest('button[data-rest]');
     if (rs) { doRest(parseInt(rs.getAttribute('data-rest'), 10) || 1); return; }
-    // 药圃：下园采收（百药园草庐专有）
+    // 药圃：按地块采收（百药园两块地、小寰岛、落云宗、芥子空间各自独立）
     const pg = e.target.closest('button[data-pickg]');
-    if (pg) { pickGarden(CAVES[pg.getAttribute('data-pickg')]); return; }
+    if (pg) {
+      const parts = String(pg.getAttribute('data-pickg')).split('|');
+      pickGarden(CAVES[parts[0]], parts[1]);
+      return;
+    }
     // 整行类只认点在行体上的点击，行内按钮一律不穿透（第二道防线，防以后新增按钮再踩同一个坑）
     const eq = e.target.closest('[data-equip]');
     if (eq && !e.target.closest('button')) { equipGear(eq.getAttribute('data-equip')); return; }
@@ -7465,9 +7490,13 @@
       return 'title';
     },
     caveTabsOf(id) { const c = CAVES[id]; return c ? caveTabs(c).map(t => t.id) : []; },
-    // 药圃读数（charge = 已长成次数，cap = 上限 99）
-    gardenState() { return { charge: gardenCharge(), cap: GARDEN_CAP, raw: Math.floor(save.gardenCharge || 0), tick: +(save.gardenTick || 0).toFixed(2) }; },
-    setGarden(n) { save.gardenCharge = Math.max(0, Math.min(GARDEN_CAP, n | 0)); save.gardenTick = 0; return save.gardenCharge; },
+    // 药圃读数：不传 id 返回全部地块 {地块id: {charge, cap, cave}}
+    gardenState(gid) {
+      const out = {};
+      for (const x of gardenList()) out[x.g.id] = { charge: gardenChargeOf(x.g), cap: gardenCapOf(x.g), cave: x.cave.id, pool: x.g.pool.length };
+      return gid ? (out[gid] || null) : out;
+    },
+    setGarden(gid, n) { save.gardenCharge = save.gardenCharge || {}; save.gardenCharge[gid] = Math.max(0, Math.min(GARDEN_CAP, n | 0)); save.gardenTick = 0; return save.gardenCharge[gid]; },
     skipStory() { let n = 0; while (G.state === 'dialog' && !G.dialogIsChoice && n < 80) { advanceDialog(); n++; } return n; },
     muteStory(on) { G.storyMute = !!on; if (on) this.skipStory(); return !!G.storyMute; },
     storyMuted() { return !!G.storyMute; },

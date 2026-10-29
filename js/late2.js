@@ -118,7 +118,13 @@
       quote: '走了这么多年，总算有个能关门的地方。',
       capLevel: 98, restStone: 420, restXp: 0.22,
       crafts: ['alchemy', 'forge', 'talisman'],
-      restTip: '云梦山灵脉甲于天南，坐一日抵得上别处十日。'
+      restTip: '云梦山灵脉甲于天南，坐一日抵得上别处十日。',
+      // 原著第 606 章前后：天泉峰小石山前的那片药园，「将药园四周的浓雾缓缓散去」「将药园的禁制重新开启」
+      gardens: [{
+        id: 'luoyun', name: '天泉峰药园', from: 'jieying',
+        tip: '小石山前一片园子，四周下着禁制，雾散开才看得见里头那几畦。',
+        pool: ['m_huangjingzhi', 'm_jinjingshen', 'm_qixingcao', 'm_sanwucao', 'm_kulianhua', 'm_wangyouguo']
+      }]
     },
     foxin: {
       id: 'foxin', name: '大晋·佛宗别院', pos: '大晋·南疆 佛宗', from: 'dajin',
@@ -134,7 +140,13 @@
       quote: '把一座园子收进袖里，天下就没有比这更静的地方。',
       capLevel: 140, restStone: 700, restXp: 0.18,
       crafts: ['alchemy', 'forge', 'talisman'],
-      restTip: '芥子里的灵气温而不燥，坐多久都不伤本。'
+      restTip: '芥子里的灵气温而不燥，坐多久都不伤本。',
+      // 原著：『将那座天机府放出……并修建好了一座药园，将从子母峰带出的玄天仙藤、龙鳞果树等移植进去』
+      gardens: [{
+        id: 'jiezi', name: '芥子药园', from: 'jiezi',
+        tip: '一亩地里挤着玄天仙藤与龙鳞果树，灵气润得不像人界。老藤偶尔结一枚，摘了要等很久。',
+        pool: ['m_longlin', 'm_xuantianteng', 'm_huangjingzhi', 'm_jinjingshen', 'm_qixingcao', 'm_sanwucao']
+      }]
     }
   });
 

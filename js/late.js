@@ -117,7 +117,13 @@
       quote: '海外无亲无故，反倒干净。',
       capLevel: 70, restStone: 200, restXp: 0.26,
       crafts: ['alchemy', 'forge', 'talisman'],
-      restTip: '海岛灵气带着咸味，比越国浓得多。'
+      restTip: '海岛灵气带着咸味，比越国浓得多。',
+      // 原著：『新洞府除了一个简易的药园和两个隐秘的密室』——岛上也开了一小片地
+      gardens: [{
+        id: 'xiaohuan', name: '简易药园', from: 'kuixing',
+        tip: '礁石后头开出来的一小片地，风大，得拿竹篱挡着。种的是从百药园带出来的旧种。',
+        pool: ['m_huangqiucao', 'm_ziyehua', 'm_wangyuecao', 'm_qixingcao', 'm_sanwucao']
+      }]
     },
     qingzhuxuan: {
       id: 'qingzhuxuan', name: '青竹小轩', pos: '乱星海·天星城 外街', from: 'qingzhu',
