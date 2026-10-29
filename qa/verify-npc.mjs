@@ -82,10 +82,14 @@ const KINDS = ['mo', 'beast', 'swarm', 'blood'];
 const badKind = bosses.filter(m => KINDS.indexOf(m.boss.kind) < 0);
 ok(badKind.length === 0, 'Boss 打法只用四种（mo / beast / swarm / blood），没有野值',
   badKind.map(m => m.id + ':' + m.boss.kind));
+// 主名（「·」之前）不重复：同一角色的分阶段关底允许共存（如「古或今」/「古或今·混沌之身」），
+// 但两张不相干的图不能出现同一个关底。
+// 全名不重复即可：同一角色的多阶段关底（「古或今」/「古或今·混沌之身」「马良·重伤显形」/「马良·真仙」）
+// 是设计需要，但两张不相干的图不能出现一字不差的同一个关底。
 const bossName = {};
 for (const m of bosses) bossName[m.boss.name] = (bossName[m.boss.name] || 0) + 1;
 const dupBoss = Object.keys(bossName).filter(k => bossName[k] > 1);
-ok(dupBoss.length === 0, 'Boss 名不重复（避免两张图出现同一个关底）', dupBoss);
+ok(dupBoss.length === 0, 'Boss 全名不重复（同名角色的分阶段关底用「·」区分）', dupBoss);
 
 // 妖兽系 boss 会「嚎叫召群」，召的小怪 id 必须是真实存在的怪。
 // 原实现把横幅和召唤物都写死成「百年狼妖 / wolf」，于是石傀儡、墨蛟、灵猿全在召狼。

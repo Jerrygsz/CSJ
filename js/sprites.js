@@ -176,7 +176,7 @@
       '...KGGGGK...', '...KGTTGK...', '....KGGK....', '...KGGGGK...', '..KGGGGGGK..',
       '..KGKGGKGK..', '..KGK..KGK..', '.KGGK..KGGK.', '.KgGK..KGgK.', '..KK....KK..'
     ] },
-    // 地火之灵：地脉火气凝出来的，没有固定形状，火舌卷成人形
+    // 地火：地脉火气凝出来的，没有固定形状，火舌卷成人形
     { name: 'huoling', pal: { K: '#3a1206', R: '#ff4a12', O: '#ff8a2a', Y: '#ffe27a' }, rows: [
       '.....KKK......', '....KRRK......', '...KRROK......', '..KROYOK......',
       '.KROYYYOK.....', 'KROYYYYYOK....', 'KROYYYYYYOK...', 'KROYYYYYYOK...',

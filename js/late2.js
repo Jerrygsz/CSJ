@@ -233,9 +233,9 @@
       unlock: 'shixiao', next: 'yinyue',
       diff: 2.5, bossAt: 100,
       enemies: ['zhengdao', 'moxiu2', 'assassin'],
-      elites: ['天阙堡剑修', '御灵宗控虫人'],
+      elites: ['天阙堡剑修', '御灵宗弟子'],
       mats: ['m_yusui', 'm_xuantie', 'm_lingmo'],
-      boss: { kind: 'mo', name: '御灵宗·魏长峰', hp: 11500, spd: 64, dmg: 44, r: 19, spr: 'neimen', scale: 5.0 },
+      boss: { kind: 'mo', name: '御灵宗大长老·东门图', hp: 11500, spd: 64, dmg: 44, r: 19, spr: 'neimen', scale: 5.0 },
       reward: { stones: 1600, mats: [['m_yusui', 3], ['m_xuantie', 3]] },
       clearTitle: '试剑已毕',
       clearDesc: '三派的人都记住了这个名字。他本来不想被记住。'
@@ -308,7 +308,7 @@
       unlock: 'yanyue', next: 'bianjie',
       diff: 2.8, escapeAt: 95,
       enemies: ['moxiu2', 'gui2', 'fashi'],
-      elites: ['魔道长老', '仲神师随侍'],
+      elites: ['魔道长老', '仲神师随从'],
       mats: ['m_xueyu', 'm_hantie', 'm_yusui', 'm_lingmo'],
       reward: { stones: 2600, mats: [['m_xueyu', 4], ['m_hantie', 3]] },
       outro: 'huanglong_out',
@@ -371,7 +371,7 @@
     ],
     sanjian: [
       ['旁白', '三派试剑，剑坪上站了三百多人。落云宗这边，他是新来的长老。'],
-      ['御灵宗·魏长峰', '听说落云宗来了个来历不明的。今日点到为止，如何？'],
+      ['御灵宗大长老·东门图', '听说落云宗来了个来历不明的。今日点到为止，如何？'],
       ['韩立', '（名字是查过的，查不出东西。他要试，那就试。）'],
       ['韩立', '点到为止。'],
       ['旁白', '三剑过后，剑坪上静得能听见风。']
@@ -801,7 +801,7 @@
       unlock: 'tianlan', next: 'jiezi',
       diff: 3.4, bossAt: 0, intro: 'liudao', outro: 'liudao_out',
       enemies: ['gui2', 'kui2', 'dajinxiu'],
-      elites: ['六道分身', '星宫叛修'],
+      elites: ['六道分身', '星宫修士'],
       mats: ['m_gangyin', 'm_gengjing', 'm_yanghun'],
       boss: { kind: 'mo', name: '六道·万天明之身', hp: 46000, spd: 64, dmg: 92, r: 23, spr: 'mo', scale: 6.0 },
       reward: { stones: 8000, mats: [['m_gangyin', 5], ['m_gengjing', 5]] },

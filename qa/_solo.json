@@ -1,0 +1,1307 @@
+[
+ {
+  "kind": "怪",
+  "map": "wolf",
+  "name": "灰毛野狼",
+  "segs": [
+   "灰毛野狼"
+  ],
+  "bad": [
+   "灰毛野狼"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "怪",
+  "map": "snake",
+  "name": "青纹毒蛇",
+  "segs": [
+   "青纹毒蛇"
+  ],
+  "bad": [
+   "青纹毒蛇"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "怪",
+  "map": "bat",
+  "name": "吸血妖蝠",
+  "segs": [
+   "吸血妖蝠"
+  ],
+  "bad": [
+   "吸血妖蝠"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "怪",
+  "map": "boar",
+  "name": "铁背野猪",
+  "segs": [
+   "铁背野猪"
+  ],
+  "bad": [
+   "铁背野猪"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "怪",
+  "map": "bandit",
+  "name": "山贼喽啰",
+  "segs": [
+   "山贼喽啰"
+  ],
+  "bad": [
+   "山贼喽啰"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "怪",
+  "map": "assassin",
+  "name": "黑衣杀手",
+  "segs": [
+   "黑衣杀手"
+  ],
+  "bad": [
+   "黑衣杀手"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "怪",
+  "map": "disciple",
+  "name": "同门陪练",
+  "segs": [
+   "同门陪练"
+  ],
+  "bad": [
+   "同门陪练"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "怪",
+  "map": "yuyao",
+  "name": "青鳞鲤妖",
+  "segs": [
+   "青鳞鲤妖"
+  ],
+  "bad": [
+   "青鳞鲤妖"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "怪",
+  "map": "gui2",
+  "name": "古魔残躯",
+  "segs": [
+   "古魔残躯"
+  ],
+  "bad": [
+   "古魔残躯"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "怪",
+  "map": "xj_tianwei",
+  "name": "天庭金仙道主",
+  "segs": [
+   "天庭金仙道主"
+  ],
+  "bad": [
+   "天庭金仙道主"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "怪",
+  "map": "xj_xuechi",
+  "name": "血池守灵",
+  "segs": [
+   "血池守灵"
+  ],
+  "bad": [
+   "血池守灵"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "Boss",
+  "map": "houshan",
+  "name": "百年狼妖",
+  "segs": [
+   "百年狼妖"
+  ],
+  "bad": [
+   "百年狼妖"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "houshan",
+  "name": "百年狼王",
+  "segs": [
+   "百年狼王"
+  ],
+  "bad": [
+   "百年狼王"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "Boss",
+  "map": "yaoyuan",
+  "name": "噬灵虫母",
+  "segs": [
+   "噬灵虫母"
+  ],
+  "bad": [
+   "噬灵虫母"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "yaoyuan",
+  "name": "噬灵虫王",
+  "segs": [
+   "噬灵虫王"
+  ],
+  "bad": [
+   "噬灵虫王"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "yaoyuan",
+  "name": "妖鼠精",
+  "segs": [
+   "妖鼠精"
+  ],
+  "bad": [
+   "妖鼠精"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "xuese",
+  "name": "魔道凶徒",
+  "segs": [
+   "魔道凶徒"
+  ],
+  "bad": [
+   "魔道凶徒"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "Boss",
+  "map": "zhuji",
+  "name": "地火之灵",
+  "segs": [
+   "地火之灵"
+  ],
+  "bad": [
+   "地火之灵"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "zhuji",
+  "name": "地火火灵",
+  "segs": [
+   "地火火灵"
+  ],
+  "bad": [
+   "地火火灵"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "yanjia",
+  "name": "血灵阵眼",
+  "segs": [
+   "血灵阵眼"
+  ],
+  "bad": [
+   "血灵阵眼"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "ningcui",
+  "name": "深海妖蟒",
+  "segs": [
+   "深海妖蟒"
+  ],
+  "bad": [
+   "深海妖蟒"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "xutian",
+  "name": "煞宝阴灵",
+  "segs": [
+   "煞宝阴灵"
+  ],
+  "bad": [
+   "煞宝阴灵"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "waihai",
+  "name": "化形妖仆",
+  "segs": [
+   "化形妖仆"
+  ],
+  "bad": [
+   "化形妖仆"
+  ],
+  "role": [],
+  "fake": [
+   "妖仆"
+  ],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "waihai",
+  "name": "海沟巨兽",
+  "segs": [
+   "海沟巨兽"
+  ],
+  "bad": [
+   "海沟巨兽"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "Boss",
+  "map": "guxiu",
+  "name": "古修遗蜕",
+  "segs": [
+   "古修遗蜕"
+  ],
+  "bad": [
+   "古修遗蜕"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "guxiu",
+  "name": "古修遗蜕",
+  "segs": [
+   "古修遗蜕"
+  ],
+  "bad": [
+   "古修遗蜕"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "yinming",
+  "name": "阴雾鬼将",
+  "segs": [
+   "阴雾鬼将"
+  ],
+  "bad": [
+   "阴雾鬼将"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "shixiao",
+  "name": "养尸人",
+  "segs": [
+   "养尸人"
+  ],
+  "bad": [
+   "养尸人"
+  ],
+  "role": [],
+  "fake": [
+   "养尸人"
+  ],
+  "group": false
+ },
+ {
+  "kind": "Boss",
+  "map": "sanjian",
+  "name": "御灵宗·魏长峰",
+  "segs": [
+   "御灵宗",
+   "魏长峰"
+  ],
+  "bad": [
+   "魏长峰"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "sanjian",
+  "name": "御灵宗控虫人",
+  "segs": [
+   "御灵宗控虫人"
+  ],
+  "bad": [
+   "御灵宗控虫人"
+  ],
+  "role": [],
+  "fake": [
+   "控虫人"
+  ],
+  "group": false
+ },
+ {
+  "kind": "Boss",
+  "map": "cangkun",
+  "name": "苍坤洞府·禁制灵傀",
+  "segs": [
+   "苍坤洞府",
+   "禁制灵傀"
+  ],
+  "bad": [
+   "苍坤洞府",
+   "禁制灵傀"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "cangkun",
+  "name": "禁制灵傀",
+  "segs": [
+   "禁制灵傀"
+  ],
+  "bad": [
+   "禁制灵傀"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "huanglong",
+  "name": "仲神师随侍",
+  "segs": [
+   "仲神师随侍"
+  ],
+  "bad": [
+   "仲神师随侍"
+  ],
+  "role": [],
+  "fake": [
+   "随侍"
+  ],
+  "group": false
+ },
+ {
+  "kind": "Boss",
+  "map": "bianjie",
+  "name": "阴罗宗宗主夫人·陆夫人",
+  "segs": [
+   "阴罗宗宗主夫人",
+   "陆夫人"
+  ],
+  "bad": [
+   "阴罗宗宗主夫人"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "bianjie",
+  "name": "血罗罩阵眼",
+  "segs": [
+   "血罗罩阵眼"
+  ],
+  "bad": [
+   "血罗罩阵眼"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "Boss",
+  "map": "zhuimo",
+  "name": "血焰主魂",
+  "segs": [
+   "血焰主魂"
+  ],
+  "bad": [
+   "血焰主魂"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "zhuimo",
+  "name": "血焰分魂",
+  "segs": [
+   "血焰分魂"
+  ],
+  "bad": [
+   "血焰分魂"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "zhuimo",
+  "name": "古魔残躯",
+  "segs": [
+   "古魔残躯"
+  ],
+  "bad": [
+   "古魔残躯"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "kunwu",
+  "name": "昆吾四兽·木魁",
+  "segs": [
+   "昆吾四兽",
+   "木魁"
+  ],
+  "bad": [
+   "昆吾四兽"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "zhenmo",
+  "name": "元刹魔像",
+  "segs": [
+   "元刹魔像"
+  ],
+  "bad": [
+   "元刹魔像"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "Boss",
+  "map": "liudao",
+  "name": "六道·万天明之身",
+  "segs": [
+   "六道",
+   "万天明之身"
+  ],
+  "bad": [
+   "万天明之身"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "liudao",
+  "name": "星宫叛修",
+  "segs": [
+   "星宫叛修"
+  ],
+  "bad": [
+   "星宫叛修"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "Boss",
+  "map": "heifeng",
+  "name": "黑凤族三妖",
+  "segs": [
+   "黑凤族三妖"
+  ],
+  "bad": [
+   "黑凤族三妖"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "guanghan",
+  "name": "广寒界守灵",
+  "segs": [
+   "广寒界守灵"
+  ],
+  "bad": [
+   "广寒界守灵"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "huangquan",
+  "name": "镇魔锁守灵",
+  "segs": [
+   "镇魔锁守灵"
+  ],
+  "bad": [
+   "镇魔锁守灵"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "huangquan",
+  "name": "黄泉鬼将",
+  "segs": [
+   "黄泉鬼将"
+  ],
+  "bad": [
+   "黄泉鬼将"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "Boss",
+  "map": "xiaoling",
+  "name": "小灵天·守炉人",
+  "segs": [
+   "小灵天",
+   "守炉人"
+  ],
+  "bad": [
+   "守炉人"
+  ],
+  "role": [],
+  "fake": [
+   "守炉人"
+  ],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "xiaoling",
+  "name": "小灵天守",
+  "segs": [
+   "小灵天守"
+  ],
+  "bad": [
+   "小灵天守"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "xiaoling",
+  "name": "灵天傀",
+  "segs": [
+   "灵天傀"
+  ],
+  "bad": [
+   "灵天傀"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "modajie",
+  "name": "苦灵岛守",
+  "segs": [
+   "苦灵岛守"
+  ],
+  "bad": [
+   "苦灵岛守"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "Boss",
+  "map": "zhangtianping",
+  "name": "马良·重伤显形",
+  "segs": [
+   "马良",
+   "重伤显形"
+  ],
+  "bad": [
+   "重伤显形"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "zhangtianping",
+  "name": "九元观随侍",
+  "segs": [
+   "九元观随侍"
+  ],
+  "bad": [
+   "九元观随侍"
+  ],
+  "role": [],
+  "fake": [
+   "随侍"
+  ],
+  "group": false
+ },
+ {
+  "kind": "Boss",
+  "map": "zhanxian",
+  "name": "马良·九元观真仙",
+  "segs": [
+   "马良",
+   "九元观真仙"
+  ],
+  "bad": [
+   "九元观真仙"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "zhanxian",
+  "name": "万灵血龙",
+  "segs": [
+   "万灵血龙"
+  ],
+  "bad": [
+   "万灵血龙"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "daoguo",
+  "name": "化木为灵·树巨人",
+  "segs": [
+   "化木为灵",
+   "树巨人"
+  ],
+  "bad": [
+   "树巨人"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "fsjie",
+  "name": "魔君化影",
+  "segs": [
+   "魔君化影"
+  ],
+  "bad": [
+   "魔君化影"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "fsjie",
+  "name": "劫雷凝形",
+  "segs": [
+   "劫雷凝形"
+  ],
+  "bad": [
+   "劫雷凝形"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "Boss",
+  "map": "linghuang",
+  "name": "灵皇大比·擂主",
+  "segs": [
+   "灵皇大比",
+   "擂主"
+  ],
+  "bad": [
+   "擂主"
+  ],
+  "role": [],
+  "fake": [
+   "擂主"
+  ],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "linghuang",
+  "name": "他族擂主",
+  "segs": [
+   "他族擂主"
+  ],
+  "bad": [
+   "他族擂主"
+  ],
+  "role": [],
+  "fake": [
+   "擂主"
+  ],
+  "group": false
+ },
+ {
+  "kind": "Boss",
+  "map": "zhandacheng",
+  "name": "拦路大乘",
+  "segs": [
+   "拦路大乘"
+  ],
+  "bad": [
+   "拦路大乘"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "zhandacheng",
+  "name": "大乘随侍",
+  "segs": [
+   "大乘随侍"
+  ],
+  "bad": [
+   "大乘随侍"
+  ],
+  "role": [],
+  "fake": [
+   "随侍"
+  ],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "baiguang",
+  "name": "白光守界",
+  "segs": [
+   "白光守界"
+  ],
+  "bad": [
+   "白光守界"
+  ],
+  "role": [],
+  "fake": [
+   "守界"
+  ],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "baiguang",
+  "name": "土皇钉傀",
+  "segs": [
+   "土皇钉傀"
+  ],
+  "bad": [
+   "土皇钉傀"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "Boss",
+  "map": "yuyang_dou",
+  "name": "虞阳城·城斗魁首",
+  "segs": [
+   "虞阳城",
+   "城斗魁首"
+  ],
+  "bad": [
+   "城斗魁首"
+  ],
+  "role": [],
+  "fake": [
+   "魁首"
+  ],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "yuyang_dou",
+  "name": "城斗老手",
+  "segs": [
+   "城斗老手"
+  ],
+  "bad": [
+   "城斗老手"
+  ],
+  "role": [],
+  "fake": [
+   "老手"
+  ],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "tiangui",
+  "name": "灵寰凶王",
+  "segs": [
+   "灵寰凶王"
+  ],
+  "bad": [
+   "灵寰凶王"
+  ],
+  "role": [],
+  "fake": [
+   "凶王"
+  ],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "dadi",
+  "name": "血门守者",
+  "segs": [
+   "血门守者"
+  ],
+  "bad": [
+   "血门守者"
+  ],
+  "role": [],
+  "fake": [
+   "守者"
+  ],
+  "group": false
+ },
+ {
+  "kind": "Boss",
+  "map": "jingong",
+  "name": "东方白·金源宫主",
+  "segs": [
+   "东方白",
+   "金源宫主"
+  ],
+  "bad": [
+   "金源宫主"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "chongchao",
+  "name": "火岁萤虫·母虫",
+  "segs": [
+   "火岁萤虫",
+   "母虫"
+  ],
+  "bad": [
+   "母虫"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "chongchao",
+  "name": "十八层守卒",
+  "segs": [
+   "十八层守卒"
+  ],
+  "bad": [
+   "十八层守卒"
+  ],
+  "role": [],
+  "fake": [
+   "守卒"
+  ],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "suidian",
+  "name": "石剑残影",
+  "segs": [
+   "石剑残影"
+  ],
+  "bad": [
+   "石剑残影"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "jiuyuan",
+  "name": "鬼阵·阴卒",
+  "segs": [
+   "鬼阵",
+   "阴卒"
+  ],
+  "bad": [
+   "阴卒"
+  ],
+  "role": [],
+  "fake": [
+   "阴卒"
+  ],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "zaimiao",
+  "name": "妙法座下",
+  "segs": [
+   "妙法座下"
+  ],
+  "bad": [
+   "妙法座下"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "youming",
+  "name": "幽冥鬼将",
+  "segs": [
+   "幽冥鬼将"
+  ],
+  "bad": [
+   "幽冥鬼将"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "shifang",
+  "name": "天道七君座下",
+  "segs": [
+   "天道七君座下"
+  ],
+  "bad": [
+   "天道七君座下"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "Boss",
+  "map": "daoyi",
+  "name": "古或今·混沌之身",
+  "segs": [
+   "古或今",
+   "混沌之身"
+  ],
+  "bad": [
+   "混沌之身"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "精英",
+  "map": "daoyi",
+  "name": "天道残影",
+  "segs": [
+   "天道残影"
+  ],
+  "bad": [
+   "天道残影"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "际遇",
+  "map": "houshan",
+  "name": "采药人 老周",
+  "segs": [
+   "采药人",
+   "老周"
+  ],
+  "bad": [
+   "采药人",
+   "老周"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "际遇",
+  "map": "houshan",
+  "name": "张铁的铁匠棚",
+  "segs": [
+   "张铁的铁匠棚"
+  ],
+  "bad": [
+   "张铁的铁匠棚"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "际遇",
+  "map": "houshan",
+  "name": "山贼丢下的行囊",
+  "segs": [
+   "山贼丢下的行囊"
+  ],
+  "bad": [
+   "山贼丢下的行囊"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "际遇",
+  "map": "mishi",
+  "name": "密室角落的丹炉",
+  "segs": [
+   "密室角落的丹炉"
+  ],
+  "bad": [
+   "密室角落的丹炉"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "际遇",
+  "map": "yaoyuan",
+  "name": "药童 小禾",
+  "segs": [
+   "药童",
+   "小禾"
+  ],
+  "bad": [
+   "药童",
+   "小禾"
+  ],
+  "role": [],
+  "fake": [
+   "药童"
+  ],
+  "group": false
+ },
+ {
+  "kind": "际遇",
+  "map": "yanjia",
+  "name": "正道小队 队长",
+  "segs": [
+   "正道小队",
+   "队长"
+  ],
+  "bad": [
+   "正道小队"
+  ],
+  "role": [
+   "队长"
+  ],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "际遇",
+  "map": "liulian",
+  "name": "船上的老渔夫",
+  "segs": [
+   "船上的老渔夫"
+  ],
+  "bad": [
+   "船上的老渔夫"
+  ],
+  "role": [],
+  "fake": [
+   "渔夫"
+  ],
+  "group": false
+ },
+ {
+  "kind": "际遇",
+  "map": "sanjian",
+  "name": "辛如音的旧识",
+  "segs": [
+   "辛如音的旧识"
+  ],
+  "bad": [
+   "辛如音的旧识"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "际遇",
+  "map": "xiaoling",
+  "name": "拦路的青袍人",
+  "segs": [
+   "拦路的青袍人"
+  ],
+  "bad": [
+   "拦路的青袍人"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "际遇",
+  "map": "xiaoling",
+  "name": "荒原上的白光",
+  "segs": [
+   "荒原上的白光"
+  ],
+  "bad": [
+   "荒原上的白光"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "际遇",
+  "map": "xiaoling",
+  "name": "魔焰里的来客",
+  "segs": [
+   "魔焰里的来客"
+  ],
+  "bad": [
+   "魔焰里的来客"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ },
+ {
+  "kind": "际遇",
+  "map": "xiaoling",
+  "name": "越国口音的老妇人",
+  "segs": [
+   "越国口音的老妇人"
+  ],
+  "bad": [
+   "越国口音的老妇人"
+  ],
+  "role": [],
+  "fake": [],
+  "group": false
+ }
+]

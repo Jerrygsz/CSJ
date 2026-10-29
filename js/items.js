@@ -70,8 +70,8 @@ window.MATERIALS = [
   { id: 'm_yusui',    name: '玉髓',     icon: '💠', rarity: 2, desc: '玉石里凝出的一线髓，刻符最灵。' },
   // 灵物
   { id: 'm_wolfdan',  name: '妖狼内丹', icon: '🔴', rarity: 1, desc: '百年狼妖的丹丸，腥气冲鼻，入药却是好东西。' },
-  { id: 'm_shedan',   name: '蛇胆',     icon: '🟢', rarity: 0, desc: '青纹毒蛇的胆，苦得舌根发麻。' },
-  { id: 'm_chongjing',name: '虫母晶核', icon: '🟣', rarity: 3, desc: '噬灵虫母体内那枚晶核，捏碎了满手灵光。' },
+  { id: 'm_shedan',   name: '蛇胆',     icon: '🟢', rarity: 0, desc: '毒蛇的胆，苦得舌根发麻。' },
+  { id: 'm_chongjing',name: '虫母晶核', icon: '🟣', rarity: 3, desc: '血蝠体内那枚晶核，捏碎了满手灵光。' },
   { id: 'm_xuesha',   name: '血煞珠',   icon: '🩸', rarity: 3, desc: '魔道修士炼的血珠，煞气未散，慎用。' },
   { id: 'm_shihui',   name: '尸傀骨粉', icon: '⚪', rarity: 1, desc: '尸傀焚后的白灰，炼器时掺一点能定形。' },
   // 符料

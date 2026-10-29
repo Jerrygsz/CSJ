@@ -270,7 +270,7 @@
       unlock: 'shisan', next: 'heti_guan',
       diff: 3.7, bossAt: 0, intro: 'guanghan', outro: 'guanghan_out',
       enemies: ['kui2', 'dajinxiu', 'zhengdao'],
-      elites: ['广寒界守灵', '寒魄傀儡'],
+      elites: ['广寒界守卫', '寒魄傀儡'],
       mats: ['m_zhenlingxue', 'm_zhenlinglin', 'm_yaodan'],
       boss: { kind: 'mo', name: '广寒界·千机子', hp: 68000, spd: 68, dmg: 112, r: 24, spr: 'neimen', scale: 6.2 },
       reward: { stones: 30000, items: ['heti'], mats: [['m_zhenlingxue', 2], ['m_zhenlinglin', 2]] },
@@ -340,9 +340,9 @@
       unlock: 'moban', next: 'huangquan',
       diff: 3.9, bossAt: 0, intro: 'yitian', outro: 'yitian_out',
       enemies: ['gui2', 'moxiu2', 'dajinxiu'],
-      elites: ['魔族魔将', '血魔卫'],
+      elites: ['魔族魔修', '血魔'],
       mats: ['m_zhenlingxue', 'm_yaodan', 'm_gangyin'],
-      boss: { kind: 'mo', name: '魔族魔将', hp: 85000, spd: 68, dmg: 130, r: 24, spr: 'mo', scale: 6.4 },
+      boss: { kind: 'mo', name: '魔族魔修', hp: 85000, spd: 68, dmg: 130, r: 24, spr: 'mo', scale: 6.4 },
       reward: { stones: 50000, mats: [['m_zhenlingxue', 2]] },
       clearTitle: '倚天城守住了',
       clearDesc: '魔将伏诛，魔潮退去。城墙上的人，第一次敢坐下。'
@@ -355,7 +355,7 @@
       unlock: 'yitian', next: 'moyuan',
       diff: 4.0, bossAt: 0, intro: 'huangquan', outro: 'huangquan_out',
       enemies: ['gui2', 'moxiu2', 'guixiu'],
-      elites: ['镇魔锁守灵', '黄泉鬼将'],
+      elites: ['镇魔锁守卫', '黄泉鬼将'],
       mats: ['m_zhenlingxue', 'm_yaodan', 'm_gangyin'],
       boss: { kind: 'mo', name: '镇魔锁·车骑恭', hp: 95000, spd: 70, dmg: 140, r: 24, spr: 'guixiu', scale: 6.4 },
       reward: { stones: 60000, mats: [['m_xuantianteng', 1], ['m_zhenlingxue', 2]] },
@@ -385,7 +385,7 @@
       mats: ['m_xuantianteng', 'm_zhenlingxue', 'm_yaodan'],
       // 原著小灵天是碎裂界面（诸族杂居），并无「界主/之主」之称 —— 此图为玩法原创，
       // 故只用地名 + 中性称谓，不冒充原著头衔
-      boss: { kind: 'mo', name: '小灵天·守炉人', hp: 105000, spd: 72, dmg: 150, r: 25, spr: 'neimen', scale: 6.6 },
+      boss: { kind: 'mo', name: '小灵天镇守', hp: 105000, spd: 72, dmg: 150, r: 25, spr: 'neimen', scale: 6.6 },
       reward: { stones: 70000, mats: [['m_xuantianteng', 1], ['m_zhenlingxue', 2]] },
       clearTitle: '小灵天开',
       clearDesc: '一方小世界落到手里。合体后期到此为止，再往上，是大乘。'
@@ -471,7 +471,7 @@
       unlock: 'zhenxian', next: 'zhanxian',
       diff: 5.2, bossAt: 0, intro: 'zhangtianping', outro: 'zhangtianping_out',
       enemies: ['gui2', 'moxiu2', 'guixiu'],
-      elites: ['九元观随侍', '金色甲士'],
+      elites: ['九元观随从', '金色甲士'],
       mats: ['m_zhenlingxue', 'm_xuantianteng'],
       boss: { kind: 'mo', name: '马良·重伤显形', hp: 260000, spd: 86, dmg: 300, r: 27, spr: 'mo', scale: 7.0 },
       reward: { stones: 220000, items: ['t_zhangtianping', 't_daotianping'], mats: [['m_xuantianteng', 1], ['m_zhenlingxue', 3]] },
@@ -502,7 +502,7 @@
       unlock: 'zhangtianping', next: 'huimoyuan',
       diff: 5.0, bossAt: 0, intro: 'zhanxian', outro: 'zhanxian_out',
       enemies: ['gui2', 'moxiu2', 'guixiu'],
-      elites: ['万灵血龙', '九元观随侍'],
+      elites: ['万灵血龙', '九元观随从'],
       mats: ['m_zhenlingxue', 'm_xuantianteng'],
       boss: { kind: 'mo', name: '马良·九元观真仙', hp: 300000, spd: 88, dmg: 320, r: 28, spr: 'mo', scale: 7.2 },
       reward: { stones: 240000, items: ['t_wanlingxueyi', 't_moguang', 't_huoxuzi', 'dan_zhihun'], mats: [['m_xuantianteng', 2], ['m_zhenlingxue', 4]] },
@@ -590,9 +590,9 @@
       unlock: null, next: null,
       diff: 3.8, bossAt: 0, intro: 'linghuang', outro: 'linghuang_out',
       enemies: ['zhengdao', 'moxiu2', 'dajinxiu'],
-      elites: ['他族擂主', '灵将'],
+      elites: ['妖修', '灵将'],
       mats: ['m_zhenlinglin', 'm_yaodan', 'm_gengjing'],
-      boss: { kind: 'mo', name: '灵皇大比·擂主', hp: 80000, spd: 68, dmg: 125, r: 23, spr: 'neimen', scale: 6.2 },
+      boss: { kind: 'mo', name: '灵将', hp: 80000, spd: 68, dmg: 125, r: 23, spr: 'neimen', scale: 6.2 },
       reward: { stones: 45000, mats: [['m_zhenlingxue', 1], ['m_zhenlinglin', 2]] },
       clearTitle: '擂主已下',
       clearDesc: '台上只剩他一个人。名分这种东西，打出来比求来快。'
@@ -605,7 +605,7 @@
       unlock: null, next: 'shengshi',
       diff: 4.2, bossAt: 0, intro: 'zhandacheng', outro: 'zhandacheng_out',
       enemies: ['kui2', 'dajinxiu', 'moxiu2'],
-      elites: ['大乘随侍', '护道傀儡'],
+      elites: ['大乘随从', '护道傀儡'],
       mats: ['m_xuantianteng', 'm_zhenlingxue', 'm_yaodan'],
       boss: { kind: 'mo', name: '拦路大乘', hp: 130000, spd: 74, dmg: 175, r: 25, spr: 'mo', scale: 6.6 },
       reward: { stones: 80000, mats: [['m_xuantianteng', 1], ['m_zhenlingxue', 2]] },
@@ -642,7 +642,7 @@
       unlock: null, next: null,
       diff: 4.3, bossAt: 0, intro: 'baiguang', outro: 'baiguang_out',
       enemies: ['gui2', 'guixiu', 'dajinxiu'],
-      elites: ['白光守界', '土皇钉傀'],
+      elites: ['白光守卫', '土皇钉傀'],
       mats: ['m_xuantianteng', 'm_zhenlingxue', 'm_yaodan'],
       boss: { kind: 'mo', name: '白光界·土皇钉', hp: 120000, spd: 72, dmg: 165, r: 24, spr: 'guixiu', scale: 6.4 },
       reward: { stones: 85000, items: ['t_tuhuangding'], mats: [['m_xuantianteng', 1], ['m_zhenlingxue', 2]] },
@@ -844,7 +844,7 @@
 
     yitian: [
       ['旁白', '倚天城的城墙有三十丈高，墙下堆着的尸首比墙还高。'],
-      ['魔族魔将', '人族的援军？就这么一个？'],
+      ['魔族魔修', '人族的援军？就这么一个？'],
       ['韩立', '（一个够了。城里有我要保的人，城外有我要断的东西。）'],
       ['旁白', '魔将提刀。刀上的血还没干。'],
       ['韩立', '（合体初期的气息。硬拼不划算，先废它的刀。）']
@@ -1110,7 +1110,7 @@
     // ---- 后期支线对白 ----
     linghuang: [
       ['旁白', '灵皇大比的擂场，四周围着百族的旗。台上没有规矩，只有胜负。'],
-      ['他族擂主', '人族？这些年人族的名分，都是靠嘴争的。'],
+      ['妖修', '人族？这些年人族的名分，都是靠嘴争的。'],
       ['韩立', '（台上只认胜负。那就用胜负说话。）'],
       ['旁白', '擂主先动，一道灵光直取面门。']
     ],
@@ -1403,9 +1403,9 @@
       startLevel: 132, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
       diff: 3.6, bossAt: 0, intro: 'yuyang_dou', outro: 'yuyang_dou_out',
       enemies: ['yaoshou2', 'kui2', 'moxiu2'],
-      elites: ['妖族斗者', '城斗老手'],
+      elites: ['妖修', '妖修'],
       mats: ['m_banyao', 'm_yaodan'],
-      boss: { kind: 'mo', name: '虞阳城·城斗魁首', hp: 75000, spd: 66, dmg: 120, r: 22, spr: 'haishou', scale: 6.0 },
+      boss: { kind: 'mo', name: '虞阳城·妖修', hp: 75000, spd: 66, dmg: 120, r: 22, spr: 'haishou', scale: 6.0 },
       reward: { stones: 50000, mats: [['m_banyao', 2], ['m_yaodan', 1]] },
       clearTitle: '城斗已了',
       clearDesc: '魁首认了输。围观的妖族哄一声散了，没人赖账——妖族城里，输赢比人族讲规矩。'

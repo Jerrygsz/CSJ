@@ -65,7 +65,7 @@ window.MAPS = [
     unlock: 'qixuan', next: 'mishi',
     diff: 1.0, bossAt: 110,
     enemies: ['wolf', 'snake', 'bat', 'boar', 'bandit'],
-    elites: ['百年狼王', '山贼头目'],
+    elites: ['百年狼王', '马贼头目'],
     mats: ['m_chijing', 'm_huangjing', 'm_jingtie', 'm_wolfdan', 'm_shedan'],
     boss: { kind: 'beast', name: '百年狼妖', hp: 1100, spd: 66, dmg: 15, r: 20, spr: 'wolf', scale: 3.4 },
     reward: { stones: 80, items: [] },
@@ -122,11 +122,11 @@ window.MAPS = [
     cave: 'huangfeng',
     diff: 1.35, bossAt: 140,
     enemies: ['bat', 'snake', 'assassin', 'ghoul', 'bandit'],
-    elites: ['噬灵虫王', '妖鼠精'],
+    elites: ['血蝠', '尸傀'],
     // 旧园只长马师伯留下的那几畦：子夜花/黄球草/白鹤芝/望月草/化龙草。
     // 原著明写主药三味「园里一株都没有」，故不在旧园池里。
     mats: ['m_ziyehua', 'm_huangqiucao', 'm_baihezhi', 'm_wangyuecao', 'm_hualongcao', 'm_lingzhi', 'm_chongjing', 'm_fuzhi'],
-    boss: { kind: 'swarm', name: '噬灵虫母', hp: 2100, spd: 38, dmg: 15, r: 18, spr: 'blacklord', scale: 3.0 },
+    boss: { kind: 'swarm', name: '血蝠', hp: 2100, spd: 38, dmg: 15, r: 18, spr: 'blacklord', scale: 3.0 },
     reward: { stones: 200, items: ['qiannian'] },
     clearTitle: '守夜已毕',
     clearDesc: '药苗保住了。虫母的甲壳底下藏着一枚聚灵的珠子。管园弟子把钥匙往土里一插：西北角那半畦，往后归你。'
@@ -139,7 +139,7 @@ window.MAPS = [
     unlock: 'yaoyuan', next: 'zhuji',
     diff: 1.6, bossAt: 170,
     enemies: ['assassin', 'ghoul', 'boar', 'bandit', 'assassin'],
-    elites: ['魔道凶徒', '血傀儡'],
+    elites: ['魔修', '血傀儡'],
     mats: ['m_yusuizhi', 'm_tianling', 'm_zihua', 'm_longlin', 'm_xuantie', 'm_xuesha', 'm_yusui'],
     // 原著禁地里真正该打的是一只未成年的墨蛟（二等妖兽，南宫婉取其元神做器灵）
     boss: { kind: 'beast', name: '墨蛟', hp: 3600, spd: 52, dmg: 19, r: 19, spr: 'dujiao', scale: 4.2, summon: 'snake' },

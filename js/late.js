@@ -97,7 +97,7 @@
     // 全书没有低阶魔道法诀可换（魔道类都是 rarity 4，给 170 HP 的越国小怪掉太重），故移除该掉落。
     moxiu:   { name: '魔道修士',   hp: 170, spd: 54, dmg: 24, r: 11, xp: 6, spr: 'mo',       drop: 0.060, tier: 0, mats: ['m_xueyu', 'm_xuesha', 'm_hantie'] },
     haishou: { name: '海妖兽',     hp: 210, spd: 58, dmg: 26, r: 11, xp: 7, spr: 'haishou',  drop: 0.075, tier: 0, mats: ['m_yaodan', 'm_banyao'] },
-    yuyao:   { name: '青鳞鲤妖',   hp: 150, spd: 74, dmg: 22, r: 9,  xp: 6, spr: 'snake',    drop: 0.060, tier: 0, wob: true, mats: ['m_yaodan'] },
+    yuyao:   { name: '婴鲤兽',   hp: 150, spd: 74, dmg: 22, r: 9,  xp: 6, spr: 'snake',    drop: 0.060, tier: 0, wob: true, mats: ['m_yaodan'] },
     guixiu:  { name: '鬼修',       hp: 250, spd: 70, dmg: 30, r: 10, xp: 8, spr: 'guixiu',   drop: 0.080, tier: 0, mats: ['m_yanghun', 'm_xueyu'], skillDrop: { id: 'sk_xuanyin', chance: 0.010 } },
     kui:     { name: '机关傀儡',   hp: 300, spd: 34, dmg: 28, r: 13, xp: 8, spr: 'kui',      drop: 0.080, tier: 0, mats: ['m_xuantie', 'm_hantie'], skillDrop: { id: 'sk_sanyan', chance: 0.010 } },
     dujiao:  { name: '毒蛟',       hp: 420, spd: 62, dmg: 38, r: 14, xp: 10, spr: 'dujiao',  drop: 0.100, tier: 0, wob: true, mats: ['m_yaodan', 'm_banyao'] }
@@ -284,7 +284,7 @@
       unlock: 'jiedan', next: 'waihai',
       diff: 2.25, bossAt: 0, intro: 'xutian', outro: 'xutian_out',
       enemies: ['guixiu', 'kui', 'ghoul'],
-      elites: ['煞宝阴灵', '守殿傀儡'],
+      elites: ['阴灵', '守殿傀儡'],
       mats: ['m_yanghun', 'm_lingru', 'm_jinlei', 'm_yaodan', 'm_xueyu'],
       boss: { kind: 'mo', name: '玄骨上人', hp: 8600, spd: 56, dmg: 36, r: 20, spr: 'guixiu', scale: 5.0 },
       reward: { stones: 1400, items: ['t_xutianding', 't_yinyue', 'butian'], mats: [['m_lingru', 2], ['m_yanghun', 2]] },
@@ -299,7 +299,7 @@
       unlock: 'xutian', next: 'yinming',
       diff: 2.4, bossAt: 0, intro: 'waihai', outro: 'waihai_out',
       enemies: ['haishou', 'guixiu', 'kui', 'dujiao'],
-      elites: ['化形妖仆', '海沟巨兽'],
+      elites: ['化形妖', '海沟巨兽'],
       mats: ['m_yaodan', 'm_banyao', 'm_jinlei', 'm_yanghun'],
       boss: { kind: 'beast', name: '八级妖兽·毒蛟', hp: 9800, spd: 64, dmg: 40, r: 23, spr: 'dujiao', scale: 6.6, summon: 'yuyao' },
       reward: { stones: 2000, mats: [['m_jinlei', 2], ['m_yaodan', 4], ['m_lingmo', 4], ['m_xueyu', 2]] },
@@ -327,7 +327,7 @@
     {
       id: 'shiku', side: true, sorder: 8, name: '灵石矿·魔道矿场', pos: '越国边境 灵矿脉',
       type: 'combat', tag: '支线', unlockBy: 'e_captain',
-      desc: '魔道六宗占了七派的灵石矿。正道小队要突一次，矿里守着的可不止人。',
+      desc: '魔道六宗占了七派的灵石矿。正道修士要突一次，矿里守着的可不止人。',
       startLevel: 40, startSkills: { sword: 5, fire: 3, orb: 3, nova: 2 },
       unlock: null, next: null,
       diff: 1.85, bossAt: 135,
@@ -592,9 +592,9 @@
       ['韩立', '（最后一张水遁符。）'],
       ['旁白', '符光托着他往上冲。冲出水面那一刻，天是灰的，海是黑的。'],
       ['旁白', '一条渔船把他捞了上去。船上的人说的话，他只听懂一半。'],
-      ['老渔夫', '外乡人？法力空成这样还没死，算命大。'],
+      ['老船工', '外乡人？法力空成这样还没死，算命大。'],
       ['韩立', '（丹田空得能听见回声。原著里这一下把他从筑基后期吸回炼气期四层——修为也跟着塌了。）'],
-      ['老渔夫', '往东三十里有座小寰岛，没人住。礁石底下能挖洞。'],
+      ['老船工', '往东三十里有座小寰岛，没人住。礁石底下能挖洞。'],
       ['韩立', '（先有个落脚处。修为塌了，就一层一层重修回来——这条路上，本来也没有捷径。）']
     ],
     liulian_out: [
@@ -680,7 +680,7 @@
     ],
     shiku_out: [
       ['旁白', '矿场的阵旗倒了，灵石原矿堆了半座山。'],
-      ['韩立', '（正道小队只管杀人，没人管矿。便宜我了。）'],
+      ['韩立', '（正道修士只管杀人，没人管矿。便宜我了。）'],
       ['旁白', '矿监的箱子里翻出两样东西：一枚大挪移令，一只封着血丝的卵。'],
       ['韩立', '（大挪移令，古传送阵上用得着。这卵……血玉蜘蛛。）'],
       ['韩立', '（今日还不知有什么用。收着。）']
@@ -752,7 +752,7 @@
     {
       id: 'sk_open', map: 'shiku', t: 2, lines: [
         ['旁白', '矿口堆着新掘的灵石原矿。守矿的傀儡，眼睛是红的。'],
-        ['韩立', '（正道小队从东口进，我从西口。谁也别等谁。）']
+        ['韩立', '（正道修士从东口进，我从西口。谁也别等谁。）']
       ]
     },
     {
@@ -806,7 +806,7 @@
       reward: { stones: 120 }
     },
     {
-      id: 'e_captain', map: 'yanjia', name: '正道小队 队长', spr: 'disciple', scale: 1.85,
+      id: 'e_captain', map: 'yanjia', name: '正道修士 队长', spr: 'disciple', scale: 1.85,
       cond: { level: 38, cleared: ['yanjia'] },
       lines: [
         ['旁白', '廊下站着个披甲的修士，手里捏着一卷矿图。'],
@@ -865,12 +865,12 @@
       reward: { stones: 0, heal: 0.4 }
     },
     {
-      id: 'e_yufu', map: 'liulian', name: '船上的老渔夫', spr: 'laoyu', scale: 1.7, repeat: true,
+      id: 'e_yufu', map: 'liulian', name: '船上的老船工', spr: 'laoyu', scale: 1.7, repeat: true,
       lines: [
-        ['旁白', '船尾坐着个老渔夫，正把网上的海草一根根摘下来。'],
-        ['老渔夫', '外海的妖，是越打越多的。你们修士打完了就走，我们还得在这儿打鱼。'],
+        ['旁白', '船尾坐着个老船工，正把网上的海草一根根摘下来。'],
+        ['老船工', '外海的妖，是越打越多的。你们修士打完了就走，我们还得在这儿打鱼。'],
         ['韩立', '（他说得对。乱星海这几十年，妖是越来越凶了。）'],
-        ['旁白', '老渔夫从舱里拖出一小袋妖丹碎块，说是船上分的，他留着没用。']
+        ['旁白', '老船工从舱里拖出一小袋妖丹碎块，说是船上分的，他留着没用。']
       ],
       reward: { stones: 60, mats: [['m_yaodan', 1], ['m_banyao', 1]] }
     },
