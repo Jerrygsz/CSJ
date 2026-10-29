@@ -93,7 +93,9 @@
   Object.assign(window.ENEMY_TYPES, {
     guiling: { name: '鬼灵门弟子', hp: 120, spd: 62, dmg: 20, r: 10, xp: 5, spr: 'assassin', drop: 0.055, tier: 0, dash: true, mats: ['m_xueyu', 'm_fuzhi', 'm_lingmo'] },
     // skillDrop：这些人身上揣着自家功法，杀了就有机会摸走法诀
-    moxiu:   { name: '魔道修士',   hp: 170, spd: 54, dmg: 24, r: 11, xp: 6, spr: 'mo',       drop: 0.060, tier: 0, mats: ['m_xueyu', 'm_xuesha', 'm_hantie'], skillDrop: { id: 'sk_xuemo', chance: 0.012 } },
+    // 原先这里挂 skillDrop: sk_xuemo —— 但那本功法物品与技能都不存在（1.2% 概率掉出一本空书）。
+    // 全书没有低阶魔道法诀可换（魔道类都是 rarity 4，给 170 HP 的越国小怪掉太重），故移除该掉落。
+    moxiu:   { name: '魔道修士',   hp: 170, spd: 54, dmg: 24, r: 11, xp: 6, spr: 'mo',       drop: 0.060, tier: 0, mats: ['m_xueyu', 'm_xuesha', 'm_hantie'] },
     haishou: { name: '海妖兽',     hp: 210, spd: 58, dmg: 26, r: 11, xp: 7, spr: 'haishou',  drop: 0.075, tier: 0, mats: ['m_yaodan', 'm_banyao'] },
     yuyao:   { name: '青鳞鲤妖',   hp: 150, spd: 74, dmg: 22, r: 9,  xp: 6, spr: 'snake',    drop: 0.060, tier: 0, wob: true, mats: ['m_yaodan'] },
     guixiu:  { name: '鬼修',       hp: 250, spd: 70, dmg: 30, r: 10, xp: 8, spr: 'guixiu',   drop: 0.080, tier: 0, mats: ['m_yanghun', 'm_xueyu'], skillDrop: { id: 'sk_xuanyin', chance: 0.010 } },

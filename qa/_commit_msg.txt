@@ -1,0 +1,33 @@
+docs(20261029i): 新增《NPC 总表》——44 怪 / 63 图 124 精英 / 61 Boss / 32 际遇，逐个回原著核对
+
+覆盖面（全部可进战斗地图的 NPC）：
+- 普通怪 44 种：enemies.js 9 + late.js 7 + late2.js 10 + xianjie.js 18（运行时 Object.assign 拼装）
+- 精英 63 张图 / 124 个名字：五处地图定义的 elites 字段
+- Boss 61 个：A2 B3 C4 D2 E2 F6 G6 H2 I1 J1 K5 L8 M12 X7
+- 际遇 NPC 32 位：encounters.js
+
+核对方法：
+- 每个名字回两部原著（3658 万字）做最长子串检索，抽上下文
+- 判四档：✅原著专名 25/39/14 · ◎原著语汇 18/11/16 · ⚠玩法原创 0/3/2 · ❗原著查无 1/8/0
+- 结论：精英层全部落在「◎/⚠」两档（本质是"某长老/某执事"，原著写群像本就这么写）；❗ 集中在 Boss 层 8 处
+
+修复（引用核对查出 1 处真 bug）：
+- moxiu（魔道修士）的 skillDrop 指向 sk_xuemo —— ITEMS 与 SKILLS 里都没有这个定义，
+  等于 1.2% 概率掉出一本空书。已删除该 skillDrop（未换别的：魔道法诀全 rarity4、
+  给 170 HP 越国小怪太重；sk_xuanyin 已由鬼修掉、sk_shayao 已有星宫来源）
+
+新增回归：
+- qa/verify-npc.mjs 18 项：怪/Boss/精英/际遇/掉落 四类引用完整性
+  · skillDrop 必须指向真实法诀物品（查 ALL_ITEMS，不是 SKILLS）
+  · eggDrop / 际遇 unlock / 地图 enemies 都不得悬空
+  · Boss 打法只用 mo/beast/swarm/blood 四种，Boss 名不重复
+
+文档：
+- 新增 NPC总表.md（九节：三层结构 / 判定图例 / 怪 / 精英 / Boss / 际遇 / 结论 / 引用核对 / 回归）
+- 第八节列了 9 处「建议改但未动」（封岳→墨蛟、尸魈王→千年尸魈、石魈→石傀儡 等），
+  等 Jerry 定夺
+- 功法总表、道具总表里 sk_xuemo 的待核项同步改为「已修」
+
+回归：smoke 291、npc 18、prefight 26、canon 46、skill-canon 39、caves 43、
+      insight 38、title 24、sweep 26、lingjie 258、xianjie 83、skillfx 75、vfx 7 —— 974 项零失败
+版本串 h->i
