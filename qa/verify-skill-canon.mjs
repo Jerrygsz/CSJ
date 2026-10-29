@@ -191,6 +191,7 @@ const out = await page.evaluate(() => {
 ok((out['field:gold'] || 0) > 0, '洞漩金光在实战中铺出金色场', out['field:gold'] || 0);
 ok((out['bullet:gold'] || 0) > 0, '念剑诀在实战中打出金色剑光弹', out['bullet:gold'] || 0);
 ok((out['field:magnet'] || 0) > 0, '元磁神光磁域仍在（未被洞漩金光挤掉）', out['field:magnet'] || 0);
+
 ok(errs.length === 0, '全程无 JS 报错', errs.slice(0, 3));
 
 console.log('===================================');
