@@ -110,6 +110,21 @@ ok(probe.mods.nianjian.indexOf('count') >= 0 && probe.mods.nianjian.indexOf('dur
    '远程类仍可抽「多打一发 / 持续」', probe.mods.nianjian);
 ok(probe.mods.changchun.length === 0, '被动功法不提供任何加成卡（此前「伤害+25%」空转）', probe.mods.changchun);
 
+// 拾取卡：数值 +30%、文案写「拾取范围」、半径真的放大 1.3 倍
+const pk = await page.evaluate(() => {
+  const F = window.__FR, G = F.G;
+  G.bonus = G.bonus || {};
+  const m = F.passiveMods().find(x => x.k === 'pickup');
+  const keep = G.bonus.pickup || 0;
+  G.bonus.pickup = 0; const base = F.pickR();
+  G.bonus.pickup = 0.30; const up = F.pickR();
+  G.bonus.pickup = keep;
+  return { m: m, base: +base.toFixed(2), up: +up.toFixed(2), ratio: +(up / base).toFixed(3) };
+});
+ok(pk.m && pk.m.v === 0.30, '拾取卡数值 +20% → +30%', pk.m);
+ok(pk.m && /拾取范围/.test(pk.m.name) && /30%/.test(pk.m.name), '拾取卡文案写明「拾取范围 +30%」', pk.m && pk.m.name);
+ok(Math.abs(pk.ratio - 1.30) < 0.005, '拾取范围真的放大 1.30 倍（半径同步）', pk);
+
 // ---------- C 实战：金色场 + 金色剑光 ----------
 console.log('\n【C · 实战术法效果】');
 await page.evaluate(() => { window.__FR.G.god = true; window.__FR.timeScale(1); });

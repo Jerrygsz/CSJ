@@ -3279,7 +3279,7 @@
     { k: 'spd', v: 0.10, cap: 0.6, name: '移速 +10%' },
     { k: 'leech', v: 0.04, cap: 0.2, name: '吸血 +4%' },
     { k: 'armor', v: 0.08, cap: 0.35, name: '减伤 +8%' },
-    { k: 'pickup', v: 0.20, cap: 1.5, name: '拾取 +20%' },
+    { k: 'pickup', v: 0.30, cap: 1.5, name: '拾取范围 +30%' },
     { k: 'maxhp', v: 15, cap: 300, name: '气血上限 +15' },
     { k: 'shaGain', v: 0.15, cap: 1.2, name: '煞气 +15%' }
   ];
@@ -7877,6 +7877,10 @@
       return out;
     },
     modKeys(id) { const s = window.skillById(id); return skillModsFor(s).map(m => m.k); },
+    // 顿悟的被动卡池（含数值与上限），供回归断言「卡面写的 = 实际生效的」
+    passiveMods() { return PASSIVE_MODS.map(m => ({ k: m.k, v: m.v, cap: m.cap, name: m.name })); },
+    // 当前拾取半径（px）—— 用来验证「拾取范围 +30%」确实放大了半径
+    pickR() { return pickupR(); },
     openRefine() { openRefine(); return G.state; },
     stage() { return G.player ? stageLabel(G.player) : ''; },
     resetRunBuffs() { resetRunBuffs(); return true; },
