@@ -75,8 +75,8 @@
       // 已装备的槽位（id 需仍在储物袋中）
       equip: { weapon: null, armor: null, trinket: null, talisman: null },
       caves: [], diffClear: {}, lastDiff: 'easy',
-      // 药圃上次采收时刻（毫秒时间戳）：只对带 garden 的洞府有用，老存档缺这一项按「可采收」算
-      gardenAt: {},
+      // 药圃：在战斗图里待 1 秒长 1 次，满 99 停，采收后归零（gardenTick 是不足 1 秒的零头）
+      gardenCharge: 0, gardenTick: 0,
       // 已遇过的际遇（一世只遇一次）；可重复的小事不入此列
       met: [],
       // 灵宠：拥有的（养在灵兽袋里）与出战的
@@ -3650,6 +3650,7 @@
   function update(dt) {
     G.time += dt;
     save.playTime = (save.playTime || 0) + dt;   // 生涯累计时长（游戏内时间，与 G.time 同源）
+    tickGarden(dt);
     tickBuffs(dt);
     tickInsight(dt);
 
@@ -6250,46 +6251,65 @@
 
   // ---------- 药圃：旧园与绿液区并入洞府之后，园子仍在窗外 ----------
   // 这两张图通关后都成了安全屋、不再有妖物，原本挂在图上的药材产点随之失效。
-  // 按原著「人住在园子里」（第 213 章「躺在百药园床上」）改成按季采收：园子自己长，人回来摘。
-  function gardenLeft(c) {
-    if (!c || !c.garden) return 0;
-    const last = (save.gardenAt || {})[c.id] || 0;
-    return Math.max(0, last + (c.garden.cdMin || 3) * 60000 - Date.now());
+  // 按原著「人住在园子里」（第 213 章「躺在百药园床上」）改成园子自己长：
+  // 在战斗地图里每待 1 秒，园里长 1 次；攒满 99 次就不再长，收一趟才重新开始。
+  // 这么设计是为了「爽感」——打得越久，回来一次收得越多，而不是干等真实时间。
+  const GARDEN_CAP = 99;
+  function gardenCharge() { return Math.min(GARDEN_CAP, Math.floor(save.gardenCharge || 0)); }
+  function tickGarden(dt) {
+    // 只有真在打的图才算：坊市、洞府、结算界面里不长
+    if (!(G.map && (G.map.type === 'combat' || G.map.type === 'boss' || G.map.type === 'chase'))) return;
+    if (gardenCharge() >= GARDEN_CAP) return;
+    save.gardenTick = (save.gardenTick || 0) + dt;
+    while (save.gardenTick >= 1 && gardenCharge() < GARDEN_CAP) {
+      save.gardenTick -= 1;
+      save.gardenCharge = (save.gardenCharge || 0) + 1;
+    }
+    if (save.gardenTick > 1) save.gardenTick = 0;
+  }
+  // 按稀有度给权重：常见药多、老药少 —— 99 次不至于全是那几味贵重货
+  function gardenWeight(m) {
+    const r = (m && m.rarity) || 1;
+    return r >= 3 ? 1 : (r === 2 ? 3 : 6);
   }
   function pickGarden(c) {
     if (!c || !c.garden) return;
-    const left = gardenLeft(c);
-    if (left > 0) { notify('药圃还不到时候 · 还需 ' + fmtSpan(Math.ceil(left / 1000))); Sfx.warn(); return; }
-    const pool = c.garden.pool.slice(), got = [];
-    for (let i = 0; i < (c.garden.take || 3) && pool.length; i++) {
-      const id = pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
-      const mat = (window.MATERIALS || []).find(x => x.id === id);
-      if (!mat) continue;
-      const n = 1 + Math.floor(Math.random() * 2);
-      save.inventory[id] = (save.inventory[id] || 0) + n;
-      save.totalItems = (save.totalItems || 0) + n;
-      got.push(mat.name + ' ×' + n);
+    const n = gardenCharge();
+    if (n <= 0) { notify('园子还空着 · 先去图里打一场'); Sfx.warn(); return; }
+    const pool = c.garden.pool.map(id => (window.MATERIALS || []).find(x => x.id === id)).filter(Boolean);
+    if (!pool.length) return;
+    const totalW = pool.reduce((s, m) => s + gardenWeight(m), 0);
+    const got = {};
+    for (let i = 0; i < n; i++) {
+      let r = Math.random() * totalW, pick = pool[pool.length - 1];
+      for (const m of pool) { r -= gardenWeight(m); if (r <= 0) { pick = m; break; } }
+      got[pick.id] = (got[pick.id] || 0) + 1;
+      save.inventory[pick.id] = (save.inventory[pick.id] || 0) + 1;
     }
-    save.gardenAt = save.gardenAt || {};
-    save.gardenAt[c.id] = Date.now();
+    save.totalItems = (save.totalItems || 0) + n;
+    save.gardenCharge = 0; save.gardenTick = 0;   // 收完重新累计
     writeSave();
-    notify(got.length ? '药圃采收 · ' + got.join('、') : '园里这一季没可采的');
+    const order = Object.keys(got).sort((a, b) => got[b] - got[a]);
+    const brief = order.slice(0, 3).map(id => { const m = pool.find(x => x.id === id); return (m ? m.name : id) + '×' + got[id]; }).join('、');
+    notify('药圃采收 ' + n + ' 株 · ' + order.length + ' 味：' + brief + (order.length > 3 ? ' 等' : ''));
     Sfx.gem();
     renderCave();
   }
   function renderCaveGarden(c) {
     const g = c.garden;
-    const left = gardenLeft(c), ready = left <= 0;
+    const n = gardenCharge(), full = n >= GARDEN_CAP;
     const names = g.pool.map(id => { const m = (window.MATERIALS || []).find(x => x.id === id); return m ? (m.icon || '🌿') + m.name : ''; }).filter(Boolean).join('　');
     return '<div class="cave-sec"><div class="cs-title">' + g.name + '</div>' +
       '<div class="cs-note">' + g.tip + '</div>' +
       '<div class="restbox"><div class="statgrid">' +
-      '<div class="statcell"><i>这一季</i><b>' + (ready ? '可采收' : '还需 ' + fmtSpan(Math.ceil(left / 1000))) + '</b></div>' +
-      '<div class="statcell"><i>每季产出</i><b>' + (g.take || 3) + ' 味</b></div>' +
+      '<div class="statcell"><i>已长成</i><b>' + n + ' / ' + GARDEN_CAP + '</b></div>' +
+      '<div class="statcell"><i>长势</i><b>' + (full ? '已长满' : '打一秒，长一寸') + '</b></div>' +
       '<div class="statcell"><i>园中品种</i><b>' + g.pool.length + ' 味</b></div>' +
       '</div>' +
+      '<div class="cs-note">' + (full ? '长满就不再多长了，收一趟再来。' : '在图里待一秒长一次，攒满 ' + GARDEN_CAP + ' 次就停。') + '</div>' +
       '<div class="cs-note">园里：' + names + '</div>' +
-      '<div class="restbtns"><button class="btn small" data-pickg="' + c.id + '"' + (ready ? '' : ' disabled') + '>下园采收</button></div>' +
+      '<div class="restbtns"><button class="btn small" data-pickg="' + c.id + '"' + (n > 0 ? '' : ' disabled') + '>' +
+        (n > 0 ? '采收 ' + n + ' 株' : '园中空着') + '</button></div>' +
       '</div></div>';
   }
 
@@ -7445,6 +7465,9 @@
       return 'title';
     },
     caveTabsOf(id) { const c = CAVES[id]; return c ? caveTabs(c).map(t => t.id) : []; },
+    // 药圃读数（charge = 已长成次数，cap = 上限 99）
+    gardenState() { return { charge: gardenCharge(), cap: GARDEN_CAP, raw: Math.floor(save.gardenCharge || 0), tick: +(save.gardenTick || 0).toFixed(2) }; },
+    setGarden(n) { save.gardenCharge = Math.max(0, Math.min(GARDEN_CAP, n | 0)); save.gardenTick = 0; return save.gardenCharge; },
     skipStory() { let n = 0; while (G.state === 'dialog' && !G.dialogIsChoice && n < 80) { advanceDialog(); n++; } return n; },
     muteStory(on) { G.storyMute = !!on; if (on) this.skipStory(); return !!G.storyMute; },
     storyMuted() { return !!G.storyMute; },

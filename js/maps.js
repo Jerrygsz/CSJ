@@ -430,15 +430,14 @@ window.CAVES = {
     crafts: ['alchemy', 'forge', 'talisman'],
     restTip: '百药园地脉不算厚，好在无人来扰，一炉灵石能换一夜清净。',
     // 旧园与绿液区都已并进洞府、不再有妖物，药材不能就此断根。
-    // 按原著「人住在园子里」的意思，改成按季采收：园子自己长，人回来摘。
+    // 按原著「人住在园子里」的意思，改成园子跟着打图一起长：
+    // 在战斗图里每待 1 秒长 1 次，攒满 99 次停手，收一趟再重新长（GARDEN_CAP 见 game.js）。
     garden: {
       name: '药圃',
       tip: '园子就在窗外。东南角是马师伯留下的老底，西北角是那口小瓶催出来的一角。',
       pool: ['m_ziyehua', 'm_wangyuecao', 'm_baihezhi', 'm_hualongcao',
         'm_huanglongcao', 'm_kulianhua', 'm_wangyouguo', 'm_sanwucao', 'm_qixingcao',
-        'm_qianjiehua', 'm_heishaocao', 'm_jinjingshen', 'm_huangjingzhi', 'm_fuyaobao'],
-      take: 3,
-      cdMin: 3
+        'm_qianjiehua', 'm_heishaocao', 'm_jinjingshen', 'm_huangjingzhi', 'm_fuyaobao']
     }
   }
 };

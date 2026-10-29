@@ -113,7 +113,7 @@ const BY = await page.evaluate(() => {
   return {
     gate: g('huangfeng'), old: g('yaoyuan'), green: g('yaopu'),
     from: c.from, froms: (c.froms || []),
-    garden: c.garden ? { pool: c.garden.pool.slice(), take: c.garden.take, cdMin: c.garden.cdMin } : null
+    garden: c.garden ? { pool: c.garden.pool.slice() } : null
   };
 });
 ok(BY.gate && BY.gate.cave === null, '黄枫谷·山门不再直接给洞府（那时只是领了差事，人还没进园子）', BY.gate);
@@ -142,11 +142,48 @@ ok(clr.caves && clr.caves.indexOf('huangfeng') >= 0, '打完旧园，草庐进�
 // 旧园从此只打这一次，首通奖励里的东西必须一定到手，否则主线会断
 ok(clr.fang > 0, '首通旧园必得筑基丹方（此后此图成洞府、不再产出，漏了就永远拿不到）', clr.fang);
 
-// 实机：药圃能采、采完进冷却
+// 实机：药圃次数「打图才长」——每秒 +1、封顶 99、采收归零
+await page.evaluate(() => {
+  const F = window.__FR;
+  F.G.state = 'title';
+  F.G.god = true;
+  F.enterMap('houshan', 'easy');
+});
+await page.waitForTimeout(300);
+const grow = await page.evaluate(() => {
+  const F = window.__FR, G = F.G;
+  const spin = n => {
+    for (let i = 0; i < n; i++) {
+      if (G.state === 'dialog') F.skipStory();
+      if (G.state === 'levelup') { const c = document.querySelector('#levelup .card'); if (c) c.click(); else F.skipStory(); }
+      F.tickFrames(1, 0.05);
+    }
+  };
+  const s0 = F.gardenState().charge;
+  spin(200);                       // 10 秒
+  const t10 = F.gardenState().charge;
+  spin(2200);                      // 再 110 秒，早该封顶
+  const capd = F.gardenState();
+  return { s0, t10, cap: capd.charge, capMax: capd.cap };
+});
+ok(grow.t10 >= 8 && grow.t10 <= 12, '在图里待 10 秒，药圃长 ~10 次（每秒 1 次）', { 起始: grow.s0, 十秒后: grow.t10 });
+ok(grow.cap === grow.capMax && grow.capMax === 99, '长到 99 次就封顶，不再累计', grow);
+
+// 洞府里不长：离开战斗图后停手
+const idle = await page.evaluate(() => {
+  const F = window.__FR, G = F.G;
+  const before = F.gardenState().charge;
+  F.G.state = 'title';
+  F.cave('huangfeng');
+  for (let i = 0; i < 200; i++) F.tickFrames(1, 0.05);
+  return { before, after: F.gardenState().charge, state: G.state };
+});
+ok(idle.after === idle.before, '洞府里待着不长（只有战斗图算时长）', idle);
+
+// 采收：一次兑现全部次数，收完归零
 const gd = await page.evaluate(() => {
   const F = window.__FR;
   const snap = () => JSON.parse(localStorage.getItem('fanren_save_v1') || '{}');
-  const before = snap();
   F.G.state = 'title';
   F.cave('huangfeng');
   const tabs = F.caveTabsOf('huangfeng');
@@ -154,19 +191,23 @@ const gd = await page.evaluate(() => {
   if (tb) tb.click();
   const body = document.querySelector('#caveBody');
   const txt0 = body ? body.innerText.replace(/\s+/g, ' ') : '';
+  const n = F.gardenState().charge;
+  const before = snap();
   const btn = document.querySelector('button[data-pickg]');
   if (btn) btn.click();
   const after = snap();
+  // 只数园池里那 14 味的增量：采药前还有别的图结算没落盘，全量比会虚高
   let gained = 0;
-  for (const k in (after.inventory || {})) gained += Math.max(0, (after.inventory[k] || 0) - ((before.inventory || {})[k] || 0));
+  for (const id of window.CAVES.huangfeng.garden.pool)
+    gained += Math.max(0, (after.inventory[id] || 0) - (before.inventory[id] || 0));
   const txt1 = body ? body.innerText.replace(/\s+/g, ' ') : '';
-  return { tabs, txt0, gained, gardenAt: !!(after.gardenAt && after.gardenAt.huangfeng), txt1 };
+  return { tabs, txt0, n, gained, afterCharge: F.gardenState().charge, txt1 };
 });
 ok(gd.tabs.indexOf('garden') >= 0, '草庐多出「药圃」页签', gd.tabs);
-ok(gd.gained >= 3, '下园采收真的入库（一次 3 味）', gd.gained);
-ok(gd.gardenAt, '采收记下了冷却时刻', gd.gardenAt);
-ok(/还需/.test(gd.txt1) && /还需/.test(gd.txt1) === true && !/可采收/.test(gd.txt1),
-  '采完立刻转冷却，不能连点刷药', gd.txt1.slice(0, 60));
+ok(gd.n === 99, '进洞府时攒的是满 99 次', gd.n);
+ok(gd.gained === gd.n, '一次采收把攒的次数全部兑现（99 次 = 99 株）', { 次数: gd.n, 入袋: gd.gained });
+ok(gd.afterCharge === 0, '收完归零，重新开始累计', gd.afterCharge);
+ok(/园中空着/.test(gd.txt1), '收完按钮变「园中空着」，不能连点刷药', gd.txt1.slice(0, 60));
 
 ok(errs.length === 0, '全程无 JS 报错', errs.slice(0, 3));
 
