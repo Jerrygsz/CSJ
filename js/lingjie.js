@@ -1491,6 +1491,14 @@
       crafts: ['alchemy', 'forge', 'talisman'],
       restTip: '天渊城的地脉是人族几万年经营出来的，坐一日抵荒原十日。'
     },
+    yuangong: {
+      id: 'yuangong', name: '元合岛·青元宫', pos: '灵界·风元大陆 元合岛', from: 'fengyuan',
+      desc: '岛上一座银色宫殿，名字是韩立自己取的。殿后药园、紫竹、灵泉各有其位，弟子往来如流。',
+      quote: '总算有一处，是自己的。',
+      capLevel: 300, restStone: 3600, restXp: 0.12,
+      crafts: ['alchemy', 'forge', 'talisman'],
+      restTip: '元合岛灵脉自海眼上涌，殿中打坐，潮声都隔在外头。'
+    },
     xlcave: {
       id: 'xlcave', name: '小灵天洞府', pos: '灵界·小灵天', from: 'xiaoling',
       desc: '一方小世界，收在袖里。天很低，一口井，一炉火，谁也找不进来。',
@@ -1502,6 +1510,7 @@
   });
   // 打通这两张图即得洞府（与其它剧情图一个机制：finishMap 认 m.cave）
   { const m = window.MAPS.find(x => x.id === 'liangzu'); if (m) m.cave = 'tycave'; }
+  { const m = window.MAPS.find(x => x.id === 'fengyuan'); if (m) m.cave = 'yuangong'; }
   { const m = window.MAPS.find(x => x.id === 'xiaoling'); if (m) m.cave = 'xlcave'; }
 
   // ========================= 五(5)、坊市「功法」柜 =========================

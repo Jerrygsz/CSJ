@@ -1277,6 +1277,34 @@
     window.SHOP_STOCK.push({ id: id, price: WB_PRICE[id], cat: WB_CAT[id] });
   }
 
+  // ========================= 六、仙界洞府（原著依据） =========================
+  // 花枝洞天（仙界篇 55 次）：「退出了花枝洞天，返回了洞府密室之内」——
+  //   里头有紫竹阁楼、雷泽灵田、新药园，是韩立大罗期真正安顿下来的家。
+  // 乌蒙岛（仙界篇 223 次）：韩立「飞出了海面，正要返回岛上小院」，
+  //   后来又成了乌蒙岛的祖神，海底禁地里还供着那颗雕像头颅。
+  window.CAVES = window.CAVES || {};
+  Object.assign(window.CAVES, {
+    huazhi: {
+      id: 'huazhi', name: '花枝洞天', pos: '仙界·蛮荒界域 花枝洞天', from: 'daluo',
+      desc: '一方洞天，紫竹阁楼、雷泽灵田、新开的药园各有其位。洞天之外是洞府密室，再往外才是蛮荒。',
+      quote: '把一座洞天收拾成这个样子，用了不止一千年。',
+      capLevel: 580, restStone: 9000, restXp: 0.09,
+      crafts: ['alchemy', 'forge', 'talisman'],
+      restTip: '洞天里的时间是自己的，坐一年，外面未必过了一月。'
+    },
+    wumeng: {
+      id: 'wumeng', name: '乌蒙岛·岛上小院', pos: '仙界·黑风海域 乌蒙岛', from: 'wumengdao',
+      desc: '岛上靠海的一处小院，屋后就是通往海底禁地的路。院墙不高，潮声整夜不歇。',
+      quote: '祖神也好，客卿也罢，总得有个能落脚的地方。',
+      capLevel: 520, restStone: 6800, restXp: 0.10,
+      crafts: ['alchemy', 'forge', 'talisman'],
+      restTip: '黑海重水压着岛脉，灵气沉而厚，正合打坐。'
+    }
+  });
+  // 打通这两张图即得洞府（与其它剧情图同一机制：finishMap 认 m.cave）
+  { const m = window.MAPS.find(x => x.id === 'daluo'); if (m) m.cave = 'huazhi'; }
+  { const m = window.MAPS.find(x => x.id === 'wumengdao'); if (m) m.cave = 'wumeng'; }
+
   // 仙界篇物品是后加的，索引要重建一次
   window.ALL_ITEMS = window.ITEMS.concat(window.MATERIALS);
 

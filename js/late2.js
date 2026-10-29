@@ -1054,7 +1054,7 @@
     { id: 'sk_fire',   name: '火弹术·法诀', rarity: 2, icon: '📕', req: 5,  teach: 'fire',   desc: '习得《火弹术》第一层。韩立早年期自炼符箓，放出追踪火蛇。' },
     { id: 'sk_orb',    name: '金光罩·法诀', rarity: 2, icon: '📕', req: 8, teach: 'orb',   desc: '习得《金光罩》第一层。庚金玄罡环绕周身，触敌即伤。' },
     { id: 'sk_nova',   name: '定神符·法诀', rarity: 3, icon: '📕', req: 12, teach: 'nova',   desc: '习得《定神符》第一层。韩立常用的金光类符箓，周期性金光爆发。' },
-    { id: 'sk_haste',  name: '雷遁术·法诀', rarity: 3, icon: '📕', req: 15, teach: 'haste',  desc: '习得《雷遁术》第一层。吐纳如雷，出手更急。' },
+    { id: 'sk_haste',  name: '御风诀·法诀', rarity: 3, icon: '📕', req: 15, teach: 'haste',  desc: '习得《御风诀》。长春功所含三法术之一，御风而行，法力不竭则身不停。' },
     { id: 'sk_frost',  name: '冰冻术·法诀', rarity: 3, icon: '📕', req: 20, teach: 'frost',  desc: '习得《冰冻术》第一层。韩立参悟的冰霜符箓，减速近身之敌。' },
     // ---- 按原著补的各境界功法：买到或搜出来，回去逐个学 ----
     { id: 'sk_changchun', name: '长春功·法诀',     rarity: 2, icon: '📕', req: 1,   teach: 'changchun', desc: '习得《长春功》。墨大夫传授的引气吐纳根基，韩立炼气期的根本功法' },
