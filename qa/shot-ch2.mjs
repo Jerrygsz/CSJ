@@ -99,7 +99,7 @@ await page.evaluate(() => { window.__FR.cave('qingzhuxuan'); window.__FR.caveTab
 await page.waitForTimeout(700);
 await page.screenshot({ path: path.join(OUT, 'ch2-qingzhu-cave.png') });
 
-// 7. 凝翠岛：七级妖兽·蓝面鲛（这一图是杀妖取丹，不是结丹）
+// 7. 凝翠岛：七级妖兽（这一图是杀妖取丹，不是结丹）
 await fresh(52);
 await page.evaluate(() => window.__FR.enterMap('ningcui', 'hard'));
 await page.waitForTimeout(2400);

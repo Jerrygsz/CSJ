@@ -802,8 +802,9 @@ ok(!hasLine('zhuji_out', '李化元', '记名弟子'), '收徒不再错放在筑
   ok(ns && ns.desc.indexOf('凝翠') >= 0, '霓裳草回归凝翠岛引妖之用');
 }
 
-// 血色禁地：Boss 是灵兽山狂人封岳；洞府在百药园；张铁不再有坟
-ok(M('xuese').boss.name.indexOf('封岳') >= 0, '血色禁地 Boss 是灵兽山封岳');
+// 血色禁地：Boss 是原著那只未成年墨蛟（南宫婉取其元神）；洞府在百药园；张铁不再有坟
+eq(M('xuese').boss.name, '墨蛟', '血色禁地 Boss 是墨蛟（原著禁地关底）');
+ok(M('xuese').boss.kind === 'beast', '墨蛟按妖兽打法（beast），不是修士打法');
 ok(W.CAVES.huangfeng.pos.indexOf('百药') >= 0 || W.CAVES.huangfeng.name.indexOf('百药') >= 0, '黄枫谷洞府落在百药园');
 ok(M('zhangtie').name.indexOf('铁匠') >= 0, '张铁支线改成铁匠棚（原著里他没有坟）');
 

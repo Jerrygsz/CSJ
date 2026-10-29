@@ -87,6 +87,20 @@ for (const m of bosses) bossName[m.boss.name] = (bossName[m.boss.name] || 0) + 1
 const dupBoss = Object.keys(bossName).filter(k => bossName[k] > 1);
 ok(dupBoss.length === 0, 'Boss 名不重复（避免两张图出现同一个关底）', dupBoss);
 
+// 妖兽系 boss 会「嚎叫召群」，召的小怪 id 必须是真实存在的怪。
+// 原实现把横幅和召唤物都写死成「百年狼妖 / wolf」，于是石傀儡、墨蛟、灵猿全在召狼。
+const beast = bosses.filter(m => m.boss.kind === 'beast');
+const badSummon = beast.filter(m => {
+  const sm = m.boss.summon;
+  if (sm === undefined || sm === null) return false;   // 未写 = 默认 wolf
+  if (sm === '') return false;                          // 空串 = 这一只不召群
+  return !eSet.has(sm);
+});
+ok(badSummon.length === 0, '妖兽系 Boss 的 summon 要么为空、要么指向真实的怪',
+  badSummon.map(m => m.id + '→' + m.boss.summon));
+const noSummonName = bosses.filter(m => m.boss.name && /百年狼妖/.test(m.boss.name) && m.boss.kind !== 'beast');
+ok(noSummonName.length === 0, '「百年狼妖」只出现在它自己的图上，没有被别的关底复用', noSummonName.map(m => m.id));
+
 console.log('\n【E · 精英】');
 const eliteMaps = D.maps.filter(m => m.elites.length);
 ok(eliteMaps.length === 63, '有精英的图 63 张', eliteMaps.length);

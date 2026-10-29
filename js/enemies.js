@@ -11,5 +11,6 @@ window.ENEMY_TYPES = {
   ghoul:   { name: '尸傀',       hp: 52, spd: 26, dmg: 15, r: 12, xp: 4, spr: 'ghoul',    drop: 0.070, tier: 0, mats: ['m_shihui'] },
   // 支线出没
   disciple:{ name: '同门陪练',   hp: 30, spd: 66, dmg: 8,  r: 9,  xp: 3, spr: 'disciple', drop: 0.050, tier: 0, mats: ['m_jingtie'] },
-  shigui:  { name: '矿洞石魈',   hp: 70, spd: 30, dmg: 14, r: 12, xp: 5, spr: 'shigui',   drop: 0.080, tier: 0, mats: ['m_jingtie', 'm_chitong', 'm_xuantie', 'm_yusui'] }
+  // 「石魈」在原著专指灵界石魈族（大族），不能拿来当人界矿洞小怪；改用「石傀儡」
+  shigui:  { name: '石傀儡',     hp: 70, spd: 30, dmg: 14, r: 12, xp: 5, spr: 'shigui',   drop: 0.080, tier: 0, mats: ['m_jingtie', 'm_chitong', 'm_xuantie', 'm_yusui'] }
 };

@@ -223,7 +223,7 @@
       enemies: ['yaoshou2', 'shixiao', 'dajinxiu'],
       elites: ['黑凤族长老', '荒岭妖将'],
       mats: ['m_zhenlinglin', 'm_yaodan', 'm_gengjing'],
-      boss: { kind: 'beast', name: '黑凤族三妖', hp: 52000, spd: 66, dmg: 96, r: 23, spr: 'haishou', scale: 6.2 },
+      boss: { kind: 'beast', name: '黑凤族三妖', hp: 52000, spd: 66, dmg: 96, r: 23, spr: 'haishou', scale: 6.2, summon: 'yaoshou2' },
       reward: { stones: 18000, items: ['tenglong'], mats: [['m_zhilongguo', 1], ['m_zhenlingxue', 1], ['m_zhenlinglin', 3]] },
       clearTitle: '荒岭已清',
       clearDesc: '三妖伏诛，鳞片、一滴真灵之血、一枚芝龙果到手。腾龙丹的炉子，有着落了。'
@@ -376,14 +376,16 @@
     {
       id: 'xiaoling', name: '小灵天', pos: '灵界·小灵天', arc: 'K',
       type: 'boss', tag: '剧情战',
-      desc: '魔界里藏着一方小世界。小灵天的主人，守着一炉不该有的火。',
+      desc: '魔界里藏着一方小世界。守着那一炉火的人，比这方天还老。',
       startLevel: 220, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
       unlock: 'moyuan', next: 'modajie',
       diff: 4.1, bossAt: 0, intro: 'xiaoling', outro: 'xiaoling_out',
       enemies: ['kui2', 'dajinxiu', 'zhengdao'],
       elites: ['小灵天守', '灵天傀'],
       mats: ['m_xuantianteng', 'm_zhenlingxue', 'm_yaodan'],
-      boss: { kind: 'mo', name: '小灵天之主', hp: 105000, spd: 72, dmg: 150, r: 25, spr: 'neimen', scale: 6.6 },
+      // 原著小灵天是碎裂界面（诸族杂居），并无「界主/之主」之称 —— 此图为玩法原创，
+      // 故只用地名 + 中性称谓，不冒充原著头衔
+      boss: { kind: 'mo', name: '小灵天·守炉人', hp: 105000, spd: 72, dmg: 150, r: 25, spr: 'neimen', scale: 6.6 },
       reward: { stones: 70000, mats: [['m_xuantianteng', 1], ['m_zhenlingxue', 2]] },
       clearTitle: '小灵天开',
       clearDesc: '一方小世界落到手里。合体后期到此为止，再往上，是大乘。'
@@ -882,12 +884,12 @@
       ['旁白', '小灵天藏在魔界的夹缝里，一方天，一口井，一炉火。'],
       ['韩立', '（小世界。这种地方，最容易藏东西。）'],
       ['旁白', '井边坐着一个人，背对着他，手里拨着一炉将熄的火。'],
-      ['小灵天之主', '你来得比我算的早。'],
+      ['守炉人', '你来得比我算的早。'],
       ['韩立', '（他算过。这种人，最麻烦。）'],
       ['旁白', '炉火忽然亮了，映得整片小灵天一片赤红。']
     ],
     xiaoling_out: [
-      ['旁白', '小灵天的主人散了，一炉火落到韩立手里。火里有两截玄天仙藤。'],
+      ['旁白', '守炉人散了，一炉火落到韩立手里。火里有两截玄天仙藤。'],
       ['韩立', '（合体后期。再往上，是大乘。）'],
       ['旁白', '他抬头看天。小灵天的天很低，低得能看见劫云在聚。']
     ],

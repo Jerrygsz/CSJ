@@ -141,10 +141,11 @@ window.MAPS = [
     enemies: ['assassin', 'ghoul', 'boar', 'bandit', 'assassin'],
     elites: ['魔道凶徒', '血傀儡'],
     mats: ['m_yusuizhi', 'm_tianling', 'm_zihua', 'm_longlin', 'm_xuantie', 'm_xuesha', 'm_yusui'],
-    boss: { kind: 'mo', name: '灵兽山·封岳', hp: 3600, spd: 52, dmg: 19, r: 19, spr: 'bandit', scale: 4.2 },
+    // 原著禁地里真正该打的是一只未成年的墨蛟（二等妖兽，南宫婉取其元神做器灵）
+    boss: { kind: 'beast', name: '墨蛟', hp: 3600, spd: 52, dmg: 19, r: 19, spr: 'dujiao', scale: 4.2, summon: 'snake' },
     reward: { stones: 320, items: ['zhangtian', 'zhuji', 'qingyuan'] },
     clearTitle: '禁地已出',
-    clearDesc: '封岳倒了，药草从他储物袋里撒出来。活着走出禁地的人不足半数——宗门立下的规矩：生还者赏一枚筑基丹。李化元看中他这半篓主药，收作记名弟子，药草取走一半，另授《青元剑诀》。'
+    clearDesc: '墨蛟沉进血雾，腥气散了一夜。活着走出禁地的人不足半数——宗门立下的规矩：生还者赏一枚筑基丹。李化元看中他这半篓主药，收作记名弟子，药草取走一半，另授《青元剑诀》。'
   },
 
   // ==================== 支线：因缘所至，另行成图 ====================
@@ -152,14 +153,14 @@ window.MAPS = [
   {
     id: 'mkuang', side: true, sorder: 1, name: '后山·废弃矿洞', pos: '青牛山北麓 旧矿脉',
     type: 'combat', tag: '支线', unlockBy: 'e_zhou',
-    desc: '山塌了半边，铁矿石露在外头。洞里住进了石魈，把矿道当成了自己的窝。',
+    desc: '山塌了半边，铁矿石露在外头。洞底挖出了几具石傀儡，把矿道当成了自己的窝。',
     startLevel: 3, startSkills: { sword: 1 },
     unlock: null, next: null,
     diff: 1.05, bossAt: 95,
     enemies: ['bat', 'snake', 'shigui', 'bandit'],
-    elites: ['矿洞石魈'],
+    elites: ['矿洞石傀儡'],
     mats: ['m_jingtie', 'm_chitong', 'm_xuantie', 'm_yusui'],
-    boss: { kind: 'beast', name: '石魈王', hp: 980, spd: 52, dmg: 14, r: 20, spr: 'shigui', scale: 3.2 },
+    boss: { kind: 'beast', name: '石傀儡王', hp: 980, spd: 52, dmg: 14, r: 20, spr: 'shigui', scale: 3.2, summon: 'shigui' },
     reward: { stones: 70, items: [], mats: [['m_jingtie', 4], ['m_chitong', 2]] },
     clearTitle: '矿洞已清',
     clearDesc: '矿道通了。碎石堆里挑出来的铁，够打两件好器。'
@@ -198,15 +199,16 @@ window.MAPS = [
       '血色禁地带回的三株主药苗也在绿液里温养着，低概率结鲜果，摘了再催。',
     startLevel: 15, startSkills: { sword: 4, fire: 2, orb: 1 },
     unlock: null, next: null,
-    // 西北角与旧园是同一片园子（同一个草庐），守药灵猿打退后这一角也归自己管 —— 通关即并入洞府
+    // 西北角与旧园是同一片园子（同一个草庐），灵猿打退后这一角也归自己管 —— 通关即并入洞府
     cave: 'huangfeng',
     diff: 1.3, bossAt: 120,
     enemies: ['snake', 'bat', 'ghoul', 'assassin'],
-    elites: ['守药灵猿'],
+    elites: ['灵猿'],
     // 绿液区：韩立埋瓶催熟的那一角，滴过绿液的高年份药只在这里出
     mats: ['m_huanglongcao', 'm_kulianhua', 'm_wangyouguo', 'm_sanwucao', 'm_qixingcao',
       'm_qianjiehua', 'm_heishaocao', 'm_jinjingshen', 'm_fuyaobao', 'm_huangjingzhi'],
-    boss: { kind: 'beast', name: '守药灵猿', hp: 2400, spd: 54, dmg: 16, r: 20, spr: 'ape', scale: 3.0 },
+    // 原著无「守药」一词；「灵猿」是原著对通灵猿属的称法（碧睛灵猿、通灵苍猿）
+    boss: { kind: 'beast', name: '灵猿', hp: 2400, spd: 54, dmg: 16, r: 20, spr: 'ape', scale: 3.0, summon: 'snake' },
     reward: { stones: 180, items: [], mats: [['m_huanglongcao', 2], ['m_sanwucao', 1], ['m_huangjingzhi', 1]] },
     clearTitle: '药圃已安',
     clearDesc: '灵猿伏地。绿液浇过的那一角，草木比人还高——这一畦剩下的药，够开好几炉。'
@@ -421,7 +423,7 @@ window.CAVES = {
     id: 'huangfeng', name: '百药园草庐', pos: '黄枫谷·青石岭 百药园',
     // 原著第 151 章「数间用干草和竹子搭建而成的茅草屋位于园子的中央」、
     // 第 157 章「进了自己居住的屋子」、第 213 章「躺在百药园床上」—— 韩立就是在这儿住下、闭关、炼丹。
-    // 来源记两张图：旧园（接管百药园）与绿液区（同一片园子的西北角，打退守药灵猿后并入）
+    // 来源记两张图：旧园（接管百药园）与绿液区（同一片园子的西北角，打退灵猿后并入）
     from: 'yaoyuan',
     froms: ['yaoyuan', 'yaopu'],
     desc: '药田尽头一间草庐，屋里一半是药架，一半是一张窄榻。窗外就是最里头那几畦。',

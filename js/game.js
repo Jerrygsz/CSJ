@@ -2028,6 +2028,8 @@
       spr: cfg.spr, scale: cfg.scale || 1.8,
       hitFlash: 0, t: 0, ang: 0, shootT: 1.4, teleT: 5.5, sumT: 8, burstT: 2.4,
       dashT: 2.2, dashAng: 0, dashing: 0, _orbCd: {},
+      // 妖兽系 boss 召哪种小怪：图里没写就还是狼；写空串表示这一只不召群
+      summon: cfg.summon === undefined ? 'wolf' : cfg.summon,
       phase2: false, phaseT: 0
     };
     G.bossActive = true; G.bossSpawned = true;
@@ -2098,11 +2100,12 @@
         b.y += Math.sin(b.dashAng) * spd * 4.4 * dt;
         if (Math.random() < 0.6) G.parts.push({ x: b.x + U.rand(-10, 10), y: b.y + U.rand(-10, 10), vx: 0, vy: 0, life: 0.3, maxlife: 0.3, size: 5, color: '#9a8360' });
       }
-      // 嚎叫召狼
+      // 嚎叫召群：召什么由地图的 boss.summon 决定，横幅用 boss 自己的名字
+      // （原先是写死的「百年狼妖」，于是石傀儡、墨蛟、灵猿全都在「嚎叫召狼」）
       b.sumT -= dt;
       if (b.sumT <= 0) {
         b.sumT = phase2 ? 7.5 : 10.5;
-        if (summonAt(b, 'wolf', phase2 ? 3 : 2, phase2 ? 9 : 6)) banner('百年狼妖 · 嚎叫召群');
+        if (b.summon && summonAt(b, b.summon, phase2 ? 3 : 2, phase2 ? 9 : 6)) banner(b.name + ' · 嚎叫召群');
       }
       if (phase2) {
         b.burstT -= dt;

@@ -152,7 +152,8 @@
       enemies: ['disciple', 'assassin'], elites: ['隔壁炉的执事', '地火火灵'],
       // 地火之屋是炼丹房，不出灵草；炉边只有尸傀骨粉、玉髓与地火边生的火灵草
       mats: ['m_shihui', 'm_yusui', 'm_huoling', 'm_lingzhi'],
-      boss: { kind: 'beast', name: '地火之灵', hp: 3600, spd: 54, dmg: 22, r: 18, spr: 'huoling', scale: 6.0 },
+      // 地火凝成的火灵没有同族可召，summon 置空 —— 只烧不叫人
+      boss: { kind: 'beast', name: '地火之灵', hp: 3600, spd: 54, dmg: 22, r: 18, spr: 'huoling', scale: 6.0, summon: '' },
       reward: { stones: 300, items: ['qingyuan'], mats: [['m_huoling', 2], ['m_lingzhi', 2]] },
       clearTitle: '筑基已成',
       clearDesc: '地火退了，丹也成了。灵液化真元，炼气到筑基那道坎，跨过去了。'
@@ -256,7 +257,8 @@
       enemies: ['haishou', 'yuyao'],
       elites: ['七级妖兽', '深海妖蟒'],
       mats: ['m_yaodan', 'm_banyao', 'm_jinlei', 'm_yusui'],
-      boss: { kind: 'beast', name: '七级妖兽·蓝面鲛', hp: 6400, spd: 60, dmg: 30, r: 22, spr: 'haishou', scale: 5.4 },
+      // 原著凝翠岛只写「杀妖取丹五年」，未点名是哪一种妖兽 —— 不臆造具体种名
+      boss: { kind: 'beast', name: '七级妖兽', hp: 6400, spd: 60, dmg: 30, r: 22, spr: 'haishou', scale: 5.4, summon: 'haishou' },
       reward: { stones: 900, mats: [['m_yaodan', 4], ['m_jinlei', 1]] },
       outro: 'ningcui_out',
       clearTitle: '妖丹已足',
@@ -299,7 +301,7 @@
       enemies: ['haishou', 'guixiu', 'kui', 'dujiao'],
       elites: ['化形妖仆', '海沟巨兽'],
       mats: ['m_yaodan', 'm_banyao', 'm_jinlei', 'm_yanghun'],
-      boss: { kind: 'beast', name: '八级妖兽·毒蛟', hp: 9800, spd: 64, dmg: 40, r: 23, spr: 'dujiao', scale: 6.6 },
+      boss: { kind: 'beast', name: '八级妖兽·毒蛟', hp: 9800, spd: 64, dmg: 40, r: 23, spr: 'dujiao', scale: 6.6, summon: 'yuyao' },
       reward: { stones: 2000, mats: [['m_jinlei', 2], ['m_yaodan', 4], ['m_lingmo', 4], ['m_xueyu', 2]] },
       clearTitle: '风雷翅已夺',
       clearDesc: '毒蛟死，龟妖伤，翅只带出半副。回洞府还得自己补齐那一炉。风希追了万里，那股风到现在还在耳边。'
@@ -330,9 +332,10 @@
       unlock: null, next: null,
       diff: 1.85, bossAt: 135,
       enemies: ['moxiu', 'kui', 'guiling'],
-      elites: ['魔道矿监', '矿脉傀儡'],
+      elites: ['魔道执事', '矿脉傀儡'],
       mats: ['m_xuantie', 'm_hantie', 'm_yusui', 'm_jingtie', 'm_xueyu'],
-      boss: { kind: 'swarm', name: '魔道矿监', hp: 4400, spd: 44, dmg: 26, r: 19, spr: 'kui', scale: 4.6 },
+      // 原著魔道六宗在各处矿脉设「执事」管事（「矿监」全书 0 次）
+      boss: { kind: 'swarm', name: '魔道执事', hp: 4400, spd: 44, dmg: 26, r: 19, spr: 'kui', scale: 4.6 },
       reward: { stones: 560, items: ['t_dayi'], mats: [['m_xuantie', 3], ['m_zhizhu', 1]] },
       outro: 'shiku_out',
       clearTitle: '矿场已夺',

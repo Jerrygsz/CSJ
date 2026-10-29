@@ -219,7 +219,8 @@
       enemies: ['shixiao', 'ghoul', 'guiwu'],
       elites: ['百年尸魈', '养尸人'],
       mats: ['m_shihui', 'm_xueyu', 'm_yusui'],
-      boss: { kind: 'blood', name: '尸魈王', hp: 11000, spd: 56, dmg: 42, r: 20, spr: 'ghoul', scale: 5.0 },
+      // 原著里的「尸王」专指结丹以上、已有灵智的炼尸头目（金鼓原一战「三只身材高大的尸王」）
+      boss: { kind: 'blood', name: '尸王', hp: 11000, spd: 56, dmg: 42, r: 20, spr: 'ghoul', scale: 5.0 },
       reward: { stones: 1400, mats: [['m_shihui', 4], ['m_yusui', 3]] },
       clearTitle: '后山已清',
       clearDesc: '尸魈的头割下来了。宗门里那几个老人看他的眼神，变了。'
@@ -277,9 +278,9 @@
       unlock: 'jiaoyihui', next: 'yanyue',
       diff: 2.6, bossAt: 120,
       enemies: ['kui2', 'dajinxiu', 'ghoul'],
-      elites: ['守洞傀儡', '禁制灵影'],
+      elites: ['守洞傀儡', '禁制灵傀'],
       mats: ['m_gengjing', 'm_yusui', 'm_xuantie', 'm_gangyin'],
-      boss: { kind: 'mo', name: '苍坤洞府·禁制灵影', hp: 14000, spd: 58, dmg: 48, r: 20, spr: 'guixiu', scale: 5.2 },
+      boss: { kind: 'mo', name: '苍坤洞府·禁制灵傀', hp: 14000, spd: 58, dmg: 48, r: 20, spr: 'guixiu', scale: 5.2 },
       reward: { stones: 2400, mats: [['m_gengjing', 2], ['m_gangyin', 1]] },
       clearTitle: '洞府已破',
       clearDesc: '南陇侯分了他一半，心里不服，脸上不显。这一趟的账，往后还要算。'
@@ -776,10 +777,11 @@
       enemies: ['zhengdao', 'moxiu2', 'kui2'],
       elites: ['天南大修士护卫', '元婴后期修士'],
       mats: ['m_gengjing', 'm_gangyin', 'm_yusui'],
-      boss: { kind: 'mo', name: '天南二修·合击', hp: 40000, spd: 62, dmg: 84, r: 22, spr: 'neimen', scale: 5.8 },
+      // 原著：天道盟第一大宗鸾鸣门有「联手双修夫妇」，两人合击勉强抵住一名元婴后期 —— 「合击」的原型即此
+      boss: { kind: 'mo', name: '鸾鸣门·双修夫妇', hp: 40000, spd: 62, dmg: 84, r: 22, spr: 'neimen', scale: 5.8 },
       reward: { stones: 7000, mats: [['m_gengjing', 4], ['m_gangyin', 4]] },
       clearTitle: '落云宗立住了',
-      clearDesc: '两个元婴后期，一个走了，一个留了。落云宗从此是天南第一门。'
+      clearDesc: '鸾鸣门那对双修夫妇联手也没挡住。落云宗从此是天南第一门。'
     },
     {
       id: 'tianlan', name: '天澜圣兽·雷劫', pos: '天澜草原·圣山', arc: 'H',
