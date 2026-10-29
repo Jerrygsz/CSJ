@@ -97,17 +97,18 @@
 
   // ========================= 六、敌人 =========================
   Object.assign(window.ENEMY_TYPES, {
-    guiwu:   { name: '阴雾鬼物', hp: 620, spd: 66, dmg: 40, r: 11, xp: 14, spr: 'guixiu',  drop: 0.09, tier: 0, mats: ['m_yanghun', 'm_xueyu'] },
+    guiwu:   { name: '阴兽', hp: 620, spd: 66, dmg: 40, r: 11, xp: 14, spr: 'guixiu',  drop: 0.09, tier: 0, mats: ['m_yanghun', 'm_xueyu'] },
     shixiao: { name: '尸魈',     hp: 700, spd: 58, dmg: 44, r: 12, xp: 15, spr: 'ghoul',    drop: 0.09, tier: 0, dash: true, mats: ['m_shihui', 'm_yusui'] },
-    moxiu2:  { name: '魔道修士', hp: 760, spd: 62, dmg: 46, r: 11, xp: 16, spr: 'mo',       drop: 0.10, tier: 0, mats: ['m_xueyu', 'm_hantie'] },
+    moxiu2:  { name: '魔修', hp: 760, spd: 62, dmg: 46, r: 11, xp: 16, spr: 'mo',       drop: 0.10, tier: 0, mats: ['m_xueyu', 'm_hantie'] },
     fashi:   { name: '慕兰法士', hp: 820, spd: 70, dmg: 50, r: 11, xp: 17, spr: 'neimen',   drop: 0.09, tier: 0, mats: ['m_yusui', 'm_xuantie'] },
-    dajinxiu:{ name: '大晋修士', hp: 900, spd: 64, dmg: 52, r: 11, xp: 18, spr: 'linmo',    drop: 0.10, tier: 0, mats: ['m_xuantie', 'm_yusui'] },
-    yaoshou2:{ name: '大晋妖兽', hp: 1000, spd: 60, dmg: 56, r: 13, xp: 20, spr: 'haishou', drop: 0.11, tier: 0, mats: ['m_yaodan', 'm_banyao'] },
-    gui2:    { name: '古魔残躯', hp: 1200, spd: 54, dmg: 62, r: 14, xp: 24, spr: 'mo',       drop: 0.12, tier: 0, mats: ['m_xueyu', 'm_yanghun'] },
-    kui2:    { name: '上古傀儡', hp: 1100, spd: 40, dmg: 58, r: 14, xp: 22, spr: 'kui',      drop: 0.12, tier: 0, mats: ['m_gangyin', 'm_xuantie'] },
-    // 天南正道修士：落云宗 / 天阙堡 / 御灵宗 / 掩月宗 / 元武付家 等本土修士，
-    // 与「慕兰法士」「大晋修士」区分开，免得天南地图冒出外域修士
-    zhengdao:{ name: '正道修士', hp: 880, spd: 66, dmg: 48, r: 11, xp: 17, spr: 'neimen',   drop: 0.09, tier: 0, mats: ['m_yusui', 'm_xuantie'] }
+    dajinxiu:{ name: '散修', hp: 900, spd: 64, dmg: 52, r: 11, xp: 18, spr: 'linmo',    drop: 0.10, tier: 0, mats: ['m_xuantie', 'm_yusui'] },
+    yaoshou2:{ name: '妖兽', hp: 1000, spd: 60, dmg: 56, r: 13, xp: 20, spr: 'haishou', drop: 0.11, tier: 0, mats: ['m_yaodan', 'm_banyao'] },
+    yaoxiu:  { name: '妖修',   hp: 980, spd: 66, dmg: 54, r: 11, xp: 19, spr: 'mo',       drop: 0.10, tier: 0, mats: ['m_zhenlinglin', 'm_yaodan'] },
+    gui2:    { name: '魔物', hp: 1200, spd: 54, dmg: 62, r: 14, xp: 24, spr: 'mo',       drop: 0.12, tier: 0, mats: ['m_xueyu', 'm_yanghun'] },
+    kui2:    { name: '傀儡', hp: 1100, spd: 40, dmg: 58, r: 14, xp: 22, spr: 'kui',      drop: 0.12, tier: 0, mats: ['m_gangyin', 'm_xuantie'] },
+    // 天南本土修士：落云宗 / 天阙堡 / 御灵宗 / 掩月宗 / 元武付家 等，
+    // 与「慕兰法士」「散修」区分开，免得天南地图冒出外域修士
+    zhengdao:{ name: '修士', hp: 880, spd: 66, dmg: 48, r: 11, xp: 17, spr: 'neimen',   drop: 0.09, tier: 0, mats: ['m_yusui', 'm_xuantie'] }
   });
 
   // ========================= 七、洞府 =========================
@@ -217,7 +218,7 @@
       unlock: 'luoyun', next: 'sanjian',
       diff: 2.45, bossAt: 110,
       enemies: ['shixiao', 'ghoul', 'guiwu'],
-      elites: ['百年尸魈', '养尸人'],
+      elites: ['百年尸魈', '落云宗弟子'],
       mats: ['m_shihui', 'm_xueyu', 'm_yusui'],
       // 原著里的「尸王」专指结丹以上、已有灵智的炼尸头目（金鼓原一战「三只身材高大的尸王」）
       boss: { kind: 'blood', name: '尸王', hp: 11000, spd: 56, dmg: 42, r: 20, spr: 'ghoul', scale: 5.0 },
@@ -278,9 +279,9 @@
       unlock: 'jiaoyihui', next: 'yanyue',
       diff: 2.6, bossAt: 120,
       enemies: ['kui2', 'dajinxiu', 'ghoul'],
-      elites: ['守洞傀儡', '禁制灵傀'],
+      elites: ['守洞傀儡', '灵傀'],
       mats: ['m_gengjing', 'm_yusui', 'm_xuantie', 'm_gangyin'],
-      boss: { kind: 'mo', name: '苍坤洞府·禁制灵傀', hp: 14000, spd: 58, dmg: 48, r: 20, spr: 'guixiu', scale: 5.2 },
+      boss: { kind: 'mo', name: '禁制灵傀', hp: 14000, spd: 58, dmg: 48, r: 20, spr: 'guixiu', scale: 5.2 },
       reward: { stones: 2400, mats: [['m_gengjing', 2], ['m_gangyin', 1]] },
       clearTitle: '洞府已破',
       clearDesc: '南陇侯分了他一半，心里不服，脸上不显。这一趟的账，往后还要算。'
@@ -438,7 +439,7 @@
       enemies: ['fashi', 'moxiu2', 'gui2'],
       elites: ['慕兰法士首领', '血罗罩阵眼'],
       mats: ['m_yusui', 'm_xuantie', 'm_gengjing', 'm_hanhuo'],
-      boss: { kind: 'blood', name: '阴罗宗宗主夫人·陆夫人', hp: 18000, spd: 60, dmg: 56, r: 21, spr: 'nvxiu', scale: 5.4 },
+      boss: { kind: 'blood', name: '陆夫人', hp: 18000, spd: 60, dmg: 56, r: 21, spr: 'nvxiu', scale: 5.4 },
       reward: { stones: 3600, mats: [['m_gengjing', 2], ['m_hanhuo', 1]] },
       clearTitle: '血罗罩已破',
       clearDesc: '元明灯到手，战局翻了。天南这边没人再把他当外人。'
@@ -476,9 +477,9 @@
       unlock: 'jixi', next: 'lingmiao',
       diff: 2.95, bossAt: 130, intro: 'zhuimo', outro: 'zhuimo_out',
       enemies: ['yaoshou2', 'gui2', 'shixiao'],
-      elites: ['血焰分魂', '古魔残躯'],
+      elites: ['古魔分魂', '古魔'],
       mats: ['m_lingzhu', 'm_huodan', 'm_gangyin', 'm_gengjing'],
-      boss: { kind: 'blood', name: '血焰主魂', hp: 24000, spd: 58, dmg: 62, r: 22, spr: 'mo', scale: 5.8 },
+      boss: { kind: 'blood', name: '古魔主魂', hp: 24000, spd: 58, dmg: 62, r: 22, spr: 'mo', scale: 5.8 },
       reward: { stones: 4200, items: ['a_jiaolong'], mats: [['m_lingzhu', 1], ['m_huodan', 1], ['m_gangyin', 2]] },
       clearTitle: '灵烛果已摘',
       clearDesc: '果子摘到了，魔也放出来了。空间裂缝一开，人就被卷了进去。'
@@ -529,7 +530,7 @@
       unlock: 'dajin', next: 'zhenmo',
       diff: 3.1, bossAt: 0, intro: 'kunwu', outro: 'kunwu_out',
       enemies: ['kui2', 'dajinxiu', 'gui2'],
-      elites: ['昆吾四兽·木魁', '阴罗宗长老'],
+      elites: ['木魁', '阴罗宗长老'],
       mats: ['m_gangyin', 'm_gengjing', 'm_xuanbing', 'm_yanghun'],
       boss: { kind: 'mo', name: '阴罗宗大长老·乾老魔', hp: 30000, spd: 60, dmg: 70, r: 22, spr: 'linmo', scale: 5.8 },
       reward: { stones: 5000, items: ['t_wuzi'], mats: [['m_gangyin', 3], ['m_gengjing', 3]] },
@@ -559,7 +560,7 @@
       unlock: 'zhenmo', next: 'xutian2',
       diff: 3.2, bossAt: 120, intro: 'xiaoji', outro: 'xiaoji_out',
       enemies: ['yaoshou2', 'kui2', 'dajinxiu'],
-      elites: ['妖族先锋', '小极宫执事'],
+      elites: ['妖族先锋', '小极宫弟子'],
       mats: ['m_xuanbing', 'm_hanhuo', 'm_gangyin', 'm_yusui'],
       boss: { kind: 'mo', name: '寒俪上人', hp: 32000, spd: 58, dmg: 72, r: 21, spr: 'neimen', scale: 5.6 },
       reward: { stones: 5200, pets: ['p_bingfeng'], mats: [['m_xuanbing', 3], ['m_hanhuo', 2]] },
@@ -644,11 +645,11 @@
       ['旁白', '半个时辰之后，谷里传来一声闷响。'],
       ['韩立', '（封印破了。）'],
       ['旁白', '血雾翻上来，一道人影在雾里成形，比他见过的任何东西都高。'],
-      ['韩立', '（血焰主魂。古魔的分魂。）'],
+      ['韩立', '（古魔主魂。这谷里压了上千年的，就是它。）'],
       ['韩立', '（这东西不是我这个境界能打的。可它挡在出去的路上。）']
     ],
     zhuimo_out: [
-      ['旁白', '血焰主魂退了，可空间也被撕开了一道口子。'],
+      ['旁白', '古魔主魂退了，可空间也被撕开了一道口子。'],
       ['韩立', '（吸力太大，退不开。）'],
       ['旁白', '白光一闪，人没了。谷口只剩一柄插在石缝里的剑。'],
       ['韩立', '（这是什么地方……灵草，一望无际的灵草。）'],
@@ -660,7 +661,7 @@
       ['旁白', '他盘膝坐下。第一年，第三年，第十年。'],
       ['韩立', '（元婴中期。再往上，得等裂缝自己松。）'],
       ['旁白', '第二十七年，那道裂缝终于裂开了一线。'],
-      ['韩立', '（天南那边，血焰分魂还在。该回去了。）']
+      ['韩立', '（天南那边，古魔分魂还在。该回去了。）']
     ],
     mulan_out: [
       ['旁白', '慕兰草原。几个法士把他围在中间，一记闷雷砸在背上。'],
@@ -775,7 +776,7 @@
       unlock: 'kunpeng', next: 'tianlan',
       diff: 3.3, bossAt: 0, intro: 'luoyun2', outro: 'luoyun2_out',
       enemies: ['zhengdao', 'moxiu2', 'kui2'],
-      elites: ['天南大修士护卫', '元婴后期修士'],
+      elites: ['大修士护卫', '元婴后期修士'],
       mats: ['m_gengjing', 'm_gangyin', 'm_yusui'],
       // 原著：天道盟第一大宗鸾鸣门有「联手双修夫妇」，两人合击勉强抵住一名元婴后期 —— 「合击」的原型即此
       boss: { kind: 'mo', name: '鸾鸣门·双修夫妇', hp: 40000, spd: 62, dmg: 84, r: 22, spr: 'neimen', scale: 5.8 },
@@ -803,7 +804,7 @@
       enemies: ['gui2', 'kui2', 'dajinxiu'],
       elites: ['六道分身', '星宫修士'],
       mats: ['m_gangyin', 'm_gengjing', 'm_yanghun'],
-      boss: { kind: 'mo', name: '六道·万天明之身', hp: 46000, spd: 64, dmg: 92, r: 23, spr: 'mo', scale: 6.0 },
+      boss: { kind: 'mo', name: '六道·万天明', hp: 46000, spd: 64, dmg: 92, r: 23, spr: 'mo', scale: 6.0 },
       reward: { stones: 8000, mats: [['m_gangyin', 5], ['m_gengjing', 5]] },
       clearTitle: '六道已斩',
       clearDesc: '星宫的账清了。紫灵那边，也该有个说法了。'

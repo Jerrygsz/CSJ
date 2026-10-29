@@ -47,7 +47,7 @@
   addDrop('bandit', ['m_lingzhi']);
   addDrop('ghoul', ['m_chijing']);
   addTo('yaoyuan', { mats: [['m_lingzhi', 3]] });
-  // 血蝠：虫母体内的晶核
+  // 巨蟒：鳞下那枚晶核
   addTo('yaoyuan', { items: [], mats: [['m_chongjing', 1]] });
   // 地火之屋：地肺之火边上长的火灵草
   addTo('jingu', { mats: [['m_huoling', 2]] });

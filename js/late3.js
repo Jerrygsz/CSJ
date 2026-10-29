@@ -187,7 +187,7 @@
   // 不是满地都有：这几种东西的巢里才揣着卵，杀了捡回去孵。
   // （血玉蜘蛛卵另走一条路：虚天殿那一趟的收成，本就是枚卵。）
   const EGG_DROP = {
-    bat: { id: 'egg_yunchi', chance: 0.020 },   // 吸血妖蝠：倒挂在洞顶，巢里混着鸟卵
+    bat: { id: 'egg_yunchi', chance: 0.020 },   // 蝙蝠：倒挂在洞顶，巢里混着鸟卵
     dujiao: { id: 'egg_mojiao', chance: 0.030 } // 毒蛟：蛟卵沉在潭底淤泥里
   };
   for (const k of Object.keys(EGG_DROP)) {

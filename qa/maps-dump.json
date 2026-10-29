@@ -1,0 +1,3504 @@
+{
+ "count": 132,
+ "maps": [
+  {
+   "id": "qixuan",
+   "order": 1,
+   "name": "七玄门·山门",
+   "pos": "越国·镜州 青牛山",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "入门考核。韩立与张铁都没能进内门，却被墨大夫留在药庐做了药童。",
+   "arc": "A",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": "qixuan"
+  },
+  {
+   "id": "houshan",
+   "order": 2,
+   "name": "七玄门·后山",
+   "pos": "青牛山北麓",
+   "type": "combat",
+   "tag": "战斗",
+   "desc": "替药庐采药。山兽与流窜山贼都在这一带出没，是炼气初期最好的练手处。",
+   "arc": "A",
+   "enemies": [
+    "wolf",
+    "snake",
+    "bat",
+    "boar",
+    "bandit"
+   ],
+   "elites": [
+    "头狼",
+    "马贼头目"
+   ],
+   "boss": "狼妖",
+   "bossKind": "beast",
+   "bossHp": 1100,
+   "bossDmg": 15,
+   "cave": null
+  },
+  {
+   "id": "mishi",
+   "order": 3,
+   "name": "墨大夫·密室",
+   "pos": "七玄门·药庐地底",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "尸虫丸的期限满了一年。墨大夫不再遮掩——他要的从来不是弟子，而是一具炉鼎。",
+   "arc": "A",
+   "enemies": [
+    "ghoul",
+    "assassin"
+   ],
+   "elites": [
+    "炼尸·铁奴",
+    "血尸·张铁"
+   ],
+   "boss": "墨大夫·墨居仁",
+   "bossKind": "mo",
+   "bossHp": 1500,
+   "bossDmg": 18,
+   "cave": null
+  },
+  {
+   "id": "tainan",
+   "order": 4,
+   "name": "太南小会",
+   "pos": "越国·太南山",
+   "type": "market",
+   "tag": "坊市",
+   "desc": "散修云集的交易会。以灵石换丹药、符箓与法器，也能把用不上的东西折价出手。",
+   "arc": "B",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "huangfeng",
+   "order": 5,
+   "name": "黄枫谷·山门",
+   "pos": "越国·黄枫谷",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "凭升仙令入门，本应配发一枚筑基丹。叶师叔上门来换：丹归他，换来一门自择的差事。",
+   "arc": "B",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "yaoyuan",
+   "order": 6,
+   "name": "黄枫谷·百药园（旧园）",
+   "pos": "青石岭背阴处",
+   "type": "combat",
+   "tag": "战斗",
+   "desc": "青石岭背阴处，雾气常年不散。竹篱歪斜，茅屋一间，四周是整齐的灵田沟垄。泥土里混着陈年药渣气，风一吹，苦香、甘香、涩香搅在一起。这里本是黄枫谷马师伯的私园，如今交到一个沉默寡言的管园弟子手里。药田东南角是马老头留了几十年的老底：子夜花、黄球草、白鹤芝、望月草，最老的一株化龙草已百余年份；角落还散着些没名字的俗世药苗，懒得拔，留着遮土气。",
+   "arc": "B",
+   "enemies": [
+    "bat",
+    "snake",
+    "assassin",
+    "ghoul",
+    "bandit"
+   ],
+   "elites": [
+    "巨蟒",
+    "尸傀"
+   ],
+   "boss": "银色巨蟒",
+   "bossKind": "swarm",
+   "bossHp": 2100,
+   "bossDmg": 15,
+   "cave": "huangfeng"
+  },
+  {
+   "id": "xuese",
+   "order": 7,
+   "name": "血色禁地",
+   "pos": "越国·七派共管秘境",
+   "type": "combat",
+   "tag": "战斗",
+   "desc": "七派试炼之地，血雾终年不散。筑基丹的主药在此，魔道修士亦在其中。",
+   "arc": "B",
+   "enemies": [
+    "assassin",
+    "ghoul",
+    "boar",
+    "bandit",
+    "assassin"
+   ],
+   "elites": [
+    "魔修",
+    "傀儡兽"
+   ],
+   "boss": "墨蛟",
+   "bossKind": "beast",
+   "bossHp": 3600,
+   "bossDmg": 19,
+   "cave": null
+  },
+  {
+   "id": "mkuang",
+   "name": "后山·废弃矿洞",
+   "pos": "青牛山北麓 旧矿脉",
+   "type": "combat",
+   "tag": "支线",
+   "desc": "山塌了半边，铁矿石露在外头。洞底挖出了几具石人，把矿道当成了自己的窝。",
+   "arc": "X",
+   "enemies": [
+    "bat",
+    "snake",
+    "shigui",
+    "bandit"
+   ],
+   "elites": [
+    "矿洞石人"
+   ],
+   "boss": "石人王",
+   "bossKind": "beast",
+   "bossHp": 980,
+   "bossDmg": 14,
+   "cave": null
+  },
+  {
+   "id": "zhangtie",
+   "name": "后山·张铁的铁匠棚",
+   "pos": "青牛山北麓 松林边",
+   "type": "story",
+   "tag": "支线",
+   "desc": "半塌的铁匠棚，风箱、丁字锤、半截断剑。炉膛冷了半年，铁砧上还压着一块铁牌。",
+   "arc": "X",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "yanwu",
+   "name": "七玄门·演武场",
+   "pos": "七玄门 前山校场",
+   "type": "combat",
+   "tag": "支线",
+   "desc": "木剑对木剑，点到为止。同门切磋，输赢都不伤和气，只是谁也不肯先认。",
+   "arc": "X",
+   "enemies": [
+    "disciple",
+    "bandit"
+   ],
+   "elites": [
+    "外门弟子"
+   ],
+   "boss": "厉飞雨（切磋）",
+   "bossKind": "mo",
+   "bossHp": 1900,
+   "bossDmg": 13,
+   "cave": null
+  },
+  {
+   "id": "yaopu",
+   "name": "百药园·绿液区（西北角）",
+   "pos": "百药园 西北角",
+   "type": "combat",
+   "tag": "支线",
+   "desc": "药田西北角，一只旧瓶埋在土里，上面压着半片法宝残片遮灵气。绿液一滴下去，草木一夜变样：黄龙草叶子翻紫，苦莲花开齐九瓣，忘忧果的皮黑得发亮。神手谷带过来的底料、太南小会换回的七星草种子、按筑基丹方补种的辅药，都挤在这一角；血色禁地带回的三株主药苗也在绿液里温养着，低概率结鲜果，摘了再催。",
+   "arc": "X",
+   "enemies": [
+    "snake",
+    "bat",
+    "ghoul",
+    "assassin"
+   ],
+   "elites": [
+    "灵猿"
+   ],
+   "boss": "灵猿",
+   "bossKind": "beast",
+   "bossHp": 2400,
+   "bossDmg": 16,
+   "cave": "huangfeng"
+  },
+  {
+   "id": "heixiang",
+   "name": "太南小会·后巷",
+   "pos": "太南山 小会后巷",
+   "type": "story",
+   "tag": "支线",
+   "desc": "一条窄巷，两边支着棚子。此处不问来路，只问价钱。",
+   "arc": "X",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "xuechi",
+   "name": "血色禁地·血池",
+   "pos": "血色禁地 北侧洼地",
+   "type": "combat",
+   "tag": "支线",
+   "desc": "听不见虫叫的地方。血从石缝里渗出来，积成一池，池边长着会变色的草。",
+   "arc": "X",
+   "enemies": [
+    "assassin",
+    "ghoul",
+    "bandit"
+   ],
+   "elites": [
+    "傀儡"
+   ],
+   "boss": "傀儡兽",
+   "bossKind": "blood",
+   "bossHp": 3200,
+   "bossDmg": 18,
+   "cave": null
+  },
+  {
+   "id": "zhuji",
+   "name": "黄枫谷·地火之屋",
+   "pos": "越国·黄枫谷 地火之屋",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "三味主药，一炉丹，一间引着地火的石室。丹成那天，地火先炸了。",
+   "arc": "C",
+   "enemies": [
+    "disciple",
+    "assassin"
+   ],
+   "elites": [
+    "丹房执事",
+    "火灵"
+   ],
+   "boss": "地火之灵",
+   "bossKind": "beast",
+   "bossHp": 3600,
+   "bossDmg": 22,
+   "cave": "cuiping"
+  },
+  {
+   "id": "yanjia",
+   "name": "燕家堡",
+   "pos": "越国·燕家堡",
+   "type": "combat",
+   "tag": "战斗",
+   "desc": "受李化元之命，带董萱儿赴燕家堡夺宝大会。堡门挂红，来客一半佩着鬼灵门的腰牌。",
+   "arc": "C",
+   "enemies": [
+    "guiling",
+    "moxiu",
+    "assassin"
+   ],
+   "elites": [
+    "鬼灵门·执事",
+    "血灵阵眼"
+   ],
+   "boss": "鬼灵门少主·王蝉",
+   "bossKind": "mo",
+   "bossHp": 4200,
+   "bossDmg": 26,
+   "cave": null
+  },
+  {
+   "id": "jingu",
+   "name": "金鼓原",
+   "pos": "越国·金鼓原",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "七派联军与魔道六宗决战之地。战线一破，身后就再没人接应。",
+   "arc": "C",
+   "enemies": [
+    "moxiu",
+    "guiling",
+    "ghoul",
+    "assassin"
+   ],
+   "elites": [
+    "魔道长老",
+    "傀儡兽"
+   ],
+   "boss": "鬼灵门·执法长老",
+   "bossKind": "blood",
+   "bossHp": 5200,
+   "bossDmg": 30,
+   "cave": null
+  },
+  {
+   "id": "guchuan",
+   "name": "古传送阵",
+   "pos": "越国·荒山古阵",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "齐云霄修复的古传送阵。阵纹一亮，越国就在身后了。",
+   "arc": "C",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "kuixing",
+   "name": "魁星岛",
+   "pos": "乱星海·魁星岛",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "落点在海底。飞天盾被水压挤碎，靠最后一张水遁符浮上来。修为还在，法力空得发慌。",
+   "arc": "D",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": "xiaohuan"
+  },
+  {
+   "id": "liulian",
+   "name": "六连殿·出海捕妖",
+   "pos": "乱星海·外海",
+   "type": "combat",
+   "tag": "战斗",
+   "desc": "六连殿雇散修出海。这一趟要捕的是一头婴鲤兽——捕到了，才知道雇主是谁。",
+   "arc": "D",
+   "enemies": [
+    "haishou",
+    "yuyao",
+    "moxiu"
+   ],
+   "elites": [
+    "六级妖兽·婴鲤兽",
+    "极阴岛·乌丑"
+   ],
+   "boss": "六连殿·古长老",
+   "bossKind": "mo",
+   "bossHp": 5800,
+   "bossDmg": 32,
+   "cave": null
+  },
+  {
+   "id": "haian",
+   "name": "海猿岛·闭关",
+   "pos": "乱星海·海猿岛",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "荒岛一座，灵脉勉强够用。凿三间石室，一修四年，把根基一层层夯回去。",
+   "arc": "D",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "tianxing",
+   "name": "天星城",
+   "pos": "乱星海·天星城",
+   "type": "market",
+   "tag": "坊市",
+   "desc": "乱星海第一大城。正道、魔道、星宫三方在此摆摊，谁也不问谁的来历。",
+   "arc": "D",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "ningcui",
+   "name": "凝翠岛·杀妖取丹",
+   "pos": "乱星海·凝翠岛",
+   "type": "combat",
+   "tag": "战斗",
+   "desc": "礁盘上生着霓裳草，叶随光变色。撒一片下去，妖就自己浮上来。",
+   "arc": "D",
+   "enemies": [
+    "haishou",
+    "yuyao"
+   ],
+   "elites": [
+    "七级妖兽",
+    "妖蟒"
+   ],
+   "boss": "七级妖兽",
+   "bossKind": "beast",
+   "bossHp": 6400,
+   "bossDmg": 30,
+   "cave": null
+  },
+  {
+   "id": "jiedan",
+   "name": "天星城·闭府结丹",
+   "pos": "乱星海·天星城 租来的洞府",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "逃到海猿岛修了四年，结丹失败；偷回小寰岛得了噬金虫。再到天星城租一间洞府，颠倒五行阵布七处，闭死关。石门一落，外头就是六十年。",
+   "arc": "D",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "xutian",
+   "name": "虚天殿",
+   "pos": "乱星海·虚天殿",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "三百年一开。外殿玄晶道、宝光阁、极妙幻境，内殿冰火道；进得去的，十不存三。",
+   "arc": "E",
+   "enemies": [
+    "guixiu",
+    "kui",
+    "ghoul"
+   ],
+   "elites": [
+    "阴灵",
+    "守殿傀儡"
+   ],
+   "boss": "玄骨上人",
+   "bossKind": "mo",
+   "bossHp": 8600,
+   "bossDmg": 36,
+   "cave": null
+  },
+  {
+   "id": "waihai",
+   "name": "外星海·奇渊岛",
+   "pos": "乱星海·外星海",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "这里的海水是黑的。他为一株伴妖草而来，撞上的是九级裂风兽的洞府。",
+   "arc": "E",
+   "enemies": [
+    "haishou",
+    "guixiu",
+    "kui",
+    "dujiao"
+   ],
+   "elites": [
+    "化形妖",
+    "深海巨兽"
+   ],
+   "boss": "八级妖兽·毒蛟",
+   "bossKind": "beast",
+   "bossHp": 9800,
+   "bossDmg": 40,
+   "cave": null
+  },
+  {
+   "id": "heisha",
+   "name": "越国·京城皇宫",
+   "pos": "越国·京城 皇宫地宫",
+   "type": "combat",
+   "tag": "支线",
+   "desc": "护秦府入京，撞见黑煞教在宫墙底下血祭。教主不是别人，是越皇。",
+   "arc": "X",
+   "enemies": [
+    "moxiu",
+    "ghoul",
+    "assassin",
+    "guiling"
+   ],
+   "elites": [
+    "血侍·冰妖",
+    "血侍·铁罗",
+    "血侍·青纹",
+    "血侍·叶蛇"
+   ],
+   "boss": "越皇",
+   "bossKind": "blood",
+   "bossHp": 4600,
+   "bossDmg": 28,
+   "cave": null
+  },
+  {
+   "id": "shiku",
+   "name": "灵石矿·魔道矿场",
+   "pos": "越国边境 灵矿脉",
+   "type": "combat",
+   "tag": "支线",
+   "desc": "魔道六宗占了七派的灵石矿。正道修士要突一次，矿里守着的可不止人。",
+   "arc": "X",
+   "enemies": [
+    "moxiu",
+    "kui",
+    "guiling"
+   ],
+   "elites": [
+    "魔道执事",
+    "矿脉傀儡"
+   ],
+   "boss": "魔道执事",
+   "bossKind": "swarm",
+   "bossHp": 4400,
+   "bossDmg": 26,
+   "cave": null
+  },
+  {
+   "id": "qingzhu",
+   "name": "青竹小轩",
+   "pos": "乱星海·天星城 外街",
+   "type": "story",
+   "tag": "支线",
+   "desc": "一间铺面，前头卖符箓法器，后头是丹房。结丹之后入世，铺子一开就是二十余年。",
+   "arc": "X",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": "qingzhuxuan"
+  },
+  {
+   "id": "guxiu",
+   "name": "古修遗址",
+   "pos": "乱星海·无名荒岛",
+   "type": "combat",
+   "tag": "支线",
+   "desc": "金青那张残图上标的。阵还在，阵眼里压着一样东西，压了三百年。",
+   "arc": "X",
+   "enemies": [
+    "kui",
+    "guixiu",
+    "ghoul"
+   ],
+   "elites": [
+    "守阵傀儡",
+    "古修尸身"
+   ],
+   "boss": "古修遗骸",
+   "bossKind": "mo",
+   "bossHp": 8000,
+   "bossDmg": 34,
+   "cave": null
+  },
+  {
+   "id": "luxiong",
+   "name": "黄枫谷·下山岔道",
+   "pos": "黄枫谷 山门外 岔道",
+   "type": "combat",
+   "tag": "支线",
+   "desc": "从坊市回谷的必经之路。两边的林子密得看不见人，喊一声也没人应。",
+   "arc": "B",
+   "enemies": [
+    "disciple",
+    "assassin"
+   ],
+   "elites": [
+    "陆师兄的随从",
+    "丹房护卫"
+   ],
+   "boss": "同门 陆师兄",
+   "bossKind": "mo",
+   "bossHp": 2800,
+   "bossDmg": 17,
+   "cave": null
+  },
+  {
+   "id": "linxiong",
+   "name": "内门·洞府夜变",
+   "pos": "黄枫谷·内门 洞府",
+   "type": "boss",
+   "tag": "支线",
+   "desc": "筑基之后分下的洞府。夜里石门被人从外头推开——来的是同门，来的也不只是同门。",
+   "arc": "C",
+   "enemies": [
+    "disciple",
+    "assassin"
+   ],
+   "elites": [
+    "千竹教·傀儡",
+    "夺舍残魂"
+   ],
+   "boss": "千竹教·林师兄",
+   "bossKind": "mo",
+   "bossHp": 3200,
+   "bossDmg": 19,
+   "cave": null
+  },
+  {
+   "id": "yinming",
+   "name": "阴冥之地",
+   "pos": "阴冥之地·鬼雾深处",
+   "type": "combat",
+   "tag": "战斗",
+   "desc": "百年一遇的绝灵之气把鬼雾撕开，人被吞了进去。落地那一刻，丹田是空的。",
+   "arc": "F",
+   "enemies": [
+    "guiwu",
+    "guixiu",
+    "ghoul"
+   ],
+   "elites": [
+    "阴雾鬼将",
+    "六道随从"
+   ],
+   "boss": "六道传人",
+   "bossKind": "mo",
+   "bossHp": 12000,
+   "bossDmg": 44,
+   "cave": null
+  },
+  {
+   "id": "bianhai",
+   "name": "无边海",
+   "pos": "天南外海·无边海",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "鬼雾散尽，眼前是一望无际的黑水。往西走，就是天南。",
+   "arc": "F",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "luoyun",
+   "name": "落云宗",
+   "pos": "天南·云梦山",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "天南七派之一的落云宗。他压着修为报到，只求一处灵脉。",
+   "arc": "F",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "shixiao",
+   "name": "尸魈之乱",
+   "pos": "天南·云梦山 后山",
+   "type": "combat",
+   "tag": "战斗",
+   "desc": "落云宗后山养着的东西跑了出来。宗门让新来的长老去收拾。",
+   "arc": "F",
+   "enemies": [
+    "shixiao",
+    "ghoul",
+    "guiwu"
+   ],
+   "elites": [
+    "百年尸魈",
+    "落云宗弟子"
+   ],
+   "boss": "尸王",
+   "bossKind": "blood",
+   "bossHp": 11000,
+   "bossDmg": 42,
+   "cave": null
+  },
+  {
+   "id": "sanjian",
+   "name": "三派试剑",
+   "pos": "天南·云梦山 剑坪",
+   "type": "combat",
+   "tag": "战斗",
+   "desc": "落云宗、天阙堡、御灵宗三派试剑。他不想露头，可有人偏要点名。",
+   "arc": "F",
+   "enemies": [
+    "zhengdao",
+    "moxiu2",
+    "assassin"
+   ],
+   "elites": [
+    "天阙堡剑修",
+    "御灵宗弟子"
+   ],
+   "boss": "御灵宗大长老·东门图",
+   "bossKind": "mo",
+   "bossHp": 11500,
+   "bossDmg": 44,
+   "cave": null
+  },
+  {
+   "id": "yinyue",
+   "name": "银月认主",
+   "pos": "天南·云梦山 洞府",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "虚天鼎里那道银白的身影，在洞府里第一次开口。",
+   "arc": "F",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "jieying",
+   "name": "云梦山·结婴",
+   "pos": "天南·云梦山 洞府",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "灵脉、丹药、心境，三样都齐了。这一关过了，天南就再没人能随手捏死他。",
+   "arc": "F",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": "luoyun"
+  },
+  {
+   "id": "jiaoyihui",
+   "name": "天南交易会",
+   "pos": "天南·阗天城",
+   "type": "market",
+   "tag": "坊市",
+   "desc": "天南各派三年一次的交易日。元婴修士有元婴修士的场子。",
+   "arc": "F",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "cangkun",
+   "name": "苍坤上人洞府",
+   "pos": "天南·大草原 苍坤洞府",
+   "type": "combat",
+   "tag": "战斗",
+   "desc": "南陇侯邀他探一处上古洞府。破禁的活他来干，分东西的时候再看人心。",
+   "arc": "F",
+   "enemies": [
+    "kui2",
+    "dajinxiu",
+    "ghoul"
+   ],
+   "elites": [
+    "守洞傀儡",
+    "灵傀"
+   ],
+   "boss": "禁制灵傀",
+   "bossKind": "mo",
+   "bossHp": 14000,
+   "bossDmg": 48,
+   "cave": null
+  },
+  {
+   "id": "yanyue",
+   "name": "掩月宗",
+   "pos": "天南·掩月宗 山门",
+   "type": "combat",
+   "tag": "战斗",
+   "desc": "南宫婉被逼嫁给化意门长老。他化形入山，只带了一柄剑。",
+   "arc": "F",
+   "enemies": [
+    "zhengdao",
+    "moxiu2",
+    "assassin"
+   ],
+   "elites": [
+    "掩月宗执事",
+    "化意门护卫"
+   ],
+   "boss": "掩月宗大长老",
+   "bossKind": "mo",
+   "bossHp": 16000,
+   "bossDmg": 52,
+   "cave": null
+  },
+  {
+   "id": "huanglong",
+   "name": "黄龙山大战",
+   "pos": "天南·黄龙山",
+   "type": "chase",
+   "tag": "追击",
+   "desc": "魔道六宗的仲神师亲至。这一仗打不得——他要做的，是活着退下去。",
+   "arc": "F",
+   "enemies": [
+    "moxiu2",
+    "gui2",
+    "fashi"
+   ],
+   "elites": [
+    "魔道长老",
+    "仲神师随从"
+   ],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "bianjie",
+   "name": "慕兰边界大战",
+   "pos": "天南·慕兰草原 边界",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "慕兰法士倾族来攻。天南各派在边界立阵，赌战定输赢。",
+   "arc": "G",
+   "enemies": [
+    "fashi",
+    "moxiu2",
+    "gui2"
+   ],
+   "elites": [
+    "慕兰法士首领",
+    "血罗罩阵眼"
+   ],
+   "boss": "陆夫人",
+   "bossKind": "blood",
+   "bossHp": 18000,
+   "bossDmg": 56,
+   "cave": null
+  },
+  {
+   "id": "yinluo",
+   "name": "阴罗宗四长老",
+   "pos": "天南·落云宗 外山",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "南宫婉被封魂咒，自封于冰中。下咒的人留了战书，等他赴约。",
+   "arc": "G",
+   "enemies": [
+    "gui2",
+    "moxiu2",
+    "dajinxiu"
+   ],
+   "elites": [
+    "阴罗宗执事",
+    "炼尸"
+   ],
+   "boss": "阴罗宗四长老",
+   "bossKind": "mo",
+   "bossHp": 20000,
+   "bossDmg": 58,
+   "cave": null
+  },
+  {
+   "id": "jixi",
+   "name": "极西之地",
+   "pos": "极西之地·千竹教故地",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "为《大衍诀》的后三层，他一路往西。千竹教的废墟里，有个东西等了一万年。",
+   "arc": "G",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "zhuimo",
+   "name": "坠魔谷",
+   "pos": "天南·坠魔谷",
+   "type": "combat",
+   "tag": "战斗",
+   "desc": "天南第一凶地。灵烛果长在内谷，可谷里压着的东西，不止一颗果子。",
+   "arc": "G",
+   "enemies": [
+    "yaoshou2",
+    "gui2",
+    "shixiao"
+   ],
+   "elites": [
+    "古魔分魂",
+    "古魔"
+   ],
+   "boss": "古魔主魂",
+   "bossKind": "blood",
+   "bossHp": 24000,
+   "bossDmg": 62,
+   "cave": null
+  },
+  {
+   "id": "lingmiao",
+   "name": "灵渺园",
+   "pos": "坠魔谷·灵渺园 芥子空间",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "上古修士种灵草的园子，被空间裂缝封在里面。出不去，正好闭关。",
+   "arc": "G",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "mulan",
+   "name": "慕兰草原",
+   "pos": "慕兰草原·去大晋的路上",
+   "type": "chase",
+   "tag": "追击",
+   "desc": "几个元婴法士围上来。这一仗赢不了，只能往大晋的方向跑。",
+   "arc": "G",
+   "enemies": [
+    "fashi",
+    "moxiu2",
+    "gui2"
+   ],
+   "elites": [
+    "慕兰神师",
+    "法士统领"
+   ],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "dajin",
+   "name": "大晋·佛宗",
+   "pos": "大晋·南疆 佛宗",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "大晋南疆一座佛宗别院。金刚舍利镇得住煞气，也镇得住他这口气。",
+   "arc": "G",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": "foxin"
+  },
+  {
+   "id": "kunwu",
+   "name": "昆吾山",
+   "pos": "大晋·昆吾山",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "大晋第一名山。叶家开了封印，三十八个元婴进去，出来的没几个。",
+   "arc": "G",
+   "enemies": [
+    "kui2",
+    "dajinxiu",
+    "gui2"
+   ],
+   "elites": [
+    "木魁",
+    "阴罗宗长老"
+   ],
+   "boss": "阴罗宗大长老·乾老魔",
+   "bossKind": "mo",
+   "bossHp": 30000,
+   "bossDmg": 70,
+   "cave": null
+  },
+  {
+   "id": "zhenmo",
+   "name": "镇魔塔",
+   "pos": "昆吾山·镇魔塔 第九层",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "塔底下压着元刹圣祖的分魂。银月站在塔前，第一次不肯往前走。",
+   "arc": "G",
+   "enemies": [
+    "gui2",
+    "kui2",
+    "dajinxiu"
+   ],
+   "elites": [
+    "叶家元婴",
+    "元刹魔像"
+   ],
+   "boss": "元刹圣祖分魂",
+   "bossKind": "blood",
+   "bossHp": 34000,
+   "bossDmg": 76,
+   "cave": null
+  },
+  {
+   "id": "xiaoji",
+   "name": "小极宫",
+   "pos": "北夜·小极宫",
+   "type": "combat",
+   "tag": "战斗",
+   "desc": "北方冰原上的小极宫，和虚天殿是一脉。冰窟底下冻着万年玄冰。",
+   "arc": "G",
+   "enemies": [
+    "yaoshou2",
+    "kui2",
+    "dajinxiu"
+   ],
+   "elites": [
+    "妖族先锋",
+    "小极宫弟子"
+   ],
+   "boss": "寒俪上人",
+   "bossKind": "mo",
+   "bossHp": 32000,
+   "bossDmg": 72,
+   "cave": null
+  },
+  {
+   "id": "xutian2",
+   "name": "虚天殿·闭关",
+   "pos": "乱星海·虚天殿",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "从虚天殿的传送阵进来，出去的路要八十年后才开。那就修八十年。",
+   "arc": "G",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "xinggong",
+   "name": "乱星海·星宫",
+   "pos": "乱星海·天星城 星宫",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "天星双圣开价：三次出手，换一套功法。他答应了。",
+   "arc": "H",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "kunpeng",
+   "name": "鲲鹏之战",
+   "pos": "乱星海·外海",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "罗睺与游天鲲鹏在外海打了一场。打完了，海上落了一根羽毛。",
+   "arc": "H",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "luoyun2",
+   "name": "落云宗立威",
+   "pos": "天南·云梦山 落云宗",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "天南两个元婴后期联手压落云宗。他回来了，只站了一场。",
+   "arc": "H",
+   "enemies": [
+    "zhengdao",
+    "moxiu2",
+    "kui2"
+   ],
+   "elites": [
+    "大修士护卫",
+    "元婴后期修士"
+   ],
+   "boss": "鸾鸣门·双修夫妇",
+   "bossKind": "mo",
+   "bossHp": 40000,
+   "bossDmg": 84,
+   "cave": null
+  },
+  {
+   "id": "tianlan",
+   "name": "天澜圣兽·雷劫",
+   "pos": "天澜草原·圣山",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "天澜圣兽渡化形雷劫。它求了一个人替它挡三道雷。",
+   "arc": "H",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "liudao",
+   "name": "乱星海·斩六道",
+   "pos": "乱星海·天星城",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "六道夺了万天明的肉身，占了星宫。天星双圣的最后一次出手，用在这里。",
+   "arc": "H",
+   "enemies": [
+    "gui2",
+    "kui2",
+    "dajinxiu"
+   ],
+   "elites": [
+    "六道分身",
+    "星宫修士"
+   ],
+   "boss": "六道·万天明",
+   "bossKind": "mo",
+   "bossHp": 46000,
+   "bossDmg": 92,
+   "cave": null
+  },
+  {
+   "id": "jiezi",
+   "name": "坠魔谷·芥子空间",
+   "pos": "天南·坠魔谷 内谷",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "把灵渺园炼成芥子空间。石门一落，外头就是三百年。",
+   "arc": "H",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": "jiezi"
+  },
+  {
+   "id": "feisheng",
+   "name": "五龙海·飞升",
+   "pos": "五龙海·空间节点",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "银月留下的空间节点在五龙海。人界的事都了了，该走了。",
+   "arc": "H",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "fujia",
+   "name": "元武国·付家",
+   "pos": "元武国·付家堡",
+   "type": "combat",
+   "tag": "支线",
+   "desc": "辛如音临终托付的那件事。付家的嫡系，一个不留。",
+   "arc": "F",
+   "enemies": [
+    "zhengdao",
+    "moxiu2",
+    "kui"
+   ],
+   "elites": [
+    "付家供奉",
+    "付家嫡系"
+   ],
+   "boss": "付家家主",
+   "bossKind": "mo",
+   "bossHp": 15000,
+   "bossDmg": 50,
+   "cave": null
+  },
+  {
+   "id": "huixiang",
+   "name": "越国·韩家村",
+   "pos": "越国·镜州 山边小村",
+   "type": "story",
+   "tag": "支线",
+   "desc": "走了这么多年，村口那棵老树还在。",
+   "arc": "F",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "zijian",
+   "name": "乱星海·紫灵",
+   "pos": "乱星海·妙音门旧地",
+   "type": "story",
+   "tag": "支线",
+   "desc": "妙音门早散了。紫灵被星宫扣着，赎她的价钱是一枚妖丹。",
+   "arc": "H",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "anyuan",
+   "name": "安远城",
+   "pos": "灵界·安远城",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "飞升灵界，落在一片陌生荒原。最近的城叫安远，城里有家天东商号。",
+   "arc": "I",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "heifeng",
+   "name": "黑凤族领地",
+   "pos": "灵界·黑凤族 荒岭",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "黑凤族的荒岭上，三头妖修拦路。韩立要的，是它们守着的真灵鳞片。",
+   "arc": "I",
+   "enemies": [
+    "yaoshou2",
+    "yaoxiu",
+    "dajinxiu"
+   ],
+   "elites": [
+    "黑凤族长老",
+    "黑凤族守卫"
+   ],
+   "boss": "黑凤族三妖",
+   "bossKind": "beast",
+   "bossHp": 52000,
+   "bossDmg": 96,
+   "cave": null
+  },
+  {
+   "id": "lianxu",
+   "name": "安远城外·五行合一",
+   "pos": "灵界·安远城外 荒原",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "腾龙丹在手，五行之力也拧成了一股。灵界的第一道大关，就在这片荒原上过。",
+   "arc": "I",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "fengyuan",
+   "name": "风元大陆",
+   "pos": "灵界·风元大陆",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "已知三片大陆里最小的一块，种族却最多。玄天斩灵剑的卦象，就落在这片大陆的西北角。",
+   "arc": "J",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": "yuangong"
+  },
+  {
+   "id": "shisan",
+   "name": "十三族会盟",
+   "pos": "灵界·玉皇顶",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "玉皇顶摆了十三把石椅。十二把坐满了，第十三把空着——那是人族的位子。",
+   "arc": "J",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "guanghan",
+   "name": "广寒界",
+   "pos": "灵界·广寒界",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "灵界有名的大秘境，寒气三千年不散。界里守着的东西，比寒气更难缠。",
+   "arc": "J",
+   "enemies": [
+    "kui2",
+    "dajinxiu",
+    "zhengdao"
+   ],
+   "elites": [
+    "广寒界守卫",
+    "寒魄傀儡"
+   ],
+   "boss": "广寒界·千机子",
+   "bossKind": "mo",
+   "bossHp": 68000,
+   "bossDmg": 112,
+   "cave": null
+  },
+  {
+   "id": "heti_guan",
+   "name": "广寒界·合体",
+   "pos": "灵界·广寒界 寒玉台",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "合体丹在手，真灵之血也够了。三千年一次的大天劫，就在这寒玉台上过。",
+   "arc": "J",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "liangzu",
+   "name": "两族大乘",
+   "pos": "灵界·天渊城",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "天渊城长老会。人妖两族凑不齐十个合体长老，谁都不肯把手里的人放出来。",
+   "arc": "K",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": "tycave"
+  },
+  {
+   "id": "shengdao",
+   "name": "圣岛",
+   "pos": "灵界·圣岛",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "人族圣地。两族大乘在此议事，灵皇大比的名分也从这里出。",
+   "arc": "K",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "mojie",
+   "name": "魔界之约",
+   "pos": "灵界·魔界入口",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "荒原尽头裂开一道黑口。魔界的约，得有人去赴。",
+   "arc": "K",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "moban",
+   "name": "魔斑降世",
+   "pos": "灵界·天渊城外 荒原",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "荒原上空裂出一块黑斑，不散，也不动。天渊城的人还没来，懂行的人已经脸白了。",
+   "arc": "K",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "yitian",
+   "name": "倚天城·人魔之战",
+   "pos": "灵界·倚天城",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "魔族大军压到倚天城下。城墙上站满了人，也站满了不敢退的人。",
+   "arc": "K",
+   "enemies": [
+    "gui2",
+    "moxiu2",
+    "dajinxiu"
+   ],
+   "elites": [
+    "魔族魔修",
+    "血魔"
+   ],
+   "boss": "魔族魔修",
+   "bossKind": "mo",
+   "bossHp": 85000,
+   "bossDmg": 130,
+   "cave": null
+  },
+  {
+   "id": "huangquan",
+   "name": "黄泉地火",
+   "pos": "灵界·魔界 黄泉地火",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "魔界深处的地火，烧的是魂魄。镇魔锁锁着的东西，比地火更烫。",
+   "arc": "K",
+   "enemies": [
+    "gui2",
+    "moxiu2",
+    "guixiu"
+   ],
+   "elites": [
+    "镇魔锁守卫",
+    "黄泉鬼将"
+   ],
+   "boss": "镇魔锁·车骑恭",
+   "bossKind": "mo",
+   "bossHp": 95000,
+   "bossDmg": 140,
+   "cave": null
+  },
+  {
+   "id": "moyuan",
+   "name": "魔源海",
+   "pos": "魔界·魔源海",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "魔界最东边的一片海，海上没有岛，只有雾。伪魔珠压着气息，压不住海里的东西。",
+   "arc": "K",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "xiaoling",
+   "name": "小灵天",
+   "pos": "灵界·小灵天",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "魔界里藏着一方小世界。守着那一炉火的人，比这方天还老。",
+   "arc": "K",
+   "enemies": [
+    "kui2",
+    "dajinxiu",
+    "zhengdao"
+   ],
+   "elites": [
+    "小灵天守卫",
+    "灵天傀儡"
+   ],
+   "boss": "小灵天镇守",
+   "bossKind": "mo",
+   "bossHp": 105000,
+   "bossDmg": 150,
+   "cave": "xlcave"
+  },
+  {
+   "id": "modajie",
+   "name": "魔界大劫",
+   "pos": "魔界·苦灵岛",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "魔界深处的苦灵岛。岛下锁着洗灵池，池里一天抵外面一年；岛外守着两位圣祖，和一座岛的魔物。",
+   "arc": "K",
+   "enemies": [
+    "gui2",
+    "moxiu2",
+    "guixiu"
+   ],
+   "elites": [
+    "圣祖魔卫",
+    "苦灵岛守卫"
+   ],
+   "boss": "元魇圣祖·化身",
+   "bossKind": "mo",
+   "bossHp": 118000,
+   "bossDmg": 158,
+   "cave": null
+  },
+  {
+   "id": "sanjie",
+   "name": "三劫·进阶大乘",
+   "pos": "灵界·荒原 劫云下",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "五行之劫、真雷劫、心魔之劫。三劫过尽，才是大乘。",
+   "arc": "L",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "jiujie",
+   "name": "九劫现",
+   "pos": "灵界·荒原 劫云下",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "九道仙劫压顶。过得去，才谈得上飞升。",
+   "arc": "L",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "qunqiang",
+   "name": "群强之陨",
+   "pos": "灵界·金色世界",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "他赶到的时候，仗已经打完了。金色世界塌了一半，坑底还立着一个金色巨人。",
+   "arc": "L",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "xianshi",
+   "name": "献祭·风元大陆",
+   "pos": "灵界·鸣煞之地",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "祭坛下方，一面青色古镜悬在半空。镜里是噬金虫王，正和金甲士缠斗。银色法盘还在往法阵里灌符文。",
+   "arc": "L",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "zhangtianping",
+   "name": "掌天瓶·盗天瓶",
+   "pos": "灵界·鸣煞之地 盆地",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "两仪微尘阵炸成一个万里大坑。马良赤身裸体地立在坑心，胸口起伏。然后两只瓶子，隔着空气互相叫了起来。",
+   "arc": "L",
+   "enemies": [
+    "gui2",
+    "moxiu2",
+    "guixiu"
+   ],
+   "elites": [
+    "九元观随从",
+    "金色甲士"
+   ],
+   "boss": "马良·真仙之身",
+   "bossKind": "mo",
+   "bossHp": 260000,
+   "bossDmg": 300,
+   "cave": null
+  },
+  {
+   "id": "zhenxian",
+   "name": "真仙之身",
+   "pos": "灵界·荒原 雷光中",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "渡劫之后，铸真仙之身。",
+   "arc": "L",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "zhanxian",
+   "name": "斩仙·万灵血玺",
+   "pos": "灵界·荒原 血河",
+   "type": "boss",
+   "tag": "终局战",
+   "desc": "八条五爪血龙从血河里爬出来。仙界来的真仙，被界面之力压着，还是大乘的威压。",
+   "arc": "L",
+   "enemies": [
+    "gui2",
+    "moxiu2",
+    "guixiu"
+   ],
+   "elites": [
+    "万灵血龙",
+    "九元观随从"
+   ],
+   "boss": "马良·九元观真仙",
+   "bossKind": "mo",
+   "bossHp": 300000,
+   "bossDmg": 320,
+   "cave": null
+  },
+  {
+   "id": "huimoyuan",
+   "name": "再回魔源",
+   "pos": "魔界·魔源海 苦灵谷",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "银色鳞片浮出一行古文：两年后，真龙之岛，广灵道果大会。赴会之前，先去魔界寻瓶灵。",
+   "arc": "L",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "daoguo",
+   "name": "道果大会",
+   "pos": "灵界·真龙之岛 禁制中",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "龙族用禁制圈出一整片山林，道果就藏在里面。规矩只有一条：抢到手的，才算你的。",
+   "arc": "L",
+   "enemies": [
+    "kui2",
+    "yaoshou2",
+    "dajinxiu"
+   ],
+   "elites": [
+    "化木为灵·巨人",
+    "异界大乘"
+   ],
+   "boss": "天象尊者",
+   "bossKind": "mo",
+   "bossHp": 200000,
+   "bossDmg": 210,
+   "cave": null
+  },
+  {
+   "id": "renzu",
+   "name": "人族之变",
+   "pos": "灵界·真龙之岛",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "道果下肚，他抱拳告辞。他不知道的是，身后的龙族长者刚刚看穿了他体内那处裂痕。",
+   "arc": "L",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "fsjie",
+   "name": "飞升之劫",
+   "pos": "灵界·荒原 劫云下",
+   "type": "boss",
+   "tag": "终局",
+   "desc": "正午，阳气最浓的时候。劫云压到头顶百丈，云里还有别的东西在等。",
+   "arc": "L",
+   "enemies": [
+    "gui2",
+    "moxiu2",
+    "guixiu"
+   ],
+   "elites": [
+    "魔君化影",
+    "劫雷凝形"
+   ],
+   "boss": "天外魔君·化身",
+   "bossKind": "mo",
+   "bossHp": 240000,
+   "bossDmg": 260,
+   "cave": null
+  },
+  {
+   "id": "xianjie",
+   "name": "飞升仙界",
+   "pos": "仙界·接引台",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "接引台在前。人界、灵界、魔界，都留在身后了。",
+   "arc": "L",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "linghuang",
+   "name": "灵皇大比",
+   "pos": "灵界·圣岛 擂场",
+   "type": "boss",
+   "tag": "支线",
+   "desc": "灵皇大比，灵界百族抢名分的地方。台上只认胜负，不认来历。",
+   "arc": "K",
+   "enemies": [
+    "zhengdao",
+    "moxiu2",
+    "dajinxiu"
+   ],
+   "elites": [
+    "妖修",
+    "灵将"
+   ],
+   "boss": "灵将",
+   "bossKind": "mo",
+   "bossHp": 80000,
+   "bossDmg": 125,
+   "cave": null
+  },
+  {
+   "id": "zhandacheng",
+   "name": "斩大乘",
+   "pos": "灵界·荒原",
+   "type": "boss",
+   "tag": "支线",
+   "desc": "一名大乘修士拦路，说是要试试「新晋大乘」的斤两。",
+   "arc": "L",
+   "enemies": [
+    "kui2",
+    "dajinxiu",
+    "moxiu2"
+   ],
+   "elites": [
+    "大乘随从",
+    "护道傀儡"
+   ],
+   "boss": "大乘修士",
+   "bossKind": "mo",
+   "bossHp": 130000,
+   "bossDmg": 175,
+   "cave": null
+  },
+  {
+   "id": "shengshi",
+   "name": "圣岛使者再来",
+   "pos": "灵界·荒原",
+   "type": "story",
+   "tag": "支线",
+   "desc": "斩了大乘的第三天，荒原上来了一位白袍使者。他没带剑，只带了一句话。",
+   "arc": "L",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "heihu",
+   "name": "黑葫城",
+   "pos": "魔界·黑葫城",
+   "type": "story",
+   "tag": "支线",
+   "desc": "魔界边城，黑葫城里什么都卖，什么都不问来路。",
+   "arc": "L",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "baiguang",
+   "name": "白光界",
+   "pos": "魔界·白光界",
+   "type": "boss",
+   "tag": "支线",
+   "desc": "魔界夹缝里的一方白光小界，界里钉着一枚土皇钉。",
+   "arc": "L",
+   "enemies": [
+    "gui2",
+    "guixiu",
+    "dajinxiu"
+   ],
+   "elites": [
+    "白光守卫",
+    "土皇钉傀儡"
+   ],
+   "boss": "白光界·土皇钉",
+   "bossKind": "mo",
+   "bossHp": 120000,
+   "bossDmg": 165,
+   "cave": null
+  },
+  {
+   "id": "tianmo",
+   "name": "天魔契约",
+   "pos": "灵界·荒原",
+   "type": "story",
+   "tag": "支线",
+   "desc": "荒原上摆着一纸契约。签了，力量来得快；代价写在最后一行。",
+   "arc": "L",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "diyi",
+   "name": "第一大乘",
+   "pos": "灵界·荒原",
+   "type": "boss",
+   "tag": "支线",
+   "desc": "灵界「第一大乘」的名号，得有人来接。来的人，不打算让。",
+   "arc": "L",
+   "enemies": [
+    "zhengdao",
+    "kui2",
+    "dajinxiu"
+   ],
+   "elites": [
+    "第一大乘护法",
+    "大乘傀儡"
+   ],
+   "boss": "第一大乘",
+   "bossKind": "mo",
+   "bossHp": 160000,
+   "bossDmg": 200,
+   "cave": null
+  },
+  {
+   "id": "huirenjie",
+   "name": "重回人界",
+   "pos": "人界·越国 山边小村",
+   "type": "story",
+   "tag": "支线",
+   "desc": "飞升之前，回一趟人界。村口那棵老树还在。",
+   "arc": "L",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "yuyang",
+   "name": "虞阳城",
+   "pos": "灵界·虞阳城",
+   "type": "market",
+   "tag": "坊市",
+   "desc": "妖族自己的城。墙是兽骨夯的，坊市里卖的货和人族坊市不是一路——伴妖草论把抓，妖丹按颗数。",
+   "arc": "L",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "yuyang_dou",
+   "name": "虞阳城·城斗场",
+   "pos": "灵界·虞阳城 斗场",
+   "type": "boss",
+   "tag": "支线",
+   "desc": "妖族城里的斗场，规矩只有一条：下场的人，输赢自己认。今日压了外乡人的彩头，堆得比石桌还高。",
+   "arc": "L",
+   "enemies": [
+    "yaoshou2",
+    "kui2",
+    "moxiu2"
+   ],
+   "elites": [
+    "妖修",
+    "妖修"
+   ],
+   "boss": "虞阳城·妖修",
+   "bossKind": "mo",
+   "bossHp": 75000,
+   "bossDmg": 120,
+   "cave": null
+  },
+  {
+   "id": "tianyuan",
+   "name": "天渊坊市",
+   "pos": "灵界·天渊城",
+   "type": "market",
+   "tag": "坊市",
+   "desc": "天渊城的坊市。灵界的货以真灵材料与人界见不到的功法为主，灵石在这里才花得出去。",
+   "arc": "I",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "linghuan",
+   "name": "灵寰界·荒地",
+   "pos": "仙界·灵寰界 荒地",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "灰白的荒地，遍地的石头和黄尘。一个六七岁的女童攥着拨浪鼓在跑，草丛里躺着一个人。",
+   "arc": "M",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "suxing",
+   "name": "苏醒·我是韩立",
+   "pos": "仙界·灵寰界 旧屋",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "他醒过来，头疼欲裂。记忆像碎掉的镜子，一片一片自己浮上来。",
+   "arc": "M",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "lingyan",
+   "name": "灵焰山脉·通易谷",
+   "pos": "仙界·灵寰界 冷焰宗",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "冷焰宗的藏经阁嵌在崖壁上，禁制一层套一层。他不是来打架的，他是来偷书的。",
+   "arc": "M",
+   "enemies": [
+    "lh_hanbing",
+    "lh_xiongshou",
+    "lh_lingzhu"
+   ],
+   "elites": [
+    "冷焰宗·护法",
+    "灵寰散修"
+   ],
+   "boss": "白石真人",
+   "bossKind": "mo",
+   "bossHp": 62000,
+   "bossDmg": 230,
+   "cave": null
+  },
+  {
+   "id": "xiaoping",
+   "name": "掌天瓶·失而复得",
+   "pos": "仙界·灵寰界 旧屋",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "袖中忽然一热。他摸出来一只巴掌大的青瓶，瓶身墨绿灵纹一道道亮着。",
+   "arc": "M",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "tiangui",
+   "name": "天鬼出世",
+   "pos": "仙界·灵寰界 黑雾谷",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "黑雾里走出一个形体，每一只眼睛都在看。看一眼，魂就散一半。",
+   "arc": "M",
+   "enemies": [
+    "lh_lingzhu",
+    "lh_hanbing",
+    "lh_xiongshou"
+   ],
+   "elites": [
+    "天鬼·分魂",
+    "凶兽"
+   ],
+   "boss": "百目天鬼",
+   "bossKind": "mo",
+   "bossHp": 88000,
+   "bossDmg": 268,
+   "cave": null
+  },
+  {
+   "id": "chulong",
+   "name": "烛龙道·第一道主",
+   "pos": "仙界·烛龙道 白玉峰",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "白玉峰顶站着十位金仙道主。峰外又来了一位银须男子——天庭的人，比道主更讲规矩。",
+   "arc": "M",
+   "enemies": [
+    "xj_lunhui",
+    "xj_tianwei",
+    "xj_daozhu"
+   ],
+   "elites": [
+    "烛龙道·长老",
+    "轮回殿·影卫"
+   ],
+   "boss": "萧晋寒·天庭使者",
+   "bossKind": "mo",
+   "bossHp": 330000,
+   "bossDmg": 360,
+   "cave": null
+  },
+  {
+   "id": "huijie",
+   "name": "灰界·石中坐客",
+   "pos": "仙界·灰界",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "灰界里没有风，也没有光。到处是石头雕像，最深处坐着一位寸发不生的小人。",
+   "arc": "M",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "taiyi",
+   "name": "进阶太乙",
+   "pos": "仙界·青黑山谷",
+   "type": "story",
+   "tag": "破境",
+   "desc": "遍地异兽残尸，血液汇成近百里的湖。湖心漂着一朵合拢的白色莲苞。",
+   "arc": "M",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "dijiang",
+   "name": "帝江坊·夜阳城",
+   "pos": "仙界·魔域 摩诃区 夜阳城",
+   "type": "market",
+   "tag": "坊市",
+   "desc": "魔域最大的一座坊市。城里的坊市不许驾车入内，十四分岔的街，全是丹药灵材与法则之物。",
+   "arc": "M",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "xingqi",
+   "name": "星器·五城会武",
+   "pos": "仙界·玄城 玄斗场",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "玄斗场上的号角响过三遍。厄脍城主叫停了会武，宣布带人进积鳞空境深处的秘境。",
+   "arc": "M",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "dadi",
+   "name": "大墟",
+   "pos": "仙界·积鳞空境 大墟",
+   "type": "boss",
+   "tag": "秘境战",
+   "desc": "一脚踏进去，五感全失，眼前漆黑。等恢复过来，脚下已是无边无际的昏黄戈壁。",
+   "arc": "M",
+   "enemies": [
+    "xj_shimei",
+    "xj_xuechi",
+    "xj_linv"
+   ],
+   "elites": [
+    "大墟炼尸",
+    "血门守卫"
+   ],
+   "boss": "鳞犼·守门",
+   "bossKind": "mo",
+   "bossHp": 420000,
+   "bossDmg": 400,
+   "cave": null
+  },
+  {
+   "id": "xiedao",
+   "name": "积鳞空境·天变了",
+   "pos": "仙界·积鳞空境 地底大殿",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "殿里金光正盛。蟹道人忽然仰起头——他好像一直在等这一刻。",
+   "arc": "M",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "jingong",
+   "name": "独闯仙宫·诛五恶",
+   "pos": "仙界·大金源仙域 金源仙宫",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "宫门大开着。他一个人走进去，像走进自己家的院子。",
+   "arc": "M",
+   "enemies": [
+    "x4_yingwei",
+    "x4_tianyin",
+    "xj_tianwei"
+   ],
+   "elites": [
+    "金源仙宫·侍卫",
+    "天阴五子"
+   ],
+   "boss": "东方白·金源宫主",
+   "bossKind": "mo",
+   "bossHp": 520000,
+   "bossDmg": 440,
+   "cave": null
+  },
+  {
+   "id": "taisui",
+   "name": "太岁府·各方云集",
+   "pos": "仙界·大金源仙域 太岁府",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "灰色巨塔立在秘境正中。塔前聚了一千多人，没有一个人肯站到第一排。",
+   "arc": "M",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "chongchao",
+   "name": "虫巢·大罗鬼王",
+   "pos": "仙界·大金源仙域 虫巢",
+   "type": "boss",
+   "tag": "秘境战",
+   "desc": "身后是铺天盖地的虫群，前面是一片赤红的岩浆湖。没有第三个方向。",
+   "arc": "M",
+   "enemies": [
+    "x4_huosui",
+    "x4_yingwei",
+    "x5_guiwu"
+   ],
+   "elites": [
+    "火岁萤虫",
+    "十八层守卫"
+   ],
+   "boss": "大罗鬼王",
+   "bossKind": "mo",
+   "bossHp": 620000,
+   "bossDmg": 470,
+   "cave": null
+  },
+  {
+   "id": "suidian",
+   "name": "岁月殿·夺灯",
+   "pos": "仙界·大金源仙域 岁月殿",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "殿门半掩，缝里透出耀眼金光。门前立着三十六柄石剑，剑尖一律朝上。",
+   "arc": "M",
+   "enemies": [
+    "x4_daobing",
+    "x4_yingwei",
+    "x5_guiwu"
+   ],
+   "elites": [
+    "岁月殿·金甲道兵",
+    "石剑残影"
+   ],
+   "boss": "奇摩子",
+   "bossKind": "mo",
+   "bossHp": 780000,
+   "bossDmg": 500,
+   "cave": null
+  },
+  {
+   "id": "daluo",
+   "name": "进阶大罗·天人境",
+   "pos": "仙界·蛮荒界域 花枝洞天",
+   "type": "story",
+   "tag": "破境",
+   "desc": "花枝洞天的银色光门外，万里云海被搅成一道巨龙卷，从高天上垂落下来。",
+   "arc": "M",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": "huazhi"
+  },
+  {
+   "id": "wubao",
+   "name": "鎏金城·万宝节",
+   "pos": "仙界·大金源仙域 鎏金城",
+   "type": "market",
+   "tag": "坊市",
+   "desc": "鎏金城没有主人。九层酒楼的雅间里坐着三个人，一个是他，另外两个不太像人。",
+   "arc": "M",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "jiuyuan",
+   "name": "九元城·鬼阵",
+   "pos": "仙界·大金源仙域 九元城",
+   "type": "boss",
+   "tag": "秘境战",
+   "desc": "鼎身上的铭文只有四个字。为了这四个字，他一路追到了九元城的底下。",
+   "arc": "M",
+   "enemies": [
+    "x5_guiwu",
+    "x5_guibing",
+    "x4_yingwei"
+   ],
+   "elites": [
+    "鬼阵·鬼兵",
+    "九元城守卫"
+   ],
+   "boss": "鬼灵子",
+   "bossKind": "mo",
+   "bossHp": 880000,
+   "bossDmg": 540,
+   "cave": null
+  },
+  {
+   "id": "zaimiao",
+   "name": "再战妙法",
+   "pos": "仙界·大金源仙域 林间凉亭",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "银色光门在同伴身后合上。门外，方圆百里已经冻成了一片冰雪。",
+   "arc": "M",
+   "enemies": [
+    "x4_yingwei",
+    "xj_xuechi",
+    "x5_guiwu"
+   ],
+   "elites": [
+    "九元观·影卫",
+    "妙法座下"
+   ],
+   "boss": "妙法仙尊",
+   "bossKind": "mo",
+   "bossHp": 960000,
+   "bossDmg": 560,
+   "cave": null
+  },
+  {
+   "id": "zhanshi",
+   "name": "斩尸",
+   "pos": "仙界·荒岛 祭坛",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "坛上有两个人面对面坐着。其中一个，坐的是他的旧躯壳。",
+   "arc": "M",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "youming",
+   "name": "幽冥·骨皇",
+   "pos": "仙界·幽冥 岛中鬼殿",
+   "type": "boss",
+   "tag": "秘境战",
+   "desc": "门楣上没有匾额，只有两扇紧闭的门。门前站着两个不太像人的东西。",
+   "arc": "M",
+   "enemies": [
+    "x5_guiwu",
+    "x5_guibing",
+    "x5_huanghun"
+   ],
+   "elites": [
+    "鬼将",
+    "骨皇卫士"
+   ],
+   "boss": "骨皇",
+   "bossKind": "mo",
+   "bossHp": 1150000,
+   "bossDmg": 600,
+   "cave": null
+  },
+  {
+   "id": "leihai",
+   "name": "雷海炼剑",
+   "pos": "仙界·无尽雷海",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "雷夔的影像散尽时，天上有门。门没开，只从里面漏出来一点威势。",
+   "arc": "M",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "fuyao",
+   "name": "赴约·仙界大劫",
+   "pos": "仙界·龙渊仙域",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "约的地方很远。来的人，比约定的多了一个。",
+   "arc": "M",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "shifang",
+   "name": "十方万仙·宴起",
+   "pos": "仙界·天庭 十方万仙之宴",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "宴摆在天庭。四面八方都有座位，只有他的名字写在请帖最下面一行。",
+   "arc": "M",
+   "enemies": [
+    "x5_huanghun",
+    "x5_guibing",
+    "x4_daobing"
+   ],
+   "elites": [
+    "天庭·仙使",
+    "天道七君座下"
+   ],
+   "boss": "古或今",
+   "bossKind": "mo",
+   "bossHp": 1400000,
+   "bossDmg": 640,
+   "cave": null
+  },
+  {
+   "id": "daotian",
+   "name": "道天大劫",
+   "pos": "仙界·天庭",
+   "type": "story",
+   "tag": "破境",
+   "desc": "不是在闭关里，是在打着的中间。五感先走，然后是那一扇门。",
+   "arc": "M",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "daoyi",
+   "name": "大道归一·夺瓶",
+   "pos": "仙界·天庭 小瓶世界",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "小瓶世界里一共有三千团光。他只有一个人在里面走。",
+   "arc": "M",
+   "enemies": [
+    "x5_huanghun",
+    "x5_guiwu",
+    "x4_daobing"
+   ],
+   "elites": [
+    "天道残影",
+    "混沌化身"
+   ],
+   "boss": "古或今·混沌之身",
+   "bossKind": "mo",
+   "bossHp": 1800000,
+   "bossDmg": 700,
+   "cave": null
+  },
+  {
+   "id": "feiyu",
+   "name": "飞羽",
+   "pos": "人界·天南 无边海",
+   "type": "story",
+   "tag": "结局",
+   "desc": "海风很咸。这片地方灵气匮乏，他的神魂却异常舒坦。",
+   "arc": "M",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  },
+  {
+   "id": "wumengdao",
+   "name": "乌蒙岛·承认身份",
+   "pos": "仙界·黑风海域 乌蒙岛",
+   "type": "story",
+   "tag": "破境",
+   "desc": "气泡散尽时，他已站在一片陌生的海上。岛外站着三个人，等他给一个说法。",
+   "arc": "M",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": "wumeng"
+  },
+  {
+   "id": "poxu",
+   "name": "破碎虚空·神秘气泡",
+   "pos": "仙界·灵寰界 界壁",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "北斗异象。天空裂开一道缝，缝里不是星，是一层薄薄的膜。这方世界留不住了。",
+   "arc": "M",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "cave": null
+  }
+ ],
+ "enemies": {
+  "wolf": {
+   "name": "恶狼",
+   "hp": 9,
+   "spd": 62,
+   "dmg": 6,
+   "r": 9,
+   "xp": 1,
+   "spr": "wolf",
+   "drop": 0.03,
+   "tier": 0,
+   "mats": [
+    "m_wolfdan",
+    "m_chijing"
+   ]
+  },
+  "snake": {
+   "name": "毒蛇",
+   "hp": 6,
+   "spd": 74,
+   "dmg": 5,
+   "r": 7,
+   "xp": 1,
+   "spr": "snake",
+   "drop": 0.028,
+   "tier": 0,
+   "wob": true,
+   "mats": [
+    "m_shedan"
+   ]
+  },
+  "bat": {
+   "name": "蝙蝠",
+   "hp": 5,
+   "spd": 68,
+   "dmg": 4,
+   "r": 7,
+   "xp": 1,
+   "spr": "bat",
+   "drop": 0.032,
+   "tier": 0,
+   "wob": true,
+   "mats": [
+    "m_chijing"
+   ],
+   "eggDrop": {
+    "id": "egg_yunchi",
+    "chance": 0.02
+   }
+  },
+  "boar": {
+   "name": "野猪",
+   "hp": 24,
+   "spd": 42,
+   "dmg": 12,
+   "r": 11,
+   "xp": 2,
+   "spr": "boar",
+   "drop": 0.045,
+   "tier": 0,
+   "charge": true,
+   "mats": [
+    "m_huangjing"
+   ]
+  },
+  "bandit": {
+   "name": "马贼",
+   "hp": 16,
+   "spd": 48,
+   "dmg": 8,
+   "r": 10,
+   "xp": 2,
+   "spr": "bandit",
+   "drop": 0.04,
+   "tier": 0,
+   "mats": [
+    "m_jingtie",
+    "m_fuzhi"
+   ]
+  },
+  "assassin": {
+   "name": "死士",
+   "hp": 14,
+   "spd": 86,
+   "dmg": 9,
+   "r": 9,
+   "xp": 3,
+   "spr": "assassin",
+   "drop": 0.055,
+   "tier": 0,
+   "dash": true,
+   "mats": [
+    "m_lingmo",
+    "m_fuzhi"
+   ]
+  },
+  "ghoul": {
+   "name": "尸傀",
+   "hp": 52,
+   "spd": 26,
+   "dmg": 15,
+   "r": 12,
+   "xp": 4,
+   "spr": "ghoul",
+   "drop": 0.07,
+   "tier": 0,
+   "mats": [
+    "m_shihui"
+   ]
+  },
+  "disciple": {
+   "name": "外门弟子",
+   "hp": 30,
+   "spd": 66,
+   "dmg": 8,
+   "r": 9,
+   "xp": 3,
+   "spr": "disciple",
+   "drop": 0.05,
+   "tier": 0,
+   "mats": [
+    "m_jingtie"
+   ]
+  },
+  "shigui": {
+   "name": "石人",
+   "hp": 70,
+   "spd": 30,
+   "dmg": 14,
+   "r": 12,
+   "xp": 5,
+   "spr": "shigui",
+   "drop": 0.08,
+   "tier": 0,
+   "mats": [
+    "m_jingtie",
+    "m_chitong",
+    "m_xuantie",
+    "m_yusui"
+   ]
+  },
+  "guiling": {
+   "name": "鬼灵门弟子",
+   "hp": 120,
+   "spd": 62,
+   "dmg": 20,
+   "r": 10,
+   "xp": 5,
+   "spr": "assassin",
+   "drop": 0.055,
+   "tier": 0,
+   "dash": true,
+   "mats": [
+    "m_xueyu",
+    "m_fuzhi",
+    "m_lingmo"
+   ]
+  },
+  "moxiu": {
+   "name": "魔道修士",
+   "hp": 170,
+   "spd": 54,
+   "dmg": 24,
+   "r": 11,
+   "xp": 6,
+   "spr": "mo",
+   "drop": 0.06,
+   "tier": 0,
+   "mats": [
+    "m_xueyu",
+    "m_xuesha",
+    "m_hantie"
+   ]
+  },
+  "haishou": {
+   "name": "海妖兽",
+   "hp": 210,
+   "spd": 58,
+   "dmg": 26,
+   "r": 11,
+   "xp": 7,
+   "spr": "haishou",
+   "drop": 0.075,
+   "tier": 0,
+   "mats": [
+    "m_yaodan",
+    "m_banyao"
+   ]
+  },
+  "yuyao": {
+   "name": "婴鲤兽",
+   "hp": 150,
+   "spd": 74,
+   "dmg": 22,
+   "r": 9,
+   "xp": 6,
+   "spr": "snake",
+   "drop": 0.06,
+   "tier": 0,
+   "wob": true,
+   "mats": [
+    "m_yaodan"
+   ]
+  },
+  "guixiu": {
+   "name": "鬼物",
+   "hp": 250,
+   "spd": 70,
+   "dmg": 30,
+   "r": 10,
+   "xp": 8,
+   "spr": "guixiu",
+   "drop": 0.08,
+   "tier": 0,
+   "mats": [
+    "m_yanghun",
+    "m_xueyu"
+   ],
+   "skillDrop": {
+    "id": "sk_xuanyin",
+    "chance": 0.01
+   }
+  },
+  "kui": {
+   "name": "机关傀儡",
+   "hp": 300,
+   "spd": 34,
+   "dmg": 28,
+   "r": 13,
+   "xp": 8,
+   "spr": "kui",
+   "drop": 0.08,
+   "tier": 0,
+   "mats": [
+    "m_xuantie",
+    "m_hantie"
+   ],
+   "skillDrop": {
+    "id": "sk_sanyan",
+    "chance": 0.01
+   }
+  },
+  "dujiao": {
+   "name": "毒蛟",
+   "hp": 420,
+   "spd": 62,
+   "dmg": 38,
+   "r": 14,
+   "xp": 10,
+   "spr": "dujiao",
+   "drop": 0.1,
+   "tier": 0,
+   "wob": true,
+   "mats": [
+    "m_yaodan",
+    "m_banyao"
+   ],
+   "eggDrop": {
+    "id": "egg_mojiao",
+    "chance": 0.03
+   }
+  },
+  "guiwu": {
+   "name": "阴兽",
+   "hp": 620,
+   "spd": 66,
+   "dmg": 40,
+   "r": 11,
+   "xp": 14,
+   "spr": "guixiu",
+   "drop": 0.09,
+   "tier": 0,
+   "mats": [
+    "m_yanghun",
+    "m_xueyu"
+   ]
+  },
+  "shixiao": {
+   "name": "尸魈",
+   "hp": 700,
+   "spd": 58,
+   "dmg": 44,
+   "r": 12,
+   "xp": 15,
+   "spr": "ghoul",
+   "drop": 0.09,
+   "tier": 0,
+   "dash": true,
+   "mats": [
+    "m_shihui",
+    "m_yusui"
+   ]
+  },
+  "moxiu2": {
+   "name": "魔修",
+   "hp": 760,
+   "spd": 62,
+   "dmg": 46,
+   "r": 11,
+   "xp": 16,
+   "spr": "mo",
+   "drop": 0.1,
+   "tier": 0,
+   "mats": [
+    "m_xueyu",
+    "m_hantie"
+   ]
+  },
+  "fashi": {
+   "name": "慕兰法士",
+   "hp": 820,
+   "spd": 70,
+   "dmg": 50,
+   "r": 11,
+   "xp": 17,
+   "spr": "neimen",
+   "drop": 0.09,
+   "tier": 0,
+   "mats": [
+    "m_yusui",
+    "m_xuantie"
+   ]
+  },
+  "dajinxiu": {
+   "name": "散修",
+   "hp": 900,
+   "spd": 64,
+   "dmg": 52,
+   "r": 11,
+   "xp": 18,
+   "spr": "linmo",
+   "drop": 0.1,
+   "tier": 0,
+   "mats": [
+    "m_xuantie",
+    "m_yusui"
+   ]
+  },
+  "yaoshou2": {
+   "name": "妖兽",
+   "hp": 1000,
+   "spd": 60,
+   "dmg": 56,
+   "r": 13,
+   "xp": 20,
+   "spr": "haishou",
+   "drop": 0.11,
+   "tier": 0,
+   "mats": [
+    "m_yaodan",
+    "m_banyao"
+   ]
+  },
+  "yaoxiu": {
+   "name": "妖修",
+   "hp": 980,
+   "spd": 66,
+   "dmg": 54,
+   "r": 11,
+   "xp": 19,
+   "spr": "mo",
+   "drop": 0.1,
+   "tier": 0,
+   "mats": [
+    "m_zhenlinglin",
+    "m_yaodan"
+   ]
+  },
+  "gui2": {
+   "name": "魔物",
+   "hp": 1200,
+   "spd": 54,
+   "dmg": 62,
+   "r": 14,
+   "xp": 24,
+   "spr": "mo",
+   "drop": 0.12,
+   "tier": 0,
+   "mats": [
+    "m_xueyu",
+    "m_yanghun"
+   ]
+  },
+  "kui2": {
+   "name": "傀儡",
+   "hp": 1100,
+   "spd": 40,
+   "dmg": 58,
+   "r": 14,
+   "xp": 22,
+   "spr": "kui",
+   "drop": 0.12,
+   "tier": 0,
+   "mats": [
+    "m_gangyin",
+    "m_xuantie"
+   ]
+  },
+  "zhengdao": {
+   "name": "修士",
+   "hp": 880,
+   "spd": 66,
+   "dmg": 48,
+   "r": 11,
+   "xp": 17,
+   "spr": "neimen",
+   "drop": 0.09,
+   "tier": 0,
+   "mats": [
+    "m_yusui",
+    "m_xuantie"
+   ]
+  },
+  "xj_lunhui": {
+   "name": "轮回殿要犯",
+   "hp": 240000,
+   "spd": 82,
+   "dmg": 300,
+   "r": 24,
+   "xp": 900,
+   "spr": "assassin",
+   "drop": 0.4,
+   "tier": 2,
+   "mats": [
+    "m_xianyuanshi"
+   ]
+  },
+  "xj_tianwei": {
+   "name": "天庭金仙道主",
+   "hp": 210000,
+   "spd": 86,
+   "dmg": 275,
+   "r": 23,
+   "xp": 850,
+   "spr": "fashi",
+   "drop": 0.4,
+   "tier": 2,
+   "mats": [
+    "m_xianyuanshi",
+    "m_xuanhuang"
+   ]
+  },
+  "xj_daozhu": {
+   "name": "烛龙道长老",
+   "hp": 190000,
+   "spd": 76,
+   "dmg": 260,
+   "r": 23,
+   "xp": 760,
+   "spr": "disciple",
+   "drop": 0.35,
+   "tier": 1,
+   "mats": [
+    "m_xianyuanshi"
+   ]
+  },
+  "xj_shimei": {
+   "name": "尸魅",
+   "hp": 240000,
+   "spd": 84,
+   "dmg": 290,
+   "r": 23,
+   "xp": 880,
+   "spr": "ghost",
+   "drop": 0.35,
+   "tier": 1,
+   "mats": [
+    "m_xianyuanshi"
+   ]
+  },
+  "xj_xuechi": {
+   "name": "血池傀儡",
+   "hp": 260000,
+   "spd": 80,
+   "dmg": 305,
+   "r": 24,
+   "xp": 940,
+   "spr": "assassin",
+   "drop": 0.4,
+   "tier": 2,
+   "mats": [
+    "m_xianyuanshi",
+    "m_shijian"
+   ]
+  },
+  "xj_linv": {
+   "name": "鳞犼守门",
+   "hp": 300000,
+   "spd": 78,
+   "dmg": 330,
+   "r": 26,
+   "xp": 1100,
+   "spr": "beast",
+   "drop": 0.45,
+   "tier": 2,
+   "mats": [
+    "m_xianyuanshi",
+    "m_shijian"
+   ]
+  },
+  "xj_yizhou": {
+   "name": "灰界傀儡",
+   "hp": 180000,
+   "spd": 70,
+   "dmg": 250,
+   "r": 24,
+   "xp": 700,
+   "spr": "kui",
+   "drop": 0.35,
+   "tier": 1,
+   "mats": [
+    "m_xianyuanshi"
+   ]
+  },
+  "lh_xiongshou": {
+   "name": "灵寰凶兽",
+   "hp": 9000,
+   "spd": 46,
+   "dmg": 120,
+   "r": 15,
+   "xp": 40,
+   "spr": "wolf",
+   "drop": 0.1,
+   "tier": 0,
+   "mats": [
+    "m_xianyuanshi"
+   ]
+  },
+  "lh_hanbing": {
+   "name": "冷焰宗弟子",
+   "hp": 13000,
+   "spd": 54,
+   "dmg": 155,
+   "r": 15,
+   "xp": 55,
+   "spr": "fashi",
+   "drop": 0.12,
+   "tier": 0,
+   "mats": [
+    "m_xianyuanshi"
+   ]
+  },
+  "lh_lingzhu": {
+   "name": "灵寰灵族",
+   "hp": 17000,
+   "spd": 60,
+   "dmg": 185,
+   "r": 16,
+   "xp": 70,
+   "spr": "yaoshou2",
+   "drop": 0.12,
+   "tier": 0,
+   "mats": [
+    "m_xianyuanshi",
+    "m_xuanhuang"
+   ]
+  },
+  "lh_baishi": {
+   "name": "白石真人",
+   "hp": 62000,
+   "spd": 68,
+   "dmg": 230,
+   "r": 23,
+   "xp": 300,
+   "spr": "hermit",
+   "drop": 0.5,
+   "tier": 2,
+   "mats": [
+    "m_xianyuanshi",
+    "m_xuanhuang"
+   ]
+  },
+  "lh_tiangui": {
+   "name": "百目天鬼",
+   "hp": 88000,
+   "spd": 74,
+   "dmg": 268,
+   "r": 25,
+   "xp": 420,
+   "spr": "guixiu",
+   "drop": 0.6,
+   "tier": 2,
+   "mats": [
+    "m_xianyuanshi",
+    "m_xuanhuang"
+   ]
+  },
+  "x4_yingwei": {
+   "name": "九元观影卫",
+   "hp": 320000,
+   "spd": 96,
+   "dmg": 350,
+   "r": 24,
+   "xp": 1200,
+   "spr": "assassin",
+   "drop": 0.42,
+   "tier": 2,
+   "mats": [
+    "m_xianyuanshi"
+   ]
+  },
+  "x4_tianyin": {
+   "name": "金仙修士",
+   "hp": 300000,
+   "spd": 90,
+   "dmg": 344,
+   "r": 24,
+   "xp": 1150,
+   "spr": "disciple",
+   "drop": 0.42,
+   "tier": 2,
+   "mats": [
+    "m_xianyuanshi",
+    "m_shijian"
+   ]
+  },
+  "x4_huosui": {
+   "name": "火岁萤虫",
+   "hp": 290000,
+   "spd": 106,
+   "dmg": 330,
+   "r": 18,
+   "xp": 1080,
+   "spr": "ghost",
+   "drop": 0.4,
+   "tier": 1,
+   "mats": [
+    "m_xianyuanshi"
+   ]
+  },
+  "x4_daobing": {
+   "name": "金甲道兵",
+   "hp": 350000,
+   "spd": 84,
+   "dmg": 362,
+   "r": 25,
+   "xp": 1260,
+   "spr": "kui",
+   "drop": 0.45,
+   "tier": 2,
+   "mats": [
+    "m_xianyuanshi"
+   ]
+  },
+  "x5_guiwu": {
+   "name": "鬼物",
+   "hp": 380000,
+   "spd": 92,
+   "dmg": 392,
+   "r": 24,
+   "xp": 1400,
+   "spr": "ghost",
+   "drop": 0.45,
+   "tier": 2,
+   "mats": [
+    "m_xianyuanshi"
+   ]
+  },
+  "x5_guibing": {
+   "name": "鬼兵",
+   "hp": 360000,
+   "spd": 88,
+   "dmg": 382,
+   "r": 24,
+   "xp": 1350,
+   "spr": "guixiu",
+   "drop": 0.45,
+   "tier": 2,
+   "mats": [
+    "m_xianyuanshi"
+   ]
+  },
+  "x5_huanghun": {
+   "name": "荒魂",
+   "hp": 420000,
+   "spd": 98,
+   "dmg": 412,
+   "r": 26,
+   "xp": 1500,
+   "spr": "ghost",
+   "drop": 0.48,
+   "tier": 2,
+   "mats": [
+    "m_xianyuanshi",
+    "m_shijian"
+   ]
+  }
+ },
+ "items": {
+  "huiqi": "止血丹",
+  "lingzhi": "辟谷丹",
+  "lingshi": "低阶灵石",
+  "peiyuan": "养精丹",
+  "huanglong": "黄龙丹",
+  "jinsui": "金髓丸",
+  "zhuji": "筑基丹",
+  "qingyan": "轻身符",
+  "xueshen": "火弹符",
+  "shenxing": "神行符",
+  "jifeng": "爆裂符",
+  "qiannian": "清心符",
+  "lianqi": "破禁符",
+  "bichen": "避尘符",
+  "chuansong": "传送符",
+  "tishen": "替身傀儡",
+  "baoliebao": "爆裂符宝",
+  "changchun": "长春功残卷",
+  "zhangtian": "掌天瓶绿液",
+  "jipin": "极品灵石",
+  "jingtie": "精铁短剑",
+  "money_sword": "金蚨子母刃",
+  "chitong": "赤铜短戟",
+  "qingzhu": "青竹剑",
+  "moyu": "墨玉飞刀",
+  "xuantie": "玄铁重剑",
+  "a_bu": "粗布道袍",
+  "a_lupi": "兽皮软甲",
+  "a_ruanwei": "金丝软甲",
+  "a_hanyu": "寒玉甲",
+  "a_xuangui": "玄龟甲",
+  "t_mupai": "旧木牌",
+  "juling": "聚灵珠",
+  "t_xuanyu": "玄玉珠",
+  "t_tianlei": "天雷子",
+  "t_zhangtie": "张铁的铁牌",
+  "fb_huo": "火球符宝",
+  "fb_bing": "冰锥符宝",
+  "huyu": "护身玉符",
+  "fb_feng": "风刃符宝",
+  "qingyuan": "青元剑诀",
+  "dayan": "大衍诀",
+  "jiangchen": "降尘丹",
+  "xueling": "雪灵水",
+  "biyanjiu": "碧焰酒",
+  "haoyuan": "昊元丹",
+  "peiyin": "培婴丹",
+  "butian": "补天丹",
+  "w_qingzhu": "青竹蜂云剑",
+  "a_yunwen": "云纹法衣",
+  "t_shijin": "噬金虫袋",
+  "t_hunyuan": "混元钵",
+  "t_cantu": "虚天残图",
+  "t_dayi": "大挪移令",
+  "t_xutianding": "虚天鼎",
+  "t_yinyue": "银月",
+  "t_honghuang": "洪荒古宝",
+  "fb_jinkulou": "金骷髅符宝",
+  "fb_fenglei": "风雷翅",
+  "dayan2": "大衍诀·后三层",
+  "yuanci": "元磁神光",
+  "moyuan": "魔元丹",
+  "w_xuemo": "血魔剑",
+  "a_xuemo": "玄玉甲",
+  "a_jiaolong": "蛟龙甲",
+  "a_tiancan": "冰蚕衣",
+  "t_yanghuan": "阳环",
+  "t_guiluo": "鬼罗幡",
+  "t_yinluo": "阴罗幡",
+  "t_wuzi": "五子同心魔",
+  "t_yuanci": "元磁山",
+  "fb_sanyan": "三焰扇",
+  "t_pojie": "破界符",
+  "t_kui": "元婴后期傀儡",
+  "t_zicheng": "紫铖兜",
+  "t_beiji": "北极元光指环",
+  "sk_swift": "罗烟步·法诀",
+  "sk_fire": "火弹术·法诀",
+  "sk_orb": "金光罩·法诀",
+  "sk_nova": "定神符·法诀",
+  "sk_haste": "御风诀·法诀",
+  "sk_frost": "冰冻术·法诀",
+  "sk_changchun": "长春功·法诀",
+  "sk_sanyan": "三焰扇·扇法",
+  "sk_jianfen": "剑影分光术·法诀",
+  "sk_shayao": "煞妖诀·法诀",
+  "sk_xueling": "血灵钻·法诀",
+  "sk_mingwang": "明王诀·法诀",
+  "sk_jifeng": "疾风九变·法诀",
+  "sk_xuelian": "血炼神光·法诀",
+  "sk_dageng": "大庚剑阵·法诀",
+  "sk_tiandu": "天都尸火·法诀",
+  "sk_cuigu": "淬骨诀·法诀",
+  "sk_tuotian": "托天魔功·法诀",
+  "sk_xueying": "血影遁·法诀",
+  "sk_shishen": "失神刺·法诀",
+  "sk_huashen": "身外化身·法诀",
+  "sk_jzhen": "青蟠剑阵·法诀",
+  "sk_heisha": "黑煞修罗功·法诀",
+  "sk_jinshen": "禁神术·法诀",
+  "sk_lihun": "离魂术·法诀",
+  "sk_mengyin": "梦引术·法诀",
+  "sk_huanxing": "换形诀·法诀",
+  "sk_fansheng": "梵圣真魔功·法诀",
+  "sk_shadan": "煞丹术·法诀",
+  "sk_sanzhuan": "三转重元功·法诀",
+  "sk_fenglei": "风雷翅·炼法",
+  "sk_tongbao": "洞漩金光·法诀",
+  "sk_leishen": "辟邪神雷·雷诀",
+  "sk_qinxian": "惊神刺·阵图",
+  "sk_xuanyin": "玄阴经·残卷",
+  "sk_wuzi": "五子同心魔·魔诀",
+  "sk_pojie": "破界符",
+  "bag_ling": "灵兽袋",
+  "bag_ling2": "特制灵兽袋",
+  "ring_ling": "灵兽环",
+  "egg_yunchi": "云翅鸟卵",
+  "egg_mojiao": "墨蛟卵",
+  "tianhuo": "天火液",
+  "jiuqu": "九曲灵参丹",
+  "dianling": "定灵丹",
+  "sanzhong": "三转重元功",
+  "t_qingzhu": "青竹蜂云剑·金雷",
+  "lianzhi": "炼尸术残卷",
+  "gupu": "神秘小瓶",
+  "tenglong": "腾龙丹",
+  "heti": "合体丹",
+  "t_xuantianjian": "玄天斩灵剑",
+  "t_weimozhu": "伪魔珠",
+  "t_tuhuangding": "土皇钉",
+  "t_wanlingsan": "万灵伞",
+  "dan_shixian": "蚀仙丹",
+  "t_xuantianzhibao": "玄天之宝",
+  "sk_baimai": "百脉炼宝诀·法诀",
+  "sk_jingzhe": "惊蛰十二变·法诀",
+  "sk_fenglei3": "三炼风雷翅·炼法",
+  "sk_nianjian": "念剑诀·法诀",
+  "sk_jingang2": "金罡灭魔神雷·雷诀",
+  "sk_wangqing": "忘情诀·法诀",
+  "sk_niling": "逆灵真阴大法·法诀",
+  "w_wulongzha": "五龙铡",
+  "w_xuejing": "血晶摩诃剑",
+  "t_wansen": "万森法盘",
+  "t_qingtian": "擎天巨舟",
+  "dan_kunpeng": "鲲鹏舍利",
+  "t_wanlingxueyi": "万灵血玺",
+  "t_moguang": "魔光",
+  "t_huoxuzi": "火须子",
+  "t_yuanhejiwu": "元合五极山",
+  "t_jinglinglian": "净灵莲",
+  "t_liangyiwuchen": "两仪微尘阵",
+  "t_wannianjingsang": "万年金桑液",
+  "t_zhenlinliuying": "真麟留影",
+  "dan_zhihun": "真魂丹",
+  "t_zhangtianping": "掌天瓶",
+  "t_daotianping": "盗天瓶",
+  "dan_guangling": "广灵道果",
+  "t_xuanhuangs": "玄黄之索",
+  "t_lingyingjianfu": "灵婴剑符",
+  "t_tianwaifeidou": "天外飞豆",
+  "t_taifeidumu": "太蜚独目",
+  "t_xingqidun": "星斗盾",
+  "t_zhongshuileizhu": "重水雷珠",
+  "t_gengyuanfalian": "隔元法链",
+  "t_suiyueshendeng": "岁月神灯",
+  "t_youmingguizhua": "幽冥鬼爪",
+  "t_yanluozhiding": "阎罗之鼎",
+  "sk_niandan": "逆丹诀·法诀",
+  "sk_nuoyi": "小挪移空间术·法诀",
+  "sk_dawuxing": "大五行幻世诀·法诀",
+  "sk_zhenyan": "真言化轮经·法诀",
+  "sk_tiansha": "天煞镇狱功·法诀",
+  "m_chijing": "人参",
+  "m_huangjing": "黄精",
+  "m_zihua": "紫猴花",
+  "m_tianling": "天灵果",
+  "f_peiyuan": "养精丹方",
+  "f_huanglong": "黄龙丹方",
+  "f_zhuji": "筑基丹方",
+  "f_jinsui": "金髓丸方",
+  "t_shengxian": "升仙令",
+  "m_yusuizhi": "玉髓芝",
+  "m_longlin": "龙鳞果",
+  "m_nishang": "霓裳草",
+  "m_ziyehua": "子夜花",
+  "m_huangqiucao": "黄球草",
+  "m_baihezhi": "白鹤芝",
+  "m_wangyuecao": "望月草",
+  "m_hualongcao": "化龙草",
+  "m_huanglongcao": "黄龙草",
+  "m_kulianhua": "苦莲花",
+  "m_wangyouguo": "忘忧果",
+  "m_sanwucao": "三乌草",
+  "m_qixingcao": "七星草",
+  "m_qianjiehua": "千结花",
+  "m_heishaocao": "黑芍草",
+  "m_jinjingshen": "金精参",
+  "m_huangjingzhi": "黄精芝",
+  "m_fuyaobao": "筑基丹辅药包",
+  "m_jingtie": "精铁",
+  "m_chitong": "赤铜",
+  "m_xuantie": "玄铁",
+  "m_hantie": "寒铁",
+  "m_yusui": "玉髓",
+  "m_wolfdan": "妖狼内丹",
+  "m_shedan": "蛇胆",
+  "m_chongjing": "妖蟒晶核",
+  "m_xuesha": "血煞珠",
+  "m_shihui": "尸傀骨粉",
+  "m_fuzhi": "空白符纸",
+  "m_lingmo": "灵墨",
+  "m_yaodan": "妖丹",
+  "m_banyao": "伴妖草",
+  "m_jinlei": "金雷竹",
+  "m_lingru": "万年灵乳",
+  "m_yanghun": "养魂木",
+  "m_xueyu": "血玉",
+  "m_zhizhu": "血玉蜘蛛卵",
+  "m_gengjing": "庚精",
+  "m_chijingzhi": "三千年赤精芝",
+  "m_kuilei": "上古傀儡核",
+  "m_lingzhu": "灵烛果",
+  "m_yinzhi": "阴芝马",
+  "m_gangyin": "罡银沙",
+  "m_huodan": "火蟾兽内丹",
+  "m_hanhuo": "五色寒焰",
+  "m_jingang": "金刚舍利",
+  "m_kunpeng": "鲲鹏之羽",
+  "m_xuanbing": "万年玄冰",
+  "m_siling": "饲灵丸",
+  "m_huoling": "火灵草",
+  "m_jiuqu": "九曲灵参",
+  "m_manaojiao": "玛瑙角",
+  "m_lingzhi": "灵芝",
+  "m_yuanci": "元磁神山核心",
+  "m_zhenlingxue": "真灵之血",
+  "m_zhenlinglin": "真灵鳞片",
+  "m_xuantianteng": "玄天仙藤",
+  "m_beijiyuanjing": "北极元晶",
+  "m_daopai": "道牌",
+  "m_zhilongguo": "芝龙果",
+  "m_zhenlingpo": "真灵之魄",
+  "m_xilingchi": "洗灵池液",
+  "m_xianyuanshi": "仙元石",
+  "m_xuanhuang": "玄黄之气",
+  "m_shijian": "时间法则之物"
+ }
+}

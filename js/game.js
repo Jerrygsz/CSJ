@@ -1321,7 +1321,7 @@
       const e = {
         type: 'wolfking', x: pos.x, y: pos.y, hp, maxhp: hp,
         spd: 66 * (dm.spd || 1), dmg: (11 + G.time * 0.06) * diff * dDmg, r: 15, xpVal: 30, spr: 'wolf', scale: 2,
-        wob: false, charge: true, dash: false, hitFlash: 0, t: 0, howlT: 7, _orbCd: {}, elite: true, name: names[0] || '百年狼王'
+        wob: false, charge: true, dash: false, hitFlash: 0, t: 0, howlT: 7, _orbCd: {}, elite: true, name: names[0] || '头狼'
       };
       G.enemies.push(e); banner('⚠ 精英 · ' + e.name); Sfx.warn();
     } else {
@@ -2101,7 +2101,7 @@
         if (Math.random() < 0.6) G.parts.push({ x: b.x + U.rand(-10, 10), y: b.y + U.rand(-10, 10), vx: 0, vy: 0, life: 0.3, maxlife: 0.3, size: 5, color: '#9a8360' });
       }
       // 嚎叫召群：召什么由地图的 boss.summon 决定，横幅用 boss 自己的名字
-      // （原先是写死的「百年狼妖」，于是石傀儡、墨蛟、灵猿全都在「嚎叫召狼」）
+      // （原先是写死的「狼妖」，于是石人、墨蛟、灵猿全都在「嚎叫召狼」）
       b.sumT -= dt;
       if (b.sumT <= 0) {
         b.sumT = phase2 ? 7.5 : 10.5;

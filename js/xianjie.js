@@ -86,22 +86,22 @@
     xj_shimei:   { name: '尸魅', hp: 240000, spd: 84, dmg: 290, r: 23, xp: 880, spr: 'ghost', drop: 0.35, tier: 1, mats: ['m_xianyuanshi'] },
     xj_xuechi:   { name: '血池傀儡', hp: 260000, spd: 80, dmg: 305, r: 24, xp: 940, spr: 'assassin', drop: 0.4, tier: 2, mats: ['m_xianyuanshi', 'm_shijian'] },
     xj_linv:     { name: '鳞犼守门', hp: 300000, spd: 78, dmg: 330, r: 26, xp: 1100, spr: 'beast', drop: 0.45, tier: 2, mats: ['m_xianyuanshi', 'm_shijian'] },
-    xj_yizhou:   { name: '灰界石傀', hp: 180000, spd: 70, dmg: 250, r: 24, xp: 700, spr: 'kui', drop: 0.35, tier: 1, mats: ['m_xianyuanshi'] },
+    xj_yizhou:   { name: '灰界傀儡', hp: 180000, spd: 70, dmg: 250, r: 24, xp: 700, spr: 'kui', drop: 0.35, tier: 1, mats: ['m_xianyuanshi'] },
     lh_xiongshou: { name: '灵寰凶兽', hp: 9000, spd: 46, dmg: 120, r: 15, xp: 40, spr: 'wolf', drop: 0.10, tier: 0, mats: ['m_xianyuanshi'] },
     lh_hanbing:   { name: '冷焰宗弟子', hp: 13000, spd: 54, dmg: 155, r: 15, xp: 55, spr: 'fashi', drop: 0.12, tier: 0, mats: ['m_xianyuanshi'] },
     lh_lingzhu:   { name: '灵寰灵族', hp: 17000, spd: 60, dmg: 185, r: 16, xp: 70, spr: 'yaoshou2', drop: 0.12, tier: 0, mats: ['m_xianyuanshi', 'm_xuanhuang'] },
     lh_baishi:    { name: '白石真人', hp: 62000, spd: 68, dmg: 230, r: 23, xp: 300, spr: 'hermit', drop: 0.5, tier: 2, mats: ['m_xianyuanshi', 'm_xuanhuang'] },
     lh_tiangui:   { name: '百目天鬼', hp: 88000, spd: 74, dmg: 268, r: 25, xp: 420, spr: 'guixiu', drop: 0.6, tier: 2, mats: ['m_xianyuanshi', 'm_xuanhuang'] },
     // 卷四档（太岁府 / 虫巢 / 九元城）：此时韩立仍是太乙巅峰，对手已经开始是大罗的东西。
-    // 九元观影卫（X4C1035，4 次）、天阴五子（X4C1024《诛五恶》）、火岁萤虫（114 次）、
+    // 九元观影卫（X4C1035，4 次）、金仙修士（金仙 1333 次；五子作精英名）、火岁萤虫（114 次）、
     // 金甲道兵（X4C1109《道兵阵》，10 次）。
     x4_yingwei:   { name: '九元观影卫', hp: 320000, spd: 96, dmg: 350, r: 24, xp: 1200, spr: 'assassin', drop: 0.42, tier: 2, mats: ['m_xianyuanshi'] },
-    x4_tianyin:   { name: '天阴五子', hp: 300000, spd: 90, dmg: 344, r: 24, xp: 1150, spr: 'disciple', drop: 0.42, tier: 2, mats: ['m_xianyuanshi', 'm_shijian'] },
+    x4_tianyin:   { name: '金仙修士', hp: 300000, spd: 90, dmg: 344, r: 24, xp: 1150, spr: 'disciple', drop: 0.42, tier: 2, mats: ['m_xianyuanshi', 'm_shijian'] },
     x4_huosui:    { name: '火岁萤虫', hp: 290000, spd: 106, dmg: 330, r: 18, xp: 1080, spr: 'ghost', drop: 0.40, tier: 1, mats: ['m_xianyuanshi'] },
     x4_daobing:   { name: '金甲道兵', hp: 350000, spd: 84, dmg: 362, r: 25, xp: 1260, spr: 'kui', drop: 0.45, tier: 2, mats: ['m_xianyuanshi'] },
     // 卷五档（幽冥 / 十方万仙）：后缀都是鬼。荒魂（24 次）、鬼兵（19 次）、鬼物（225 次）。
-    x5_guiwu:     { name: '幽冥鬼物', hp: 380000, spd: 92, dmg: 392, r: 24, xp: 1400, spr: 'ghost', drop: 0.45, tier: 2, mats: ['m_xianyuanshi'] },
-    x5_guibing:   { name: '幽冥鬼兵', hp: 360000, spd: 88, dmg: 382, r: 24, xp: 1350, spr: 'guixiu', drop: 0.45, tier: 2, mats: ['m_xianyuanshi'] },
+    x5_guiwu:     { name: '鬼物', hp: 380000, spd: 92, dmg: 392, r: 24, xp: 1400, spr: 'ghost', drop: 0.45, tier: 2, mats: ['m_xianyuanshi'] },
+    x5_guibing:   { name: '鬼兵', hp: 360000, spd: 88, dmg: 382, r: 24, xp: 1350, spr: 'guixiu', drop: 0.45, tier: 2, mats: ['m_xianyuanshi'] },
     x5_huanghun:  { name: '荒魂', hp: 420000, spd: 98, dmg: 412, r: 26, xp: 1500, spr: 'ghost', drop: 0.48, tier: 2, mats: ['m_xianyuanshi', 'm_shijian'] }
   });
 
@@ -160,7 +160,7 @@
       unlock: 'xiaoping', next: 'poxu',
       diff: 4.2, bossAt: 0, intro: 'tiangui', outro: 'tiangui_out',
       enemies: ['lh_lingzhu', 'lh_hanbing', 'lh_xiongshou'],
-      elites: ['天鬼·分魂', '灵寰凶王'],
+      elites: ['天鬼·分魂', '凶兽'],
       mats: ['m_xianyuanshi', 'm_xuanhuang'],
       boss: { kind: 'mo', name: '百目天鬼', hp: 88000, spd: 74, dmg: 268, r: 25, spr: 'guixiu', scale: 5.8 },
       reward: { stones: 200000, items: ['t_xuanhuangs', 't_lingyingjianfu'], mats: [['m_xianyuanshi', 5], ['m_xuanhuang', 3]] },
@@ -288,7 +288,7 @@
       unlock: 'xiedao', next: 'taisui',
       diff: 5.6, bossAt: 0, intro: 'jingong', outro: 'jingong_out',
       enemies: ['x4_yingwei', 'x4_tianyin', 'xj_tianwei'],
-      elites: ['金源仙宫·侍卫', '天阴五子·影'],
+      elites: ['金源仙宫·侍卫', '天阴五子'],
       mats: ['m_xianyuanshi', 'm_shijian'],
       boss: { kind: 'mo', name: '东方白·金源宫主', hp: 520000, spd: 98, dmg: 440, r: 30, spr: 'mo', scale: 8.2 },
       reward: { stones: 720000, mats: [['m_xianyuanshi', 16], ['m_shijian', 3]] },
@@ -318,7 +318,7 @@
       unlock: 'taisui', next: 'suidian',
       diff: 5.8, bossAt: 0, intro: 'chongchao', outro: 'chongchao_out',
       enemies: ['x4_huosui', 'x4_yingwei', 'x5_guiwu'],
-      elites: ['火岁萤虫·母虫', '十八层守卫'],
+      elites: ['火岁萤虫', '十八层守卫'],
       mats: ['m_xianyuanshi', 'm_shijian'],
       boss: { kind: 'mo', name: '大罗鬼王', hp: 620000, spd: 100, dmg: 470, r: 32, spr: 'guixiu', scale: 8.6 },
       reward: { stones: 840000, mats: [['m_xianyuanshi', 18], ['m_shijian', 5]] },
@@ -433,7 +433,7 @@
       unlock: 'zhanshi', next: 'leihai',
       diff: 6.6, bossAt: 0, intro: 'youming', outro: 'youming_out',
       enemies: ['x5_guiwu', 'x5_guibing', 'x5_huanghun'],
-      elites: ['幽冥鬼将', '骨海卫士'],
+      elites: ['鬼将', '骨皇卫士'],
       mats: ['m_xianyuanshi', 'm_shijian'],
       boss: { kind: 'mo', name: '骨皇', hp: 1150000, spd: 110, dmg: 600, r: 34, spr: 'guixiu', scale: 10.0 },
       reward: { stones: 1800000, mats: [['m_xianyuanshi', 24], ['m_shijian', 12]] },

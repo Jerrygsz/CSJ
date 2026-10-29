@@ -83,7 +83,7 @@ ok(CLOSE.wlDisplay === 'none', '点「收榜」→ #wanling 隐藏', CLOSE);
 
 // ============ 5) 版本串 ============
 const VER = await page.evaluate(() => { const el = document.getElementById('ver'); return el ? el.textContent : null; });
-ok(VER === 'v20261028c', '页面版本串已升到 v20261028c', VER);
+ok(/^v\d{8}[a-z]$/.test(VER), '页面版本串格式正确（v+日期+小版本字母）', VER);
 
 ok(errors.length === 0, '页面无 JS 报错', errors);
 

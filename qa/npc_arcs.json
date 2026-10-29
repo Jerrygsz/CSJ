@@ -1,0 +1,369 @@
+{
+ "_note": "每张战斗/剧情战地图对应的原著章节区间（已按关键词首现/共现逐图校准）。book: main=凡人修仙传, xj=仙界篇。anchor 用于自检：该词必须在该区间内出现。",
+ "houshan": {
+  "book": "main",
+  "from": 1,
+  "to": 99,
+  "anchor": "七玄门"
+ },
+ "yanwu": {
+  "book": "main",
+  "from": 1,
+  "to": 99,
+  "anchor": "七玄门"
+ },
+ "mkuang": {
+  "book": "main",
+  "from": 1,
+  "to": 99,
+  "anchor": "矿"
+ },
+ "mishi": {
+  "book": "main",
+  "from": 29,
+  "to": 99,
+  "anchor": "墨大夫"
+ },
+ "yaoyuan": {
+  "book": "main",
+  "from": 145,
+  "to": 175,
+  "anchor": "百药园"
+ },
+ "yaopu": {
+  "book": "main",
+  "from": 145,
+  "to": 175,
+  "anchor": "百药园"
+ },
+ "luxiong": {
+  "book": "main",
+  "from": 150,
+  "to": 178,
+  "anchor": "陆师兄"
+ },
+ "xuese": {
+  "book": "main",
+  "from": 179,
+  "to": 262,
+  "anchor": "血色禁地"
+ },
+ "xuechi": {
+  "book": "main",
+  "from": 179,
+  "to": 262,
+  "anchor": "血色禁地"
+ },
+ "zhuji": {
+  "book": "main",
+  "from": 205,
+  "to": 245,
+  "anchor": "地火之屋"
+ },
+ "linxiong": {
+  "book": "main",
+  "from": 220,
+  "to": 245,
+  "anchor": "千竹教"
+ },
+ "yanjia": {
+  "book": "main",
+  "from": 240,
+  "to": 272,
+  "anchor": "燕家堡"
+ },
+ "jingu": {
+  "book": "main",
+  "from": 262,
+  "to": 320,
+  "anchor": "金鼓原"
+ },
+ "heisha": {
+  "book": "main",
+  "from": 300,
+  "to": 360,
+  "anchor": "越皇"
+ },
+ "shiku": {
+  "book": "main",
+  "from": 280,
+  "to": 363,
+  "anchor": "灵石矿"
+ },
+ "fujia": {
+  "book": "main",
+  "from": 340,
+  "to": 380,
+  "anchor": "付家"
+ },
+ "liulian": {
+  "book": "main",
+  "from": 370,
+  "to": 400,
+  "anchor": "六连殿"
+ },
+ "ningcui": {
+  "book": "main",
+  "from": 388,
+  "to": 412,
+  "anchor": "凝翠岛"
+ },
+ "guxiu": {
+  "book": "main",
+  "from": 410,
+  "to": 440,
+  "anchor": "金青"
+ },
+ "xutian": {
+  "book": "main",
+  "from": 425,
+  "to": 480,
+  "anchor": "虚天殿"
+ },
+ "waihai": {
+  "book": "main",
+  "from": 505,
+  "to": 560,
+  "anchor": "奇渊岛"
+ },
+ "yinming": {
+  "book": "main",
+  "from": 575,
+  "to": 600,
+  "anchor": "阴冥之地"
+ },
+ "shixiao": {
+  "book": "main",
+  "from": 605,
+  "to": 650,
+  "anchor": "尸魈"
+ },
+ "sanjian": {
+  "book": "main",
+  "from": 596,
+  "to": 660,
+  "anchor": "落云宗"
+ },
+ "cangkun": {
+  "book": "main",
+  "from": 675,
+  "to": 700,
+  "anchor": "苍坤"
+ },
+ "zhuimo": {
+  "book": "main",
+  "from": 800,
+  "to": 880,
+  "anchor": "坠魔谷"
+ },
+ "yanyue": {
+  "book": "main",
+  "from": 705,
+  "to": 740,
+  "anchor": "化意门"
+ },
+ "luoyun2": {
+  "book": "main",
+  "from": 745,
+  "to": 775,
+  "anchor": "鸾鸣门"
+ },
+ "bianjie": {
+  "book": "main",
+  "from": 760,
+  "to": 800,
+  "anchor": "慕兰"
+ },
+ "yinluo": {
+  "book": "main",
+  "from": 760,
+  "to": 800,
+  "anchor": "阴罗宗"
+ },
+ "xiaoji": {
+  "book": "main",
+  "from": 940,
+  "to": 1000,
+  "anchor": "小极宫"
+ },
+ "kunwu": {
+  "book": "main",
+  "from": 970,
+  "to": 1010,
+  "anchor": "昆吾山"
+ },
+ "zhenmo": {
+  "book": "main",
+  "from": 1000,
+  "to": 1060,
+  "anchor": "镇魔塔"
+ },
+ "liudao": {
+  "book": "main",
+  "from": 1200,
+  "to": 1230,
+  "anchor": "星宫"
+ },
+ "heifeng": {
+  "book": "main",
+  "from": 1280,
+  "to": 1340,
+  "anchor": "黑凤"
+ },
+ "yuyang_dou": {
+  "book": "main",
+  "from": 1288,
+  "to": 1320,
+  "anchor": "虞阳城"
+ },
+ "linghuang": {
+  "book": "main",
+  "from": 1750,
+  "to": 1840,
+  "anchor": "灵皇大比"
+ },
+ "yitian": {
+  "book": "main",
+  "from": 1880,
+  "to": 1925,
+  "anchor": "倚天城"
+ },
+ "huangquan": {
+  "book": "main",
+  "from": 1900,
+  "to": 1950,
+  "anchor": "黄泉地火"
+ },
+ "xiaoling": {
+  "book": "main",
+  "from": 2040,
+  "to": 2078,
+  "anchor": "小灵天"
+ },
+ "modajie": {
+  "book": "main",
+  "from": 2075,
+  "to": 2120,
+  "anchor": "苦灵岛"
+ },
+ "daoguo": {
+  "book": "main",
+  "from": 2435,
+  "to": 2446,
+  "anchor": "道果"
+ },
+ "baiguang": {
+  "book": "main",
+  "from": 2205,
+  "to": 2245,
+  "anchor": "白光界"
+ },
+ "zhandacheng": {
+  "book": "main",
+  "from": 2270,
+  "to": 2360,
+  "anchor": "大乘"
+ },
+ "zhanxian": {
+  "book": "main",
+  "from": 2360,
+  "to": 2446,
+  "anchor": "万灵血玺"
+ },
+ "zhangtianping": {
+  "book": "main",
+  "from": 2400,
+  "to": 2446,
+  "anchor": "掌天瓶"
+ },
+ "diyi": {
+  "book": "main",
+  "from": 2420,
+  "to": 2446,
+  "anchor": "第一大乘"
+ },
+ "fsjie": {
+  "book": "main",
+  "from": 2420,
+  "to": 2446,
+  "anchor": "飞升"
+ },
+ "lingyan": {
+  "book": "xj",
+  "from": 20,
+  "to": 60,
+  "anchor": "灵焰山脉"
+ },
+ "tiangui": {
+  "book": "xj",
+  "from": 40,
+  "to": 90,
+  "anchor": "天鬼"
+ },
+ "chulong": {
+  "book": "xj",
+  "from": 140,
+  "to": 210,
+  "anchor": "烛龙道"
+ },
+ "dadi": {
+  "book": "xj",
+  "from": 890,
+  "to": 970,
+  "anchor": "大墟"
+ },
+ "jingong": {
+  "book": "xj",
+  "from": 1000,
+  "to": 1070,
+  "anchor": "金源仙宫"
+ },
+ "chongchao": {
+  "book": "xj",
+  "from": 1000,
+  "to": 1100,
+  "anchor": "虫"
+ },
+ "suidian": {
+  "book": "xj",
+  "from": 1080,
+  "to": 1160,
+  "anchor": "岁月殿"
+ },
+ "jiuyuan": {
+  "book": "xj",
+  "from": 1190,
+  "to": 1270,
+  "anchor": "九元城"
+ },
+ "zaimiao": {
+  "book": "xj",
+  "from": 1200,
+  "to": 1290,
+  "anchor": "妙法"
+ },
+ "youming": {
+  "book": "xj",
+  "from": 1280,
+  "to": 1350,
+  "anchor": "幽冥"
+ },
+ "shifang": {
+  "book": "xj",
+  "from": 1330,
+  "to": 1394,
+  "anchor": "十方万仙"
+ },
+ "daoyi": {
+  "book": "xj",
+  "from": 1360,
+  "to": 1394,
+  "anchor": "大道归一"
+ },
+ "guanghan": {
+  "book": "main",
+  "from": 1590,
+  "to": 1660,
+  "anchor": "广寒界"
+ }
+}

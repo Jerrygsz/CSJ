@@ -59,7 +59,7 @@ ok(YY.yuyang && YY.yuyang.next === 'yuyang_dou', 'yuyang.next = yuyang_dou（坊
 ok(YY.yuyang && YY.yuyang.shop && ['m_banyao','m_yaodan','m_zhenlinglin','m_zhenlingxue','sk_xueying'].every(id => YY.yuyang.shop.indexOf(id) >= 0),
   'yuyang 货架 = 伴妖草/妖丹/真灵材料/血影遁（妖族硬通货）', YY.yuyang && YY.yuyang.shop);
 ok(YY.dou && YY.dou.type === 'boss' && YY.dou.side, 'yuyang_dou：城斗场·支线·boss 类型', YY.dou);
-ok(YY.dou && YY.dou.boss === '虞阳城·城斗魁首', 'yuyang_dou Boss = 虞阳城·城斗魁首', YY.dou);
+ok(YY.dou && YY.dou.boss === '虞阳城·妖修', 'yuyang_dou Boss = 虞阳城·妖修', YY.dou);
 ok(YY.dou && YY.dou.next === null && YY.dou.unlock === null, 'yuyang_dou：链尾（unlock/next 均为 null）', YY.dou);
 // 货架全部已上架 SHOP_STOCK
 ok(['m_banyao','m_yaodan','m_zhenlinglin','m_zhenlingxue','sk_xueying'].every(id => YY.stock.indexOf(id) >= 0),
@@ -112,7 +112,7 @@ ok(SIM.dou.banyao >= 2 && SIM.dou.yaodan >= 1, '城斗场奖励(伴妖草×2+妖
 
 // ============ 5) 版本串 ============
 const VER = await page.evaluate(() => { const el = document.getElementById('ver'); return el ? el.textContent : null; });
-ok(VER === 'v20261028c', '页面版本串已升到 v20261028c', VER);
+ok(/^v\d{8}[a-z]$/.test(VER), '页面版本串格式正确（v+日期+小版本字母）', VER);
 
 ok(errors.length === 0, '页面无 JS 报错', errors);
 

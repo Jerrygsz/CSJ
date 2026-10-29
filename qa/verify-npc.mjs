@@ -49,14 +49,14 @@ const D = await page.evaluate(() => {
 });
 
 console.log('\n【A · 普通怪】');
-ok(D.enemies.length === 44, '敌人共 44 种', D.enemies.length);
+ok(D.enemies.length === 45, '敌人共 45 种', D.enemies.length);
 ok(D.enemies.every(e => e.name && e.hp > 0 && e.dmg > 0), '每种怪都有名字、血量、伤害',
   D.enemies.filter(e => !(e.name && e.hp > 0 && e.dmg > 0)).map(e => e.id));
 const dupName = {};
 for (const e of D.enemies) { dupName[e.name] = (dupName[e.name] || 0) + 1; }
 const dups = Object.keys(dupName).filter(k => dupName[k] > 1);
 ok(dups.length <= 1 && (!dups.length || dupName[dups[0]] === 2),
-  '重名只允许「魔道修士」两档（早期 / 后期），其余不得重名', dups);
+  '同类怪不得重名（至多允许一组同名两档），其余不得重名', dups);
 
 console.log('\n【B · 掉落引用完整】');
 // skillDrop 存的是「法诀物品」的 id（sk_*），不是技能 id —— 掉落的是书，不是技能本身。
@@ -84,7 +84,7 @@ ok(badKind.length === 0, 'Boss 打法只用四种（mo / beast / swarm / blood�
   badKind.map(m => m.id + ':' + m.boss.kind));
 // 主名（「·」之前）不重复：同一角色的分阶段关底允许共存（如「古或今」/「古或今·混沌之身」），
 // 但两张不相干的图不能出现同一个关底。
-// 全名不重复即可：同一角色的多阶段关底（「古或今」/「古或今·混沌之身」「马良·重伤显形」/「马良·真仙」）
+// 全名不重复即可：同一角色的多阶段关底（「古或今」/「古或今·混沌之身」「马良·真仙之身」/「马良·九元观真仙」）
 // 是设计需要，但两张不相干的图不能出现一字不差的同一个关底。
 const bossName = {};
 for (const m of bosses) bossName[m.boss.name] = (bossName[m.boss.name] || 0) + 1;

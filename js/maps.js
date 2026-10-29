@@ -65,9 +65,9 @@ window.MAPS = [
     unlock: 'qixuan', next: 'mishi',
     diff: 1.0, bossAt: 110,
     enemies: ['wolf', 'snake', 'bat', 'boar', 'bandit'],
-    elites: ['百年狼王', '马贼头目'],
+    elites: ['头狼', '马贼头目'],
     mats: ['m_chijing', 'm_huangjing', 'm_jingtie', 'm_wolfdan', 'm_shedan'],
-    boss: { kind: 'beast', name: '百年狼妖', hp: 1100, spd: 66, dmg: 15, r: 20, spr: 'wolf', scale: 3.4 },
+    boss: { kind: 'beast', name: '狼妖', hp: 1100, spd: 66, dmg: 15, r: 20, spr: 'wolf', scale: 3.4 },
     reward: { stones: 80, items: [] },
     clearTitle: '采药已毕',
     clearDesc: '人参够数了。只是那狼妖的骨头，比寻常野兽硬得多。'
@@ -122,14 +122,14 @@ window.MAPS = [
     cave: 'huangfeng',
     diff: 1.35, bossAt: 140,
     enemies: ['bat', 'snake', 'assassin', 'ghoul', 'bandit'],
-    elites: ['血蝠', '尸傀'],
+    elites: ['巨蟒', '尸傀'],
     // 旧园只长马师伯留下的那几畦：子夜花/黄球草/白鹤芝/望月草/化龙草。
     // 原著明写主药三味「园里一株都没有」，故不在旧园池里。
     mats: ['m_ziyehua', 'm_huangqiucao', 'm_baihezhi', 'm_wangyuecao', 'm_hualongcao', 'm_lingzhi', 'm_chongjing', 'm_fuzhi'],
-    boss: { kind: 'swarm', name: '血蝠', hp: 2100, spd: 38, dmg: 15, r: 18, spr: 'blacklord', scale: 3.0 },
+    boss: { kind: 'swarm', name: '银色巨蟒', hp: 2100, spd: 38, dmg: 15, r: 18, spr: 'blacklord', scale: 3.0 },
     reward: { stones: 200, items: ['qiannian'] },
     clearTitle: '守夜已毕',
-    clearDesc: '药苗保住了。虫母的甲壳底下藏着一枚聚灵的珠子。管园弟子把钥匙往土里一插：西北角那半畦，往后归你。'
+    clearDesc: '药苗保住了。巨蟒的鳞下压着一枚聚灵的珠子。管园弟子把钥匙往土里一插：西北角那半畦，往后归你。'
   },
   {
     id: 'xuese', order: 7, name: '血色禁地', pos: '越国·七派共管秘境',
@@ -139,7 +139,7 @@ window.MAPS = [
     unlock: 'yaoyuan', next: 'zhuji',
     diff: 1.6, bossAt: 170,
     enemies: ['assassin', 'ghoul', 'boar', 'bandit', 'assassin'],
-    elites: ['魔修', '血傀儡'],
+    elites: ['魔修', '傀儡兽'],
     mats: ['m_yusuizhi', 'm_tianling', 'm_zihua', 'm_longlin', 'm_xuantie', 'm_xuesha', 'm_yusui'],
     // 原著禁地里真正该打的是一只未成年的墨蛟（二等妖兽，南宫婉取其元神做器灵）
     boss: { kind: 'beast', name: '墨蛟', hp: 3600, spd: 52, dmg: 19, r: 19, spr: 'dujiao', scale: 4.2, summon: 'snake' },
@@ -153,14 +153,14 @@ window.MAPS = [
   {
     id: 'mkuang', side: true, sorder: 1, name: '后山·废弃矿洞', pos: '青牛山北麓 旧矿脉',
     type: 'combat', tag: '支线', unlockBy: 'e_zhou',
-    desc: '山塌了半边，铁矿石露在外头。洞底挖出了几具石傀儡，把矿道当成了自己的窝。',
+    desc: '山塌了半边，铁矿石露在外头。洞底挖出了几具石人，把矿道当成了自己的窝。',
     startLevel: 3, startSkills: { sword: 1 },
     unlock: null, next: null,
     diff: 1.05, bossAt: 95,
     enemies: ['bat', 'snake', 'shigui', 'bandit'],
-    elites: ['矿洞石傀儡'],
+    elites: ['矿洞石人'],
     mats: ['m_jingtie', 'm_chitong', 'm_xuantie', 'm_yusui'],
-    boss: { kind: 'beast', name: '石傀儡王', hp: 980, spd: 52, dmg: 14, r: 20, spr: 'shigui', scale: 3.2, summon: 'shigui' },
+    boss: { kind: 'beast', name: '石人王', hp: 980, spd: 52, dmg: 14, r: 20, spr: 'shigui', scale: 3.2, summon: 'shigui' },
     reward: { stones: 70, items: [], mats: [['m_jingtie', 4], ['m_chitong', 2]] },
     clearTitle: '矿洞已清',
     clearDesc: '矿道通了。碎石堆里挑出来的铁，够打两件好器。'
@@ -231,10 +231,10 @@ window.MAPS = [
     unlock: null, next: null,
     diff: 1.5, bossAt: 150,
     enemies: ['assassin', 'ghoul', 'bandit'],
-    elites: ['血傀儡'],
+    elites: ['傀儡'],
     // 血池同在血色禁地之内：筑基丹三主药此处亦有，与正图同源
     mats: ['m_xuesha', 'm_yusuizhi', 'm_zihua', 'm_tianling', 'm_longlin', 'm_yusui'],
-    boss: { kind: 'blood', name: '血傀儡', hp: 3200, spd: 46, dmg: 18, r: 19, spr: 'ghoul', scale: 3.0 },
+    boss: { kind: 'blood', name: '傀儡兽', hp: 3200, spd: 46, dmg: 18, r: 19, spr: 'ghoul', scale: 3.0 },
     reward: { stones: 260, items: [], mats: [['m_xuesha', 2], ['m_yusuizhi', 1]] },
     clearTitle: '血池已涸',
     clearDesc: '池底只剩一层暗红的泥。玉髓芝长在池边的石缝里，一朵要长几百年。'

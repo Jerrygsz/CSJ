@@ -220,8 +220,8 @@
       startLevel: 132, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
       unlock: 'anyuan', next: 'lianxu',
       diff: 3.5, bossAt: 0, intro: 'heifeng', outro: 'heifeng_out',
-      enemies: ['yaoshou2', 'shixiao', 'dajinxiu'],
-      elites: ['黑凤族长老', '荒岭妖将'],
+      enemies: ['yaoshou2', 'yaoxiu', 'dajinxiu'],
+      elites: ['黑凤族长老', '黑凤族守卫'],
       mats: ['m_zhenlinglin', 'm_yaodan', 'm_gengjing'],
       boss: { kind: 'beast', name: '黑凤族三妖', hp: 52000, spd: 66, dmg: 96, r: 23, spr: 'haishou', scale: 6.2, summon: 'yaoshou2' },
       reward: { stones: 18000, items: ['tenglong'], mats: [['m_zhilongguo', 1], ['m_zhenlingxue', 1], ['m_zhenlinglin', 3]] },
@@ -381,7 +381,7 @@
       unlock: 'moyuan', next: 'modajie',
       diff: 4.1, bossAt: 0, intro: 'xiaoling', outro: 'xiaoling_out',
       enemies: ['kui2', 'dajinxiu', 'zhengdao'],
-      elites: ['小灵天守', '灵天傀'],
+      elites: ['小灵天守卫', '灵天傀儡'],
       mats: ['m_xuantianteng', 'm_zhenlingxue', 'm_yaodan'],
       // 原著小灵天是碎裂界面（诸族杂居），并无「界主/之主」之称 —— 此图为玩法原创，
       // 故只用地名 + 中性称谓，不冒充原著头衔
@@ -402,7 +402,7 @@
       unlock: 'xiaoling', next: 'sanjie',
       diff: 4.15, bossAt: 0, intro: 'modajie', outro: 'modajie_out',
       enemies: ['gui2', 'moxiu2', 'guixiu'],
-      elites: ['圣祖魔卫', '苦灵岛守'],
+      elites: ['圣祖魔卫', '苦灵岛守卫'],
       mats: ['m_zhenlingxue', 'm_zhenlinglin', 'm_yaodan'],
       boss: { kind: 'mo', name: '元魇圣祖·化身', hp: 118000, spd: 74, dmg: 158, r: 25, spr: 'mo', scale: 6.6 },
       reward: { stones: 78000, items: ['t_jinglinglian'], mats: [['m_zhenlingxue', 3], ['m_zhenlinglin', 2]] },
@@ -473,7 +473,7 @@
       enemies: ['gui2', 'moxiu2', 'guixiu'],
       elites: ['九元观随从', '金色甲士'],
       mats: ['m_zhenlingxue', 'm_xuantianteng'],
-      boss: { kind: 'mo', name: '马良·重伤显形', hp: 260000, spd: 86, dmg: 300, r: 27, spr: 'mo', scale: 7.0 },
+      boss: { kind: 'mo', name: '马良·真仙之身', hp: 260000, spd: 86, dmg: 300, r: 27, spr: 'mo', scale: 7.0 },
       reward: { stones: 220000, items: ['t_zhangtianping', 't_daotianping'], mats: [['m_xuantianteng', 1], ['m_zhenlingxue', 3]] },
       clearTitle: '掌天瓶',
       clearDesc: '青瓶与墨绿瓶之间的嗡鸣声越来越响，像两头隔着水面互相呼唤的兽。原来它有名字。'
@@ -533,7 +533,7 @@
       unlock: 'huimoyuan', next: 'renzu',
       diff: 4.55, bossAt: 0, intro: 'daoguo', outro: 'daoguo_out',
       enemies: ['kui2', 'yaoshou2', 'dajinxiu'],
-      elites: ['化木为灵·树巨人', '异界大乘'],
+      elites: ['化木为灵·巨人', '异界大乘'],
       mats: ['m_zhenlingxue', 'm_zhenlinglin'],   // 道牌只走通关奖励，不进材料池（信物不该被刷）
       boss: { kind: 'mo', name: '天象尊者', hp: 200000, spd: 80, dmg: 210, r: 27, spr: 'haishou', scale: 6.8 },
       reward: { stones: 210000, items: ['dan_guangling', 't_wannianjingsang', 't_zhenlinliuying'], mats: [['m_daopai', 1], ['m_zhenlingxue', 2]] },
@@ -607,7 +607,7 @@
       enemies: ['kui2', 'dajinxiu', 'moxiu2'],
       elites: ['大乘随从', '护道傀儡'],
       mats: ['m_xuantianteng', 'm_zhenlingxue', 'm_yaodan'],
-      boss: { kind: 'mo', name: '拦路大乘', hp: 130000, spd: 74, dmg: 175, r: 25, spr: 'mo', scale: 6.6 },
+      boss: { kind: 'mo', name: '大乘修士', hp: 130000, spd: 74, dmg: 175, r: 25, spr: 'mo', scale: 6.6 },
       reward: { stones: 80000, mats: [['m_xuantianteng', 1], ['m_zhenlingxue', 2]] },
       clearTitle: '大乘之血',
       clearDesc: '同为大乘，他输在准备不足。玄天仙藤落了一截。'
@@ -642,7 +642,7 @@
       unlock: null, next: null,
       diff: 4.3, bossAt: 0, intro: 'baiguang', outro: 'baiguang_out',
       enemies: ['gui2', 'guixiu', 'dajinxiu'],
-      elites: ['白光守卫', '土皇钉傀'],
+      elites: ['白光守卫', '土皇钉傀儡'],
       mats: ['m_xuantianteng', 'm_zhenlingxue', 'm_yaodan'],
       boss: { kind: 'mo', name: '白光界·土皇钉', hp: 120000, spd: 72, dmg: 165, r: 24, spr: 'guixiu', scale: 6.4 },
       reward: { stones: 85000, items: ['t_tuhuangding'], mats: [['m_xuantianteng', 1], ['m_zhenlingxue', 2]] },
@@ -1151,7 +1151,7 @@
       ['旁白', '白光界不大，天是白的，地也是白的。界心钉着一枚土黄色的长钉。'],
       ['韩立', '（土皇钉。钉住这一界的，就是它。）'],
       ['旁白', '长钉忽然自己转了一下，四周的白光凝成一个人形。'],
-      ['土皇钉傀', '……出去。'],
+      ['土皇钉傀儡', '……出去。'],
       ['韩立', '（拔了钉子，这一界就塌。得快。）']
     ],
     baiguang_out: [
