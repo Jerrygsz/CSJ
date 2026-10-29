@@ -420,14 +420,28 @@
     return out;
   }
   function gb(k) { return (G.gear && G.gear[k]) || 0; }
+  // 本局顿悟被动（C 卡）：只在当前这一局有效，不落盘。
+  // 必须与永久加成 G.bonus 分开：共用会互相截断——
+  // 永久加成封顶后，本局再叠的卡会被 Math.min 削平；本局叠高后吃一颗永久丹药也会被砍回上限。
+  function rp(k) { return (G.runP && G.runP[k]) || 0; }
+  // 一屏要多大半径才算「全屏拾取」：视口半对角线再放一点余量。
+  // W/H 是逻辑视口且随设备伸展（480×864 起，长屏可到 480×1120），故实时算，不写死。
+  function viewPickR() { return Math.sqrt(W * W + H * H) / 2 + 24; }
   // 被动加成全部走「功法属性」聚合：新旧被动功法一起算，练到几层就给几层的力
   function hasteMul() { return Math.pow(0.92, (passiveSum('atkSpd') + buffSum('atkSpd')) / 0.08); }
-  function spdMul() { return 1 + rb('spd') + passiveSum('spd') + buffSum('spd') + G.realm.spd + gb('spd'); }
+  function spdMul() { return 1 + rb('spd') + passiveSum('spd') + buffSum('spd') + G.realm.spd + gb('spd') + rp('spd'); }
   function atkMul() { return 1 / (1 + rb('atkSpd') + (G.bonus.atkSpd || 0) + gb('atkSpd') + G.realm.atk); }
   function dmgMul() { return (1 + rb('dmg') + (G.bonus.dmg || 0) + gb('dmg')) * (1 + G.realm.dmg) * (1 + passiveSum('dmg') + buffSum('dmg')); }
-  function pickupR() { return 46 * (1 + passiveSum('pickup') + buffSum('pickup')) * (1 + rb('pickup') + (G.bonus.pickup || 0) + gb('pickup')); }
+  // 拾取半径原始值（不封顶）：顿悟卡 rp('pickup') 无上限，可以一直往上叠
+  function pickupRaw() {
+    return 46 * (1 + passiveSum('pickup') + buffSum('pickup')) * (1 + rb('pickup') + (G.bonus.pickup || 0) + gb('pickup') + rp('pickup'));
+  }
+  // 实际拾取半径：叠到覆盖整屏就锁在「全屏」不再涨（再大也只是白算距离）
+  function pickupR() { const r = pickupRaw(), full = viewPickR(); return r >= full ? full : r; }
+  // 是否已能拾取整屏（含四角）
+  function pickupFull() { return pickupRaw() >= viewPickR(); }
   function critChance() { return 0.05 + rb('crit') + (G.bonus.crit || 0) + gb('crit') + passiveSum('crit') + buffSum('crit'); }
-  function armorRate() { return Math.min(0.62, rb('armor') + (G.bonus.armor || 0) + gb('armor') + passiveSum('armor') + buffSum('armor')); }
+  function armorRate() { return Math.min(0.62, rb('armor') + (G.bonus.armor || 0) + gb('armor') + passiveSum('armor') + buffSum('armor') + rp('armor')); }
   // 生命上限 = 基础 + 永久道具 + 境界累计 + 装备 + 葫芦功法
   // 形象跟着人走：袍色看境界，甲色看身上穿的护甲，封印了人就灰下去
   function heroTierOf(lv) {
@@ -462,7 +476,7 @@
     const p = G.player; if (!p) return;
     const old = p.maxhp || 1;
     const ratio = keepPct ? U.clamp(p.hp / old, 0, 1) : -1;
-    p.maxhp = 100 + rb('maxhp') + (G.bonus.maxhp || 0) + (G.realmHp || 0) + gb('maxhp') + passiveSum('maxhp');
+    p.maxhp = 100 + rb('maxhp') + (G.bonus.maxhp || 0) + (G.realmHp || 0) + gb('maxhp') + passiveSum('maxhp') + rp('maxhp');
     // 五鬼锁魂这类封印：人被压着，气血也翻不上去
     if (save.sealed) p.maxhp = Math.round(p.maxhp * (save.sealed.hp || 0.5));
     // 天人有五衰：扛过来的衰还压在身上，气血先削一截
@@ -482,6 +496,8 @@
   // 永久加成：首局带入 save.bonuses，本局所得同时写回 save（跨地图不清零）
   function resetRunBonus() {
     G.bonus = {};
+    G.runP = {};   // 本局顿悟被动，每局清零（不落盘、无上限）
+    G._pickFullTold = 0;
     for (const k of BONUS_KEYS) G.bonus[k] = Math.min(BONUS_CAP[k], save.bonuses[k] || 0);
     G.bonus.maxhp = Math.min(BONUS_CAP.maxhp, save.bonuses.maxhp || 0);
   }
@@ -1014,7 +1030,7 @@
     }
     // 吸血（顿悟被动）：打出去多少，按比例回一点气血
     // 吸血：顿悟被动的 leech + 血炼神光（每层 0.4%，满层 2.4%）
-    const lc = (G.bonus.leech || 0) + ((G.player && G.player.skills && (G.player.skills.xuelian || 0)) * 0.004);
+    const lc = (G.bonus.leech || 0) + rp('leech') + ((G.player && G.player.skills && (G.player.skills.xuelian || 0)) * 0.004);
     if (lc > 0 && G.player && G.player.hp > 0) {
       G.player.hp = Math.min(G.player.maxhp, G.player.hp + d * Math.min(0.2, lc));
     }
@@ -3284,7 +3300,7 @@
     { k: 'spd', v: 0.10, cap: 0.6, name: '移速 +10%' },
     { k: 'leech', v: 0.04, cap: 0.2, name: '吸血 +4%' },
     { k: 'armor', v: 0.08, cap: 0.35, name: '减伤 +8%' },
-    { k: 'pickup', v: 0.30, cap: 1.5, name: '拾取范围 +30%' },
+    { k: 'pickup', v: 0.30, cap: null, name: '拾取范围 +30%' },
     { k: 'maxhp', v: 15, cap: 300, name: '气血上限 +15' },
     { k: 'shaGain', v: 0.15, cap: 1.2, name: '煞气 +15%' }
   ];
@@ -3314,8 +3330,11 @@
       name: '悟得「' + s.name + '」', desc: passive ? '新功法 · 学了就运在身上' : '新神通 · 立刻就跟着打' };
   }
   function optPassive() {
-    const p = U.pick(PASSIVE_MODS);
-    return { key: 'C' + p.k, kind: 'C', icon: '🌀', mod: p, name: p.name, desc: '本局被动，可叠加' };
+    // 拾取已覆盖全屏后再抽到它是空卡（半径已到顶、再大也没用），从卡池里让掉，不白占一次顿悟
+    const pool = PASSIVE_MODS.filter(p => !(p.k === 'pickup' && pickupFull()));
+    const p = U.pick(pool.length ? pool : PASSIVE_MODS);
+    return { key: 'C' + p.k, kind: 'C', icon: '🌀', mod: p, name: p.name,
+      desc: p.cap == null ? '本局被动 · 叠加无上限' : '本局被动，可叠加' };
   }
   function optStone() {
     const pick = U.pick([
@@ -3378,9 +3397,13 @@
       banner(c.name + ' · 已运起'); Sfx.levelup();
     } else if (c.kind === 'C') {
       const p = c.mod;
-      G.bonus[p.k] = Math.min(p.cap, (G.bonus[p.k] || 0) + p.v);
+      // 本局被动写 runP（不与永久加成共用），cap 为 null 表示不封顶
+      G.runP[p.k] = (G.runP[p.k] || 0) + p.v;
+      if (p.cap != null && G.runP[p.k] > p.cap) G.runP[p.k] = p.cap;
       if (p.k === 'maxhp') recalcMaxhp(true);
       banner(p.name + ' · 本局生效'); Sfx.buff();
+      // 拾取范围刚跨过整屏时给一次明确反馈，否则玩家看不见“已经满了”
+      if (p.k === 'pickup' && pickupFull() && !G._pickFullTold) { G._pickFullTold = 1; banner('拾取范围已覆盖全屏'); }
     } else if (c.kind === 'D') {
       const st = shaSt();
       if (c.pick.v <= 1) { save.stones = (save.stones || 0) + c.pick.v; banner('灵石 +' + c.pick.v); }
@@ -3528,7 +3551,7 @@
     const st = shaSt();
     // 已经吃过 11 / 14 次之后，煞气来得慢一点：高密度图不至于变成十几次连弹
     const damp = (st.done || 0) >= 14 ? 0.35 : ((st.done || 0) >= 11 ? 0.65 : 1);
-    const k = (1 + (G.bonus.shaGain || 0)) * (st.x2T > 0 ? 2 : 1) * damp;
+    const k = (1 + (G.bonus.shaGain || 0) + rp('shaGain')) * (st.x2T > 0 ? 2 : 1) * damp;
     st.v += n * k;
     while (st.v >= st.need) { st.v -= st.need; st.pending = (st.pending || 0) + 1; }
   }
@@ -3648,6 +3671,7 @@
     }
 
     const p = G.player;
+    if (!p) return;   // 进图过渡帧：state 已切到 play，人还没立起来
     let dx = 0, dy = 0;
     if (keys.left) dx--; if (keys.right) dx++; if (keys.up) dy--; if (keys.down) dy++;
     if (jx !== 0 || jy !== 0) { dx = jx; dy = jy; }
@@ -7895,6 +7919,13 @@
       return true;
     },
     refineCost() { const i = G.insight || {}; return REFINE_COST[i.refine || 0] == null ? null : REFINE_COST[i.refine || 0]; },
+    // 直接吃一张指定的 C 卡（绕过随机），验证「卡面 → 真实落点」：应写 runP，不写永久加成 G.bonus
+    insightPickC(k) {
+      const p = PASSIVE_MODS.find(x => x.k === k) || PASSIVE_MODS[0];
+      onPick({ key: 'C' + p.k, kind: 'C', icon: '🌀', mod: p, name: p.name, desc: '' });
+      return { k: p.k, runP: rp(p.k), bonus: G.bonus[p.k] || 0, cap: p.cap == null ? null : p.cap,
+        r: pickupR(), full: viewPickR(), isFull: pickupFull() };
+    },
     // 顿悟加成探针：给定功法 + mod，返回这门功法「这一次出手」的真实配置
     // （用来验收「卡面描述」和「真实施法参数」是否一致）
     atkProbe(id, mods) {
@@ -7908,9 +7939,18 @@
     },
     modKeys(id) { const s = window.skillById(id); return skillModsFor(s).map(m => m.k); },
     // 顿悟的被动卡池（含数值与上限），供回归断言「卡面写的 = 实际生效的」
-    passiveMods() { return PASSIVE_MODS.map(m => ({ k: m.k, v: m.v, cap: m.cap, name: m.name })); },
+    passiveMods() { return PASSIVE_MODS.map(m => ({ k: m.k, v: m.v, cap: m.cap == null ? null : m.cap, name: m.name })); },
     // 当前拾取半径（px）—— 用来验证「拾取范围 +30%」确实放大了半径
     pickR() { return pickupR(); },
+    // 未封顶的原始半径 / 整屏所需半径 / 是否已覆盖全屏（验证「无限叠加到全屏」）
+    pickInfo() { return { raw: pickupRaw(), r: pickupR(), full: viewPickR(), isFull: pickupFull(), stacked: rp('pickup'), cap: null }; },
+    // 直接叠一层本局被动（模拟抽中 C 卡，绕过随机）
+    addRunPassive(k, v) { G.runP[k] = (G.runP[k] || 0) + v; if (k === 'maxhp') recalcMaxhp(true); return G.runP[k]; },
+    // 真实生效的乘数快照：用来断言「卡面写的 = 实际吃到的」
+    runStats() {
+      return { spd: +spdMul().toFixed(3), armor: +armorRate().toFixed(3), pick: +pickupR().toFixed(2),
+        maxhp: G.player ? G.player.maxhp : 0, runP: JSON.parse(JSON.stringify(G.runP || {})) };
+    },
     openRefine() { openRefine(); return G.state; },
     stage() { return G.player ? stageLabel(G.player) : ''; },
     resetRunBuffs() { resetRunBuffs(); return true; },

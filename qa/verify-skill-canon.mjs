@@ -21,7 +21,7 @@ const server = http.createServer((rq, rs) => { let p = decodeURIComponent(rq.url
 await new Promise(r => server.listen(PORT,'127.0.0.1',r));
 const b = await chromium.launch({ channel: 'chrome' });
 const page = await b.newPage({ viewport:{width:430,height:900} });
-const errs = []; page.on('pageerror', e=>errs.push(String(e))); page.on('console', m=>{ if(m.type()==='error') errs.push(m.text()); });
+const errs = []; page.on('pageerror', e=>errs.push(String(e) + ' || ' + ((e.stack||'').split('\n')[1]||''))); page.on('console', m=>{ if(m.type()==='error') errs.push(m.text()); });
 let pass = 0, fail = 0;
 const ok = (cond, label, extra) => {
   if (cond) { pass++; console.log('  ✓ ' + label); }
@@ -110,20 +110,53 @@ ok(probe.mods.nianjian.indexOf('count') >= 0 && probe.mods.nianjian.indexOf('dur
    '远程类仍可抽「多打一发 / 持续」', probe.mods.nianjian);
 ok(probe.mods.changchun.length === 0, '被动功法不提供任何加成卡（此前「伤害+25%」空转）', probe.mods.changchun);
 
-// 拾取卡：数值 +30%、文案写「拾取范围」、半径真的放大 1.3 倍
+// 拾取卡：+30%/张、不设上限 —— 一路叠到覆盖整屏（视口半对角线）才锁住
 const pk = await page.evaluate(() => {
   const F = window.__FR, G = F.G;
   G.bonus = G.bonus || {};
+  const keepBonus = G.bonus.pickup || 0, keepRun = G.runP || {};
+  G.bonus.pickup = 0; G.runP = {};
   const m = F.passiveMods().find(x => x.k === 'pickup');
-  const keep = G.bonus.pickup || 0;
-  G.bonus.pickup = 0; const base = F.pickR();
-  G.bonus.pickup = 0.30; const up = F.pickR();
-  G.bonus.pickup = keep;
-  return { m: m, base: +base.toFixed(2), up: +up.toFixed(2), ratio: +(up / base).toFixed(3) };
+  const base = F.pickInfo();
+  F.addRunPassive('pickup', 0.30);
+  const one = F.pickInfo();
+  // 一路叠到覆盖整屏，数一数要几张
+  let n = 1;
+  while (!F.pickInfo().isFull && n < 400) { F.addRunPassive('pickup', 0.30); n++; }
+  const hit = F.pickInfo();
+  // 满了以后再叠两张：半径必须锁住不涨（否则白算更远的距离）
+  F.addRunPassive('pickup', 0.30); F.addRunPassive('pickup', 0.30);
+  const over = F.pickInfo();
+  // 走一次真实的卡落地，确认写的是 runP 而不是永久加成 G.bonus
+  const landed = F.insightPickC('pickup');
+  G.runP = keepRun; G.bonus.pickup = keepBonus;
+  return { m: m, base: +base.r.toFixed(2), one: +one.r.toFixed(2), ratio: +(one.r / base.r).toFixed(3),
+    n: n, full: +hit.full.toFixed(2), hitRaw: +hit.raw.toFixed(2), hitR: +hit.r.toFixed(2),
+    overR: +over.r.toFixed(2), landedBonus: +landed.bonus.toFixed(3), landedRunP: +landed.runP.toFixed(2) };
 });
 ok(pk.m && pk.m.v === 0.30, '拾取卡数值 +20% → +30%', pk.m);
 ok(pk.m && /拾取范围/.test(pk.m.name) && /30%/.test(pk.m.name), '拾取卡文案写明「拾取范围 +30%」', pk.m && pk.m.name);
+ok(pk.m && pk.m.cap === null, '拾取卡已解除上限（cap 为 null，不再卡 1.5）', pk.m && pk.m.cap);
 ok(Math.abs(pk.ratio - 1.30) < 0.005, '拾取范围真的放大 1.30 倍（半径同步）', pk);
+ok(pk.hitRaw >= pk.full && Math.abs(pk.hitR - pk.full) < 0.01,
+  '不停叠下去能覆盖整屏（半径达视口半对角线后锁在全屏）', { 张数: pk.n, 原始半径: pk.hitRaw, 全屏所需: pk.full });
+ok(pk.overR === pk.hitR, '覆盖全屏后半径锁住、不再虚涨', { 满时: pk.hitR, 再叠两张: pk.overR });
+console.log('   · 全屏拾取需要 ' + pk.n + ' 张：基础 ' + pk.base + 'px → 视口半对角线 ' + pk.full + 'px');
+ok(pk.landedBonus === 0 && pk.landedRunP > 0,
+  '卡落在本局 runP，不污染永久加成 G.bonus（否则会被永久上限削平）', { bonus: pk.landedBonus, runP: pk.landedRunP });
+
+// 移速 / 减伤卡：此前写进 G.bonus 却没人读（spdMul 里压根没有 G.bonus.spd），抽到等于白给
+const otherC = await page.evaluate(() => {
+  const F = window.__FR, G = F.G;
+  const keep = G.runP || {}; G.runP = {};
+  const s0 = F.runStats();
+  F.insightPickC('spd');   const s1 = F.runStats();
+  F.insightPickC('armor'); const s2 = F.runStats();
+  G.runP = keep;
+  return { spd0: s0.spd, spd1: s1.spd, arm0: s0.armor, arm1: s2.armor };
+});
+ok(otherC.spd1 > otherC.spd0, '「移速 +10%」真的作用到移速（此前空转）', { before: otherC.spd0, after: otherC.spd1 });
+ok(otherC.arm1 > otherC.arm0, '「减伤 +8%」真的作用到减伤', { before: otherC.arm0, after: otherC.arm1 });
 
 // ---------- C 实战：金色场 + 金色剑光 ----------
 console.log('\n【C · 实战术法效果】');
