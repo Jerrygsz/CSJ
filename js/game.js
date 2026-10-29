@@ -66,6 +66,8 @@
       settings: { autoSave: true, manualSave: true },
       best: { time: 0, kills: 0, level: 1 },
       wins: 0, seen: [],
+      // 生涯累计（跨局、跨图、跨轮回都不清零）：首页报的是这些，不是单局最高
+      totalKills: 0, playTime: 0,
       inventory: {}, bonuses: {}, totalItems: 0,
       stones: 0, cleared: [], unlocked: ['qixuan'], mapId: 'qixuan',
       // 跨地图永久修为：等级与功法只增不减，回刷低级图也不会退回去
@@ -187,6 +189,8 @@
         settings: Object.assign({}, d.settings, s.settings || {}),
         best: Object.assign({}, d.best, s.best || {}),
         wins: s.wins || 0,
+        totalKills: Math.max(0, s.totalKills | 0),
+        playTime: Math.max(0, +s.playTime || 0),
         seen: Array.isArray(s.seen) ? s.seen : [],
         inventory: s.inventory || {},
         bonuses: Object.assign({}, s.bonuses || {}),
@@ -1024,6 +1028,7 @@
   function killEnemy(e) {
     if (e._dead) return; e._dead = true;
     G.kills++;
+    save.totalKills = (save.totalKills || 0) + 1;   // 生涯累计（首页用），与单局 G.kills 各记各的
     // 煞气：小怪 3~5、精英 50、Boss 100 —— 3 分钟一局的燃料
     gainSha(e === G.boss ? 100 : (e.elite ? 50 : U.rand(3, 5)));
     // 厉飞雨·双身份化名系统（P0-1）：干脏活让「厉飞雨」背锅，好事以「韩天尊」留名
@@ -3619,6 +3624,7 @@
   // ---------- 主更新 ----------
   function update(dt) {
     G.time += dt;
+    save.playTime = (save.playTime || 0) + dt;   // 生涯累计时长（游戏内时间，与 G.time 同源）
     tickBuffs(dt);
     tickInsight(dt);
 
@@ -5001,31 +5007,41 @@
   function tsRow(k, v, wide) {
     return '<div class="ts-row' + (wide ? ' wide' : '') + '"><i>' + k + '</i><b>' + v + '</b></div>';
   }
+  // 首页只报「生涯累计」与「收集进度」——玩家真正关心的是这一世走到哪了，
+  // 不是上一局打了多少。单局最高（best）留在结算页，不再占首页。
   function refreshTitle() {
     if (elBest) {
       const rp = rebirthPool();
       elBest.innerHTML =
         '<div class="ts-hd">生涯</div><div class="ts-grid">' +
-        tsRow('最高存活', fmtTime(save.best.time)) +
-        tsRow('最多斩敌', save.best.kills) +
-        tsRow('最高境界', realmName(save.best.level) + '（' + save.best.level + ' 层）') +
+        tsRow('累计斩敌', (save.totalKills || 0).toLocaleString('en-US')) +
+        tsRow('修行时长', fmtTime(save.playTime || 0)) +
         tsRow('通关', save.wins + ' 次') +
-        (rp.cycles ? tsRow('轮回余荫', '第 ' + rp.cycles + ' 世 · 属性已加成') : '') +
+        tsRow('最高境界', realmName(save.best.level || 1)) +
+        (rp.cycles ? tsRow('轮回余荫', '第 ' + rp.cycles + ' 世 · 已加成', true) : '') +
         '</div>';
     }
     if (elTitleBag) {
       const m = MAPS.find(x => x.id === (save.mapId || 'qixuan')) || MAPS[0];
-      const main = MAPS.filter(x => !x.side), side = MAPS.filter(x => x.side);
-      const um = main.filter(x => save.unlocked.indexOf(x.id) >= 0).length;
-      const us = side.filter(x => save.unlocked.indexOf(x.id) >= 0).length;
+      const main = MAPS.filter(x => !x.side);
+      const clearedMain = main.filter(x => (save.cleared || []).indexOf(x.id) >= 0).length;
+      const cs = save.cultivate.skills || {};
+      const skillN = Object.keys(cs).filter(k => (cs[k] || 0) > 0).length;
+      const skillAll = (window.SKILLS || []).length;
+      const caveAll = Object.keys(CAVES || {}).length;
+      const wanAll = (window.ALL_ITEMS || []).filter(i => i && i.rarity === 5 && i.unique);
+      const inv = save.inventory || {};
+      const wanN = wanAll.filter(i => inv[i.id]).length;
       elTitleBag.innerHTML =
-        '<div class="ts-hd">行囊与足迹</div><div class="ts-grid">' +
-        tsRow('储物袋', (save.totalItems || 0) + ' 件') +
-        tsRow('灵石', save.stones || 0) +
-        tsRow('修行图', um + '/' + main.length) +
-        tsRow('支线', us + '/' + side.length) +
-        tsRow('洞府', save.caves.length + ' 处') +
+        '<div class="ts-hd">道途</div><div class="ts-grid">' +
+        tsRow('当前境界', realmName(save.cultivate.level || 1)) +
+        tsRow('破关', clearedMain + '/' + main.length) +
+        tsRow('功法', skillN + '/' + skillAll) +
+        tsRow('洞府', (save.caves || []).length + '/' + caveAll) +
+        tsRow('万灵榜', wanN + '/' + wanAll.length) +
         tsRow('法器', equippedCount() + '/4') +
+        tsRow('灵石', (save.stones || 0).toLocaleString('en-US')) +
+        tsRow('储物袋', (save.totalItems || 0) + ' 件') +
         tsRow('现处', m.name, true) +
         '</div>';
     }
@@ -6894,9 +6910,14 @@
   if (elSweep) elSweep.addEventListener('click', e => {
     if (e.target.closest('#sweepBack') || e.target === elSweep) {
       elSweep.style.display = 'none';
-      G.state = 'diff';
-      renderDiffPick();
-      if (elDifficulty) elDifficulty.style.display = 'flex';
+      // 只有「从难度面板点扫荡进来」的（state=sweep）收下之后才回难度面板。
+      // 首页/世界图状态下误点到，就只是关掉 —— 以前这里无条件 state='diff' + 弹难度框，
+      // 首屏又漏隐藏 #sweep，于是「进首页先看到扫荡、点一下就蹦出难度选择」。
+      if (G.state === 'sweep') {
+        G.state = 'diff';
+        renderDiffPick();
+        if (elDifficulty) elDifficulty.style.display = 'flex';
+      }
     }
   });
   if (elPfBody) elPfBody.addEventListener('click', e => {
@@ -7312,6 +7333,7 @@
         loot: G.loot.length, runLoot: G.runLoot.length, totalItems: save.totalItems || 0,
         npcs: G.npcs.length, met: (save.met || []).length,
         stones: save.stones || 0, combo: G.combo,
+        totalKills: save.totalKills || 0, playTime: +(save.playTime || 0).toFixed(1),
         diff: G.diff ? G.diff.id : null, diffName: G.diff ? G.diff.name : null,
         realmBonus: { dmg: +G.realm.dmg.toFixed(2), atk: +G.realm.atk.toFixed(2), spd: +G.realm.spd.toFixed(2) },
         bonus: Object.assign({}, G.bonus), settings: Object.assign({}, save.settings),

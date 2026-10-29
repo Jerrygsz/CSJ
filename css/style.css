@@ -141,7 +141,7 @@ body.fs #wrap { background: #000; }
 #dialog { z-index: var(--z-dialog); }
 #pause, #victory, #gameover, #levelup { z-index: var(--z-modal); }
 /* 覆盖层默认 display:flex，凡是「不该一进页面就露出」的都要列进这里 */
-#dialog, #levelup, #pause, #gameover, #victory, #worldmap, #shop, #difficulty, #cave, #prefight, #coop, #break, #wanling { display: none; }
+#dialog, #levelup, #pause, #gameover, #victory, #worldmap, #shop, #difficulty, #cave, #prefight, #coop, #break, #wanling, #sweep { display: none; }
 
 /* 突破清单：一样一行，齐了打勾 */
 .brk-list { display: flex; flex-direction: column; gap: var(--sp-2); margin: 8px 0 4px; }
