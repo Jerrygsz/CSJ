@@ -4385,6 +4385,14 @@
 
   // ---------- HUD ----------
   function fmtTime(t) { const m = Math.floor(t / 60), s = Math.floor(t % 60); return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s; }
+  // 生涯累计时长：单局用 mm:ss，几小时的累计再那么写就成了「327:00」，读不出量级
+  function fmtSpan(t) {
+    t = Math.max(0, t || 0);
+    const h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60);
+    if (h > 0) return h + ' 时 ' + m + ' 分';
+    if (m > 0) return m + ' 分';
+    return Math.floor(t) + ' 秒';
+  }
   function updateHUD() {
     const p = G.player; if (!p) return;
     elHpfill.style.width = U.clamp(p.hp / p.maxhp, 0, 1) * 100 + '%';
@@ -5015,7 +5023,7 @@
       elBest.innerHTML =
         '<div class="ts-hd">生涯</div><div class="ts-grid">' +
         tsRow('累计斩敌', (save.totalKills || 0).toLocaleString('en-US')) +
-        tsRow('修行时长', fmtTime(save.playTime || 0)) +
+        tsRow('修行时长', fmtSpan(save.playTime || 0)) +
         tsRow('通关', save.wins + ' 次') +
         tsRow('最高境界', realmName(save.best.level || 1)) +
         (rp.cycles ? tsRow('轮回余荫', '第 ' + rp.cycles + ' 世 · 已加成', true) : '') +
