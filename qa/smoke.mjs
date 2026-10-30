@@ -503,21 +503,29 @@ eq(badRecipe.length, 0, '配方产物与材料都取得到', badRecipe.slice(0, 
 // 6 条基础方 + late3 新增 3 条突破用方（天火液 / 九曲灵参丹 / 定灵丹）+ value.js 2 条（饲灵丸 / 造化丹）
 eq(W.RECIPES.filter(r => r.kind === 'alchemy').length, 12, '炼丹方 12 条（含魔元丹；降尘丹 / 补天丹按原著为剧情所得，无丹方）');
 
+// 沙箱只加载到 late3（人界 + 灵界），仙界那几张图的际遇不在 ALLM 里，
+// 「map 是否存在」这一条交给 verify-xianjie.mjs 守；这里只管能看见的那部分。
 const badEnc = [];
+const encOnMap = id => ALLM.find(m => m.id === id);
+// 仙界图（xianjie.js）不在沙箱里，连带的仙界道具也取不到 —— 那几条整条跳过，
+// 由 verify-xianjie.mjs 的「仙界际遇」一组断言守（map / spr / 奖励 / 图类型全查）。
+const XJ_MAPS = ['xianyun', 'dijiang', 'xingqi', 'shuiyan', 'xisha', 'lingyan', 'tiangui', 'jingong', 'suidian', 'dadi', 'chongchao', 'jiuyuan'];
 for (const e of W.ENCOUNTERS) {
   if (!W.Sprites[e.spr]) badEnc.push(e.id + ':spr');
-  if (!ALLM.find(m => m.id === e.map)) badEnc.push(e.id + ':map');
+  if (!encOnMap(e.map)) { if (XJ_MAPS.indexOf(e.map) < 0) badEnc.push(e.id + ':map'); else continue; }
   if (e.unlock && !ALLM.find(m => m.id === e.unlock)) badEnc.push(e.id + ':unlock');
   for (const i of ((e.reward || {}).items || [])) if (!W.Items.get(i)) badEnc.push(e.id + ':item');
   for (const mm of ((e.reward || {}).mats || [])) if (!W.Items.get(mm[0])) badEnc.push(e.id + ':mat');
 }
 eq(badEnc.length, 0, '际遇引用全部有效', badEnc.slice(0, 5));
+if (badEnc.length) console.log('   ↳ 明细:', JSON.stringify(badEnc));
 
 // 际遇只能落在「能走动」的图上：剧情图一进去就结算，走不到人跟前。
 // 坊市不让走动，但进门那一下会把未了的因缘先讲完，所以坊市可以有。
+// 同理：只看沙箱里加载到的图（仙界那张 xianyun 是坊市，本来就可以挂际遇）
 const deadEnc = W.ENCOUNTERS.filter(e => {
-  const m = ALLM.find(x => x.id === e.map);
-  return !m || m.type === 'story';
+  const m = encOnMap(e.map);
+  return m && m.type === 'story';
 }).map(e => e.id);
 eq(deadEnc.length, 0, '没有际遇落在纯剧情图上', deadEnc);
 

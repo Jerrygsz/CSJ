@@ -1,5 +1,5 @@
 {
- "count": 132,
+ "count": 136,
  "maps": [
   {
    "id": "qixuan",
@@ -2266,6 +2266,85 @@
    "cave": null
   },
   {
+   "id": "shijin",
+   "name": "深渊·噬金仙",
+   "pos": "仙界·积鳞空境 深渊",
+   "type": "boss",
+   "tag": "剧情战",
+   "desc": "下探近千丈，山崖平台上散着数十具枯骨。幽绿磷火顺着煞气，一点点往深渊下方飘。",
+   "arc": "M",
+   "enemies": [
+    "yj_guhai"
+   ],
+   "elites": [
+    "骸骨",
+    "傀儡"
+   ],
+   "boss": "太乙境噬金仙",
+   "bossKind": "beast",
+   "bossHp": 400000,
+   "bossDmg": 420,
+   "extraBoss": [],
+   "cave": null
+  },
+  {
+   "id": "xianyun",
+   "name": "闲云山·野鹤谷",
+   "pos": "仙界·黑山仙域 浮云山脉",
+   "type": "market",
+   "tag": "隐居",
+   "desc": "浮云山脉深处的一座山。山下有块大石，四个人常年坐在上面，下棋、弹琴、喝酒。",
+   "arc": "M",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "extraBoss": [],
+   "cave": null
+  },
+  {
+   "id": "shuiyan",
+   "name": "水衍宫·法言天地",
+   "pos": "仙界·真言门遗址",
+   "type": "story",
+   "tag": "剧情",
+   "desc": "殿里立着一尊大头童子的石像，脚边是一截被斩断的巨型石墩。殿后一座石台，四面云海无边。",
+   "arc": "M",
+   "enemies": [],
+   "elites": [],
+   "boss": null,
+   "bossKind": null,
+   "bossHp": null,
+   "bossDmg": null,
+   "extraBoss": [],
+   "cave": null
+  },
+  {
+   "id": "xisha",
+   "name": "灰界·洗煞雷池",
+   "pos": "仙界·灰界 修罗城",
+   "type": "combat",
+   "tag": "剧情战",
+   "desc": "地底巨厅，四座雷池翻着青、紫、银、金四色雷光。池中央的十字木架上，坐着九尾雪白的巨狐。",
+   "arc": "M",
+   "enemies": [
+    "jy_younu",
+    "jy_xiushi"
+   ],
+   "elites": [
+    "九幽族长老",
+    "九幽族修士"
+   ],
+   "boss": "鬼木",
+   "bossKind": "mo",
+   "bossHp": 440000,
+   "bossDmg": 440,
+   "extraBoss": [],
+   "cave": null
+  },
+  {
    "id": "taiyi",
    "name": "进阶太乙",
    "pos": "仙界·青黑山谷",
@@ -3157,7 +3236,7 @@
    "dmg": 275,
    "r": 23,
    "xp": 850,
-   "spr": "fashi",
+   "spr": "neimen",
    "drop": 0.4,
    "tier": 2,
    "mats": [
@@ -3186,7 +3265,7 @@
    "dmg": 290,
    "r": 23,
    "xp": 880,
-   "spr": "ghost",
+   "spr": "shigui",
    "drop": 0.35,
    "tier": 1,
    "mats": [
@@ -3215,7 +3294,7 @@
    "dmg": 330,
    "r": 26,
    "xp": 1100,
-   "spr": "beast",
+   "spr": "haishou",
    "drop": 0.45,
    "tier": 2,
    "mats": [
@@ -3258,7 +3337,7 @@
    "dmg": 155,
    "r": 15,
    "xp": 55,
-   "spr": "fashi",
+   "spr": "disciple",
    "drop": 0.12,
    "tier": 0,
    "mats": [
@@ -3272,7 +3351,7 @@
    "dmg": 185,
    "r": 16,
    "xp": 70,
-   "spr": "yaoshou2",
+   "spr": "neimen",
    "drop": 0.12,
    "tier": 0,
    "mats": [
@@ -3346,7 +3425,7 @@
    "dmg": 330,
    "r": 18,
    "xp": 1080,
-   "spr": "ghost",
+   "spr": "shijin",
    "drop": 0.4,
    "tier": 1,
    "mats": [
@@ -3374,7 +3453,7 @@
    "dmg": 392,
    "r": 24,
    "xp": 1400,
-   "spr": "ghost",
+   "spr": "guixiu",
    "drop": 0.45,
    "tier": 2,
    "mats": [
@@ -3402,8 +3481,52 @@
    "dmg": 412,
    "r": 26,
    "xp": 1500,
-   "spr": "ghost",
+   "spr": "shigui",
    "drop": 0.48,
+   "tier": 2,
+   "mats": [
+    "m_xianyuanshi",
+    "m_shijian"
+   ]
+  },
+  "yj_guhai": {
+   "name": "骸骨",
+   "hp": 250000,
+   "spd": 74,
+   "dmg": 300,
+   "r": 24,
+   "xp": 920,
+   "spr": "shigui",
+   "drop": 0.38,
+   "tier": 1,
+   "mats": [
+    "m_xianyuanshi"
+   ]
+  },
+  "jy_younu": {
+   "name": "幽奴",
+   "hp": 280000,
+   "spd": 90,
+   "dmg": 322,
+   "r": 24,
+   "xp": 1030,
+   "spr": "assassin",
+   "drop": 0.44,
+   "tier": 2,
+   "mats": [
+    "m_xianyuanshi",
+    "m_shijian"
+   ]
+  },
+  "jy_xiushi": {
+   "name": "九幽族修士",
+   "hp": 300000,
+   "spd": 86,
+   "dmg": 336,
+   "r": 25,
+   "xp": 1100,
+   "spr": "guixiu",
+   "drop": 0.46,
    "tier": 2,
    "mats": [
     "m_xianyuanshi",
@@ -3576,6 +3699,9 @@
   "t_xingqidun": "星斗盾",
   "t_zhongshuileizhu": "重水雷珠",
   "t_gengyuanfalian": "隔元法链",
+  "t_wushidan": "五石丹",
+  "t_lvpeijiu": "绿醅酒",
+  "t_fayantiandi": "法言天地",
   "t_suiyueshendeng": "岁月神灯",
   "t_youmingguizhua": "幽冥鬼爪",
   "t_yanluozhiding": "阎罗之鼎",

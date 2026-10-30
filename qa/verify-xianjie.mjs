@@ -33,7 +33,7 @@ await page.waitForTimeout(1200);
 
 // 全链：卷一六图 + 金仙/太乙/大罗/道祖四道破境图 + 卷二卷三 + 卷四卷五（X1–X5）
 const IDS = ['linghuan', 'suxing', 'lingyan', 'xiaoping', 'tiangui', 'poxu', 'wumengdao',
-  'chulong', 'huijie', 'taiyi', 'dijiang', 'xingqi', 'dadi',
+  'chulong', 'huijie', 'shijin', 'xianyun', 'shuiyan', 'xisha', 'taiyi', 'dijiang', 'xingqi', 'dadi',
   'xiedao', 'jingong', 'taisui', 'chongchao', 'suidian', 'daluo', 'wubao', 'jiuyuan',
   'zaimiao', 'zhanshi', 'youming', 'leihai', 'fuyao', 'shifang', 'daotian', 'daoyi', 'feiyu'];
 
@@ -50,14 +50,15 @@ const M1 = await page.evaluate((ids) => {
     prevClear: M('xianjie').clearDesc
   };
 }, IDS);
-ok(M1.maps.length === 30 && M1.maps.every(m => m.arc === 'M'), '仙界篇三十图已注册且都在 arc M（X1–X5 全卷）', M1.maps.length);
+ok(M1.maps.length === 34 && M1.maps.every(m => m.arc === 'M'), '仙界篇三十四图已注册且都在 arc M（X1–X5 全卷）', M1.maps.length);
 ok(M1.prevNext === 'linghuan', '前传终点「飞升仙界」接上灵寰界（不再是终点）', M1.prevNext);
 const chain = M1.maps.map(m => m.next);
-const WANT = ['suxing', 'lingyan', 'xiaoping', 'tiangui', 'poxu', 'wumengdao', 'chulong', 'huijie', 'taiyi',
+const WANT = ['suxing', 'lingyan', 'xiaoping', 'tiangui', 'poxu', 'wumengdao', 'chulong', 'huijie',
+  'shijin', 'xianyun', 'shuiyan', 'xisha', 'taiyi',
   'dijiang', 'xingqi', 'dadi', 'xiedao', 'jingong', 'taisui', 'chongchao', 'suidian', 'daluo', 'wubao', 'jiuyuan',
   'zaimiao', 'zhanshi', 'youming', 'leihai', 'fuyao', 'shifang', 'daotian', 'daoyi', 'feiyu', null];
 ok(chain.length === WANT.length && chain.every((v, i) => v === WANT[i]),
-  '链条完整：卷一→乌蒙岛→烛龙道→灰界→太乙→帝江坊→五城会武→大墟→卷四《大罗之争》→卷五《大道归一》→飞羽', chain);
+  '链条完整：卷一→乌蒙岛→烛龙道→灰界→深渊→闲云山→水衍宫→洗煞雷池→太乙→帝江坊→五城会武→大墟→卷四《大罗之争》→卷五《大道归一》→飞羽', chain);
 ok(M1.maps.every(m => !m.unlock || M1.maps.some(x => x.id === m.unlock) || m.unlock === 'xianjie'),
   '每张图的解锁前驱都存在', M1.maps.map(m => m.unlock));
 
@@ -77,8 +78,8 @@ const T2 = await page.evaluate((ids) => {
     texts: ids.map(id => (W.MAP_STORIES[id] || []).map(x => x[1]).join(''))
   };
 }, IDS);
-ok(T2.types.join(',') === 'story,story,boss,story,boss,story,story,boss,story,story,market,story,boss,'
-  + 'story,boss,story,boss,boss,story,market,boss,boss,story,boss,story,story,boss,story,boss,story',
+ok(T2.types.join(',') === 'story,story,boss,story,boss,story,story,boss,story,boss,market,story,combat,'
+  + 'story,market,story,boss,story,boss,story,boss,boss,story,market,boss,boss,story,boss,story,story,boss,story,boss,story',
   '仙界篇都是波形（卷一藏、卷二最密、卷三峰后有谷、卷四最密、卷五收一场）', T2.types);
 ok(T2.lines.every(n => n >= 9), '每张图对白都不少于 9 行', T2.lines);
 ok(/石头哥哥/.test(T2.texts[0]) && /拨浪鼓/.test(T2.texts[0]), '灵寰界写的是「石头哥哥」与拨浪鼓（X1C1-C3）', T2.texts[0].slice(0, 20));
@@ -130,7 +131,7 @@ const TY = await page.evaluate(() => {
     layer: rl.name, slots: W.skillSlots(520), cap: W.realmSkillCap(520) };
 });
 ok(TY.realm === '太乙' && TY.endLevel === 520 && TY.type === 'story', '太乙破境关已立（460→520，破境图进阶太乙）', TY);
-ok(TY.story[0] === 'huijie', '太乙关的剧情前置是灰界', TY.story);
+ok(TY.story[0] === 'xisha', '太乙关的剧情前置是灰界洗煞雷池（卷三 X3C578–C754 四图补在灰界与太乙之间）', TY.story);
 ok(/莲苞/.test(TY.text) && /异兽/.test(TY.text), '太乙关用原著口径：仙灵莲苞硬扛异兽围攻', TY.text.slice(0, 24));
 ok(TY.layer === '太乙' && TY.slots === 10 && TY.cap === 12, '太乙档已进境界层（功法位 10 / 上限 12）', TY);
 ok(G3.slots === 9 && G3.cap === 11, '金仙功法位 9、层数上限 11', { slots: G3.slots, cap: G3.cap });
@@ -410,11 +411,120 @@ const R6 = await page.evaluate(async (ids) => {
 ok(R6.allCleared, '卷一六图可依次通关', R6.steps.filter(s => !s.cleared));
 ok(R6.bag.xianyuanshi >= 1, '仙元石进背包（仙界关的消耗来源）', R6.bag);
 ok(R6.bag.xuanhuangs >= 1 && R6.bag.tianwaifeidou >= 1, '玄黄之索 / 天外飞豆进背包', R6.bag);
-ok(R6.lvs.slice(0, 7).every(v => v <= 420) && R6.lvs.slice(7, 10).every(v => v <= 520)
-  && R6.lvs.slice(10, 27).every(v => v <= 580) && R6.lvs.slice(27).every(v => v <= 640),
-  '全程不越档：卷一七图 ≤420，卷二三图 ≤520，卷三到卷五之宴 ≤580，道祖段 ≤640', R6.lvs);
-ok(R6.lvs.indexOf(640) > R6.lvs.indexOf(580) && R6.lvs[29] === 640,
-  '等级阶梯单调：大罗(580) 在前，道祖(640) 在后', R6.lvs);
+ok(R6.lvs.slice(0, 7).every(v => v <= 420) && R6.lvs.slice(7, 14).every(v => v <= 460)
+  && R6.lvs.slice(14, 23).every(v => v <= 520) && R6.lvs.slice(23).every(v => v <= 640),
+  '全程不越档：卷一七图 ≤420，卷二三图 ≤460，卷三起 ≤520，卷四卷五 ≤640', R6.lvs);
+ok(R6.lvs.every((v, i) => i === 0 || v >= R6.lvs[i - 1]) && R6.lvs[R6.lvs.length - 1] === 640,
+  '等级阶梯单调不降，卷末收在道祖(640)', R6.lvs);
+
+// ---- 7) 卷三中期四图实机通关（深渊 → 闲云山 → 水衍宫 → 洗煞雷池）----
+console.log('\n== 7. 卷三中期四图实机通关 ==');
+const R7 = await page.evaluate(async () => {
+  const W = window, F = W.__FR;
+  const NEW = ['shijin', 'xianyun', 'shuiyan', 'xisha'];
+  F.clearProgress(); F.setLevel(459); F.god(true); F.unlockAll();
+  const steps = [];
+  for (const id of NEW) {
+    F.clearProgress(); F.setLevel(459); F.god(true); F.unlockAll();
+    F.enterMap(id, 'easy');
+    for (let k = 0; k < 26; k++) { F.skipStory(); F.tickFrames(2); }
+    const m = W.MAPS.find(x => x.id === id);
+    if (m.type === 'market') {
+      const sc = document.getElementById('shopClose');
+      if (sc) sc.click();
+      for (let k = 0; k < 14; k++) { F.skipStory(); F.tickFrames(2); if (F.info().state === 'levelup') F.insightAuto(); }
+    }
+    if (m.boss) {
+      F.boss(); F.killBoss();
+      for (let k = 0; k < 70; k++) { F.skipStory(); F.tickFrames(3); if (F.info().state === 'levelup') F.insightAuto(); }
+    }
+    for (let k = 0; k < 14; k++) { F.skipStory(); F.tickFrames(2); if (F.info().state === 'levelup') F.insightAuto(); }
+    const i = F.info();
+    // 背包要在本张图结算之后立刻采样：下一轮开头的 clearProgress 会把存档清掉
+    const bg = F.bag();
+    steps.push({
+      id, cleared: i.cleared.indexOf(id) >= 0, state: i.state, boss: m.bossAt || 0, type: m.type, met: i.met,
+      bag: { wushi: bg.t_wushidan || 0, lvpei: bg.t_lvpeijiu || 0, fayan: bg.t_fayantiandi || 0 }
+    });
+  }
+  const pick = (key) => {
+    for (const st of steps) if (st.bag[key] > 0) return st.bag[key];
+    return 0;
+  };
+  return {
+    steps, bag: { wushi: pick('wushi'), lvpei: pick('lvpei'), fayan: pick('fayan') },
+    encAll: (W.ENCOUNTERS || []).length,
+    encOnXianyun: (W.ENCOUNTERS || []).filter(e => e.map === 'xianyun').length
+  };
+});
+ok(R7.steps.every(s => s.cleared), '四张新图可依次通关（深渊/闲云山/水衍宫/洗煞雷池）', R7.steps.filter(s => !s.cleared));
+ok(R7.steps[0].boss === 0 && R7.steps[0].type === 'boss', '深渊是单挑型剧情战（bossAt 0，一进去就打）', R7.steps[0]);
+ok(R7.steps[3].boss === 60 && R7.steps[3].type === 'combat', '洗煞雷池是 combat 且有 bossAt（留出刷际遇的时间）', R7.steps[3]);
+ok(R7.steps[1].type === 'market', '闲云山是坊市（走得到人跟前，际遇才挂得上）', R7.steps[1]);
+ok(R7.bag.lvpei >= 1, '绿醅酒进背包（闲云山通关奖励）', R7.bag);
+ok(R7.bag.fayan >= 1, '法言天地进背包（水衍宫通关奖励）', R7.bag);
+ok(R7.encOnXianyun === 2, '闲云山挂着两条际遇（热火仙尊 / 景阳上人）', R7.encOnXianyun);
+ok(R7.steps[1].met >= 1, '闲云山进门就把未了的因缘讲了（际遇真的触发，不是只挂着）', R7.steps[1].met);
+
+// ---- 8) 仙界中期四图（X3C578–C754）与仙界际遇 ----
+console.log('\n== 8. 卷三中期四图与仙界际遇 ==');
+const R8 = await page.evaluate(() => {
+  const W = window;
+  const NEW = ['shijin', 'xianyun', 'shuiyan', 'xisha'];
+  // 所有 spr 引用（敌人 / Boss）必须真的有立绘，否则 drawEnemy 会直接 return —— 敌人隐形
+  const badSpr = [];
+  for (const id of NEW) {
+    const m = W.MAPS.find(x => x.id === id) || {};
+    const list = [];
+    for (const t of (m.enemies || [])) if (W.ENEMY_TYPES[t] && W.ENEMY_TYPES[t].spr) list.push(W.ENEMY_TYPES[t].spr);
+    if (m.boss && m.boss.spr) list.push(m.boss.spr);
+    for (const s of list) if (!W.Sprites[s]) badSpr.push(id + ':' + s);
+  }
+  // 顺带全量扫仙界：任何 ENEMY_TYPES 的 spr 缺失都记下来
+  const missAll = Object.keys(W.ENEMY_TYPES || {})
+    .filter(k => /^(xj_|lh_|x4_|x5_|jy_|yj_)/.test(k))
+    .map(k => k + ':' + (W.ENEMY_TYPES[k].spr || ''))
+    .filter(x => !W.Sprites[x.split(':')[1]]);
+  // 仙界际遇：map 必须在，类型不能是 story（一进去就结算，走不到人跟前）
+  // 蟹道人的际遇挂在帝江坊（坊市，可逗留），所以这里把 dijiang 一并算进来
+  const ENCMAPS = NEW.concat(['dijiang']);
+  const enc = (W.ENCOUNTERS || []).filter(e => ENCMAPS.indexOf(e.map) >= 0);
+  const badEnc = [];
+  for (const e of enc) {
+    const m = W.MAPS.find(x => x.id === e.map);
+    if (!m) { badEnc.push(e.id + ':map'); continue; }
+    if (m.type === 'story') badEnc.push(e.id + ':storymap');
+    if (!W.Sprites[e.spr]) badEnc.push(e.id + ':spr');
+    for (const i of ((e.reward || {}).items || [])) if (!W.Items.get(i)) badEnc.push(e.id + ':item');
+    for (const mm of ((e.reward || {}).mats || [])) if (!W.Items.get(mm[0])) badEnc.push(e.id + ':mat');
+  }
+  const texts = {};
+  for (const id of NEW) texts[id] = (W.MAP_STORIES[id] || []).map(x => x[1]).join('');
+  return {
+    badSpr, missAll, badEnc,
+    encNames: enc.map(e => e.name),
+    lines: NEW.map(id => (W.MAP_STORIES[id] || []).length),
+    outs: NEW.map(id => ((W.MAP_STORIES[id + '_out'] || []).length)),
+    texts,
+    shop: (W.MAPS.find(x => x.id === 'xianyun') || {}).shop || [],
+    prices: (W.SHOP_STOCK || []).map(x => x.id)
+  };
+});
+ok(R8.badSpr.length === 0, '四张新图的敌人 / Boss 立绘都存在（缺了会隐形）', R8.badSpr);
+ok(R8.missAll.length === 0, '仙界全部敌人立绘引用有效', R8.missAll);
+ok(R8.badEnc.length === 0, '仙界际遇的图 / 立绘 / 奖励全部有效，且不落在纯剧情图', R8.badEnc);
+ok(R8.encNames.length === 5, '仙界际遇 5 条（热火仙尊 / 景阳上人 / 蟹道人 / 啼魂 / 柳岐老祖）', R8.encNames);
+ok(R8.lines.every(n => n >= 9), '四张新图的剧情都不少于 9 行', R8.lines);
+ok(R8.outs[0] >= 5 && R8.outs[3] >= 5, '深渊 / 洗煞两场有收尾对白', R8.outs);
+ok(/好重的煞气/.test(R8.texts.shijin) && /蟹道人/.test(R8.texts.shijin),
+  '深渊那张写的是蟹道人那句「好重的煞气」（X3C578 原句）', '');
+ok(/厉飞雨/.test(R8.texts.xianyun) && /不问过往/.test(R8.texts.xianyun),
+  '闲云山写的是「厉飞雨」与山规「不问过往」（X3C603–C604）', '');
+ok(/弥罗老祖/.test(R8.texts.shuiyan) && /法言天地/.test(R8.texts.shuiyan),
+  '水衍宫写的是弥罗老祖与「法言天地」石台（X3C642–C669）', '');
+ok(/柳岐老祖/.test(R8.texts.xisha) && /啼魂/.test(R8.texts.xisha) && /洗煞/.test(R8.texts.xisha),
+  '洗煞雷池写的是柳岐老祖 + 啼魂重逢 + 洗煞（X3C738–C754）', '');
+ok(R8.shop.every(id => R8.prices.indexOf(id) >= 0), '闲云山货架每一件都已上架（有价）', R8.shop);
 
 console.log('\n--------------------------------');
 console.log(`结果: ${pass} 通过 / ${fail} 失败`);

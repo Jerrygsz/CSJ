@@ -55,7 +55,23 @@
       effect: { dmg: 0.24, atkSpd: 0.08 } },
     { id: 't_gengyuanfalian', name: '隔元法链', rarity: 4, icon: '⛓', req: 540,
       desc: '一条隔开元气的法链（X2C202《重水真轮》，50 次）。链一缠上，遁速就先去了三分',
-      effect: { armor: 0.16, spd: 0.10 } }
+      effect: { armor: 0.16, spd: 0.10 } },
+    // ---- 闲云山四友的往来（X3C603–C604）----
+    // 五石丹 6 次：「厉道友，五石丹……每人一颗，多了可就没有了」——金仙级别的丹药，
+    //   稳固境界、提升修为，韩立一炉炼出几颗，四友一人一颗。
+    // 绿醅酒 5 次：景阳上人「揉和了一百多味仙芝灵草精华」酿的醇酒，数量极少，
+    //   原著原句「价值之高不在五石丹之下」，韩立拿它换丹。
+    { id: 't_wushidan', name: '五石丹', rarity: 5, icon: '💊', req: 460,
+      desc: '金仙级别的丹药（X3C604《闲云野鹤》，6 次）。稳固境界、提升修为，一炉也出不了几颗',
+      effect: { xpMul: 0.38, maxhp: 300 } },
+    { id: 't_lvpeijiu', name: '绿醅酒', rarity: 4, icon: '🍶', req: 460,
+      desc: '景阳上人揉和一百多味仙芝灵草酿的醇酒（X3C604，5 次）。数量极少，价值不在五石丹之下',
+      effect: { regen: 1.8, spd: 0.10 } },
+    // ---- 弥罗老祖那一场讲道的余泽（X3C669《缘法天地间》）----
+    // 讲道无字可抄，能带走的只有那一线时间法则的余韵。
+    { id: 't_fayantiandi', name: '法言天地', rarity: 5, icon: '☯', req: 470, unique: true, noDrop: true,
+      desc: '石台上刻着的四个金篆大字（X3C669，35 次）。弥罗老祖当年就在这方石台上讲道，听满八句半，周身神通自转',
+      effect: { xpMul: 0.26, crit: 0.09 } }
   );
 
   // ---- 卷四 / 卷五 的三件仙器（后传专名，频次均已核）----
@@ -80,16 +96,16 @@
   Object.assign(window.ENEMY_TYPES, {
     // 仙界档（卷二往后）：仙元石级的东西，量级远高于灵寰界
     xj_lunhui:   { name: '轮回殿要犯', hp: 240000, spd: 82, dmg: 300, r: 24, xp: 900, spr: 'assassin', drop: 0.4, tier: 2, mats: ['m_xianyuanshi'] },
-    xj_tianwei:  { name: '天庭金仙道主', hp: 210000, spd: 86, dmg: 275, r: 23, xp: 850, spr: 'fashi', drop: 0.4, tier: 2, mats: ['m_xianyuanshi', 'm_xuanhuang'] },
+    xj_tianwei:  { name: '天庭金仙道主', hp: 210000, spd: 86, dmg: 275, r: 23, xp: 850, spr: 'neimen', drop: 0.4, tier: 2, mats: ['m_xianyuanshi', 'm_xuanhuang'] },
     xj_daozhu:   { name: '烛龙道长老', hp: 190000, spd: 76, dmg: 260, r: 23, xp: 760, spr: 'disciple', drop: 0.35, tier: 1, mats: ['m_xianyuanshi'] },
     // 卷三档（大墟 / 五城会武 / 魔域）
-    xj_shimei:   { name: '尸魅', hp: 240000, spd: 84, dmg: 290, r: 23, xp: 880, spr: 'ghost', drop: 0.35, tier: 1, mats: ['m_xianyuanshi'] },
+    xj_shimei:   { name: '尸魅', hp: 240000, spd: 84, dmg: 290, r: 23, xp: 880, spr: 'shigui', drop: 0.35, tier: 1, mats: ['m_xianyuanshi'] },
     xj_xuechi:   { name: '血池傀儡', hp: 260000, spd: 80, dmg: 305, r: 24, xp: 940, spr: 'assassin', drop: 0.4, tier: 2, mats: ['m_xianyuanshi', 'm_shijian'] },
-    xj_linv:     { name: '鳞犼守门', hp: 300000, spd: 78, dmg: 330, r: 26, xp: 1100, spr: 'beast', drop: 0.45, tier: 2, mats: ['m_xianyuanshi', 'm_shijian'] },
+    xj_linv:     { name: '鳞犼守门', hp: 300000, spd: 78, dmg: 330, r: 26, xp: 1100, spr: 'haishou', drop: 0.45, tier: 2, mats: ['m_xianyuanshi', 'm_shijian'] },
     xj_yizhou:   { name: '灰界傀儡', hp: 180000, spd: 70, dmg: 250, r: 24, xp: 700, spr: 'kui', drop: 0.35, tier: 1, mats: ['m_xianyuanshi'] },
     lh_xiongshou: { name: '灵寰凶兽', hp: 9000, spd: 46, dmg: 120, r: 15, xp: 40, spr: 'wolf', drop: 0.10, tier: 0, mats: ['m_xianyuanshi'] },
-    lh_hanbing:   { name: '冷焰宗弟子', hp: 13000, spd: 54, dmg: 155, r: 15, xp: 55, spr: 'fashi', drop: 0.12, tier: 0, mats: ['m_xianyuanshi'] },
-    lh_lingzhu:   { name: '灵寰灵族', hp: 17000, spd: 60, dmg: 185, r: 16, xp: 70, spr: 'yaoshou2', drop: 0.12, tier: 0, mats: ['m_xianyuanshi', 'm_xuanhuang'] },
+    lh_hanbing:   { name: '冷焰宗弟子', hp: 13000, spd: 54, dmg: 155, r: 15, xp: 55, spr: 'disciple', drop: 0.12, tier: 0, mats: ['m_xianyuanshi'] },
+    lh_lingzhu:   { name: '灵寰灵族', hp: 17000, spd: 60, dmg: 185, r: 16, xp: 70, spr: 'neimen', drop: 0.12, tier: 0, mats: ['m_xianyuanshi', 'm_xuanhuang'] },
     lh_baishi:    { name: '白石真人', hp: 62000, spd: 68, dmg: 230, r: 23, xp: 300, spr: 'hermit', drop: 0.5, tier: 2, mats: ['m_xianyuanshi', 'm_xuanhuang'] },
     lh_tiangui:   { name: '百目天鬼', hp: 88000, spd: 74, dmg: 268, r: 25, xp: 420, spr: 'guixiu', drop: 0.6, tier: 2, mats: ['m_xianyuanshi', 'm_xuanhuang'] },
     // 卷四档（太岁府 / 虫巢 / 九元城）：此时韩立仍是太乙巅峰，对手已经开始是大罗的东西。
@@ -97,12 +113,21 @@
     // 金甲道兵（X4C1109《道兵阵》，10 次）。
     x4_yingwei:   { name: '九元观影卫', hp: 320000, spd: 96, dmg: 350, r: 24, xp: 1200, spr: 'assassin', drop: 0.42, tier: 2, mats: ['m_xianyuanshi'] },
     x4_tianyin:   { name: '金仙修士', hp: 300000, spd: 90, dmg: 344, r: 24, xp: 1150, spr: 'disciple', drop: 0.42, tier: 2, mats: ['m_xianyuanshi', 'm_shijian'] },
-    x4_huosui:    { name: '火岁萤虫', hp: 290000, spd: 106, dmg: 330, r: 18, xp: 1080, spr: 'ghost', drop: 0.40, tier: 1, mats: ['m_xianyuanshi'] },
+    x4_huosui:    { name: '火岁萤虫', hp: 290000, spd: 106, dmg: 330, r: 18, xp: 1080, spr: 'shijin', drop: 0.40, tier: 1, mats: ['m_xianyuanshi'] },
     x4_daobing:   { name: '金甲道兵', hp: 350000, spd: 84, dmg: 362, r: 25, xp: 1260, spr: 'kui', drop: 0.45, tier: 2, mats: ['m_xianyuanshi'] },
     // 卷五档（幽冥 / 十方万仙）：后缀都是鬼。荒魂（24 次）、鬼兵（19 次）、鬼物（225 次）。
-    x5_guiwu:     { name: '鬼物', hp: 380000, spd: 92, dmg: 392, r: 24, xp: 1400, spr: 'ghost', drop: 0.45, tier: 2, mats: ['m_xianyuanshi'] },
+    x5_guiwu:     { name: '鬼物', hp: 380000, spd: 92, dmg: 392, r: 24, xp: 1400, spr: 'guixiu', drop: 0.45, tier: 2, mats: ['m_xianyuanshi'] },
     x5_guibing:   { name: '鬼兵', hp: 360000, spd: 88, dmg: 382, r: 24, xp: 1350, spr: 'guixiu', drop: 0.45, tier: 2, mats: ['m_xianyuanshi'] },
-    x5_huanghun:  { name: '荒魂', hp: 420000, spd: 98, dmg: 412, r: 26, xp: 1500, spr: 'ghost', drop: 0.48, tier: 2, mats: ['m_xianyuanshi', 'm_shijian'] }
+    x5_huanghun:  { name: '荒魂', hp: 420000, spd: 98, dmg: 412, r: 26, xp: 1500, spr: 'shigui', drop: 0.48, tier: 2, mats: ['m_xianyuanshi', 'm_shijian'] },
+    // 卷三中期补齐（X3C578–C754）：原先 huijie(C454) 之后直接跳到 taiyi(C775)，
+    // 中间三百多章是空的 —— 而热火仙尊 / 景阳上人 / 弥罗老祖 / 柳岐老祖四个都在这一段。
+    // 深渊崖台上「散落着数十具枯骨」（X3C578 原句），煞气一浸，骨头自己会动。
+    yj_guhai:     { name: '骸骨', hp: 250000, spd: 74, dmg: 300, r: 24, xp: 920, spr: 'shigui', drop: 0.38, tier: 1, mats: ['m_xianyuanshi'] },
+    // 九幽族（131 次）：九幽域的统领种族，洗煞雷池是他们的禁地。
+    // 「黑袍幽奴」66 次（X3C725 起，鬼木身边传令跑腿的都是这个）；
+    // 「九幽族修士」8 次（原文「九幽族修士驻守，就在这里动手吧」）。
+    jy_younu:     { name: '幽奴', hp: 280000, spd: 90, dmg: 322, r: 24, xp: 1030, spr: 'assassin', drop: 0.44, tier: 2, mats: ['m_xianyuanshi', 'm_shijian'] },
+    jy_xiushi:    { name: '九幽族修士', hp: 300000, spd: 86, dmg: 336, r: 25, xp: 1100, spr: 'guixiu', drop: 0.46, tier: 2, mats: ['m_xianyuanshi', 'm_shijian'] }
   });
 
   // ========================= 三、卷一《风起灵寰》六图 =========================
@@ -193,10 +218,92 @@
       type: 'story', tag: '剧情',
       desc: '灰界里没有风，也没有光。到处是石头雕像，最深处坐着一位寸发不生的小人。',
       startLevel: 460, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'chulong', next: 'taiyi',
+      unlock: 'chulong', next: 'shijin',
       reward: { stones: 340000, mats: [['m_xianyuanshi', 8], ['m_xuanhuang', 5]] },
       clearTitle: '灰界',
       clearDesc: '整座灰界静得能听见石头的声音。那位小人说，它等了很久。'
+    },
+    {
+      // 卷三深渊（X3C578《下探》–C602）：这一段原著里韩立是往下走，不是往外走。
+      // C578 原句：「飞身落在一座突起于外的山崖平台，袖袍一挥，将散落在其上的数十具枯骨扫落，
+      //   大片幽绿磷火立即飞舞半空」；他召出蟹道人、金童、白玉貔貅守在崖上——
+      //   「好重的煞气……」蟹道人开口说的第一句话就是这句。
+      // 韩立自己下更深处闭关，噬金仙追下来：金童替他挡了一记五彩晶矛，
+      //   蟹道人提着「斩霆」战刀接战，一记「旱地升雷」劈在深渊谷底。
+      id: 'shijin', name: '深渊·噬金仙', pos: '仙界·积鳞空境 深渊', arc: 'M',
+      type: 'boss', tag: '剧情战',
+      desc: '下探近千丈，山崖平台上散着数十具枯骨。幽绿磷火顺着煞气，一点点往深渊下方飘。',
+      startLevel: 460, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'huijie', next: 'xianyun',
+      diff: 5.2, bossAt: 0, intro: 'shijin', outro: 'shijin_out',
+      enemies: ['yj_guhai'],
+      elites: ['骸骨', '傀儡'],
+      mats: ['m_xianyuanshi', 'm_shijian'],
+      // 太乙境噬金仙：甲虫身、五彩晶光、钢矛般的前肢。它是这一卷里第一个「打不动」的东西。
+      boss: { kind: 'beast', name: '太乙境噬金仙', hp: 400000, spd: 96, dmg: 420, r: 28, spr: 'shijin', scale: 7.6, summon: '' },
+      reward: { stones: 380000, mats: [['m_xianyuanshi', 10], ['m_shijian', 2]] },
+      clearTitle: '深渊',
+      clearDesc: '神念囚笼碎了，可它也没能站起来。金童的嘴角还挂着血，蟹道人的刀已经卷了口。'
+    },
+    {
+      // 闲云山·野鹤谷（X3C603《对弈》–C604《闲云野鹤》）：韩立化名「厉飞雨」在黑山仙域
+      //   浮云山脉躲着炼丹的那段日子。巨石上常年坐着四个人：
+      //   热火仙尊（白发老叟，金仙后期，本地中等宗门太上长老，懒，把担子丢给师弟）、
+      //   段与哉（黑发老者，金仙初期，山野散修，虎口夺食一路杀出来的）、
+      //   虞子期（弹琴男子，真仙后期）、景阳上人（褐衣老者，金仙后期，酿绿醅酒）。
+      //   另有莫无雪（金仙初期），在清风崖上坐枯禅，一发能发上十年百年。
+      // 山里立着一条规矩：「不问过往，不涉争端，不为外扰」。
+      // 这一段的用处不是打——是让玩家知道韩立也有过几天不看人脸色、只下棋喝酒的日子。
+      id: 'xianyun', name: '闲云山·野鹤谷', pos: '仙界·黑山仙域 浮云山脉', arc: 'M',
+      type: 'market', tag: '隐居',
+      shop: ['t_wushidan', 't_lvpeijiu', 'm_xianyuanshi', 'm_shijian', 'jipin', 'qiannian'],
+      desc: '浮云山脉深处的一座山。山下有块大石，四个人常年坐在上面，下棋、弹琴、喝酒。',
+      shopSub: '山里有条规矩：不问过往，不涉争端，不为外扰。谁犯了，当年那位散修一个人也能灭一门。',
+      startLevel: 460, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'shijin', next: 'shuiyan',
+      reward: { stones: 0, items: ['t_lvpeijiu'], mats: [['m_shijian', 1]] },
+      clearTitle: '野鹤谷',
+      clearDesc: '一壶绿醅酒换一颗五石丹，谁也不欠谁。四个人照旧下他们的棋——他在这座山里，只是个丹师。'
+    },
+    {
+      // 水衍宫·法言天地（X3C642《不凑热闹》–C669《缘法天地间》）：弥罗老祖的遗迹。
+      //   殿里那尊大头童子的石像，「身形外貌」跟当年围坐在大耳僧身边的五个人之一一样；
+      //   殿后石台上刻着「法言天地」四个金篆大字——正是韩立当年透过晶壁看到的讲道之处。
+      //   他听了八句半讲经，周身神通自行运转，一口气连开八处仙窍。
+      //   弥罗老祖人早已不在，留下的是石台、云海，和那部《大五行幻世诀》。
+      id: 'shuiyan', name: '水衍宫·法言天地', pos: '仙界·真言门遗址', arc: 'M',
+      type: 'story', tag: '剧情',
+      desc: '殿里立着一尊大头童子的石像，脚边是一截被斩断的巨型石墩。殿后一座石台，四面云海无边。',
+      startLevel: 460, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'xianyun', next: 'xisha',
+      reward: { stones: 420000, items: ['t_fayantiandi'], mats: [['m_shijian', 3], ['m_xianyuanshi', 10]] },
+      clearTitle: '法言天地',
+      clearDesc: '石台上没有人。可他一站上去，身上八处仙窍自己转了起来——那句讲经，隔了这么多年还在这里。'
+    },
+    {
+      // 灰界·洗煞雷池（X3C738《坎坷经历》–C754《天狐老祖》）：
+      //   修罗城地底巨厅，四座雷池翻着青、紫、银、金四色雷光，地上遍刻阵纹；
+      //   池中央一座十字木架，捆着四根粗大锁链，上头坐着九条尾巴的雪白巨狐——柳岐老祖，
+      //   天狐族的道祖，被九幽族囚在这里多年。
+      //   啼魂在这一段与韩立重逢（C738）：「啼魂，是你！」她当年被真仙界的人召唤飞升，
+      //   却在灰界当了能呼风唤雨的那一位，还掏出一枚浣金雷珠替他破丹田禁制。
+      //   追着他们进来的九幽族是鬼木（「鬼木大人」，124 次）与镇守此处的阴墟长老。
+      // 这一关的正事有两件：洗去一身煞气，把那只老狐狸放下来。
+      id: 'xisha', name: '灰界·洗煞雷池', pos: '仙界·灰界 修罗城', arc: 'M',
+      type: 'combat', tag: '剧情战',
+      desc: '地底巨厅，四座雷池翻着青、紫、银、金四色雷光。池中央的十字木架上，坐着九尾雪白的巨狐。',
+      startLevel: 460, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'shuiyan', next: 'taiyi',
+      diff: 5.4, bossAt: 60, intro: 'xisha', outro: 'xisha_out',
+      enemies: ['jy_younu', 'jy_xiushi'],
+      elites: ['九幽族长老', '九幽族修士'],
+      mats: ['m_xianyuanshi', 'm_shijian'],
+      // 鬼木：九幽族大罗。八张黑色符箓化八根漆黑巨兵，「每一根散发的气息，都不逊于一件入品仙器」。
+      boss: { kind: 'mo', name: '鬼木', hp: 440000, spd: 92, dmg: 440, r: 27, spr: 'mo', scale: 7.2 },
+      // 洗煞池洗的是煞气。身上若还压着「五鬼锁魂」这类煞气封印，这一池水一并洗掉。
+      reward: { stones: 480000, unseal: true, mats: [['m_xianyuanshi', 14], ['m_shijian', 4]] },
+      clearTitle: '洗煞',
+      clearDesc: '四色雷光熄了，煞气随着池水一寸寸退下去。木架上的锁链断开时，那只老狐狸只睁了一下眼。'
     },
     {
       // 太乙破境图（后传 X3C775《进阶太乙》）：青黑山谷遍地铁兽残尸，血汇成湖；
@@ -205,7 +312,7 @@
       type: 'story', tag: '破境',
       desc: '遍地异兽残尸，血液汇成近百里的湖。湖心漂着一朵合拢的白色莲苞。',
       startLevel: 460, endLevel: 520, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'huijie', next: 'dijiang',
+      unlock: 'xisha', next: 'dijiang',
       reward: { stones: 400000, mats: [['m_xianyuanshi', 10], ['m_xuanhuang', 6]] },
       clearTitle: '太乙',
       clearDesc: '莲苞开的时候，谷外最后一只雪蟾也倒下了。这一关不是打出来的，是熬出来的。'
@@ -254,7 +361,7 @@
       enemies: ['xj_shimei', 'xj_xuechi', 'xj_linv'],
       elites: ['大墟炼尸', '血门守卫'],
       mats: ['m_xianyuanshi', 'm_shijian'],
-      boss: { kind: 'mo', name: '鳞犼·守门', hp: 420000, spd: 94, dmg: 400, r: 29, spr: 'beast', scale: 7.8 },
+      boss: { kind: 'mo', name: '鳞犼·守门', hp: 420000, spd: 94, dmg: 400, r: 29, spr: 'haishou', scale: 7.8 },
       reward: { stones: 560000, mats: [['m_xianyuanshi', 14], ['m_shijian', 4]] },
       clearTitle: '大墟',
       clearDesc: '埋骨之地的白骨里，还埋着上一个进来的人。'
@@ -628,7 +735,7 @@
     stones: 420000,
     chance: { min: 1 },
     wushuai: { pay: 'm_xianyuanshi', per: 5, base: 0.60, step: 0.14, canAvoid: 3, cost: 3 },
-    story: [{ id: 'huijie', name: '仙界·灰界' }],
+    story: [{ id: 'xisha', name: '仙界·灰界 修罗城 洗煞雷池' }],
     lines: [
       ['旁白', '青黑山谷里，遍地是支离破碎的异兽残尸。'],
       ['旁白', '乌黑的血液到处横流，汇成一片方圆近百里的血湖，浮尸无数。'],
@@ -832,6 +939,85 @@
     ['旁白', '整座灰界一动不动。'],
     ['韩立', '（这一界没有法则之言，全靠自身悟。这才是太乙要的东西。）'],
     ['旁白', '石台上的小人站了起来，没有发出一点声音。']
+  ];
+  window.MAP_STORIES.shijin = [
+    ['旁白', '下探近千丈。山崖平台上散着数十具枯骨，一脚踩下去，骨粉混着幽绿磷火飘了起来。'],
+    ['旁白', '他挥袖把枯骨扫落崖下，三道光同时落在台上：两金一白。'],
+    ['蟹道人', '好重的煞气……'],
+    ['金童', '大叔，这里是……'],
+    ['韩立', '（蟹道人，金童，白玉貔貅。煞气到了这里，他们还顶得住。）'],
+    ['韩立', '我们已经身处在深渊中了。你们暂且留在这里，我还要往更深处闭关。'],
+    ['金童', '大叔，你就放心在下面修炼，上面交给我们。'],
+    ['旁白', '他往下去了。崖台上的磷火，一盏一盏自己亮起来。'],
+    ['旁白', '三日后，深渊上方传来一声闷响。崖壁被撞开，一只金色的东西挤了进来。'],
+    ['旁白', '甲壳，六足，两只前肢像钢矛。'],
+    ['韩立', '（太乙境噬金仙。它怎么会追到这里。）'],
+    ['金童', '大叔——！'],
+    ['旁白', '一道五彩晶矛破空而至。金童横身挡在他前面，骨骼碎裂的声音很轻。'],
+    ['韩立', '（不能让它近身。真言宝轮——定。）']
+  ];
+  window.MAP_STORIES.shijin_out = [
+    ['旁白', '神念囚笼崩碎的那一刻，他自己的神识也见了底。'],
+    ['旁白', '蟹道人刀尖朝天，一记「旱地升雷」从谷底升起，把整条深渊照成金色。'],
+    ['蟹道人', '韩道友，斩霆只出得了这一刀。'],
+    ['韩立', '（够了。金童已经钻进去了。）'],
+    ['旁白', '金色的甲壳从里面裂开。噬金仙一声长啸，栽进煞气里。'],
+    ['韩立', '（太乙后期。它还差半步。这半步，够它死很多次。）'],
+    ['旁白', '金童从血里爬出来，肩上那个洞还在冒光。蟹道人收了刀，站在崖边没说话。']
+  ];
+  window.MAP_STORIES.xianyun = [
+    ['旁白', '浮云山脉深处有一座山，山下有一块大石。'],
+    ['旁白', '石上四个人：一个白发老叟在等棋，一个黑发老者对着棋盘想了半个时辰，一个男子在弹琴，一个褐衣老者抱着酒壶。'],
+    ['热火仙尊', '厉道友近来忙于炼丹，误了诸位的邀约，还请见谅。'],
+    ['旁白', '韩立上前一一见礼。他在这座山里的名字叫厉飞雨，是个丹师。'],
+    ['热火仙尊', '无妨，无妨。你毕竟是个丹师，炼丹才是正事——不像我们这些老家伙，整日游手好闲。'],
+    ['韩立', '（热火仙尊。金仙后期，本地一座中等宗门的太上长老。嫌管宗门麻烦，担子全丢给师弟了。）'],
+    ['景阳上人', '风花雪月可不是一个人能独享的乐趣，须得子期你帮上一把。'],
+    ['虞子期', '你这酒鬼，又要人替你弹琴。'],
+    ['韩立', '（这四个人，没有一个问过他的来历。）'],
+    ['旁白', '山脚下有一块碑，上头只刻了一行字：不问过往，不涉争端，不为外扰。'],
+    ['韩立', '（在这座山里，我只是个炼丹的。）']
+  ];
+  window.MAP_STORIES.shuiyan = [
+    ['旁白', '殿里立着一尊石像。大头童子，身形矮小，头却比身子还大。'],
+    ['韩立', '（眼熟。在哪里见过。）'],
+    ['旁白', '石像脚边是一截被斩断的巨型石墩，断口和底座吻合——它原本是立在这儿的。'],
+    ['韩立', '（想起来了。晶壁里那位大耳僧讲道，身边围着五个人，其中就有一个头大身小的童子。）'],
+    ['韩立', '（弥罗老祖。真言门的那位。）'],
+    ['旁白', '殿后一片云海。云海里浮着一座石台，藤蔓底下压着几个金篆大字。'],
+    ['韩立', '法言天地。'],
+    ['韩立', '（就是这里。当年我不过听了八句半讲经，周身神通自行运转，一口气开了八处仙窍。）'],
+    ['旁白', '石台上没有人。他站上去，把手一摊，真言宝轮浮了出来。'],
+    ['韩立', '（今日选个好方位，看全了它。）'],
+    ['旁白', '宝轮转起来的那一刻，云海动了。八句半讲经，一个字一个字自己浮上来。']
+  ];
+  window.MAP_STORIES.xisha = [
+    ['旁白', '修罗城的地底下，是一座巨厅。'],
+    ['旁白', '四座雷池，分别翻着青、紫、银、金四色雷光，像四条怒龙在水里滚。'],
+    ['旁白', '地上遍刻阵纹。雷一溢出池外，阵纹里就涌出一股白雾，把它顶回去。'],
+    ['旁白', '四池中央的地面上立着一根巨大的十字木架。架上坐着一头巨兽，浑身雪白皮毛，九条长尾无力垂着。'],
+    ['旁白', '四根粗大锁链绕着它缠了几圈，把它牢牢缚在架上。'],
+    ['韩立', '（柳岐老祖。天狐族的道祖，被锁在这里多少年了。）'],
+    ['旁白', '一道黑影掠到池边。三目，头生怪角。'],
+    ['啼魂', '主人。'],
+    ['韩立', '啼魂，是你！'],
+    ['啼魂', '看来我们分开太久，主人早已将我忘记了……'],
+    ['韩立', '（当年她被真仙界的人召唤飞升。怎么会落在灰界。）'],
+    ['啼魂', '此事稍后再说。主人先用这枚浣金雷珠破开丹田禁制。'],
+    ['旁白', '一枚鸡蛋大小的金色雷珠递过来，珠身刻满雷电纹路，不停喷出细密金弧。'],
+    ['韩立', '（浣骨金雷。阴栝煞雷的克星。）'],
+    ['柳岐老祖', '真仙界之人……你们怎么会来到这个地方？'],
+    ['韩立', '（四座洗煞雷池。这地方，正好洗我一身煞气。）']
+  ];
+  window.MAP_STORIES.xisha_out = [
+    ['旁白', '鬼木的八根巨兵碎在地上，一根一根变回黑符，烧成了灰。'],
+    ['旁白', '啼魂扯断最后一根锁链。四色雷光熄了大半。'],
+    ['柳岐老祖', '这四座洗煞雷池，你下去洗一洗。'],
+    ['韩立', '（一身煞气，从灵界带到仙界，压得太久了。）'],
+    ['旁白', '池水没到胸口，雷光一寸寸把黑色的东西从他身上剥下来。'],
+    ['柳岐老祖', '洗完了就走吧。此处不宜久留。'],
+    ['韩立', '（老狐狸不想说当年的事。也罢。）'],
+    ['旁白', '他上岸的时候，骨头缝里都是轻的。']
   ];
   window.MAP_STORIES.dijiang = [
     ['旁白', '夜阳城的坊市不许驾车入内——这是大皇子定下的规矩，城内所有坊市全都适用。'],
@@ -1277,6 +1463,24 @@
   for (const id of WB_SHOP) {
     if (window.SHOP_STOCK.some(s => s.id === id)) continue;
     window.SHOP_STOCK.push({ id: id, price: WB_PRICE[id], cat: WB_CAT[id] });
+  }
+
+  // ========================= 七(4)、闲云山「野鹤谷」的往来（X3C603–C604）=========================
+  // 这里不是坊市，是四个隐士的大石。摆出来的只有两样东西：
+  //   五石丹（韩立自己炼的，一炉几颗，四友一人一颗）、绿醅酒（景阳上人酿的，数量极少）。
+  // 原著里这两样是拿物换物，游戏里折成仙元石——反正韩立也不缺这几个钱。
+  const XY_SHOP = ['t_wushidan', 't_lvpeijiu', 'm_xianyuanshi', 'm_shijian', 'jipin', 'qiannian'];
+  const XY_PRICE = {
+    t_wushidan: 300000, t_lvpeijiu: 260000,
+    m_xianyuanshi: 80000, m_shijian: 260000, jipin: 120000, qiannian: 95000
+  };
+  const XY_CAT = {
+    t_wushidan: 'dan', t_lvpeijiu: 'dan',
+    m_xianyuanshi: 'cai', m_shijian: 'cai', jipin: 'dan', qiannian: 'fu'
+  };
+  for (const id of XY_SHOP) {
+    if (window.SHOP_STOCK.some(s => s.id === id)) continue;
+    window.SHOP_STOCK.push({ id: id, price: XY_PRICE[id], cat: XY_CAT[id] });
   }
 
   // ========================= 六、仙界洞府（原著依据） =========================

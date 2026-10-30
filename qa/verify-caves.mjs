@@ -70,7 +70,7 @@ ok(wm && wm.from === 'wumengdao', '乌蒙岛小院挂在乌蒙岛图（原著：
 // ---------- C 坊市 ----------
 console.log('\n【C · 坊市】');
 const S = await page.evaluate(() => window.MAPS.filter(m => m.type === 'market').map(m => ({ id: m.id, name: m.name, pos: m.pos, shopN: (m.shop || []).length })));
-ok(S.length === 7, '坊市 7 处（太南小会/天星城/天南交易会/虞阳城/天渊坊市/帝江坊/鎏金城万宝节）', S.length);
+ok(S.length === 8, '坊市 8 处（太南小会/天星城/天南交易会/虞阳城/天渊坊市/帝江坊/鎏金城万宝节 + 闲云山野鹤谷）', S.length);
 const emptyShop = S.filter(m => m.shopN === 0);
 ok(emptyShop.length === 0, '每个坊市都有货架（不是空壳）', emptyShop.map(x => x.id));
 const names = S.map(m => m.name).join('|');
