@@ -540,7 +540,7 @@
       boss: { kind: 'mo', name: '天象尊者', hp: 200000, spd: 80, dmg: 210, r: 27, spr: 'haishou', scale: 6.8 },
       reward: { stones: 210000, items: ['dan_guangling', 't_wannianjingsang', 't_zhenlinliuying'], mats: [['m_daopai', 1], ['m_zhenlingxue', 2]] },
       clearTitle: '得果',
-      clearDesc: '掌天瓶一压，天象尊者认输，道牌交了出来。道果到手——他当场就吞了。'
+      clearDesc: '掌天瓶一压，天象尊者认输，道牌交了出来。一百零八枚牌子换到一枚广灵道果——此果不宜久露在外，他收好了，留着配合其他灵物再服食。'
     },
     {
       // 原著 C2441《人族之变》：金长老并未当面说破，而是在韩立告辞之后才与族中长老议论——
