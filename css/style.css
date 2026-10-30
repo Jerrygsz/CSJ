@@ -119,6 +119,12 @@ body.fs #wrap { background: #000; }
 #pauseBtn { position: absolute; right: 12px; top: 62px; width: 44px; height: 44px; border: none; border-radius: var(--r-md); background: rgba(0,0,0,0.5); color: var(--text-1); pointer-events: auto; display: flex; align-items: center; justify-content: center; gap: var(--sp-1); padding: 0; }
 #pauseBtn::before, #pauseBtn::after { content: ''; display: block; width: 5px; height: 17px; border-radius: 1px; background: currentColor; }
 #pauseBtn:active { background: rgba(0,0,0,0.72); transform: scale(var(--press)); }
+/* 自动战斗：并排在暂停键左边。开着的时候整颗亮起来，一眼看得出「现在是它替我打」 */
+#autoBtn { position: absolute; right: 64px; top: 62px; height: 44px; padding: 0 11px; border: 1px solid rgba(255,255,255,0.22); border-radius: var(--r-md); background: rgba(0,0,0,0.5); color: var(--text-1); font-size: var(--fs-cap); letter-spacing: 2px; pointer-events: auto; display: none; align-items: center; justify-content: center; }
+#autoBtn:active { background: rgba(0,0,0,0.72); transform: scale(var(--press)); }
+#autoBtn.on { border-color: var(--accent); color: var(--accent); background: rgba(0,0,0,0.78); box-shadow: 0 0 0 1px rgba(0,0,0,0.4); }
+#autoBtn.on::after { content: ''; width: 6px; height: 6px; margin-left: 5px; border-radius: 50%; background: var(--accent); animation: autoDot 1.1s ease-in-out infinite; }
+@keyframes autoDot { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
 #bosswrap { position: absolute; top: 104px; left: 12px; right: 12px; display: none; }
 #bossname { font-size: var(--fs-body); color: var(--accent); text-shadow: 0 1px 3px #000; margin-bottom: 0; }
 #bossbar { height: 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--accent); border-radius: var(--r-sm); overflow: hidden; }

@@ -3459,6 +3459,90 @@
     insSt().n++;
     resumePlay();
   }
+
+  // ==================== 自动战斗（站桩挂机） ====================
+  // 点「自动」之后人就站着不动，剩下全交给它：
+  //   怪进范围就开火（fireWeapons 本来就是自动索敌，不必另写一套），
+  //   对白一句句自己点过去，煞气满 / 升级的三选一自己选第一张，
+  //   进了结算画面就收工 —— 一张图一趟，不跨图。
+  // 两件它不做的事：不替玩家花灵石（祭炼面板直接收掉），不替客机点房主的对白。
+  const AUTO_LINE_MIN = 1.0;   // 一句对白至少停这么久，让人看得见
+  const AUTO_LINE_MAX = 2.6;
+  const AUTO_PICK = 0.75;      // 选卡 / 抉择落手前停一下，别像抢的
+  // 这些状态一出现就说明这一趟结束了（或人不在战场上），自动收工
+  const AUTO_OFF_STATES = {
+    victory: 1, gameover: 1, title: 1, map: 1, cave: 1, shop: 1,
+    wanling: 1, diff: 1, sweep: 1, prefight: 1
+  };
+
+  // 按钮该不该露面：只在能打的图上，且人还在这一趟里（对话 / 选卡 / 暂停时也得留着）
+  function autoBtnAllowed() {
+    const fightMap = G.map && (G.map.type === 'combat' || G.map.type === 'boss' || G.map.type === 'chase');
+    const onStage = G.state === 'play' || G.state === 'dialog' || G.state === 'levelup' || G.state === 'pause' || G.state === 'down';
+    return !!(fightMap && onStage);
+  }
+  // 一句对白停多久：字数越多停越久，但两头都夹住 —— 太短看不清，太长像卡住
+  function autoLineDelay(line) {
+    const n = (line && line[1] ? line[1] : '').length;
+    return U.clamp(AUTO_LINE_MIN + n * 0.028, AUTO_LINE_MIN, AUTO_LINE_MAX);
+  }
+  function autoPickCard() {
+    if (G.state !== 'levelup' || !G.cardsNow || !G.cardsNow.length) return false;
+    // 祭炼卡要花灵石：挂机不替人花钱，把面板收掉就回战场
+    if (G.cardsNow.every(c => c.kind === 'R')) {
+      G.cardsNow = null;
+      if (elLevelup) elLevelup.style.display = 'none';
+      resumePlay();
+      banner('自动 · 祭炼面板已收起（不替你花灵石）');
+      return true;
+    }
+    const c = G.cardsNow[0];
+    G.cardsNow = null;
+    if (elLevelup) elLevelup.style.display = 'none';
+    onPick(c);   // onPick 末尾会 resumePlay，状态自然回到 play
+    return true;
+  }
+  function setAuto(on, silent) {
+    on = !!on;
+    if (!!G.autoOn === on) return G.autoOn;
+    G.autoOn = on;
+    G.autoT = on ? 0.6 : 0;   // 开起来先停半拍，别一开就把第一句对白点掉
+    if (elAutoBtn) elAutoBtn.classList.toggle('on', on);
+    if (!silent) {
+      if (on) { banner('自动战斗 · 开启（站桩，到结算为止）'); Sfx.buff(); }
+      else banner('自动战斗 · 关闭');
+    }
+    return G.autoOn;
+  }
+  // 每帧一次：只处理「停在 play 之外、本来等人点一下」的地方；打仗本身仍归 update
+  function tickAuto(dt) {
+    if (!G.autoOn) return;
+    if (AUTO_OFF_STATES[G.state]) { setAuto(false, true); return; }
+    if (G.state === 'dialog') {
+      // 客机不替房主点对白：联机节奏以房主为准，否则两边各点各的，镜像会乱
+      if (G.coopRole === 'client' && G.coopShared) return;
+      G.autoT -= dt;
+      if (G.autoT > 0) return;
+      if (G.dialogIsChoice) {
+        if (G.dialogChoiceOpts && G.dialogChoiceOpts.length) {
+          pickChoice(G.dialogChoiceOpts[0].v);   // 抉择一律取第一项
+          G.autoT = AUTO_PICK;
+        } else G.autoT = 0.3;
+        return;
+      }
+      if (!G.dialogLines) { G.autoT = 0.2; return; }
+      const line = G.dialogLines[G.dialogIdx];
+      advanceDialog();
+      G.autoT = autoLineDelay(line);
+      return;
+    }
+    if (G.state === 'levelup') {
+      G.autoT -= dt;
+      if (G.autoT > 0) return;
+      G.autoT = autoPickCard() ? AUTO_PICK : 0.3;
+    }
+  }
+
   function openInsight() {
     const st = shaSt();
     // 这一次顿悟用掉的门槛，用掉之后抬一档
@@ -3693,8 +3777,11 @@
     const p = G.player;
     if (!p) return;   // 进图过渡帧：state 已切到 play，人还没立起来
     let dx = 0, dy = 0;
-    if (keys.left) dx--; if (keys.right) dx++; if (keys.up) dy--; if (keys.down) dy++;
-    if (jx !== 0 || jy !== 0) { dx = jx; dy = jy; }
+    // 自动战斗：站桩 —— 键与摇杆一律不认，脚下生根，剩下的交给自动索敌
+    if (!G.autoOn) {
+      if (keys.left) dx--; if (keys.right) dx++; if (keys.up) dy--; if (keys.down) dy++;
+      if (jx !== 0 || jy !== 0) { dx = jx; dy = jy; }
+    }
     const len = Math.hypot(dx, dy) || 1;
     const sp = p.spd * spdMul() * (1 + (G.bonus.spd || 0));
     p.x += (dx / len) * sp * dt; p.y += (dy / len) * sp * dt;
@@ -4473,6 +4560,11 @@
     elHud.style.display = playing ? 'block' : 'none';
     // 暂停键用 flex 居中两根竖条（图标是 CSS 画的，不是字体字形）
     elPauseBtn.style.display = G.state === 'play' ? 'flex' : 'none';
+    // 自动战斗只出现在能打的图里；对话 / 选卡 / 暂停时也留着，否则一进对白按钮就没了
+    if (elAutoBtn) {
+      elAutoBtn.style.display = autoBtnAllowed() ? 'flex' : 'none';
+      elAutoBtn.classList.toggle('on', !!G.autoOn);
+    }
     if (elCombo && !playing) elCombo.style.display = 'none';
   }
 
@@ -4511,6 +4603,8 @@
     G.victoryNote = '';
     G.woundedNote = '';
     G.npcs = []; G.encT = 8;
+    // 自动战斗只管这一趟：进新图一律复位，得重新点一次（「到结算为止」的边界就在这儿）
+    G.autoOn = false; G.autoT = 0;
     G.realmIdx = 0; G.realm = { dmg: 0, atk: 0, spd: 0 }; G.realmHp = 0;
     resetCombo();
     for (const s of STORY) s.done = false;
@@ -6782,6 +6876,7 @@
     btn.addEventListener('click', ev => { ev.preventDefault(); ev.stopPropagation(); });
   });
   const elPauseBtn = document.getElementById('pauseBtn');
+  const elAutoBtn = document.getElementById('autoBtn');
   const elBosswrap = document.getElementById('bosswrap');
   const elBossname = document.getElementById('bossname');
   const elBossfill = document.getElementById('bossfill');
@@ -6947,6 +7042,11 @@
   }
   elDialog.addEventListener('click', () => { if (G.state === 'dialog') advanceDialog(); });
   elPauseBtn.addEventListener('click', () => { if (G.state === 'play') doPause(); });
+  // 自动战斗：战斗中随时可开可关。开着的时候人不动，对白与选卡都自己走
+  elAutoBtn.addEventListener('click', () => {
+    if (elAutoBtn.style.display === 'none') return;
+    setAuto(!G.autoOn);
+  });
   // 联机：暂停菜单里给个「离开联机房间」，不用回标题就能断开（没连上时自动隐藏）
   if (elPauseLeaveCoop) {
     elPauseLeaveCoop.style.display = 'none';
@@ -7376,6 +7476,8 @@
     else if (G.state === 'down') updateDown(dt * (G.ts || 1));   // P6 倒地观战：世界照转，自己不能动
     // 洞府 / 坊市 / 对话 / 暂停 / 看地图这些状态下也保持联机心跳，否则队友会误报失联
     else if (window.Coop) window.Coop.tickSend(dt * (G.ts || 1));
+    // 自动战斗：update 只在 play 时跑，对话与选卡这两处得单独推一把
+    if (G.autoOn) tickAuto(dt);
     if (G.state !== 'title') { render(); updateHUD(); }
     // 结算态：小舞台自己跑（走动 / 头顶表情 / 位置同步），战斗逻辑不跑
     if (G.state === 'victory') updateSettle(dt * (G.ts || 1));
@@ -8043,6 +8145,27 @@
       return true;
     },
     refineCost() { const i = G.insight || {}; return REFINE_COST[i.refine || 0] == null ? null : REFINE_COST[i.refine || 0]; },
+    // ---- 自动战斗（供回归：能不能开、按钮亮不亮、对白与选卡到底推没推进）----
+    autoMode(on) { if (on === undefined) return !!G.autoOn; setAuto(!!on, true); return !!G.autoOn; },
+    // 手动喂若干帧给自动逻辑（不走 rAF，测试能快进）
+    autoTick(n, dt) {
+      for (let i = 0; i < (n || 1); i++) tickAuto(dt || 0.05);
+      return { on: !!G.autoOn, state: G.state, t: +(G.autoT || 0).toFixed(2), idx: G.dialogIdx || 0 };
+    },
+    autoPick() { return autoPickCard(); },
+    autoInfo() {
+      const p = G.player;
+      return {
+        on: !!G.autoOn, state: G.state, t: +(G.autoT || 0).toFixed(2),
+        btn: elAutoBtn ? elAutoBtn.style.display : null,
+        lit: elAutoBtn ? elAutoBtn.classList.contains('on') : null,
+        cards: G.cardsNow ? G.cardsNow.length : 0,
+        // should = 按规则此刻该不该出现（DOM 的 display 要等下一帧渲染，断言用这个更准）
+        should: autoBtnAllowed(),
+        map: G.map ? G.map.id : null, mapType: G.map ? G.map.type : null,
+        px: p ? +p.x.toFixed(1) : null, py: p ? +p.y.toFixed(1) : null
+      };
+    },
     // 直接吃一张指定的 C 卡（绕过随机），验证「卡面 → 真实落点」：应写 runP，不写永久加成 G.bonus
     insightPickC(k) {
       const p = PASSIVE_MODS.find(x => x.k === k) || PASSIVE_MODS[0];
