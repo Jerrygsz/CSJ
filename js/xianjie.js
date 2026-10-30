@@ -138,6 +138,7 @@
       elites: ['冷焰宗·护法', '灵寰散修'],
       mats: ['m_xianyuanshi', 'm_xuanhuang'],
       boss: { kind: 'mo', name: '白石真人', hp: 62000, spd: 68, dmg: 230, r: 23, spr: 'hermit', scale: 5.4 },
+      extraBoss: [{ kind: 'mo', name: '冷焰老祖', hp: 58000, spd: 62, dmg: 240, r: 22, spr: 'mo', scale: 5.6, summon: '' }],
       reward: { stones: 160000, mats: [['m_xianyuanshi', 4], ['m_xuanhuang', 2]] },
       clearTitle: '瞒天过海',
       clearDesc: '典籍到手，人也全身而退。只是那一下撞上来的神念，让他明白两件事：自己伤没好，这地方藏不住多久。'
@@ -338,6 +339,7 @@
       elites: ['岁月殿·金甲道兵', '石剑残影'],
       mats: ['m_xianyuanshi', 'm_shijian'],
       boss: { kind: 'mo', name: '奇摩子', hp: 780000, spd: 104, dmg: 500, r: 32, spr: 'mo', scale: 9.0 },
+      extraBoss: [{ kind: 'mo', name: '黑天魔祖', hp: 720000, spd: 100, dmg: 520, r: 30, spr: 'mo', scale: 8.6, summon: '' }, { kind: 'mo', name: '白云道祖', hp: 820000, spd: 102, dmg: 540, r: 31, spr: 'neimen', scale: 8.8, summon: '' }],
       reward: { stones: 980000, items: ['t_suiyueshendeng'], mats: [['m_xianyuanshi', 20], ['m_shijian', 8]] },
       clearTitle: '入手神灯',
       clearDesc: '五色融光散尽的时候，一个大罗从头开始，一点一点跌回太乙。'

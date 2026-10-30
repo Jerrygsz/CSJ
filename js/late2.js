@@ -533,6 +533,7 @@
       elites: ['木魁', '阴罗宗长老'],
       mats: ['m_gangyin', 'm_gengjing', 'm_xuanbing', 'm_yanghun'],
       boss: { kind: 'mo', name: '阴罗宗大长老·乾老魔', hp: 30000, spd: 60, dmg: 70, r: 22, spr: 'linmo', scale: 5.8 },
+      extraBoss: [{ kind: 'beast', name: '银翅夜叉', hp: 27000, spd: 64, dmg: 78, r: 21, spr: 'guixiu', scale: 5.4, summon: '' }],
       reward: { stones: 5000, items: ['t_wuzi'], mats: [['m_gangyin', 3], ['m_gengjing', 3]] },
       clearTitle: '乾老魔已灭',
       clearDesc: '五子同心魔认了新主。封魂咒的解术，也从他脑子里搜出来了。'
@@ -548,6 +549,7 @@
       elites: ['叶家元婴', '元刹魔像'],
       mats: ['m_gangyin', 'm_yanghun', 'm_xuanbing'],
       boss: { kind: 'blood', name: '元刹圣祖分魂', hp: 34000, spd: 62, dmg: 76, r: 23, spr: 'guixiu', scale: 6.2 },
+      extraBoss: [{ kind: 'mo', name: '敖啸老祖', hp: 31000, spd: 60, dmg: 82, r: 21, spr: 'neimen', scale: 5.4, summon: '' }],
       reward: { stones: 6000, items: ['t_pojie'], mats: [['m_gangyin', 4], ['m_yanghun', 4]] },
       clearTitle: '塔已塌',
       clearDesc: '玲珑走了，逆星盘的光一闪就没了。破界符留在手里，沉甸甸的。'
@@ -563,6 +565,7 @@
       elites: ['妖族先锋', '小极宫弟子'],
       mats: ['m_xuanbing', 'm_hanhuo', 'm_gangyin', 'm_yusui'],
       boss: { kind: 'mo', name: '寒骊上人', hp: 32000, spd: 58, dmg: 72, r: 21, spr: 'neimen', scale: 5.6 },
+      extraBoss: [{ kind: 'beast', name: '冰凤', hp: 30000, spd: 70, dmg: 80, r: 21, spr: 'bingfeng', scale: 5.4, summon: '' }],
       reward: { stones: 5200, pets: ['p_bingfeng'], mats: [['m_xuanbing', 3], ['m_hanhuo', 2]] },
       clearTitle: '冰凤相随',
       clearDesc: '小极宫塌了。冰凤跟出来的时候，回头看了一次，再没回头。'
@@ -780,6 +783,7 @@
       mats: ['m_gengjing', 'm_gangyin', 'm_yusui'],
       // 原著：天道盟第一大宗鸾鸣门有「联手双修夫妇」，两人合击勉强抵住一名元婴后期 —— 「合击」的原型即此
       boss: { kind: 'mo', name: '鸾鸣门·双修夫妇', hp: 40000, spd: 62, dmg: 84, r: 22, spr: 'neimen', scale: 5.8 },
+      extraBoss: [{ kind: 'mo', name: '至阳上人', hp: 37000, spd: 60, dmg: 90, r: 21, spr: 'neimen', scale: 5.4, summon: '' }],
       reward: { stones: 7000, mats: [['m_gengjing', 4], ['m_gangyin', 4]] },
       clearTitle: '落云宗立住了',
       clearDesc: '鸾鸣门那对双修夫妇联手也没挡住。落云宗从此是天南第一门。'

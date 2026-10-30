@@ -1321,7 +1321,7 @@
       const e = {
         type: 'wolfking', x: pos.x, y: pos.y, hp, maxhp: hp,
         spd: 66 * (dm.spd || 1), dmg: (11 + G.time * 0.06) * diff * dDmg, r: 15, xpVal: 30, spr: 'wolf', scale: 2,
-        wob: false, charge: true, dash: false, hitFlash: 0, t: 0, howlT: 7, _orbCd: {}, elite: true, name: names[0] || '头狼'
+        wob: false, charge: true, dash: false, hitFlash: 0, t: 0, howlT: 7, _orbCd: {}, elite: true, name: names[idx] || names[0] || '头狼'
       };
       G.enemies.push(e); banner('⚠ 精英 · ' + e.name); Sfx.warn();
     } else {
@@ -1329,7 +1329,7 @@
       const e = {
         type: 'blacklord', x: pos.x, y: pos.y, hp, maxhp: hp, spd: 44 * (dm.spd || 1), dmg: (10 + G.time * 0.05) * diff * dDmg, r: 14,
         xpVal: 45, spr: 'blacklord', scale: 1.4, wob: false, charge: false, dash: false, hitFlash: 0,
-        t: 0, shootT: 1.5, _orbCd: {}, elite: true, name: names[1] || '厉无极', ranged: true
+        t: 0, shootT: 1.5, _orbCd: {}, elite: true, name: names[idx] || names[1] || '厉无极', ranged: true
       };
       G.enemies.push(e); banner('⚠ 精英 · ' + e.name); Sfx.warn();
     }
@@ -2013,8 +2013,7 @@
   }
 
   // ---------- Boss（按地图配置，四种打法） ----------
-  function spawnBoss() {
-    const cfg = (G.map && G.map.boss) || { kind: 'mo', name: '墨大夫', hp: 1800, spd: 40, dmg: 18, r: 20, spr: 'mo', scale: 1.8 };
+  function spawnBossFrom(cfg) {
     const p = G.player;
     const dm = curDiff();
     // Boss 单独吃一档倍率：凡境不变，险境 ×1.5，死境 ×2（Jerry 定：中高难度 Boss 要更硬）
@@ -2036,6 +2035,10 @@
     G.enemies = G.enemies.filter(e => !e.elite);
     G.flash = Math.max(G.flash, 0.5); G.shake = 12;
     banner('⚔ ' + cfg.name + ' 现身' + (dm.id !== 'easy' ? '　·　' + dm.name : '')); Sfx.boss();
+  }
+  function spawnBoss() {
+    const cfg = (G.map && G.map.boss) || { kind: 'mo', name: '墨大夫', hp: 1800, spd: 40, dmg: 18, r: 20, spr: 'mo', scale: 1.8 };
+    spawnBossFrom(cfg);
   }
 
   // 二阶段演出：定身 + 冲击波 + 屏幕血光
@@ -2188,6 +2191,16 @@
   function onBossDead() {
     const name = G.boss ? G.boss.name : '妖首';
     G.bossActive = false; G.boss = null;
+    // 多 Boss：本图还有 extraBoss 未出场，先洒一小波灵石，再续战下一只（不结算）
+    const eb = (G.map && G.map.extraBoss) || null;
+    if (eb && (G.extraIdx || 0) < eb.length) {
+      const cfg = eb[G.extraIdx++];
+      G.shake = 16; G.flash = 0.7; G.hitStop = 0.1;
+      for (let i = 0; i < 14; i++) { const a = Math.random() * 6.28, dd = U.rand(20, 140); G.gems.push({ x: G.player.x + Math.cos(a) * dd, y: G.player.y + Math.sin(a) * dd, r: 5, val: 4 }); }
+      banner(name + ' 已伏诛 · ' + cfg.name + ' 现身');
+      spawnBossFrom(cfg);
+      return;
+    }
     G.shake = 18; G.flash = 0.85; G.hitStop = 0.14;
     // 灵石与道具洒落，稍后随结局对话自动收取
     for (let i = 0; i < 34; i++) { const a = Math.random() * 6.28, dd = U.rand(20, 150); G.gems.push({ x: G.player.x + Math.cos(a) * dd, y: G.player.y + Math.sin(a) * dd, r: 5, val: 5 }); }
@@ -4488,7 +4501,7 @@
     G.enemies = []; G.bullets = []; G.ebullets = []; G.gems = []; G.herbs = []; G.parts = []; G.texts = []; G.loot = [];
     G.time = 0; G.kills = 0; G.spawnT = 1; G.nextEliteT = 100; G.eliteIdx = 0;
     G.fxBullets.length = 0; G.coopFrozen = false; G.dialogSynced = false;
-    G.boss = null; G.bossActive = false; G.bossSpawned = false; G.bossWarned = false;
+    G.boss = null; G.bossActive = false; G.bossSpawned = false; G.bossWarned = false; G.extraIdx = 0;
     G.fieldSlow = []; G.shake = 0; G.flash = 0; G.hitStop = 0;
     G.decor = []; G.chunkMap = {}; G.cam = { x: -W / 2, y: -H / 2 }; G.orbPos = [];
     G.vacuumT = 0; G.pendingEnding = false; G.runLoot = []; G.matGain = 0; G.lastAutoSave = 0;
@@ -8117,7 +8130,7 @@
       spawnBoss(); return G.boss ? G.boss.name : 'fail';
     },
     bossDamage(pct) { if (G.boss) damageEnemy(G.boss, G.boss.maxhp * (pct || 0.25)); },
-    killBoss() { if (G.boss) damageEnemy(G.boss, G.boss.hp); },
+    killBoss() { let n = 0; while (G.boss && n++ < 12) damageEnemy(G.boss, G.boss.hp); },
     phase2() { if (G.boss && !G.boss.phase2) startPhase2(); },
     story(id) {
       const s = STORY.find(x => x.id === id);

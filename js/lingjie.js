@@ -343,6 +343,7 @@
       elites: ['魔族魔修', '血魔'],
       mats: ['m_zhenlingxue', 'm_yaodan', 'm_gangyin'],
       boss: { kind: 'mo', name: '魔族魔修', hp: 85000, spd: 68, dmg: 130, r: 24, spr: 'mo', scale: 6.4 },
+      extraBoss: [{ kind: 'mo', name: '青龙上人', hp: 78000, spd: 62, dmg: 138, r: 23, spr: 'neimen', scale: 6.2, summon: '' }],
       reward: { stones: 50000, mats: [['m_zhenlingxue', 2]] },
       clearTitle: '倚天城守住了',
       clearDesc: '魔将伏诛，魔潮退去。城墙上的人，第一次敢坐下。'
@@ -405,6 +406,7 @@
       elites: ['圣祖魔卫', '苦灵岛守卫'],
       mats: ['m_zhenlingxue', 'm_zhenlinglin', 'm_yaodan'],
       boss: { kind: 'mo', name: '元魇圣祖·化身', hp: 118000, spd: 74, dmg: 158, r: 25, spr: 'mo', scale: 6.6 },
+      extraBoss: [{ kind: 'mo', name: '宝花圣祖', hp: 105000, spd: 60, dmg: 168, r: 24, spr: 'nvxiu', scale: 6.4, summon: '' }],
       reward: { stones: 78000, items: ['t_jinglinglian'], mats: [['m_zhenlingxue', 3], ['m_zhenlinglin', 2]] },
       clearTitle: '苦灵岛·洗灵池',
       clearDesc: '三日洗灵池，抵外面三年苦修。炼魔草交出去，换一条活着离开魔界的路。'
@@ -593,6 +595,7 @@
       elites: ['妖修', '灵将'],
       mats: ['m_zhenlinglin', 'm_yaodan', 'm_gengjing'],
       boss: { kind: 'mo', name: '灵将', hp: 80000, spd: 68, dmg: 125, r: 23, spr: 'neimen', scale: 6.2 },
+      extraBoss: [{ kind: 'mo', name: '陇家老祖', hp: 76000, spd: 62, dmg: 130, r: 23, spr: 'neimen', scale: 6.2, summon: '' }, { kind: 'mo', name: '银光仙子', hp: 68000, spd: 66, dmg: 120, r: 22, spr: 'nvxiu', scale: 6.0, summon: '' }],
       reward: { stones: 45000, mats: [['m_zhenlingxue', 1], ['m_zhenlinglin', 2]] },
       clearTitle: '擂主已下',
       clearDesc: '台上只剩他一个人。名分这种东西，打出来比求来快。'

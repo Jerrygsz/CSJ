@@ -302,6 +302,7 @@
       elites: ['化形妖', '深海巨兽'],
       mats: ['m_yaodan', 'm_banyao', 'm_jinlei', 'm_yanghun'],
       boss: { kind: 'beast', name: '八级妖兽·毒蛟', hp: 9800, spd: 64, dmg: 40, r: 23, spr: 'dujiao', scale: 6.6, summon: 'yuyao' },
+      extraBoss: [{ kind: 'mo', name: '妙鹤真人', hp: 9200, spd: 58, dmg: 44, r: 20, spr: 'neimen', scale: 5.2, summon: '' }],
       reward: { stones: 2000, mats: [['m_jinlei', 2], ['m_yaodan', 4], ['m_lingmo', 4], ['m_xueyu', 2]] },
       clearTitle: '风雷翅已夺',
       clearDesc: '毒蛟死，龟妖伤，翅只带出半副。回洞府还得自己补齐那一炉。风希追了万里，那股风到现在还在耳边。'
@@ -319,6 +320,7 @@
       elites: ['血侍·冰妖', '血侍·铁罗', '血侍·青纹', '血侍·叶蛇'],
       mats: ['m_xueyu', 'm_xuesha', 'm_shihui', 'm_hantie'],
       boss: { kind: 'blood', name: '越皇', hp: 4600, spd: 50, dmg: 28, r: 20, spr: 'mo', scale: 4.6 },
+      extraBoss: [{ kind: 'mo', name: '令狐老祖', hp: 5000, spd: 58, dmg: 30, r: 20, spr: 'neimen', scale: 5.2, summon: '' }],
       reward: { stones: 520, items: ['t_cantu'], mats: [['m_xuesha', 2], ['m_hantie', 2]] },
       outro: 'heisha_out',
       clearTitle: '黑煞教已灭',

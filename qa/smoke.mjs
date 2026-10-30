@@ -1133,6 +1133,34 @@ const after = F.info();
 ok(['play', 'victory', 'levelup', 'dialog', 'gameover'].includes(after.state), '连续 120 帧无崩溃（state=' + after.state + '）');
 ok(isFinite(after.hp) && after.hp > 0, '血量正常', after.hp);
 
+console.log('\n== 多 Boss 续战 ==');
+const EB = {
+  houshan: '狼妖|贾天龙', waihai: '八级妖兽·毒蛟|妙鹤真人', heisha: '越皇|令狐老祖',
+  kunwu: '阴罗宗大长老·乾老魔|银翅夜叉', zhenmo: '元刹圣祖分魂|敖啸老祖', xiaoji: '寒骊上人|冰凤',
+  luoyun2: '鸾鸣门·双修夫妇|至阳上人'
+};
+const ebBad = [];
+F.clearProgress(); F.setLevel(600); F.unlockAll();
+for (const id in EB) {
+  const want = EB[id].split('|');
+  F.clearProgress(); F.setLevel(600); F.unlockAll();
+  const mid = F.enterMap(id, 'easy');
+  frames(150);
+  for (let k = 0; k < 16; k++) { F.skipStory(); frames(2); }
+  const seq = [];
+  if (mid !== id) { ebBad.push(id + ':enter->' + mid + ',state=' + F.info().state); continue; }
+  F.boss();
+  seq.push(F.info().boss ? F.info().boss.name : null);
+  for (let i = 0; i < 4; i++) {
+    F.bossDamage(1); frames(6);
+    const nm = F.info().boss ? F.info().boss.name : null;
+    if (!nm) break;
+    seq.push(nm);
+  }
+  if (JSON.stringify(seq) !== JSON.stringify(want)) ebBad.push(id + ':' + JSON.stringify(seq));
+}
+ok(ebBad.length === 0, '7 张（人界）图主 Boss→续战 Boss 逐只刷出、顺序正确', ebBad);
+
 console.log('\n===================================');
 console.log(`  通过 ${pass}  失败 ${fail}`);
 if (fail) { console.log('  失败项：'); fails.forEach(f => console.log('   - ' + f)); }

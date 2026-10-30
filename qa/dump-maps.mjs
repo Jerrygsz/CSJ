@@ -18,6 +18,7 @@ const maps = (ctx.MAPS||[]).map(m => ({
   boss: m.boss ? (m.boss.name||m.boss.kind) : null,
   bossKind: m.boss ? m.boss.kind : null,
   bossHp: m.boss ? m.boss.hp : null, bossDmg: m.boss ? m.boss.dmg : null,
+  extraBoss: (m.extraBoss || []).map(x => x.name),
   cave: m.cave||null
 }));
 const items = {};

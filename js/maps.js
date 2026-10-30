@@ -68,6 +68,7 @@ window.MAPS = [
     elites: ['头狼', '马贼头目'],
     mats: ['m_chijing', 'm_huangjing', 'm_jingtie', 'm_wolfdan', 'm_shedan'],
     boss: { kind: 'beast', name: '狼妖', hp: 1100, spd: 66, dmg: 15, r: 20, spr: 'wolf', scale: 3.4 },
+    extraBoss: [{ kind: 'mo', name: '贾天龙', hp: 1200, spd: 60, dmg: 16, r: 20, spr: 'bandit', scale: 4.4, summon: '' }],
     reward: { stones: 80, items: [] },
     clearTitle: '采药已毕',
     clearDesc: '人参够数了。只是那狼妖的骨头，比寻常野兽硬得多。'
