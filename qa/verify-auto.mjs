@@ -62,7 +62,9 @@ ok(b3.should === false && dom3 === 'none', '坊市上按钮不出现', { should:
 console.log('\n== 2. 站桩：开了就不认方向键 ==');
 await boot('houshan');
 await page.waitForTimeout(140);
-await page.evaluate(() => window.__FR.autoMode(true));
+// 先把怪清干净：这一段验的是「按键不生效」，躲弹幕另在第 9 段
+// （不清的话怪贴上来时侧身让半步，位移就不是 0 了 —— 那是第 9 段要验的事）
+await page.evaluate(() => { window.__FR.clear(); window.__FR.autoMode(true); });
 const s0 = await page.evaluate(() => window.__FR.autoInfo());
 await page.keyboard.down('ArrowRight'); await page.keyboard.down('ArrowDown');
 await page.waitForTimeout(900);
@@ -70,7 +72,9 @@ await page.keyboard.up('ArrowRight'); await page.keyboard.up('ArrowDown');
 const s1 = await page.evaluate(() => window.__FR.autoInfo());
 const moved = Math.hypot(s1.px - s0.px, s1.py - s0.py);
 ok(s1.on === true, '自动开着', s1.on);
-ok(moved < 1, '按住两个方向键 0.9 秒，人一步没挪', { from: [s0.px, s0.py], to: [s1.px, s1.py], d: +moved.toFixed(2) });
+ok(moved < 1, '场上没有威胁时，按住两个方向键 0.9 秒，人一步没挪', { from: [s0.px, s0.py], to: [s1.px, s1.py], d: +moved.toFixed(2) });
+const s2 = await page.evaluate(() => window.__FR.autoDodgeInfo());
+ok(s2.dir === null, '没有威胁就不躲（站桩不等于乱走）', s2.dir);
 
 // ---------------------------------------------------------------- 3. 关掉后操作恢复
 console.log('\n== 3. 关掉之后方向键立刻回来 ==');
@@ -187,6 +191,63 @@ const n = await page.evaluate(() => {
 });
 ok(n.on1 === true, '前一张图开着', n.on1);
 ok(n.on2 === false, '换图后自动复位（「到结算为止」的边界就在这儿）', { map: n.map, on: n.on2 });
+
+// ---------------------------------------------------------------- 9. 顺带躲一下
+console.log('\n== 9. 自动战斗会侧身让开，但不是跑开 ==');
+const dj = await page.evaluate(() => {
+  const F = window.__FR;
+  const boot = () => {
+    F.clearProgress(); F.setLevel(60); F.god(false); F.unlockAll();
+    F.enterMap('houshan', 'easy');
+    for (let k = 0; k < 3; k++) { F.skipStory(); F.tickFrames(2); }
+    F.clear(); F.heal();
+  };
+  const loop = (n, onFrame) => {
+    let maxMove = 0, drift = 0;
+    const p0 = F.autoDodgeInfo();
+    for (let i = 0; i < n; i++) {
+      if (onFrame) onFrame(i);
+      F.tickFrames(1);
+      const d = F.autoDodgeInfo();
+      if (!d) continue;
+      if (d.state === 'dialog') F.skipStory();
+      maxMove = Math.max(maxMove, Math.hypot(d.px - p0.px, d.py - p0.py));
+      if (d.anchor) drift = Math.max(drift, Math.hypot(d.px - d.anchor.x, d.py - d.anchor.y));
+    }
+    const d = F.autoDodgeInfo();
+    return { hp0: p0.hp, hp1: d.hp, lost: p0.hp - d.hp, maxMove: +maxMove.toFixed(1), drift: +drift.toFixed(1) };
+  };
+
+  // ① 站着不动挨一发：对照组
+  boot(); F.autoMode(false); F.autoShot(180, 190, 30);
+  const stand = loop(45);
+  // ② 同一发弹幕，开着自动
+  boot(); F.autoMode(true); F.autoShot(180, 190, 30);
+  const one = loop(45);
+  const dir0 = F.autoDodgeInfo();
+  // ③ 躲完回原位
+  const home = loop(120);
+  const endD = F.autoDodgeInfo();
+  const backDist = endD.anchor ? Math.hypot(endD.px - endD.anchor.x, endD.py - endD.anchor.y) : -1;
+  // ④ 弹幕流：站 vs 自动，各挨 300 帧
+  boot(); F.autoMode(false);
+  const bStand = loop(300, i => { if (i % 8 === 0) F.autoShot(210, 200, 25); });
+  boot(); F.autoMode(true);
+  const bAuto = loop(300, i => { if (i % 8 === 0) F.autoShot(210, 200, 25); });
+  // ⑤ Boss 算威胁
+  boot(); F.autoMode(true); F.boss();
+  const nearBoss = F.autoDodgeInfo();
+  return { stand, one, dir0, home, backDist: +backDist.toFixed(1), bStand, bAuto, nearBoss: nearBoss.threats };
+});
+ok(dj.stand.lost > 0 && dj.stand.maxMove < 1, '关着自动：一发弹幕打在身上，人也不动（对照组）', dj.stand);
+ok(dj.one.lost === 0, '开着自动：同一发弹幕一滴血没掉（侧身让开了）', dj.one);
+ok(dj.one.maxMove > 15, '让开的那一下是真挪了步（不是判定放宽了）', dj.one.maxMove);
+ok(dj.one.maxMove < 90, '只让半步：位移没超过一个身位，人还在原地附近', dj.one.maxMove);
+ok(dj.home.maxMove < 95, '连躲几秒也不往外跑（远处的怪不算威胁）', dj.home);
+ok(dj.backDist < 25, '躲完自己走回原来站着的地方', dj.backDist);
+ok(dj.bAuto.lost * 3 < dj.bStand.lost, '弹幕流：自动比站着少挨一大截（不到三分之一）', { stand: dj.bStand.lost, auto: dj.bAuto.lost });
+ok(dj.bAuto.drift < 100, '整段弹幕下来人没被赶出场：离锚点始终不到 100px', dj.bAuto.drift);
+ok(dj.nearBoss >= 1, 'Boss 贴上来也算威胁（冲刺时会侧让）', dj.nearBoss);
 
 console.log('\n--------------------------------');
 ok(errors.length === 0, '全程无 JS 报错', errors.slice(0, 3));

@@ -3507,13 +3507,111 @@
     if (!!G.autoOn === on) return G.autoOn;
     G.autoOn = on;
     G.autoT = on ? 0.6 : 0;   // 开起来先停半拍，别一开就把第一句对白点掉
+    // 锚点 = 开自动时脚下这一块：躲开之后还会自己走回来，不至于一路漂到天涯
+    G.autoAnchor = (on && G.player) ? { x: G.player.x, y: G.player.y } : null;
+    G.autoDodge = null; G.autoDodgePrev = null;
     if (elAutoBtn) elAutoBtn.classList.toggle('on', on);
     if (!silent) {
-      if (on) { banner('自动战斗 · 开启（站桩，到结算为止）'); Sfx.buff(); }
+      if (on) { banner('自动战斗 · 开启（站桩，遇险侧身）'); Sfx.buff(); }
       else banner('自动战斗 · 关闭');
     }
     return G.autoOn;
   }
+  // ---------- 自动战斗的「躲」 ----------
+  // 站桩不等于站着挨打。但也不能做成「贴脸就退」——那样会被一群怪推着满场跑，
+  // 反倒成了另一种失控。这里的做法是：只把「眼前这几秒真的会撞上」的东西当成威胁，
+  // 试一圈方向，哪边最不疼就往哪边让半步，让开就立刻站住。
+  const DODGE_DIRS = 12;      // 顺时针试这么多方向（含原地不动）
+  const DODGE_STEP = 0.18;    // 一步探多远（秒），只探半步，不是逃
+  const DODGE_T = [0.1, 0.24, 0.4];   // 按这几个时间点预测威胁位置
+  const DODGE_NEAR = 140;     // 小怪只在这个半径内才算威胁
+  const DODGE_NEAREST = 22;   // 最多只看最近这么多条威胁（虫群图一屏几百发，看不过来也不必看）
+  const DODGE_HOME = 14;      // 回到锚点这个范围内就站住（留一点死区，免得来回抖）
+  const DODGE_HOME_R = 40;    // 锚点周围这么一圈算「原地」，不收不罚
+  const DODGE_HOME_W = 0.55;  // 往家走的拉力：要压得住「随便走哪边都一样」的平局，压不住要命的弹幕
+
+  // 把眼前会撞上的东西列出来：弹幕 / 贴身的小怪 / 正在冲的 Boss
+  // 只留最近的一小撮：虫群那类图一屏能有两三百发，全算一遍是白花力气，
+  // 而真正决定往哪躲的本来就是最近那几发。
+  function autoThreats(p) {
+    const out = [];
+    const R = 300, R2 = R * R;
+    for (const b of G.ebullets) {
+      const dx = b.x - p.x, dy = b.y - p.y;
+      const d2 = dx * dx + dy * dy;
+      if (d2 > R2) continue;
+      out.push({ x: b.x, y: b.y, vx: b.vx, vy: b.vy, r: (b.r || 6) + p.r + 10, w: 1, d2 });
+    }
+    for (const e of G.enemies) {
+      const dx = e.x - p.x, dy = e.y - p.y;
+      const d2 = dx * dx + dy * dy;
+      if (d2 > DODGE_NEAR * DODGE_NEAR) continue;
+      // 小怪是朝人走的，预测要带上它的速度，否则永远只在「已经贴上」才算威胁
+      const dd = Math.sqrt(d2) || 1;
+      out.push({ x: e.x, y: e.y, vx: -dx / dd * e.spd, vy: -dy / dd * e.spd, r: e.r + p.r + 14, w: 0.55, d2 });
+    }
+    if (out.length > DODGE_NEAREST) {
+      out.sort((a, b) => a.d2 - b.d2);
+      out.length = DODGE_NEAREST;
+    }
+    const b = G.boss;
+    if (b && G.bossActive) {
+      const dash = (b.dashing || 0) > 0;
+      out.push({
+        x: b.x, y: b.y,
+        vx: dash ? Math.cos(b.dashAng || 0) * b.spd * 4.4 : 0,
+        vy: dash ? Math.sin(b.dashAng || 0) * b.spd * 4.4 : 0,
+        r: b.r + p.r + 16, w: 1.2
+      });
+    }
+    return out;
+  }
+  // 返回这一帧该往哪迈（单位向量）；null = 站住
+  function autoDodgeDir(p) {
+    const th = autoThreats(p);
+    const anch = G.autoAnchor;
+    const hx = anch ? anch.x - p.x : 0, hy = anch ? anch.y - p.y : 0;
+    const homeD = Math.hypot(hx, hy);
+    // 眼前干净：躲开了就走回原来站着的地方，走到附近就停
+    if (!th.length) return (anch && homeD > DODGE_HOME) ? { x: hx / homeD, y: hy / homeD, back: 1 } : null;
+    const sp = p.spd * spdMul() * (1 + (G.bonus.spd || 0));
+    const step = sp * DODGE_STEP;
+    const score = (qx, qy) => {
+      let s = 0;
+      for (let k = 0; k < DODGE_T.length; k++) {
+        const t = DODGE_T[k];
+        for (let i = 0; i < th.length; i++) {
+          const x = th[i];
+          const ddx = x.x + x.vx * t - qx, ddy = x.y + x.vy * t - qy;
+          const d = Math.hypot(ddx, ddy);
+          if (d >= x.r) continue;
+          const k2 = 1 - d / x.r;
+          s += k2 * k2 * x.w;
+        }
+      }
+      if (anch) {
+        // 离家越远越想回去。不是「不许走远」，只是在同样能躲开的几条路里，挑更靠家的一条：
+        // 否则一场架下来一步一步往边上挪，最后人跑到半屏外，就不叫站桩了。
+        const od = Math.hypot(qx - anch.x, qy - anch.y);
+        s += Math.max(0, od - DODGE_HOME_R) / DODGE_HOME_R * DODGE_HOME_W;
+      }
+      return s;
+    };
+    const stay = score(p.x, p.y);
+    // 上一帧往哪边让的：同样的好坏，宁可接着往原来那个方向走，免得两帧一换来原地抖
+    const prev = G.autoDodgePrev;
+    let best = stay, bx = 0, by = 0;
+    for (let i = 0; i < DODGE_DIRS; i++) {
+      const a = i / DODGE_DIRS * Math.PI * 2;
+      const ux = Math.cos(a), uy = Math.sin(a);
+      let s = score(p.x + ux * step, p.y + uy * step);
+      if (prev) s += (1 - (ux * prev.x + uy * prev.y)) * 0.08;
+      if (s < best - 0.02) { best = s; bx = ux; by = uy; }
+    }
+    if (!bx && !by) return null;   // 让不出更好的位置：站住（被围住的时候本来就无处可躲）
+    return { x: bx, y: by };
+  }
+
   // 每帧一次：只处理「停在 play 之外、本来等人点一下」的地方；打仗本身仍归 update
   function tickAuto(dt) {
     if (!G.autoOn) return;
@@ -3777,10 +3875,16 @@
     const p = G.player;
     if (!p) return;   // 进图过渡帧：state 已切到 play，人还没立起来
     let dx = 0, dy = 0;
-    // 自动战斗：站桩 —— 键与摇杆一律不认，脚下生根，剩下的交给自动索敌
+    // 自动战斗：站桩 —— 键与摇杆一律不认，脚下生根，剩下的交给自动索敌；
+    // 只有「马上要撞上」的时候才侧身让半步（躲的是弹幕和冲刺，不是躲怪）
     if (!G.autoOn) {
       if (keys.left) dx--; if (keys.right) dx++; if (keys.up) dy--; if (keys.down) dy++;
       if (jx !== 0 || jy !== 0) { dx = jx; dy = jy; }
+    } else {
+      const dv = autoDodgeDir(p);
+      G.autoDodge = dv || null;
+      if (dv) { dx = dv.x; dy = dv.y; G.autoDodgePrev = dv.back ? null : { x: dv.x, y: dv.y }; }
+      else G.autoDodgePrev = null;
     }
     const len = Math.hypot(dx, dy) || 1;
     const sp = p.spd * spdMul() * (1 + (G.bonus.spd || 0));
@@ -4604,7 +4708,7 @@
     G.woundedNote = '';
     G.npcs = []; G.encT = 8;
     // 自动战斗只管这一趟：进新图一律复位，得重新点一次（「到结算为止」的边界就在这儿）
-    G.autoOn = false; G.autoT = 0;
+    G.autoOn = false; G.autoT = 0; G.autoAnchor = null; G.autoDodge = null; G.autoDodgePrev = null;
     G.realmIdx = 0; G.realm = { dmg: 0, atk: 0, spd: 0 }; G.realmHp = 0;
     resetCombo();
     for (const s of STORY) s.done = false;
@@ -8153,6 +8257,29 @@
       return { on: !!G.autoOn, state: G.state, t: +(G.autoT || 0).toFixed(2), idx: G.dialogIdx || 0 };
     },
     autoPick() { return autoPickCard(); },
+    // 躲的探针：这一帧看到了几个威胁、该往哪让（回归用它验「真躲开」而不是「真跑开」）
+    autoDodgeInfo() {
+      const p = G.player;
+      if (!p) return null;
+      const th = autoThreats(p);
+      const dir = G.autoOn ? autoDodgeDir(p) : null;
+      return {
+        on: !!G.autoOn, state: G.state, threats: th.length,
+        dir: dir ? { x: +dir.x.toFixed(2), y: +dir.y.toFixed(2), back: !!dir.back } : null,
+        anchor: G.autoAnchor ? { x: +G.autoAnchor.x.toFixed(1), y: +G.autoAnchor.y.toFixed(1) } : null,
+        px: +p.x.toFixed(1), py: +p.y.toFixed(1), hp: Math.ceil(p.hp)
+      };
+    },
+    // 朝玩家打一发弹幕（测试「会不会侧身让开」用）
+    autoShot(dist, spd, dmg) {
+      const p = G.player;
+      if (!p) return null;
+      const d = dist || 220, a = Math.random() * 6.28;
+      const sx = p.x + Math.cos(a) * d, sy = p.y + Math.sin(a) * d;
+      const ang = Math.atan2(p.y - sy, p.x - sx);
+      G.ebullets.push({ x: sx, y: sy, vx: Math.cos(ang) * (spd || 170), vy: Math.sin(ang) * (spd || 170), r: 6, dmg: dmg || 10, life: 5 });
+      return { x: +sx.toFixed(1), y: +sy.toFixed(1), n: G.ebullets.length };
+    },
     autoInfo() {
       const p = G.player;
       return {
