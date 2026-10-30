@@ -730,7 +730,7 @@ ok(hasLine('waihai', '风希', '造化'), '风希以剧情角色登场（擒人 
 ok(M('heisha').name.includes('京城'), '黑煞教改在越国京城');
 eq(M('heisha').boss.name, '越皇', '黑煞教首领是越皇');
 ok((M('heisha').reward.items || []).includes('t_cantu'), '黑煞教一役产出虚天残图');
-ok(hasLine('heisha_out', null, '偷袭') || hasLine('heisha_out', null, '背后穿了过去'), '刘靖是被教主偷袭身亡');
+ok((W.MAP_STORIES['heisha_out']||[]).some(l=>String(l[1]).includes('刘靖')&&String(l[1]).includes('黑煞教主')), '刘靖是被黑煞教主从背后偷袭身亡');
 
 // 灵石矿的两样关键产出
 ok((M('shiku').reward.items || []).includes('t_dayi'), '灵石矿产出大挪移令');
@@ -748,9 +748,9 @@ ok(hasLine('yanjia_out', '韩立', '厉飞雨'), '燕家堡逃命时报出「黄
 ok(hasLine('yanjia_out', null, '墨蛟'), '燕家堡的毒出自血色禁地那条墨蛟');
 ok(hasLine('yanjia_out', null, '金骷髅'), '王蝉丢下金骷髅符宝，被韩立捡走');
 
-// 古传送阵：齐云霄修，独自走
-ok(hasLine('guchuan', '齐云霄', '阵修好了'), '古传送阵是齐云霄修的');
-ok(!hasLine('guchuan', '辛如音', ''), '古传送阵不再由辛如音修');
+// 古传送阵：辛如音所设，韩立与曲魂独自走（现场无南宫婉）
+ok(hasLine('jingu', null, '辛如音') && hasLine('jingu', null, '古阵'), '古传送阵是辛如音所设');
+ok(!hasLine('guchuan', null, '南宫婉'), '古传送阵现场无南宫婉（仅韩立与曲魂）');
 ok(!hasLine('guchuan', null, '拉进阵中'), '南宫屏不再跟着一起传送');
 
 // ===== 对白与任务细节：按原著逐条钉住 =====
@@ -784,7 +784,7 @@ ok(hasLine('mishi', '韩立', '第六层'), '韩立已到第六层（对方算�
 ok(hasLine('moutro', null, '张铁'), '铁奴揭面是张铁');
 ok(hasLine('moutro', null, '嘉元城'), '遗书指向嘉元城墨府');
 
-ok(hasLine('tainan', null, '嘉元城'), '太南小会补上嘉元城解魔银手之毒');
+ok(hasLine('tainan', null, '嘉元城') && hasLine('tainan', null, '尸虫丸'), '太南小会补上嘉元城解尸虫丸之毒');
 ok(hasLine('tainan', '韩立', '小妹出嫁'), '补上韩立回乡、小妹出嫁');
 ok((W.STORY || []).some(s => s.id === 'yj_open' && s.lines.some(l => l[0] === '田不缺')), '燕家堡补上合欢宗田不缺');
 
@@ -818,9 +818,9 @@ ok(M('zhangtie').name.indexOf('铁匠') >= 0, '张铁支线改成铁匠棚（原
 
 // 金鼓原：令狐老祖把低阶弟子当弃子；古阵在灵石矿底下
 ok(hasLine('jingu', null, '令狐老祖'), '金鼓原点明令狐老祖的弃子之计');
-ok(hasLine('guchuan', '南宫婉', '阵') || hasLine('guchuan', null, '南宫婉'), '古传送阵遇到的是南宫婉');
+ok(hasLine('guchuan', null, '王蝉'), '古传送阵遭鬼灵门王蝉、李氏兄弟压顶');
 ok(!hasLine('guchuan', null, '南宫屏'), '不再误作南宫屏');
-ok(hasLine('guchuan', null, '灵石矿底下'), '古传送阵在灵石矿底下');
+ok(hasLine('guchuan', null, '灵石矿底'), '古传送阵在灵石矿底');
 
 // 乱星海：法力枯竭，不是境界跌落
 ok(!hasLine('kuixing', null, '筑基掉回炼气'), '乱星海不再「修为跌落」');
