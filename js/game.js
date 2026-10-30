@@ -7597,6 +7597,7 @@
 
   // ---------- 主循环 ----------
   let last = performance.now();
+  let _verShown = null;   // 版本水印：仅在标题首页显示，缓存避免每帧重复写
   function loop(t) {
     const dt = Math.min(0.05, (t - last) / 1000); last = t;
     if (G.state === 'play') update(dt * (G.ts || 1));
@@ -7606,6 +7607,13 @@
     // 自动战斗：update 只在 play 时跑，对话与选卡这两处得单独推一把
     if (G.autoOn) tickAuto(dt);
     if (G.state !== 'title') { render(); updateHUD(); }
+    // 版本水印只在首页（标题态）露脸：进图/坊市/洞府/结算等一律收起
+    const _onTitle = (G.state === 'title');
+    if (_onTitle !== _verShown) {
+      _verShown = _onTitle;
+      const _v = document.getElementById('ver');
+      if (_v) _v.style.display = _onTitle ? '' : 'none';
+    }
     // 结算态：小舞台自己跑（走动 / 头顶表情 / 位置同步），战斗逻辑不跑
     if (G.state === 'victory') updateSettle(dt * (G.ts || 1));
     // 飞鸽传书：战斗 / 暂停 / 选图（修行图）/ 对话时才给用，标题与结算收起来
