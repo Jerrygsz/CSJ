@@ -618,7 +618,7 @@
     ctx.fillStyle = down ? '#ff6b6b' : (ratio > 0.5 ? '#7fe0a0' : (ratio > 0.25 ? '#ffd24a' : '#ff8f5a'));
     ctx.fillRect(pt.x - bw / 2, pt.y - 46, bw * (down ? 1 : ratio), bh);
     // 名牌：名字 + 等级（倒下时标出来）
-    const name = '队友·' + (pt.name || '') + ' Lv.' + (pt.level || 1) + (down ? ' 倒下' : '');
+    const name = '队友·' + (pt.name || '') + (down ? ' 倒下' : '');
     ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
     const tw = ctx.measureText(name).width + 10;
     ctx.fillStyle = 'rgba(10,20,30,0.72)';

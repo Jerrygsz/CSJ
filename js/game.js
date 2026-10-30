@@ -198,7 +198,7 @@
         inventory: s.inventory || {},
         bonuses: Object.assign({}, s.bonuses || {}),
         totalItems: s.totalItems || 0,
-        stones: s.stones || 0,
+        stones: Math.round(s.stones || 0),
         cleared: Array.isArray(s.cleared) ? s.cleared.filter(id => typeof id === 'string') : [],
         unlocked: unlocked.length ? unlocked : ['qixuan'],
         mapId: (typeof s.mapId === 'string' && MAPS.some(m => m.id === s.mapId)) ? s.mapId : 'qixuan',
@@ -242,7 +242,7 @@
       save.mates = (save.mates || []).filter(id => (window.MATES || []).some(m => m.id === id));
     } catch (e) {}
   }
-  function writeSave() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
+  function writeSave() { try { save.stones = Math.round(save.stones || 0); localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
   loadSave();
   // 旧档补发：血色禁地已经通关，宗门该赏的那一枚筑基丹却没到手（本版才补上的剧情奖励）。
   // 老存档不必重开：读档即补，只补一次，且只在还卡在筑基门前（Lv36 之前）时才补。
@@ -3799,7 +3799,7 @@
     for (const s of SKILLS) {
       const lv = G.player.skills[s.id] || 0;
       if (s.minLv && G.player.level < s.minLv) continue;  // 境界不到，这门功法连门都入不了
-      if (lv < capOf(s)) pool.push({ kind: 'skill', id: s.id, name: s.name, icon: s.icon, desc: s.desc + (lv > 0 ? ('（Lv' + lv + '→' + (lv + 1) + '）') : '（新功法）') });
+      if (lv < capOf(s)) pool.push({ kind: 'skill', id: s.id, name: s.name, icon: s.icon, desc: s.desc + (lv > 0 ? ('（' + lv + '→' + (lv + 1) + ' 重）') : '（新功法）') });
     }
     pool.sort(() => Math.random() - 0.5);
     const picks = pool.slice(0, 3);
@@ -4646,7 +4646,7 @@
     elTime.textContent = fmtTime(G.time);
     elKills.textContent = '斩 ' + G.kills;
     if (elBag) elBag.textContent = '袋 ' + (G.runLoot ? G.runLoot.length : 0);
-    if (elStones) elStones.textContent = '灵石 ' + (save.stones || 0);
+    if (elStones) elStones.textContent = '灵石 ' + Math.round(save.stones || 0);
     if (elMapName) {
       const d = G.diff;
       elMapName.textContent = (G.map ? G.map.name : '') + (d && d.id !== 'easy' ? '　·　' + d.name : '');
@@ -4793,7 +4793,7 @@
       const s = it.s, lv2 = cultObj().skills[s.id] || 0;
       const on = eq.indexOf(s.id) >= 0;
       h += '<div class="recrow' + (on ? ' can' : '') + '">' +
-        '<div class="rr-main"><b>' + ico(s.icon) + s.name + '　Lv' + lv2 +
+        '<div class="rr-main"><b>' + ico(s.icon) + s.name + '　' + lv2 + ' 重' +
         (it.tier.id === G.pfCurTier ? '' : '　<span class="pf-count">' + it.tier.name + '</span>') +
         '　[' + skillTypeLabel(s) + ']</b><em>' + s.desc + '</em></div>' +
         '<div class="rr-right"><button class="sr-btn' + (on ? ' ghost' : ' buy') + '" data-pfskill="' + s.id + '">' +
@@ -4994,7 +4994,7 @@
     const gate = m.endLevel ? breakReqFor(m.endLevel) : null;
     const rate = gate ? Math.round(breakSuccessRate(gate) * 100) : 0;
     showChoice(
-      '丹药、主药、灵石皆已备齐，冲关把握约 ' + rate + '%。是否就此借地火之屋的火脉冲关？',
+      '丹药、主药、灵石皆已备齐，冲关把握约 ' + pctCheng(rate) + '。是否就此借地火之屋的火脉冲关？',
       [{ t: '就此突破', v: 'yes' }, { t: '暂不突破·回洞府', v: 'no' }],
       (v) => {
         if (v === 'yes') zhujiCommitBreak(m, gate);
@@ -5167,7 +5167,7 @@
         ? (lvMiss
             ? ('修为未达 ' + (breakGate.from || '') + ' · 先厚实根基，再回此图冲关')
             : ('破境之物未齐（还差 ' + missGate.length + ' 样）· 集齐了再来此图冲关'))
-        : ('破境之物已齐 · 就地冲关（持丹 ' + breakGatePills(breakGate) + ' 枚 · 把握 ' + Math.round(breakSuccessRate(breakGate) * 100) + '%）');
+        : ('破境之物已齐 · 就地冲关（持丹 ' + breakGatePills(breakGate) + ' 枚 · 把握 ' + pctCheng(breakSuccessRate(breakGate) * 100) + '）');
     } else {
       G.victoryNote = '';
     }
@@ -5422,7 +5422,7 @@
     const rows = all.map((it, idx) => {
       const got = !!inv[it.id];
       if (got) collected++;
-      const reqTxt = it.req ? ('门槛 Lv.' + it.req) : '无门槛';
+      const reqTxt = it.req ? ('修为·' + realmName(it.req)) : '无门槛';
       const note = got ? (it.desc || '（无备注）') : '尚未入手，榜上留位以待。';
       return '<div class="wl-row' + (got ? ' got' : '') + '">' +
         '<div class="wl-rank">' + (idx + 1) + '</div>' +
@@ -5757,8 +5757,8 @@
     if (elCaveName) elCaveName.textContent = c.name;
     if (elCaveDesc) elCaveDesc.textContent = c.quote;
     if (elCavePos) elCavePos.textContent = c.pos + '　·　' + c.desc;
-    if (elCaveStones) elCaveStones.textContent = '灵石 ' + (save.stones || 0);
-    if (elCaveRealm) elCaveRealm.textContent = realmName(lv) + '（Lv ' + lv + '）';
+    if (elCaveStones) elCaveStones.textContent = '灵石 ' + Math.round(save.stones || 0);
+    if (elCaveRealm) elCaveRealm.textContent = realmName(lv);
     if (elCaveBag) elCaveBag.textContent = '储物袋 ' + (save.totalItems || 0) + ' 件';
     // tabs
     if (elCaveTabs) {
@@ -5781,6 +5781,25 @@
     elCaveBody.innerHTML = html;
   }
 
+  // 把 0~100 的百分数念成修仙口吻的「成」：一成=10%，五成多=五成出头，不足一成=不到一成
+  const CHENG_CN = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+  function pctCheng(p) {
+    p = Math.round(p || 0);
+    if (p <= 0) return '无';
+    if (p >= 100) return '十成';
+    const whole = Math.floor(p / 10), rem = p - whole * 10;
+    if (whole === 0) return '不足一成';
+    return rem === 0 ? (CHENG_CN[whole] + '成') : (CHENG_CN[whole] + '成多');
+  }
+  // 增量：+10% → 加一成；+8% → 加不足一成
+  function pctChengDelta(d) {
+    d = Math.round(d || 0);
+    if (d <= 0) return '';
+    if (d >= 100) return '加十成';
+    const whole = Math.floor(d / 10), rem = d - whole * 10;
+    if (whole === 0) return '加不足一成';
+    return rem === 0 ? ('加' + CHENG_CN[whole] + '成') : ('加' + CHENG_CN[whole] + '成多');
+  }
   function pct(v) { return (v >= 0 ? '+' : '') + Math.round(v * 100) + '%'; }
   function renderCaveStat(lv) {
     const g = gearBonus();
@@ -5793,7 +5812,6 @@
     const armor = Math.min(0.62, rb('armor') + (save.bonuses.armor || 0) + (g.armor || 0));
     const rows = [
       ['境界', realmName(lv)],
-      ['肉身等级', 'Lv ' + lv],
       ['生命上限', Math.round(maxhp)],
       ['伤害倍率', '×' + dmg.toFixed(2)],
       ['出手间隔', '×' + atk.toFixed(2)],
@@ -5810,7 +5828,7 @@
     const sk = save.cultivate.skills || {};
     const skRow = SKILLS.map(s => {
       const n = sk[s.id] || 0;
-      return '<div class="skipill' + (n ? ' on' : '') + '"><span>' + s.icon + '</span><b>' + s.name + '</b><i>' + (n ? 'Lv ' + n + ' / ' + s.max : '未习') + '</i></div>';
+      return '<div class="skipill' + (n ? ' on' : '') + '"><span>' + s.icon + '</span><b>' + s.name + '</b><i>' + (n ? (n + ' / ' + s.max + ' 重') : '未习') + '</i></div>';
     }).join('');
     // 进度
     const mainMaps = MAPS.filter(x => !x.side), sideMaps = MAPS.filter(x => x.side);
@@ -5930,8 +5948,8 @@
       const top = window.skillCapById ? window.skillCapById(s.id, lv) : s.max;
       const okLv = lv >= (s.minLv || 1);
       html += '<div class="recrow' + (on ? ' can' : '') + '">' +
-        '<div class="rr-main"><b>' + ico(s.icon) + s.name + '　Lv' + lv2 + (s.main ? '　· 主力' : '') + '　[' + skillTypeLabel(s) + ']' + '</b>' +
-        '<em>' + s.desc + '　此境可至 Lv' + top + (okLv ? '' : '　· 境界不足') + '</em></div>' +
+        '<div class="rr-main"><b>' + ico(s.icon) + s.name + '　' + lv2 + ' 重' + (s.main ? '　· 主力' : '') + '　[' + skillTypeLabel(s) + ']' + '</b>' +
+        '<em>' + s.desc + '　此境可至 ' + top + ' 重' + (okLv ? '' : '　· 境界不足') + '</em></div>' +
         '<div class="rr-right"><button class="sr-btn' + (on ? ' ghost' : ' buy') + '" data-skill="' + s.id + '">' +
         (on ? '卸下' : '运起') + '</button></div></div>';
     }
@@ -6130,7 +6148,7 @@
       else if (miss.length) status = '　还差 ' + miss.length + ' 样';
       else status = '　齐了';
       html += '<div class="cave-sec2"><div class="cs-title">' + (done ? '✔ ' : '') + b.from + ' → ' + b.realm +
-        '（Lv ' + b.lv + '）' + status + '</div>' +
+        status + '</div>' +
         '<div class="cs-note">' + (b.tip || '') + '</div>';
       // 物事齐了：「闭门冲关」按钮顶在最上面，不用往下翻就能点
       if (!done && !miss.length) {
@@ -6142,15 +6160,15 @@
           // 五衰关：把握不是这里定的 —— 押几档、扛几道衰，进图之后才问
           odds = '天人有五衰 · 可避开 <b>' + wuCanAvoid(b) + '</b> 道（前两道躲不掉）· ' +
             wuName(b) + ' <b>' + wuHave(b) + '</b> 枚 · 每押一档 <b>' + wuStakeCost(b, 1) + '</b> 枚换 +' +
-            Math.round(((b.wushuai.step != null) ? b.wushuai.step : 0.15) * 100) + '% 把握，可避开的衰少一道';
+            pctCheng(((b.wushuai.step != null) ? b.wushuai.step : 0.15) * 100) + ' 把握，可避开的衰少一道';
         } else if (c.booster) {
           const bn = Items.get(c.booster) || { name: '助丹' };
           const n = save.inventory[c.booster] || 0;
-          odds = '持丹 <b>' + pills + '</b> 套 · ' + bn.name + ' <b>' + n + '</b> 枚 · 冲关把握 <b>' + Math.round(rate * 100) + '%</b>'
-            + (rate >= 1 ? '（十成把握）' : '（每枚 +' + Math.round((c.step || 0.1) * 100) + '%；败则丹药尽毁）');
+          odds = '持丹 <b>' + pills + '</b> 套 · ' + bn.name + ' <b>' + n + '</b> 枚 · 冲关把握 <b>' + pctCheng(rate * 100) + '</b>'
+            + (rate >= 1 ? '（十成把握）' : '（每枚 ' + pctChengDelta((c.step || 0.1) * 100) + '；败则丹药尽毁）');
         } else {
-          odds = '持丹 <b>' + pills + '</b> 枚 · 冲关把握 <b>' + Math.round(rate * 100) + '%</b>'
-            + (rate >= 1 ? '（十成把握）' : '（每枚 +' + Math.round(breakStepOf(b) * 100) + '%，' + Math.ceil(1 / breakStepOf(b)) + ' 枚必成；败则丹药尽毁）');
+          odds = '持丹 <b>' + pills + '</b> 枚 · 冲关把握 <b>' + pctCheng(rate * 100) + '</b>'
+            + (rate >= 1 ? '（十成把握）' : '（每枚 ' + pctChengDelta(breakStepOf(b) * 100) + '，' + Math.ceil(1 / breakStepOf(b)) + ' 枚必成；败则丹药尽毁）');
         }
         html += '<div class="cs-note">' + odds + '</div>';
         html += '<button class="btn small" data-breaknow="' + b.lv + '">入' + (bm ? '「' + bm.name + '」' : '洞府') + '冲关 · ' + b.realm + '</button>';
@@ -6281,9 +6299,9 @@
     if (gate.chance && gate.chance.booster) {
       const bn = Items.get(gate.chance.booster) || { name: '助丹' };
       const n = save.inventory[gate.chance.booster] || 0;
-      lines.push(['旁白', '（' + itemNames + ' 已入炉，' + bn.name + ' ' + n + ' 枚尽数服下 —— 冲关把握约 ' + Math.round(rate * 100) + '%。）']);
+      lines.push(['旁白', '（' + itemNames + ' 已入炉，' + bn.name + ' ' + n + ' 枚尽数服下 —— 冲关把握约 ' + pctCheng(rate * 100) + '。）']);
     } else {
-      lines.push(['旁白', '（囊中' + itemNames + ' ' + pills + ' 枚，尽数入炉 —— 冲关把握约 ' + Math.round(rate * 100) + '%。）']);
+      lines.push(['旁白', '（囊中' + itemNames + ' ' + pills + ' 枚，尽数入炉 —— 冲关把握约 ' + pctCheng(rate * 100) + '。）']);
     }
     // 手里还留着煞丹术这一手的，提前说一声（这是原著里那条旁门）
     if (shaDanReady(gate)) lines.push(['旁白', '（另外 —— 这一炉真炸了，你还有煞丹术可走，只是根基要脏一分。）']);
@@ -6304,7 +6322,7 @@
     for (let k = 0; k <= maxK; k++) {
       const cost = wuStakeCost(gate, k);
       const t = (k === 0 ? '不押' : ('押 ' + cost + ' 枚'))
-        + ' · 把握 ' + Math.round(wuRate(gate, k) * 100) + '%'
+        + ' · 把握 ' + pctCheng(wuRate(gate, k) * 100)
         + ' / 扛 ' + wuTake(gate, k) + ' 衰'
         + (cost > have ? '（' + nm + '不够）' : '');
       opts.push({ v: String(k), t: t });
@@ -6319,7 +6337,7 @@
       const rate = wuRate(gate, k), take = wuTake(gate, k);
       const lines2 = [
         ['旁白', '（' + (k === 0 ? '不押 —— 仙窍由它自己稳。' : ('押' + nm + ' ' + paid + ' 枚，压住' + (k * 1) + '重仙窍。'))
-          + '冲关把握 ' + Math.round(rate * 100) + '%，可避开的衰还剩 ' + Math.max(0, avoid - k) + ' 道 —— 这一趟要扛 ' + take + ' 道。）'],
+          + '冲关把握 ' + pctCheng(rate * 100) + '，可避开的衰还剩 ' + Math.max(0, avoid - k) + ' 道 —— 这一趟要扛 ' + take + ' 道。）'],
         ['旁白', '（躲不掉的那两道，跟修行时间有关。修得越久，来得越早。）']
       ];
       settleBreakScene(gate, onDone, lines2);
@@ -8217,7 +8235,7 @@
     givePet(id) { if ((save.pets || []).indexOf(id) < 0) (save.pets = save.pets || []).push(id); save.pet = id; writeSave(); return save.pet; },
     heroSkin() { return Object.assign({}, heroLook()); },
     equipTo(id) { equipGear(id); return Object.assign({}, save.equip); },
-    grant(stones) { save.stones = (save.stones || 0) + (stones || 0); writeSave(); return save.stones; },
+    grant(stones) { save.stones = Math.round((save.stones || 0) + (stones || 0)); writeSave(); return save.stones; },
     freeCount(id) { return sellableCount(id); },
     sell(id, all) { sellItem(id, !!all); return { left: save.inventory[id] || 0, stones: save.stones || 0 }; },
     decomp(id, all) { decomposeItem(id, !!all); return { left: save.inventory[id] || 0 }; },
@@ -8340,7 +8358,7 @@
     rebuild(lv) { const ok = rebuildTo(lv); return { ok: ok, lv: save.cultivate.level, wounded: save.wounded || null }; },
     unlockAll() { for (const m of MAPS) if (save.unlocked.indexOf(m.id) < 0) save.unlocked.push(m.id); writeSave(); renderWorldMap(); return save.unlocked.length; },
     shop(tab) { openShop(tab); return G.shopTab; },
-    stones(n) { save.stones = Math.max(0, (save.stones || 0) + (n == null ? 100 : n)); writeSave(); renderShop(); renderWorldMap(); refreshTitle(); return save.stones; },
+    stones(n) { save.stones = Math.max(0, Math.round((save.stones || 0) + (n == null ? 100 : n))); writeSave(); renderShop(); renderWorldMap(); refreshTitle(); return save.stones; },
     levelUp(n) { for (let i = 0; i < (n || 1); i++) { const p = G.player; p.level++; p.next = xpNeed(p.level); } },
     realm(n) {
       if (!G.player) return '未开始';
