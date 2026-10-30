@@ -249,6 +249,59 @@ ok(dj.bAuto.lost * 3 < dj.bStand.lost, '弹幕流：自动比站着少挨一大�
 ok(dj.bAuto.drift < 100, '整段弹幕下来人没被赶出场：离锚点始终不到 100px', dj.bAuto.drift);
 ok(dj.nearBoss >= 1, 'Boss 贴上来也算威胁（冲刺时会侧让）', dj.nearBoss);
 
+// ---------------------------------------------------------------- 10. 升级/突破三选一也要自己选
+// 这块面板和煞气顿悟不是同一套：卡挂在 elCards 上、点了走 chooseCard，而不是 G.cardsNow。
+// 以前只认 G.cardsNow，于是每升一级就卡在那儿等人点（实战里升级比煞气满频繁得多）。
+console.log('\n== 10. 升级/突破三选一也能自动选 ==');
+await boot('houshan');
+await page.evaluate(() => window.__FR.autoMode(true));
+// 真循环里会插剧情对话，先把对话点掉再开面板，免得把 openLevel 挡在 dialog 上
+const drain = () => page.evaluate(() => {
+  const F = window.__FR;
+  for (let k = 0; k < 30 && F.info().state !== 'play'; k++) {
+    if (F.info().state === 'dialog') F.skipStory();
+    F.tickFrames(2);
+  }
+  return F.info().state;
+});
+const lv = [];
+for (let round = 0; round < 3; round++) {
+  await drain();
+  await page.evaluate(() => window.__FR.openLevel());
+  const opened = await page.evaluate(() => ({
+    state: window.__FR.autoInfo().state,
+    cards: document.querySelectorAll('#levelup .card').length
+  }));
+  await page.waitForTimeout(1700);   // 留足落手前的停顿 + 一帧渲染
+  const closed = await page.evaluate(() => ({
+    state: window.__FR.autoInfo().state,
+    panel: document.getElementById('levelup').style.display,
+    on: window.__FR.autoInfo().on
+  }));
+  lv.push({ opened, closed });
+}
+ok(lv.every(x => x.opened.state === 'levelup' && x.opened.cards === 3), '三选一面板真的弹出来了（升级/突破那一套）', lv.map(x => x.opened));
+ok(lv.every(x => x.closed.panel === 'none'), '三块面板都被自动点掉、真的收起来了（一轮三次都不卡）', lv.map(x => x.closed.panel));
+ok(lv.every(x => x.closed.state !== 'levelup'), '点完之后不再停在选卡态（对话顶上来不算卡）', lv.map(x => x.closed.state));
+ok(lv.every(x => x.closed.on === true), '选完卡自动还在', lv.map(x => x.closed.on));
+
+// 升级面板刚点完，紧接着煞气满再弹一块：两块面板轮着来也不会互相打架
+await drain();
+const mix = await page.evaluate(() => {
+  const F = window.__FR;
+  const s = F.sha();                 // 只补「刚好够一格」的煞气，别攒出一长串 pending
+  F.sha(s.need * 1.2);
+  return { pending: F.sha().pending, state: F.autoInfo().state };
+});
+await page.waitForTimeout(2200);
+const mix2 = await page.evaluate(() => ({
+  state: window.__FR.autoInfo().state,
+  panel: document.getElementById('levelup').style.display,
+  pending: window.__FR.sha().pending
+}));
+ok(mix.pending >= 1, '灌满一格煞气，顿悟排上了', mix);
+ok(mix2.panel === 'none' && mix2.pending === 0, '紧接着弹的煞气顿悟也自己选掉了（没和升级面板打架）', mix2);
+
 console.log('\n--------------------------------');
 ok(errors.length === 0, '全程无 JS 报错', errors.slice(0, 3));
 console.log(`结果: ${pass} 通过 / ${fail} 失败`);

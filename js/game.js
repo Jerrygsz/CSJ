@@ -3486,21 +3486,26 @@
     const n = (line && line[1] ? line[1] : '').length;
     return U.clamp(AUTO_LINE_MIN + n * 0.028, AUTO_LINE_MIN, AUTO_LINE_MAX);
   }
+  // 自动选卡：点面板上的第一张。走的是玩家自己点卡那条 click handler ——
+  // 煞气顿悟（onPick）、升级/突破三选一（chooseCard）、灵石祭炼（onPick）共用同一块面板，
+  // 以前只认 G.cardsNow，于是「升级/突破」那种把卡放在 elCards 上的面板选不动，
+  // 一升级就卡在那儿等人点。改成直接点 DOM，三条路一次全管上，以后再加卡也自动跟上。
   function autoPickCard() {
-    if (G.state !== 'levelup' || !G.cardsNow || !G.cardsNow.length) return false;
+    if (G.state !== 'levelup') return false;
     // 祭炼卡要花灵石：挂机不替人花钱，把面板收掉就回战场
-    if (G.cardsNow.every(c => c.kind === 'R')) {
+    if (G.cardsNow && G.cardsNow.length && G.cardsNow.every(c => c.kind === 'R')) {
       G.cardsNow = null;
       if (elLevelup) elLevelup.style.display = 'none';
       resumePlay();
       banner('自动 · 祭炼面板已收起（不替你花灵石）');
       return true;
     }
-    const c = G.cardsNow[0];
+    const el = elCards && elCards.querySelector('.card');
     G.cardsNow = null;
+    if (el) { el.click(); return true; }   // click 里自己会藏面板、onPick/chooseCard 自己会回 play
     if (elLevelup) elLevelup.style.display = 'none';
-    onPick(c);   // onPick 末尾会 resumePlay，状态自然回到 play
-    return true;
+    if (G.state === 'levelup') resumePlay();
+    return false;
   }
   function setAuto(on, silent) {
     on = !!on;
