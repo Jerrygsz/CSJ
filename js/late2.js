@@ -562,7 +562,7 @@
       enemies: ['yaoshou2', 'kui2', 'dajinxiu'],
       elites: ['妖族先锋', '小极宫弟子'],
       mats: ['m_xuanbing', 'm_hanhuo', 'm_gangyin', 'm_yusui'],
-      boss: { kind: 'mo', name: '寒俪上人', hp: 32000, spd: 58, dmg: 72, r: 21, spr: 'neimen', scale: 5.6 },
+      boss: { kind: 'mo', name: '寒骊上人', hp: 32000, spd: 58, dmg: 72, r: 21, spr: 'neimen', scale: 5.6 },
       reward: { stones: 5200, pets: ['p_bingfeng'], mats: [['m_xuanbing', 3], ['m_hanhuo', 2]] },
       clearTitle: '冰凤相随',
       clearDesc: '小极宫塌了。冰凤跟出来的时候，回头看了一次，再没回头。'
@@ -721,7 +721,7 @@
       ['旁白', '冰窟底下，一口复制品的虚天鼎压着，鼎边是一缕乾蓝的焰。'],
       ['韩立', '（乾蓝冰焰。真品在我手里，这缕是仿的。）'],
       ['旁白', '妖族在攻山。小极宫的大长老在阵眼里，眼睛盯着他袖口。'],
-      ['寒俪上人', '道友袖里那口鼎，借我一用。'],
+      ['寒骊上人', '道友袖里那口鼎，借我一用。'],
       ['韩立', '（借。这字在修仙界，从来不还。）']
     ],
     xiaoji_out: [
@@ -834,12 +834,12 @@
     {
       id: 'fujia', side: true, sorder: 11, name: '元武国·付家', pos: '元武国·付家堡',
       type: 'combat', tag: '支线', unlockBy: 'e_fujia', arc: 'F',
-      desc: '辛如音临终托付的那件事。付家的嫡系，一个不留。',
+      desc: '辛如音临终托付的那件事。付家满门，一个不留。',
       startLevel: 84, startSkills: { sword: 6, fire: 5, orb: 4, nova: 4, frost: 5 },
       unlock: null, next: null,
       diff: 2.65, bossAt: 110,
       enemies: ['zhengdao', 'moxiu2', 'kui'],
-      elites: ['付家供奉', '付家嫡系'],
+      elites: ['付家修士', '付家子弟'],
       mats: ['m_xuantie', 'm_gengjing', 'm_yusui'],
       boss: { kind: 'mo', name: '付家家主', hp: 15000, spd: 60, dmg: 50, r: 20, spr: 'neimen', scale: 5.2 },
       reward: { stones: 2600, pets: ['p_liuyi'], mats: [['m_gengjing', 2], ['m_yusui', 4]] },
