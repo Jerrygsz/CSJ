@@ -6215,8 +6215,11 @@
   // ==========================================================================
   // 突破面板：修为到了顶，缺什么摆出来，齐了才破
   // ==========================================================================
-  function breakRow(ok, tag, text) {
-    return '<div class="brk-row' + (ok ? ' ok' : '') + '"><i>' + tag + '</i><span>' + text + '</span><b>' + (ok ? '齐' : '缺') + '</b></div>';
+  function breakRow(ok, tag, text, itemId) {
+    const click = itemId ? ' data-item="' + itemId + '"' : '';
+    const q = itemId ? '<em class="brk-q">?</em>' : '';
+    return '<div class="brk-row' + (ok ? ' ok' : '') + (itemId ? ' click' : '') + '"' + click + '>' +
+      '<i>' + tag + '</i><span>' + text + '</span>' + q + '<b>' + (ok ? '齐' : '缺') + '</b></div>';
   }
   function renderBreakBody(b) {
     if (!b) return '<div class="cs-empty">眼前没有要破的关。<br>修为满了，自然会来。</div>';
@@ -6227,14 +6230,20 @@
       html += '<div class="cs-note">天人有五衰（X2C327）：此番可避开 <b>' + wuCanAvoid(b) + '</b> 道，' +
         '余下 <b>' + wuTake(b, 0) + '</b> 道只能扛 —— 押' + wuName(b) + '越多，把握越高，可避开的衰越少。</div>';
     }
+    html += '<div class="cs-note brk-hint">点道具行可看「去哪取」。</div>';
     html += '<div class="brk-list">';
     for (const it of (b.items || [])) {
       const have = save.inventory[it[0]] || 0;
-      html += breakRow(have >= it[1], '丹', breakNameOf(it[0]) + '　' + have + ' / ' + it[1]);
+      html += breakRow(have >= it[1], '丹', breakNameOf(it[0]) + '　' + have + ' / ' + it[1], it[0]);
     }
     for (const mt of (b.mats || [])) {
       const have = save.inventory[mt[0]] || 0;
-      html += breakRow(have >= mt[1], '材', breakNameOf(mt[0]) + '　' + have + ' / ' + mt[1]);
+      html += breakRow(have >= mt[1], '材', breakNameOf(mt[0]) + '　' + have + ' / ' + mt[1], mt[0]);
+    }
+    // 硬门槛（补天丹之类一次性至宝）：原先漏渲染了，这里补上「需」行，让它也可见可点
+    for (const nd of (b.needs || [])) {
+      const have = save.inventory[nd[0]] || 0;
+      html += breakRow(have >= nd[1], '需', breakNameOf(nd[0]) + '　' + have + ' / ' + nd[1], nd[0]);
     }
     if (b.stones) html += breakRow((save.stones || 0) >= b.stones, '石', '灵石　' + (save.stones || 0) + ' / ' + b.stones);
     for (const s of (b.story || [])) {
@@ -6257,7 +6266,28 @@
     hideAllOverlays();
     elBreak.style.display = 'flex';
   }
-  function closeBreak() { if (elBreak) elBreak.style.display = 'none'; }
+  function closeBreak() { if (elBreak) elBreak.style.display = 'none'; hideBreakTip(); }
+  // 突破道具「去哪取」提示：点一行弹一卡，最简洁词句，依原著描述
+  let elBreakTip = null;
+  function ensureBreakTip() {
+    if (elBreakTip) return elBreakTip;
+    elBreakTip = document.createElement('div');
+    elBreakTip.id = 'breakTip';
+    elBreakTip.className = 'break-tip';
+    elBreakTip.style.display = 'none';
+    (elBreak || document.body).appendChild(elBreakTip);
+    return elBreakTip;
+  }
+  function showBreakItemHint(id) {
+    const tip = ensureBreakTip();
+    const t = (window.BREAK_ITEM_HINTS || {})[id];
+    const item = Items.get(id);
+    if (!t) { tip.style.display = 'none'; return; }
+    const name = item ? item.name : id;
+    tip.innerHTML = '<b>' + name + '</b><span>' + t + '</span>';
+    tip.style.display = 'block';
+  }
+  function hideBreakTip() { if (elBreakTip) elBreakTip.style.display = 'none'; }
   // 撞上瓶颈：修为卡住。战斗里不弹全屏面板遮挡画面 ——
   // 每张图进门只弹幕提示一次：料不齐说缺什么；料齐了叫回洞府走「突破」剧情。
   function markBlocked(b) {
@@ -7021,6 +7051,26 @@
   const elBreakLater = document.getElementById('breakLater');
   if (elBreakGo) elBreakGo.addEventListener('click', () => doBreakNow());
   if (elBreakLater) elBreakLater.addEventListener('click', () => { closeBreak(); if (G.state === 'play') last = performance.now(); });
+  // 突破道具行：点一下看「去哪取」（依原著）
+  if (elBreakBody) {
+    elBreakBody.addEventListener('click', (e) => {
+      const row = e.target.closest && e.target.closest('.brk-row.click');
+      if (row && row.getAttribute('data-item')) {
+        e.stopPropagation();
+        showBreakItemHint(row.getAttribute('data-item'));
+        return;
+      }
+      hideBreakTip();
+    });
+    elBreakBody.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = e.target.closest && e.target.closest('.brk-row.click');
+      if (row && row.getAttribute('data-item')) {
+        e.preventDefault();
+        showBreakItemHint(row.getAttribute('data-item'));
+      }
+    });
+  }
   const elPauseLeaveCoop = document.getElementById('pauseLeaveCoop');
   const elGameover = document.getElementById('gameover');
   const elGoTime = document.getElementById('goTime');

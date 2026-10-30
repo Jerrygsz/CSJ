@@ -171,6 +171,20 @@ body.fs #wrap { background: #000; }
 .brk-row.ok { border-color: rgba(111,224,138,0.4); }
 .brk-row.ok i { background: var(--ok); }
 .brk-row.ok b { color: var(--ok); }
+/* 可点击的道具行：点一下看「去哪取」 */
+.brk-row.click { cursor: pointer; transition: border-color .12s, background .12s; }
+.brk-row.click:hover { border-color: rgba(201,162,74,0.55); background: rgba(201,162,74,0.10); }
+.brk-row .brk-q { flex: none; width: 16px; height: 16px; line-height: 16px; text-align: center;
+  border-radius: 50%; background: rgba(201,162,74,0.85); color: #1a140a; font-style: normal;
+  font-size: 11px; font-weight: 700; margin-left: 2px; }
+.brk-hint { color: rgba(201,162,74,0.8); font-size: var(--fs-micro); margin: 2px 0 0; }
+/* 突破道具「去哪取」提示卡 */
+.break-tip { position: fixed; left: 50%; bottom: 12%; transform: translateX(-50%);
+  max-width: min(540px, 88vw); background: rgba(18,14,9,0.97); border: 1px solid rgba(201,162,74,0.55);
+  border-radius: var(--r-md); padding: 10px 14px; box-shadow: 0 8px 26px rgba(0,0,0,0.55);
+  z-index: 60; font-size: var(--fs-cap); line-height: 1.6; pointer-events: none; }
+.break-tip b { color: var(--accent); margin-right: 6px; }
+.break-tip span { color: var(--text-2); }
 .cave-sec2 { margin: 8px 0; padding-top: 8px; border-top: 1px dashed rgba(201,162,74,0.22); }
 /* 内容型面板（标题 / 暂停 / 道陨 / 通关 / 升级）：高度贴合内容，垂直居中 */
 .panel { width: 100%; max-width: 460px; background: linear-gradient(180deg,var(--bg-panel-a),var(--bg-panel-b)); border: 1px solid var(--line-gold); border-radius: var(--r-lg); padding: var(--sp-5); box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
