@@ -4695,6 +4695,7 @@
     if (elRebirth) elRebirth.style.display = 'none';
     if (elWanling) elWanling.style.display = 'none';
     if (elSweep) elSweep.style.display = 'none';
+    hideBreakTip();
   }
   function resetRun() {
     if (window.Coop) window.Coop.reset();
@@ -6182,15 +6183,15 @@
     let h = '';
     for (const it of (b.items || [])) {
       const have = save.inventory[it[0]] || 0;
-      h += breakRow(have >= it[1], '丹', breakNameOf(it[0]) + '　' + have + ' / ' + it[1]);
+      h += breakRow(have >= it[1], '丹', breakNameOf(it[0]) + '　' + have + ' / ' + it[1], it[0]);
     }
     for (const it of (b.needs || [])) {
       const have = save.inventory[it[0]] || 0;
-      h += breakRow(have >= it[1], '宝', breakNameOf(it[0]) + '　' + have + ' / ' + it[1] + (it[1] === 1 ? '（天下独一份）' : ''));
+      h += breakRow(have >= it[1], '宝', breakNameOf(it[0]) + '　' + have + ' / ' + it[1] + (it[1] === 1 ? '（天下独一份）' : ''), it[0]);
     }
     for (const mt of (b.mats || [])) {
       const have = save.inventory[mt[0]] || 0;
-      h += breakRow(have >= mt[1], '材', breakNameOf(mt[0]) + '　' + have + ' / ' + mt[1]);
+      h += breakRow(have >= mt[1], '材', breakNameOf(mt[0]) + '　' + have + ' / ' + mt[1], mt[0]);
     }
     if (b.stones) h += breakRow((save.stones || 0) >= b.stones, '石', '灵石　' + (save.stones || 0) + ' / ' + b.stones);
     for (const s of (b.story || [])) {
@@ -6275,7 +6276,7 @@
     elBreakTip.id = 'breakTip';
     elBreakTip.className = 'break-tip';
     elBreakTip.style.display = 'none';
-    (elBreak || document.body).appendChild(elBreakTip);
+    document.body.appendChild(elBreakTip);
     return elBreakTip;
   }
   function showBreakItemHint(id) {
@@ -7377,6 +7378,8 @@
     renderCave();
   });
   if (elCaveBody) elCaveBody.addEventListener('click', e => {
+    // 点到道具行外的任何地方，先收「去哪取」提示卡（点道具行时下面会重新弹）
+    if (!e.target.closest('.brk-row.click')) hideBreakTip();
     // 按钮必须排在整行之前判：
     // 装备行的「拆」是嵌在 data-equip 那一行里头的 <button>，
     // 若先 closest('[data-equip]')，点「拆」会被整行抢走 —— 表现为「点拆却佩上了」。
@@ -7476,6 +7479,12 @@
       const lv = parseInt(bn.getAttribute('data-breaknow'), 10) || 0;
       const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv);
       if (b) { enterBreakMap(b); }
+      return;
+    }
+    // 洞府突破清单里的道具行：点一下看「去哪取」（依原著）
+    const brkRow = e.target.closest('.brk-row.click');
+    if (brkRow && brkRow.getAttribute('data-item')) {
+      showBreakItemHint(brkRow.getAttribute('data-item'));
       return;
     }
   });
