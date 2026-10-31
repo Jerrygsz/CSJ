@@ -1513,13 +1513,18 @@
       id: 'xlcave', name: '小灵天洞府', pos: '灵界·小灵天', from: 'xiaoling',
       desc: '一方小世界，收在袖里。天很低，一口井，一炉火，谁也找不进来。',
       quote: '打下来的小世界，比买来的洞府踏实。',
-      capLevel: 400, restStone: 5200, restXp: 0.10,
+      capLevel: 440, restStone: 5200, restXp: 0.10,
       crafts: ['alchemy', 'forge', 'talisman'],
       restTip: '小灵天的灵气自成一界，闭门坐一年，外面的事一件都不知道。'
     }
   });
-  // 打通这两张图即得洞府（与其它剧情图一个机制：finishMap 认 m.cave）
-  { const m = window.MAPS.find(x => x.id === 'liangzu'); if (m) m.cave = 'tycave'; }
+  // 灵界洞府（与其它剧情图同一机制：finishMap 认 m.cave，通关即归己有）
+  // ① 天渊城洞府（tycave，cap 220）：飞升落地、灵界第一课（安远城）通关即得。
+  //    原著韩立抵灵界先落脚天渊城，在灵界浓厚灵气中闭关，化神后期方能圆满、进阶炼虚；
+  //    故此洞府须早于「炼虚关」到手，否则化神后期卡在 149 之前、无地可圆满（死锁）。
+  // ② 元合岛·青元宫（yuangong，cap 300）、③ 小灵天洞府（xlcave，cap 440）依主线后得。
+  { const m = window.MAPS.find(x => x.id === 'anyuan'); if (m) m.cave = 'tycave'; }
+  { const m = window.MAPS.find(x => x.id === 'liangzu'); if (m) m.cave = 'tycave'; } // 兜底：主线推到此处亦得
   { const m = window.MAPS.find(x => x.id === 'fengyuan'); if (m) m.cave = 'yuangong'; }
   { const m = window.MAPS.find(x => x.id === 'xiaoling'); if (m) m.cave = 'xlcave'; }
 
