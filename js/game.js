@@ -4664,9 +4664,12 @@
     elSkillrow.innerHTML = '';
     for (const s of SKILLS) { const lv = skillLv(s.id); if (lv > 0) { const d = document.createElement('div'); d.className = 'pip'; d.innerHTML = '<span>' + s.icon + '</span><b>' + lv + '</b>'; elSkillrow.appendChild(d); } }
     if (G.boss) {
+      // 血条永远贴着顶栏下沿走：顶栏在窄屏会换行变高，写死 96px 会把 Boss 名压到地图名上（Jerry 实测）
+      if (elTopbar && elTopbar.offsetHeight > 40) elBosswrap.style.top = (elTopbar.offsetHeight + 8) + 'px';
       elBosswrap.style.display = 'block'; elBossname.textContent = G.boss.name;
       elBossfill.style.width = U.clamp(Math.max(0, G.boss.hp) / G.boss.maxhp, 0, 1) * 100 + '%';
       elBossfill.style.background = G.boss.phase2 ? 'linear-gradient(90deg,#ff1f1f,#ff9a4a)' : 'linear-gradient(90deg,#b03a3a,#ff5a4a)';
+      if (elBossbar) elBossbar.classList.toggle('p2', !!G.boss.phase2);
     }
     else elBosswrap.style.display = 'none';
     const playing = G.state === 'play' || G.state === 'dialog' || G.state === 'levelup' || G.state === 'pause';
@@ -7142,6 +7145,7 @@
   const elKills = document.getElementById('kills');
   const elStones = document.getElementById('stones');
   const elMapName = document.getElementById('mapName');
+  const elTopbar = document.getElementById('topbar');
   const elCombo = document.getElementById('combo');
   const elSkillrow = document.getElementById('skillrow');
   const elBuffrow = document.getElementById('buffrow');
@@ -7163,6 +7167,7 @@
   const elBosswrap = document.getElementById('bosswrap');
   const elBossname = document.getElementById('bossname');
   const elBossfill = document.getElementById('bossfill');
+  const elBossbar = document.getElementById('bossbar');
   const elBanner = document.getElementById('banner');
   const elDialog = document.getElementById('dialog');
   const elDialogSpeaker = document.getElementById('dialogSpeaker');

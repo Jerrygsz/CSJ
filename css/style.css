@@ -117,7 +117,7 @@ body.fs #wrap { background: #000; }
 #level { color: var(--accent-soft); letter-spacing: 2px; }
 #time { color: var(--text-3); }
 #stones { color: var(--accent); }
-#mapName { align-self: flex-start; font-size: var(--fs-micro); letter-spacing: 2px; color: var(--text-3); border-left: 2px solid var(--line-gold); padding-left: 6px; text-shadow: 0 1px 2px #000; }
+#mapName { align-self: flex-start; font-size: var(--fs-micro); letter-spacing: 3px; color: var(--text-3); border-left: 2px solid var(--line-gold); padding-left: 7px; text-shadow: 0 1px 2px #000; }
 /* 禁制（暂停）键：与「大衍」同为细长素签。热区保持 ≥44×44（点得中），
    「看得见的那颗」是 32px 高的金线胶囊：圆签用 ::before 画，文字套 span 浮在其上 */
 #pauseBtn { position: absolute; right: 12px; top: 52px; min-width: 44px; height: 44px; border: none; background: transparent; color: var(--text-2); pointer-events: auto; display: flex; align-items: center; justify-content: center; padding: 0 12px; }
@@ -131,10 +131,25 @@ body.fs #wrap { background: #000; }
 #autoBtn.on { border-color: var(--accent-deep); color: var(--accent); background: rgba(24,18,6,0.66); text-shadow: 0 0 8px rgba(255,210,74,0.45); }
 #autoBtn.on::after { content: ''; width: 5px; height: 5px; margin-left: 2px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px rgba(255,210,74,0.8); animation: autoDot 1.1s ease-in-out infinite; }
 @keyframes autoDot { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
-#bosswrap { position: absolute; top: 96px; left: 12px; right: 12px; display: none; }
-#bossname { font-size: var(--fs-body); letter-spacing: 2px; color: var(--accent); text-shadow: 0 1px 3px #000; margin-bottom: 0; }
-#bossbar { height: 10px; background: rgba(0,0,0,0.55); border: 1px solid var(--accent-deep); border-radius: var(--r-pill); overflow: hidden; }
+/* Boss 名牌：金线从两侧渐隐收拢，名字鎏金，血条鎏金描边带顶部高光 —— 修仙应该有的那点体面 */
+#bosswrap { position: absolute; top: 96px; left: 14px; right: 14px; display: none; }
+#bossname { display: flex; align-items: center; justify-content: center; gap: 10px;
+  font-size: var(--fs-body); font-weight: 600; letter-spacing: 5px; text-indent: 5px;
+  background: linear-gradient(180deg, #ffe9b0 20%, var(--accent) 85%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.85)); margin-bottom: 5px; }
+#bossname::before, #bossname::after { content: ''; flex: 1; height: 1px; }
+#bossname::before { background: linear-gradient(90deg, rgba(201,162,74,0), rgba(201,162,74,0.7)); }
+#bossname::after  { background: linear-gradient(270deg, rgba(201,162,74,0), rgba(201,162,74,0.7)); }
+#bossbar { position: relative; height: 12px; background: rgba(0,0,0,0.62);
+  border: 1px solid rgba(201,162,74,0.55); border-radius: var(--r-pill); overflow: hidden;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.55), inset 0 1px 3px rgba(0,0,0,0.85); }
+#bossbar::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0) 46%); }
 #bossfill { height: 100%; width: 100%; background: linear-gradient(90deg,var(--danger-deep),#ff5a4a); transition: width .15s linear; }
+/* 二阶段：血条泛红光，脉一下停一下，不吵但看得见 */
+#bossbar.p2 { border-color: rgba(255,90,74,0.8); animation: bossP2 1.6s ease-in-out infinite; }
+@keyframes bossP2 { 0%, 100% { box-shadow: 0 1px 6px rgba(0,0,0,0.55), 0 0 4px rgba(255,60,40,0.25); } 50% { box-shadow: 0 1px 6px rgba(0,0,0,0.55), 0 0 12px rgba(255,60,40,0.65); } }
 #skillrow { position: absolute; left: 12px; bottom: 12px; display: flex; flex-wrap: wrap; gap: var(--sp-1); max-width: 70%; }
 .pip { width: 26px; height: 26px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); border-radius: var(--r-sm); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: var(--fs-cap); line-height: 1; }
 .pip b { font-size: var(--fs-micro); color: var(--accent); }
