@@ -450,7 +450,7 @@ const ALLM = W.MAPS;
 const mainMaps = ALLM.filter(m => !m.side);
 const sideAll = ALLM.filter(m => m.side);
 eq(mainMaps.length, 48, '主线共 48 图（练气 7 + 筑基结丹 12 + 元婴化神 29）');
-eq(sideAll.length, 15, '支线共 15 图（练气 7 + 筑基金丹 5 + 元婴 3）');
+eq(sideAll.length, 16, '支线共 16 图（练气 7 + 筑基金丹 5 + 元婴 4）');
 eq(W.MAIN_MAP_COUNT, 48, 'MAIN_MAP_COUNT 跟着变');
 
 const RL = W.REALM_LAYERS;

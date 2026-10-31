@@ -5152,6 +5152,10 @@
     }
     // 太南小会散场后，后巷才会有人（原著那两个散修际遇挂在小会上，坊市里刷不出人）
     if (m.id === 'tainan' && save.unlocked.indexOf('heixiang') < 0) save.unlocked.push('heixiang');
+    // 入落云宗（只是领了差事、分到天泉峰）后，药园那段支线才开；药园通关即成本命洞府（原著第 603-604 章）
+    if (m.id === 'luoyun' && save.unlocked.indexOf('luoyunyaoyuan') < 0) save.unlocked.push('luoyunyaoyuan');
+    // 结婴在洞府里进行：若玩家跳过了药园支线，这里兜底把洞府补开，免得无洞府可归
+    if (m.id === 'jieying' && save.caves.indexOf('luoyun') < 0) save.caves.push('luoyun');
     // 破境图：物事齐了才谈冲关；冲关还可能失败 —— 解锁下一图要等「真的破了」才给
     // alreadyPast：早已站在这道门之后（如重打这张破境图），不再重复冲关，也不因「没带丹」被反锁
     const alreadyPast = !!(m.endLevel && (save.cultivate.level || 1) >= m.endLevel);
