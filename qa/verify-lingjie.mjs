@@ -138,8 +138,8 @@ const its = await page.evaluate(() => ['tenglong', 'm_zhenlingxue', 'm_zhenlingl
 ok(its.every(x => x.ok), '原著灵物已入库（腾龙丹/真灵之血/真灵鳞片/合体丹/玄天斩灵剑）', its);
 
 // ---- 4) 「备齐」判定 ----
-await run(`F.clearProgress();F.setLevel(149);F.god(true);F.clearMap('heifeng');F.addItem('tenglong',1);F.setStones(20000);`);
-ok(await page.evaluate(() => window.__FR.breakCan(150)) === true, '修为149 + 腾龙丹 + 已通黑凤族 → breakCan(150)=true');
+await run(`F.clearProgress();F.setLevel(149);F.god(true);F.clearMap('heifeng');F.addItem('tenglong',1);F.setStones(20000);F.learn('baimai');`);
+ok(await page.evaluate(() => window.__FR.breakCan(150)) === true, '修为149 + 腾龙丹 + 已通黑凤族 + 百脉炼宝诀 → breakCan(150)=true');
 
 await run(`F.clearProgress();F.setLevel(149);F.clearMap('heifeng');F.setStones(20000);`);
 ok(await page.evaluate(() => window.__FR.breakCan(150)) === false, '缺腾龙丹 → breakCan(150)=false');
@@ -692,11 +692,11 @@ ok(Math.abs(BONUS.plain - 0.5) < 0.001, '腾龙丹一枚：炼虚关基础把握
 ok(Math.abs(BONUS.inCave - 0.8) < 0.001, '在天渊城洞府冲关：把握 +30%（0.5→0.8）', BONUS.inCave);
 
 // ---- 6) 洞府冲关入口 + 真实突破 ----
-await run(`F.clearProgress();F.setLevel(149);F.god(true);F.clearMap('heifeng');F.addItem('tenglong',1);F.setStones(20000);`);
+await run(`F.clearProgress();F.setLevel(149);F.god(true);F.clearMap('heifeng');F.addItem('tenglong',1);F.setStones(20000);F.learn('baimai');`);
 const st = await page.evaluate(() => window.__FR.startBreak(150));
 ok(st && st.map === 'lianxu', '洞府「突破」入口反查到炼虚关（lianxu）', st);
 
-await run(`F.clearProgress();F.setLevel(149);F.god(true);F.clearMap('heifeng');F.addItem('tenglong',3);F.setStones(20000);`);
+await run(`F.clearProgress();F.setLevel(149);F.god(true);F.clearMap('heifeng');F.addItem('tenglong',3);F.setStones(20000);F.learn('baimai');`);
 const br = await page.evaluate(() => window.__FR.breakNow(150));
 ok(br && br.cult === 150, 'breakNow(150) 成功推进到炼虚（cultivate=150）', br);
 

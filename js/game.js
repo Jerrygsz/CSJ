@@ -1681,6 +1681,11 @@
       if ((save.unlocked || []).indexOf(s.id) >= 0) continue;
       if ((save.cleared || []).indexOf(s.id) < 0) miss.push({ kind: 'story', id: s.id, name: s.name });
     }
+    // 功法：五行合一须兼修一门多属性功法（如百脉炼宝诀），未习得则差这一样
+    if (b.skill) {
+      const have = (cultObj().skills || {})[b.skill] ? 1 : 0;
+      if (have < 1) miss.push({ kind: 'skill', id: b.skill, need: 1, have: have });
+    }
     return miss;
   }
   // 对话分流用：当前这张破境图「正在通关」，剧情节点天然算通过；
@@ -1692,6 +1697,7 @@
     for (const it of (b.needs || [])) if ((save.inventory[it[0]] || 0) < it[1]) return false;
     for (const mt of (b.mats || [])) if ((save.inventory[mt[0]] || 0) < mt[1]) return false;
     if ((save.stones || 0) < (b.stones || 0)) return false;
+    if (b.skill && !((cultObj().skills || {})[b.skill])) return false;
     return true;
   }
   function canBreak(b) { return !b || breakMissing(b).length === 0; }
@@ -6264,6 +6270,11 @@
       h += breakRow(have >= mt[1], '材', breakNameOf(mt[0]) + '　' + have + ' / ' + mt[1], mt[0]);
     }
     if (b.stones) h += breakRow((save.stones || 0) >= b.stones, '石', '灵石　' + (save.stones || 0) + ' / ' + b.stones);
+    if (b.skill) {
+      const learned = !!((cultObj().skills || {})[b.skill]);
+      const sk = window.skillById ? window.skillById(b.skill) : null;
+      h += breakRow(learned, '功', (sk ? sk.name : b.skill) + (learned ? '（已习）' : '（须先习得 · 天渊坊市）'), 'sk_' + b.skill);
+    }
     for (const s of (b.story || [])) {
       const ok = (save.cleared || []).indexOf(s.id) >= 0;
       h += breakRow(ok, '剧', (s.name || s.id) + '（' + (ok ? '已通' : '须先通关') + '）');
@@ -6317,6 +6328,11 @@
       html += breakRow(have >= nd[1], '需', breakNameOf(nd[0]) + '　' + have + ' / ' + nd[1], nd[0]);
     }
     if (b.stones) html += breakRow((save.stones || 0) >= b.stones, '石', '灵石　' + (save.stones || 0) + ' / ' + b.stones);
+    if (b.skill) {
+      const learned = !!((cultObj().skills || {})[b.skill]);
+      const sk = window.skillById ? window.skillById(b.skill) : null;
+      html += breakRow(learned, '功', (sk ? sk.name : b.skill) + (learned ? '（已习）' : '（须先习得 · 天渊坊市）'), 'sk_' + b.skill);
+    }
     for (const s of (b.story || [])) {
       const done = (save.cleared || []).indexOf(s.id) >= 0;
       html += breakRow(done, '剧', (s.name || s.id) + '（' + (done ? '已通' : '须先通关') + '）');

@@ -110,10 +110,11 @@
   window.BREAKTHROUGH.push({
     lv: 150, realm: '炼虚初期', from: '化神后期',
     canonCave: 'tycave',
-    tip: '进阶炼虚的关键是「五行合一」——须兼修多属性功法，单一属性难成（V7C1219）。再以一炉腾龙丹压住灵压，才敢在灵界冲这一关（V9C1364）。',
+    tip: '进阶炼虚的关键是「五行合一」——须兼修多属性功法（如天渊坊市可得的《百脉炼宝诀》），单一属性难成（V7C1219）。再以一炉腾龙丹压住灵压，才敢在灵界冲这一关（V9C1364）。',
     items: [['tenglong', 1]],
     mats: [],
     stones: 15000,
+    skill: 'baimai',   // 五行合一：须兼修一门多属性功法（百脉炼宝诀，天渊坊市可得）
     chance: { step: 0.5 },   // 一枚腾龙丹五成；押两枚必成
     story: [{ id: 'heifeng', name: '灵界·黑凤族领地' }],
     lines: [
@@ -237,7 +238,7 @@
       // 破境图：endLevel 必须等于炼虚关 lv150，洞府「进阶」靠它进场（同 jieying / jiezi）
       id: 'lianxu', name: '安远城外·五行合一', pos: '灵界·安远城外 荒原', arc: 'I',
       type: 'story', tag: '剧情',
-      desc: '腾龙丹在手，五行之力也拧成了一股。灵界的第一道大关，就在这片荒原上过。',
+      desc: '腾龙丹在手，只待五行合一。灵界的第一道大关，就在这片荒原上过。',
       startLevel: 132, endLevel: 150, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
       unlock: 'heifeng', next: 'fengyuan',
       reward: { stones: 20000, mats: [['m_zhenlingxue', 1]] },
