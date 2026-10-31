@@ -51,5 +51,20 @@ await page.locator('#breakBody .brk-row.click').first().click();
 await page.waitForTimeout(200);
 await page.screenshot({ path: join(here, 'shot-advance-panel-tip.png') });
 
+// 4. 结丹门：筑基后期（Lv55）点「天火液」→ 看它写去哪儿取
+await page.evaluate(() => {
+  const F = window.__FR;
+  F.cultLevel(55);
+  F.addItem('xueling', 1);
+  F.cave('qingzhuxuan');
+});
+await page.waitForTimeout(250);
+await page.click('#caveTabs button[data-ctab="break"]');
+await page.waitForTimeout(250);
+const tf = page.locator('#caveBody .brk-row.click[data-item="tianhuo"]').first();
+if (await tf.count()) await tf.click();
+await page.waitForTimeout(200);
+await page.screenshot({ path: join(here, 'shot-jiedan-tianhuo.png') });
+
 console.log('shots done');
 await browser.close(); server.close();

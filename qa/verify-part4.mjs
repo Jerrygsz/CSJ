@@ -66,6 +66,7 @@ const steps = await page.evaluate(() => {
   const F = window.__FR;
   const lv = (window.BREAKTHROUGH || [])[0].lv;          // 筑基初期 Lv36
   const snap = () => ({ can: F.breakCan(lv), miss: F.breakMissing(lv) });
+  F.cultLevel(lv - 1);                                    // 修为先摆到门前，否则差的是「修为」不是「物事」
   const out = { lv };
   out.s0 = snap();                                        // 什么都没有
   F.addItem('zhuji', 2);                                  // 备丹
@@ -92,7 +93,8 @@ const gate = await page.evaluate(() => {
   const p = F.G.player;
   const out = { reqLv: lv };
   // 经验顶满，站在门槛前
-  const arm = () => { const q = F.G.player; q.level = lv - 1; q.next = 5; q.xp = 50; };
+  // 修为门槛认的是存档里的 cultivate.level（不是本局的 G.player.level），两处一起摆到门前
+  const arm = () => { F.cultLevel(lv - 1); const q = F.G.player; q.level = lv - 1; q.next = 5; q.xp = 50; };
   F.setStones(0);                       // 缺灵石 → 撞门
   arm(); F.tickFrames(4, 0.05);
   out.blocked = { lv: F.G.player.level, pending: F.breakPending(), can: F.breakCan(lv) };

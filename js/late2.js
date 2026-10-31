@@ -35,7 +35,7 @@
     { id: 'm_lingzhu',  name: '灵烛果',     icon: '🕯', rarity: 4, desc: '果身像一截白烛，点在暗处会自己亮。服之可预尝下一层境界。' },
     { id: 'm_yinzhi',   name: '阴芝马',     icon: '🐴', rarity: 3, desc: '长成马形的阴芝，跑得比人快。养元培元的一味好药。' },
     { id: 'm_gangyin',  name: '罡银沙',     icon: '🌪', rarity: 4, desc: '沙粒里裹着罡风，一撮能压塌半间石室。' },
-    { id: 'm_huodan',   name: '火蟾兽内丹', icon: '🔥', rarity: 4, desc: '火蟾兽腹里那枚，百年才结一颗。坠魔谷的硬货。' },
+    { id: 'm_huodan',   name: '火蟾兽内丹', icon: '🔥', rarity: 4, desc: '上古火蟾腹里那枚内丹。原著里是用来化解封魂印毒咒的外物（第727章），坠魔谷才有的硬货。' },
     { id: 'm_hanhuo',   name: '五色寒焰',   icon: '❄', rarity: 4, desc: '五种极寒之焰各取一缕，封在玉瓶里。化神那一关就靠它。' },
     { id: 'm_jingang',  name: '金刚舍利',   icon: '🛕', rarity: 4, desc: '佛宗高僧坐化后留下的骨珠。镇煞气，也镇心神。' },
     { id: 'm_kunpeng',  name: '鲲鹏之羽',   icon: '🪶', rarity: 4, desc: '游天鲲鹏落下的一根。轻得没有重量，风一过就自己动。' },

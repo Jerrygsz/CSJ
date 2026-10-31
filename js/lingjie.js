@@ -20,10 +20,10 @@
   window.ITEMS.push(
     // noDrop：破境丹只该在剧情节点给一枚，任何怪都不随机爆 ——
     // 否则人界 82 级的 Boss 就能爆出灵界的腾龙丹，等于把炼虚关的门槛提前拆了。
-    { id: 'tenglong', name: '腾龙丹', rarity: 4, icon: '🐉', req: 150, noDrop: true,
+    { id: 'tenglong', name: '腾龙丹', rarity: 4, icon: '🐉', req: 132, noDrop: true,
       desc: '芝龙果为主药，三万年一结果。炼虚级灵药，生服也能凭空涨六十年苦修（V9C1364）。',
       effect: { xpMul: 0.2 } },
-    { id: 'heti', name: '合体丹', rarity: 4, icon: '💊', req: 200, noDrop: true,
+    { id: 'heti', name: '合体丹', rarity: 4, icon: '💊', req: 150, noDrop: true,
       desc: '炼虚后期冲击合体的丹药（V10C1770）。',
       effect: { maxhp: 240 } },
     { id: 't_xuantianjian', name: '玄天斩灵剑', rarity: 5, icon: '⚔', slot: 'weapon', req: 260,
@@ -102,6 +102,11 @@
   // ========================= 二、炼虚突破关（lv150） =========================
   // 原著：进阶炼虚的关键是「五行合一」，须兼修多属性功法；单一属性难成（V7C1219）。
   // 腾龙丹为炼虚级灵药（V9C1364）。修为门槛沿用 breakLevelOk：lv-1 = 149（化神后期）。
+  // 灵界两味破境丹的「去哪取」提示（门槛按「拿到手的那一级」写，不是按破境之后写）：
+  Object.assign(window.BREAK_ITEM_HINTS, {
+    tenglong: '掉落：黑凤族领地那一趟的收成（芝龙果为主药，三万年一结果，生服也涨六十年苦修；V9C1364）。',
+    heti:     '掉落：广寒界深处玉台上那一枚（炼虚后期冲合体用的丹药；V10C1770）。'
+  });
   window.BREAKTHROUGH.push({
     lv: 150, realm: '炼虚初期', from: '化神后期',
     canonCave: 'tycave',

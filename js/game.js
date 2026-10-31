@@ -8591,6 +8591,11 @@
       clear: () => { localStorage.removeItem(SAVE_KEY); return '已清除存档'; },
       wins: (v) => { save.wins = v; writeSave(); return '通关次数=' + v; }
     },
+    // 修为（存档里的那一档，进阶门的门槛认它，不认本局 G.player.level）
+    cultLevel(n) {
+      if (n == null) return save.cultivate.level || 1;
+      save.cultivate.level = Math.max(1, n | 0); writeSave(); return save.cultivate.level;
+    },
     sfx(name) { if (typeof Sfx[name] === 'function') { Sfx[name](); return 'played:' + name; } return 'no such sfx'; },
     sfxList: ['hit', 'shoot', 'fire', 'nova', 'gem', 'heal', 'buff', 'burst', 'hurt', 'enemyDie', 'boss', 'warn', 'bossPhase', 'levelup', 'win', 'lose']
   };
