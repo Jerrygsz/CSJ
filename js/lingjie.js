@@ -229,7 +229,7 @@
       clearDesc: '三妖伏诛，鳞片、一滴真灵之血、一枚芝龙果到手。腾龙丹的炉子，有着落了。'
     },
     {
-      // 破境图：endLevel 必须等于炼虚关 lv150，洞府「突破」靠它进场（同 jieying / jiezi）
+      // 破境图：endLevel 必须等于炼虚关 lv150，洞府「进阶」靠它进场（同 jieying / jiezi）
       id: 'lianxu', name: '安远城外·五行合一', pos: '灵界·安远城外 荒原', arc: 'I',
       type: 'story', tag: '剧情',
       desc: '腾龙丹在手，五行之力也拧成了一股。灵界的第一道大关，就在这片荒原上过。',

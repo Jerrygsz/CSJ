@@ -71,7 +71,7 @@ let r2 = await E(`(() => {
 ok(r2.can === true, '物料四项齐备，可突破', r2);
 ok(r2.lv === 35 && r2.pending === 36, '战斗里经验顶满也不自动破境（仍卡在 35→36 门口）', r2);
 ok(r2.shown === false, '不再弹全屏面板', r2);
-ok(r2.banner.indexOf('洞府') >= 0 && r2.banner.indexOf('突破') >= 0, '弹幕提示「回洞府选突破」', r2.banner);
+ok(r2.banner.indexOf('洞府') >= 0 && r2.banner.indexOf('进阶') >= 0, '弹幕提示「回洞府选进阶」', r2.banner);
 
 // ===== 3. 洞府「突破」按钮 → 进剧情地图 =====
 console.log('\n== 3. 突破按钮进破境地图 ==');

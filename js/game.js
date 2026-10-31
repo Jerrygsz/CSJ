@@ -3234,7 +3234,7 @@
       Sfx.levelup();
     }
 
-    let text = '境界突破 · ' + r.name;
+    let text = '境界进阶 · ' + r.name;
     if (r.skill) {
       const s = SKILLS.find(x => x.id === r.skill);
       if (s) {
@@ -3812,7 +3812,7 @@
     return picks;
   }
   function buildChoicesAndShow() {
-    const t = document.querySelector('#levelup .lu-title'); if (t) t.textContent = '突破 · 择一功法';
+    const t = document.querySelector('#levelup .lu-title'); if (t) t.textContent = '进阶 · 择一功法';
     const choices = buildChoices();
     elCards.innerHTML = '';
     for (const c of choices) {
@@ -3987,7 +3987,7 @@
     if (G.state === 'play') updateEncounters(dt);
 
     if (G.state === 'play' && p.xp >= p.next) {
-      // 大境界卡一道门：材料齐了也不再自动破关 —— 得回洞府「突破」走那段剧情才破
+      // 大境界卡一道门：材料齐了也不再自动破关 —— 得回洞府「进阶」走那段剧情才破
       const req = breakReqFor(p.level + 1);
       if (req) { p.xp = Math.min(p.xp, p.next - 0.5); markBlocked(req); }
       else {
@@ -4695,7 +4695,7 @@
     if (elRebirth) elRebirth.style.display = 'none';
     if (elWanling) elWanling.style.display = 'none';
     if (elSweep) elSweep.style.display = 'none';
-    hideBreakTip();
+    hideItemTip();
   }
   function resetRun() {
     if (window.Coop) window.Coop.reset();
@@ -4964,7 +4964,7 @@
     if (m.id === 'zhuji' && MAP_STORIES['zhuji_out']) {
       const bg = m.endLevel ? breakReqFor(m.endLevel) : null;
       if ((save.cultivate.level || 1) >= 36) {
-        // 提前已筑基：省略突破剧情，直接进「被发现已筑基」的对白（原著里李化元当场点破）
+        // 提前已筑基：省略进阶剧情，直接进「被发现已筑基」的对白（原著里李化元当场点破）
         key = 'zhuji_out_ready';
       } else if (breakReadyNow(bg)) {
         // 已备齐（修为已达炼气期十三层 + 破境之物齐）：先问玩家是否就此突破（成败各凭把握）
@@ -4985,7 +4985,7 @@
     if (lines && G.coopRole === 'client' && G.coopShared) { finishMap(m); return; }
     if (lines) {
       G.state = 'dialog';
-      // 「已备齐破境之物」分支：播完询问对白后，让玩家自己选「突破 / 暂不突破」
+      // 「已备齐破境之物」分支：播完询问对白后，让玩家自己选「进阶 / 暂不进阶」
       const onEnd = (key === 'zhuji_out_ask') ? () => zhujiAskBreak(m) : () => finishMap(m);
       showLines(lines, onEnd, 'outro:' + m.id);
     } else finishMap(m);
@@ -4996,7 +4996,7 @@
     const rate = gate ? Math.round(breakSuccessRate(gate) * 100) : 0;
     showChoice(
       '丹药、主药、灵石皆已备齐，冲关把握约 ' + pctCheng(rate) + '。是否就此借地火之屋的火脉冲关？',
-      [{ t: '就此突破', v: 'yes' }, { t: '暂不突破·回洞府', v: 'no' }],
+      [{ t: '就此进阶', v: 'yes' }, { t: '暂不进阶·回洞府', v: 'no' }],
       (v) => {
         if (v === 'yes') zhujiCommitBreak(m, gate);
         else gotoZhujiCave();   // 不突破 → 回洞府继续修行打怪备取破境之物
@@ -5734,7 +5734,7 @@
   // ---------- 洞府（安全屋） ----------
   function caveTabs(c) {
     const t = [{ id: 'stat', name: '属性' }, { id: 'equip', name: '装备' }, { id: 'skill', name: '功法' },
-               { id: 'pet', name: '灵宠' }, { id: 'mate', name: '同伴' }, { id: 'break', name: '突破' },
+               { id: 'pet', name: '灵宠' }, { id: 'mate', name: '同伴' }, { id: 'break', name: '进阶' },
                { id: 'quick', name: '快捷' }];
     for (const k of c.crafts) t.push({ id: k, name: RECIPE_KINDS[k].name });
     if (c.gardens && c.gardens.length) t.push({ id: 'garden', name: '药圃' });
@@ -5758,6 +5758,7 @@
   }
   function renderCave() {
     const c = CAVES[G.caveId]; if (!c || !elCaveBody) return;
+    hideItemTip();   // 换页签/重画面板，旧的「去哪取」卡片一并收起
     const lv = Math.max(save.cultivate.level || 1, save.best.level || 1);
     if (elCaveName) elCaveName.textContent = c.name;
     if (elCaveDesc) elCaveDesc.textContent = c.quote;
@@ -5895,7 +5896,8 @@
     if (!kd) return '<div class="cave-sec empty"><div class="cs-empty">此地并无这般工坊。</div></div>';
     const list = Recipes.of(kind);
     let html = '<div class="cave-sec"><div class="cs-title">' + kd.icon + ' ' + kd.name + '</div>' +
-      '<div class="cs-note">' + kd.tip + '　材料可在战斗中获得，也可在坊市买入。</div>';
+      '<div class="cs-note">' + kd.tip + '　材料可在战斗中获得，也可在坊市买入。</div>' +
+      '<div class="cs-note brk-hint">缺哪一味，点料名就写它去哪儿取。</div>';
     for (const r of list) {
       const outItem = Items.get(r.out);
       const rar = outItem ? RARITY[outItem.rarity] : RARITY[0];
@@ -5907,7 +5909,9 @@
         const have = save.inventory[m[0]] || 0;
         if (have < m[1]) okMat = false;
         const it = Items.get(m[0]);
-        return '<span class="mat' + (have >= m[1] ? ' ok' : '') + '">' + (it ? it.name : m[0]) + ' ' + Math.min(have, 99) + '/' + m[1] + '</span>';
+        // 料名可点：缺的、够的都点得，点一下就知道去哪儿取
+        return '<span class="mat clk' + (have >= m[1] ? ' ok' : '') + '" data-mat="' + m[0] + '">' +
+          (it ? it.name : m[0]) + ' ' + Math.min(have, 99) + '/' + m[1] + '</span>';
       }).join('');
       const can = okReq && okBook && okStone && okMat;
       // 火候几成，先让人看见。炼坏了材料是不退的
@@ -6139,7 +6143,7 @@
       }
       html += '</div>';
     }
-    html += '<div class="cave-sec"><div class="cs-title">突破</div>' +
+    html += '<div class="cave-sec"><div class="cs-title">进阶</div>' +
       '<div class="cs-note">大境界不是刷满修为就能过。丹药、材料、灵石、剧情，四样齐备才谈得上冲关；' +
       '而冲关有成败 —— 破境丹押得越多把握越大（各境每枚的加成都不同），只带一枚，也只是赌一把。缺什么这里都写着。</div>';
     let pending = null;
@@ -6218,13 +6222,13 @@
   }
 
   // ==========================================================================
-  // 突破面板：修为到了顶，缺什么摆出来，齐了才破
+  // 进阶面板：修为到了顶，缺什么摆出来，齐了才破
   // ==========================================================================
+  // 进阶清单的一行。可点击的行不再挂「?」—— 点行上的字就出「去哪取」
   function breakRow(ok, tag, text, itemId) {
     const click = itemId ? ' data-item="' + itemId + '"' : '';
-    const q = itemId ? '<em class="brk-q">?</em>' : '';
     return '<div class="brk-row' + (ok ? ' ok' : '') + (itemId ? ' click' : '') + '"' + click + '>' +
-      '<i>' + tag + '</i><span>' + text + '</span>' + q + '<b>' + (ok ? '齐' : '缺') + '</b></div>';
+      '<i>' + tag + '</i><span>' + text + '</span><b>' + (ok ? '齐' : '缺') + '</b></div>';
   }
   function renderBreakBody(b) {
     if (!b) return '<div class="cs-empty">眼前没有要破的关。<br>修为满了，自然会来。</div>';
@@ -6235,7 +6239,7 @@
       html += '<div class="cs-note">天人有五衰（X2C327）：此番可避开 <b>' + wuCanAvoid(b) + '</b> 道，' +
         '余下 <b>' + wuTake(b, 0) + '</b> 道只能扛 —— 押' + wuName(b) + '越多，把握越高，可避开的衰越少。</div>';
     }
-    html += '<div class="cs-note brk-hint">点道具行可看「去哪取」。</div>';
+    html += '<div class="cs-note brk-hint">缺哪一样，点那一行就写它去哪儿取。</div>';
     html += '<div class="brk-list">';
     for (const it of (b.items || [])) {
       const have = save.inventory[it[0]] || 0;
@@ -6266,35 +6270,93 @@
     const miss = breakMissing(G.breakCur);
     if (elBreakGo) {
       elBreakGo.disabled = miss.length > 0;
-      elBreakGo.textContent = miss.length ? ('还差 ' + miss.length + ' 样') : ('突破 · ' + G.breakCur.realm);
+      elBreakGo.textContent = miss.length ? ('还差 ' + miss.length + ' 样') : ('进阶 · ' + G.breakCur.realm);
     }
     hideAllOverlays();
     elBreak.style.display = 'flex';
   }
-  function closeBreak() { if (elBreak) elBreak.style.display = 'none'; hideBreakTip(); }
-  // 突破道具「去哪取」提示：点一行弹一卡，最简洁词句，依原著描述
-  let elBreakTip = null;
-  function ensureBreakTip() {
-    if (elBreakTip) return elBreakTip;
-    elBreakTip = document.createElement('div');
-    elBreakTip.id = 'breakTip';
-    elBreakTip.className = 'break-tip';
-    elBreakTip.style.display = 'none';
-    document.body.appendChild(elBreakTip);
-    return elBreakTip;
+  function closeBreak() { if (elBreak) elBreak.style.display = 'none'; hideItemTip(); }
+  // 道具「去哪取」提示：进阶清单与炼丹/炼器/制符的材料共用同一张卡。
+  // 先认原著写好的条目（BREAK_ITEM_HINTS），没写过的按数据层现算：
+  // 坊市有售 → 哪张图掉 → 药圃可种 → 自家能炼。四样都没有就直说「暂无定处」，不瞎编。
+  let elItemTip = null;
+  function ensureItemTip() {
+    if (elItemTip) return elItemTip;
+    elItemTip = document.createElement('div');
+    elItemTip.id = 'itemTip';
+    elItemTip.className = 'item-tip';
+    elItemTip.style.display = 'none';
+    document.body.appendChild(elItemTip);
+    return elItemTip;
   }
-  function showBreakItemHint(id) {
-    const tip = ensureBreakTip();
-    const t = (window.BREAK_ITEM_HINTS || {})[id];
+  const ITEM_HINT_CACHE = {};
+  function itemHintOf(id) {
+    if (id in ITEM_HINT_CACHE) return ITEM_HINT_CACHE[id];
+    let out = (window.BREAK_ITEM_HINTS || {})[id] || '';
+    if (!out) {
+      const bits = [];
+      // 坊市：哪家铺子有卖、几钱
+      const stock = (window.SHOP_STOCK || []).find(s => s.id === id);
+      if (stock) {
+        const where = [];
+        for (const m of (window.MAPS || [])) {
+          if (m.shop && m.shop.indexOf(stock.id) >= 0 && where.indexOf(m.name) < 0) where.push(m.name);
+        }
+        if (where.length) bits.push('坊市有售：' + where.slice(0, 2).join('、') + (where.length > 2 ? ' 等处' : '') + '（' + stock.price + ' 灵石）');
+      }
+      // 掉落：哪张图的妖兽、矿脉会出（含通关奖励里的那份）
+      const drops = [];
+      for (const m of (window.MAPS || [])) {
+        let hit = (m.mats || []).indexOf(id) >= 0;
+        if (!hit && m.reward && m.reward.mats) hit = m.reward.mats.some(x => x[0] === id);
+        if (!hit && m.enemies) {
+          for (const k of m.enemies) {
+            const e = (window.ENEMY_TYPES || {})[k];
+            if (e && e.mats && e.mats.indexOf(id) >= 0) { hit = true; break; }
+          }
+        }
+        if (hit && drops.indexOf(m.name) < 0) drops.push(m.name);
+      }
+      if (drops.length) bits.push('掉落：' + drops.slice(0, 2).join('、') + (drops.length > 2 ? ' 等处' : ''));
+      // 药圃：自家洞府里种的
+      const grows = [];
+      for (const cid in (window.CAVES || {})) {
+        for (const g of (((window.CAVES[cid] || {}).gardens) || [])) {
+          if ((g.pool || []).indexOf(id) >= 0 && grows.indexOf(g.name) < 0) grows.push(g.name);
+        }
+      }
+      if (grows.length) bits.push('药圃可种：' + grows.slice(0, 2).join('、') + (grows.length > 2 ? ' 等处' : ''));
+      // 自炼：哪张方子出这件东西
+      const rec = (window.RECIPES || []).find(r => r.out === id);
+      if (rec) {
+        const kd = (window.RECIPE_KINDS || {})[rec.kind] || { name: '炼制' };
+        bits.push('可自炼：' + kd.name + '「' + rec.name + '」');
+      }
+      out = bits.length ? bits.join(' · ') : '暂无定处 · 寻常打不着，须另寻机缘';
+    }
+    ITEM_HINT_CACHE[id] = out;
+    return out;
+  }
+  function showItemHint(id, anchor) {
+    const t = itemHintOf(id);
     const item = Items.get(id);
+    const tip = ensureItemTip();
     if (!t) { tip.style.display = 'none'; return; }
-    const name = item ? item.name : id;
-    tip.innerHTML = '<b>' + name + '</b><span>' + t + '</span>';
+    tip.innerHTML = '<b>' + (item ? item.name : id) + '</b><span>' + t + '</span>';
     tip.style.display = 'block';
+    // 就地把卡片插到点的那一行下面 —— 不遮按钮、不盖列表
+    const row = (anchor && anchor.closest) ? anchor.closest('.recrow, .brk-row') : null;
+    if (row && row.parentNode) {
+      tip.classList.add('inline'); tip.classList.remove('float');
+      row.insertAdjacentElement('afterend', tip);
+    } else {
+      tip.classList.add('float'); tip.classList.remove('inline');
+      document.body.appendChild(tip);
+    }
   }
-  function hideBreakTip() { if (elBreakTip) elBreakTip.style.display = 'none'; }
+  function hideItemTip() { if (elItemTip) elItemTip.style.display = 'none'; }
   // 撞上瓶颈：修为卡住。战斗里不弹全屏面板遮挡画面 ——
-  // 每张图进门只弹幕提示一次：料不齐说缺什么；料齐了叫回洞府走「突破」剧情。
+  // 每张图进门只弹幕提示一次：料不齐说缺什么；料齐了叫回洞府走「进阶」剧情。
   function markBlocked(b) {
     G.breakPending = b || null;
     if (!b) return;
@@ -6302,13 +6364,13 @@
       G.breakHinted = true;
       const lvOk = breakLevelOk(b);
       banner((lvOk && canBreak(b))
-        ? ('物事已齐 · 回任一洞府选「突破」冲关 · ' + b.realm)
+        ? ('物事已齐 · 回任一洞府选「进阶」冲关 · ' + b.realm)
         : (lvOk
             ? ('修为已至 ' + (b.from || '') + ' · 缺 ' + b.realm + ' 的物事')
             : ('修为未达 ' + (b.from || '') + ' · 先厚实根基再来')));
     }
   }
-  // 突破剧情演出：按原著演一段，演完押上这一炉丹搏一把 —— 成则破境，败则丹药散尽、可再来。
+  // 进阶剧情演出：按原著演一段，演完押上这一炉丹搏一把 —— 成则破境，败则丹药散尽、可再来。
   // onDone(gate, ok)
   function breakSceneThen(gate, onDone) {
     if (!gate) { if (onDone) onDone(null, true); return; }
@@ -6440,7 +6502,7 @@
     }
     if (onDone) onDone(gate, true);
   }
-  // 洞府「突破」按钮：物事齐了 → 进这张门对应的破境地图，走完剧情/打完，就地在剧情里破境
+  // 洞府「进阶」按钮：物事齐了 → 进这张门对应的破境地图，走完剧情/打完，就地在剧情里破境
   function enterBreakMap(gate) {
     if (!gate) return;
     const miss = breakMissing(gate);
@@ -6922,7 +6984,7 @@
     while (lv < 140 && guard++ < 400) {
       const need = xpNeed(lv);
       if (c.xp < need) break;
-      // 大境界门：丹药材料剧情齐了也得回洞府「突破」冲关，打坐/遇敌过不去
+      // 大境界门：丹药材料剧情齐了也得回洞府「进阶」冲关，打坐/遇敌过不去
       const blk = breakReqFor(lv + 1);
       if (blk) { c.xp = Math.min(c.xp, need - 1); G.breakPending = blk; break; }
       // 小境界门（原著点名处）：物事没备齐就顶在关口
@@ -6946,7 +7008,7 @@
       save.stones -= c.restStone;
       addCultivateXp(Math.max(1, Math.round(xpNeed(lv) * c.restXp)));
       n++;
-      // 撞上大境界门：修为顶在门口，再坐也是白烧灵石 —— 立刻停下，催他去「突破」页
+      // 撞上大境界门：修为顶在门口，再坐也是白烧灵石 —— 立刻停下，催他去「进阶」页
       if ((save.cultivate.level || 1) === lv && (save.cultivate.xp || 0) >= xpNeed(lv) - 1) { gated = true; break; }
       // 筑基后掌天瓶日产绿液 —— 前提是瓶子在手上（七玄门那一趟就该拿到了）
       const hasBottle = (save.inventory['gupu'] || 0) > 0 || (save.inventory['zhangtian'] || 0) > 0;
@@ -6954,7 +7016,7 @@
     }
     if (n) { writeSave(); }
     if (gated) {
-      notify('修为已至瓶颈 · 回「突破」页备料冲关');
+      notify('修为已至瓶颈 · 回「进阶」页备料冲关');
       Sfx.warn();
     } else if (!n) {
       const lv = save.cultivate.level || 1;
@@ -7049,30 +7111,30 @@
   const elLevelup = document.getElementById('levelup');
   const elCards = document.getElementById('cards');
   const elPause = document.getElementById('pause');
-  // 突破面板
+  // 进阶面板
   const elBreak = document.getElementById('break');
   const elBreakBody = document.getElementById('breakBody');
   const elBreakGo = document.getElementById('breakGo');
   const elBreakLater = document.getElementById('breakLater');
   if (elBreakGo) elBreakGo.addEventListener('click', () => doBreakNow());
   if (elBreakLater) elBreakLater.addEventListener('click', () => { closeBreak(); if (G.state === 'play') last = performance.now(); });
-  // 突破道具行：点一下看「去哪取」（依原著）
+  // 进阶道具行：点一下看「去哪取」（依原著）
   if (elBreakBody) {
     elBreakBody.addEventListener('click', (e) => {
       const row = e.target.closest && e.target.closest('.brk-row.click');
       if (row && row.getAttribute('data-item')) {
         e.stopPropagation();
-        showBreakItemHint(row.getAttribute('data-item'));
+        showItemHint(row.getAttribute('data-item'), row);
         return;
       }
-      hideBreakTip();
+      hideItemTip();
     });
     elBreakBody.addEventListener('keydown', (e) => {
       if (e.key !== 'Enter' && e.key !== ' ') return;
       const row = e.target.closest && e.target.closest('.brk-row.click');
       if (row && row.getAttribute('data-item')) {
         e.preventDefault();
-        showBreakItemHint(row.getAttribute('data-item'));
+        showItemHint(row.getAttribute('data-item'), row);
       }
     });
   }
@@ -7382,8 +7444,8 @@
     renderCave();
   });
   if (elCaveBody) elCaveBody.addEventListener('click', e => {
-    // 点到道具行外的任何地方，先收「去哪取」提示卡（点道具行时下面会重新弹）
-    if (!e.target.closest('.brk-row.click')) hideBreakTip();
+    // 点到可点物件外的任何地方，先收「去哪取」提示卡（点物件时下面会重新弹）
+    if (!e.target.closest('.brk-row.click') && !e.target.closest('.mat.clk')) hideItemTip();
     // 按钮必须排在整行之前判：
     // 装备行的「拆」是嵌在 data-equip 那一行里头的 <button>，
     // 若先 closest('[data-equip]')，点「拆」会被整行抢走 —— 表现为「点拆却佩上了」。
@@ -7393,6 +7455,9 @@
     if (da) { decomposeItem(da.getAttribute('data-decompall'), true); return; }
     const cr = e.target.closest('button[data-craft]');
     if (cr) { craftRecipe(cr.getAttribute('data-craft')); return; }
+    // 炼丹/炼器/制符：点料名看「去哪取」（不挂问号，点字就出）
+    const mt = e.target.closest('.mat.clk[data-mat]');
+    if (mt) { showItemHint(mt.getAttribute('data-mat'), mt); return; }
     const rs = e.target.closest('button[data-rest]');
     if (rs) { doRest(parseInt(rs.getAttribute('data-rest'), 10) || 1); return; }
     // 药圃：按地块采收（百药园两块地、小寰岛、落云宗、芥子空间各自独立）
@@ -7477,7 +7542,7 @@
     // 重修：闭关一年/六年，把跌掉的修为补回来（原著小寰岛闭关服丹的路子）
     const rb = e.target.closest('button[data-rebuild]');
     if (rb) { rebuildTo(parseInt(rb.getAttribute('data-rebuild'), 10) || 0); return; }
-    // 突破页：物事齐了 → 进对应的剧情地图，打到关底就地在剧情里破境
+    // 进阶页：物事齐了 → 进对应的剧情地图，打到关底就地在剧情里破境
     const bn = e.target.closest('button[data-breaknow]');
     if (bn) {
       const lv = parseInt(bn.getAttribute('data-breaknow'), 10) || 0;
@@ -7485,10 +7550,10 @@
       if (b) { enterBreakMap(b); }
       return;
     }
-    // 洞府突破清单里的道具行：点一下看「去哪取」（依原著）
+    // 洞府进阶清单里的道具行：点一下看「去哪取」（依原著）
     const brkRow = e.target.closest('.brk-row.click');
     if (brkRow && brkRow.getAttribute('data-item')) {
-      showBreakItemHint(brkRow.getAttribute('data-item'));
+      showItemHint(brkRow.getAttribute('data-item'), brkRow);
       return;
     }
   });
@@ -8325,6 +8390,7 @@
     equip(id) { equipGear(id); return save.equip; },
     unequip(slot) { unequipSlot(slot); return save.equip; },
     craft(rid) { craftRecipe(rid); return 'ok'; },
+    hintOf(id) { return itemHintOf(id); },
     rest(n) { doRest(n || 1); return save.cultivate.level; },
     addMat(id, n) { const it = Items.get(id); if (!it) return 'no item'; save.inventory[id] = (save.inventory[id] || 0) + (n || 1); save.totalItems = (save.totalItems || 0) + (n || 1); writeSave(); if (G.state === 'cave') renderCave(); return save.inventory[id]; },
     addMats(n) { const pool = (G.map && G.map.mats) || ['m_chijing', 'm_jingtie', 'm_fuzhi', 'm_lingmo']; for (const id of pool) { save.inventory[id] = (save.inventory[id] || 0) + (n || 3); save.totalItems = (save.totalItems || 0) + (n || 3); } writeSave(); if (G.state === 'cave') renderCave(); return pool.length; },

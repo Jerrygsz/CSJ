@@ -616,8 +616,8 @@ for (let k = 0; k < 12; k++) { F.skipStory(); frames(2); }
 // 破境之物齐了：地火之屋不替玩家做主，先问「是否就此冲关」
 eq(F.info().state, 'dialog', '地火之屋打完先停在抉择（不直接宣布筑基）');
 const zjOpts = F.dialogState().choiceOpts || [];
-ok(zjOpts.some(t => t.indexOf('就此突破') >= 0), '地火之屋给出「就此突破 / 暂不突破」', zjOpts);
-eq(F.pickChoice('yes'), true, '选了「就此突破」');
+ok(zjOpts.some(t => t.indexOf('就此进阶') >= 0), '地火之屋给出「就此进阶 / 暂不进阶」', zjOpts);
+eq(F.pickChoice('yes'), true, '选了「就此进阶」');
 frames(4);
 for (let k = 0; k < 30; k++) { F.skipStory(); frames(6); }
 ok(F.info().unlocked.includes('yanjia'), '打通筑基闭关 → 燕家堡显现');

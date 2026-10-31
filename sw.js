@@ -6,7 +6,7 @@
 // 机制：拦截顶层导航（index.html）请求，给 URL 追加 ?_sw=<BUILD> 缓存破坏参数，
 //       让中间代理按「全新地址」回源取最新 index.html。
 //       每次发版时同步修改下方 BUILD 与 index.html 里的 ?v= 与 sw.js?v= 三者。
-const BUILD = '20261030l'; // 与 index.html 的 ?v= 同步 bump
+const BUILD = '20261031a'; // 与 index.html 的 ?v= 同步 bump
 
 self.addEventListener('install', () => {
   self.skipWaiting(); // 新 SW 直接激活，不等旧页面关闭

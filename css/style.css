@@ -171,20 +171,22 @@ body.fs #wrap { background: #000; }
 .brk-row.ok { border-color: rgba(111,224,138,0.4); }
 .brk-row.ok i { background: var(--ok); }
 .brk-row.ok b { color: var(--ok); }
-/* 可点击的道具行：点一下看「去哪取」 */
+/* 可点击的道具行：点一下看「去哪取」（不挂问号，字底一道虚线当暗记） */
 .brk-row.click { cursor: pointer; transition: border-color .12s, background .12s; }
 .brk-row.click:hover { border-color: rgba(201,162,74,0.55); background: rgba(201,162,74,0.10); }
-.brk-row .brk-q { flex: none; width: 16px; height: 16px; line-height: 16px; text-align: center;
-  border-radius: 50%; background: rgba(201,162,74,0.85); color: #1a140a; font-style: normal;
-  font-size: 11px; font-weight: 700; margin-left: 2px; }
+.brk-row.click span { text-decoration: underline dotted rgba(201,162,74,0.4); text-underline-offset: 3px; }
 .brk-hint { color: rgba(201,162,74,0.8); font-size: var(--fs-micro); margin: 2px 0 0; }
-/* 突破道具「去哪取」提示卡 */
-.break-tip { position: fixed; left: 50%; bottom: 12%; transform: translateX(-50%);
-  max-width: min(540px, 88vw); background: rgba(18,14,9,0.97); border: 1px solid rgba(201,162,74,0.55);
-  border-radius: var(--r-md); padding: 10px 14px; box-shadow: 0 8px 26px rgba(0,0,0,0.55);
-  z-index: 60; font-size: var(--fs-cap); line-height: 1.6; pointer-events: none; }
-.break-tip b { color: var(--accent); margin-right: 6px; }
-.break-tip span { color: var(--text-2); }
+/* 道具「去哪取」提示卡：进阶清单与炼丹材料共用 */
+.item-tip { background: rgba(18,14,9,0.97); border: 1px solid rgba(201,162,74,0.5);
+  border-radius: var(--r-md); padding: 8px 12px; font-size: var(--fs-cap);
+  line-height: 1.55; pointer-events: none; }
+.item-tip b { display: block; color: var(--accent); margin-bottom: 3px; letter-spacing: .5px; }
+.item-tip span { color: var(--text-2); }
+/* 就地展开：贴在点过的那一行下面，不遮列表也不盖按钮 */
+.item-tip.inline { margin: 0 0 6px; border-left: 2px solid var(--accent); }
+/* 兜底：没有落点就浮在底部 */
+.item-tip.float { position: fixed; left: 50%; bottom: 9%; transform: translateX(-50%);
+  width: max-content; max-width: min(460px, 88vw); box-shadow: 0 8px 26px rgba(0,0,0,0.55); z-index: 60; }
 .cave-sec2 { margin: 8px 0; padding-top: 8px; border-top: 1px dashed rgba(201,162,74,0.22); }
 /* 内容型面板（标题 / 暂停 / 道陨 / 通关 / 升级）：高度贴合内容，垂直居中 */
 .panel { width: 100%; max-width: 460px; background: linear-gradient(180deg,var(--bg-panel-a),var(--bg-panel-b)); border: 1px solid var(--line-gold); border-radius: var(--r-lg); padding: var(--sp-5); box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
@@ -552,6 +554,9 @@ body.fs #wrap { background: #000; }
 .mat.ok { color: var(--ok); border-color: rgba(159,224,192,0.45); }
 .mat.stone { color: var(--accent); border-color: rgba(255,210,74,0.3); }
 .mat.stone.ok { color: var(--accent); border-color: rgba(255,210,74,0.6); }
+/* 可点的料名：点一下写它去哪儿取 */
+.mat.clk { cursor: pointer; transition: border-color .12s, background .12s; }
+.mat.clk:hover { background: rgba(201,162,74,0.16); border-color: rgba(201,162,74,0.6); }
 .rr-right { flex: 0 0 auto; }
 
 .restbox { display: flex; flex-direction: column; gap: var(--sp-2); }
