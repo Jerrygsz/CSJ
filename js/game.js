@@ -1675,6 +1675,10 @@
     const st = b.stones || 0;
     if ((save.stones || 0) < st) miss.push({ kind: 'stone', need: st, have: save.stones || 0 });
     for (const s of (b.story || [])) {
+      // 破境剧情图自身不算「前置」：这道门就落在它里面，没打通它当然没 cleared。
+      // 只要这张图已经解锁（人进得去），就不该被算成「还差一样」把人拦在洞府门口
+      // （地火之屋、云梦山结婴、芥子空间这几道门都是这种形状）。
+      if ((save.unlocked || []).indexOf(s.id) >= 0) continue;
       if ((save.cleared || []).indexOf(s.id) < 0) miss.push({ kind: 'story', id: s.id, name: s.name });
     }
     return miss;
@@ -4711,6 +4715,8 @@
     G.breakHinted = false;   // 瓶颈弹幕每图只提一次
     G.minorHint = 0;         // 小境界关口弹幕也每图只提一次
     G.victoryNote = '';
+    G.victoryTitle = '';     // 结局标题/描述的临时覆盖（破境图分三种结局：石门未闭 / 冲关失败 / 成了）
+    G.victoryDesc = '';
     G.woundedNote = '';
     G.npcs = []; G.encT = 8;
     // 自动战斗只管这一趟：进新图一律复位，得重新点一次（「到结算为止」的边界就在这儿）
@@ -4909,7 +4915,9 @@
 
     if (m.type === 'story') {
       G.state = 'dialog';
-      showLines(MAP_STORIES[id], () => onStoryMapDone(m), 'map:' + id);
+      // 破境剧情图（闭府结丹 / 云梦山结婴…）的开场要按「门开不开得了」分流：
+      // 物事没备齐，就不能演「丹成」那一版，否则对话说成了、结算却说没成（自相矛盾）。
+      showLines(storyLinesOf(m, id), () => onStoryMapDone(m), 'map:' + id);
       return;
     }
     if (m.type === 'market') {
@@ -4954,6 +4962,30 @@
 
   function onStoryMapDone(m) {
     finishMap(m);
+  }
+  // 破境剧情图的开场台词：备齐了演正剧（jiedan），没备齐演「点检行囊、石门不落」（jiedan_lock）。
+  // 判定口径与破境门完全一致（修为 + 丹药 + 主药 + 灵石），不另立一套标准。
+  // 没写专属 lock 台词的破境图（灵界 / 仙界那几张）走中性兜底 —— 宁可少说一句，也绝不能
+  // 让「料都没齐」的开场先替玩家把「成了」说出口。
+  function storyKeyOf(m, id) {
+    if (!m || !m.endLevel) return id;
+    const g = breakReqFor(m.endLevel);
+    if (!g) return id;
+    const lockKey = id + '_lock';
+    if (!MAP_STORIES[lockKey]) return id;
+    return breakReadyNow(g) ? id : lockKey;
+  }
+  function storyLinesOf(m, id) {
+    if (!m || !m.endLevel) return MAP_STORIES[id];
+    const g = breakReqFor(m.endLevel);
+    if (!g || breakReadyNow(g)) return MAP_STORIES[storyKeyOf(m, id)];
+    const lock = MAP_STORIES[id + '_lock'];
+    if (lock) return lock;
+    return [
+      ['旁白', '他把该备的东西在石台上又点了一遍。'],
+      ['韩立', '（还差着。' + (g.from || '') + ' → ' + (g.realm || '') + '，这一步不能这么走。）'],
+      ['旁白', '东西一样样收了回去，他转身退回原处。']
+    ];
   }
   function startOutro() {
     const m = G.map; if (!m) return;
@@ -5179,6 +5211,9 @@
     if (blocked) {
       G.breakPending = breakGate;
       save.mapId = m.id;
+      // 关没闭成：结局标题不能还写「结丹已成」。图里配了专用文案就用，没配则给中性兜底。
+      G.victoryTitle = m.clearTitleLock || (m.name + ' · 未了');
+      G.victoryDesc = m.clearDescLock || '这一趟没走到那一步 —— 该备的还没备齐。';
       writeSave();
       showVictory(m, gained, null, cave, newDiff, realmUp);
       return;
@@ -5193,11 +5228,30 @@
     // 冲关演出 → 成则破境并解锁下一图；败则丹药散尽、原地再来
     writeSave();
     breakSceneThen(breakGate, (g, ok) => {
-      let newly = null;
-      if (ok) { newly = unlockNext(m); save.mapId = m.next || m.id; }
-      else { G.breakPending = g; save.mapId = m.id; G.victoryNote = '冲关失败 · 丹药散尽，另备丹药再来此图'; }
-      writeSave();
-      showVictory(m, gained, newly, cave, newDiff, ok ? realmName(g.lv) : null);
+      // 先诚实地把这一炉的结果说完，再进结算界面。
+      // 结丹：结成了播 jiedan_win，散了播 jiedan_fail（第386章两种都有）；没配结尾台的图照旧直接结算。
+      const after = () => {
+        let newly = null;
+        if (ok) {
+          newly = unlockNext(m); save.mapId = m.next || m.id;
+          // 有专属结局台词的图（结丹），结局已经说清了，别再叠一句「持丹 1 枚 · 把握五成」的旁注
+          if (MAP_STORIES[m.id + '_win']) G.victoryNote = '';
+        } else {
+          G.breakPending = g; save.mapId = m.id;
+          // 冲关未成：标题同样不许留「已成」。配了专用文案就用，没配则给中性兜底。
+          G.victoryTitle = m.clearTitleFail || (m.name + ' · 冲关未成');
+          G.victoryDesc = m.clearDescFail || '这一炉没成。';
+          // 失败时更不能留着「破境之物已齐 · 就地冲关」那句 —— 刚才那一炉已经散了
+          G.victoryNote = m.clearTitleFail ? '' : '冲关失败 · 丹药散尽，另备丹药再来此图';
+        }
+        writeSave();
+        showVictory(m, gained, newly, cave, newDiff, ok ? realmName(g.lv) : null);
+      };
+      const tail = MAP_STORIES[m.id + (ok ? '_win' : '_fail')];
+      if (tail && tail.length) {
+        G.state = 'dialog';
+        showLines(tail, after, 'break:' + m.id + ':' + (ok ? 'win' : 'fail'));
+      } else after();
     });
   }
   function showVictory(m, gained, newly, cave, newDiff, realmUp) {
@@ -5206,14 +5260,19 @@
     // 双人联机：房主通关 = 共享胜利，把战果（击杀/时长）广播给客机，让双方结算界面一致
     if (G.coopRole === 'host' && window.Coop && !G._endSent) { G._endSent = true; window.Coop.sendEnd('win'); }
     Sfx.win();
-    if (elVictoryTitle) elVictoryTitle.textContent = m.clearTitle || (m.name + ' · 已了');
+    // 破境图有三种结局（石门未闭 / 冲关未成 / 成了），标题与描述按实际结果走，不搞一律「已成」
+    const vTitle = G.victoryTitle || m.clearTitle || (m.name + ' · 已了');
+    const vDesc = G.victoryDesc || m.clearDesc || '所得已入储物袋。';
+    if (elVictoryTitle) elVictoryTitle.textContent = vTitle;
     if (elVictoryDesc) {
-      const base = m.clearDesc || '所得已入储物袋。';
-      const pruneNote = (G.lastPrune && G.lastPrune.cut > 0) ? '　功法已敛 · 只留三门最精' : '';
+      const base = vDesc;
+      // 剧情图 / 坊市没有「打完一场收功法」这回事，别把注脚塞进结局文气里
+      const pruneNote = ((m.type === 'story' || m.type === 'market') ? '' : ((G.lastPrune && G.lastPrune.cut > 0) ? '　功法已敛 · 只留三门最精' : ''));
       const bn = G.victoryNote ? ('　' + G.victoryNote) : '';
       const wn = G.woundedNote ? ('　' + G.woundedNote) : '';
       elVictoryDesc.textContent = (realmUp ? ('境界已进 · ' + realmUp + '　') : '') + base + pruneNote + bn + wn;
     }
+    G.victoryTitle = ''; G.victoryDesc = '';   // 一张图一套结局，用过即清，别带到下一张
     if (elVictoryStats) elVictoryStats.style.display = (m.type === 'story' || m.type === 'market') ? 'none' : 'flex';
     elVTime.textContent = fmtTime(G.time); elVKills.textContent = G.kills; elVLevel.textContent = realmName(G.player.level);
     renderVictoryLoot(gained, newly, cave, newDiff);
