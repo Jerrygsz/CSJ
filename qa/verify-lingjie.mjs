@@ -580,12 +580,37 @@ const buy = await page.evaluate(() => {
   const btn = [...document.querySelectorAll('#shopList button[data-buy]')].find(b => b.getAttribute('data-buy') === 'sk_baimai');
   if (!btn) return { ok: false, rows: document.querySelectorAll('#shopList .shoprow').length };
   btn.click();
-  const F = window.__FR;
-  return { ok: true, learned: !!(F.skillState().learned || {}).baimai, stones: F.info().stones };
+  return { ok: true, learned: !!(window.__FR.skillState().learned || {}).baimai, stones: window.__FR.info().stones };
 });
 ok(buy.ok, '「功法」柜里能点出百脉炼宝诀', buy);
-ok(buy.learned === true, '买下即习得百脉炼宝诀', buy);
-ok(buy.stones === 174000, '买功法扣灵石（200000−26000）', buy.stones);
+ok(buy.learned === false, '买法诀当时未自动习得（改入储物袋）', buy);
+ok(buy.stones === 174000, '买法诀扣灵石（200000−26000）', buy.stones);
+
+// 去洞府「功法」页：手册进「未习法诀·藏经」，点「学习」才习得，书留架上可重学
+await run(`F.cave('tycave');F.caveTab('skill');`);
+await page.waitForTimeout(200);
+const learnUI = await page.evaluate(() => {
+  const F = window.__FR;
+  const btn = [...document.querySelectorAll('#caveBody button[data-learn]')].find(b => b.getAttribute('data-learn') === 'sk_baimai');
+  if (!btn) return { hasBtn: false, learned: !!(F.skillState().learned || {}).baimai };
+  btn.click();
+  const kept = !!([...document.querySelectorAll('#caveBody button[data-discard]')].find(b => b.getAttribute('data-discard') === 'sk_baimai'));
+  return { hasBtn: true, learned: !!(F.skillState().learned || {}).baimai, kept };
+});
+ok(learnUI.hasBtn, '洞府「功法」页有「学习」按钮（未习法诀·藏经）', learnUI);
+ok(learnUI.learned === true, '洞府点「学习」→ 习得百脉炼宝诀', learnUI);
+ok(learnUI.kept, '研习后法诀手册仍在储物袋（书留架上，可重学）', learnUI);
+
+// 弃去手册：从储物袋移除，不影响已习得
+const discarded = await page.evaluate(() => {
+  const F = window.__FR;
+  const btn = [...document.querySelectorAll('#caveBody button[data-discard]')].find(b => b.getAttribute('data-discard') === 'sk_baimai');
+  if (btn) btn.click();
+  const still = [...document.querySelectorAll('#caveBody button[data-discard],#caveBody button[data-learn]')].find(b => (b.getAttribute('data-discard')||b.getAttribute('data-learn')) === 'sk_baimai');
+  return { gone: !still, learned: !!(F.skillState().learned || {}).baimai };
+});
+ok(discarded.gone, '「弃」后法诀手册移出储物袋', discarded);
+ok(discarded.learned === true, '弃手册不影响已习得状态', discarded);
 
 // 5c-补①：化神初期（低于门槛）时，坊市显示百脉炼宝诀「需化神后期」而非「需炼虚初期」
 await run(`F.clearProgress();F.setLevel(112);F.setStones(200000);F.unlockAll();F.enterMap('tianyuan');`);
@@ -600,20 +625,18 @@ const disp = await page.evaluate(() => {
 });
 ok(/需化神后期/.test(disp) && !/炼虚/.test(disp), '化神初期看百脉炼宝诀：显示「需化神后期」（非「需炼虚初期」）', disp);
 
-// 5c-补②：化神后期（lv140）即可买下并习得，解除「炼虚要百脉、百脉要炼虚」死锁（V8C1351 韩立化神期得之）
+// 5c-补②：化神后期（lv140）买→洞府研习→炼虚关(需百脉)齐备，死锁解除（V8C1351 韩立化神期得之）
 await run(`F.clearProgress();F.setLevel(140);F.setStones(200000);F.unlockAll();F.enterMap('tianyuan');`);
 await page.waitForTimeout(300);
 await run(`for(let i=0;i<30;i++){F.skipStory();}`);
 await page.waitForTimeout(200);
 await page.evaluate(() => { const b=[...document.querySelectorAll('#shopCats button')].find(x=>x.textContent==='功法'); if(b)b.click(); });
 await page.waitForTimeout(200);
-const buyHS = await page.evaluate(() => {
-  const F = window.__FR;
-  const btn = [...document.querySelectorAll('#shopList button[data-buy]')].find(b => b.getAttribute('data-buy')==='sk_baimai');
-  if (btn) btn.click();
-  return { learned: !!(F.skillState().learned||{}).baimai, stones: F.info().stones };
-});
-ok(buyHS.learned === true, '化神后期（lv140）可买下并习得百脉炼宝诀（死锁解除）', buyHS);
+await page.evaluate(() => { const btn=[...document.querySelectorAll('#shopList button[data-buy]')].find(b=>b.getAttribute('data-buy')==='sk_baimai'); if(btn) btn.click(); });
+await run(`F.cave('tycave');F.caveTab('skill');`);
+await page.waitForTimeout(150);
+await page.evaluate(() => { const btn=[...document.querySelectorAll('#caveBody button[data-learn]')].find(b=>b.getAttribute('data-learn')==='sk_baimai'); if(btn) btn.click(); });
+ok(await page.evaluate(() => !!(window.__FR.skillState().learned||{}).baimai), '化神后期（lv140）买+研习→习得百脉炼宝诀（死锁解除）');
 
 // ---- 5d) 掉落池按 arc 分段：灵界不掉人界低阶成品 ----
 const L1 = await page.evaluate(() => {

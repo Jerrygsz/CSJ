@@ -6030,6 +6030,26 @@
         '<div class="rr-right"><button class="sr-btn' + (on ? ' ghost' : ' buy') + '" data-skill="' + s.id + '">' +
         (on ? '卸下' : '运起') + '</button></div></div>';
     }
+    // 未习法诀（藏经）：储物袋里的法诀，点「学习」才记入已习得；书留架上，日后被清可重学
+    const manualItems = (window.ALL_ITEMS || []).filter(it => it.teach && (save.inventory[it.id] || 0) > 0);
+    if (manualItems.length) {
+      html += '<div class="cave-sec"><div class="cs-title">未习法诀（藏经）</div>' +
+        '<div class="cs-note">袋里这些法诀还没研习。点「学习」才记入已习得；研习后书仍留架上，' +
+        '日后若被清掉，回来翻一翻便能重学。也可在储物袋里「化开」立刻学，只是那本会化没。</div>';
+      for (const it of manualItems) {
+        const tid = it.teach;
+        const d = window.skillById ? window.skillById(tid) : null;
+        const learned = !!(c.skills[tid]);
+        const okLv = d && lv >= (d.minLv || 1);
+        html += '<div class="recrow">' +
+          '<div class="rr-main"><b>' + ico(it.icon) + (d ? d.name : it.name) + (learned ? '　· 已习' : '') + '</b>' +
+          '<em>' + (d ? d.desc : it.desc) + (okLv ? '' : '　· 境界不足，学了也运不起') + '</em></div>' +
+          '<div class="rr-right">' + (learned
+            ? '<button class="sr-btn ghost" data-discard="' + it.id + '">弃</button>'
+            : '<button class="sr-btn buy" data-learn="' + it.id + '">学习</button>') + '</div></div>';
+      }
+      html += '</div>';
+    }
     if (!any) html += '<div class="cs-empty">一门都还没学过。</div>';
     html += '</div>';
     return html;
@@ -6273,7 +6293,7 @@
     if (b.skill) {
       const learned = !!((cultObj().skills || {})[b.skill]);
       const sk = window.skillById ? window.skillById(b.skill) : null;
-      h += breakRow(learned, '功', (sk ? sk.name : b.skill) + (learned ? '（已习）' : '（须先习得 · 天渊坊市）'), 'sk_' + b.skill);
+      h += breakRow(learned, '功', (sk ? sk.name : b.skill) + (learned ? '（已习）' : '（须先习得 · 天渊坊市购法诀·洞府研习）'), 'sk_' + b.skill);
     }
     for (const s of (b.story || [])) {
       const ok = (save.cleared || []).indexOf(s.id) >= 0;
@@ -6331,7 +6351,7 @@
     if (b.skill) {
       const learned = !!((cultObj().skills || {})[b.skill]);
       const sk = window.skillById ? window.skillById(b.skill) : null;
-      html += breakRow(learned, '功', (sk ? sk.name : b.skill) + (learned ? '（已习）' : '（须先习得 · 天渊坊市）'), 'sk_' + b.skill);
+      html += breakRow(learned, '功', (sk ? sk.name : b.skill) + (learned ? '（已习）' : '（须先习得 · 天渊坊市购法诀·洞府研习）'), 'sk_' + b.skill);
     }
     for (const s of (b.story || [])) {
       const done = (save.cleared || []).indexOf(s.id) >= 0;
@@ -6411,6 +6431,8 @@
         bits.push('可自炼：' + kd.name + '「' + rec.name + '」');
       }
       out = bits.length ? bits.join(' · ') : '暂无定处 · 寻常打不着，须另寻机缘';
+    const _ti = Items.get(id);
+    if (_ti && _ti.teach) out += '　·　法诀：购 / 得后至洞府「功法」页点「学习」方才习得（书留架上，日后被清可重学）';
     }
     ITEM_HINT_CACHE[id] = out;
     return out;
@@ -6894,8 +6916,8 @@
     const lv = Math.max(save.cultivate.level || 1, save.best.level || 1);
     // 提示按「玩家最该先知道的那条」排：已学过 → 境界 → 灵石
     // 这三句原先都有，但按钮是 disabled，浏览器根本不发点击事件，于是全成了死代码。
-    if (it.teach && (cultObj().skills || {})[it.teach]) {
-      notify('这门已学过 · 去洞府「功法」页运起');
+    if (it.teach && ((cultObj().skills || {})[it.teach] || (save.inventory[it.id] || 0) > 0)) {
+      notify('这门已在册 · 去洞府「功法」页研习 / 重学');
       Sfx.warn(); return;
     }
     if (it.req && lv < reqLv(it.req)) { notify('境界不足 · 需' + realmName(it.req)); Sfx.warn(); return; }
@@ -6903,11 +6925,13 @@
       notify('灵石不足 · 还差 ' + (s.price - (save.stones || 0)));
       Sfx.warn(); return;
     }
-    // 法诀买回去就化了：学会一门功法，不入储物袋
+    // 法诀买回去是「手册」：入储物袋，去洞府「功法」页点「学习」才习得（书留架上，被清可重学）
     if (it.teach) {
       save.stones -= s.price;
-      learnSkill(it.teach);
+      addToBag(it, { silent: true });
       writeSave(); renderShop(); refreshTitle();
+      notify('买入 · ' + it.name + '（储物袋 · 至洞府「功法」研习）');
+      Sfx.buff();
       return;
     }
     save.stones -= s.price;
@@ -7569,6 +7593,33 @@
       renderCave();
       return;
     }
+    // 未习法诀：洞府「功法」页点「学习」才习得（书留架上，被清可重学）
+    // 注：研习只做「登记已习得」，不卡 minLv（minLv 只限运起/使用），避免「要学才能破境、要到破境后才能学」的循环死锁
+    const lb = e.target.closest('button[data-learn]');
+    if (lb) {
+      const id = lb.getAttribute('data-learn');
+      const it = Items.get(id);
+      if (it && it.teach) {
+        const d = window.skillById ? window.skillById(it.teach) : null;
+        const okLv = learnSkill(it.teach);
+        notify(okLv ? ('研习 · ' + (d ? d.name : it.teach) + '（书留架上）') : '这门已学过');
+      }
+      renderCave(); refreshTitle();
+      return;
+    }
+    // 藏经：弃去已习的法诀手册（不再占用储物袋）
+    const dbg = e.target.closest('button[data-discard]');
+    if (dbg) {
+      const id = dbg.getAttribute('data-discard');
+      save.inventory[id] = (save.inventory[id] || 0) - 1;
+      if (save.inventory[id] <= 0) delete save.inventory[id];
+      save.totalItems = Math.max(0, (save.totalItems || 1) - 1);
+      const it = Items.get(id);
+      notify('弃去 · ' + (it ? it.name : id)); Sfx.warn();
+      writeSave();
+      renderCave(); refreshTitle();
+      return;
+    }
     // 灵宠：放出 / 收回
     const pb = e.target.closest('button[data-pet]');
     if (pb) { setPet(pb.getAttribute('data-pet')); return; }
@@ -7849,6 +7900,7 @@
     save.petFeed = { on: false, t: 0 };
     save.greenLiquid = 0; save.ach = {};
     save.wounded = null;      // 存档重来：修为受创一并清掉
+    G.breakCaveId = null; G.breakPending = null;  // 清掉过图会话态：避免重生后误吃原著洞府 +30%
     save.gift_zhuji = false;
     save.repBlack = 0; save.repWhite = 0; save.identity = 'han'; save.liUnlocked = false;
     if (G.player) { resetRunBonus(); G.gear = {}; G.runLoot = []; }
