@@ -314,6 +314,19 @@
     writeSave();
   })();
 
+  // 老存档：灵界「炼虚→合体」这一段按原著补了火瑚群岛、魔金山脉两张图，
+  // 并把广寒界之后那一关挪到了元合岛。已经打到后头的存档不该被新图卡在门口：
+  // 只要后继图已经开着或已经通关，就先把本图解出来（对正常存档是空操作）。
+  (function backfillLingjieChain() {
+    const cl = save.cleared || [], un = save.unlocked || [];
+    let changed = false;
+    for (const m of (window.MAPS || [])) {
+      if (!m.next || un.indexOf(m.id) >= 0) continue;
+      if (cl.indexOf(m.next) >= 0 || un.indexOf(m.next) >= 0) { un.push(m.id); changed = true; }
+    }
+    if (changed) writeSave();
+  })();
+
   // ---------- 游戏状态 ----------
   const G = {
     state: 'title',

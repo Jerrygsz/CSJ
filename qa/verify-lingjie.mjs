@@ -34,18 +34,19 @@ await page.waitForTimeout(1200);
 const run = (body) => page.evaluate(`(()=>{const F=window.__FR;${body}})()`);
 
 // ---- 1) 地图存在与 chain ----
-const ALL_IDS = ['anyuan', 'tianyuan', 'heifeng', 'lianxu', 'fengyuan', 'shisan', 'guanghan', 'heti_guan',
+const ALL_IDS = ['anyuan', 'tianyuan', 'heifeng', 'lianxu', 'fengyuan', 'huohu', 'shisan', 'mojin', 'guanghan', 'heti_guan',
   'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling',
   'modajie', 'sanjie', 'jiujie', 'qunqiang', 'xianshi', 'zhenxian', 'zhangtianping', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie'];
 const maps = await page.evaluate((ids) => window.MAPS.filter(m => ids.includes(m.id))
   .map(m => ({ id: m.id, type: m.type, unlock: m.unlock, next: m.next, startLevel: m.startLevel, endLevel: m.endLevel })), ALL_IDS);
-ok(maps.length === 29, '灵界二十九张主线图已注册', maps);
+ok(maps.length === 31, '灵界三十一张主线图已注册', maps);
 const chain = await page.evaluate((ids) => {
   const g = id => window.MAPS.find(m => m.id === id) || {};
   const o = { fs: g('feisheng').next };
   for (const id of ids) o[id] = g(id);
   o.ay = g('anyuan'); o.hf = g('heifeng'); o.lx = g('lianxu');
-  o.fy = g('fengyuan'); o.gh = g('guanghan'); o.hg = g('heti_guan');
+  o.fy = g('fengyuan'); o.hu = g('huohu'); o.ss = g('shisan'); o.mj = g('mojin');
+  o.gh = g('guanghan'); o.hg = g('heti_guan');
   return o;
 }, ALL_IDS);
 ok(chain.fs === 'anyuan', '飞升图 next 已接安远城', chain.fs);
@@ -53,9 +54,12 @@ ok(chain.ay.unlock === 'feisheng' && chain.ay.next === 'tianyuan', '安远城 un
 ok(chain.hf.unlock === 'tianyuan' && chain.hf.next === 'lianxu', '黑凤族 unlock=天渊坊市 / next=炼虚关', chain.hf);
 ok(chain.lx && chain.lx.unlock === 'heifeng', '炼虚关 unlock=黑凤族', chain.lx);
 ok(chain.lx && chain.lx.endLevel === 150, '破境图 lianxu 的 endLevel=150（洞府突破可反查）', chain.lx);
-ok(chain.lx && chain.lx.next === 'fengyuan', '炼虚关 next=风元大陆', chain.lx);
-ok(chain.fy && chain.fy.next === 'shisan', '风元大陆 next=十三族会盟', chain.fy);
-ok(chain.gh && chain.gh.unlock === 'shisan' && chain.gh.next === 'heti_guan', '广寒界 unlock=十三族会盟 / next=合体关', chain.gh);
+ok(chain.lx && chain.lx.next === 'fengyuan', '炼虚关 next=黑隐山脉', chain.lx);
+ok(chain.fy && chain.fy.next === 'huohu', '黑隐山脉 next=火瑚群岛（玄天之争后被空间裂缝抛去雷鸣海域）', chain.fy);
+ok(chain.hu && chain.hu.unlock === 'fengyuan' && chain.hu.next === 'shisan', '火瑚群岛 unlock=黑隐山脉 / next=天云十三族', chain.hu);
+ok(chain.ss && chain.ss.unlock === 'huohu' && chain.ss.next === 'mojin', '天云十三族 unlock=火瑚群岛 / next=魔金山脉', chain.ss);
+ok(chain.mj && chain.mj.unlock === 'shisan' && chain.mj.next === 'guanghan', '魔金山脉 unlock=天云十三族 / next=广寒界', chain.mj);
+ok(chain.gh && chain.gh.unlock === 'mojin' && chain.gh.next === 'heti_guan', '广寒界 unlock=魔金山脉 / next=合体关', chain.gh);
 ok(chain.hg && chain.hg.unlock === 'guanghan', '合体关 unlock=广寒界', chain.hg);
 ok(chain.hg && chain.hg.endLevel === 200, '破境图 heti_guan 的 endLevel=200（洞府突破可反查）', chain.hg);
 
@@ -112,7 +116,7 @@ const b200 = await page.evaluate(() => {
 });
 ok(!!b200, 'BREAKTHROUGH 含 lv200', b200);
 ok(b200 && b200.realm === '合体初期', 'lv200 = 合体初期', b200 && b200.realm);
-ok(b200 && b200.items && b200.items[0] && b200.items[0][0] === 'heti', '合体关需要合体丹', b200 && b200.items);
+ok(b200 && b200.items && b200.items[0] && b200.items[0][0] === 'heti', '合体关需要万妙丹（广寒界玉台所得）', b200 && b200.items);
 ok(b200 && b200.mats && b200.mats[0] && b200.mats[0][0] === 'm_zhenlingxue', '合体关需要真灵之血', b200 && b200.mats);
 ok(b200 && b200.story && b200.story[0] && b200.story[0].id === 'guanghan', '合体关需已通广寒界', b200 && b200.story);
 
@@ -198,7 +202,7 @@ const i3 = await page.evaluate(() => window.__FR.info());
 ok(i3.mapId === 'lianxu', '可进入炼虚破境图', i3.mapId);
 ok(i3.state === 'dialog', '炼虚关开场对白已播', i3.state);
 
-for (const mid of ['tianyuan', 'fengyuan', 'shisan', 'guanghan', 'heti_guan',
+for (const mid of ['tianyuan', 'fengyuan', 'huohu', 'shisan', 'mojin', 'guanghan', 'heti_guan',
   'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling',
   'modajie', 'sanjie', 'jiujie', 'qunqiang', 'xianshi', 'zhenxian', 'zhangtianping', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie']) {
   await run(`F.clearProgress();F.setLevel(419);F.god(true);F.enterMap('${mid}');`);
@@ -304,7 +308,7 @@ ok(!!MDJ.boss, '魔界大劫首领能刷出来', MDJ.boss);
 ok(MDJ.cleared, '魔界大劫能打通并记入已通关', { cleared: MDJ.cleared });
 ok(MDJ.unlockedNext, '打通魔界大劫 → 三劫显现', { unlockedNext: MDJ.unlockedNext });
 
-// ---- 5b·3) 十三族会盟（V9C1434/1562/1673，无战斗的政治图） ----
+// ---- 5b·3) 天云十三族（韩立 1463 岁入雷鸣大陆，广寒令；无战斗的市井图） ----
 const SSN = await page.evaluate(() => {
   const W = window, F = W.__FR;
   const m = W.MAPS.find(x => x.id === 'shisan') || {};
@@ -314,22 +318,22 @@ const SSN = await page.evaluate(() => {
   const state0 = F.info().state;
   for (let k = 0; k < 20; k++) { F.skipStory(); F.tickFrames(2); }
   return {
-    type: m.type, pos: m.pos, unlock: m.unlock, next: m.next, boss: !!m.boss,
+    type: m.type, name: m.name, pos: m.pos, unlock: m.unlock, next: m.next, boss: !!m.boss,
     lines: lines.length,
     speakers: [...new Set(lines.map(x => x[0]))],
     text: lines.map(x => x[1]).join(''),
     state0, cleared: F.info().cleared.indexOf('shisan') >= 0,
-    nextOpen: F.info().unlocked.indexOf('guanghan') >= 0
+    nextOpen: F.info().unlocked.indexOf('mojin') >= 0
   };
 });
-ok(SSN.type === 'story' && !SSN.boss, '十三族会盟是无战斗的剧情图（会盟不是打架）', SSN);
-ok(SSN.pos === '灵界·玉皇顶' && SSN.unlock === 'fengyuan' && SSN.next === 'guanghan',
-  '会盟串在风元大陆与广寒界之间（V9C1434 玉皇顶）', SSN);
-ok(SSN.lines >= 12, '会盟对白够一段（13 行）', SSN.lines);
-ok(SSN.speakers.indexOf('沙老夫人') >= 0, '大乘沙老夫人登场（V9C1673）', SSN.speakers);
-ok(/渡劫/.test(SSN.text) && /大乘/.test(SSN.text), '会盟点出「大乘之上还有渡劫」这条线索', SSN.text.slice(-40));
-ok(SSN.state0 === 'dialog', '进场即播会盟对白', SSN.state0);
-ok(SSN.cleared && SSN.nextOpen, '走完会盟 → 通关并开出广寒界', { cleared: SSN.cleared, nextOpen: SSN.nextOpen });
+ok(SSN.type === 'story' && !SSN.boss, '天云十三族是无战斗的市井图（原著这一段是买甲、遇人、得令）', SSN);
+ok(SSN.name === '天云十三族' && SSN.pos === '灵界·雷鸣大陆 天云城' && SSN.unlock === 'huohu' && SSN.next === 'mojin',
+  '天云十三族串在火瑚群岛与魔金山脉之间（雷鸣大陆）', SSN);
+ok(SSN.lines >= 8, '天云城对白够一段（9 行）', SSN.lines);
+ok(SSN.speakers.indexOf('摊主') >= 0, '天云城旧货摊主登场（卖破损天外魔甲）', SSN.speakers);
+ok(/广寒令/.test(SSN.text), '在城里无意激发广寒令（进广寒界的由来）', SSN.text.slice(-40));
+ok(SSN.state0 === 'dialog', '进场即播天云城对白', SSN.state0);
+ok(SSN.cleared && SSN.nextOpen, '走完天云城 → 通关并开出魔金山脉', { cleared: SSN.cleared, nextOpen: SSN.nextOpen });
 
 // ---- 5b·3·4) 群强之陨（V12C2423）+ 420 段成品池 ----
 const QQ = await page.evaluate(() => {
@@ -729,7 +733,8 @@ const CAVE = await page.evaluate(() => {
 });
 ok(CAVE.caves.every(c => c && c.crafts >= 2), '两座灵界洞府已建（天渊城洞府 / 小灵天洞府）', CAVE.caves);
 ok(CAVE.mapCave.liangzu === 'tycave' && CAVE.mapCave.xiaoling === 'xlcave', '洞府挂在对应剧情图上', CAVE.mapCave);
-ok(CAVE.br.filter(x => x.lv <= 420).every(x => x.cave && ['tycave', 'xlcave'].indexOf(x.cave) >= 0),
+// lv200 合体关按原著挪到了元合岛·青元宫（自雷鸣大陆跨大陆传送回风元大陆后闭关）
+ok(CAVE.br.filter(x => x.lv <= 420).every(x => x.cave && ['tycave', 'yuangong', 'xlcave'].indexOf(x.cave) >= 0),
   '五道灵界关都指到了洞府（不再吃不到 +30%）', CAVE.br.filter(x => x.lv <= 420));
 ok(CAVE.br.filter(x => x.lv > 420).every(x => !x.cave),
   '仙界关（460）不吃洞府 +30%：灵寰界没有原著洞府，韩立只是借住', CAVE.br.filter(x => x.lv > 420));

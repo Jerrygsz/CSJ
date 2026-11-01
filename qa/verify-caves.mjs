@@ -134,8 +134,10 @@ const GL = await page.evaluate(() => {
   }
   return out;
 });
-ok(GL.length === 5, '全库 5 块药圃：旧园 / 绿液区 / 小寰岛 / 落云宗 / 芥子空间', GL.map(x => x.cave + ':' + x.name));
-ok(GL.every(x => x.pool >= 4), '每块地都有 4 味以上药材', GL.filter(x => x.pool < 4));
+// 第六块是天渊城洞府的「灵界药圃」：基础品种为空，全靠移栽（见 verify-garden-transplant）
+ok(GL.length === 6, '全库 6 块药圃：旧园 / 绿液区 / 小寰岛 / 落云宗 / 芥子空间 / 灵界药圃', GL.map(x => x.cave + ':' + x.name));
+ok(GL.filter(x => x.id !== 'tygarden').every(x => x.pool >= 4), '旧有五块地各有 4 味以上药材', GL.filter(x => x.id !== 'tygarden' && x.pool < 4));
+ok(GL.some(x => x.id === 'tygarden' && x.pool === 0), '灵界药圃基础为空，只收移栽品种', GL.filter(x => x.id === 'tygarden'));
 const caveWithGarden = GL.map(x => x.cave).filter((v, i, a) => a.indexOf(v) === i);
 ok(['huangfeng', 'xiaohuan', 'luoyun', 'jiezi'].every(id => caveWithGarden.indexOf(id) >= 0),
   '有药园的洞府都挂上了（百药园草庐 / 小寰岛 / 落云宗 / 芥子空间）', caveWithGarden);
@@ -164,11 +166,13 @@ const grow = await page.evaluate(() => {
   const capd = F.gardenState();
   return { t10, capd };
 });
-const gids = Object.keys(grow.t10);
-ok(gids.length === 5, '五块地同时都在累计', gids);
+// 只算「有品种」的地：天渊城的灵界药圃要先移栽进灵药才长，空圃按设计不累计
+const gids = Object.keys(grow.t10).filter(id => (grow.t10[id].ids || []).length > 0);
+ok(gids.length === 5, '五块有种的地同时都在累计（空着的灵界药圃不算）', gids);
 ok(gids.every(id => grow.t10[id].charge >= 8 && grow.t10[id].charge <= 12),
   '待 10 秒，每块地各长 ~10 次（不是轮流长）', grow.t10);
 ok(gids.every(id => grow.capd[id].charge === 99), '打够时长后每块地各自封顶 99', grow.capd);
+ok(grow.t10.tygarden && grow.t10.tygarden.charge === 0, '空着的灵界药圃不白涨「已长成」', grow.t10.tygarden);
 
 // 采收分开：只收一块，另一块原封不动
 const sep = await page.evaluate(() => {
