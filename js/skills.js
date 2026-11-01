@@ -59,6 +59,7 @@ window.SKILLS = [
 
   // ============ 结丹期：乱星海 → 虚天殿 ============
   { id: 'jianfen', name: '剑影分光术', icon: '🗡️', max: 6, minLv: 56, type: 'ranged',
+    enlighten: true, prereq: 'qingyuan',   // 原著：青元剑诀第三层神通，可由青元剑诀顿悟进阶
     atk: { kind: 'beam', base: 6, perLv: 2.5, cd: 1.5, countBase: 2, countPerLv: 0.5, range: 460, spread: 0.26, pierceBase: 2, life: 1.3, vfx: 'swordarray' },
     desc: '青元剑诀第三层神通：一剑化数影，同出同归。剑影初成不过本体十之一二，修到九层才有三分之一，影多而每影皆轻' },
   { id: 'shayao', name: '煞妖诀', icon: '🦇', max: 6, minLv: 56, type: 'aura',
@@ -112,6 +113,7 @@ window.SKILLS = [
     atk: { kind: 'burst', base: 26, perLv: 9, cdBase: 4.2, cdPerLv: 0.25, cdMin: 2.6, radBase: 120, radPerLv: 16, range: 9999, vfx: 'soul' },
     desc: '大衍诀演出的神识杀招：一道神念凝成尖刺扎进识海，荡开的余波远近皆受' },
   { id: 'shishen', name: '失神刺', icon: '🔱', max: 7, minLv: 102, type: 'ranged',
+    enlighten: true, prereq: 'qinxian',   // 原著：参照惊神刺自创的简化版，可由惊神刺顿悟进阶
     atk: { kind: 'homing', base: 9, perLv: 4, cd: 2.6, countBase: 1, countPerLv: 0.34, range: 520, pierce: 1, life: 2.2, vfx: 'soul', stun: 0.65 },
     desc: '参照惊神刺自创的简化版：一缕神念扎进识海，人不伤，神先懵。一击之后自己也头晕，再无力补第二下' },
   { id: 'huashen', name: '身外化身', icon: '👥', max: 5, minLv: 110, type: 'passive',
@@ -136,6 +138,7 @@ window.SKILLS = [
     effect: { armor: 0.05, spd: 0.08 },
     desc: '换一副皮相行走：气息身形都能改。只是术一施开，一身法力只动得七成' },
   { id: 'fansheng', name: '梵圣真魔功', icon: '🕉️', max: 6, minLv: 112, type: 'passive',
+    enlighten: true, prereq: 'mingwang',  // 原著：明王诀走到尽头的模样，可由明王诀顿悟进阶
     effect: { armor: 0.06, maxhp: 110, dmg: 0.03 },
     desc: '明王诀走到尽头的模样：佛魔同体，肉身与法力一起压进骨头里' },
   { id: 'shadan', name: '煞丹术', icon: '🔴', max: 5, minLv: 112, type: 'passive',

@@ -3362,7 +3362,11 @@
       name: s.name + ' · ' + m.name, desc: '本局内永久生效' };
   }
   function optNewSkill() {
-    const pool = newSkills(); if (!pool.length) return optPassive();
+    // 顿悟能「悟」出的新神通，只能是：① 原著明言可不凭典籍自行参悟的功法；
+    // ② 在已习功法基础上、原著描述可顿悟进阶的功法（见 skills.js 的 enlighten / prereq 标注）。
+    // 没学过、又无原著铺垫的功法，绝不会莫名其妙顿悟出来。
+    const pool = newSkills().filter(s => s.enlighten && (!s.prereq || (G.player.skills[s.prereq] || 0) > 0));
+    if (!pool.length) return optPassive();
     const s = U.pick(pool);
     const passive = s.type === 'passive';
     return { key: 'B' + s.id, kind: 'B', id: s.id, icon: s.icon || '📜',
@@ -8543,7 +8547,7 @@
     // 3 分钟单局循环的调试口
     sha(n) { if (n != null) gainSha(n); return { v: G.sha ? G.sha.v : 0, need: G.sha ? G.sha.need : 0, pending: (G.sha && G.sha.pending) || 0, dmgT: (G.sha && G.sha.dmgT) || 0 }; },
     insight() { return JSON.parse(JSON.stringify(G.insight || {})); },
-    insightRoll() { return rollInsight().map(c => ({ kind: c.kind, name: c.name })); },
+    insightRoll() { return rollInsight().map(c => ({ kind: c.kind, name: c.name, id: c.id || null })); },
     insightAuto() {
       if (G.state !== 'levelup' || !G.cardsNow || !G.cardsNow.length) return false;
       const c = G.cardsNow[0];
