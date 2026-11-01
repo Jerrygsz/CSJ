@@ -42,7 +42,7 @@ const C = await page.evaluate(() => {
   const caveMaps = window.MAPS.filter(m => m.cave).map(m => ({ id: m.id, cave: m.cave, hasCave: !!window.CAVES[m.cave] }));
   return { list, caveMaps, total: list.length };
 });
-ok(C.total === 13, '洞府共 13 处（人界 8 + 灵界 3 + 仙界 2）', C.total);
+ok(C.total === 14, '洞府共 14 处（人界 9 + 灵界 3 + 仙界 2）', C.total);
 const badFrom = C.list.filter(c => !c.mapExists);
 ok(badFrom.length === 0, '每个洞府的 from 地图都存在', badFrom.map(x => x.id + '→' + x.from));
 const badBack = C.list.filter(c => !c.backRef);
@@ -53,11 +53,11 @@ const badNum = C.list.filter(c => !(c.cap > 0 && c.restStone > 0 && c.restXp > 0
 ok(badNum.length === 0, '洞府参数完整（cap/restStone/restXp/crafts）', badNum.map(x => x.id));
 
 console.log('\n【B · 分段覆盖】');
-const seg = id => (['qixuan','huangfeng','cuiping','xiaohuan','qingzhuxuan','luoyun','foxin','jiezi'].includes(id) ? '人界'
+const seg = id => (['qixuan','huangfeng','cuiping','xiaohuan','xingcheng','qingzhuxuan','luoyun','foxin','jiezi'].includes(id) ? '人界'
   : ['tycave','yuangong','xlcave'].includes(id) ? '灵界' : '仙界');
 const cnt = { 人界: 0, 灵界: 0, 仙界: 0 };
 for (const c of C.list) cnt[seg(c.id)]++;
-ok(cnt['人界'] === 8, '人界 8 处洞府', cnt['人界']);
+ok(cnt['人界'] === 9, '人界 9 处洞府（百药园 / 内门 / 小寰岛 / 天星城租洞 / 青竹小轩 / 落云宗 / 丰心谷 / 芥子空间 + 起始）', cnt['人界']);
 ok(cnt['灵界'] === 3, '灵界 3 处洞府（天渊城 / 元合岛·青元宫 / 小灵天）', cnt['灵界']);
 ok(cnt['仙界'] === 2, '仙界 2 处洞府（花枝洞天 / 乌蒙岛小院）', cnt['仙界']);
 const yg = C.list.find(c => c.id === 'yuangong');

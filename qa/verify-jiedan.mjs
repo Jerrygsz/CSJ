@@ -139,7 +139,7 @@ ok(vC.title.indexOf('结丹已成') >= 0, '结算标题是「结丹已成」', v
 ok(vC.cult === 56, '境界落到 56（结丹初期）', vC.cult);
 ok(vC.realm === '结丹初期', '境界名「结丹初期」', vC.realm);
 const un = await page.evaluate(() => (window.__FR.save.read() ? JSON.parse(window.__FR.save.read()).unlocked : []));
-ok((un || []).indexOf('xutian') >= 0, '虚天殿已解锁', un);
+ok((un || []).indexOf('miaoyin') >= 0, '结丹之后接的是妙音门（天雷竹），虚天殿还要再走三段', un);
 await page.screenshot({ path: join(here, 'shot-jiedan-win.png') });
 
 // ---------- ④ 结婴：料不齐也不许演「元婴」 ----------

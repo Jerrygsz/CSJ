@@ -228,8 +228,10 @@ let r6 = await E(`(() => {
 // 六连殿 → 海猿岛 → 天星城 → 凝翠岛 → 闭府结丹 → 虚天殿 → 外星海 → 阴冥之地 → 无边海 →
 // 落云宗 → 结婴 → 掩月宗 → 黄龙山 → 慕兰 → 极西之地 → 坠魔谷 → 灵渺园 → 大晋 → 昆吾山 →
 // 镇魔塔 → 小极宫 → 虚天殿闭关 → 星宫 → 鲲鹏 → 天澜圣兽 → 斩六道 → 芥子空间 → 飞升
-const want6 = ['qixuan', 'houshan', 'mishi', 'tainan', 'huangfeng', 'yaoyuan', 'xuese', 'zhuji', 'yanjia', 'jingu',
-  'guchuan', 'kuixing', 'liulian', 'haian', 'tianxing', 'ningcui', 'jiedan', 'xutian', 'waihai', 'yinming',
+const want6 = ['qixuan', 'houshan', 'mishi', 'yelang', 'jiayuan', 'tainan', 'huangfeng', 'yaoyuan', 'xuese', 'zhuji',
+  'yanjia', 'jingu',
+  'guchuan', 'kuixing', 'liulian', 'haian', 'tianxing', 'ningcui', 'jiedan', 'miaoyin', 'qingzhu', 'guxiu',
+  'xutian', 'wuzhong', 'waihai', 'yuanyao', 'yinming',
   'bianhai', 'luoyun', 'shixiao', 'sanjian', 'yinyue', 'jieying', 'jiaoyihui', 'cangkun', 'yanyue', 'huanglong',
   'bianjie', 'yinluo', 'jixi', 'zhuimo', 'lingmiao', 'mulan', 'dajin', 'kunwu', 'zhenmo', 'xiaoji',
   'xutian2', 'xinggong', 'kunpeng', 'luoyun2', 'tianlan', 'liudao', 'jiezi', 'feisheng',

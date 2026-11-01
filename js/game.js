@@ -289,6 +289,31 @@
   // 原来只有 9 图且顺序不对（倚天城写成守住了、车骑恭写成敌人、小灵天错放在魔劫里）。
   // 已经进阶大乘的存档，人早就把这一段走完了 —— 整段记为已了，免得行迹图上留下
   // 「后面的图开了、中间九张还锁着」的窟窿；想重看重打随时能进。
+  // 旧档迁移：人界四段按原著补了七张图 —— 野狼帮之围 / 嘉元城墨府（第一卷末到第二卷初）、
+  // 妙音门天雷竹 / 青竹小轩入世二十年 / 古修遗址玄骨 / 雾中岛外星海 / 元瑶还魂术（结丹期）。
+  // 旧档里这些图压根不存在，链一补就会卡在中间；按「他已经走到哪儿」逐段判定，
+  // 走过哪一段就把那一段的新图整段记为已了，绝不留一串锁着的窟窿。
+  (function migrateHumanArc() {
+    const cl = save.cleared || [], un = save.unlocked || [];
+    // 已经过了太南小会 → 野狼帮与嘉元城必已走过；已经结丹 → 妙音门必已走过；
+    // 已过虚天殿 → 青竹小轩与古修遗址必已走过；已过外星海 / 阴冥之地 → 雾中岛 / 元瑶护法必已走过
+    const gates = [
+      ['tainan', ['yelang', 'jiayuan']],
+      ['jiedan', ['miaoyin']],
+      ['xutian', ['qingzhu', 'guxiu']],
+      ['waihai', ['wuzhong']],
+      ['yinming', ['yuanyao']]
+    ];
+    let changed = false;
+    for (const [gate, ids] of gates) {
+      if (cl.indexOf(gate) < 0) continue;
+      for (const id of ids) {
+        if (cl.indexOf(id) < 0) { cl.push(id); changed = true; }
+        if (un.indexOf(id) < 0) { un.push(id); changed = true; }
+      }
+    }
+    if (changed) writeSave();
+  })();
   (function migrateArcK() {
     const cl = save.cleared || [], un = save.unlocked || [];
     if (cl.indexOf('sanjie') < 0) return;

@@ -449,9 +449,9 @@ const W = sandbox.window;
 const ALLM = W.MAPS;
 const mainMaps = ALLM.filter(m => !m.side);
 const sideAll = ALLM.filter(m => m.side);
-eq(mainMaps.length, 48, '主线共 48 图（练气 7 + 筑基结丹 12 + 元婴化神 29）');
-eq(sideAll.length, 16, '支线共 16 图（练气 7 + 筑基金丹 5 + 元婴 4）');
-eq(W.MAIN_MAP_COUNT, 48, 'MAIN_MAP_COUNT 跟着变');
+eq(mainMaps.length, 55, '主线共 55 图（人界 55：练气 9 + 筑基金丹 12 + 元婴化神 34）');
+eq(sideAll.length, 14, '支线共 14 图（练气 8 + 筑基金丹 4 + 元婴 2）');
+eq(W.MAIN_MAP_COUNT, 55, 'MAIN_MAP_COUNT 跟着变');
 
 const RL = W.REALM_LAYERS;
 eq(RL.length, 25, '境界 25 层（练气十三 + 筑基三 + 结丹三 + 元婴三 + 化神三）');
@@ -635,11 +635,11 @@ F.enterMap('yanjia', 'easy');
 frames(4);
 eq(F.info().realm, '筑基初期', '进燕家堡即跨入筑基初期');
 
-// 结丹：进虚天殿即结丹初期
+// 结丹：虚天殿在青竹小轩、古修遗址之后（原著 147 岁炼成青竹蜂云剑才进殿）
 F.setLevel(50);
 F.enterMap('xutian', 'easy');
 frames(4);
-eq(F.info().realm, '结丹初期', '进虚天殿即结丹初期');
+eq(F.info().realm, '结丹中期', '进虚天殿即结丹中期');
 
 // 际遇开支线：刘靖 → 黑煞教老巢
 F.clearProgress();
@@ -654,17 +654,9 @@ F.skipStory(); frames(4);
 ok(F.met().includes('e_liujing'), '刘靖这段因缘记入已遇');
 ok(F.sideMaps().find(x => x.id === 'heisha' && x.on), '支线「胥国·黑煞教老巢」已显现');
 
-// 金青 → 古修遗址（凝翠岛的礁盘上遇到）
-F.enterMap('tianxing');
-frames(4);
-F.enterMap('ningcui', 'easy');
-frames(18);
-for (let k = 0; k < 12; k++) { F.skipStory(); frames(2); }
-const jq = F.spawnEnc('e_jinqing');
-eq(jq, 'e_jinqing', '凝翠岛遇到散修金青');
-F.walkToEnc(); frames(3);
-F.skipStory(); frames(4);
-ok(F.sideMaps().find(x => x.id === 'guxiu' && x.on), '支线「古修遗址」已显现');
+// 古修遗址：原著的虚天殿前置（得虚天残图），已由支线提为主线
+ok(!F.sideMaps().some(x => x.id === 'guxiu'), '古修遗址已提为主线（不再靠奇遇解锁）');
+ok(!!mainMaps.find(x => x.id === 'guxiu'), '古修遗址在主线链上');
 
 // 陆师兄 → 下山岔道（药园遇到，支线开在血色禁地之前）
 F.clearProgress();
@@ -770,7 +762,7 @@ ok(hasLine('qixuan', null, '内门'), '两人都没进内门，才被墨大夫�
   // qingzhu（结丹后青竹小轩）里提「该炼青竹蜂云剑」是对的，其余一律不许
   const allStory = [];
   for (const k in (W.MAP_STORIES || {})) {
-    if (k === 'qingzhu' || k === 'xutian2') continue;
+    if (k === 'qingzhu' || k === 'xutian2' || k === 'miaoyin') continue;
     (W.MAP_STORIES[k] || []).forEach(l => allStory.push(String(l[1])));
   }
   (W.STORY || []).forEach(s => (s.lines || []).forEach(l => allStory.push(String(l[1]))));
@@ -789,12 +781,12 @@ ok(hasLine('mishi', '韩立', '第六层'), '韩立已到第六层（对方算�
 ok(hasLine('moutro', null, '张铁'), '铁奴揭面是张铁');
 ok(hasLine('moutro', null, '嘉元城'), '遗书指向嘉元城墨府');
 
-ok(hasLine('tainan', null, '嘉元城') && hasLine('tainan', null, '尸虫丸'), '太南小会补上嘉元城解尸虫丸之毒');
+ok(hasLine('jiayuan', null, '暖阳宝玉') && hasLine('jiayuan', null, '尸虫丸'), '嘉元城墨府补上暖阳宝玉解尸虫丸之毒');
 ok(hasLine('tainan', '韩立', '小妹出嫁'), '补上韩立回乡、小妹出嫁');
 ok((W.STORY || []).some(s => s.id === 'yj_open' && s.lines.some(l => l[0] === '田不缺')), '燕家堡补上合欢宗田不缺');
 
 // 太南小会：金光上人的升仙令 + 万小山
-ok(hasLine('tainan', null, '金光上人'), '太南小会交代金光上人与升仙令');
+ok(hasLine('yelang', null, '金光上人') && hasLine('yelang_out', null, '升仙令'), '野狼帮之围交代金光上人与升仙令来路');
 ok(hasLine('tainan', '万小山', '升仙令') || hasLine('tainan', '万小山', '令牌'), '补上万小山告诉他升仙令的用法');
 
 // 血色禁地：五年一开、开完封六十年、李化元打赌收记名弟子
@@ -1148,7 +1140,7 @@ ok(isFinite(after.hp) && after.hp > 0, '血量正常', after.hp);
 
 console.log('\n== 多 Boss 续战 ==');
 const EB = {
-  houshan: '狼妖|贾天龙', waihai: '八级妖兽·毒蛟|妙鹤真人', heisha: '越皇|令狐老祖',
+  houshan: '狼妖|山贼头目', waihai: '八级妖兽·毒蛟|妙鹤真人', heisha: '越皇|令狐老祖',
   kunwu: '阴罗宗大长老·乾老魔|银翅夜叉', zhenmo: '元刹圣祖分魂|敖啸老祖', xiaoji: '寒骊上人|冰凤',
   luoyun2: '鸾鸣门·双修夫妇|至阳上人'
 };

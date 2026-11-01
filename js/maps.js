@@ -68,17 +68,18 @@ window.MAPS = [
     elites: ['头狼', '马贼头目'],
     mats: ['m_chijing', 'm_huangjing', 'm_jingtie', 'm_wolfdan', 'm_shedan'],
     boss: { kind: 'beast', name: '狼妖', hp: 1100, spd: 66, dmg: 15, r: 20, spr: 'wolf', scale: 3.4 },
-    extraBoss: [{ kind: 'mo', name: '贾天龙', hp: 1200, spd: 60, dmg: 16, r: 20, spr: 'bandit', scale: 4.4, summon: '' }],
-    reward: { stones: 80, items: [] },
+    extraBoss: [{ kind: 'mo', name: '山贼头目', hp: 1200, spd: 60, dmg: 16, r: 20, spr: 'bandit', scale: 4.4, summon: 'bandit' }],
+    // 原著：采药那几年在药庐外头捡到一只小绿瓶，夜里会自己聚一滴绿液 —— 掌天瓶
+    reward: { stones: 80, items: ['zhangtian'] },
     clearTitle: '采药已毕',
-    clearDesc: '人参够数了。只是那狼妖的骨头，比寻常野兽硬得多。'
+    clearDesc: '人参够数了。只是那狼妖的骨头，比寻常野兽硬得多。回药庐的路上，他在石缝里捡到一只小绿瓶——巴掌大，通体碧绿，夜里会自己凝出一滴绿液。'
   },
   {
     id: 'mishi', order: 3, name: '墨大夫·密室', pos: '七玄门·药庐地底',
     type: 'boss', tag: '剧情战',
     desc: '尸虫丸的期限满了一年。墨大夫不再遮掩——他要的从来不是弟子，而是一具炉鼎。',
     startLevel: 7, startSkills: { sword: 3, fire: 1 },
-    unlock: 'houshan', next: 'tainan',
+    unlock: 'houshan', next: 'yelang',
     diff: 1.15, bossAt: 0, intro: 'mishi',
     enemies: ['ghoul', 'assassin'],
     elites: ['炼尸·铁奴', '血尸·张铁'],
@@ -88,21 +89,52 @@ window.MAPS = [
     clearTitle: '墨居仁已除',
     clearDesc: '密室空了。铁奴揭下面具，是张铁。墨大夫留了一封信，指向嘉元城。'
   },
+  // 原著第一卷末：墨居仁死后半年，野狼帮联合几家帮派攻上青牛山，
+  // 帮里请来的「金光上人」是韩立头一回见到的修仙者。杀了他，才得到升仙令 ——
+  // 这一枚令牌是韩立进黄枫谷的唯一凭据，不能挂在太南小会的货架上。
   {
-    id: 'tainan', order: 4, name: '太南小会', pos: '越国·太南山',
+    id: 'yelang', order: 4, name: '七玄门·野狼帮之围', pos: '青牛山 七玄门山门',
+    type: 'boss', tag: '剧情战',
+    desc: '山门被围了三日。野狼帮帮主贾天龙请来一位「金光上人」——七玄门上下，没人挡得住他。',
+    startLevel: 13, startSkills: { sword: 4, fire: 2, orb: 1, nova: 1 },
+    unlock: 'mishi', next: 'jiayuan',
+    diff: 1.4, bossAt: 0, intro: 'yelang', outro: 'yelang_out',
+    enemies: ['bandit', 'assassin'],
+    elites: ['野狼帮好手', '金光上人的护法'],
+    mats: ['m_jingtie', 'm_xuantie', 'm_lingmo', 'm_shihui'],
+    boss: { kind: 'mo', name: '金光上人', hp: 2600, spd: 54, dmg: 20, r: 19, spr: 'mo', scale: 4.2 },
+    extraBoss: [{ kind: 'mo', name: '野狼帮帮主·贾天龙', hp: 2200, spd: 58, dmg: 18, r: 20, spr: 'bandit', scale: 4.4, summon: 'bandit' }],
+    reward: { stones: 240, items: ['t_shengxian'], mats: [['m_jingtie', 3]] },
+    clearTitle: '七玄门已解围',
+    clearDesc: '金光上人烧成了一截焦骨。他怀里那枚令牌落到韩立手上——升仙令。七派认令不认人：这一枚，是他走进修仙界的第一张凭据。'
+  },
+  // 原著第二卷开头：遗书指向嘉元城。墨家五个夫人、三个女儿，一帮等着吞掉惊蛟会的人，
+  // 还有独霸山庄的欧阳飞天。解药暖阳宝玉在墨府，取它得先替墨家杀人。
+  {
+    id: 'jiayuan', order: 5, name: '嘉元城·墨府', pos: '越国·岚州 嘉元城',
+    type: 'story', tag: '剧情',
+    desc: '尸虫丸的毒一月比一月密。墨居仁的遗书只写了一处地方：嘉元城墨府，暖阳宝玉。',
+    startLevel: 15, startSkills: { sword: 4, fire: 2, orb: 1, nova: 1 },
+    unlock: 'yelang', next: 'tainan',
+    reward: { stones: 180, mats: [['m_lingmo', 2], ['m_fuzhi', 2]] },
+    clearTitle: '阴毒已解',
+    clearDesc: '暖阳宝玉在掌心里发烫。半个月，尸虫丸的毒一点点退干净。墨彩环把宝玉塞给他时只说了一句：这是我的嫁妆，反正我也不打算成亲。'
+  },
+  {
+    id: 'tainan', order: 6, name: '太南小会', pos: '越国·太南山',
     type: 'market', tag: '坊市',
     desc: '散修云集的交易会。以灵石换丹药、符箓与法器，也能把用不上的东西折价出手。',
-    startLevel: 7, startSkills: { sword: 3, fire: 1 },
-    unlock: 'mishi', next: 'huangfeng',
-    reward: { stones: 0, items: ['t_shengxian'] },   // 万小山认过的升仙令，剧情后就在袋里
+    startLevel: 17, startSkills: { sword: 4, fire: 2, orb: 1, nova: 1 },
+    unlock: 'jiayuan', next: 'huangfeng',
+    reward: { stones: 0 },
     clearTitle: '小会已散',
     clearDesc: '灵石花得干净，储物袋也换了个模样。'
   },
   {
-    id: 'huangfeng', order: 5, name: '黄枫谷·山门', pos: '越国·黄枫谷',
+    id: 'huangfeng', order: 7, name: '黄枫谷·山门', pos: '越国·黄枫谷',
     type: 'story', tag: '剧情',
     desc: '凭升仙令入门，本应配发一枚筑基丹。叶师叔上门来换：丹归他，换来一门自择的差事。',
-    startLevel: 10, startSkills: { sword: 4, fire: 2, orb: 1 },
+    startLevel: 19, startSkills: { sword: 4, fire: 2, orb: 1 },
     unlock: 'tainan', next: 'yaoyuan',
     // 此处只是「领了差事」：玉牌到手、人还没进园子，草庐得等旧园那一关跑完才开（见 yaoyuan 的 cave）
     reward: { stones: 100, mats: [['m_chijing', 2], ['m_huangjing', 2]] },
@@ -110,13 +142,13 @@ window.MAPS = [
     clearDesc: '丹给了叶师叔，换来青石岭百药园这个差事。灵根差，丹也没了，好在没人来扰。'
   },
   {
-    id: 'yaoyuan', order: 6, name: '黄枫谷·百药园（旧园）', pos: '青石岭背阴处',
+    id: 'yaoyuan', order: 8, name: '黄枫谷·百药园（旧园）', pos: '青石岭背阴处',
     type: 'combat', tag: '战斗',
     desc: '青石岭背阴处，雾气常年不散。竹篱歪斜，茅屋一间，四周是整齐的灵田沟垄。' +
       '泥土里混着陈年药渣气，风一吹，苦香、甘香、涩香搅在一起。' +
       '这里本是黄枫谷马师伯的私园，如今交到一个沉默寡言的管园弟子手里。' +
       '药田东南角是马老头留了几十年的老底：子夜花、黄球草、白鹤芝、望月草，最老的一株化龙草已百余年份；角落还散着些没名字的俗世药苗，懒得拔，留着遮土气。',
-    startLevel: 13, startSkills: { sword: 4, fire: 2, orb: 1 },
+    startLevel: 22, startSkills: { sword: 4, fire: 2, orb: 1 },
     unlock: 'huangfeng', next: 'xuese',
     // 原著第 151/157/213 章：园中央数间茅草屋，韩立「进了自己居住的屋子」「躺在百药园床上」——
     // 接管百药园 = 入住草庐，此图通关后即为主角洞府
@@ -133,10 +165,10 @@ window.MAPS = [
     clearDesc: '药苗保住了。巨蟒的鳞下压着一枚聚灵的珠子。管园弟子把钥匙往土里一插：西北角那半畦，往后归你。'
   },
   {
-    id: 'xuese', order: 7, name: '血色禁地', pos: '越国·七派共管秘境',
+    id: 'xuese', order: 9, name: '血色禁地', pos: '越国·七派共管秘境',
     type: 'combat', tag: '战斗',
     desc: '七派试炼之地，血雾终年不散。筑基丹的主药在此，魔道修士亦在其中。',
-    startLevel: 20, startSkills: { sword: 5, fire: 3, orb: 2, nova: 1 },
+    startLevel: 28, startSkills: { sword: 5, fire: 3, orb: 2, nova: 1 },
     unlock: 'yaoyuan', next: 'zhuji',
     diff: 1.6, bossAt: 170,
     enemies: ['assassin', 'ghoul', 'boar', 'bandit', 'assassin'],
@@ -144,9 +176,9 @@ window.MAPS = [
     mats: ['m_yusuizhi', 'm_tianling', 'm_zihua', 'm_longlin', 'm_xuantie', 'm_xuesha', 'm_yusui'],
     // 原著禁地里真正该打的是一只未成年的墨蛟（二等妖兽，南宫婉取其元神做器灵）
     boss: { kind: 'beast', name: '墨蛟', hp: 3600, spd: 52, dmg: 19, r: 19, spr: 'dujiao', scale: 4.2, summon: 'snake' },
-    reward: { stones: 320, items: ['zhangtian', 'zhuji', 'qingyuan'] },
+    reward: { stones: 320, items: ['jinye', 'zhuji', 'qingyuan'] },
     clearTitle: '禁地已出',
-    clearDesc: '墨蛟沉进血雾，腥气散了一夜。活着走出禁地的人不足半数——宗门立下的规矩：生还者赏一枚筑基丹。李化元看中他这半篓主药，收作记名弟子，药草取走一半，另授《青元剑诀》。'
+    clearDesc: '墨蛟沉进血雾。中心区那一战，与他联手的是掩月宗一个姓南宫的女修——墨蛟的淫囊在最后一击破了，那一夜的事，两个人往后谁都没提。杀散时他从一个巨剑门修士的尸身上摸走一片金阙玉书残页，酥黄，看不懂，还是收了。李化元看中他这半篓主药，收作记名弟子，药草取走一半，另授《青元剑诀》。'
   },
 
   // ==================== 支线：因缘所至，另行成图 ====================
@@ -244,7 +276,7 @@ window.MAPS = [
 
 window.MAIN_MAPS = function () { return window.MAPS.filter(m => !m.side); };
 window.SIDE_MAPS = function () { return window.MAPS.filter(m => m.side); };
-window.MAIN_MAP_COUNT = 7;
+window.MAIN_MAP_COUNT = 9;
 
 // 剧情对白：剧情地图全文，或战斗地图的开场 / 收尾
 window.MAP_STORIES = {
@@ -312,6 +344,38 @@ window.MAP_STORIES = {
     ['韩立', '（人都死了，还留一条活路给我。这算什么呢。）'],
     ['旁白', '韩立把铁奴收起，改名曲魂，连夜下了青牛山。']
   ],
+  yelang: [
+    ['旁白', '青牛山被围第三日。山门前的木栅烧了两回，又拿湿毡子扑灭。'],
+    ['韩立', '（墨居仁死了半年。门里的人只当七玄门还是那个七玄门。）'],
+    ['旁白', '野狼帮帮主贾天龙站在阵前。他身边立着一个披黄袍的人，脚不沾地。'],
+    ['贾天龙', '金光上人，这一门上下，就劳您了。'],
+    ['金光上人', '一帮凡人，也配让我动手。'],
+    ['韩立', '（他身上有灵气。修仙者——墨居仁笔记里那三个字，原来是这个样子。）'],
+    ['韩立', '（长春功第九层，火弹术，只有一击的机会。山门后头还有几百口人。）'],
+    ['旁白', '韩立从石碑后头站出来，手心里已经捏起一团火。']
+  ],
+  yelang_out: [
+    ['旁白', '金光上人整个人烧了起来，落在地上还在烧。贾天龙掉头就跑。'],
+    ['韩立', '（死了。修仙者也会死。）'],
+    ['旁白', '焦尸怀里翻出一枚青玉令牌，正面刻着两个字：升仙。'],
+    ['韩立', '（升仙令。万小山说过，七派认令不认人——这一枚，够换一个入门的名分。）'],
+    ['旁白', '门主许他长老之位、许他田产。韩立摇头，只提了三件事：厉飞雨升堂主、张家那门亲事、往日照看三叔。'],
+    ['韩立', '（七玄门留不住我了。修仙者这三个字一露，就再没有回头路。）']
+  ],
+  jiayuan: [
+    ['旁白', '嘉元城，岚州第一大城。惊蛟会总舵就在这条街上，六万四千帮众。'],
+    ['韩立', '（墨居仁的遗书只说一处：暖阳宝玉在墨府。尸虫丸的毒，只剩它能解。）'],
+    ['旁白', '墨府的门开着。五位夫人，三位小姐，等着他的不是哭丧，是一桩买卖。'],
+    ['严夫人', '墨大夫是你杀的。'],
+    ['韩立', '（她没哭，也没喊人。她在算账。）'],
+    ['韩立', '他要夺我的舍。我不杀他，死的就是我。'],
+    ['严夫人', '这话我信。暖阳宝玉可以给你——先替墨家杀一个人。独霸山庄，欧阳飞天。'],
+    ['旁白', '独霸山庄离城三日。欧阳飞天每晚独自在院里赏月，身边只带两个护卫。'],
+    ['韩立', '（一道剑符，人头落地。这买卖不难，难的是他们后头还会加价。）'],
+    ['旁白', '宝玉到手。通体青色，里面隐隐透出一线红光。'],
+    ['墨彩环', '这是我的嫁妆。娘亲她们舍不得，我舍得——反正我也不打算成亲。'],
+    ['韩立', '（墨家三女里，只有她把宝玉真的递到我手上。）']
+  ],
   yooutro: [
     ['旁白', '巨蟒的鳞甲裂开，盘着的身子松了劲。'],
     ['韩立', '（药园保住了。这一夜，倒是比在山里杀狼还累。）'],
@@ -336,6 +400,8 @@ window.MAP_STORIES = {
   xsoutro: [
     ['旁白', '血雾散去。禁地深处的灵药被采了个干净。'],
     ['韩立', '（玉髓芝、紫猴花、天灵果。三味主药，都齐了。）'],
+    ['韩立', '（还有那一页银书。杀巨剑门那人时，从他袖里掉出来的，字迹会自己走。）'],
+    ['韩立', '（掩月宗那位南宫道友……墨蛟的淫囊破了。这事，就当没发生过。）'],
     ['旁白', '七派在禁地口点验所得。李化元与几位长老赌了一句：谁门下采得多。'],
     ['旁白', '黄枫谷这一趟采得最多。韩立交上去的药草，压过了所有人。'],
     ['李化元', '你叫什么名字？'],
@@ -349,10 +415,9 @@ window.MAP_STORIES = {
   // 因为这张图本身是个坊市，散会了还能逛摊、还能接际遇，戏里先散了会就穿帮。
   tainan: [
     ['旁白', '太南山下。五年一次的散修小会，棚子从山脚一直搭到半山，山道上全是往会上去的人。'],
-    ['韩立', '（离开七玄门那一夜，野狼帮围攻山门。帮中供奉的金光上人是个凡人武林高手，死在我的火弹术下。）'],
-    ['韩立', '（他贴身收着的那枚升仙令，如今在我袖里。七玄门是待不下去了——修仙者的身份一露，就再没有回头路。）'],
-    ['韩立', '（下山这半年，先回了一趟五里沟。小妹出嫁，家里连一床新被都凑不出。我把灵石留下，只说是门里赏的。）'],
-    ['韩立', '（再绕去嘉元城墨府。暖阳宝玉解了尸虫丸的毒，那几位夫人倒没为难我。）'],
+    ['韩立', '（升仙令揣在袖里。万小山说七派认令不认人，可令往哪儿递、怎么递，他一句没提。）'],
+    ['韩立', '（回五里沟那一趟，小妹出嫁，家里连一床新被都凑不出。我把灵石留下，只说是门里赏的。）'],
+    ['韩立', '（往后这个家，我不一定还回得去。修仙者的年月，和凡人的年月，不是一个算法。）'],
     ['旁白', '山道上有人跟他搭话。一个瘦小散修，怀里抱着一摞旧书，说是也往山上去。'],
     ['万小山', '道友面生。头一回来太南？'],
     ['韩立', '头一回。……我这有一块令牌，是旁人身上得来的，一直不知道是什么东西。'],
@@ -459,6 +524,8 @@ window.MAP_SCENERY = {
   qixuan:   { bg: { base: '#36532f', a: '#3c5c34', b: '#30492a' }, decor: [['tree', 0.18], ['rock', 0.16], ['tuft', 0.26]] },
   houshan:  { bg: { base: '#36532f', a: '#3c5c34', b: '#30492a' }, decor: [['tree', 0.18], ['rock', 0.16], ['tuft', 0.26]] },
   mishi:    { bg: { base: '#262232', a: '#2e2940', b: '#1d1a26' }, decor: [['rock', 0.42], ['tuft', 0.10]] },
+  yelang:   { bg: { base: '#33261f', a: '#3d2e25', b: '#261c17' }, decor: [['rock', 0.22], ['tree', 0.10], ['tuft', 0.14]] },
+  jiayuan:  { bg: { base: '#3a332a', a: '#453d32', b: '#2c2721' }, decor: [['rock', 0.14], ['tree', 0.18], ['tuft', 0.14]] },
   tainan:   { bg: { base: '#3a352c', a: '#454032', b: '#2f2b23' }, decor: [['rock', 0.22], ['tuft', 0.20], ['tree', 0.06]] },
   huangfeng:{ bg: { base: '#33472e', a: '#3a5234', b: '#2b3d27' }, decor: [['tree', 0.20], ['rock', 0.14], ['tuft', 0.24]] },
   yaoyuan:  { bg: { base: '#2f4a33', a: '#37573b', b: '#273e2b' }, decor: [['tuft', 0.30], ['tree', 0.12], ['rock', 0.14]] },

@@ -118,6 +118,9 @@ window.ITEMS = [
   { id: 'changchun',name: '长春功残卷', rarity: 3, icon: '📖', req: 6,  desc: '每秒回血 +0.6，修为 +20%。墨大夫授的引气之法，只此一份', effect: { regen: 0.6, xpMul: 0.2 }, unique: true },
   { id: 'zhangtian',name: '掌天瓶绿液', rarity: 4, icon: '🍶', req: 15, desc: '伤害 +20%，上限 +30，回血 +1。瓶底积了三年的一滴，兑开能服一次', effect: { dmg: 0.2, maxhp: 30, regen: 1 }, unique: true },
   { id: 'jipin',    name: '极品灵石', rarity: 4, icon: '💎', req: 112, desc: '化开供闭关之需，30 息内修为 +50%', buffs: [{ stat: 'xpMul', amount: 0.50, dur: 30 }] },
+  // 原著：血色禁地里杀巨剑门修士，从他身上掉出一页银色书页 —— 金阙玉书的散落残页之一。
+  // 这一页在人界只当古物收着，到灵界「灵地·金阙玉书」才读出用处（外七十二页/百脉炼宝诀）。
+  { id: 'jinye',    name: '金阙玉书残页', rarity: 5, icon: '📃', req: 35, desc: '一页银色的书，字迹会自己走。杀巨剑门修士所得——金阙玉书散落各界的残页之一，此刻还看不出用处', effect: { xpMul: 0.12, pickup: 0.10 }, unique: true },
 
   // ==== 兵器（装备）====
   { id: 'jingtie',  name: '精铁短剑',   rarity: 1, icon: '🗡', slot: 'weapon', req: 3,  desc: '伤害 +10%，攻速 +4%。七玄门铁匠打的制式短剑', effect: { dmg: 0.10, atkSpd: 0.04 } },
