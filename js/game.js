@@ -1708,6 +1708,17 @@
     }
     return miss;
   }
+  // 把「还差什么」翻译成人话（入口横幅 / 调试口共用），避免一句「差1样」让人摸不着头脑
+  function missLabels(b) {
+    return breakMissing(b).map(m => {
+      if (m.kind === 'level') return '修为未达' + (b.from || '') + '·巅峰(Lv' + m.need + ')';
+      if (m.kind === 'stone') return '灵石×' + m.need;
+      if (m.kind === 'skill') { const sk = window.skillById ? window.skillById(m.id) : null; return (sk ? sk.name : m.id); }
+      if (m.kind === 'story') return '先通关·' + (m.name || m.id);
+      const it = Items.get(m.id);
+      return (it ? it.name : m.id) + '×' + m.need;
+    });
+  }
   // 对话分流用：当前这张破境图「正在通关」，剧情节点天然算通过；
   // 看「修为是否已达当前境界巅峰」且「丹 / 材 / 石」是否齐，用来判断玩家此刻是否已具备筑基条件（决定地火之屋结局台词）。
   function breakReadyNow(b) {
@@ -4936,10 +4947,25 @@
     // 破境图：物事未齐时进门就提醒一句 —— 此图可打可拾，破不了境
     if (m.endLevel) {
       const g = breakReqFor(m.endLevel);
-      if (g && breakMissing(g).length) {
-        const missN = breakMissing(g).length;
+      const missGate = g ? breakMissing(g) : [];
+      if (g && missGate.length) {
+        const lvMiss = missGate.some(mm => mm.kind === 'level');
+        let text;
+        if (lvMiss) {
+          const others = missGate.filter(mm => mm.kind !== 'level').map(m => {
+            if (m.kind === 'stone') return '灵石×' + m.need;
+            if (m.kind === 'skill') { const sk = window.skillById ? window.skillById(m.id) : null; return sk ? sk.name : m.id; }
+            if (m.kind === 'story') return '先通关·' + (m.name || m.id);
+            const it = Items.get(m.id);
+            return (it ? it.name : m.id) + '×' + m.need;
+          });
+          text = '修为未达 ' + (g.from || '') + '·巅峰（须达 Lv' + ((g.lv || 0) - 1) + '）· 先厚实根基'
+            + (others.length ? ('；另须备：' + others.join('、')) : '') + '，再来此图冲关';
+        } else {
+          text = '破境之物未齐（还差 ' + missGate.length + ' 样：' + missLabels(g).join('、') + '）· 此图可打可拾，集齐了再来冲关';
+        }
         setTimeout(function () {
-          if (G.state === 'play' || G.state === 'dialog') banner('破境之物未齐（还差 ' + missN + ' 样）· 此图可打可拾，集齐了再来冲关');
+          if (G.state === 'play' || G.state === 'dialog') banner(text);
         }, 1400);
       }
     }
@@ -8487,6 +8513,10 @@
     },
     breakList() { return JSON.parse(JSON.stringify(window.BREAKTHROUGH || [])); },    breakMissing(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); return b ? breakMissing(b).map(m => ({ kind: m.kind, id: m.id || null, name: m.name || null, need: m.need, have: m.have })) : null; },
     breakCan(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); return b ? canBreak(b) : true; },
+    breakMiss(lv) {
+      const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv);
+      return b ? missLabels(b) : [];
+    },
     breakNow(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); if (!b) return 'no req'; G.breakCur = b; const ok = doBreakNow(); return { ok: ok, pending: G.breakPending, lv: G.player ? G.player.level : null, cult: save.cultivate.level }; },
     breakLuck(v) { G.breakForce = (v == null) ? null : !!v; return G.breakForce; },   // 调试：固定冲关成败
     breakRate(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); return b ? { pills: breakGatePills(b), rate: breakSuccessRate(b) } : null; },
