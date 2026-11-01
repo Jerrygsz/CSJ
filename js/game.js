@@ -210,6 +210,8 @@
           xp: Math.max(0, cult.xp || 0),
           skills: cultSkills
         },
+        // 读档即带「手册研习标记」：旧档若没有这个字段，下面会按 cultivate.skills 回填
+        learnedManuals: (s.learnedManuals && typeof s.learnedManuals === 'object') ? s.learnedManuals : {},
         equip: eq,
         caves: Array.isArray(s.caves) ? s.caves.filter(id => CAVES[id]) : [],
         diffClear: (s.diffClear && typeof s.diffClear === 'object') ? s.diffClear : {},
@@ -239,6 +241,14 @@
       // 老存档：已通关的剧情图自动补成洞府
       for (const id of save.cleared) { const m = MAPS.find(x => x.id === id); if (m && m.cave && save.caves.indexOf(m.cave) < 0) save.caves.push(m.cave); }
       normalizePets();
+      // 旧档迁移：修复前学到的「手册功法」只写进 cultivate.skills、没有 learnedManuals 标记，
+      // 与新剪枝逻辑不兼容（读档就会被当成临图功法清掉）。这里把「已拥有的手册功法」一次性补进 learnedManuals，
+      // 旧存档立即生效：学习了就永久在册，不再切图被清。
+      const _taughtSet = {};
+      for (const it of (window.ALL_ITEMS || [])) if (it && it.teach) _taughtSet[it.teach] = true;
+      for (const id in (save.cultivate.skills || {})) {
+        if ((save.cultivate.skills[id] || 0) > 0 && _taughtSet[id]) save.learnedManuals[id] = true;
+      }
       // 养过的灵宠 / 同伴，若名字已不在表里就清掉（改过数据的老存档）
       if (save.pet && !petDefOf(save.pet)) save.pet = null;
       if (save.mate && !(window.MATES || []).some(m => m.id === save.mate)) save.mate = null;
@@ -6048,8 +6058,8 @@
     const manualItems = (window.ALL_ITEMS || []).filter(it => it.teach && (save.inventory[it.id] || 0) > 0);
     if (manualItems.length) {
       html += '<div class="cave-sec"><div class="cs-title">未习法诀（藏经）</div>' +
-        '<div class="cs-note">袋里这些法诀还没研习。点「学习」才记入已习得；研习后书仍留架上，' +
-        '日后若被清掉，回来翻一翻便能重学。也可在储物袋里「化开」立刻学，只是那本会化没。</div>';
+        '<div class="cs-note">袋里这些法诀还没研习。点「学习」即化开此册、永久习得这门功法，手册随之用掉；' +
+        '习得后再不会因切图被清。储物袋里「化开」也是同一回事（掉落/奖励所得法诀不入袋，直接化开）。</div>';
       for (const it of manualItems) {
         const tid = it.teach;
         const d = window.skillById ? window.skillById(tid) : null;
@@ -7609,16 +7619,28 @@
       renderCave();
       return;
     }
-    // 未习法诀：洞府「功法」页点「学习」才习得（书留架上，被清可重学）
-    // 注：研习只做「登记已习得」，不卡 minLv（minLv 只限运起/使用），避免「要学才能破境、要到破境后才能学」的循环死锁
+    // 未习法诀：洞府「功法」页点「学习」即化开此册，永久习得这门功法（手册随之用掉）
+    // 注：研习只做「登记已习得」+ 消耗手册，不卡 minLv（minLv 只限运起/使用），避免「要学才能破境、要到破境后才能学」的循环死锁
     const lb = e.target.closest('button[data-learn]');
     if (lb) {
       const id = lb.getAttribute('data-learn');
       const it = Items.get(id);
       if (it && it.teach) {
         const d = window.skillById ? window.skillById(it.teach) : null;
+        const had = save.inventory[id] || 0;
         const okLv = learnSkill(it.teach);
-        notify(okLv ? ('研习 · ' + (d ? d.name : it.teach) + '（书留架上）') : '这门已学过');
+        if (okLv) {
+          // 化开此册：消耗手中这本手册（用掉即永久习得，不留架上）
+          if (had > 0) {
+            save.inventory[id] = had - 1;
+            if (save.inventory[id] <= 0) delete save.inventory[id];
+            save.totalItems = Math.max(0, (save.totalItems || 1) - 1);
+          }
+          writeSave();
+          notify('研习 · ' + (d ? d.name : it.teach) + '（化开此册 · 永久习得）');
+        } else {
+          notify('这门已学过');
+        }
       }
       renderCave(); refreshTitle();
       return;
@@ -8001,6 +8023,7 @@
         bonus: Object.assign({}, G.bonus), settings: Object.assign({}, save.settings),
         gear: Object.assign({}, G.gear || {}), equip: Object.assign({}, save.equip),
         cultivate: { level: save.cultivate.level, skills: Object.assign({}, save.cultivate.skills) },
+        inventory: Object.assign({}, save.inventory),
         caves: save.caves.slice(), matGain: G.matGain || 0,
         diffClear: JSON.parse(JSON.stringify(save.diffClear || {})),
         boss: G.boss ? { name: G.boss.name, kind: G.boss.kind, hp: Math.ceil(G.boss.hp), maxhp: G.boss.maxhp, phase2: !!G.boss.phase2, phaseT: +(G.boss.phaseT || 0).toFixed(2) } : null,
@@ -8507,7 +8530,7 @@
     },
     wuClear() { const st = wuState(); st.n = 0; st.log = {}; G.wuStake = 0; writeSave(); return wuLayers(); },
     warp(sec) { G.time += (sec || 0); return +G.time.toFixed(1); },
-    skillState() { return { learned: Object.assign({}, cultObj().skills), equipped: equippedOf().slice(), slots: slotCapOf(Math.max(save.cultivate.level || 1, save.best.level || 1)) }; },
+    skillState() { return { learned: Object.assign({}, cultObj().skills), learnedManuals: Object.assign({}, save.learnedManuals), equipped: equippedOf().slice(), slots: slotCapOf(Math.max(save.cultivate.level || 1, save.best.level || 1)) }; },
     // 身上正在生效的限时增益（服丹 / 催符所得），t 是剩余时间
     buffs() { return (G.buffs || []).map(b => ({ stat: b.stat, amount: b.amount, t: +b.t.toFixed(2), dur: b.dur, name: b.name })); },
     setSkill(id, on) { return on ? equipSkill(id) : unequipSkill(id); },

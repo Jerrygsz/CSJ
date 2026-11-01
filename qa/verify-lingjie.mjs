@@ -586,7 +586,7 @@ ok(buy.ok, '「功法」柜里能点出百脉炼宝诀', buy);
 ok(buy.learned === false, '买法诀当时未自动习得（改入储物袋）', buy);
 ok(buy.stones === 174000, '买法诀扣灵石（200000−26000）', buy.stones);
 
-// 去洞府「功法」页：手册进「未习法诀·藏经」，点「学习」才习得，书留架上可重学
+// 去洞府「功法」页：手册进「未习法诀·藏经」，点「学习」即化开此册、永久习得（手册随之用掉）
 await run(`F.cave('tycave');F.caveTab('skill');`);
 await page.waitForTimeout(200);
 const learnUI = await page.evaluate(() => {
@@ -594,18 +594,23 @@ const learnUI = await page.evaluate(() => {
   const btn = [...document.querySelectorAll('#caveBody button[data-learn]')].find(b => b.getAttribute('data-learn') === 'sk_baimai');
   if (!btn) return { hasBtn: false, learned: !!(F.skillState().learned || {}).baimai };
   btn.click();
-  const kept = !!([...document.querySelectorAll('#caveBody button[data-discard]')].find(b => b.getAttribute('data-discard') === 'sk_baimai'));
-  return { hasBtn: true, learned: !!(F.skillState().learned || {}).baimai, kept };
+  const stillUnlearned = !!([...document.querySelectorAll('#caveBody button[data-learn]')].find(b => b.getAttribute('data-learn') === 'sk_baimai'));
+  const invLeft = (F.info().inventory || {}).sk_baimai || 0;
+  return { hasBtn: true, learned: !!(F.skillState().learned || {}).baimai, stillUnlearned, invLeft };
 });
 ok(learnUI.hasBtn, '洞府「功法」页有「学习」按钮（未习法诀·藏经）', learnUI);
 ok(learnUI.learned === true, '洞府点「学习」→ 习得百脉炼宝诀', learnUI);
-ok(learnUI.kept, '研习后法诀手册仍在储物袋（书留架上，可重学）', learnUI);
+ok(learnUI.invLeft === 0, '研习即化开手册：手中那本被用掉（袋中余 0）', learnUI);
+ok(learnUI.stillUnlearned === false, '研习后不再出现「学习」按钮', learnUI);
 
-// 弃去手册：从储物袋移除，不影响已习得
+// 弃去手册（未学习的）：从储物袋移除，不影响已习得
 const discarded = await page.evaluate(() => {
   const F = window.__FR;
+  F.addItem('sk_baimai', 1);        // 再给一本（尚未研习）
+  F.caveTab('skill');
   const btn = [...document.querySelectorAll('#caveBody button[data-discard]')].find(b => b.getAttribute('data-discard') === 'sk_baimai');
-  if (btn) btn.click();
+  if (!btn) return { gone: false, learned: !!(F.skillState().learned || {}).baimai };
+  btn.click();
   const still = [...document.querySelectorAll('#caveBody button[data-discard],#caveBody button[data-learn]')].find(b => (b.getAttribute('data-discard')||b.getAttribute('data-learn')) === 'sk_baimai');
   return { gone: !still, learned: !!(F.skillState().learned || {}).baimai };
 });
