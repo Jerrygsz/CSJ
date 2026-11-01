@@ -232,6 +232,7 @@
         ach: (s.ach && typeof s.ach === 'object') ? s.ach : {},
         greenLiquid: s.greenLiquid || 0,
         gift_zhuji: !!s.gift_zhuji,
+        gift_tenglong: !!s.gift_tenglong,
         wounded: (s.wounded && typeof s.wounded === 'object') ? s.wounded : null,
         // 天人有五衰：老存档没有这个字段，读进来补成空账（压在身上的衰为 0）
         wushuai: (s.wushuai && typeof s.wushuai === 'object')
@@ -269,6 +270,22 @@
       save.totalItems = (save.totalItems || 0) + 1;
       pendingZhujiGift = true;
     }
+    writeSave();
+  })();
+
+  // 老存档补发：黑凤族已通关，但旧版没在 boss 奖励里给《腾龙丹方》，
+  // 导致化神→炼虚缺方、冲关无门、也找不到丹方去哪领。读档即补，只补一次：
+  // 只要黑凤族已清、且身上没有丹方，就发还一枚（丹方不毁、可反复开炉，多给无害）。
+  // 新存档走正常 boss 奖励拿方，不会重复触发；已领过（gift_tenglong）或已持有也不重复补。
+  let pendingTenglongGift = false;
+  (function backfillTenglongRecipe() {
+    if (save.gift_tenglong) return;
+    save.gift_tenglong = true;
+    if ((save.cleared || []).indexOf('heifeng') < 0) { writeSave(); return; }
+    if ((save.inventory.f_tenglong || 0) > 0) { writeSave(); return; }
+    save.inventory.f_tenglong = 1;
+    save.totalItems = (save.totalItems || 0) + 1;
+    pendingTenglongGift = true;
     writeSave();
   })();
 
@@ -8101,6 +8118,7 @@
     save.wounded = null;      // 存档重来：修为受创一并清掉
     G.breakCaveId = null; G.breakPending = null;  // 清掉过图会话态：避免重生后误吃原著洞府 +30%
     save.gift_zhuji = false;
+    save.gift_tenglong = false;
     save.repBlack = 0; save.repWhite = 0; save.identity = 'han'; save.liUnlocked = false;
     if (G.player) { resetRunBonus(); G.gear = {}; G.runLoot = []; }
   }
@@ -8960,6 +8978,10 @@
   if (pendingZhujiGift) {
     pendingZhujiGift = false;
     setTimeout(function () { try { banner('宗门旧例 · 补授筑基丹一枚'); Sfx.buff(); } catch (e) {} }, 900);
+  }
+  if (pendingTenglongGift) {
+    pendingTenglongGift = false;
+    setTimeout(function () { try { banner('黑凤旧债 · 补授《腾龙丹方》一枚'); Sfx.buff(); } catch (e) {} }, 1100);
   }
   requestAnimationFrame(loop);
 })();
