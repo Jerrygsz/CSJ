@@ -38,10 +38,12 @@ const ALL_IDS = ['qinluo', 'anyuan', 'luori', 'shanku', 'tianyuan', 'lingdi', 'm
   'lianxu', 'fengyuan', 'huohu', 'shisan', 'mojin', 'guanghan', 'heti_guan',
   'liangzu', 'jiuxian', 'heiyu', 'longjia', 'shengdao', 'zhenling', 'mojie', 'diyuan2',
   'moban', 'huangquan', 'yitian', 'tianzhan', 'xueya', 'huanxiao', 'moyuan', 'modajie', 'lanpu', 'muzu2',
-  'sanjie', 'xiaoling', 'jiujie', 'qunqiang', 'xianshi', 'zhenxian', 'zhangtianping', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie'];
+  'sanjie', 'dashengdian', 'shiyin', 'lingzu', 'xiaoxiuluo', 'qingyuangong', 'minghe2', 'helian',
+  'tiandinggong', 'xuetian', 'qiangzhe', 'xiaoling', 'qunqiang', 'xianshi', 'zhangtianping', 'zhanxian',
+  'diyi', 'huimoyuan', 'daoguo', 'renzu', 'jiujie', 'zhenxian', 'fsjie', 'xianjie'];
 const maps = await page.evaluate((ids) => window.MAPS.filter(m => ids.includes(m.id))
   .map(m => ({ id: m.id, type: m.type, unlock: m.unlock, next: m.next, startLevel: m.startLevel, endLevel: m.endLevel })), ALL_IDS);
-ok(maps.length === 48, '灵界四十八张主线图已注册', maps);
+ok(maps.length === 59, '灵界五十九张主线图已注册', maps);
 const chain = await page.evaluate((ids) => {
   const g = id => window.MAPS.find(m => m.id === id) || {};
   const o = { fs: g('feisheng').next };
@@ -83,12 +85,15 @@ const LINKS = [
   ['yitian', 'tianzhan', null], ['tianzhan', 'xueya', 240], ['xueya', 'huanxiao', null],
   ['huanxiao', 'moyuan', null], ['moyuan', 'modajie', null],
   ['modajie', 'lanpu', null], ['lanpu', 'muzu2', null], ['muzu2', 'sanjie', null],
-  ['sanjie', 'xiaoling', 260], ['xiaoling', 'jiujie', null],
-  ['jiujie', 'qunqiang', null], ['qunqiang', 'xianshi', null],
-  ['xianshi', 'zhenxian', null], ['zhenxian', 'zhangtianping', 420],
-  ['zhangtianping', 'zhanxian', null],
-  ['zhanxian', 'huimoyuan', null],
-  ['huimoyuan', 'daoguo', null], ['daoguo', 'renzu', null], ['renzu', 'fsjie', null], ['fsjie', 'xianjie', null]
+  ['sanjie', 'dashengdian', 260], ['dashengdian', 'shiyin', null], ['shiyin', 'lingzu', null],
+  ['lingzu', 'xiaoxiuluo', null], ['xiaoxiuluo', 'qingyuangong', null], ['qingyuangong', 'minghe2', null],
+  ['minghe2', 'helian', null], ['helian', 'tiandinggong', null], ['tiandinggong', 'xuetian', null],
+  ['xuetian', 'qiangzhe', null], ['qiangzhe', 'xiaoling', null], ['xiaoling', 'qunqiang', null],
+  ['qunqiang', 'xianshi', null], ['xianshi', 'zhangtianping', null],
+  ['zhangtianping', 'zhanxian', null], ['zhanxian', 'diyi', null],
+  ['diyi', 'huimoyuan', null],
+  ['huimoyuan', 'daoguo', null], ['daoguo', 'renzu', null], ['renzu', 'jiujie', null],
+  ['jiujie', 'zhenxian', null], ['zhenxian', 'fsjie', 420], ['fsjie', 'xianjie', null]
 ];
 for (const [from, to, endLv] of LINKS) {
   ok(chain[from] && chain[from].next === to, `${from} next=${to}`, chain[from]);
@@ -145,7 +150,7 @@ ok(high[1] && high[1].realm === '渡劫期', 'lv330 = 渡劫期', high[1]);
 ok(high[2] && high[2].realm === '真仙', 'lv420 = 真仙', high[2]);
 ok(high[0] && high[0].mats.some(m => m[0] === 'm_wuxingzhenguang') && high[0].mats.some(m => m[0] === 'm_zhenlingxue'), '大乘关需阴阳大五行真光（第三座极山）+ 真灵之血', high[0]);
 ok(high[0] && high[0].story[0].id === 'sanjie', '大乘关落在翻天台（三劫）', high[0]);
-ok(high[1] && high[1].story[0].id === 'sanjie', '渡劫关需已通三劫', high[1]);
+ok(high[1] && high[1].story[0].id === 'qiangzhe', '渡劫关需已通强者之战', high[1]);
 ok(high[2] && high[2].story[0].id === 'jiujie', '真仙关需已通九劫', high[2]);
 ok(await page.evaluate(() => (window.BREAKTHROUGH || []).some(x => x.lv === 260) &&
   !(window.BREAKTHROUGH || []).some(x => ['dachengdan', 'dujiedan', 'lianxudan'].includes(x.items && x.items[0] && x.items[0][0]))),
@@ -188,10 +193,10 @@ ok(await page.evaluate(() => window.__FR.breakCan(260)) === true, '260 备齐（
 await run(`F.clearProgress();F.setLevel(259);F.clearMap('sanjie');F.addItem('m_zhenlingxue',3);F.setStones(65000);`);
 ok(await page.evaluate(() => window.__FR.breakCan(260)) === false, '260 缺阴阳大五行真光 → false');
 
-await run(`F.clearProgress();F.setLevel(329);F.god(true);F.clearMap('sanjie');F.addItem('m_xuantianteng',2);F.addItem('m_zhenlingxue',4);F.setStones(110000);`);
-ok(await page.evaluate(() => window.__FR.breakCan(330)) === true, '330 备齐（仙藤×2+真灵血×4+通三劫）→ true');
+await run(`F.clearProgress();F.setLevel(329);F.god(true);F.clearMap('qiangzhe');F.addItem('m_xuantianteng',2);F.addItem('m_zhenlingxue',4);F.setStones(110000);`);
+ok(await page.evaluate(() => window.__FR.breakCan(330)) === true, '330 备齐（仙藤×2+真灵血×4+通强者之战）→ true');
 await run(`F.clearProgress();F.setLevel(329);F.addItem('m_xuantianteng',2);F.addItem('m_zhenlingxue',4);F.setStones(110000);`);
-ok(await page.evaluate(() => window.__FR.breakCan(330)) === false, '330 未通三劫 → false');
+ok(await page.evaluate(() => window.__FR.breakCan(330)) === false, '330 未通强者之战 → false');
 
 await run(`F.clearProgress();F.setLevel(419);F.god(true);F.clearMap('jiujie');F.addItem('m_xuantianteng',3);F.addItem('m_zhenlingxue',5);F.setStones(190000);`);
 ok(await page.evaluate(() => window.__FR.breakCan(420)) === true, '420 备齐（仙藤×3+真灵血×5+通九劫）→ true');
@@ -219,7 +224,9 @@ ok(i3.state === 'dialog', '炼虚关开场对白已播', i3.state);
 
 for (const mid of ['tianyuan', 'fengyuan', 'huohu', 'shisan', 'mojin', 'guanghan', 'heti_guan',
   'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling',
-  'modajie', 'sanjie', 'jiujie', 'qunqiang', 'xianshi', 'zhenxian', 'zhangtianping', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie']) {
+  'modajie', 'sanjie', 'dashengdian', 'shiyin', 'lingzu', 'xiaoxiuluo', 'qingyuangong', 'minghe2', 'helian',
+  'tiandinggong', 'xuetian', 'qiangzhe', 'xiaoling', 'qunqiang', 'xianshi', 'zhangtianping', 'zhanxian', 'diyi',
+  'huimoyuan', 'daoguo', 'renzu', 'jiujie', 'zhenxian', 'fsjie', 'xianjie']) {
   await run(`F.clearProgress();F.setLevel(419);F.god(true);F.enterMap('${mid}');`);
   await page.waitForTimeout(200);
   const im = await page.evaluate(() => window.__FR.info());
@@ -253,20 +260,19 @@ const SIDE = [
   { id: 'heihu', e: 'e_heihu', lv: 260 },
   { id: 'baiguang', e: 'e_baiguang', lv: 260 },
   { id: 'tianmo', e: 'e_tianmo', lv: 330 },
-  { id: 'diyi', e: 'e_diyi', lv: 330 },
   { id: 'huirenjie', e: 'e_huirenjie', lv: 420 }
 ];
 const sides = await page.evaluate((ids) => ids.map(id => {
   const m = window.MAPS.find(x => x.id === id);
   return m ? { id, side: !!m.side, unlockBy: m.unlockBy, type: m.type } : null;
 }), SIDE.map(s => s.id));
-ok(sides.every(x => x && x.side), '七条后期支线已注册为 side 图', sides);
+ok(sides.every(x => x && x.side), '六条后期支线已注册为 side 图', sides);
 const encs = await page.evaluate((pairs) => pairs.map(p => {
   const e = (window.ENCOUNTERS || []).find(x => x.id === p.e);
   return { e: p.e, ok: !!e, unlock: e && e.unlock, map: e && e.map };
 }), SIDE);
 ok(encs.every(x => x.ok && x.unlock === SIDE.find(s => s.e === x.e).id),
-  '七条奇遇均指向对应支线图', encs);
+  '六条奇遇均指向对应支线图', encs);
 for (const s of SIDE) {
   await run(`F.clearProgress();F.setLevel(${s.lv});F.god(true);`);
   const u = await page.evaluate((id) => window.__FR.unlockSide(id), s.id);
@@ -375,15 +381,15 @@ const QQ = await page.evaluate(() => {
     floor, poolMin: pool.length ? Math.min(...pool) : null, poolMax: pool.length ? Math.max(...pool) : null
   };
 });
-ok(QQ.type === 'story' && QQ.lv === 330 && QQ.unlock === 'jiujie' && QQ.next === 'xianshi',
-  '群强之陨串在九劫现与献祭之间（V12C2423）', QQ);
+ok(QQ.type === 'story' && QQ.lv === 336 && QQ.unlock === 'xiaoling' && QQ.next === 'xianshi',
+  '群强之陨串在小灵天与献祭之间（V12C2423，2482 岁）', QQ);
 ok(/仗已经打完了/.test(QQ.text) && /明尊/.test(QQ.text) && /九劫真焰/.test(QQ.text) && /元合五极山/.test(QQ.text),
   '群强之陨是「赶到时仗已打完」（原著韩立不在现场），写的是明尊/九劫真焰/元合五极山', QQ.text.slice(0, 24));
 ok(QQ.spoils.every(s => s.n >= 1 && s.item), '群强之陨给出元合五极山与两仪微尘阵', QQ.spoils);
 ok(QQ.cleared, '群强之陨能通关', { cleared: QQ.cleared });
 ok(!!QQ.zhihun && !!QQ.jingling, '真魂丹与净灵莲已入库（斩仙 / 洗灵池出处）', { zhihun: QQ.zhihun, jingling: QQ.jingling });
-ok(QQ.floor === 360, '420 段成品门槛从 160 抬到 360', QQ.floor);
-ok(QQ.poolMin === null || QQ.poolMin >= 360, '420 段成品池里没有 req<360 的东西', { min: QQ.poolMin, max: QQ.poolMax });
+ok(QQ.floor === 296, '斩仙段成品门槛 296（356 级 −60）', QQ.floor);
+ok(QQ.poolMin === null || QQ.poolMin >= 260, '斩仙段成品池里没有 req<260 的东西', { min: QQ.poolMin, max: QQ.poolMax });
 
 // ---- 5b·3·45) 献祭（V12C2424）+ 掌天瓶（V12C2425）：瓶入韩立之手的因果 ----
 const XS = await page.evaluate(() => {
@@ -420,17 +426,17 @@ const XS = await page.evaluate(() => {
     boss
   };
 });
-ok(XS.xs.type === 'story' && XS.xs.lv === 330 && XS.xs.unlock === 'qunqiang' && XS.xs.next === 'zhenxian',
-  '献祭串在群强之陨与真仙之身之间（V12C2424）', XS.xs);
+ok(XS.xs.type === 'story' && XS.xs.lv === 342 && XS.xs.unlock === 'qunqiang' && XS.xs.next === 'zhangtianping',
+  '献祭串在群强之陨与掌天瓶之间（V12C2424）', XS.xs);
 ok(/献祭|风元大陆/.test(XS.xs.pos + XS.xs.text) === false || /祭坛/.test(XS.xs.text),
   '献祭是鸣煞之地的祭坛场景', XS.xs.pos);
 ok(/青色古镜/.test(XS.xs.text) && /银色法盘/.test(XS.xs.text) && /噬金虫王|金虫/.test(XS.xs.text)
   && /玄天之宝的替代之物/.test(XS.xs.text),
   '献祭对白用原著实词：青色古镜/银色法盘/噬金虫王/玄天之宝的替代之物', XS.xs.text.slice(0, 24));
 ok(/没有喊停/.test(XS.xs.text), '韩立知情不阻止（他事先安排了虫王去牵制马良）', '');
-ok(XS.xs.cleared && XS.xs.nextOpen, '走完献祭 → 通关并开出真仙之身', { c: XS.xs.cleared, o: XS.xs.nextOpen });
-ok(XS.ztp.type === 'boss' && XS.ztp.lv === 420 && XS.ztp.unlock === 'zhenxian' && XS.ztp.next === 'zhanxian',
-  '掌天瓶串在真仙之身与斩仙之间（V12C2425）', XS.ztp);
+ok(XS.xs.cleared && XS.xs.nextOpen, '走完献祭 → 通关并开出掌天瓶', { c: XS.xs.cleared, o: XS.xs.nextOpen });
+ok(XS.ztp.type === 'boss' && XS.ztp.lv === 348 && XS.ztp.unlock === 'xianshi' && XS.ztp.next === 'zhanxian',
+  '掌天瓶串在献祭与斩仙之间（V12C2425）', XS.ztp);
 ok(/掌天瓶/.test(XS.ztp.intro) && /盗天瓶/.test(XS.ztp.intro) && /瓶灵/.test(XS.ztp.intro)
   && /只是一个外壳/.test(XS.ztp.intro),
   '掌天瓶对白用原著实词：掌天瓶/盗天瓶/瓶灵/只是一个外壳', XS.ztp.intro.slice(-24));
@@ -466,8 +472,8 @@ const ZX = await page.evaluate(() => {
     tianmoText: (W.MAP_STORIES['tianmo'] || []).map(x => x[1]).join('')
   };
 });
-ok(ZX.type === 'boss' && ZX.arc === 'L' && ZX.lv === 420, '斩仙是前传 420 级终局战（arc L，不进仙界篇）', ZX);
-ok(ZX.unlock === 'zhangtianping' && ZX.next === 'huimoyuan', '斩仙串在掌天瓶与再回魔源之间（V12C2426–2429）', ZX);
+ok(ZX.type === 'boss' && ZX.arc === 'L' && ZX.lv === 356, '斩仙是 356 级终局战（arc L，不进仙界篇）', ZX);
+ok(ZX.unlock === 'zhangtianping' && ZX.next === 'diyi', '斩仙串在掌天瓶与青元宫·第一大乘之间（V12C2426–2429）', ZX);
 ok(ZX.bossName === '马良·九元观真仙', '对手是九元观真仙马良', ZX.bossName);
 ok(ZX.bossHp >= 300000 && ZX.diff >= 5, '斩仙是前传血量最高的 Boss（不低于飞升之劫）', { hp: ZX.bossHp, diff: ZX.diff });
 ok(/万灵血玺|血龙/.test(ZX.intro) && /梵圣魔神/.test(ZX.intro) && /洞漩金光/.test(ZX.intro) && /墨绿细线/.test(ZX.intro),
@@ -535,11 +541,11 @@ const END2 = await page.evaluate(() => {
 ok(END2.wave.join(',') === 'story,boss,story,boss,story',
   '终局段是波浪节奏（剧情→战斗→剧情→战斗→收尾），不是「4 张空白再塞战斗」', END2.wave);
 ok(END2.hui.type === 'story' && /苦灵谷/.test(END2.hui.pos), '再回魔源是苦灵谷剧情图（V12C2434-2435）', END2.hui);
-ok(END2.hui.unlock === 'zhanxian' && END2.hui.next === 'daoguo', '再回魔源接在斩仙之后、指向道果大会', END2.hui);
+ok(END2.hui.unlock === 'diyi' && END2.hui.next === 'daoguo', '再回魔源接在青元宫·第一大乘之后、指向道果大会', END2.hui);
 ok(/瓶灵|灵霄天柱/.test(END2.hui.text) && /元魇/.test(END2.hui.text) && /蟹道人/.test(END2.hui.text),
   '再回魔源写进了「灵霄天柱 / 瓶灵 / 元魇被蟹道人挡下」的原著实际内容', END2.hui.text.slice(-30));
-ok(END2.dao.type === 'boss' && END2.dao.lv === 420 && END2.dao.unlock === 'huimoyuan' && END2.dao.next === 'renzu',
-  '道果大会是 420 级剧情战，夹在再回魔源与人族之变之间（V12C2439-2440）', END2.dao);
+ok(END2.dao.type === 'boss' && END2.dao.lv === 378 && END2.dao.unlock === 'huimoyuan' && END2.dao.next === 'renzu',
+  '道果大会是 378 级剧情战，夹在再回魔源与人族之变之间（V12C2439-2440）', END2.dao);
 ok(END2.dao.bossName === '天象尊者', '道果大会的对手是天象尊者（原著在位者）', END2.dao.bossName);
 ok(END2.dao.lines >= 15 && /道牌/.test(END2.dao.text) && /化木为灵/.test(END2.dao.text),
   '道果大会有争夺过程（化木为灵 / 道牌），不是一句旁白带过', { n: END2.dao.lines });
@@ -548,8 +554,8 @@ ok(END2.c2 && END2.o2, '打通道果大会 → 通关并开出人族之变', { c
 ok(END2.fruitAfterHui === 0 && END2.fruitAfterDao >= 1, '道果在道果大会拿到（不在再回魔源）',
   { hui: END2.fruitAfterHui, dao: END2.fruitAfterDao });
 ok(END2.daopai >= 1, '道果大会掉道牌（V12C2440）', END2.daopai);
-ok(END2.ren.type === 'story' && END2.ren.unlock === 'daoguo' && END2.ren.next === 'fsjie',
-  '人族之变接在道果大会之后、飞升之劫之前（V12C2441）', END2.ren);
+ok(END2.ren.type === 'story' && END2.ren.unlock === 'daoguo' && END2.ren.next === 'jiujie',
+  '人族之变接在道果大会之后、九劫之前（V12C2441）', END2.ren);
 ok(END2.ren.lines >= 14, '人族之变对白够一段', END2.ren.lines);
 ok(/神识|神念/.test(END2.renText) && /闭关/.test(END2.renText) && /劫云/.test(END2.renText),
   '人族之变把「神念隐患 → 闭关 → 劫云」这条线走完', END2.renText.slice(0, 24));
@@ -794,11 +800,11 @@ ok(br2 && br2.cult === 200, 'breakNow(200) 成功推进到合体（cultivate=200
 
 const HIGH = [
   { lv: 260, map: 'sanjie', lvBefore: 259, story: 'sanjie', mat: 'm_wuxingzhenguang', n: 1, xue: 3, stones: 65000 },
-  { lv: 330, map: 'jiujie', lvBefore: 329, story: 'sanjie', mat: 'm_xuantianteng', n: 2, xue: 4, stones: 110000 },
+  { lv: 330, map: 'qiangzhe', lvBefore: 329, story: 'qiangzhe', mat: 'm_xuantianteng', n: 2, xue: 4, stones: 110000 },
   { lv: 420, map: 'zhenxian', lvBefore: 419, story: 'jiujie', mat: 'm_xuantianteng', n: 3, xue: 5, stones: 190000 }
 ];
 for (const h of HIGH) {
-  await run(`F.clearProgress();F.setLevel(${h.lvBefore});F.god(true);F.clearMap('${h.story}');F.addItem('${h.mat}',${h.n});F.addItem('m_zhenlingxue',${h.xue});F.setStones(${h.stones});`);
+  await run(`F.toTitle();F.clearProgress();F.setLevel(${h.lvBefore});F.god(true);F.clearMap('${h.story}');F.addItem('${h.mat}',${h.n});F.addItem('m_zhenlingxue',${h.xue});F.setStones(${h.stones});`);
   const stH = await page.evaluate((lv) => window.__FR.startBreak(lv), h.lv);
   ok(stH && stH.map === h.map, `startBreak(${h.lv}) → ${h.map}`, stH);
 

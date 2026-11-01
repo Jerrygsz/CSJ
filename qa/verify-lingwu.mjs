@@ -153,7 +153,7 @@ ok(has(RW.lanpu.mats, 'm_wuxingzhenguang') && has(RW.lanpu.mats, 'm_xueyami'),
   '蓝瀑城 reward.mats 含 阴阳大五行真光 + 血牙米', RW.lanpu.mats);
 
 ok(RW.baiguang.items.indexOf('t_tuhuangding') >= 0, '白光界 reward.items 含 土皇钉', RW.baiguang.items);
-ok(RW.jiujie.items.indexOf('t_wanlingsan') >= 0 && RW.jiujie.items.indexOf('dan_shixian') >= 0, '九劫现 reward.items 含 万灵伞+蚀仙丹', RW.jiujie.items);
+ok(RW.jiujie.items.indexOf('t_wanlingsan') >= 0, '九劫现 reward.items 含 万灵伞', RW.jiujie.items);
 
 // ============ 4) 端到端：真打通 5 张图，奖励确实进背包/灵宠栏 ============
 const SIM = await page.evaluate(() => {

@@ -302,6 +302,24 @@
     }
     if (changed) writeSave();
   })();
+  // 旧档迁移：灵界「大乘」（arc L）这一段按原著补齐 10 张（大乘圣典 / 始印之地 / 灵族 / 小修罗界 /
+  // 青元宫 / 冥河青元子 / 赫连商盟 / 天鼎宫 / 血天大陆 / 强者之战），并把终局段重新排了序。
+  // 已经走到终局（围杀马良之后）的存档，人早把这一段走完了 —— 整段记为已了，免得中间留一串锁着的窟窿。
+  (function migrateArcL() {
+    const cl = save.cleared || [], un = save.unlocked || [];
+    const L_ALL = ['sanjie', 'dashengdian', 'shiyin', 'lingzu', 'xiaoxiuluo', 'qingyuangong', 'minghe2', 'helian',
+      'tiandinggong', 'xuetian', 'qiangzhe', 'xiaoling', 'qunqiang', 'xianshi', 'zhangtianping', 'zhanxian',
+      'diyi', 'huimoyuan', 'daoguo', 'renzu', 'jiujie', 'zhenxian', 'fsjie', 'xianjie'];
+    const DEEP = ['qunqiang', 'xianshi', 'zhangtianping', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'jiujie', 'fsjie', 'xianjie'];
+    const hasDeep = DEEP.some(id => cl.indexOf(id) >= 0);
+    if (!hasDeep) return;
+    let changed = false;
+    for (const id of L_ALL) {
+      if (cl.indexOf(id) < 0) { cl.push(id); changed = true; }
+      if (un.indexOf(id) < 0) { un.push(id); changed = true; }
+    }
+    if (changed) writeSave();
+  })();
   // 老存档不必重开：读档即补，只补一次，且只在还卡在筑基门前（Lv36 之前）时才补。
   let pendingZhujiGift = false;
   (function backfillZhujiGift() {
@@ -8840,7 +8858,7 @@
     breakNow(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); if (!b) return 'no req'; G.breakCur = b; const ok = doBreakNow(); return { ok: ok, pending: G.breakPending, lv: G.player ? G.player.level : null, cult: save.cultivate.level }; },
     breakLuck(v) { G.breakForce = (v == null) ? null : !!v; return G.breakForce; },   // 调试：固定冲关成败
     breakRate(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); return b ? { pills: breakGatePills(b), rate: breakSuccessRate(b) } : null; },
-    startBreak(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); if (!b) return 'no req'; enterBreakMap(b); return { map: G.mapId, state: G.state }; },
+    startBreak(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); if (!b) return 'no req'; enterBreakMap(b); return { map: (G.state === 'prefight' && G.pf) ? G.pf.id : (G.mapId || (G.pf && G.pf.id) || null), state: G.state }; },
     breakScene(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); if (!b) return 'no req'; breakSceneThen(b, () => { G.state = 'cave'; if (elCave) elCave.style.display = 'flex'; renderCave(); }); return { scene: G.breakScene, dialog: G.state === 'dialog', lines: G.dialogLines ? G.dialogLines.length : 0 }; },
     finishMapNow() { if (!G.map) return 'no map'; const m = G.map; finishMap(m); return { state: G.state, level: save.cultivate.level, cleared: save.cleared.slice(), unlocked: save.unlocked.slice(), caves: save.caves.slice() }; },
     breakOpen(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); openBreak(b); return !!(elBreak && elBreak.style.display === 'flex'); },

@@ -110,10 +110,26 @@
       desc: '蓝瀑城矿脉深处磁光兽守着的五色真光，炼元合五极山（第三座极山）的主料（V10）。' }
   );
   window.ITEMS.push(
-    // 镇魔锁：血光圣祖以「分元斩尸大法」分出的一魂（车骑恭）被封在锁里，替法宝当着「充能」。
+    // 镇魔锁：斩三尊者后所得。锁里囚着车骑恭的一道分魂，他要自由、韩立要混沌二气的炼法，两下里正好换。
     { id: 't_zhenmosuo', name: '镇魔锁', rarity: 5, icon: '🔒', slot: 'trinket', req: 210, unique: true, noDrop: true,
-      desc: '斩三尊者后落到手里的古锁。锁里囚着血光圣祖的一缕分魂——车骑恭，一身墨绿长袍、头插黄木钗（V10）。他要自由，韩立要混沌二气的炼法，两下里正好换。',
+      desc: '斩三尊者后落到手里的古锁。锁里囚着一道叫车骑恭的分魂，一身墨绿长袍、头插黄木钗（V10）。他要自由，韩立要混沌二气的炼法，两下里正好换。',
       effect: { armor: 0.10, dmg: 0.08, maxhp: 220 } }
+  );
+
+  // 大乘期（V11 / V12）新器物：全部 noDrop，只走剧情 reward
+  window.MATERIALS.push(
+    { id: 'm_mingmuhe', name: '螟虫之母晶核', icon: '🟣', rarity: 5,
+      desc: '始印之地那头螟虫之母的元神被斩后凝下的黑色晶石（V11）。噬金虫王吞了它，才完成最后一次蜕变。' },
+    { id: 'm_sanqingfu', name: '三清雷霄符', icon: '🔱', rarity: 5,
+      desc: '灵王手里的渡劫至宝，一枚可挡一次大天劫。韩立用小修罗界的光阴之丝换来两枚，赶回去时敖啸已经先渡了劫（V11）。' }
+  );
+  window.ITEMS.push(
+    { id: 't_yuanhundeng', name: '元魂灯', icon: '🏮', rarity: 5, slot: 'trinket', req: 290, unique: true, noDrop: true,
+      desc: '小修罗界修罗大战里从五光族大乘手中得来的古灯（V11）。灯里养着的不是火，是一缕不灭的元魂。',
+      effect: { maxhp: 260, dmg: 0.10, armor: 0.08 } },
+    { id: 't_shanhaizhu', name: '山海珠', icon: '🔵', rarity: 5, slot: 'trinket', req: 290, unique: true, noDrop: true,
+      desc: '寒潭底下空鱼一族的洞天圣物（V11）。珠子一开，里头是一片海；空鱼一族认它为主，也认了韩立为主。',
+      effect: { maxhp: 220, dmg: 0.07, crit: 0.04 } }
   );
   window.PETS.push(
     // 蟹道人：魔源海雷海之禁尽头那头真灵级大螃蟹，苦灵岛外替韩立拍死了涅槃圣祖化身，此后随行（V10）。
@@ -213,17 +229,17 @@
     {
       lv: 330, realm: '渡劫期', from: '大乘期',
       canonCave: 'xlcave',
-      tip: '飞升之前最后一关是仙劫。九劫压顶，玄天仙藤护身、真灵之血续命（V12C2422 / V7C1219）。',
+      tip: '大乘之后是渡劫。原著这一年，他在强者之战里杀了凶司王、击败佛骨王，灵界再无人能试他的斤两——剩下的只有天上那一道仙劫。玄天仙藤护身、真灵之血续命（V12C2422 / V7C1219）。',
       items: [],
       mats: [['m_xuantianteng', 2], ['m_zhenlingxue', 4]],
       stones: 100000,
       chance: { min: 1 },
-      story: [{ id: 'sanjie', name: '灵界·三劫' }],
+      story: [{ id: 'qiangzhe', name: '血天大陆·浮空战场' }],
       lines: [
-        ['韩立', '（大乘之后，是渡劫。九道仙劫，一道比一道狠。）'],
-        ['旁白', '九劫压顶，天光被劈成碎线。玄天仙藤在身外织成一层青网，真灵之血在经脉里烧。'],
-        ['韩立', '（撑过去。）'],
-        ['旁白', '第九道劫雷落下时，天地静了一瞬。'],
+        ['韩立', '（大乘之上，是渡劫。灵界已无对手，剩下的只是天上那一道。）'],
+        ['旁白', '血天大陆的强者之战打完，凶司王倒在石台上，佛骨王的佛身碎了一地。'],
+        ['韩立', '（碧影说：剩下的别掺和。可这道劫，没人替我掺和。）'],
+        ['旁白', '玄天仙藤在身外织成一层青网，真灵之血在经脉里烧。'],
         ['韩立', '（渡劫。）']
       ]
     },
@@ -252,7 +268,7 @@
       { id: 'I', name: '灵界·初入', note: '飞升之后，五行合一' },
       { id: 'J', name: '灵界·百族', note: '黑隐山脉，雷鸣大陆，广寒界' },
       { id: 'K', name: '灵界·魔劫', note: '圣岛，魔界之战' },
-      { id: 'L', name: '真仙', note: '三劫，九劫，飞升仙界' }
+      { id: 'L', name: '灵界·大乘', note: '大乘圣典，魔界始印之地，小修罗界，血天大陆，飞升仙界' }
     );
   }
 
@@ -775,6 +791,12 @@
     },
 
     // ---------------- V11 / V12 大乘 · 渡劫 · 真仙 ----------------
+    // 原著时序：2468 进阶大乘 → 2469 大乘圣典 · 再入魔界救莫简离敖啸（始印之地 · 螟虫之母）→
+    // 2470 灵族求三清雷霄符 · 小修罗界（玄武真血/元魂灯/山海珠/蓝药）· 敖啸渡劫陨落 · 元合岛建青元宫 →
+    // 2476 冥河青元子渡劫（黄元子/不灭天尊）· 赫连商盟拍卖会（五藏锻元功/田飞儿）→
+    // 2477 天鼎宫救冰魄仙子 · 血天大陆马良血祭（万灵血玺，瞬杀三大乘）→
+    // 2479 强者之战（凶司王/佛骨王/元罡罩）→ 2480 小灵天接南宫婉 → 2482 围杀马良（群强之陨 · 献祭 · 掌天瓶 · 斩仙）→
+    // 2483 青元宫尽败灵界顶尖高手（第一大乘）→ 2487 魔源海收瓶灵 · 龙岛广灵道果大会 → 11190 飞升北寒仙域。
     {
       // 原著（2467–2468 岁，V11）：修翻天台、造灵潮，硬渡三劫——五行之劫、真雷劫（黑白雷球）、心魔之劫，
       // 三阳灌体重铸肉身，进阶大乘。这一段不吃丹，靠的是极山、金身、虫群与炼神术。
@@ -782,71 +804,215 @@
       type: 'story', tag: '剧情',
       desc: '荒原上一座三层高的翻天台，台下灵潮翻涌。五行之劫、真雷劫、心魔之劫——三劫过尽，才是大乘。',
       startLevel: 240, endLevel: 260, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'muzu2', next: 'xiaoling',
+      unlock: 'muzu2', next: 'dashengdian',
       reward: { stones: 80000, mats: [['m_zhenlingxue', 2]] },
       clearTitle: '大乘已成',
       clearDesc: '三劫散尽，三阳灌体，真元沉成一片海。大乘。'
     },
     {
-      // 原著（V11）：南宫婉流落小灵天的消息自朱果儿、宝花两处拼起来，韩立大乘之后的头一件事，
-      // 就是循着那条路进小灵天把人接回来。此前这一段被错放在魔劫里，等于让他合体期就跑了一趟。
+      // 原著（2469 岁，V11）：出关回天渊城，办大乘庆典；夜叉族黑枭王上门掂量，
+      // 圣典上被韩立重创而非杀死——庆典不是战场，这一手是给整个灵界看的。
+      id: 'dashengdian', name: '大乘圣典·天渊城', pos: '灵界·天渊城', arc: 'L',
+      type: 'boss', tag: '剧情战',
+      desc: '天渊城的城头挂满了红绸，灵界各族都派人来了——来的人里，有一半不是来道贺的。',
+      startLevel: 260, endLevel: 268, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'sanjie', next: 'shiyin',
+      diff: 4.5, bossAt: 0, intro: 'dashengdian', outro: 'dashengdian_out',
+      enemies: ['moxiu2', 'dajinxiu', 'zhengdao'],
+      elites: ['夜叉族战将', '观礼大乘'],
+      mats: ['m_zhenlingxue', 'm_zhenlinglin', 'm_yaodan'],
+      boss: { kind: 'mo', name: '夜叉族·黑枭王', hp: 150000, spd: 78, dmg: 186, r: 26, spr: 'mo', scale: 6.8 },
+      reward: { stones: 88000, mats: [['m_zhenlingxue', 3], ['m_zhenlinglin', 4]] },
+      clearTitle: '圣典',
+      clearDesc: '三招，黑枭王的护体神光碎了两次，第三次没敢再用。庆典照旧，再没人上前。'
+    },
+    {
+      // 原著（2469 岁，V11C2050 前后）：魔族为加固螟虫之母的封印，反被螟母吞了阵眼，
+      // 莫简离与敖啸都被困在始印之地。韩立与蟹道人、银月再入魔界，与宝花等异界大乘、
+      // 仙界使者何康合力斩螟虫之母（元神被银纱女子夺舍后由何康了结），得螟母晶核；
+      // 顺路取得泣灵秘藏（墨灵圣舟、烈煞金罡沙、近十万魔晶傀儡）。紫灵仍在魔界，拒了他。
+      id: 'shiyin', name: '魔界·始印之地', pos: '魔界·始印之地', arc: 'L',
+      type: 'boss', tag: '剧情战',
+      desc: '始印之地是一口倒扣的井，井底的法阵正在往回缩——那道锁本是为了关住螟虫之母，如今反把它要救的人锁在里头。',
+      startLevel: 268, endLevel: 276, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'dashengdian', next: 'lingzu',
+      diff: 4.65, bossAt: 0, intro: 'shiyin', outro: 'shiyin_out',
+      enemies: ['gui2', 'moxiu2', 'guixiu'],
+      elites: ['螟虫之将', '异界大乘'],
+      mats: ['m_yimojin', 'm_zhenlingxue', 'm_yaodan'],
+      boss: { kind: 'beast', name: '螟虫之母·元神', hp: 230000, spd: 80, dmg: 215, r: 28, spr: 'haishou', scale: 7.4 },
+      extraBoss: [{ kind: 'mo', name: '元魇圣祖·化身', hp: 120000, spd: 66, dmg: 175, r: 24, spr: 'mo', scale: 6.6, summon: '' }],
+      reward: { stones: 96000, items: ['t_yuanhundeng'], mats: [['m_mingmuhe', 1], ['m_yimojin', 3], ['m_zhenlingxue', 4]] },
+      clearTitle: '始印已开',
+      clearDesc: '井底的阵松了。莫简离扶着敖啸走出来，宝花站在雾里没动。紫灵站得更远，只摇了摇头。'
+    },
+    {
+      // 原著（2470 岁）：为救敖啸的天劫，去灵族向灵王求三清雷霄符。
+      // 灵王的价码是光阴之丝——一缕丝换一枚符，丝要小修罗界的修罗蛛晶核才炼得出来。
+      id: 'lingzu', name: '灵族·灵王', pos: '灵界·灵族 圣城', arc: 'L',
+      type: 'story', tag: '剧情',
+      desc: '灵王的殿里没有阶，只有一池水。水里浮着两枚雷霄符的影子。',
+      startLevel: 276, endLevel: 282, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'shiyin', next: 'xiaoxiuluo',
+      reward: { stones: 90000, mats: [['m_sanqingfu', 2], ['m_zhenlingxue', 2]] },
+      clearTitle: '两枚雷霄符',
+      clearDesc: '两枚符揣进袖里。他算过脚程——赶得及，只要小修罗界那边不出岔子。'
+    },
+    {
+      // 原著（2470 岁）：小修罗界斩不知名龟兽得玄武真血；修罗大战重创五光族大乘奕姓老者，
+      // 得元魂灯；与樱仙子、修罗蛛族母交易，入寒潭打捞空鱼族圣物，换得十二枚晶核，
+      // 另得洞天圣物「山海珠」，空鱼一族认主，收族长之女蓝药为徒。
+      id: 'xiaoxiuluo', name: '小修罗界·寒潭', pos: '小修罗界·寒潭', arc: 'L',
+      type: 'boss', tag: '剧情战',
+      desc: '小修罗界的天是紫的，没有日月。寒潭底下压着一件不属于这一界的圣物。',
+      startLevel: 282, endLevel: 290, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'lingzu', next: 'qingyuangong',
+      diff: 4.6, bossAt: 0, intro: 'xiaoxiuluo', outro: 'xiaoxiuluo_out',
+      enemies: ['gui2', 'yaoshou2', 'dajinxiu'],
+      elites: ['修罗蛛', '五光族大乘'],
+      mats: ['m_zhenlingxue', 'm_zhenlinglin', 'm_yaodan'],
+      boss: { kind: 'beast', name: '修罗蛛·族母', hp: 190000, spd: 74, dmg: 200, r: 27, spr: 'haishou', scale: 7.0 },
+      extraBoss: [{ kind: 'mo', name: '五光族·奕姓大乘', hp: 130000, spd: 70, dmg: 180, r: 24, spr: 'nvxiu', scale: 6.4, summon: '' }],
+      reward: { stones: 94000, items: ['t_shanhaizhu'], mats: [['m_zhenlingxue', 4], ['m_zhenlinglin', 5]] },
+      clearTitle: '山海珠',
+      clearDesc: '十二枚晶核换出光阴之丝，寒潭底还浮起一枚珠子。空鱼一族齐齐俯首，族长把女儿蓝药交到他手上。'
+    },
+    {
+      // 原著（2470 岁，同年）：敖啸等不到雷霄符，提前渡大天劫，陨落。
+      // 韩立在无涯海元合岛立青元宫；2476 岁把灵芝化身交给银月，才了结忘情诀那桩事。
+      id: 'qingyuangong', name: '无涯海·青元宫', pos: '灵界·无涯海 元合岛', arc: 'L',
+      type: 'story', tag: '剧情',
+      desc: '无涯海最深处的一座岛，他给它取名青元宫。名字是从一柄剑上借来的。',
+      startLevel: 290, endLevel: 296, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'xiaoxiuluo', next: 'minghe2',
+      reward: { stones: 98000, mats: [['m_zhenlingxue', 2]] },
+      clearTitle: '青元宫',
+      clearDesc: '宫成那日，千里外落下最后一道天劫。两枚雷霄符还在袖里，晚了三日。'
+    },
+    {
+      // 原著（2476 岁）：携血魂等去冥河之地探青元子，正逢其渡劫，
+      // 黄元子、不灭天尊、三全道人趁劫寻仇——黄元子与不灭天尊被斩，三全道人遁走，噬金虫王首次现出王相。
+      id: 'minghe2', name: '冥河·青元子渡劫', pos: '灵界·冥河之地', arc: 'L',
+      type: 'boss', tag: '剧情战',
+      desc: '冥河之地常年不晴。青元子的雷劫正落在河面上，三个大乘踩着劫云来了。',
+      startLevel: 296, endLevel: 304, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'qingyuangong', next: 'helian',
+      diff: 4.7, bossAt: 0, intro: 'minghe2', outro: 'minghe2_out',
+      enemies: ['moxiu2', 'dajinxiu', 'guixiu'],
+      elites: ['黄元子门人', '不灭天尊随侍'],
+      mats: ['m_zhenlingxue', 'm_yaodan', 'm_zhenlinglin'],
+      boss: { kind: 'mo', name: '黄元子', hp: 200000, spd: 76, dmg: 205, r: 26, spr: 'neimen', scale: 6.9 },
+      extraBoss: [{ kind: 'mo', name: '不灭天尊', hp: 150000, spd: 72, dmg: 190, r: 25, spr: 'mo', scale: 6.6, summon: '' }],
+      reward: { stones: 100000, mats: [['m_zhenlingxue', 4], ['m_xuantianteng', 1]] },
+      clearTitle: '冥河三敌',
+      clearDesc: '两死一逃，河面上的劫云散了。青元子看着他，半天才说出一句：你这一身，已不是合体了。'
+    },
+    {
+      // 原著（2476 岁）：雷鸣大陆赫连商盟拍卖会，得金阙玉书内页《五藏锻元功》；
+      // 真龙族田飞儿以魇龙之血与「道果」的用处为价，换他带自己过跨大陆传送阵。
+      id: 'helian', name: '赫连商盟拍卖会', pos: '灵界·雷鸣大陆 天云城', arc: 'L',
+      type: 'story', tag: '剧情',
+      desc: '雷鸣大陆的拍卖会一年一次。会上卖的东西，多半不该出现在市面上。',
+      startLevel: 304, endLevel: 310, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'minghe2', next: 'tiandinggong',
+      reward: { stones: 105000, mats: [['m_zhenlingxue', 3]] },
+      clearTitle: '五藏锻元功',
+      clearDesc: '一页金书落进袖里。田飞儿在偏厅等着，手里握着一枚龙鳞。'
+    },
+    {
+      // 原著（2477 岁）：血天大陆天鼎宫，救出被困数千年的冰魄仙子（已承天鼎真人衣钵、进阶大乘），
+      // 得天鼎真人秘术「提炼雷之力」。
+      id: 'tiandinggong', name: '天鼎宫', pos: '血天大陆·天鼎宫', arc: 'L',
+      type: 'boss', tag: '剧情战',
+      desc: '天鼎宫沉在地底。宫门开着，里头没有活人，只有一座还在转的鼎。',
+      startLevel: 310, endLevel: 318, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'helian', next: 'xuetian',
+      diff: 4.75, bossAt: 0, intro: 'tiandinggong', outro: 'tiandinggong_out',
+      enemies: ['guixiu', 'gui2', 'dajinxiu'],
+      elites: ['天鼎宫傀儡', '守鼎尸傀'],
+      mats: ['m_zhenlingxue', 'm_zhenlinglin', 'm_yaodan'],
+      boss: { kind: 'mo', name: '天鼎宫·守鼎傀儡', hp: 210000, spd: 72, dmg: 208, r: 27, spr: 'guixiu', scale: 7.0 },
+      reward: { stones: 108000, mats: [['m_zhenlingxue', 4], ['m_xuantianteng', 1]] },
+      clearTitle: '提炼雷之力',
+      clearDesc: '冰魄仙子把玉简递来。第九重殿的鼎转了一格，宫外的天已经红了——那不是晚霞。'
+    },
+    {
+      // 原著（2477 岁）：真仙马良下界，血祭血天大陆亿万生灵祭炼万灵血玺，瞬杀三名大乘；
+      // 六翼与冰凤因拒绝做灵奴被追杀。韩立在场，但这一战打不了——只能先退、先看清。
+      id: 'xuetian', name: '血天大陆·万灵血玺', pos: '血天大陆·血河', arc: 'L',
+      type: 'story', tag: '剧情',
+      desc: '血天大陆的天是红的，不是因为它叫血天——是这一整片生灵，在这三天里被抽干了。',
+      startLevel: 318, endLevel: 324, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'tiandinggong', next: 'qiangzhe',
+      reward: { stones: 110000, mats: [['m_zhenlingxue', 3], ['m_xuantianteng', 1]] },
+      clearTitle: '血天',
+      clearDesc: '三名大乘迎上去，三息之内只剩三片血雾。他退到百里之外——这不是能硬打的东西。'
+    },
+    {
+      // 原著（2479 岁）：应碧影之约参加强者之战，杀凶司王、击败佛骨王，得仙界秘术《元罡罩》。
+      // 随后血骨门牵头成立灭魔会伏击马良，反被马良所灭，萧冥、碧影先后陨落。
+      id: 'qiangzhe', name: '强者之战', pos: '血天大陆·浮空战场', arc: 'L',
+      type: 'boss', tag: '剧情战',
+      desc: '强者之战不讲规矩，只讲谁站到最后。碧影请他来，是来补那个空位的。',
+      startLevel: 324, endLevel: 330, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'xuetian', next: 'xiaoling',
+      diff: 4.85, bossAt: 0, intro: 'qiangzhe', outro: 'qiangzhe_out',
+      enemies: ['dajinxiu', 'moxiu2', 'zhengdao'],
+      elites: ['凶司王亲卫', '佛骨门徒'],
+      mats: ['m_zhenlingxue', 'm_xuantianteng', 'm_zhenlinglin'],
+      boss: { kind: 'mo', name: '凶司王', hp: 240000, spd: 80, dmg: 220, r: 27, spr: 'mo', scale: 7.0 },
+      extraBoss: [{ kind: 'mo', name: '佛骨王', hp: 200000, spd: 74, dmg: 205, r: 26, spr: 'neimen', scale: 6.8, summon: '' }],
+      reward: { stones: 118000, mats: [['m_zhenlingxue', 5], ['m_xuantianteng', 1]] },
+      clearTitle: '元罡罩',
+      clearDesc: '凶司王倒了，佛骨王的佛身碎了一地。碧影把一枚玉简抛过来，只说了一句：剩下的，你最好别掺和。'
+    },
+    {
+      // 原著（2480 岁）：循上古祭坛算出的入口进小灵天，与南宫婉重逢；
+      // 震慑小灵天诸族，携人族精英百余返回灵界；与六翼签下契约（替他寻到宝物便还其自由）。
+      // 这一段此前被错放在魔劫末尾，等于让合体期的人先跑了一趟。
       id: 'xiaoling', name: '小灵天·南宫婉', pos: '灵界·小灵天', arc: 'L',
       type: 'story', tag: '剧情',
-      desc: '小灵天藏在界面的夹缝里，一方天，一口井，一炉火。天很低，低得能看见劫云在别处聚。',
-      startLevel: 260, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'sanjie', next: 'jiujie',
-      reward: { stones: 110000, mats: [['m_zhenlingxue', 2]] },
-      clearTitle: '小灵天',
+      desc: '小灵天藏在界面的夹缝里。一方天，一口井，一炉火。天很低，低得能看见劫云在别处聚。',
+      startLevel: 330, endLevel: 336, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'qiangzhe', next: 'qunqiang',
+      reward: { stones: 120000, mats: [['m_zhenlingxue', 3]] },
+      clearTitle: '重逢',
       clearDesc: '井边那个人回过头来。几百年的话，到嘴边只剩一句：我来接你了。'
     },
     {
-      id: 'jiujie', name: '九劫现', pos: '灵界·荒原 劫云下', arc: 'L',
-      type: 'story', tag: '剧情',
-      desc: '九道仙劫压顶。过得去，才谈得上飞升。',
-      startLevel: 260, endLevel: 330, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'xiaoling', next: 'qunqiang',
-      reward: { stones: 120000, items: ['t_wanlingsan', 'dan_shixian'] },
-      clearTitle: '九劫已过',
-      clearDesc: '第九道劫雷落下又散去。撑劫的万灵伞收进袖里，一枚蚀仙丹滚落掌心——天地间，再没有什么能压住他了。'
-    },
-    {
-      // V12C2423《群强之陨》：轩九灵以「九劫灭灵大法」的九劫真焰击杀了明尊，
-      // 随后七座血玺落下，三人大乘连同四头真兽化为飞灰；银色巨人被八座金色火山困杀。
-      // **原著里韩立不在现场**（C2423 全章 0 次出现「韩立」）——所以这一图是「赶到时仗已打完」，
-      // 由旁白与战后现场还原，不能写成他亲自动手。
+      // 原著（2482 岁，V12C2423《群强之陨》）：灵界强者与供奉真灵合力围杀马良，
+      // 轩九灵以九劫灭灵大法击伤马良，马良反手以万灵血玺杀人——除韩立外，队友全灭。
+      // **原著里韩立赶到时仗已打完**，所以这一图是「战后现场」，不能写成他亲自动手。
       id: 'qunqiang', name: '群强之陨', pos: '灵界·金色世界', arc: 'L',
       type: 'story', tag: '剧情',
       desc: '他赶到的时候，仗已经打完了。金色世界塌了一半，坑底还立着一个金色巨人。',
-      startLevel: 330, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'jiujie', next: 'xianshi',
+      startLevel: 336, endLevel: 342, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'xiaoling', next: 'xianshi',
       reward: { stones: 150000, items: ['t_yuanhejiwu', 't_liangyiwuchen'], mats: [['m_zhenlingxue', 3]] },
       clearTitle: '群强之陨',
       clearDesc: '赢是赢了，赢得一个都不剩。坑底只剩两样东西：元合五极山，和一座两仪微尘阵。'
     },
     {
-      // V12C2424《献祭》：明尊要用整个风元大陆换一座两仪微尘阵（残品）来对付马良。
-      // 云淡、月梳这两位大乘被安排在「阵眼」，其实是明尊给他们设的绝地——
-      // 原著原话：「明尊根本没有在这里留下什么玄天之宝，他恐怕是想让我兄妹当玄天之宝的替代之物」。
-      // 韩立这一段不是旁观者：他事先暗中吩咐噬金虫王去牵制马良，好看清那边的情形；
-      // 银色法盘往下灌符文时，他也没有喊停。
+      // 原著（V12C2424《献祭》）：明尊要用整个风元大陆换一座两仪微尘阵（残品）来对付马良。
+      // 云淡、月梳两位大乘被安排在「阵眼」，其实是绝地——「他恐怕是想让我兄妹当玄天之宝的替代之物」。
+      // 韩立事先吩咐噬金虫王去牵制马良，好看清那边的情形；法盘灌符文时，他也没有喊停。
       id: 'xianshi', name: '献祭·风元大陆', pos: '灵界·鸣煞之地', arc: 'L',
       type: 'story', tag: '剧情',
       desc: '祭坛下方，一面青色古镜悬在半空。镜里是噬金虫王，正和金甲士缠斗。银色法盘还在往法阵里灌符文。',
-      startLevel: 330, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'qunqiang', next: 'zhenxian',
+      startLevel: 342, endLevel: 348, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'qunqiang', next: 'zhangtianping',
       reward: { stones: 130000, mats: [['m_zhenlingxue', 3], ['m_xuantianteng', 1]] },
       clearTitle: '献祭',
       clearDesc: '风元大陆元气大伤。他没喊停——这一局，本来就不只是他一个人在打。'
     },
     {
-      // V12C2425《掌天瓶》：两仪微尘阵自爆 → 巨大盆地 → 马良重伤显形 →
-      // 韩立胸前瓶形青光浮现，马良袖中飞出墨绿小瓶。
-      // **「掌天瓶」这个名字就是在这一章由马良说出来的**（原著全 13 次，首现即此章）。
+      // 原著（V12C2425《掌天瓶》）：两仪微尘阵自爆 → 万里盆地 → 马良重伤显形 →
+      // 韩立胸前瓶形青光浮现，马良袖中飞出墨绿小瓶。「掌天瓶」这个名字就是在这一章由马良说出来的。
       id: 'zhangtianping', name: '掌天瓶·盗天瓶', pos: '灵界·鸣煞之地 盆地', arc: 'L',
       type: 'boss', tag: '剧情战',
-      desc: '两仪微尘阵炸成一个万里大坑。马良赤身裸体地立在坑心，胸口起伏。然后两只瓶子，隔着空气互相叫了起来。',
-      startLevel: 420, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'zhenxian', next: 'zhanxian',
+      desc: '两仪微尘阵炸成一个万里大坑。马良立在坑心，胸口起伏。然后两只瓶子，隔着空气互相叫了起来。',
+      startLevel: 348, endLevel: 356, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'xianshi', next: 'zhanxian',
       diff: 5.2, bossAt: 0, intro: 'zhangtianping', outro: 'zhangtianping_out',
       enemies: ['gui2', 'moxiu2', 'guixiu'],
       elites: ['九元观随从', '金色甲士'],
@@ -857,27 +1023,14 @@
       clearDesc: '青瓶与墨绿瓶之间的嗡鸣声越来越响，像两头隔着水面互相呼唤的兽。原来它有名字。'
     },
     {
-      id: 'zhenxian', name: '真仙之身', pos: '灵界·荒原 雷光中', arc: 'L',
-      type: 'story', tag: '剧情',
-      desc: '渡劫之后，铸真仙之身。',
-      startLevel: 330, endLevel: 420, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'xianshi', next: 'zhangtianping',
-      reward: { stones: 160000 },
-      clearTitle: '真仙',
-      clearDesc: '一身不再是凡胎。眉眼还是那眉眼，气息已不在此界。'
-    },
-    {
-      // 前传最后一战（原著 C2426–C2428《斩仙》上中下 / C2429《天魔契约》）：
-      // 仙界九元观嫡传马良下界，界面之力把他压着，只能显出大乘的威压；
-      // 他手上有万灵血玺（八条五爪血龙）、一支银笛，还放出了火须子。
-      // 韩立化梵圣魔神（三头六臂，五件金色重兵），最后以「洞漩金光」定住他，
-      // 再用玄天斩灵剑放出的墨绿细线从脖颈一闪而过——头颅滚落，元婴被毁灭之力震碎。
-      // 这一战之后：收金灿灿储物镯、魔光吞了马良的神魂来投靠、火须子为回仙界认主。
+      // 原著（V12C2426–C2429《斩仙》《天魔契约》）：马良以万灵血玺（八条五爪血龙）与银笛应战，
+      // 放出火须子；韩立化梵圣魔神，以洞漩金光定住他，再用玄天斩灵剑的墨绿细线断其首。
+      // 战后得三颗真魂丹、盗天瓶；魔光吞其神魂来投，火须子为回仙界认主。
       id: 'zhanxian', name: '斩仙·万灵血玺', pos: '灵界·荒原 血河', arc: 'L',
       type: 'boss', tag: '终局战',
       desc: '八条五爪血龙从血河里爬出来。仙界来的真仙，被界面之力压着，还是大乘的威压。',
-      startLevel: 420, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'zhangtianping', next: 'huimoyuan',
+      startLevel: 356, endLevel: 364, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'zhangtianping', next: 'diyi',
       diff: 5.0, bossAt: 0, intro: 'zhanxian', outro: 'zhanxian_out',
       enemies: ['gui2', 'moxiu2', 'guixiu'],
       elites: ['万灵血龙', '九元观随从'],
@@ -888,57 +1041,94 @@
       clearDesc: '墨绿细线从脖颈一闪而过，一颗头颅滚落下来。灵界最后一场硬仗，打完了。'
     },
     {
-      // V12 终局段（原著 C2434《再回魔源》/ C2435《瓶灵回归》）：鳞片传来「两年后·真龙之岛·广灵道果大会」，
-      // 赴会之前先去魔界寻瓶灵 —— 魔源海苦灵谷，灵霄天柱自开，黄色小瓶要跟掌天瓶「合一」。
-      // 这一图不是打，是对峙：元魇圣祖想抢，被蟹道人挡在阵前，一步没敢上来。
-      id: 'huimoyuan', name: '再回魔源', pos: '魔界·魔源海 苦灵谷', arc: 'L',
+      // 原著（2483 岁）：青元宫尽败灵界顶尖高手，被誉为「灵界第一大乘」。
+      id: 'diyi', name: '青元宫·第一大乘', pos: '灵界·无涯海 青元宫', arc: 'L',
+      type: 'boss', tag: '剧情战',
+      desc: '青元宫的山门前排了一整条石阶，阶上站满了人。灵界「第一大乘」的名号，得有人来接。',
+      startLevel: 364, endLevel: 372, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'zhanxian', next: 'huimoyuan',
+      diff: 4.9, bossAt: 0, intro: 'diyi', outro: 'diyi_out',
+      enemies: ['zhengdao', 'kui2', 'dajinxiu'],
+      elites: ['第一大乘护法', '大乘傀儡'],
+      mats: ['m_xuantianteng', 'm_zhenlingxue', 'm_yaodan'],
+      boss: { kind: 'mo', name: '灵界第一大乘', hp: 160000, spd: 78, dmg: 200, r: 26, spr: 'neimen', scale: 6.8 },
+      reward: { stones: 120000, mats: [['m_xuantianteng', 2]] },
+      clearTitle: '第一大乘',
+      clearDesc: '他退了半步。灵界「第一大乘」这四个字，从此换了人。'
+    },
+    {
+      // 原著（2487 岁，V12C2434《再回魔源》/ C2435《瓶灵回归》）：鳞片传来「两年后·真龙之岛·广灵道果大会」，
+      // 赴会之前先去魔界寻瓶灵——魔源海苦灵谷，灵霄天柱自开，黄色小瓶要与掌天瓶合一。
+      // 元魇圣祖想抢，被蟹道人挡在阵前，一步没敢上来。
+      id: 'huimoyuan', name: '再回魔源·瓶灵', pos: '魔界·魔源海 苦灵谷', arc: 'L',
       type: 'story', tag: '剧情',
       desc: '银色鳞片浮出一行古文：两年后，真龙之岛，广灵道果大会。赴会之前，先去魔界寻瓶灵。',
-      startLevel: 420, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'zhanxian', next: 'daoguo',
+      startLevel: 372, endLevel: 378, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'diyi', next: 'daoguo',
       reward: { stones: 190000, mats: [['m_zhenlingxue', 2], ['m_zhenlinglin', 3]] },
       clearTitle: '瓶灵回归',
       clearDesc: '两只小瓶合成一只。元魇圣祖站在阵外看了很久，到底没敢上前。'
     },
     {
-      // 原著 C2439《交易、大会》/ C2440《得果》：龙族用独有禁制圈出一整片山林，道果藏在其间，
-      // 规矩只有一条——抢到手的才是你的。树化巨人、天象尊者都是真刀真枪杀过来的。
-      // 终局段四张图里，只有这一张是「高密度战斗」，飞升之劫之前的一次全身活动。
-      id: 'daoguo', name: '道果大会', pos: '灵界·真龙之岛 禁制中', arc: 'L',
+      // 原著（2487–2488 岁，V12C2439《交易、大会》/ C2440《得果》）：龙族以禁制圈出山林，
+      // 道果藏于其间，抢到手才算数。一百零八枚道牌换一枚广灵道果，服后成广灵道体。
+      id: 'daoguo', name: '广灵道果大会', pos: '真龙之岛·禁制山林', arc: 'L',
       type: 'boss', tag: '剧情战',
       desc: '龙族用禁制圈出一整片山林，道果就藏在里面。规矩只有一条：抢到手的，才算你的。',
-      startLevel: 420, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      startLevel: 378, endLevel: 386, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
       unlock: 'huimoyuan', next: 'renzu',
       diff: 4.55, bossAt: 0, intro: 'daoguo', outro: 'daoguo_out',
       enemies: ['kui2', 'yaoshou2', 'dajinxiu'],
       elites: ['化木为灵·巨人', '异界大乘'],
-      mats: ['m_zhenlingxue', 'm_zhenlinglin'],   // 道牌只走通关奖励，不进材料池（信物不该被刷）
+      mats: ['m_zhenlingxue', 'm_zhenlinglin'],
       boss: { kind: 'mo', name: '天象尊者', hp: 200000, spd: 80, dmg: 210, r: 27, spr: 'haishou', scale: 6.8 },
       reward: { stones: 210000, items: ['dan_guangling', 't_wannianjingsang', 't_zhenlinliuying'], mats: [['m_daopai', 1], ['m_zhenlingxue', 2]] },
       clearTitle: '得果',
-      clearDesc: '掌天瓶一压，天象尊者认输，道牌交了出来。一百零八枚牌子换到一枚广灵道果——此果不宜久露在外，他收好了，留着配合其他灵物再服食。'
+      clearDesc: '一百零八枚牌子换到一枚广灵道果。此果不宜久露在外，他收好了，留着配合其他灵物再服食。'
     },
     {
-      // 原著 C2441《人族之变》：金长老并未当面说破，而是在韩立告辞之后才与族中长老议论——
+      // 原著（2488 岁后，V12C2441《人族之变》）：龙族金长老并未当面说破，只在韩立告辞后才与族中长老议论——
       // 「神念之力超出我等界面生灵承受的极限，根基隐患重重，几百年内连性命都无法保住」。
       // 玩家知道，他自己不知道。这一笔才是飞升之劫真正的引信。
-      id: 'renzu', name: '人族之变', pos: '灵界·真龙之岛', arc: 'L',
+      id: 'renzu', name: '人族之变', pos: '真龙之岛', arc: 'L',
       type: 'story', tag: '剧情',
       desc: '道果下肚，他抱拳告辞。他不知道的是，身后的龙族长者刚刚看穿了他体内那处裂痕。',
-      startLevel: 420, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'daoguo', next: 'fsjie',
+      startLevel: 386, endLevel: 392, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'daoguo', next: 'jiujie',
       reward: { stones: 200000, mats: [['m_zhenlingxue', 2]] },
-      clearTitle: '出关·劫云已聚',
-      clearDesc: '两百年闭关，外面已经换了一个人族。出关那日，天上劫云在聚——飞升之劫，来了。'
+      clearTitle: '劫云已聚',
+      clearDesc: '几百年一晃而过。出关那日，天上劫云在聚——飞升之劫，来了。'
     },
     {
-      // 独立关卡（原著 C2445）：九劫只是前奏，真正的飞升之劫在正午阳气最浓时落下。
+      // 原著（V12C2445 前后）：九道仙劫是飞升之劫的前奏；玄天仙藤护身、真灵之血续命。
+      id: 'jiujie', name: '九劫现', pos: '灵界·荒原 劫云下', arc: 'L',
+      type: 'story', tag: '剧情',
+      desc: '九道仙劫压顶。过得去，才谈得上飞升。',
+      startLevel: 392, endLevel: 400, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'renzu', next: 'zhenxian',
+      reward: { stones: 120000, items: ['t_wanlingsan'], mats: [['m_xuantianteng', 1]] },
+      clearTitle: '九劫已过',
+      clearDesc: '第九道劫雷落下又散去。撑劫的万灵伞收进袖里——天地间，再没有什么能压住他了。'
+    },
+    {
+      // 原著：九劫之后铸真仙之身。玄天仙藤化开、真灵之血入骨，一身不再是凡胎。
+      id: 'zhenxian', name: '真仙之身', pos: '灵界·荒原 雷光中', arc: 'L',
+      type: 'story', tag: '剧情',
+      desc: '九劫之后，雷光还没散尽。他要在这片雷光里，把这一身重铸一遍。',
+      startLevel: 400, endLevel: 420, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'jiujie', next: 'fsjie',
+      reward: { stones: 160000, mats: [['m_xuantianteng', 1]] },
+      clearTitle: '真仙',
+      clearDesc: '一身不再是凡胎。眉眼还是那眉眼，气息已不在此界。'
+    },
+    {
+      // 独立关卡（原著 V12C2445 前后）：九劫只是前奏，真正的飞升之劫在正午阳气最浓时落下。
       // 天外魔君当年放过话——「你渡那飞升之劫之时，本座一定邀遍附近界面所有魔君前来阻你飞升」。
       id: 'fsjie', name: '飞升之劫', pos: '灵界·荒原 劫云下', arc: 'L',
       type: 'boss', tag: '终局',
       desc: '正午，阳气最浓的时候。劫云压到头顶百丈，云里还有别的东西在等。',
       startLevel: 420, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'renzu', next: 'xianjie',
+      unlock: 'zhenxian', next: 'xianjie',
       diff: 4.8, bossAt: 0, intro: 'fsjie', outro: 'fsjie_out',
       enemies: ['gui2', 'moxiu2', 'guixiu'],
       elites: ['魔君化影', '劫雷凝形'],
@@ -949,6 +1139,7 @@
       clearDesc: '魔君退去，劫雷散尽。天上裂开一道真真正正的门——那不是劫，是路。'
     },
     {
+      // 原著（11190 岁）：飞升仙界北寒仙域。
       id: 'xianjie', name: '飞升仙界', pos: '仙界·接引台', arc: 'L',
       type: 'story', tag: '剧情',
       desc: '接引台在前。人界、灵界、魔界，都留在身后了。',
@@ -1037,21 +1228,6 @@
       reward: { stones: 90000, mats: [['m_zhenlingxue', 2]] },
       clearTitle: '契约已签',
       clearDesc: '他签了。不是贪那点力量——而是这缕神魂已经吞过真仙，他不收，别的更不收。'
-    },
-    {
-      id: 'diyi', side: true, sorder: 26, name: '第一大乘', pos: '灵界·荒原', arc: 'L',
-      type: 'boss', tag: '支线', unlockBy: 'e_diyi',
-      desc: '灵界「第一大乘」的名号，得有人来接。来的人，不打算让。',
-      startLevel: 330, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: null, next: null,
-      diff: 4.5, bossAt: 0, intro: 'diyi', outro: 'diyi_out',
-      enemies: ['zhengdao', 'kui2', 'dajinxiu'],
-      elites: ['第一大乘护法', '大乘傀儡'],
-      mats: ['m_xuantianteng', 'm_zhenlingxue', 'm_yaodan'],
-      boss: { kind: 'mo', name: '第一大乘', hp: 160000, spd: 78, dmg: 200, r: 26, spr: 'neimen', scale: 6.8 },
-      reward: { stones: 120000, mats: [['m_xuantianteng', 2]] },
-      clearTitle: '第一大乘',
-      clearDesc: '他退了半步。灵界「第一大乘」这四个字，从此换了人。'
     },
     {
       id: 'huirenjie', side: true, sorder: 27, name: '重回人界', pos: '人界·越国 山边小村', arc: 'L',
@@ -1561,6 +1737,124 @@
       ['韩立', '（该冲大乘了。）']
     ],
 
+    // -------- 大乘期（V11 / V12）：从大乘圣典到飞升仙界 --------
+    dashengdian: [
+      ['旁白', '大乘庆典摆在城头。红绸从城门一直铺到议事厅，来的人比魔劫那年还齐。'],
+      ['韩立', '（大乘这两个字，摆出来是给人看的。看的人里，有几位是来掂量的。）'],
+      ['旁白', '夜叉族的黑枭王上前一步，连客套都省了。'],
+      ['黑枭王', '新晋大乘？我来试试这「大乘」二字，是不是写错了。'],
+      ['韩立', '（他先动的手。那就好办。）']
+    ],
+    dashengdian_out: [
+      ['旁白', '三招。黑枭王的护体神光碎了两次，第三次他没敢再用。'],
+      ['黑枭王', '……受教。'],
+      ['旁白', '城头上的红绸还在响。他重创了对方，却没杀——今儿是庆典，不是战场。'],
+      ['韩立', '（这一手给出去，往后省很多麻烦。）']
+    ],
+
+    shiyin: [
+      ['旁白', '魔界的边荒没有天。始印之地是一口倒扣的井，井底的法阵正在往回缩。'],
+      ['莫简离', '韩道友……这道锁，本是我们加固上去的。'],
+      ['韩立', '（螟虫之母在吸封印。它不是要破阵，它是在吃阵。）'],
+      ['旁白', '一位青袍老者从阵纹里走出来，一身仙气不与魔气冲。'],
+      ['何康', '灵界的道友。要开这道锁，得有人先替阵眼挨一记。'],
+      ['韩立', '（宝花要神胶丹，何康要螟母的命，我要里头的两个人。这笔账算得过来。）']
+    ],
+    shiyin_out: [
+      ['旁白', '螟母的元神被银纱女子从躯壳里拖出来，何康那一剑跟着落下。井底的阵，松了。'],
+      ['莫简离', '韩道友，我这条命——'],
+      ['韩立', '走。外头还有人等着。'],
+      ['旁白', '出井时宝花站在雾里。紫灵站在更远的地方，只摇了摇头。'],
+      ['韩立', '（她修的是大道，不是我这条路。）']
+    ],
+
+    lingzu: [
+      ['旁白', '灵族不设王座。灵王坐在一池灵水边，水面浮着两枚符的影子。'],
+      ['灵王', '三清雷霄符，我这里有两枚。你要，拿光阴之丝来换。'],
+      ['韩立', '（一缕丝换一枚符。可敖啸的天劫，等不了这么久。）'],
+      ['旁白', '他答得很快：小修罗界，他自己去。'],
+      ['灵王', '那里的修罗蛛，比魔界的圣祖更不讲道理。']
+    ],
+
+    xiaoxiuluo: [
+      ['旁白', '小修罗界没有日月，紫天之下连影子都是淡的。寒潭边站着修罗蛛一族。'],
+      ['樱仙子', '空鱼一族的圣物沉在潭底。你捞得上来，十二枚晶核归你。'],
+      ['韩立', '（潭底有东西在看我们。它不是鱼。）'],
+      ['旁白', '一头背甲刻满古纹的龟兽从潭底翻上来，甲上的字比这座界面还老。'],
+      ['韩立', '（玄武真血。原来在这里。）']
+    ],
+    xiaoxiuluo_out: [
+      ['旁白', '玄武真血入瓶，元魂灯浮在潭面上，被他一并收了。'],
+      ['樱仙子', '洞天圣物叫山海珠。海里的东西认你，不认我们。'],
+      ['旁白', '空鱼一族齐齐俯首。族长把女儿蓝药推到他面前，行的是拜师礼。'],
+      ['韩立', '（十二枚晶核，两枚符。这一趟够了。）']
+    ],
+
+    qingyuangong: [
+      ['旁白', '无涯海的浪一圈圈围着岛。青元宫落成那日，千里之外的天忽然黑了——有人在渡大天劫。'],
+      ['敖啸', '（传音）符……来不及了。'],
+      ['韩立', '（两枚雷霄符揣在袖里。晚了三日。）'],
+      ['旁白', '银月从殿里走出来，眼神平得像一潭水，看见他也没有起伏。'],
+      ['韩立', '（忘情诀。她把自己那点东西，全炼没了。）'],
+      ['旁白', '他把灵芝化身递过去。她接了，指尖顿了一下，很短。']
+    ],
+
+    minghe2: [
+      ['旁白', '冥河之地常年不晴。青元子的雷劫正落在河面上，三道气息从云外插了进来。'],
+      ['黄元子', '青元子，旧账该清了。'],
+      ['韩立', '（专挑渡劫最紧的一刻来。这三个人，等了很久。）'],
+      ['旁白', '河底的雷光里，噬金虫群开始聚拢，聚成一团金的。']
+    ],
+    minghe2_out: [
+      ['旁白', '黄元子与不灭天尊沉进河底，三全道人跑了。噬金虫王第一次现出王相，甲壳上浮着细密的金纹。'],
+      ['青元子', '你这一身……已不是合体了。'],
+      ['韩立', '来讨一杯酒。'],
+      ['旁白', '雷劫散尽，河面平得像一面镜子。']
+    ],
+
+    helian: [
+      ['旁白', '会场的门是空的，人要从禁制里穿过去。台上第一件东西不是法宝，是一页金书。'],
+      ['韩立', '（金阙玉书内页·五藏锻元功。这一页，我找了很久。）'],
+      ['旁白', '偏厅里有人堵住他，手里握着一枚龙鳞，龙气压得廊下的灯都暗了。'],
+      ['田飞儿', '魇龙之血，道果的用处——我都知道。带我过传送阵，我就说。'],
+      ['韩立', '（真龙族的人。她要去的地方，比血天大陆还远。）'],
+      ['旁白', '他点头。第二天，跨大陆传送阵亮了一整夜。']
+    ],
+
+    tiandinggong: [
+      ['旁白', '天鼎宫沉在血天大陆的地底。宫门开着，里头没有活人，只有一座还在转的鼎。'],
+      ['旁白', '路是用尸骨铺的。第九重殿里困着一个人，气息已是大乘。'],
+      ['冰魄仙子', '天鼎真人的衣钵，我接了。他的秘术，我也可以给你。'],
+      ['韩立', '（提炼雷之力。三座极山若再加上这一层，雷劫可借，不必硬扛。）'],
+      ['旁白', '鼎转了一格，殿里的傀儡全活了过来。']
+    ],
+    tiandinggong_out: [
+      ['旁白', '冰魄仙子把玉简递过来时，宫外的天已经红了——那不是晚霞。'],
+      ['冰魄仙子', '有人在血天大陆上，杀了一整片生灵。'],
+      ['韩立', '（真仙下界。）']
+    ],
+
+    xuetian: [
+      ['旁白', '血天大陆的天是红的，不是因为它叫血天——是这一整片生灵，在这三天里被抽干了。'],
+      ['旁白', '一亿人的精血往一处汇。天上悬着一枚血玺，八条血龙在玺下游。'],
+      ['韩立', '（真仙。被界面之力压着，还能有这种威势。）'],
+      ['旁白', '三名大乘迎上去，三息之内，只剩三片血雾。'],
+      ['韩立', '（这不是能硬打的东西。先退，先看清。）']
+    ],
+
+    qiangzhe: [
+      ['旁白', '战场是一片浮空的石台。碧影指着最前头的两个人：凶司王，佛骨王。'],
+      ['碧影', '你只要撑到最后，元罡罩归你。'],
+      ['韩立', '（仙界秘术。这一趟，冲的是它。）'],
+      ['旁白', '石台一块块往下沉。凶司王先动了。']
+    ],
+    qiangzhe_out: [
+      ['旁白', '凶司王倒了，佛骨王的佛身碎了一地。碧影把一枚玉简抛过来。'],
+      ['碧影', '剩下的，你最好别掺和。'],
+      ['旁白', '血骨门已经在召集灭魔会。他去了——然后看着他们全灭。'],
+      ['韩立', '（明知是死局还去。这种人不多了。）']
+    ],
+
     sanjie: [
       ['旁白', '荒原上一座三层高的翻天台，台下灵潮翻涌。五行之劫先落，金木水火土轮着劈。'],
       ['韩立', '（梵圣金身硬接。三座极山抵真雷。噬金虫和涅槃圣体啃黑白雷球。）'],
@@ -1928,17 +2222,6 @@
       unlock: 'tianmo', reward: { stones: 0 }
     },
     {
-      id: 'e_diyi', map: 'xiaoling', name: '灵界第一大乘', spr: 'neimen', scale: 2.0,
-      cond: { level: 330, cleared: ['jiujie'] },
-      lines: [
-        ['旁白', '一个白发老者拦在路中央，手里没有法宝，气息却压得荒原发沉。'],
-        ['第一大乘', '灵界第一大乘。你若要往上走，先过我这关。'],
-        ['韩立', '（第一大乘。这一战，是他等我。）'],
-        ['韩立', '请。']
-      ],
-      unlock: 'diyi', reward: { stones: 0 }
-    },
-    {
       id: 'e_huirenjie', map: 'xiaoling', name: '越国口音的老妇人', spr: 'rogue', scale: 1.8,
       cond: { level: 420, cleared: ['zhenxian'] },
       lines: [
@@ -2002,7 +2285,7 @@
   // 灵界的功法出处：全部随剧情给，坊市不卖高阶法诀
   // 《百脉炼宝诀》＝金阙玉书外七十二页（灵地图）；《惊蛰十二变》＝天鹏族地渊试炼（天鹏圣地）；
   // 《念剑诀》＝V10C1755，重返天渊城、进阶合体之前所得（合体关）；《三炼风雷翅》＝九仙山万宝大会上换来的炼法。
-  const GIVE = { lingdi: 'sk_baimai', tianpeng: 'sk_jingzhe', heti_guan: 'sk_nianjian', jiuxian: 'sk_fenglei3', sanjie: 'sk_jingang2', jiujie: 'sk_wangqing', fsjie: 'sk_niling' };
+  const GIVE = { lingdi: 'sk_baimai', tianpeng: 'sk_jingzhe', heti_guan: 'sk_nianjian', jiuxian: 'sk_fenglei3', sanjie: 'sk_jingang2', qingyuangong: 'sk_wangqing', fsjie: 'sk_niling' };
   for (const mid in GIVE) {
     const m = window.MAPS.find(x => x.id === mid);
     if (!m) continue;
@@ -2259,6 +2542,16 @@
     xiaoling: { bg: { base: '#3a2626', a: '#462e2e', b: '#2b1c1c' }, decor: [['rock', 0.24], ['tuft', 0.06]] },
     modajie:  { bg: { base: '#1e2430', a: '#263040', b: '#161b24' }, decor: [['rock', 0.30], ['tuft', 0.02]] },
     sanjie:   { bg: { base: '#242a36', a: '#2c3443', b: '#1a1f28' }, decor: [['rock', 0.26], ['tuft', 0.04]] },
+    dashengdian: { bg: { base: '#2f3440', a: '#3a4150', b: '#22262f' }, decor: [['rock', 0.14], ['tuft', 0.03]] },
+    shiyin:   { bg: { base: '#201c26', a: '#2a2431', b: '#151219' }, decor: [['rock', 0.36], ['tuft', 0.02]] },
+    lingzu:   { bg: { base: '#2a3a44', a: '#334755', b: '#1d2a32' }, decor: [['rock', 0.16], ['tuft', 0.06]] },
+    xiaoxiuluo: { bg: { base: '#32284a', a: '#3d3159', b: '#231c36' }, decor: [['rock', 0.24], ['tuft', 0.05]] },
+    qingyuangong: { bg: { base: '#25343c', a: '#2d424b', b: '#1a252b' }, decor: [['rock', 0.10], ['tuft', 0.08]] },
+    minghe2:  { bg: { base: '#1d2c2c', a: '#253838', b: '#151f1f' }, decor: [['rock', 0.28], ['tuft', 0.02]] },
+    helian:   { bg: { base: '#3a3327', a: '#463d2f', b: '#2b261c' }, decor: [['rock', 0.10], ['tuft', 0.03]] },
+    tiandinggong: { bg: { base: '#332b24', a: '#40352c', b: '#251f1a' }, decor: [['rock', 0.32], ['tuft', 0.02]] },
+    xuetian:  { bg: { base: '#3d1f22', a: '#4a2729', b: '#2b1617' }, decor: [['rock', 0.24], ['tuft', 0.02]] },
+    qiangzhe: { bg: { base: '#33313a', a: '#3d3a45', b: '#25232a' }, decor: [['rock', 0.20], ['tuft', 0.02]] },
     jiujie:   { bg: { base: '#2a2f3a', a: '#343a47', b: '#1f232c' }, decor: [['rock', 0.24], ['tuft', 0.03]] },
     qunqiang: { bg: { base: '#4a4132', a: '#564c3a', b: '#332d23' }, decor: [['rock', 0.30], ['tuft', 0.04]] },
     xianshi:  { bg: { base: '#2b2438', a: '#342c43', b: '#1e1929' }, decor: [['rock', 0.20], ['tuft', 0.04]] },
@@ -2285,7 +2578,9 @@
   for (const id of ['qinluo', 'anyuan', 'luori', 'shanku', 'tianyuan', 'lingdi', 'muzu', 'zhenchan', 'tianpeng', 'minghe',
                     'lianxu', 'fengyuan', 'huohu', 'shisan', 'mojin', 'guanghan', 'heti_guan',
                     'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling', 'modajie',
-                    'sanjie', 'jiujie', 'qunqiang', 'xianshi', 'zhenxian', 'zhangtianping', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie',
+                    'sanjie', 'dashengdian', 'shiyin', 'lingzu', 'xiaoxiuluo', 'qingyuangong', 'minghe2', 'helian',
+                    'tiandinggong', 'xuetian', 'qiangzhe',
+                    'jiujie', 'qunqiang', 'xianshi', 'zhenxian', 'zhangtianping', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie',
                     'linghuang', 'zhandacheng', 'shengshi', 'heihu', 'baiguang', 'tianmo', 'diyi', 'huirenjie', 'yuyang', 'yuyang_dou']) {
     const m = window.MAPS.find(x => x.id === id);
     const sc = window.MAP_SCENERY[id];

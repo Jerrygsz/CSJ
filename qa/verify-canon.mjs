@@ -238,7 +238,9 @@ const want6 = ['qixuan', 'houshan', 'mishi', 'tainan', 'huangfeng', 'yaoyuan', '
   'lianxu', 'fengyuan', 'huohu', 'shisan', 'mojin', 'guanghan', 'heti_guan',
   'liangzu', 'jiuxian', 'heiyu', 'longjia', 'shengdao', 'zhenling', 'mojie', 'diyuan2',
   'moban', 'huangquan', 'yitian', 'tianzhan', 'xueya', 'huanxiao', 'moyuan', 'modajie', 'lanpu', 'muzu2',
-  'sanjie', 'xiaoling', 'jiujie', 'qunqiang', 'xianshi', 'zhenxian', 'zhangtianping', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie',
+  'sanjie', 'dashengdian', 'shiyin', 'lingzu', 'xiaoxiuluo', 'qingyuangong', 'minghe2', 'helian',
+  'tiandinggong', 'xuetian', 'qiangzhe', 'xiaoling', 'qunqiang', 'xianshi', 'zhangtianping', 'zhanxian',
+  'diyi', 'huimoyuan', 'daoguo', 'renzu', 'jiujie', 'zhenxian', 'fsjie', 'xianjie',
   // 仙界篇（X1–X5）：风起灵寰 → 重回仙界 → 时空迷踪 → 大罗之争 → 大道归一 → 飞羽
   'linghuan', 'suxing', 'lingyan', 'xiaoping', 'tiangui', 'poxu', 'wumengdao', 'chulong', 'huijie', 'shijin', 'xianyun', 'shuiyan', 'xisha', 'taiyi',
   'dijiang', 'xingqi', 'dadi', 'xiedao', 'jingong', 'taisui', 'chongchao', 'suidian', 'daluo', 'wubao',
