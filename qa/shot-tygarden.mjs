@@ -22,11 +22,27 @@ await fresh();
 await openGarden();
 await page.screenshot({ path: join(root, 'qa', 'shot-tygarden-empty.png') });
 
-await page.evaluate(() => { window.__FR.addBag('m_zhilongguo', 3); window.__FR.transplant(); window.__FR.setGarden('tygarden', 26); window.__FR.cave('tycave'); });
+// 原著口径：黑凤族只给一枚，这一枚当场留种，袋里归零
+await page.evaluate(() => { window.__FR.addBag('m_zhilongguo', 1); window.__FR.transplant(); window.__FR.setGarden('tygarden', 26); window.__FR.cave('tycave'); });
 await page.waitForTimeout(300);
 await page.click('[data-ctab="garden"]');
 await page.waitForTimeout(400);
 await page.screenshot({ path: join(root, 'qa', 'shot-tygarden-planted.png') });
+
+// 丹炉：芝龙果 0/1 时点料名，看「去哪取」有没有指到自家药圃
+await page.evaluate(() => { window.__FR.cave('tycave'); });
+await page.click('[data-ctab="alchemy"]');
+await page.waitForTimeout(400);
+await page.evaluate(() => {
+  const rows = Array.from(document.querySelectorAll('.recrow'));
+  const row = rows.find(r => r.textContent.indexOf('腾龙丹') >= 0);
+  if (!row) return;
+  row.scrollIntoView({ block: 'center' });
+  const sp = row.querySelector('.mat.clk[data-mat="m_zhilongguo"]');
+  if (sp) sp.click();
+});
+await page.waitForTimeout(400);
+await page.screenshot({ path: join(root, 'qa', 'shot-tenglong-mat-hint.png') });
 
 await browser.close(); server.close();
 console.log('shots done');

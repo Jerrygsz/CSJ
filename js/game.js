@@ -236,6 +236,7 @@
         greenLiquid: s.greenLiquid || 0,
         gift_zhuji: !!s.gift_zhuji,
         gift_tenglong: !!s.gift_tenglong,
+        gift_zhilongguo: !!s.gift_zhilongguo,
         // 移栽品种老存档：没有这个字段就补成空账
         gardenSeed: (s.gardenSeed && typeof s.gardenSeed === 'object') ? s.gardenSeed : {},
         wounded: (s.wounded && typeof s.wounded === 'object') ? s.wounded : null,
@@ -291,6 +292,25 @@
     save.inventory.f_tenglong = 1;
     save.totalItems = (save.totalItems || 0) + 1;
     pendingTenglongGift = true;
+    writeSave();
+  })();
+
+  // 老存档兜底：黑凤族已清、天渊城洞府已在，但药圃里始终没芝龙果、袋里也一枚不剩
+  // （旧版 boss 直接给成品丹、或后来两炉都炼废了）。那就直接往药圃补种一株 ——
+  // 芝龙果全游戏只有黑凤族那一枚，不补这一下，腾龙丹这条线就永远断在这里。
+  // 只补一次；手里还有存果的走正常移栽（见 autoTransplant），不重复给。
+  let pendingZhilongPlant = false;
+  (function backfillZhilongSeed() {
+    if (save.gift_zhilongguo) return;
+    save.gift_zhilongguo = true;
+    if ((save.cleared || []).indexOf('heifeng') < 0) { writeSave(); return; }
+    if (save.caves.indexOf('tycave') < 0) { writeSave(); return; }
+    save.gardenSeed = save.gardenSeed || {};
+    const seeded = save.gardenSeed.tygarden || [];
+    if (seeded.indexOf('m_zhilongguo') >= 0) { writeSave(); return; }
+    if ((save.inventory.m_zhilongguo || 0) > 0) { writeSave(); return; }
+    save.gardenSeed.tygarden = seeded.concat(['m_zhilongguo']);
+    pendingZhilongPlant = true;
     writeSave();
   })();
 
@@ -5403,11 +5423,16 @@
         const r = RARITY[it.rarity];
         extra += '<div class="lootrow reward"><b style="color:' + r.color + '">' + it.name + '</b><span>章节赠予</span></div>';
       }
+      const trIds = (gained.transplants || []).map(x => x.id);
       for (const mm of (gained.mats || [])) {
         const r = RARITY[mm.item.rarity];
-        extra += '<div class="lootrow reward"><b style="color:' + r.color + '">' + mm.item.name + '</b><span>药材 ×' + mm.n + '</span></div>';
+        const planted = trIds.indexOf(mm.item.id) >= 0;
+        extra += '<div class="lootrow reward"><b style="color:' + r.color + '">' + mm.item.name + '</b><span>药材 ×' + mm.n +
+          (planted ? ' · 留种入药圃 ×1' : '') + '</span></div>';
       }
       for (const tm of (gained.transplants || [])) {
+        // 战利品里当场留种的，已在上面那行标过，不重复列
+        if ((gained.mats || []).some(x => x.item.id === tm.id)) continue;
         extra += '<div class="lootrow reward"><b style="color:#9fe0c0">移栽 · ' + tm.name + '</b><span>留种 ×1 入药圃</span></div>';
       }
     }
@@ -6577,11 +6602,12 @@
         if (hit && drops.indexOf(m.name) < 0) drops.push(m.name);
       }
       if (drops.length) bits.push('掉落：' + drops.slice(0, 2).join('、') + (drops.length > 2 ? ' 等处' : ''));
-      // 药圃：自家洞府里种的
+      // 药圃：自家洞府里种的（基础品种 + 移栽进来的品种都算）
       const grows = [];
       for (const cid in (window.CAVES || {})) {
         for (const g of (((window.CAVES[cid] || {}).gardens) || [])) {
-          if ((g.pool || []).indexOf(id) >= 0 && grows.indexOf(g.name) < 0) grows.push(g.name);
+          const seeded = ((save.gardenSeed || {})[g.id]) || [];
+          if (((g.pool || []).indexOf(id) >= 0 || seeded.indexOf(id) >= 0) && grows.indexOf(g.name) < 0) grows.push(g.name);
         }
       }
       if (grows.length) bits.push('药圃可种：' + grows.slice(0, 2).join('、') + (grows.length > 2 ? ' 等处' : ''));
@@ -6895,6 +6921,8 @@
       if (save.inventory[m.id] <= 0) delete save.inventory[m.id];
       save.totalItems = Math.max(0, (save.totalItems || 0) - 1);
       seed.push(m.id);
+      // 这味的「去哪取」缓存要重算：多了一条「药圃可种」
+      try { delete ITEM_HINT_CACHE[m.id]; } catch (e) {}
       planted.push(m);
     }
     if (planted.length) {
@@ -8182,6 +8210,7 @@
     G.breakCaveId = null; G.breakPending = null;  // 清掉过图会话态：避免重生后误吃原著洞府 +30%
     save.gift_zhuji = false;
     save.gift_tenglong = false;
+    save.gift_zhilongguo = false;
     save.gardenSeed = {};     // 洞府重开：移栽的品种一并清掉（基础品种写在数据里，会随洞府重开回来）
     save.repBlack = 0; save.repWhite = 0; save.identity = 'han'; save.liUnlocked = false;
     if (G.player) { resetRunBonus(); G.gear = {}; G.runLoot = []; }
@@ -9062,6 +9091,10 @@
   if (pendingTenglongGift) {
     pendingTenglongGift = false;
     setTimeout(function () { try { banner('黑凤旧债 · 补授《腾龙丹方》一枚'); Sfx.buff(); } catch (e) {} }, 1100);
+  }
+  if (pendingZhilongPlant) {
+    pendingZhilongPlant = false;
+    setTimeout(function () { try { banner('旧账 · 灵界药圃补种芝龙果一株'); Sfx.gem(); } catch (e) {} }, 1500);
   }
   requestAnimationFrame(loop);
 })();

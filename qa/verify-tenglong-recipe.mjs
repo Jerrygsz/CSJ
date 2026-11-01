@@ -45,6 +45,8 @@ const data = await page.evaluate(() => {
   const hf = window.MAPS.find(m => m.id === 'heifeng');
   out.boss = hf ? { items: hf.reward.items, mats: hf.reward.mats, stones: hf.reward.stones } : null;
   out.hint = window.BREAK_ITEM_HINTS ? window.BREAK_ITEM_HINTS.tenglong : null;
+  out.guoHint = window.BREAK_ITEM_HINTS ? window.BREAK_ITEM_HINTS.m_zhilongguo : null;
+  out.hfMats = (hf && hf.mats) || null;
   const b150 = window.BREAKTHROUGH.find(x => x.lv === 150);
   out.keepOnFail = b150 ? !!b150.keepOnFail : false;
   return out;
@@ -57,11 +59,15 @@ ok(data.recipe && data.recipe.mats.length === 3 && data.recipe.cost === 5000 && 
   'r_tenglong 用料=芝龙果/真灵之血/真灵鳞、cost=5000、req=132', data.recipe && data.recipe.mats);
 ok(data.boss && data.boss.items.indexOf('f_tenglong') >= 0 && data.boss.items.indexOf('tenglong') < 0,
   '黑凤族 boss 战利品改为掉《腾龙丹方》(f_tenglong)，不再直接掉成品丹', data.boss && data.boss.items);
-ok(data.boss && data.boss.mats[0][1] === 3 && data.boss.mats[1][1] === 2 && data.boss.mats[2][1] === 6,
-  'boss 主材料：芝龙果×3（留 1 株作种移栽 / 净剩 2 够炼两炉）、真灵之血×2、真灵鳞×6', data.boss && data.boss.mats);
+ok(data.boss && data.boss.mats[0][1] === 1 && data.boss.mats[1][1] === 2 && data.boss.mats[2][1] === 6,
+  'boss 主材料按原著：芝龙果×1（同行诸人各分一枚）、真灵之血×2、真灵鳞×6', data.boss && data.boss.mats);
+ok(data.hfMats && data.hfMats.indexOf('m_zhenlingxue') >= 0,
+  '黑凤族小怪掉落池含真灵之血（成算低，只靠封赏两炉炼废就断供）', data.hfMats);
 ok(data.hint && data.hint.indexOf('丹方') >= 0 && data.hint.indexOf('丹炉') >= 0,
   'BREAK_ITEM_HINTS.tenglong 指明「丹方 + 洞府丹炉自炼」', data.hint);
 ok(data.keepOnFail, 'lv150 破境关 keepOnFail=true（失败不退丹）');
+ok(data.guoHint && data.guoHint.indexOf('药圃') >= 0,
+  'BREAK_ITEM_HINTS.m_zhilongguo 指明唯一持续来源是灵界药圃', data.guoHint);
 
 // ---------- ② 炼丹闭环：持方子在 tycave 丹炉炼出腾龙丹 ----------
 const craft = await page.evaluate(() => {

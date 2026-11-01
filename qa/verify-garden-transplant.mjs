@@ -59,8 +59,8 @@ const fresh = async () => { await page.evaluate((k) => { localStorage.removeItem
   ok(data.flag === 'tygarden', '芝龙果带 transplant:tygarden 标记', data.flag);
   ok(data.hasGarden && data.transplant, '天渊城洞府已开「灵界药圃」且标注 transplant', data.hasGarden);
   ok(data.pool0 && data.pool0.length === 0, '灵界药圃基础品种为空（全靠移栽）', data.pool0);
-  ok(data.reward && data.reward.mats[0][0] === 'm_zhilongguo' && data.reward.mats[0][1] === 3,
-    '黑凤族给芝龙果 ×3（留 1 株作种 + 够炼两炉）', data.reward && data.reward.mats);
+  ok(data.reward && data.reward.mats[0][0] === 'm_zhilongguo' && data.reward.mats[0][1] === 1,
+    '黑凤族只给芝龙果 ×1（按原著：同行诸人各分一枚）', data.reward && data.reward.mats);
 
   // ---------- ④ 未拥有洞府：不移栽 ----------
   await fresh();
@@ -76,7 +76,7 @@ const fresh = async () => { await page.evaluate((k) => { localStorage.removeItem
   await fresh();
   r = await page.evaluate(() => {
     window.__FR.cave('tycave');          // 开洞府（此刻手里还没芝龙果，不会触发移栽）
-    window.__FR.addBag('m_zhilongguo', 3);
+    window.__FR.addBag('m_zhilongguo', 1);        // 原著口径：到手只有一枚
     const before = window.__FR.bagCount('m_zhilongguo');
     const planted = window.__FR.transplant();
     const bag = window.__FR.bagCount('m_zhilongguo');
@@ -84,7 +84,7 @@ const fresh = async () => { await page.evaluate((k) => { localStorage.removeItem
     return { before, planted, bag, seed };
   });
   ok(r.planted.length === 1 && r.planted[0] === 'm_zhilongguo', '拥有洞府后自动移栽芝龙果', r.planted);
-  ok(r.before === 3 && r.bag === 2, '移栽消耗 1 株作种（3 → 2）', r);
+  ok(r.before === 1 && r.bag === 0, '移栽消耗唯一一枚作种（1 → 0，此后全靠药圃）', r);
   ok((r.seed.tygarden || []).indexOf('m_zhilongguo') >= 0, 'gardenSeed.tygarden 记入芝龙果', r.seed);
 
   // ---------- ③ 重复巡检不重复消耗 ----------
@@ -92,7 +92,7 @@ const fresh = async () => { await page.evaluate((k) => { localStorage.removeItem
     const again = window.__FR.transplant();
     return { again, bag: window.__FR.bagCount('m_zhilongguo') };
   });
-  ok(r.again.length === 0 && r.bag === 2, '再次巡检不重复移栽、不再扣库存', r);
+  ok(r.again.length === 0 && r.bag === 0, '再次巡检不重复移栽、不再扣库存', r);
 
   // ---------- ⑤ 移栽后正常采收 ----------
   r = await page.evaluate(() => {
@@ -104,7 +104,7 @@ const fresh = async () => { await page.evaluate((k) => { localStorage.removeItem
     return { st, delta, before, after };
   });
   ok(r.st.ids.length === 1 && r.st.ids[0] === 'm_zhilongguo', '药圃品种 = 移栽进来的芝龙果', r.st);
-  ok(r.before === 2 && r.after === 10, '采收 8 株全为芝龙果（2 → 10）', r);
+  ok(r.before === 0 && r.after === 8, '采收 8 株全为芝龙果（0 → 8，唯一来源就是药圃）', r);
 
   // ---------- ⑥ 空圃不累计、收不出东西 ----------
   await fresh();
@@ -118,6 +118,26 @@ const fresh = async () => { await page.evaluate((k) => { localStorage.removeItem
   });
   ok(r.st0.ids.length === 0 && r.st1.ids.length === 0, '未移栽的药圃没有品种', r.st0);
   ok(!r.delta || Object.keys(r.delta).length === 0, '空圃采收不产出任何东西', r.delta);
+
+  // ---------- ⑦ 端到端：黑凤族唯一一枚 → 留种 → 采收 → 开炉 ----
+  await fresh();
+  r = await page.evaluate(() => {
+    const FR = window.__FR;
+    FR.cave('tycave');
+    FR.setLevel(200);
+    FR.setStones(100000);
+    FR.addBag('f_tenglong', 1);
+    FR.addBag('m_zhenlingxue', 2);
+    FR.addBag('m_zhenlinglin', 6);
+    FR.addBag('m_zhilongguo', 1);      // 战利品：只有这一枚
+    const planted = FR.transplant();
+    const bag0 = FR.bagCount('m_zhilongguo');
+    FR.setGarden('tygarden', 3);
+    FR.harvest('tygarden');
+    return { planted, bag0, bag1: FR.bagCount('m_zhilongguo') };
+  });
+  ok(r.planted.length === 1 && r.bag0 === 0, '端到端：唯一一枚当场留种，袋里归零', r);
+  ok(r.bag1 === 3, '端到端：药圃一收 3 枚，够开 3 炉（成算 42%，不再受「只给几枚」限制）', r);
 
   ok(errors.length === 0, '全程无页面 JS 报错', errors.slice(0, 3));
   console.log('\n  结果：' + pass + ' 通过 / ' + fail + ' 失败');

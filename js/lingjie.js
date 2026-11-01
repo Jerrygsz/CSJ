@@ -106,7 +106,9 @@
   // 腾龙丹为炼虚级灵药（V9C1364）。修为门槛沿用 breakLevelOk：lv-1 = 149（化神后期）。
   // 灵界两味破境丹的「去哪取」提示（门槛按「拿到手的那一级」写，不是按破境之后写）：
   Object.assign(window.BREAK_ITEM_HINTS, {
-    tenglong: '黑凤族领地一战得《腾龙丹方》与芝龙果／真灵之血／真灵鳞片三味主料（一趟够炼两炉）。芝龙果自动留一株作种移入天渊城洞府「灵界药圃」，此后定期可采。携方回洞府「丹炉」自炼腾龙丹，方子不毁可反复开炉（V9C1364）。',
+    tenglong: '黑凤族领地一战得《腾龙丹方》。芝龙果全篇只有一枚（原著：木族之行得手，同行诸人各分一枚），到手即留种移入天渊城洞府「灵界药圃」，此后打图就长、回洞府定期采收，取之不绝；真灵之血／鳞片另攒。携方回洞府「丹炉」自炼，方子不毁可反复开炉（V9C1364）。',
+    // 丹炉里「芝龙果 0/1」点料名时给的去处：别让人以为只能等 boss，唯一的持续来源是自家药圃
+    m_zhilongguo: '黑凤族荒岭只得一枚（原著同行诸人各分一枚）。这一枚会当场留种移入天渊城洞府「灵界药圃」，此后在战斗图里自行生长、回洞府采收即得，取之不尽（V9C1364）。',
     heti:     '掉落：广寒界深处玉台上那一枚（炼虚后期冲合体用的丹药；V10C1770）。'
   });
   window.BREAKTHROUGH.push({
@@ -231,9 +233,11 @@
       diff: 3.5, bossAt: 0, intro: 'heifeng', outro: 'heifeng_out',
       enemies: ['yaoshou2', 'yaoxiu', 'dajinxiu'],
       elites: ['黑凤族长老', '黑凤族守卫'],
-      mats: ['m_zhenlinglin', 'm_yaodan', 'm_gengjing'],
+      mats: ['m_zhenlinglin', 'm_zhenlingxue', 'm_yaodan', 'm_gengjing'],
       boss: { kind: 'beast', name: '黑凤族三妖', hp: 52000, spd: 66, dmg: 96, r: 23, spr: 'haishou', scale: 6.2, summon: 'yaoshou2' },
-      reward: { stones: 18000, items: ['f_tenglong'], mats: [['m_zhilongguo', 3], ['m_zhenlingxue', 2], ['m_zhenlinglin', 6]] },
+      // 原著口径：芝龙果「每人分得一枚」——韩立手上就只有一枚，不再为爽感多发。
+      // 这一枚当场留种移入灵界药圃（绿液催着，此后定期采收），持久供给靠药圃，不靠白送。
+      reward: { stones: 18000, items: ['f_tenglong'], mats: [['m_zhilongguo', 1], ['m_zhenlingxue', 2], ['m_zhenlinglin', 6]] },
       clearTitle: '荒岭已清',
       clearDesc: '三妖伏诛，鳞片、真灵之血、芝龙果到手，《腾龙丹方》也落进怀里。携方回天渊城洞府丹炉，一炉成丹，炼虚关的炉子，有着落了。'
     },

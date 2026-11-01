@@ -90,6 +90,26 @@ const base = (extra) => Object.assign({
   });
   ok(craftable === true, '场景⑤：补发的 f_tenglong 使 r_tenglong 配方可炼（持方即可开炉）', craftable);
 
+  // ---------- ⑥ 老存档：黑凤已清、洞府已在、药圃无种、袋里无果 → 补种一株 ----------
+  await page.evaluate((k) => { localStorage.removeItem(k); }, KEY);
+  await seed(base({ cleared: ['anyuan', 'heifeng'], caves: ['tycave'], inventory: {} }));
+  await reload();
+  let g6 = await page.evaluate(() => ({ seed: window.__FR.info().gardenSeed, st: window.__FR.gardenState('tygarden') }));
+  ok((g6.seed.tygarden || []).indexOf('m_zhilongguo') >= 0, '场景⑥：药圃补种芝龙果（旧档不再断在腾龙丹这一步）', g6.seed);
+  ok(g6.st.ids.indexOf('m_zhilongguo') >= 0, '场景⑥：该地块从此可长芝龙果', g6.st);
+
+  // ---------- ⑦ 补种后：可正常采收，且不重复补 ----------
+  const g7 = await page.evaluate(() => {
+    window.__FR.setGarden('tygarden', 2);
+    window.__FR.harvest('tygarden');
+    return window.__FR.bagCount('m_zhilongguo');
+  });
+  ok(g7 === 2, '场景⑦：补种后采收即得芝龙果 ×2', g7);
+  await reload();
+  const g8 = await page.evaluate(() => ({ seed: window.__FR.info().gardenSeed, bag: window.__FR.bagCount('m_zhilongguo') }));
+  ok((g8.seed.tygarden || []).filter(x => x === 'm_zhilongguo').length === 1 && g8.bag === 2,
+    '场景⑦：再次读档不重复补种、库存不被动', g8);
+
   ok(errors.length === 0, '全程无页面 JS 报错', errors.slice(0, 3));
   console.log('\n  结果：' + pass + ' 通过 / ' + fail + ' 失败');
   await browser.close();
