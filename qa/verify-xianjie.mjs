@@ -321,13 +321,13 @@ ok(/雷夔/.test(V45.lhText) && /道祖遗物/.test(V45.lhText) && /玄天剑灵
   '雷海炼剑用原著实词：雷夔 / 道祖遗物 / 玄天剑灵', V45.lhText.slice(0, 20));
 ok(/陈如烟/.test(V45.fyText) && /水之本源道祖/.test(V45.fyText) && /善尸/.test(V45.fyText),
   '赴约用原著实词：陈如烟 / 水之本源道祖 / 善尸', V45.fyText.slice(0, 20));
-ok(/古或今/.test(V45.sfText) && /李元究/.test(V45.sfText) && /十方万仙/.test(V45.sfText),
-  '十方万仙用原著实词：古或今 / 李元究 / 十方万仙', V45.sfText.slice(0, 20));
+ok(/十方万仙阵/.test(V45.sfText) && /东离虎/.test(V45.sfText) && /菩提宴/.test(V45.sfText),
+  '十方万仙阵用原著实词：十方万仙阵 / 东离虎 / 菩提宴（阵不是宴，古或今不在阵里）', V45.sfText.slice(0, 20));
 ok(/三千大道/.test(V45.dyText) && /混沌法则/.test(V45.dyText) && /轮回殿主/.test(V45.dyText),
   '大道归一用原著实词：三千大道 / 混沌法则 / 轮回殿主', V45.dyText.slice(0, 20));
 ok(/无边海/.test(V45.feText) && /瓶灵/.test(V45.feText) && /大罗境巅峰/.test(V45.feText) && /厉飞雨/.test(V45.feText),
   '飞羽用原著实词：无边海 / 瓶灵 / 大罗境巅峰 / 厉飞雨', V45.feText.slice(0, 20));
-ok(V45.x5.filter(m => m.boss).map(m => m.boss).join(',') === '妙法仙尊,骨皇,古或今,古或今·混沌之身',
+ok(V45.x5.filter(m => m.boss).map(m => m.boss).join(',') === '妙法仙尊,骨皇,东离虎·道祖,古或今·混沌之身',
   '卷五首领是原著人物', V45.x5.map(m => m.boss));
 
 // ---- 4) 仙界材料 / 成品 / 功法 / 敌人 ----
