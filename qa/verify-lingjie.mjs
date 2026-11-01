@@ -36,11 +36,12 @@ const run = (body) => page.evaluate(`(()=>{const F=window.__FR;${body}})()`);
 // ---- 1) 地图存在与 chain ----
 const ALL_IDS = ['qinluo', 'anyuan', 'luori', 'shanku', 'tianyuan', 'lingdi', 'muzu', 'zhenchan', 'tianpeng', 'minghe',
   'lianxu', 'fengyuan', 'huohu', 'shisan', 'mojin', 'guanghan', 'heti_guan',
-  'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling',
-  'modajie', 'sanjie', 'jiujie', 'qunqiang', 'xianshi', 'zhenxian', 'zhangtianping', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie'];
+  'liangzu', 'jiuxian', 'heiyu', 'longjia', 'shengdao', 'zhenling', 'mojie', 'diyuan2',
+  'moban', 'huangquan', 'yitian', 'tianzhan', 'xueya', 'huanxiao', 'moyuan', 'modajie', 'lanpu', 'muzu2',
+  'sanjie', 'xiaoling', 'jiujie', 'qunqiang', 'xianshi', 'zhenxian', 'zhangtianping', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie'];
 const maps = await page.evaluate((ids) => window.MAPS.filter(m => ids.includes(m.id))
   .map(m => ({ id: m.id, type: m.type, unlock: m.unlock, next: m.next, startLevel: m.startLevel, endLevel: m.endLevel })), ALL_IDS);
-ok(maps.length === 38, '灵界三十八张主线图已注册', maps);
+ok(maps.length === 48, '灵界四十八张主线图已注册', maps);
 const chain = await page.evaluate((ids) => {
   const g = id => window.MAPS.find(m => m.id === id) || {};
   const o = { fs: g('feisheng').next };
@@ -73,13 +74,17 @@ ok(chain.gh && chain.gh.unlock === 'mojin' && chain.gh.next === 'heti_guan', '�
 ok(chain.hg && chain.hg.unlock === 'guanghan', '合体关 unlock=广寒界', chain.hg);
 ok(chain.hg && chain.hg.endLevel === 200, '破境图 heti_guan 的 endLevel=200（洞府突破可反查）', chain.hg);
 
-// V10–V12 链（含「两族大乘 / 魔斑降世 / 魔源海 / 飞升之劫」四个过场节点）
+// V10–V12 链（V10 按原著重排成 19 图；小灵天挪到三劫之后，属大乘期一段）
 const LINKS = [
-  ['heti_guan', 'liangzu', 200], ['liangzu', 'shengdao', null], ['shengdao', 'mojie', null],
-  ['mojie', 'moban', null], ['moban', 'yitian', null], ['yitian', 'huangquan', null],
-  ['huangquan', 'moyuan', null], ['moyuan', 'xiaoling', null], ['xiaoling', 'modajie', null],
-  ['modajie', 'sanjie', null],
-  ['sanjie', 'jiujie', 260], ['jiujie', 'qunqiang', null], ['qunqiang', 'xianshi', null],
+  ['heti_guan', 'liangzu', 200], ['liangzu', 'jiuxian', null], ['jiuxian', 'heiyu', null],
+  ['heiyu', 'longjia', null], ['longjia', 'shengdao', null], ['shengdao', 'zhenling', null],
+  ['zhenling', 'mojie', null], ['mojie', 'diyuan2', null],
+  ['diyuan2', 'moban', null], ['moban', 'huangquan', null], ['huangquan', 'yitian', null],
+  ['yitian', 'tianzhan', null], ['tianzhan', 'xueya', 240], ['xueya', 'huanxiao', null],
+  ['huanxiao', 'moyuan', null], ['moyuan', 'modajie', null],
+  ['modajie', 'lanpu', null], ['lanpu', 'muzu2', null], ['muzu2', 'sanjie', null],
+  ['sanjie', 'xiaoling', 260], ['xiaoling', 'jiujie', null],
+  ['jiujie', 'qunqiang', null], ['qunqiang', 'xianshi', null],
   ['xianshi', 'zhenxian', null], ['zhenxian', 'zhangtianping', 420],
   ['zhangtianping', 'zhanxian', null],
   ['zhanxian', 'huimoyuan', null],
@@ -93,7 +98,7 @@ for (const [from, to, endLv] of LINKS) {
 ok(chain.xianjie && chain.xianjie.next === 'linghuan', '飞升仙界不是终点：接仙界篇·灵寰界', chain.xianjie);
 
 // 过场节点：都是 story 图，且都有对白（没有对白就是空图，等于白走一趟）
-const PASSING = ['liangzu', 'moban', 'moyuan'];
+const PASSING = ['liangzu', 'jiuxian', 'heiyu', 'shengdao', 'mojie', 'moban', 'xueya', 'moyuan', 'xiaoling'];
 const passInfo = await page.evaluate((ids) => {
   const o = {};
   for (const id of ids) {
@@ -128,7 +133,7 @@ ok(!!b200, 'BREAKTHROUGH 含 lv200', b200);
 ok(b200 && b200.realm === '合体初期', 'lv200 = 合体初期', b200 && b200.realm);
 ok(b200 && b200.items && b200.items[0] && b200.items[0][0] === 'heti', '合体关需要万妙丹（广寒界玉台所得）', b200 && b200.items);
 ok(b200 && b200.mats && b200.mats[0] && b200.mats[0][0] === 'm_zhenlingxue', '合体关需要真灵之血', b200 && b200.mats);
-ok(b200 && b200.story && b200.story[0] && b200.story[0].id === 'guanghan', '合体关需已通广寒界', b200 && b200.story);
+ok(b200 && b200.story && b200.story[0] && b200.story[0].id === 'tianyuan', '合体关落在天渊城洞府（原著 1565 岁闭关半年进阶）', b200 && b200.story);
 
 const high = await page.evaluate(() => [260, 330, 420].map(lv => {
   const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv);
@@ -138,8 +143,8 @@ ok(high.every(Boolean), 'BREAKTHROUGH 含 260 / 330 / 420', high);
 ok(high[0] && high[0].realm === '大乘期', 'lv260 = 大乘期', high[0]);
 ok(high[1] && high[1].realm === '渡劫期', 'lv330 = 渡劫期', high[1]);
 ok(high[2] && high[2].realm === '真仙', 'lv420 = 真仙', high[2]);
-ok(high[0] && high[0].mats.some(m => m[0] === 'm_xuantianteng') && high[0].mats.some(m => m[0] === 'm_zhenlingxue'), '大乘关需玄天仙藤 + 真灵之血', high[0]);
-ok(high[0] && high[0].story[0].id === 'modajie', '大乘关需已通魔界大劫（洗灵池）', high[0]);
+ok(high[0] && high[0].mats.some(m => m[0] === 'm_wuxingzhenguang') && high[0].mats.some(m => m[0] === 'm_zhenlingxue'), '大乘关需阴阳大五行真光（第三座极山）+ 真灵之血', high[0]);
+ok(high[0] && high[0].story[0].id === 'sanjie', '大乘关落在翻天台（三劫）', high[0]);
 ok(high[1] && high[1].story[0].id === 'sanjie', '渡劫关需已通三劫', high[1]);
 ok(high[2] && high[2].story[0].id === 'jiujie', '真仙关需已通九劫', high[2]);
 ok(await page.evaluate(() => (window.BREAKTHROUGH || []).some(x => x.lv === 260) &&
@@ -165,23 +170,23 @@ await run(`F.clearProgress();F.setLevel(140);F.clearMap('minghe');F.addItem('ten
 ok(await page.evaluate(() => window.__FR.breakCan(150)) === false, '修为未到化神后期(149) → breakCan(150)=false');
 
 // ---- 4b) 合体关（200）备齐判定 ----
-await run(`F.clearProgress();F.setLevel(199);F.god(true);F.clearMap('guanghan');F.addItem('heti',1);F.addItem('m_zhenlingxue',2);F.setStones(35000);`);
+await run(`F.clearProgress();F.setLevel(199);F.god(true);F.clearMap('tianyuan');F.addItem('heti',1);F.addItem('m_zhenlingxue',2);F.setStones(35000);`);
 ok(await page.evaluate(() => window.__FR.breakCan(200)) === true, '修为199 + 合体丹 + 真灵之血×2 + 已通广寒界 → breakCan(200)=true');
 
-await run(`F.clearProgress();F.setLevel(199);F.clearMap('guanghan');F.addItem('m_zhenlingxue',2);F.setStones(35000);`);
+await run(`F.clearProgress();F.setLevel(199);F.clearMap('tianyuan');F.addItem('m_zhenlingxue',2);F.setStones(35000);`);
 ok(await page.evaluate(() => window.__FR.breakCan(200)) === false, '缺合体丹 → breakCan(200)=false');
 
 await run(`F.clearProgress();F.setLevel(199);F.addItem('heti',1);F.addItem('m_zhenlingxue',2);F.setStones(35000);`);
 ok(await page.evaluate(() => window.__FR.breakCan(200)) === false, '未通广寒界 → breakCan(200)=false');
 
-await run(`F.clearProgress();F.setLevel(190);F.clearMap('guanghan');F.addItem('heti',1);F.addItem('m_zhenlingxue',2);F.setStones(35000);`);
+await run(`F.clearProgress();F.setLevel(190);F.clearMap('tianyuan');F.addItem('heti',1);F.addItem('m_zhenlingxue',2);F.setStones(35000);`);
 ok(await page.evaluate(() => window.__FR.breakCan(200)) === false, '修为未到炼虚后期(199) → breakCan(200)=false');
 
 // ---- 4c) 260 / 330 / 420 备齐判定 ----
-await run(`F.clearProgress();F.setLevel(259);F.god(true);F.clearMap('modajie');F.addItem('m_xuantianteng',1);F.addItem('m_zhenlingxue',3);F.setStones(65000);`);
-ok(await page.evaluate(() => window.__FR.breakCan(260)) === true, '260 备齐（仙藤+真灵血+通魔界大劫）→ true');
-await run(`F.clearProgress();F.setLevel(259);F.clearMap('modajie');F.addItem('m_zhenlingxue',3);F.setStones(65000);`);
-ok(await page.evaluate(() => window.__FR.breakCan(260)) === false, '260 缺玄天仙藤 → false');
+await run(`F.clearProgress();F.setLevel(259);F.god(true);F.clearMap('sanjie');F.addItem('m_wuxingzhenguang',1);F.addItem('m_zhenlingxue',3);F.setStones(65000);`);
+ok(await page.evaluate(() => window.__FR.breakCan(260)) === true, '260 备齐（五行真光+真灵血+翻天台已开）→ true');
+await run(`F.clearProgress();F.setLevel(259);F.clearMap('sanjie');F.addItem('m_zhenlingxue',3);F.setStones(65000);`);
+ok(await page.evaluate(() => window.__FR.breakCan(260)) === false, '260 缺阴阳大五行真光 → false');
 
 await run(`F.clearProgress();F.setLevel(329);F.god(true);F.clearMap('sanjie');F.addItem('m_xuantianteng',2);F.addItem('m_zhenlingxue',4);F.setStones(110000);`);
 ok(await page.evaluate(() => window.__FR.breakCan(330)) === true, '330 备齐（仙藤×2+真灵血×4+通三劫）→ true');
@@ -289,7 +294,7 @@ await page.waitForTimeout(200);
 const iSS = await page.evaluate(() => window.__FR.info());
 ok(iSS.mapId === 'shengshi', '可进入圣岛使者线', iSS.mapId);
 
-// ---- 5b·2) V10 收束图「魔界大劫」（苦灵岛·洗灵池） ----
+// ---- 5b·2) V10 收束图「苦灵岛·洗灵池」 ----
 const MDJ = await page.evaluate(() => {
   const W = window, F = W.__FR;
   const m = W.MAPS.find(x => x.id === 'modajie') || {};
@@ -306,17 +311,17 @@ const MDJ = await page.evaluate(() => {
     bossName: (m.boss && m.boss.name) || null, startLevel: m.startLevel,
     gateStage: (g.story && g.story[0] && g.story[0].id) || null,
     lineCount: (W.MAP_STORIES['modajie'] || []).length + (W.MAP_STORIES['modajie_out'] || []).length,
-    boss: boss, cleared: info.cleared.indexOf('modajie') >= 0, unlockedNext: info.unlocked.indexOf('sanjie') >= 0
+    boss: boss, cleared: info.cleared.indexOf('modajie') >= 0, unlockedNext: info.unlocked.indexOf('lanpu') >= 0
   };
 });
-ok(MDJ.type === 'boss' && MDJ.startLevel === 220, '魔界大劫是 220 级剧情战', MDJ);
-ok(MDJ.unlock === 'xiaoling' && MDJ.next === 'sanjie', '魔界大劫串在小灵天与三劫之间', MDJ);
-ok(/元魇圣祖/.test(MDJ.bossName || ''), '对手是元魇圣祖（V10C2100 原著在位者）', MDJ.bossName);
-ok(MDJ.lineCount >= 12, '魔界大劫开场+收尾对白齐备', MDJ.lineCount);
-ok(MDJ.gateStage === 'modajie', '大乘关的剧情前置改成了魔界大劫', MDJ.gateStage);
-ok(!!MDJ.boss, '魔界大劫首领能刷出来', MDJ.boss);
-ok(MDJ.cleared, '魔界大劫能打通并记入已通关', { cleared: MDJ.cleared });
-ok(MDJ.unlockedNext, '打通魔界大劫 → 三劫显现', { unlockedNext: MDJ.unlockedNext });
+ok(MDJ.type === 'boss' && MDJ.startLevel === 245, '苦灵岛是 245 级剧情战', MDJ);
+ok(MDJ.unlock === 'moyuan' && MDJ.next === 'lanpu', '苦灵岛串在魔源海与蓝瀑城之间（合体期 19 图链）', MDJ);
+ok(/元魇始祖/.test(MDJ.bossName || ''), '对手是元魇始祖化身（苦灵岛守池者）', MDJ.bossName);
+ok(MDJ.lineCount >= 10, '苦灵岛开场+收尾对白齐备', MDJ.lineCount);
+ok(MDJ.gateStage === 'sanjie', '大乘关落在三劫（翻天台）', MDJ.gateStage);
+ok(!!MDJ.boss, '苦灵岛首领能刷出来', MDJ.boss);
+ok(MDJ.cleared, '苦灵岛能打通并记入已通关', { cleared: MDJ.cleared });
+ok(MDJ.unlockedNext, '打通苦灵岛 → 蓝瀑城显现', { unlockedNext: MDJ.unlockedNext });
 
 // ---- 5b·3) 天云十三族（韩立 1463 岁入雷鸣大陆，广寒令；无战斗的市井图） ----
 const SSN = await page.evaluate(() => {
@@ -574,7 +579,7 @@ const FX = await page.evaluate(() => {
   };
 });
 ok(FX.skills.every(Boolean), '灵界七门功法已注册', FX.skills);
-ok(FX.skills.map(s => s && s.minLv).join(',') === '150,165,200,220,260,330,420', '灵界功法等级铺满 150→420', FX.skills.map(s => s && s.minLv));
+ok(FX.skills.map(s => s && s.minLv).join(',') === '150,165,200,200,260,330,420', '灵界功法等级铺满 150→420', FX.skills.map(s => s && s.minLv));
 ok(FX.items.every(x => x && x.req && x.teach), '七门功法都有对应法诀道具', FX.items);
 ok(FX.slots.join(',') === '5,6,7,7,8', '功法位随境界扩到 8（化神5→炼虚6→合体7→渡劫8）', FX.slots);
 ok(FX.caps.join(',') === '7,8,10', '功法层数上限随境界放开（化神7→炼虚8→真仙10）', FX.caps);
@@ -723,7 +728,7 @@ const GEAR = await page.evaluate(() => {
     F.clearProgress(); F.setLevel(lv); F.god(true); F.unlockAll(); F.enterMap(mid);
     return [0, 1, 2, 3, 4].flatMap(r => F.dropPool(r)).map(x => x.req);
   };
-  const hei = pool('muzu', 150), xiao = pool('xiaoling', 220);
+  const hei = pool('muzu', 150), xiao = pool('xiaoling', 260);
   return { rows, hei: { min: Math.min.apply(null, hei), max: Math.max.apply(null, hei) },
     xiao: { min: Math.min.apply(null, xiao), max: Math.max.apply(null, xiao) } };
 });
@@ -751,7 +756,7 @@ const CAVE = await page.evaluate(() => {
 });
 ok(CAVE.caves.every(c => c && c.crafts >= 2), '两座灵界洞府已建（天渊城洞府 / 小灵天洞府）', CAVE.caves);
 ok(CAVE.mapCave.liangzu === 'tycave' && CAVE.mapCave.xiaoling === 'xlcave', '洞府挂在对应剧情图上', CAVE.mapCave);
-// lv200 合体关按原著挪到了元合岛·青元宫（自雷鸣大陆跨大陆传送回风元大陆后闭关）
+// lv200 合体关落在天渊城洞府（原著 1565 岁：走回天渊城，闭关半年，炼神术第一层成）
 ok(CAVE.br.filter(x => x.lv <= 420).every(x => x.cave && ['tycave', 'yuangong', 'xlcave'].indexOf(x.cave) >= 0),
   '五道灵界关都指到了洞府（不再吃不到 +30%）', CAVE.br.filter(x => x.lv <= 420));
 ok(CAVE.br.filter(x => x.lv > 420).every(x => !x.cave),
@@ -779,25 +784,25 @@ await run(`F.clearProgress();F.setLevel(149);F.god(true);F.clearMap('minghe');F.
 const br = await page.evaluate(() => window.__FR.breakNow(150));
 ok(br && br.cult === 150, 'breakNow(150) 成功推进到炼虚（cultivate=150）', br);
 
-await run(`F.clearProgress();F.setLevel(199);F.god(true);F.clearMap('guanghan');F.addItem('heti',1);F.addItem('m_zhenlingxue',2);F.setStones(35000);`);
+await run(`F.clearProgress();F.setLevel(199);F.god(true);F.clearMap('tianyuan');F.addItem('heti',1);F.addItem('m_zhenlingxue',2);F.setStones(35000);`);
 const st2 = await page.evaluate(() => window.__FR.startBreak(200));
 ok(st2 && st2.map === 'heti_guan', '洞府「突破」入口反查到合体关（heti_guan）', st2);
 
-await run(`F.clearProgress();F.setLevel(199);F.god(true);F.clearMap('guanghan');F.addItem('heti',3);F.addItem('m_zhenlingxue',2);F.setStones(35000);`);
+await run(`F.clearProgress();F.setLevel(199);F.god(true);F.clearMap('tianyuan');F.addItem('heti',3);F.addItem('m_zhenlingxue',2);F.setStones(35000);`);
 const br2 = await page.evaluate(() => window.__FR.breakNow(200));
 ok(br2 && br2.cult === 200, 'breakNow(200) 成功推进到合体（cultivate=200）', br2);
 
 const HIGH = [
-  { lv: 260, map: 'sanjie', lvBefore: 259, story: 'modajie', teng: 1, xue: 3, stones: 65000 },
-  { lv: 330, map: 'jiujie', lvBefore: 329, story: 'sanjie', teng: 2, xue: 4, stones: 110000 },
-  { lv: 420, map: 'zhenxian', lvBefore: 419, story: 'jiujie', teng: 3, xue: 5, stones: 190000 }
+  { lv: 260, map: 'sanjie', lvBefore: 259, story: 'sanjie', mat: 'm_wuxingzhenguang', n: 1, xue: 3, stones: 65000 },
+  { lv: 330, map: 'jiujie', lvBefore: 329, story: 'sanjie', mat: 'm_xuantianteng', n: 2, xue: 4, stones: 110000 },
+  { lv: 420, map: 'zhenxian', lvBefore: 419, story: 'jiujie', mat: 'm_xuantianteng', n: 3, xue: 5, stones: 190000 }
 ];
 for (const h of HIGH) {
-  await run(`F.clearProgress();F.setLevel(${h.lvBefore});F.god(true);F.clearMap('${h.story}');F.addItem('m_xuantianteng',${h.teng});F.addItem('m_zhenlingxue',${h.xue});F.setStones(${h.stones});`);
+  await run(`F.clearProgress();F.setLevel(${h.lvBefore});F.god(true);F.clearMap('${h.story}');F.addItem('${h.mat}',${h.n});F.addItem('m_zhenlingxue',${h.xue});F.setStones(${h.stones});`);
   const stH = await page.evaluate((lv) => window.__FR.startBreak(lv), h.lv);
   ok(stH && stH.map === h.map, `startBreak(${h.lv}) → ${h.map}`, stH);
 
-  await run(`F.clearProgress();F.setLevel(${h.lvBefore});F.god(true);F.clearMap('${h.story}');F.addItem('m_xuantianteng',${h.teng});F.addItem('m_zhenlingxue',${h.xue});F.setStones(${h.stones});`);
+  await run(`F.clearProgress();F.setLevel(${h.lvBefore});F.god(true);F.clearMap('${h.story}');F.addItem('${h.mat}',${h.n});F.addItem('m_zhenlingxue',${h.xue});F.setStones(${h.stones});`);
   const brH = await page.evaluate((lv) => window.__FR.breakNow(lv), h.lv);
   ok(brH && brH.cult === h.lv, `breakNow(${h.lv}) 推进到 ${h.lv}`, brH);
 }

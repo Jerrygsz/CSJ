@@ -60,11 +60,19 @@ const report = await page.evaluate(() => {
     }
     return out;
   };
+  // 药圃三条来路都算：① 地块自带的固定品种 ② 存档里已移栽进去的品种 ③ 器物自身声明了 transplant（移栽目标地块）
   const gardensOf = id => {
     const out = [];
+    const it = itemOf(id) || {};
+    const seed = (window.__FR && window.__FR.info ? window.__FR.info().gardenSeed : {}) || {};
     for (const cid in (window.CAVES || {})) {
       const c = window.CAVES[cid];
-      for (const g of (c.gardens || [])) if ((g.pool || []).indexOf(id) >= 0) out.push((window.MAPS || []).find(m => m.id === g.from));
+      for (const g of (c.gardens || [])) {
+        const hit = (g.pool || []).indexOf(id) >= 0
+          || ((seed[g.id] || []).indexOf(id) >= 0)
+          || (it.transplant && it.transplant === g.id);
+        if (hit) out.push((window.MAPS || []).find(m => m.id === g.from));
+      }
     }
     return out;
   };
@@ -125,7 +133,12 @@ const report = await page.evaluate(() => {
       if (/购买|可购|坊市/.test(h)) claims.push({ kind: '购买', has: !!(shopOf(id) && shopOf(id).maps.length) });
       if (/炼制|自炼|开炉/.test(h)) claims.push({ kind: '炼制', has: craftsOf(id).length > 0 });
       if (/掉落|采集|收成/.test(h)) claims.push({ kind: '掉落', has: dropsOf(id).length > 0 });
-      if (/药圃|可种/.test(h)) claims.push({ kind: '药圃', has: gardensOf(id).length > 0 });
+      // 药圃这条路可以是自己种（芝龙果），也可以是自己炼的丹里那味主药能种（腾龙丹 ← 芝龙果）
+      if (/药圃|可种/.test(h)) {
+        const growable = gardensOf(id).length > 0
+          || craftsOf(id).some(r => (r.mats || []).some(m => gardensOf(m[0]).length > 0));
+        claims.push({ kind: '药圃', has: growable });
+      }
       hints.push({ id, name: nameOf(id), hint: h, claims: claims.filter(c => !c.has) });
     }
   }

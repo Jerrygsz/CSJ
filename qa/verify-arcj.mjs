@@ -56,21 +56,21 @@ const KEY = 'fanren_save_v1';
     };
   });
   ok(data.arc.map(x => x.id).join('>') === 'fengyuan>huohu>shisan>mojin>guanghan>heti_guan',
-    '六张图按原著排：黑隐山脉 → 火瑚群岛 → 天云十三族 → 魔金山脉 → 广寒界 → 元合岛', data.arc.map(x => x.id));
+    '六张图按原著排：黑隐山脉 → 火瑚群岛 → 天云十三族 → 魔金山脉 → 广寒界 → 天渊城', data.arc.map(x => x.id));
   ok(data.arc.every((x, i) => i === 0 ? x.unlock === 'lianxu' : x.unlock === data.arc[i - 1].id),
     '图链首尾相接（每张图的 unlock 都是上一张）', data.arc.map(x => x.id + '<' + x.unlock));
   ok(data.arc[0].pos === '灵界·风元大陆 边缘半岛' && data.arc[0].type === 'boss',
     '黑隐山脉在风元大陆边缘半岛，是「玄天之争」那一战', data.arc[0]);
   ok(data.arc[1].pos === '灵界·雷鸣大陆 海域' && data.arc[2].pos === '灵界·雷鸣大陆 天云城' && data.arc[3].pos === '灵界·雷鸣大陆 魔金山脉',
     '火瑚群岛 / 天云城 / 魔金山脉 都在雷鸣大陆（原著被空间裂缝抛过去的）', data.arc.slice(1, 4));
-  ok(data.arc[5].pos === '灵界·风元大陆 元合岛', '合体关落回风元大陆·元合岛（不再在广寒界过）', data.arc[5]);
+  ok(data.arc[5].pos === '灵界·天渊城', '合体关落回天渊城（原著 1565 岁闭关半年，不在广寒界、也不在元合岛）', data.arc[5]);
 
   // ---------- ② 玄天斩灵剑 / 万妙丹 ----------
   ok((data.arc[0].items || []).indexOf('t_xuantianjian') >= 0, '玄天斩灵剑出在黑隐山脉（玄天果实化剑）', data.arc[0].items);
   ok((data.arc.find(x => x.id === 'guanghan').items || []).indexOf('heti') >= 0 && data.hetiName === '万妙丹',
     '广寒界玉台上给的是万妙丹（原著 1467 岁入界所得）', { items: data.arc.find(x => x.id === 'guanghan').items, name: data.hetiName });
-  ok(data.b200.item === 'heti' && data.b200.cave === 'yuangong' && /元合岛/.test(data.b200.story.name),
-    '合体关：万妙丹 + 元合岛青元宫，前置仍是已通广寒界', data.b200);
+  ok(data.b200.item === 'heti' && data.b200.cave === 'tycave' && /天渊城/.test(data.b200.story.name),
+    '合体关：万妙丹 + 天渊城洞府（元合岛是 2483 岁大乘之后才建的）', data.b200);
 
   // ---------- ③ 对白齐备 ----------
   const st = data.stories;

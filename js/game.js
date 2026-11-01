@@ -285,7 +285,23 @@
     }
     if (changed) writeSave();
   })();
-  // 旧档补发：血色禁地已经通关，宗门该赏的那一枚筑基丹却没到手（本版才补上的剧情奖励）。
+  // 旧档迁移：灵界「合体 → 大乘」这一段（arc K）按原著重排成 19 图，
+  // 原来只有 9 图且顺序不对（倚天城写成守住了、车骑恭写成敌人、小灵天错放在魔劫里）。
+  // 已经进阶大乘的存档，人早就把这一段走完了 —— 整段记为已了，免得行迹图上留下
+  // 「后面的图开了、中间九张还锁着」的窟窿；想重看重打随时能进。
+  (function migrateArcK() {
+    const cl = save.cleared || [], un = save.unlocked || [];
+    if (cl.indexOf('sanjie') < 0) return;
+    let changed = false;
+    // 旧图改名（黄泉地火→镇魔锁、魔界大劫→苦灵岛）与新增图一并补上
+    const arcK = ['liangzu', 'jiuxian', 'heiyu', 'longjia', 'shengdao', 'zhenling', 'mojie', 'diyuan2',
+      'moban', 'huangquan', 'yitian', 'tianzhan', 'xueya', 'huanxiao', 'moyuan', 'modajie', 'lanpu', 'muzu2'];
+    for (const id of arcK) {
+      if (cl.indexOf(id) < 0) { cl.push(id); changed = true; }
+      if (un.indexOf(id) < 0) { un.push(id); changed = true; }
+    }
+    if (changed) writeSave();
+  })();
   // 老存档不必重开：读档即补，只补一次，且只在还卡在筑基门前（Lv36 之前）时才补。
   let pendingZhujiGift = false;
   (function backfillZhujiGift() {
