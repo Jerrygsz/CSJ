@@ -1337,7 +1337,7 @@
 
   // 法诀道具（teach 类：拿到要回洞府学，学了才进功法位）
   window.ITEMS.push(
-    { id: 'sk_baimai', name: '百脉炼宝诀·法诀', rarity: 4, icon: '📕', req: 150, teach: 'baimai',
+    { id: 'sk_baimai', name: '百脉炼宝诀·法诀', rarity: 4, icon: '📕', req: 132, teach: 'baimai',
       desc: '习得《百脉炼宝诀》。V8C1351 天渊城所得，炼的是身上这一副皮囊' },
     { id: 'sk_jingzhe', name: '惊蛰十二变·法诀', rarity: 4, icon: '📕', req: 165, teach: 'jingzhe',
       desc: '习得《惊蛰十二变》。V9C1425 风元大陆所得，十二形轮转，身形如蛰虫乍醒' },

@@ -587,6 +587,34 @@ ok(buy.ok, '「功法」柜里能点出百脉炼宝诀', buy);
 ok(buy.learned === true, '买下即习得百脉炼宝诀', buy);
 ok(buy.stones === 174000, '买功法扣灵石（200000−26000）', buy.stones);
 
+// 5c-补①：化神初期（低于门槛）时，坊市显示百脉炼宝诀「需化神后期」而非「需炼虚初期」
+await run(`F.clearProgress();F.setLevel(112);F.setStones(200000);F.unlockAll();F.enterMap('tianyuan');`);
+await page.waitForTimeout(300);
+await run(`for(let i=0;i<30;i++){F.skipStory();}`);
+await page.waitForTimeout(200);
+await page.evaluate(() => { const b=[...document.querySelectorAll('#shopCats button')].find(x=>x.textContent==='功法'); if(b)b.click(); });
+await page.waitForTimeout(200);
+const disp = await page.evaluate(() => {
+  const row = [...document.querySelectorAll('#shopList .shoprow')].find(r => r.textContent.includes('百脉炼宝诀'));
+  return row ? row.textContent : '';
+});
+ok(/需化神后期/.test(disp) && !/炼虚/.test(disp), '化神初期看百脉炼宝诀：显示「需化神后期」（非「需炼虚初期」）', disp);
+
+// 5c-补②：化神后期（lv140）即可买下并习得，解除「炼虚要百脉、百脉要炼虚」死锁（V8C1351 韩立化神期得之）
+await run(`F.clearProgress();F.setLevel(140);F.setStones(200000);F.unlockAll();F.enterMap('tianyuan');`);
+await page.waitForTimeout(300);
+await run(`for(let i=0;i<30;i++){F.skipStory();}`);
+await page.waitForTimeout(200);
+await page.evaluate(() => { const b=[...document.querySelectorAll('#shopCats button')].find(x=>x.textContent==='功法'); if(b)b.click(); });
+await page.waitForTimeout(200);
+const buyHS = await page.evaluate(() => {
+  const F = window.__FR;
+  const btn = [...document.querySelectorAll('#shopList button[data-buy]')].find(b => b.getAttribute('data-buy')==='sk_baimai');
+  if (btn) btn.click();
+  return { learned: !!(F.skillState().learned||{}).baimai, stones: F.info().stones };
+});
+ok(buyHS.learned === true, '化神后期（lv140）可买下并习得百脉炼宝诀（死锁解除）', buyHS);
+
 // ---- 5d) 掉落池按 arc 分段：灵界不掉人界低阶成品 ----
 const L1 = await page.evaluate(() => {
   const F = window.__FR;
