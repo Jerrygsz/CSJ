@@ -418,6 +418,8 @@ body.fs #wrap { background: #000; }
 .shopauc { display: flex; flex-direction: column; gap: 2px; margin: 2px 0 6px; padding: 8px 10px; background: linear-gradient(90deg, rgba(201,162,74,0.22), rgba(201,162,74,0.06)); border: 1px solid rgba(201,162,74,0.45); border-radius: var(--r-md); color: #f0d79a; font-size: var(--fs-cap); letter-spacing: 0.5px; }
 .shopauc span { color: var(--text-3); font-size: var(--fs-micro); letter-spacing: 0; }
 .shoprow.poor { opacity: .55; }
+/* 一键卖出材料：与常规卖行区分，强调是「批量」入口 */
+.shoprow.sellall-mat { background: linear-gradient(90deg, rgba(112,197,112,0.16), rgba(112,197,112,0.04)); border-color: rgba(112,197,112,0.5); margin: 4px 0; }
 .sr-main { flex: 1; min-width: 0; }
 .sr-main b { font-size: var(--fs-cap); display: block; }
 .sr-main i { display: block; font-style: normal; color: var(--text-3); font-size: var(--fs-micro); line-height: 1.45; margin-top: 0; }

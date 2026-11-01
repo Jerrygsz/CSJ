@@ -6056,6 +6056,8 @@
     let other = '';
     for (const [key, title, note] of groupMeta) {
       const ids = groups[key]; if (!ids.length) continue;
+      // 「用」按钮按类别换字眼：丹药曰服、符箓曰催、灵物曰捏
+      const useLabel = key === 'pill' ? '服' : key === 'talisman' ? '催' : '捏';
       ids.sort((a, b) => (Items.get(b).rarity - Items.get(a).rarity) || (a < b ? -1 : 1));
       let rows = '';
       for (const id of ids) {
@@ -6069,7 +6071,7 @@
           '<div class="gr-main"><b style="color:' + r.color + '">' + it.icon + ' ' + it.name + '</b>' +
           '<i>' + r.name + '　' + d + '</i></div>' +
           '<div class="gr-right">' +
-          (consumable ? '<button class="sr-btn buy" data-use="' + id + '">用</button>' : '') +
+          (consumable ? '<button class="sr-btn buy" data-use="' + id + '">' + useLabel + '</button>' : '') +
           '<span class="sr-own">×' + n + '</span></div></div>';
       }
       other += '<div class="baggrp"><div class="cs-sub">' + title + '</div>' +
@@ -6971,6 +6973,18 @@
       const ids = Object.keys(save.inventory).filter(id => (save.inventory[id] || 0) > 0 && Items.get(id));
       if (!ids.length) rows.push('<div class="shopempty">储物袋里空空的，先去打些东西。</div>');
       else rows.push('<div class="shopempty tip">同名之物可叠加。佩在身上的那份不动，其余可卖、可拆成材料。</div>');
+      // 一键卖出材料：扫一遍储物袋里所有可卖之料，一次清空换灵石
+      {
+        let mk = 0, mt = 0;
+        for (const id of ids) {
+          const it = Items.get(id); if (!it || !it.mat || it.unique) continue;
+          const k = sellableCount(id); if (k <= 0) continue;
+          mk++; mt += sellPriceOf(it) * k;
+        }
+        if (mk > 0) rows.push('<div class="shoprow sellall-mat">' +
+          '<div class="sr-main"><b>一键卖出材料</b><i>共 ' + mk + ' 种 · 估 ' + mt + ' 灵石（不含佩带中与仅此一件的料）</i></div>' +
+          '<div class="sr-right"><button class="sr-btn buy" data-sellmat="1">卖出</button></div></div>');
+      }
       for (const id of ids) {
         const it = Items.get(id), r = RARITY[it.rarity], price = sellPriceOf(it);
         const own = save.inventory[id], free = sellableCount(id), eq = equippedCountOf(id);
@@ -7089,6 +7103,31 @@
     Sfx.gem();
     notify('卖出 · ' + it.name + (k > 1 ? ' ×' + k : '') + '　+' + price + ' 灵石');
     if (G.state === 'shop') renderShop(); else if (G.state === 'cave') renderCave();
+    refreshTitle();
+  }
+  // 一键卖出材料：把储物袋里所有可卖之料（非装备、非仅此一件）一次清空换灵石
+  function sellAllMaterials() {
+    const toSell = [];
+    for (const id of Object.keys(save.inventory)) {
+      const n = save.inventory[id] || 0; if (n <= 0) continue;
+      const it = Items.get(id); if (!it || !it.mat || it.unique) continue;
+      const k = sellableCount(id); if (k <= 0) continue;
+      toSell.push({ it, k });
+    }
+    if (!toSell.length) { notify('没有可卖的材料'); Sfx.warn(); return; }
+    let total = 0, count = 0, kinds = 0;
+    for (const { it, k } of toSell) {
+      total += sellPriceOf(it) * k; count += k; kinds++;
+      save.inventory[it.id] -= k;
+      if (save.inventory[it.id] <= 0) delete save.inventory[it.id];
+      save.totalItems = Math.max(0, (save.totalItems || 0) - k);
+    }
+    save.stones = (save.stones || 0) + total;
+    writeSave(); Sfx.gem();
+    notify('卖出材料 ' + kinds + ' 种 ' + count + ' 件　+' + total + ' 灵石');
+    // 哪块面板正亮着就刷哪块——不依赖 G.state（坊市进场剧情期间 state 仍是 dialog，但面板已展开）
+    if (elShop && elShop.style.display === 'flex') renderShop();
+    else if (elCave && elCave.style.display === 'flex') renderCave();
     refreshTitle();
   }
   // 分解：重复的、用不上的装备拆回材料
@@ -7867,6 +7906,8 @@
     if (s) { sellItem(s.getAttribute('data-sell')); return; }
     const sa = e.target.closest('button[data-sellall]');
     if (sa) { sellItem(sa.getAttribute('data-sellall'), true); return; }
+    const sm = e.target.closest('button[data-sellmat]');
+    if (sm) { sellAllMaterials(); return; }
     const dc = e.target.closest('button[data-decomp]');
     if (dc) { decomposeItem(dc.getAttribute('data-decomp')); return; }
     const da = e.target.closest('button[data-decompall]');
@@ -8679,6 +8720,7 @@
     grant(stones) { save.stones = Math.round((save.stones || 0) + (stones || 0)); writeSave(); return save.stones; },
     freeCount(id) { return sellableCount(id); },
     sell(id, all) { sellItem(id, !!all); return { left: save.inventory[id] || 0, stones: save.stones || 0 }; },
+    sellMat() { const before = save.stones || 0; sellAllMaterials(); return { stones: save.stones || 0, gained: (save.stones || 0) - before }; },
     decomp(id, all) { decomposeItem(id, !!all); return { left: save.inventory[id] || 0 }; },
     toasts() { return toastRows.map(r => ({ id: r.item.id, name: r.item.name, n: r.n })); },
     toastCount() { return Math.min(TOAST_KEEP, toastRows.length) + (toastRows.length > TOAST_KEEP ? 1 : 0); },
