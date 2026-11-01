@@ -1916,7 +1916,12 @@
   // 碧焰酒：原著「韩立借此突破了结丹中期瓶颈」—— 卡在中期、破的是进后期这一道，
   // 所以门摆在 72（结丹后期），不是 64（进中期）。
   window.MINOR_BREAKS = window.MINOR_BREAKS || [
-    { lv: 72, realm: '结丹后期', item: 'biyanjiu', tip: '原著里韩立卡在结丹中期瓶颈，是借裂风兽一族酿的碧焰酒冲过去的。' }
+    { lv: 72, realm: '结丹后期', item: 'biyanjiu', tip: '原著里韩立卡在结丹中期瓶颈，是借裂风兽一族酿的碧焰酒冲过去的。' },
+    // 化神三道小门槛，皆按原著点名处设关；道具只取可重复获取者，避开「元磁神山核心」这种一次性剧情物，免得卡死进度。
+    // 化神初期(lv112)是大破境，走「进阶」冲关；这里只管中期/后期/圆满三道小关。
+    { lv: 122, realm: '化神中期', item: 'm_hanhuo', tip: '原著里韩立化神中期一关，靠自己修出的五色寒焰压住极寒煞气，才再往前推一截。' },
+    { lv: 132, realm: '化神后期', item: 'moyuan', tip: '原著里韩立以万年玄玉换得魔元丹，化神后期这一关多得它一分底气。' },
+    { lv: 149, realm: '化神圆满', item: 'm_hanhuo', tip: '化神圆满是化神一境的顶，仍须五色寒焰收束周身极寒，才压得住这道巅峰。' }
   ];
   // 修为受创后的重修：原著里韩立在小寰岛闭关、大量服食丹药——
   // 一年回到炼气期九层，再一年重回筑基，又六年修成大衍诀第二层与身外化身，51 岁筑基后期。
@@ -7135,7 +7140,10 @@
     c.xp = (c.xp || 0) + amount;
     let lv = c.level || 1;
     let guard = 0;
-    while (lv < 140 && guard++ < 400) {
+    // 这两道「卡在关口」信号只代表上一次灌修为的结果；本次重新算，避免残留旧值误导 UI / 调试口
+    G.minorPending = null;
+    G.breakPending = null;
+    while (lv < 150 && guard++ < 400) {
       const need = xpNeed(lv);
       if (c.xp < need) break;
       // 大境界门：丹药材料剧情齐了也得回洞府「进阶」冲关，打坐/遇敌过不去
@@ -7170,7 +7178,14 @@
     }
     if (n) { writeSave(); }
     if (gated) {
-      notify('修为已至瓶颈 · 回「进阶」页备料冲关');
+      const nextLv = (save.cultivate.level || 1) + 1;
+      const mn = minorReqFor(nextLv);
+      if (mn && minorHave(mn) <= 0) {
+        const mi = Items.get(mn.item);
+        notify('修为已至 ' + mn.realm + ' 关口 · 须服「' + (mi ? mi.name : mn.item) + '」');
+      } else {
+        notify('修为已至瓶颈 · 回「进阶」页备料冲关');
+      }
       Sfx.warn();
     } else if (!n) {
       const lv = save.cultivate.level || 1;
@@ -8527,6 +8542,16 @@
     breakShown() { return !!(elBreak && elBreak.style.display === 'flex'); },
     breakClose() { closeBreak(); return !!(elBreak && elBreak.style.display === 'flex'); },
     breakPending() { return G.breakPending ? G.breakPending.lv : null; },
+    // 小境界门（原著点名处）调试口：查关、查可过、直接灌修为、看卡在哪一关
+    minorList() { return JSON.parse(JSON.stringify(window.MINOR_BREAKS || [])); },
+    minorAt(lv) { const m = minorReqFor(lv); return m ? { lv: m.lv, realm: m.realm, item: m.item } : null; },
+    minorCan(lv) { const m = minorReqFor(lv); return m ? minorHave(m) > 0 : true; },
+    addCultXp(amount) {
+      const before = save.cultivate.level || 1;
+      const lv = addCultivateXp(amount || 1);
+      return { before, after: lv, xp: save.cultivate.xp || 0, minorPending: G.minorPending ? { lv: G.minorPending.lv, realm: G.minorPending.realm, item: G.minorPending.item } : null, breakPending: G.breakPending ? G.breakPending.lv : null };
+    },
+    minorPending() { return G.minorPending ? { lv: G.minorPending.lv, realm: G.minorPending.realm, item: G.minorPending.item } : null; },
     shaDan(lv) {
       const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv) || null;
       return { count: save.shaDan || 0, penalty: shaDanPenalty(), cost: b ? shaDanCost(b) : null, ready: shaDanReady(b) };
