@@ -57,8 +57,8 @@ ok(data.recipe && data.recipe.mats.length === 3 && data.recipe.cost === 5000 && 
   'r_tenglong 用料=芝龙果/真灵之血/真灵鳞、cost=5000、req=132', data.recipe && data.recipe.mats);
 ok(data.boss && data.boss.items.indexOf('f_tenglong') >= 0 && data.boss.items.indexOf('tenglong') < 0,
   '黑凤族 boss 战利品改为掉《腾龙丹方》(f_tenglong)，不再直接掉成品丹', data.boss && data.boss.items);
-ok(data.boss && data.boss.mats[0][1] === 2 && data.boss.mats[1][1] === 2 && data.boss.mats[2][1] === 6,
-  'boss 主材料给 2 倍缓冲（芝龙果×2/真灵之血×2/真灵鳞×6），够炼两炉', data.boss && data.boss.mats);
+ok(data.boss && data.boss.mats[0][1] === 3 && data.boss.mats[1][1] === 2 && data.boss.mats[2][1] === 6,
+  'boss 主材料：芝龙果×3（留 1 株作种移栽 / 净剩 2 够炼两炉）、真灵之血×2、真灵鳞×6', data.boss && data.boss.mats);
 ok(data.hint && data.hint.indexOf('丹方') >= 0 && data.hint.indexOf('丹炉') >= 0,
   'BREAK_ITEM_HINTS.tenglong 指明「丹方 + 洞府丹炉自炼」', data.hint);
 ok(data.keepOnFail, 'lv150 破境关 keepOnFail=true（失败不退丹）');

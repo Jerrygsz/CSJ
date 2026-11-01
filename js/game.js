@@ -81,6 +81,9 @@
       // 药圃：按地块各记一份（{地块id: 已长成次数}），在战斗图里待 1 秒每块各长 1 次，满 99 停；
       // gardenTick 是所有地块共用的、不足 1 秒的零头
       gardenCharge: {}, gardenTick: 0,
+      // 移栽品种：{地块id: [材料id]} —— 原著里韩立拿绿液把灵药移进药园、此后定期采收；
+      // 基础品种仍写在 CAVES[].gardens[].pool，这里只记「玩家自己移栽进来的」那几味
+      gardenSeed: {},
       // 已遇过的际遇（一世只遇一次）；可重复的小事不入此列
       met: [],
       // 灵宠：拥有的（养在灵兽袋里）与出战的
@@ -233,6 +236,8 @@
         greenLiquid: s.greenLiquid || 0,
         gift_zhuji: !!s.gift_zhuji,
         gift_tenglong: !!s.gift_tenglong,
+        // 移栽品种老存档：没有这个字段就补成空账
+        gardenSeed: (s.gardenSeed && typeof s.gardenSeed === 'object') ? s.gardenSeed : {},
         wounded: (s.wounded && typeof s.wounded === 'object') ? s.wounded : null,
         // 天人有五衰：老存档没有这个字段，读进来补成空账（压在身上的衰为 0）
         wushuai: (s.wushuai && typeof s.wushuai === 'object')
@@ -5263,6 +5268,11 @@
       save.caves.push(m.cave);
       cave = CAVES[m.cave];
     }
+    // 拿到可移栽的灵药，当场留一株作种入园（原著：绿液移药，此后定期可采）
+    {
+      const _tr = autoTransplant(true);
+      if (_tr.length) gained.transplants = _tr;
+    }
     // 古传送阵：为南宫婉疗伤，修为被吸干 —— 原著第403章左右：跌回「炼气期四层」。
     // 照原著照抄：真跌到炼气期四层。恢复不走打怪，走「回洞府闭关 + 大量服食丹药」，见 REBUILD_STAGES。
     if (m.id === 'guchuan' && !save.wounded) {
@@ -5396,6 +5406,9 @@
       for (const mm of (gained.mats || [])) {
         const r = RARITY[mm.item.rarity];
         extra += '<div class="lootrow reward"><b style="color:' + r.color + '">' + mm.item.name + '</b><span>药材 ×' + mm.n + '</span></div>';
+      }
+      for (const tm of (gained.transplants || [])) {
+        extra += '<div class="lootrow reward"><b style="color:#9fe0c0">移栽 · ' + tm.name + '</b><span>留种 ×1 入药圃</span></div>';
       }
     }
     const dm = (G.map && (G.map.type === 'combat' || G.map.type === 'boss')) ? (G.diff || DIFFICULTIES[0]) : DIFFICULTIES[0];
@@ -5915,6 +5928,8 @@
   function renderCave() {
     const c = CAVES[G.caveId]; if (!c || !elCaveBody) return;
     hideItemTip();   // 换页签/重画面板，旧的「去哪取」卡片一并收起
+    // 进洞府先看一眼有没有该移栽的灵药（原著：得药先留一株作种入园，此后定期可采）
+    autoTransplant();
     const lv = Math.max(save.cultivate.level || 1, save.best.level || 1);
     if (elCaveName) elCaveName.textContent = c.name;
     if (elCaveDesc) elCaveDesc.textContent = c.quote;
@@ -6849,11 +6864,54 @@
   }
   function gardenCapOf(g) { return (g && g.cap) || GARDEN_CAP; }
   function gardenChargeOf(g) { return Math.min(gardenCapOf(g), Math.floor(((save.gardenCharge || {})[g.id]) || 0)); }
+  // 一块地实际能长哪些药：数据里的基础品种 + 存档里移栽进来的品种（去重、顺序稳定）
+  function gardenPoolOf(g) {
+    if (!g) return [];
+    const out = [];
+    const push = (id) => {
+      if (id && out.indexOf(id) < 0 && (window.MATERIALS || []).some(m => m.id === id)) out.push(id);
+    };
+    for (const id of (g.pool || [])) push(id);
+    for (const id of (((save.gardenSeed || {})[g.id]) || [])) push(id);
+    return out;
+  }
+  // 移栽：材料上带 transplant:'<地块id>' 的，一旦手里有 ≥1，就自动留一株作种移进那块地。
+  // 原著里绿液就是这么用的——灵药到手不急着全用掉，先移进药园，此后定期采收。
+  // 返回本次新移栽的材料（供提示 / 验收）。silent=true 时不弹提示（读档、后台巡检用）。
+  function autoTransplant(silent) {
+    const list = gardenList();
+    if (!list.length) return [];
+    save.gardenSeed = save.gardenSeed || {};
+    const planted = [];
+    for (const m of (window.MATERIALS || [])) {
+      if (!m.transplant) continue;
+      const owner = list.find(x => x.g.id === m.transplant);
+      if (!owner) continue;                                   // 目标药圃不在数据里
+      if (save.caves.indexOf(owner.cave.id) < 0) continue;    // 洞府还没到手，先不移
+      const seed = save.gardenSeed[m.transplant] = save.gardenSeed[m.transplant] || [];
+      if (seed.indexOf(m.id) >= 0) continue;                  // 已经移栽过
+      if ((save.inventory[m.id] || 0) <= 0) continue;         // 手里还没有这味
+      save.inventory[m.id]--;                                 // 留一株作种
+      if (save.inventory[m.id] <= 0) delete save.inventory[m.id];
+      save.totalItems = Math.max(0, (save.totalItems || 0) - 1);
+      seed.push(m.id);
+      planted.push(m);
+    }
+    if (planted.length) {
+      writeSave();
+      if (!silent) {
+        notify('已移栽 ' + planted.map(m => m.name).join('、') + ' ×1 至药圃 · 此后定期可采');
+        Sfx.gem();
+      }
+    }
+    return planted;
+  }
   function tickGarden(dt) {
     // 只有真在打的图才算：坊市、洞府、结算界面里不长
     if (!(G.map && (G.map.type === 'combat' || G.map.type === 'boss' || G.map.type === 'chase'))) return;
-    const list = gardenList();
-    if (!list.length) return;
+    // 尚未移栽的空圃不累计（否则「已长成」白涨，收出来却什么都没有）
+    const list = gardenList().filter(x => gardenPoolOf(x.g).length > 0);
+    if (!list.length) { save.gardenTick = 0; return; }
     // 全部地块都长满了就不必再累计零头
     if (list.every(x => gardenChargeOf(x.g) >= gardenCapOf(x.g))) { save.gardenTick = 0; return; }
     save.gardenCharge = save.gardenCharge || {};
@@ -6877,9 +6935,11 @@
   function pickGarden(c, gid) {
     if (!c || !c.gardens || !c.gardens.length) return;
     const g = c.gardens.find(x => x.id === gid) || c.gardens[0];
+    const ids = gardenPoolOf(g);
+    if (!ids.length) { notify('这块地还空着 · 得灵药后会自动移栽进来'); Sfx.warn(); return; }
     const n = gardenChargeOf(g);
     if (n <= 0) { notify('这块地还空着 · 先去图里打一场'); Sfx.warn(); return; }
-    const pool = g.pool.map(id => (window.MATERIALS || []).find(x => x.id === id)).filter(Boolean);
+    const pool = ids.map(id => (window.MATERIALS || []).find(x => x.id === id)).filter(Boolean);
     if (!pool.length) return;
     const totalW = pool.reduce((s, m) => s + gardenWeight(m), 0);
     const got = {};
@@ -6902,17 +6962,20 @@
   function renderCaveGarden(c) {
     return c.gardens.map(g => {
       const n = gardenChargeOf(g), cap = gardenCapOf(g), full = n >= cap;
-      const names = g.pool.map(id => { const m = (window.MATERIALS || []).find(x => x.id === id); return m ? (m.icon || '🌿') + m.name : ''; }).filter(Boolean).join('　');
+      const ids = gardenPoolOf(g);
+      const names = ids.map(id => { const m = (window.MATERIALS || []).find(x => x.id === id); return m ? (m.icon || '🌿') + m.name : ''; }).filter(Boolean).join('　') || '（尚无移栽灵药）';
+      const emptyNote = (g.transplant && !ids.length)
+        ? '<div class="cs-note">灵界灵药到手后，会自动留一株作种移入此地，此后定期可采。</div>' : '';
       return '<div class="cave-sec"><div class="cs-title">' + g.name + '</div>' +
         '<div class="cs-note">' + g.tip + '</div>' +
         '<div class="restbox"><div class="statgrid">' +
         '<div class="statcell"><i>已长成</i><b>' + n + ' / ' + cap + '</b></div>' +
-        '<div class="statcell"><i>长势</i><b>' + (full ? '已长满' : '每秒 +1') + '</b></div>' +
-        '<div class="statcell"><i>园中品种</i><b>' + g.pool.length + ' 味</b></div>' +
+        '<div class="statcell"><i>长势</i><b>' + (ids.length ? (full ? '已长满' : '每秒 +1') : '待移栽') + '</b></div>' +
+        '<div class="statcell"><i>园中品种</i><b>' + ids.length + ' 味</b></div>' +
         '</div>' +
-        '<div class="cs-note">园里：' + names + '</div>' +
-        '<div class="restbtns"><button class="btn small" data-pickg="' + c.id + '|' + g.id + '"' + (n > 0 ? '' : ' disabled') + '>' +
-          (n > 0 ? '采收 ' + n + ' 株' : '这块地空着') + '</button></div>' +
+        '<div class="cs-note">园里：' + names + '</div>' + emptyNote +
+        '<div class="restbtns"><button class="btn small" data-pickg="' + c.id + '|' + g.id + '"' + (n > 0 && ids.length ? '' : ' disabled') + '>' +
+          (ids.length ? (n > 0 ? '采收 ' + n + ' 株' : '这块地空着') : '待移栽') + '</button></div>' +
         '</div></div>';
     }).join('');
   }
@@ -8119,6 +8182,7 @@
     G.breakCaveId = null; G.breakPending = null;  // 清掉过图会话态：避免重生后误吃原著洞府 +30%
     save.gift_zhuji = false;
     save.gift_tenglong = false;
+    save.gardenSeed = {};     // 洞府重开：移栽的品种一并清掉（基础品种写在数据里，会随洞府重开回来）
     save.repBlack = 0; save.repWhite = 0; save.identity = 'han'; save.liUnlocked = false;
     if (G.player) { resetRunBonus(); G.gear = {}; G.runLoot = []; }
   }
@@ -8203,6 +8267,7 @@
         gear: Object.assign({}, G.gear || {}), equip: Object.assign({}, save.equip),
         cultivate: { level: save.cultivate.level, skills: Object.assign({}, save.cultivate.skills) },
         inventory: Object.assign({}, save.inventory),
+        gardenSeed: JSON.parse(JSON.stringify(save.gardenSeed || {})),
         caves: save.caves.slice(), matGain: G.matGain || 0,
         diffClear: JSON.parse(JSON.stringify(save.diffClear || {})),
         boss: G.boss ? { name: G.boss.name, kind: G.boss.kind, hp: Math.ceil(G.boss.hp), maxhp: G.boss.maxhp, phase2: !!G.boss.phase2, phaseT: +(G.boss.phaseT || 0).toFixed(2) } : null,
@@ -8224,10 +8289,20 @@
     // 药圃读数：不传 id 返回全部地块 {地块id: {charge, cap, cave}}
     gardenState(gid) {
       const out = {};
-      for (const x of gardenList()) out[x.g.id] = { charge: gardenChargeOf(x.g), cap: gardenCapOf(x.g), cave: x.cave.id, pool: x.g.pool.length };
+      for (const x of gardenList()) out[x.g.id] = { charge: gardenChargeOf(x.g), cap: gardenCapOf(x.g), cave: x.cave.id, pool: gardenPoolOf(x.g).length, ids: gardenPoolOf(x.g) };
       return gid ? (out[gid] || null) : out;
     },
     setGarden(gid, n) { save.gardenCharge = save.gardenCharge || {}; save.gardenCharge[gid] = Math.max(0, Math.min(GARDEN_CAP, n | 0)); save.gardenTick = 0; return save.gardenCharge[gid]; },
+    transplant(silent) { const p = autoTransplant(!!silent); return p.map(m => m.id); },
+    harvest(gid) {
+      const x = gardenList().find(y => y.g.id === gid);
+      if (!x) return null;
+      const before = Object.assign({}, save.inventory);
+      pickGarden(x.cave, gid);
+      const delta = {};
+      for (const k in save.inventory) if ((save.inventory[k] || 0) !== (before[k] || 0)) delta[k] = (save.inventory[k] || 0) - (before[k] || 0);
+      return delta;
+    },
     skipStory() { let n = 0; while (G.state === 'dialog' && !G.dialogIsChoice && n < 80) { advanceDialog(); n++; } return n; },
     muteStory(on) { G.storyMute = !!on; if (on) this.skipStory(); return !!G.storyMute; },
     storyMuted() { return !!G.storyMute; },
@@ -8975,6 +9050,11 @@
   refreshTitle();
   syncMute();
   syncSettingsUI();
+  // 老存档：手里已握着可移栽的灵药（如芝龙果），读档即留一株作种入园
+  {
+    const _tr = autoTransplant(true);
+    if (_tr.length) setTimeout(function () { try { banner('移栽入园 · ' + _tr.map(m => m.name).join('、') + ' ×1 · 此后定期可采'); Sfx.gem(); } catch (e) {} }, 1250);
+  }
   if (pendingZhujiGift) {
     pendingZhujiGift = false;
     setTimeout(function () { try { banner('宗门旧例 · 补授筑基丹一枚'); Sfx.buff(); } catch (e) {} }, 900);

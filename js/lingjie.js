@@ -45,7 +45,9 @@
   // 全部 noDrop+unique（或材料），只走地图 reward，绝不进随机掉落池。
   window.MATERIALS.push(
     { id: 'm_zhilongguo', name: '芝龙果', icon: '🍄', rarity: 4,
-      desc: '三万年才结一次果的灵药，腾龙丹的主药；即便生服，也能凭空添几十年苦修（V9C1364）。' },
+      // 原著：木族之行途中夺得，绿液催得的灵药；游戏里让它可移栽进灵界药圃、此后定期采收
+      transplant: 'tygarden',
+      desc: '三万年才结一次果的灵药，腾龙丹的主药；即便生服，也能凭空添几十年苦修（V9C1364）。得手后留一株作种移入灵界药圃，此后定期可采。' },
     { id: 'm_zhenlingpo', name: '真灵之魄', icon: '🔮', rarity: 4,
       desc: '真灵陨落后凝而不散的一缕"魄"。两团之魄战到一处，声势已堪比真龙天凤（V9C1381）。' },
     { id: 'm_xilingchi', name: '洗灵池液', icon: '💧', rarity: 4,
@@ -104,7 +106,7 @@
   // 腾龙丹为炼虚级灵药（V9C1364）。修为门槛沿用 breakLevelOk：lv-1 = 149（化神后期）。
   // 灵界两味破境丹的「去哪取」提示（门槛按「拿到手的那一级」写，不是按破境之后写）：
   Object.assign(window.BREAK_ITEM_HINTS, {
-    tenglong: '黑凤族领地一战得《腾龙丹方》与芝龙果／真灵之血／真灵鳞片三味主料（一趟够炼两炉）。携方回天渊城洞府「丹炉」自炼腾龙丹，方子不毁可反复开炉（V9C1364）。',
+    tenglong: '黑凤族领地一战得《腾龙丹方》与芝龙果／真灵之血／真灵鳞片三味主料（一趟够炼两炉）。芝龙果自动留一株作种移入天渊城洞府「灵界药圃」，此后定期可采。携方回洞府「丹炉」自炼腾龙丹，方子不毁可反复开炉（V9C1364）。',
     heti:     '掉落：广寒界深处玉台上那一枚（炼虚后期冲合体用的丹药；V10C1770）。'
   });
   window.BREAKTHROUGH.push({
@@ -231,7 +233,7 @@
       elites: ['黑凤族长老', '黑凤族守卫'],
       mats: ['m_zhenlinglin', 'm_yaodan', 'm_gengjing'],
       boss: { kind: 'beast', name: '黑凤族三妖', hp: 52000, spd: 66, dmg: 96, r: 23, spr: 'haishou', scale: 6.2, summon: 'yaoshou2' },
-      reward: { stones: 18000, items: ['f_tenglong'], mats: [['m_zhilongguo', 2], ['m_zhenlingxue', 2], ['m_zhenlinglin', 6]] },
+      reward: { stones: 18000, items: ['f_tenglong'], mats: [['m_zhilongguo', 3], ['m_zhenlingxue', 2], ['m_zhenlinglin', 6]] },
       clearTitle: '荒岭已清',
       clearDesc: '三妖伏诛，鳞片、真灵之血、芝龙果到手，《腾龙丹方》也落进怀里。携方回天渊城洞府丹炉，一炉成丹，炼虚关的炉子，有着落了。'
     },
@@ -1501,7 +1503,15 @@
       quote: '在灵界有个能关门的地方，比什么法宝都难得。',
       capLevel: 220, restStone: 2600, restXp: 0.14,
       crafts: ['alchemy', 'forge', 'talisman'],
-      restTip: '天渊城的地脉是人族几万年经营出来的，坐一日抵荒原十日。'
+      restTip: '天渊城的地脉是人族几万年经营出来的，坐一日抵荒原十日。',
+      // 原著：韩立飞升后在灵界安顿下来，掌天瓶绿液照旧催药。得灵界灵药（如芝龙果）后
+      // 自动留一株作种移进这畦，此后在战斗图里照常生长、回洞府定期采收。
+      gardens: [{
+        id: 'tygarden', name: '灵界药圃', from: 'liangzu',
+        tip: '洞府后墙根下开出的一小畦，绿液一滴，灵界的药也能活。移栽进来的灵药，此后定期可采。',
+        pool: [],          // 基础为空；品种全由「移栽」进来（见 game.js autoTransplant）
+        transplant: true
+      }]
     },
     yuangong: {
       id: 'yuangong', name: '元合岛·青元宫', pos: '灵界·风元大陆 元合岛', from: 'fengyuan',

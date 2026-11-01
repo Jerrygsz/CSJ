@@ -494,14 +494,19 @@ for (const m of ALLM) {
 ok(badRef.length === 0, '地图引用全部有效', badRef.slice(0, 6));
 
 const badRecipe = [];
+// r_tenglong（腾龙丹）的产物与材料都在 lingjie.js（灵界篇），本沙箱只加载到 late3 取不到 —— 整条跳过，
+// 由 qa/verify-tenglong-recipe.mjs 在真浏览器里守（丹方 / 配方 / 材料 / 产出全查）。
+const LINGJIE_RECIPES = new Set(['r_tenglong']);
 for (const r of W.RECIPES) {
+  if (LINGJIE_RECIPES.has(r.id)) continue;
   if (!W.RECIPE_KINDS[r.kind]) badRecipe.push(r.id + ':kind');
   if (!W.Items.get(r.out)) badRecipe.push(r.id + ':out');
   for (const mm of (r.mats || [])) if (!W.Items.get(mm[0])) badRecipe.push(r.id + ':' + mm[0]);
 }
 eq(badRecipe.length, 0, '配方产物与材料都取得到', badRecipe.slice(0, 5));
 // 6 条基础方 + late3 新增 3 条突破用方（天火液 / 九曲灵参丹 / 定灵丹）+ value.js 2 条（饲灵丸 / 造化丹）
-eq(W.RECIPES.filter(r => r.kind === 'alchemy').length, 12, '炼丹方 12 条（含魔元丹；降尘丹 / 补天丹按原著为剧情所得，无丹方）');
+// + recipes.js 的 r_tenglong（腾龙丹，灵界方，见上）
+eq(W.RECIPES.filter(r => r.kind === 'alchemy').length, 13, '炼丹方 13 条（含魔元丹、腾龙丹；降尘丹 / 补天丹按原著为剧情所得，无丹方）');
 
 // 沙箱只加载到 late3（人界 + 灵界），仙界那几张图的际遇不在 ALLM 里，
 // 「map 是否存在」这一条交给 verify-xianjie.mjs 守；这里只管能看见的那部分。
