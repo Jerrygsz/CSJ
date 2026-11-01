@@ -1453,6 +1453,22 @@
     renderQuickBar();
     return true;
   }
+  // 洞府「储物袋其他」里消耗品的「用」：服用丹药 / 催动符箓 / 捏碎灵石 —— 与 useQuick 的物品分支同口径，
+  // 只是不进快捷栏、不限回气，在洞府直接吃（破境要带在身上的至宝不让当补药吞）。
+  function useItemFromBag(id) {
+    const it = Items.get(id);
+    if (!it) return;
+    if (it.slot) { notify(it.name + ' 得在洞府佩戴'); Sfx.warn(); return; }
+    if (isGateNeed(it.id)) { notify(it.name + ' 另有他用 · 破境时要带在身上'); Sfx.warn(); return; }
+    if ((save.inventory[id] || 0) <= 0) { notify('袋中没有了'); Sfx.warn(); return; }
+    if (!canUse(it)) { notify('境界不足 · 需' + realmName(it.req)); Sfx.warn(); return; }
+    save.inventory[id]--;
+    if (save.inventory[id] <= 0) delete save.inventory[id];
+    save.totalItems = Math.max(0, (save.totalItems || 1) - 1);
+    applyItem(it, { fromBag: true, noRun: true });
+    writeSave();
+    renderCave(); refreshTitle();
+  }
   function tickQuickCd(dt) {
     if (!G.quickCd) return;
     let dirty = false;
@@ -6009,9 +6025,63 @@
           '</div></div>';
       }
     }
+    // 储物袋其他：装备之外的所有物（丹药 / 符箓 / 灵物 / 丹方 / 材料）
+    const bookIds = new Set((window.RECIPES || []).filter(r => r.book).map(r => r.book));
+    const recipesByBook = {};
+    for (const r of (window.RECIPES || [])) if (r.book) (recipesByBook[r.book] = recipesByBook[r.book] || []).push(r);
+    function catOf(it) {
+      if (!it) return 'misc';
+      if (it.slot) return 'gear';
+      if (it.craftOnly === 'alchemy') return 'pill';
+      if (it.buffs && !it.mat) return 'talisman';
+      if (it.mat) return bookIds.has(it.id) ? 'book' : 'mat';
+      if (it.effect) return 'elixir';
+      return 'misc';
+    }
+    const groups = { pill: [], talisman: [], elixir: [], book: [], mat: [] };
+    for (const id of Object.keys(save.inventory)) {
+      const n = save.inventory[id] || 0; if (n <= 0) continue;
+      const it = Items.get(id); if (!it) continue;
+      const c = catOf(it);
+      if (c === 'gear' || c === 'misc' || !groups[c]) continue;
+      groups[c].push(id);
+    }
+    const groupMeta = [
+      ['pill', '丹药', '服下即见效，限时增益'],
+      ['talisman', '符箓', '催动即生效，限时增益'],
+      ['elixir', '灵物', '灵石 / 灵液等，捏碎吞吐灵气'],
+      ['book', '丹方', '未用的丹方 · 持方方可开炉炼此药'],
+      ['mat', '材料', '炼丹 / 炼器 / 制符之料，也可折价卖出']
+    ];
+    let other = '';
+    for (const [key, title, note] of groupMeta) {
+      const ids = groups[key]; if (!ids.length) continue;
+      ids.sort((a, b) => (Items.get(b).rarity - Items.get(a).rarity) || (a < b ? -1 : 1));
+      let rows = '';
+      for (const id of ids) {
+        const it = Items.get(id), r = RARITY[it.rarity], n = save.inventory[id];
+        const consumable = (key === 'pill' || key === 'talisman' || key === 'elixir')
+          && !isGateNeed(id) && canUse(it);
+        const d = (key === 'book' && recipesByBook[id])
+          ? ('可炼：' + recipesByBook[id].map(x => x.name).join('、'))
+          : (it.desc.length > 42 ? it.desc.slice(0, 42) + '…' : it.desc);
+        rows += '<div class="bagrow" data-item="' + id + '">' +
+          '<div class="gr-main"><b style="color:' + r.color + '">' + it.icon + ' ' + it.name + '</b>' +
+          '<i>' + r.name + '　' + d + '</i></div>' +
+          '<div class="gr-right">' +
+          (consumable ? '<button class="sr-btn buy" data-use="' + id + '">用</button>' : '') +
+          '<span class="sr-own">×' + n + '</span></div></div>';
+      }
+      other += '<div class="baggrp"><div class="cs-sub">' + title + '</div>' +
+        '<div class="cs-note">' + note + '</div>' +
+        '<div class="baglist">' + rows + '</div></div>';
+    }
+    if (!other) other = '<div class="shopempty">储物袋其他空空如也。</div>';
+
     return '<div class="cave-sec"><div class="cs-title">身上法器</div><div class="equipgrid">' + slots + '</div>' +
       '<div class="cs-note">佩上即生效，可随时更换；境界不足者佩不动。</div></div>' +
-      '<div class="cave-sec"><div class="cs-title">储物袋 · 可佩之物</div><div class="gearlist">' + list + '</div></div>';
+      '<div class="cave-sec"><div class="cs-title">储物袋 · 可佩之物</div><div class="gearlist">' + list + '</div></div>' +
+      '<div class="cave-sec"><div class="cs-title">储物袋 · 其他</div>' + other + '</div>';
   }
 
   function renderCaveCraft(c, kind, lv) {
@@ -7760,6 +7830,12 @@
       if (b) { enterBreakMap(b); }
       return;
     }
+    // 储物袋其他：消耗品「用」掉（服用丹药 / 催动符箓 / 捏碎灵石）
+    const ub = e.target.closest('button[data-use]');
+    if (ub) { useItemFromBag(ub.getAttribute('data-use')); return; }
+    // 储物袋其他：点行看物件详情
+    const bt = e.target.closest('.bagrow[data-item]');
+    if (bt && !e.target.closest('button')) { showItemHint(bt.getAttribute('data-item'), bt); return; }
     // 洞府进阶清单里的道具行：点一下看「去哪取」（依原著）
     const brkRow = e.target.closest('.brk-row.click');
     if (brkRow && brkRow.getAttribute('data-item')) {

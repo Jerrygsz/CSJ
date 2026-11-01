@@ -557,6 +557,13 @@ body.fs #wrap { background: #000; }
 .gr-need { font-size: var(--fs-micro); color: var(--danger); }
 .gr-on { font-size: var(--fs-micro); color: var(--ok); }
 
+/* 储物袋 · 其他（丹药 / 符箓 / 灵物 / 丹方 / 材料） */
+.baggrp { display: flex; flex-direction: column; gap: var(--sp-2); margin-top: 2px; }
+.cs-sub { color: var(--accent-soft); font-size: var(--fs-cap); letter-spacing: 1px; border-left: 2px solid rgba(201,162,74,0.35); padding-left: var(--sp-2); margin-top: 2px; }
+.baglist { display: flex; flex-direction: column; gap: var(--sp-2); }
+.bagrow { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 8px; border-radius: var(--r-md); border: 1px solid rgba(201,162,74,0.18); background: rgba(255,255,255,0.03); cursor: pointer; transition: background .1s; }
+.bagrow:active { transform: scale(var(--press)); background: rgba(255,255,255,0.08); }
+
 .recrow { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 8px; border-radius: var(--r-md); border: 1px solid rgba(201,162,74,0.18); background: rgba(255,255,255,0.03); }
 .recrow.can { border-color: rgba(111,224,138,0.35); background: rgba(111,224,138,0.05); }
 .rr-main { flex: 1; min-width: 0; }
