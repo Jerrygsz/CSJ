@@ -104,16 +104,17 @@
   // 腾龙丹为炼虚级灵药（V9C1364）。修为门槛沿用 breakLevelOk：lv-1 = 149（化神后期）。
   // 灵界两味破境丹的「去哪取」提示（门槛按「拿到手的那一级」写，不是按破境之后写）：
   Object.assign(window.BREAK_ITEM_HINTS, {
-    tenglong: '掉落：黑凤族领地那一趟的收成（芝龙果为主药，三万年一结果，生服也涨六十年苦修；V9C1364）。',
+    tenglong: '黑凤族领地一战得《腾龙丹方》与芝龙果／真灵之血／真灵鳞片三味主料（一趟够炼两炉）。携方回天渊城洞府「丹炉」自炼腾龙丹，方子不毁可反复开炉（V9C1364）。',
     heti:     '掉落：广寒界深处玉台上那一枚（炼虚后期冲合体用的丹药；V10C1770）。'
   });
   window.BREAKTHROUGH.push({
     lv: 150, realm: '炼虚初期', from: '化神后期',
     canonCave: 'tycave',
-    tip: '进阶炼虚的关键是「五行合一」——须兼修多属性功法（如天渊坊市可得的《百脉炼宝诀》），单一属性难成（V7C1219）。再以一炉腾龙丹压住灵压，才敢在灵界冲这一关（V9C1364）。',
+    tip: '进阶炼虚的关键是「五行合一」——须兼修多属性功法（如天渊坊市可得的《百脉炼宝诀》），单一属性难成（V7C1219）。再以一炉腾龙丹压住灵压，才敢在灵界冲这一关（V9C1364）。腾龙丹凭黑凤族领地所得《腾龙丹方》，回天渊城洞府「丹炉」自炼。',
     items: [['tenglong', 1]],
     mats: [],
     stones: 15000,
+    keepOnFail: true,  // 腾龙丹是黑凤族一趟一趟磨来的，冲关失利不没收，灵压反噬退回
     skill: 'baimai',   // 五行合一：须兼修一门多属性功法（百脉炼宝诀，天渊坊市可得）
     chance: { step: 0.5 },   // 一枚腾龙丹五成；押两枚必成
     story: [{ id: 'heifeng', name: '灵界·黑凤族领地' }],
@@ -230,9 +231,9 @@
       elites: ['黑凤族长老', '黑凤族守卫'],
       mats: ['m_zhenlinglin', 'm_yaodan', 'm_gengjing'],
       boss: { kind: 'beast', name: '黑凤族三妖', hp: 52000, spd: 66, dmg: 96, r: 23, spr: 'haishou', scale: 6.2, summon: 'yaoshou2' },
-      reward: { stones: 18000, items: ['tenglong'], mats: [['m_zhilongguo', 1], ['m_zhenlingxue', 1], ['m_zhenlinglin', 3]] },
+      reward: { stones: 18000, items: ['f_tenglong'], mats: [['m_zhilongguo', 2], ['m_zhenlingxue', 2], ['m_zhenlinglin', 6]] },
       clearTitle: '荒岭已清',
-      clearDesc: '三妖伏诛，鳞片、一滴真灵之血、一枚芝龙果到手。腾龙丹的炉子，有着落了。'
+      clearDesc: '三妖伏诛，鳞片、真灵之血、芝龙果到手，《腾龙丹方》也落进怀里。携方回天渊城洞府丹炉，一炉成丹，炼虚关的炉子，有着落了。'
     },
     {
       // 破境图：endLevel 必须等于炼虚关 lv150，洞府「进阶」靠它进场（同 jieying / jiezi）

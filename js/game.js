@@ -6767,6 +6767,8 @@
     }
     const rate = breakSuccessRate(b);
     const isWu = !!b.wushuai, k = isWu ? (G.wuStake || 0) : 0;
+    // keepOnFail：冲关失利时把押进去的破境丹原数退回（灵石照扣，丹药不没收）
+    const keep = b.keepOnFail ? (b.items || []).map(([id]) => [id, save.inventory[id] || 0]) : null;
     if (isWu) payWuStake(b, k);     // 五衰关的押注（仙元石）在此扣，与押丹分开
     payBreak(b);
     G.breakCur = null;
@@ -6781,8 +6783,9 @@
         return false;
       }
       if (applyShaDan(b)) { renderCave(); refreshTitle(); return true; }
+      if (keep) for (const [id, had] of keep) { const it = Items.get(id); if (it && had > 0) for (let i = 0; i < had; i++) addToBag(it, { silent: true }); }
       G.breakPending = b;
-      banner('冲关失败 · 丹药散尽，另备丹药再来'); Sfx.warn();
+      banner(b.keepOnFail ? '冲关失败 · 灵压反噬，丹药退回，再备料重来' : '冲关失败 · 丹药散尽，另备丹药再来'); Sfx.warn();
       writeSave(); renderCave(); refreshTitle();
       return false;
     }

@@ -35,6 +35,8 @@ window.MATERIALS = [
     desc: '黄枫谷百药园里抄来的，三味主药的分量分毫不能差。筑基丹之所以金贵，一半在这张纸上。', unique: true },
   { id: 'f_jinsui',  name: '金髓丸方', icon: '📜', rarity: 4, req: 1,
     desc: '乱星海市面流出来的方子，主药是妖兽骨髓。天星城的丹师靠它吃饭。', unique: true },
+  { id: 'f_tenglong', name: '腾龙丹方', icon: '📜', rarity: 4, req: 1,
+    desc: '黑凤族荒岭上夺来的方子——芝龙果为主药，佐真灵之血、真灵鳞。一炉成丹，压得住炼虚关的灵压（V9C1364）。持方回洞府丹炉自炼，方子不毁，可反复开炉。', unique: true },
   { id: 't_shengxian', name: '升仙令', icon: '🎴', rarity: 4, slot: 'trinket', req: 1,
     desc: '金光上人贴身收着的那枚。七派认令不认人——持令登门，换一个入门的名分，还配一枚筑基丹。',
     effect: { xpMul: 0.05 }, unique: true },
