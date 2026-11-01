@@ -264,6 +264,27 @@
   }
   function writeSave() { try { save.stones = Math.round(save.stones || 0); localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
   loadSave();
+  // 旧档迁移：原来那张「黑凤族领地」已经并进「木族领地」——
+  // 原著里芝龙果、腾龙丹方都出在木族之行（黑凤族筱虹只是同行者）。
+  // 打通过旧图的老存档按「木族已了」对待，不让人在白丢一张图之后又卡在门外。
+  (function migrateArc1() {
+    const cl = save.cleared || [], un = save.unlocked || [];
+    let changed = false;
+    if (cl.indexOf('heifeng') >= 0) {
+      if (cl.indexOf('muzu') < 0) { cl.push('muzu'); changed = true; }
+      if (un.indexOf('muzu') < 0) { un.push('muzu'); changed = true; }
+    }
+    // 已经破了炼虚的存档：这一段是按原著后补的（青罗沙漠 / 落日之墓 / 山腹 / 灵地 /
+    // 木族 / 碧眼真蟾 / 天鹏圣地 / 冥河），人早就走过去了。整段记为已了，
+    // 免得行迹图上留下「后面的图开了、中间这张还锁着」的窟窿；想重看重打随时能进。
+    if (cl.indexOf('lianxu') >= 0) {
+      for (const id of ['qinluo', 'anyuan', 'luori', 'shanku', 'tianyuan', 'lingdi', 'muzu', 'zhenchan', 'tianpeng', 'minghe']) {
+        if (cl.indexOf(id) < 0) { cl.push(id); changed = true; }
+        if (un.indexOf(id) < 0) { un.push(id); changed = true; }
+      }
+    }
+    if (changed) writeSave();
+  })();
   // 旧档补发：血色禁地已经通关，宗门该赏的那一枚筑基丹却没到手（本版才补上的剧情奖励）。
   // 老存档不必重开：读档即补，只补一次，且只在还卡在筑基门前（Lv36 之前）时才补。
   let pendingZhujiGift = false;
@@ -279,15 +300,15 @@
     writeSave();
   })();
 
-  // 老存档补发：黑凤族已通关，但旧版没在 boss 奖励里给《腾龙丹方》，
+  // 老存档补发：木族（旧版叫黑凤族领地）已通关，但旧版没在 boss 奖励里给《腾龙丹方》，
   // 导致化神→炼虚缺方、冲关无门、也找不到丹方去哪领。读档即补，只补一次：
-  // 只要黑凤族已清、且身上没有丹方，就发还一枚（丹方不毁、可反复开炉，多给无害）。
+  // 只要木族已清、且身上没有丹方，就发还一枚（丹方不毁、可反复开炉，多给无害）。
   // 新存档走正常 boss 奖励拿方，不会重复触发；已领过（gift_tenglong）或已持有也不重复补。
   let pendingTenglongGift = false;
   (function backfillTenglongRecipe() {
     if (save.gift_tenglong) return;
     save.gift_tenglong = true;
-    if ((save.cleared || []).indexOf('heifeng') < 0) { writeSave(); return; }
+    if ((save.cleared || []).indexOf('muzu') < 0) { writeSave(); return; }
     if ((save.inventory.f_tenglong || 0) > 0) { writeSave(); return; }
     save.inventory.f_tenglong = 1;
     save.totalItems = (save.totalItems || 0) + 1;
@@ -295,15 +316,15 @@
     writeSave();
   })();
 
-  // 老存档兜底：黑凤族已清、天渊城洞府已在，但药圃里始终没芝龙果、袋里也一枚不剩
+  // 老存档兜底：木族已清、天渊城洞府已在，但药圃里始终没芝龙果、袋里也一枚不剩
   // （旧版 boss 直接给成品丹、或后来两炉都炼废了）。那就直接往药圃补种一株 ——
-  // 芝龙果全游戏只有黑凤族那一枚，不补这一下，腾龙丹这条线就永远断在这里。
+  // 芝龙果全游戏只有木族之行那一枚，不补这一下，腾龙丹这条线就永远断在这里。
   // 只补一次；手里还有存果的走正常移栽（见 autoTransplant），不重复给。
   let pendingZhilongPlant = false;
   (function backfillZhilongSeed() {
     if (save.gift_zhilongguo) return;
     save.gift_zhilongguo = true;
-    if ((save.cleared || []).indexOf('heifeng') < 0) { writeSave(); return; }
+    if ((save.cleared || []).indexOf('muzu') < 0) { writeSave(); return; }
     if (save.caves.indexOf('tycave') < 0) { writeSave(); return; }
     save.gardenSeed = save.gardenSeed || {};
     const seeded = save.gardenSeed.tygarden || [];
@@ -323,6 +344,19 @@
     for (const m of (window.MAPS || [])) {
       if (!m.next || un.indexOf(m.id) >= 0) continue;
       if (cl.indexOf(m.next) >= 0 || un.indexOf(m.next) >= 0) { un.push(m.id); changed = true; }
+    }
+    if (changed) writeSave();
+  })();
+
+  // 老存档：在两张既有的图之间插了新图（青罗沙漠 / 落日之墓 / 山腹 / 灵地 / 木族 / 碧眼真蟾 / 天鹏圣地 / 冥河），
+  // 新图的 unlock 是「上一张图」，而上一张老档早已通关 —— 但 unlocked 里没有它，就会白锁着。
+  // 这里按同一口径补开：上一张已通关，这张就该开着（对正常存档是空操作）。
+  (function backfillUnlockByPrev() {
+    const cl = save.cleared || [], un = save.unlocked || [];
+    let changed = false;
+    for (const m of (window.MAPS || [])) {
+      if (!m.unlock || un.indexOf(m.id) >= 0) continue;
+      if (cl.indexOf(m.unlock) >= 0) { un.push(m.id); changed = true; }
     }
     if (changed) writeSave();
   })();
@@ -759,8 +793,8 @@
   function inLingjie() { return !!(G.map && LINGJIE_ARCS.indexOf(G.map.arc) >= 0); }
   // 仙界篇（arc M）：卷一在灵寰界，韩立带伤藏拙，成品只出真仙级往上的东西。
   function inXianjie() { return !!(G.map && XIANJIE_ARCS.indexOf(G.map.arc) >= 0); }
-  // 灵界成品池最低门槛：跟着地图修为段走 —— 黑凤族 72（化神旧宝），越往魔界/魔源海越往上抬，
-  // 到小灵天之后封顶 160。这样黑凤族掉的是飞升带下来的旧宝，魔界深处掉的才是灵界本地器物。
+  // 灵界成品池最低门槛：跟着地图修为段走 —— 初入灵界（木族/黑凤旧账）72（化神旧宝），越往魔界/魔源海越往上抬，
+  // 到小灵天之后封顶 160。这样渡劫前后掉的是飞升带下来的旧宝，魔界深处掉的才是灵界本地器物。
   function lootMinReq() {
     if (inXianjie()) return 420;          // 仙界档：真仙级往上，灵寰界的破烂一件不出
     if (!inLingjie()) return 0;
@@ -6492,7 +6526,7 @@
     if (b.skill) {
       const learned = !!((cultObj().skills || {})[b.skill]);
       const sk = window.skillById ? window.skillById(b.skill) : null;
-      h += breakRow(learned, '功', (sk ? sk.name : b.skill) + (learned ? '（已习）' : '（须先习得 · 天渊坊市购法诀·洞府研习）'), 'sk_' + b.skill);
+      h += breakRow(learned, '功', (sk ? sk.name : b.skill) + (learned ? '（已习）' : '（须先习得 · 随剧情得法诀·洞府研习）'), 'sk_' + b.skill);
     }
     for (const s of (b.story || [])) {
       const ok = (save.cleared || []).indexOf(s.id) >= 0;
@@ -9103,7 +9137,7 @@
   }
   if (pendingTenglongGift) {
     pendingTenglongGift = false;
-    setTimeout(function () { try { banner('黑凤旧债 · 补授《腾龙丹方》一枚'); Sfx.buff(); } catch (e) {} }, 1100);
+    setTimeout(function () { try { banner('木族旧账 · 补授《腾龙丹方》一枚'); Sfx.buff(); } catch (e) {} }, 1100);
   }
   if (pendingZhilongPlant) {
     pendingZhilongPlant = false;

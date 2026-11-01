@@ -34,25 +34,35 @@ await page.waitForTimeout(1200);
 const run = (body) => page.evaluate(`(()=>{const F=window.__FR;${body}})()`);
 
 // ---- 1) 地图存在与 chain ----
-const ALL_IDS = ['anyuan', 'tianyuan', 'heifeng', 'lianxu', 'fengyuan', 'huohu', 'shisan', 'mojin', 'guanghan', 'heti_guan',
+const ALL_IDS = ['qinluo', 'anyuan', 'luori', 'shanku', 'tianyuan', 'lingdi', 'muzu', 'zhenchan', 'tianpeng', 'minghe',
+  'lianxu', 'fengyuan', 'huohu', 'shisan', 'mojin', 'guanghan', 'heti_guan',
   'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling',
   'modajie', 'sanjie', 'jiujie', 'qunqiang', 'xianshi', 'zhenxian', 'zhangtianping', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie'];
 const maps = await page.evaluate((ids) => window.MAPS.filter(m => ids.includes(m.id))
   .map(m => ({ id: m.id, type: m.type, unlock: m.unlock, next: m.next, startLevel: m.startLevel, endLevel: m.endLevel })), ALL_IDS);
-ok(maps.length === 31, '灵界三十一张主线图已注册', maps);
+ok(maps.length === 38, '灵界三十八张主线图已注册', maps);
 const chain = await page.evaluate((ids) => {
   const g = id => window.MAPS.find(m => m.id === id) || {};
   const o = { fs: g('feisheng').next };
   for (const id of ids) o[id] = g(id);
-  o.ay = g('anyuan'); o.hf = g('heifeng'); o.lx = g('lianxu');
+  o.ql = g('qinluo'); o.ay = g('anyuan'); o.lo = g('luori'); o.sk = g('shanku');
+  o.ld = g('lingdi'); o.mz = g('muzu'); o.zc = g('zhenchan'); o.tp = g('tianpeng'); o.mh = g('minghe');
+  o.lx = g('lianxu');
   o.fy = g('fengyuan'); o.hu = g('huohu'); o.ss = g('shisan'); o.mj = g('mojin');
   o.gh = g('guanghan'); o.hg = g('heti_guan');
   return o;
 }, ALL_IDS);
-ok(chain.fs === 'anyuan', '飞升图 next 已接安远城', chain.fs);
-ok(chain.ay.unlock === 'feisheng' && chain.ay.next === 'tianyuan', '安远城 unlock=feisheng / next=天渊坊市', chain.ay);
-ok(chain.hf.unlock === 'tianyuan' && chain.hf.next === 'lianxu', '黑凤族 unlock=天渊坊市 / next=炼虚关', chain.hf);
-ok(chain.lx && chain.lx.unlock === 'heifeng', '炼虚关 unlock=黑凤族', chain.lx);
+ok(chain.fs === 'qinluo', '飞升图 next 已接青罗沙漠（原著落点）', chain.fs);
+ok(chain.ql.unlock === 'feisheng' && chain.ql.next === 'anyuan', '青罗沙漠 unlock=飞升 / next=安远城', chain.ql);
+ok(chain.ay.unlock === 'qinluo' && chain.ay.next === 'luori', '安远城 unlock=青罗沙漠 / next=落日之墓（兽潮城破后西行）', chain.ay);
+ok(chain.lo.unlock === 'anyuan' && chain.lo.next === 'shanku', '落日之墓 unlock=安远城 / next=山腹', chain.lo);
+ok(chain.sk.unlock === 'luori' && chain.sk.next === 'tianyuan', '山腹 unlock=落日之墓 / next=天渊城（天渊卫引渡）', chain.sk);
+ok(chain.ld.unlock === 'tianyuan' && chain.ld.next === 'muzu', '灵地·金阙玉书 unlock=天渊城 / next=木族', chain.ld);
+ok(chain.mz.unlock === 'lingdi' && chain.mz.next === 'zhenchan', '木族 unlock=灵地 / next=碧眼真蟾', chain.mz);
+ok(chain.zc.unlock === 'muzu' && chain.zc.next === 'tianpeng', '碧眼真蟾 unlock=木族 / next=天鹏圣地', chain.zc);
+ok(chain.tp.unlock === 'zhenchan' && chain.tp.next === 'minghe', '天鹏圣地 unlock=碧眼真蟾 / next=冥河', chain.tp);
+ok(chain.mh.unlock === 'tianpeng' && chain.mh.next === 'lianxu', '冥河 unlock=天鹏圣地 / next=炼虚关', chain.mh);
+ok(chain.lx && chain.lx.unlock === 'minghe', '炼虚关 unlock=冥河之地', chain.lx);
 ok(chain.lx && chain.lx.endLevel === 150, '破境图 lianxu 的 endLevel=150（洞府突破可反查）', chain.lx);
 ok(chain.lx && chain.lx.next === 'fengyuan', '炼虚关 next=黑隐山脉', chain.lx);
 ok(chain.fy && chain.fy.next === 'huohu', '黑隐山脉 next=火瑚群岛（玄天之争后被空间裂缝抛去雷鸣海域）', chain.fy);
@@ -108,7 +118,7 @@ const b150 = await page.evaluate(() => {
 ok(!!b150, 'BREAKTHROUGH 含 lv150', b150);
 ok(b150 && b150.realm === '炼虚初期', 'lv150 = 炼虚初期', b150 && b150.realm);
 ok(b150 && b150.items && b150.items[0] && b150.items[0][0] === 'tenglong', '炼虚关需要腾龙丹', b150 && b150.items);
-ok(b150 && b150.story && b150.story[0] && b150.story[0].id === 'heifeng', '炼虚关需已通黑凤族', b150 && b150.story);
+ok(b150 && b150.story && b150.story[0] && b150.story[0].id === 'minghe', '炼虚关需已通冥河之地（种剑百年的前一段）', b150 && b150.story);
 
 const b200 = await page.evaluate(() => {
   const b = (window.BREAKTHROUGH || []).find(x => x.lv === 200);
@@ -142,16 +152,16 @@ const its = await page.evaluate(() => ['tenglong', 'm_zhenlingxue', 'm_zhenlingl
 ok(its.every(x => x.ok), '原著灵物已入库（腾龙丹/真灵之血/真灵鳞片/合体丹/玄天斩灵剑）', its);
 
 // ---- 4) 「备齐」判定 ----
-await run(`F.clearProgress();F.setLevel(149);F.god(true);F.clearMap('heifeng');F.addItem('tenglong',1);F.setStones(20000);F.learn('baimai');`);
-ok(await page.evaluate(() => window.__FR.breakCan(150)) === true, '修为149 + 腾龙丹 + 已通黑凤族 + 百脉炼宝诀 → breakCan(150)=true');
+await run(`F.clearProgress();F.setLevel(149);F.god(true);F.clearMap('minghe');F.addItem('tenglong',1);F.setStones(20000);F.learn('baimai');`);
+ok(await page.evaluate(() => window.__FR.breakCan(150)) === true, '修为149 + 腾龙丹 + 已过冥河 + 百脉炼宝诀 → breakCan(150)=true');
 
-await run(`F.clearProgress();F.setLevel(149);F.clearMap('heifeng');F.setStones(20000);`);
+await run(`F.clearProgress();F.setLevel(149);F.clearMap('minghe');F.setStones(20000);`);
 ok(await page.evaluate(() => window.__FR.breakCan(150)) === false, '缺腾龙丹 → breakCan(150)=false');
 
 await run(`F.clearProgress();F.setLevel(149);F.addItem('tenglong',1);F.setStones(20000);`);
-ok(await page.evaluate(() => window.__FR.breakCan(150)) === false, '未通黑凤族 → breakCan(150)=false');
+ok(await page.evaluate(() => window.__FR.breakCan(150)) === false, '未过冥河 → breakCan(150)=false');
 
-await run(`F.clearProgress();F.setLevel(140);F.clearMap('heifeng');F.addItem('tenglong',1);F.setStones(20000);`);
+await run(`F.clearProgress();F.setLevel(140);F.clearMap('minghe');F.addItem('tenglong',1);F.setStones(20000);`);
 ok(await page.evaluate(() => window.__FR.breakCan(150)) === false, '修为未到化神后期(149) → breakCan(150)=false');
 
 // ---- 4b) 合体关（200）备齐判定 ----
@@ -190,13 +200,13 @@ const i1 = await page.evaluate(() => window.__FR.info());
 ok(i1.mapId === 'anyuan', '可进入安远城', i1.mapId);
 ok(i1.state === 'dialog', '安远城开场对白已播', i1.state);
 
-await run(`F.clearProgress();F.setLevel(132);F.god(true);F.enterMap('heifeng');`);
+await run(`F.clearProgress();F.setLevel(132);F.god(true);F.enterMap('muzu');`);
 await page.waitForTimeout(300);
 const i2 = await page.evaluate(() => window.__FR.info());
-ok(i2.mapId === 'heifeng', '可进入黑凤族领地', i2.mapId);
-ok(i2.state === 'dialog', '黑凤族开场对白已播', i2.state);
+ok(i2.mapId === 'muzu', '可进入木族领地', i2.mapId);
+ok(i2.state === 'dialog', '木族开场对白已播', i2.state);
 
-await run(`F.clearProgress();F.setLevel(149);F.god(true);F.clearMap('heifeng');F.addItem('tenglong',1);F.setStones(20000);F.enterMap('lianxu');`);
+await run(`F.clearProgress();F.setLevel(149);F.god(true);F.clearMap('minghe');F.addItem('tenglong',1);F.setStones(20000);F.enterMap('lianxu');`);
 await page.waitForTimeout(300);
 const i3 = await page.evaluate(() => window.__FR.info());
 ok(i3.mapId === 'lianxu', '可进入炼虚破境图', i3.mapId);
@@ -569,83 +579,91 @@ ok(FX.items.every(x => x && x.req && x.teach), '七门功法都有对应法诀�
 ok(FX.slots.join(',') === '5,6,7,7,8', '功法位随境界扩到 8（化神5→炼虚6→合体7→渡劫8）', FX.slots);
 ok(FX.caps.join(',') === '7,8,10', '功法层数上限随境界放开（化神7→炼虚8→真仙10）', FX.caps);
 ok(FX.cats.indexOf('skill') >= 0, '坊市有「功法」柜（此前 24 条法诀无页签可点）', FX.cats);
-ok(FX.tyShop.length >= 6 && !FX.hasTeng, '天渊坊市上架灵界货，但玄天仙藤不上架', FX.tyShop);
+ok(FX.tyShop.length >= 5 && !FX.hasTeng, '天渊城上架灵界货（真灵鳞/血/丹药/符/丹方），但玄天仙藤不上架', FX.tyShop);
 
+// 原著里两门高阶法诀都不是买来的：《百脉炼宝诀》出自金阙玉书外七十二页（灵地图），
+// 《惊蛰十二变》出自天鹏族地渊试炼（天鹏圣地）。天渊城的「功法」柜因此是空的。
 await run(`F.clearProgress();F.setLevel(150);F.setStones(200000);F.unlockAll();F.enterMap('tianyuan');`);
 await page.waitForTimeout(300);
 await run(`for(let i=0;i<30;i++){F.skipStory();}`);
 await page.waitForTimeout(300);
 const sh = await page.evaluate(() => ({ state: window.__FR.info().state, tabs: [...document.querySelectorAll('#shopCats button')].map(b => b.textContent) }));
-ok(sh.state === 'shop', '天渊坊市进得去（摆摊状态）', sh.state);
-ok(sh.tabs.indexOf('功法') >= 0, '坊市页签里有「功法」', sh.tabs);
+ok(sh.state === 'shop', '天渊城进得去（摆摊状态）', sh.state);
+ok(sh.tabs.indexOf('功法') >= 0, '坊市页签里有「功法」（虞阳城那类妖族坊市还用得上）', sh.tabs);
 await page.evaluate(() => { const b = [...document.querySelectorAll('#shopCats button')].find(x => x.textContent === '功法'); if (b) b.click(); });
 await page.waitForTimeout(250);
+const tySkill = await page.evaluate(() => ({
+  rows: document.querySelectorAll('#shopList button[data-buy]').length,
+  txt: document.querySelector('#shopList').textContent
+}));
+ok(tySkill.rows === 0 && /无货/.test(tySkill.txt), '天渊城功法柜不卖法诀（百脉/惊蛰各有正途）', tySkill);
+
+// 换一份干净存档：灵地·金阙玉书走完即得《百脉炼宝诀》（章节赠予的法诀当场化开）
+await page.evaluate(() => localStorage.clear());
+await page.reload();
+await page.waitForTimeout(1200);
+await run(`F.clearProgress();F.setLevel(150);F.unlockAll();F.god(true);F.enterMap('lingdi');`);
+await page.waitForTimeout(300);
+await run(`for(let i=0;i<30;i++){F.skipStory();}`);
+await page.waitForTimeout(300);
+const jinkui = await page.evaluate(() => {
+  const F = window.__FR, i = F.info();
+  return { cleared: i.cleared.indexOf('lingdi') >= 0, learned: !!(F.skillState().learned || {}).baimai,
+    bag: (i.inventory || {}).sk_baimai || 0 };
+});
+ok(jinkui.cleared && jinkui.learned, '通关灵地·金阙玉书 → 《百脉炼宝诀》当场习得（金阙玉书外七十二页）', jinkui);
+
+// 功法到手 + 腾龙丹 + 已过冥河 → 炼虚关齐备（不再是死锁）
+await run(`F.clearMap('minghe');F.addItem('tenglong',1);F.setStones(20000);`);
+ok(await page.evaluate(() => window.__FR.breakCan(150)) === true,
+  '金阙玉书 → 百脉炼宝诀 → 炼虚关（腾龙丹 + 冥河）齐备，无死锁');
+
+// 坊市里仍可买到的法诀（虞阳城·血影遁）走老路：买入入袋 → 洞府「学习」化开
+await run(`F.setLevel(150);F.setStones(200000);F.unlockAll();F.enterMap('yuyang');`);
+await page.waitForTimeout(400);
+await page.evaluate(() => { const b=[...document.querySelectorAll('#shopCats button')].find(x=>x.textContent==='功法'); if(b)b.click(); });
+await page.waitForTimeout(250);
 const buy = await page.evaluate(() => {
-  const btn = [...document.querySelectorAll('#shopList button[data-buy]')].find(b => b.getAttribute('data-buy') === 'sk_baimai');
+  const btn = [...document.querySelectorAll('#shopList button[data-buy]')].find(b => b.getAttribute('data-buy') === 'sk_xueying');
   if (!btn) return { ok: false, rows: document.querySelectorAll('#shopList .shoprow').length };
   btn.click();
-  return { ok: true, learned: !!(window.__FR.skillState().learned || {}).baimai, stones: window.__FR.info().stones };
+  const F = window.__FR;
+  return { ok: true, learned: !!(F.skillState().learned || {}).xueying, stones: F.info().stones,
+    bag: (F.info().inventory || {}).sk_xueying || 0 };
 });
-ok(buy.ok, '「功法」柜里能点出百脉炼宝诀', buy);
-ok(buy.learned === false, '买法诀当时未自动习得（改入储物袋）', buy);
-ok(buy.stones === 174000, '买法诀扣灵石（200000−26000）', buy.stones);
+ok(buy.ok, '虞阳城「功法」柜里能点出血影遁（妖族坊市仍卖法诀）', buy);
+ok(buy.learned === false && buy.bag >= 1, '买法诀当时未自动习得（改入储物袋）', buy);
+ok(buy.stones === 178000, '买法诀扣灵石（200000−22000）', buy.stones);
 
-// 去洞府「功法」页：手册进「未习法诀·藏经」，点「学习」即化开此册、永久习得（手册随之用掉）
 await run(`F.cave('tycave');F.caveTab('skill');`);
 await page.waitForTimeout(200);
 const learnUI = await page.evaluate(() => {
   const F = window.__FR;
-  const btn = [...document.querySelectorAll('#caveBody button[data-learn]')].find(b => b.getAttribute('data-learn') === 'sk_baimai');
-  if (!btn) return { hasBtn: false, learned: !!(F.skillState().learned || {}).baimai };
+  const btn = [...document.querySelectorAll('#caveBody button[data-learn]')].find(b => b.getAttribute('data-learn') === 'sk_xueying');
+  if (!btn) return { hasBtn: false, learned: !!(F.skillState().learned || {}).xueying };
   btn.click();
-  const stillUnlearned = !!([...document.querySelectorAll('#caveBody button[data-learn]')].find(b => b.getAttribute('data-learn') === 'sk_baimai'));
-  const invLeft = (F.info().inventory || {}).sk_baimai || 0;
-  return { hasBtn: true, learned: !!(F.skillState().learned || {}).baimai, stillUnlearned, invLeft };
+  const stillUnlearned = !!([...document.querySelectorAll('#caveBody button[data-learn]')].find(b => b.getAttribute('data-learn') === 'sk_xueying'));
+  const invLeft = (F.info().inventory || {}).sk_xueying || 0;
+  return { hasBtn: true, learned: !!(F.skillState().learned || {}).xueying, stillUnlearned, invLeft };
 });
 ok(learnUI.hasBtn, '洞府「功法」页有「学习」按钮（未习法诀·藏经）', learnUI);
-ok(learnUI.learned === true, '洞府点「学习」→ 习得百脉炼宝诀', learnUI);
+ok(learnUI.learned === true, '洞府点「学习」→ 习得血影遁', learnUI);
 ok(learnUI.invLeft === 0, '研习即化开手册：手中那本被用掉（袋中余 0）', learnUI);
 ok(learnUI.stillUnlearned === false, '研习后不再出现「学习」按钮', learnUI);
 
 // 弃去手册（未学习的）：从储物袋移除，不影响已习得
 const discarded = await page.evaluate(() => {
   const F = window.__FR;
-  F.addItem('sk_baimai', 1);        // 再给一本（尚未研习）
+  F.addItem('sk_xueying', 1);        // 再给一本（尚未研习）
   F.caveTab('skill');
-  const btn = [...document.querySelectorAll('#caveBody button[data-discard]')].find(b => b.getAttribute('data-discard') === 'sk_baimai');
-  if (!btn) return { gone: false, learned: !!(F.skillState().learned || {}).baimai };
+  const btn = [...document.querySelectorAll('#caveBody button[data-discard]')].find(b => b.getAttribute('data-discard') === 'sk_xueying');
+  if (!btn) return { gone: false, learned: !!(F.skillState().learned || {}).xueying };
   btn.click();
-  const still = [...document.querySelectorAll('#caveBody button[data-discard],#caveBody button[data-learn]')].find(b => (b.getAttribute('data-discard')||b.getAttribute('data-learn')) === 'sk_baimai');
-  return { gone: !still, learned: !!(F.skillState().learned || {}).baimai };
+  const still = [...document.querySelectorAll('#caveBody button[data-discard],#caveBody button[data-learn]')].find(b => (b.getAttribute('data-discard')||b.getAttribute('data-learn')) === 'sk_xueying');
+  return { gone: !still, learned: !!(F.skillState().learned || {}).xueying };
 });
 ok(discarded.gone, '「弃」后法诀手册移出储物袋', discarded);
 ok(discarded.learned === true, '弃手册不影响已习得状态', discarded);
-
-// 5c-补①：化神初期（低于门槛）时，坊市显示百脉炼宝诀「需化神后期」而非「需炼虚初期」
-await run(`F.clearProgress();F.setLevel(112);F.setStones(200000);F.unlockAll();F.enterMap('tianyuan');`);
-await page.waitForTimeout(300);
-await run(`for(let i=0;i<30;i++){F.skipStory();}`);
-await page.waitForTimeout(200);
-await page.evaluate(() => { const b=[...document.querySelectorAll('#shopCats button')].find(x=>x.textContent==='功法'); if(b)b.click(); });
-await page.waitForTimeout(200);
-const disp = await page.evaluate(() => {
-  const row = [...document.querySelectorAll('#shopList .shoprow')].find(r => r.textContent.includes('百脉炼宝诀'));
-  return row ? row.textContent : '';
-});
-ok(/需化神后期/.test(disp) && !/炼虚/.test(disp), '化神初期看百脉炼宝诀：显示「需化神后期」（非「需炼虚初期」）', disp);
-
-// 5c-补②：化神后期（lv140）买→洞府研习→炼虚关(需百脉)齐备，死锁解除（V8C1351 韩立化神期得之）
-await run(`F.clearProgress();F.setLevel(140);F.setStones(200000);F.unlockAll();F.enterMap('tianyuan');`);
-await page.waitForTimeout(300);
-await run(`for(let i=0;i<30;i++){F.skipStory();}`);
-await page.waitForTimeout(200);
-await page.evaluate(() => { const b=[...document.querySelectorAll('#shopCats button')].find(x=>x.textContent==='功法'); if(b)b.click(); });
-await page.waitForTimeout(200);
-await page.evaluate(() => { const btn=[...document.querySelectorAll('#shopList button[data-buy]')].find(b=>b.getAttribute('data-buy')==='sk_baimai'); if(btn) btn.click(); });
-await run(`F.cave('tycave');F.caveTab('skill');`);
-await page.waitForTimeout(150);
-await page.evaluate(() => { const btn=[...document.querySelectorAll('#caveBody button[data-learn]')].find(b=>b.getAttribute('data-learn')==='sk_baimai'); if(btn) btn.click(); });
-ok(await page.evaluate(() => !!(window.__FR.skillState().learned||{}).baimai), '化神后期（lv140）买+研习→习得百脉炼宝诀（死锁解除）');
 
 // ---- 5d) 掉落池按 arc 分段：灵界不掉人界低阶成品 ----
 const L1 = await page.evaluate(() => {
@@ -662,7 +680,7 @@ const L1 = await page.evaluate(() => {
     return a;
   };
   F.clearProgress(); F.setLevel(150); F.unlockAll(); F.god(true);
-  F.enterMap('heifeng');
+  F.enterMap('muzu');
   const era = F.lootEra(), floor = F.lootFloor();
   const small = tally(12, 0), boss = tally(12, 2);
   return {
@@ -700,18 +718,18 @@ const GEAR = await page.evaluate(() => {
     return it ? { id, name: it.name, req: it.req, rarity: it.rarity, slot: it.slot || null,
       droppable: !it.unique && !it.craftOnly && !it.noDrop && !it.teach } : null;
   });
-  // 上下限：黑凤族不该出大乘器物，小灵天不该再出化神旧宝
+  // 上下限：初入灵界不该出大乘器物，小灵天不该再出化神旧宝
   const pool = (mid, lv) => {
     F.clearProgress(); F.setLevel(lv); F.god(true); F.unlockAll(); F.enterMap(mid);
     return [0, 1, 2, 3, 4].flatMap(r => F.dropPool(r)).map(x => x.req);
   };
-  const hei = pool('heifeng', 150), xiao = pool('xiaoling', 220);
+  const hei = pool('muzu', 150), xiao = pool('xiaoling', 220);
   return { rows, hei: { min: Math.min.apply(null, hei), max: Math.max.apply(null, hei) },
     xiao: { min: Math.min.apply(null, xiao), max: Math.max.apply(null, xiao) } };
 });
 ok(GEAR.rows.every(x => x && x.req >= 150 && x.rarity === 4 && x.droppable),
   '五件灵界成品已入库且可随机掉（五龙铡/血晶摩诃剑/万森法盘/擎天巨舟/鲲鹏舍利）', GEAR.rows);
-ok(GEAR.hei.max <= 172, '黑凤族不会掉出高一个大境界的东西（池子上限 172）', GEAR.hei);
+ok(GEAR.hei.max <= 172, '初入灵界（木族）不会掉出高一个大境界的东西（池子上限 172）', GEAR.hei);
 ok(GEAR.xiao.min >= 160, '小灵天之后不再掉化神旧宝（池子下限 160）', GEAR.xiao);
 
 const CAVE = await page.evaluate(() => {
@@ -743,7 +761,7 @@ ok(CAVE.got1 && CAVE.got2, '打通两族大乘/小灵天即得洞府', { got1: C
 const BONUS = await page.evaluate(() => {
   const F = window.__FR;
   F.clearProgress(); F.setLevel(149); F.god(true);
-  F.clearMap('heifeng'); F.addItem('tenglong', 1); F.setStones(20000);
+  F.clearMap('minghe'); F.addItem('tenglong', 1); F.setStones(20000);
   const plain = F.breakRate(150).rate;      // 别处冲关
   F.cave('tycave');                          // 从天渊城洞府出关
   const inCave = F.breakRate(150).rate;
@@ -753,11 +771,11 @@ ok(Math.abs(BONUS.plain - 0.5) < 0.001, '腾龙丹一枚：炼虚关基础把握
 ok(Math.abs(BONUS.inCave - 0.8) < 0.001, '在天渊城洞府冲关：把握 +30%（0.5→0.8）', BONUS.inCave);
 
 // ---- 6) 洞府冲关入口 + 真实突破 ----
-await run(`F.clearProgress();F.setLevel(149);F.god(true);F.clearMap('heifeng');F.addItem('tenglong',1);F.setStones(20000);F.learn('baimai');`);
+await run(`F.clearProgress();F.setLevel(149);F.god(true);F.clearMap('minghe');F.addItem('tenglong',1);F.setStones(20000);F.learn('baimai');`);
 const st = await page.evaluate(() => window.__FR.startBreak(150));
 ok(st && st.map === 'lianxu', '洞府「突破」入口反查到炼虚关（lianxu）', st);
 
-await run(`F.clearProgress();F.setLevel(149);F.god(true);F.clearMap('heifeng');F.addItem('tenglong',3);F.setStones(20000);F.learn('baimai');`);
+await run(`F.clearProgress();F.setLevel(149);F.god(true);F.clearMap('minghe');F.addItem('tenglong',3);F.setStones(20000);F.learn('baimai');`);
 const br = await page.evaluate(() => window.__FR.breakNow(150));
 ok(br && br.cult === 150, 'breakNow(150) 成功推进到炼虚（cultivate=150）', br);
 

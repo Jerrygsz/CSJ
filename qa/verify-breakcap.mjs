@@ -64,7 +64,7 @@ ok(ay.hasTycave, '飞升落地（安远城通关）即得天渊城洞府 tycave'
 ok(ay.cap >= 149, '天渊城洞府可修至化神后期圆满（cap ' + ay.cap + ' >= 149）', ay);
 
 // ---- 3) 端到端：化神后期在灵界闭关圆满后，可破境炼虚 ----
-await run(`F.clearProgress();F.unlockAll();F.setLevel(132);F.god(true);F.clearMap('heifeng');F.addItem('tenglong',3);F.setStones(20000);`);
+await run(`F.clearProgress();F.unlockAll();F.setLevel(132);F.god(true);F.clearMap('minghe');F.addItem('tenglong',3);F.setStones(20000);`);
 await page.evaluate(() => { window.__FR.enterMap('anyuan'); window.__FR.finishMapNow(); });  // 得 tycave
 await run(`F.setLevel(149);F.learn('baimai');`);  // 模拟在 tycave 闭关到化神后期圆满，并兼修百脉炼宝诀（五行合一）
 const br = await page.evaluate(() => window.__FR.breakNow(150));

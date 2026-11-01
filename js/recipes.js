@@ -31,7 +31,7 @@ window.RECIPES = [
       '所以整个越国七大派联手，也要十年才出得一鼎，区区千余颗。' },
   { book: 'f_tenglong', id: 'r_tenglong', kind: 'alchemy', name: '腾龙丹', out: 'tenglong', outN: 1, cost: 5000, req: 132, rate: 0.42,
     mats: [['m_zhilongguo', 1], ['m_zhenlingxue', 1], ['m_zhenlinglin', 3]],
-    desc: '芝龙果三万年一结果，为主药；真灵之血凝魂，真灵鳞锁灵。三味齐入炉，地火一催，六十年苦修之功凝成一粒（V9C1364）。黑凤族荒岭一战所得丹方，材料也出自那一趟。' },
+    desc: '芝龙果三万年一结果，为主药；真灵之血凝魂，真灵鳞锁灵。三味齐入炉，地火一催，六十年苦修之功凝成一粒（V9C1364）。木族之行所得丹方，材料也出自那一趟（黑凤族筱虹同行，陨于归途）。' },
 
   // ================= 炼器 =================
   { id: 'r_jingtie', kind: 'forge', name: '精铁短剑', out: 'jingtie', outN: 1, cost: 22, req: 3, rate: 0.9,

@@ -42,7 +42,7 @@ const data = await page.evaluate(() => {
   out.danfang = !!window.Items.get('f_tenglong');
   const r = window.RECIPES.find(x => x.id === 'r_tenglong');
   out.recipe = r ? { book: r.book, out: r.out, mats: r.mats, cost: r.cost, req: r.req } : null;
-  const hf = window.MAPS.find(m => m.id === 'heifeng');
+  const hf = window.MAPS.find(m => m.id === 'muzu');   // 芝龙果与丹方都出在木族之行
   out.boss = hf ? { items: hf.reward.items, mats: hf.reward.mats, stones: hf.reward.stones } : null;
   out.hint = window.BREAK_ITEM_HINTS ? window.BREAK_ITEM_HINTS.tenglong : null;
   out.guoHint = window.BREAK_ITEM_HINTS ? window.BREAK_ITEM_HINTS.m_zhilongguo : null;
@@ -58,11 +58,11 @@ ok(data.recipe && data.recipe.book === 'f_tenglong' && data.recipe.out === 'teng
 ok(data.recipe && data.recipe.mats.length === 3 && data.recipe.cost === 5000 && data.recipe.req === 132,
   'r_tenglong 用料=芝龙果/真灵之血/真灵鳞、cost=5000、req=132', data.recipe && data.recipe.mats);
 ok(data.boss && data.boss.items.indexOf('f_tenglong') >= 0 && data.boss.items.indexOf('tenglong') < 0,
-  '黑凤族 boss 战利品改为掉《腾龙丹方》(f_tenglong)，不再直接掉成品丹', data.boss && data.boss.items);
+  '木族 boss 战利品给《腾龙丹方》(f_tenglong)，不再直接掉成品丹', data.boss && data.boss.items);
 ok(data.boss && data.boss.mats[0][1] === 1 && data.boss.mats[1][1] === 2 && data.boss.mats[2][1] === 6,
   'boss 主材料按原著：芝龙果×1（同行诸人各分一枚）、真灵之血×2、真灵鳞×6', data.boss && data.boss.mats);
 ok(data.hfMats && data.hfMats.indexOf('m_zhenlingxue') >= 0,
-  '黑凤族小怪掉落池含真灵之血（成算低，只靠封赏两炉炼废就断供）', data.hfMats);
+  '木族小怪掉落池含真灵之血（成算低，只靠封赏两炉炼废就断供）', data.hfMats);
 ok(data.hint && data.hint.indexOf('丹方') >= 0 && data.hint.indexOf('丹炉') >= 0,
   'BREAK_ITEM_HINTS.tenglong 指明「丹方 + 洞府丹炉自炼」', data.hint);
 ok(data.keepOnFail, 'lv150 破境关 keepOnFail=true（失败不退丹）');
@@ -110,7 +110,7 @@ ok(dom.indexOf('可炼：腾龙丹') >= 0, '储物袋·其他 中《腾龙丹方
 // ---------- ④ 冲关失败不退丹（keepOnFail） ----------
 const failTest = await page.evaluate(() => {
   const FR = window.__FR;
-  FR.clearMap('heifeng');           // 满足「先通关·黑凤族领地」前置
+  FR.clearMap('minghe');            // 满足「先过冥河」前置（炼虚关）
   FR.dropItem('tenglong', 99);      // 清掉上一关炼出的余丹
   FR.setLevel(150);                 // 化神后期·巅峰
   FR.learn('baimai');               // 五行合一功法

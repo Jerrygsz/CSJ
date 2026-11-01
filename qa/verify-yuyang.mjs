@@ -48,13 +48,14 @@ const YY = await page.evaluate(() => {
   const dou = W.MAPS.find(x => x.id === 'yuyang_dou');
   const stock = (W.SHOP_STOCK || []).map(s => s.id);
   return {
-    yuyang: m ? { type: m.type, side: !!m.side, shop: m.shop || [], next: m.next, unlockBy: m.unlockBy, clearTitle: m.clearTitle } : null,
+    yuyang: m ? { type: m.type, side: !!m.side, shop: m.shop || [], next: m.next, unlock: m.unlock, clearTitle: m.clearTitle } : null,
     dou: dou ? { type: dou.type, side: !!dou.side, boss: dou.boss ? dou.boss.name : null, mats: (dou.reward && dou.reward.mats) || [], next: dou.next, unlock: dou.unlock } : null,
     stock
   };
 });
 ok(!!YY.yuyang && YY.yuyang.type === 'market' && YY.yuyang.side, 'yuyang：妖族坊市·支线·market 类型', YY.yuyang);
-ok(YY.yuyang && YY.yuyang.unlockBy === 'e_yuyang', 'yuyang.unlockBy = e_yuyang（与奇遇对应）', YY.yuyang);
+// 按原著（1047 岁）虞阳城在「初入灵界」，安远城城破后落脚；原来靠大后期的 e_yuyang 奇遇引出，已改为主链解锁
+ok(YY.yuyang && YY.yuyang.unlock === 'anyuan', 'yuyang.unlock = anyuan（安远城之后即开，符合原著时序）', YY.yuyang);
 ok(YY.yuyang && YY.yuyang.next === 'yuyang_dou', 'yuyang.next = yuyang_dou（坊市之后接城斗场）', YY.yuyang);
 ok(YY.yuyang && YY.yuyang.shop && ['m_banyao','m_yaodan','m_zhenlinglin','m_zhenlingxue','sk_xueying'].every(id => YY.yuyang.shop.indexOf(id) >= 0),
   'yuyang 货架 = 伴妖草/妖丹/真灵材料/血影遁（妖族硬通货）', YY.yuyang && YY.yuyang.shop);

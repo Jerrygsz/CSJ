@@ -30,7 +30,7 @@ async function enterAndBanner(setupFn) {
 // 场景 A：化神后期·小成（lv140），功法/灵石/丹/剧情都齐 —— 缺口应为「修为」，横幅须说修为未达，而非「物未齐」
 const bannerA = await enterAndBanner(() => {
   const F = window.__FR;
-  F.clearProgress(); F.setLevel(140); F.learn('baimai'); F.clearMap('heifeng');
+  F.clearProgress(); F.setLevel(140); F.learn('baimai'); F.clearMap('minghe');
   F.addItem('tenglong', 1); F.setStones(2230942);
 });
 console.log('A·横幅:', bannerA);
@@ -42,20 +42,20 @@ check(missA.length === 1 && /修为未达/.test(missA[0]), 'A·breakMiss 仅 1 �
 // 场景 B：已到化神后期·巅峰（lv149）—— 全部齐，不应再有「未齐/未达」横幅
 const bannerB = await enterAndBanner(() => {
   const F = window.__FR;
-  F.clearProgress(); F.setLevel(149); F.learn('baimai'); F.clearMap('heifeng');
+  F.clearProgress(); F.setLevel(149); F.learn('baimai'); F.clearMap('minghe');
   F.addItem('tenglong', 1); F.setStones(2230942);
 });
 console.log('B·横幅:', bannerB);
 check(!/未齐|未达/.test(bannerB), 'B·化神后期·巅峰进门：无「未齐/未达」横幅（已齐全，可冲关）');
 
-// 场景 C：lv149 但缺腾龙丹 + 黑凤族未通 —— 横幅须具体列出缺的物
+// 场景 C：lv149 但缺腾龙丹 + 冥河未通 —— 横幅须具体列出缺的物
 const bannerC = await enterAndBanner(() => {
   const F = window.__FR;
   F.clearProgress(); F.setLevel(149); F.learn('baimai'); F.setStones(2230942);
-  // 不 clearMap heifeng、不 addItem tenglong
+  // 不 clearMap minghe、不 addItem tenglong
 });
 console.log('C·横幅:', bannerC);
-check(/破境之物未齐（还差 2 样：腾龙丹×1、先通关·灵界·黑凤族领地）/.test(bannerC), 'C·缺丹+缺剧情：横幅具体列出「腾龙丹×1、先通关·灵界·黑凤族领地」');
+check(/破境之物未齐（还差 2 样：腾龙丹×1、先通关·灵界·黑隐山脉 洞府）/.test(bannerC), 'C·缺丹+缺剧情：横幅具体列出「腾龙丹×1、先通关·灵界·黑隐山脉 洞府」');
 
 console.log('\n结果: ' + pass + ' 通过 / ' + fail + ' 失败');
 await browser.close(); server.close();

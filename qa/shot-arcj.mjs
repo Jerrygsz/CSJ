@@ -19,7 +19,8 @@ await page.evaluate(() => {
   const F = window.__FR;
   F.unlockAll(); F.setLevel(180); F.setStones(1392449);
   // 打到广寒界通关、元合岛合体关待冲关 —— 与玩家的实际进度一致
-  ['anyuan', 'tianyuan', 'heifeng', 'lianxu', 'fengyuan', 'huohu', 'shisan', 'mojin', 'guanghan'].forEach(id => F.clearMap(id));
+  ['qinluo', 'anyuan', 'luori', 'shanku', 'tianyuan', 'lingdi', 'muzu', 'zhenchan', 'tianpeng', 'minghe', 'lianxu',
+    'fengyuan', 'huohu', 'shisan', 'mojin', 'guanghan'].forEach(id => F.clearMap(id));
 });
 await page.waitForTimeout(300);
 await page.click('#startBtn');

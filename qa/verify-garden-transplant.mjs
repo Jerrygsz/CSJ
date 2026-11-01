@@ -53,14 +53,14 @@ const fresh = async () => { await page.evaluate((k) => { localStorage.removeItem
       hasGarden: !!g,
       pool0: g ? g.pool.slice() : null,
       transplant: g ? !!g.transplant : false,
-      reward: (window.MAPS.find(m => m.id === 'heifeng') || {}).reward
+      reward: (window.MAPS.find(m => m.id === 'muzu') || {}).reward
     };
   });
   ok(data.flag === 'tygarden', '芝龙果带 transplant:tygarden 标记', data.flag);
   ok(data.hasGarden && data.transplant, '天渊城洞府已开「灵界药圃」且标注 transplant', data.hasGarden);
   ok(data.pool0 && data.pool0.length === 0, '灵界药圃基础品种为空（全靠移栽）', data.pool0);
   ok(data.reward && data.reward.mats[0][0] === 'm_zhilongguo' && data.reward.mats[0][1] === 1,
-    '黑凤族只给芝龙果 ×1（按原著：同行诸人各分一枚）', data.reward && data.reward.mats);
+    '木族只给芝龙果 ×1（按原著：同行诸人各分一枚）', data.reward && data.reward.mats);
 
   // ---------- ④ 未拥有洞府：不移栽 ----------
   await fresh();

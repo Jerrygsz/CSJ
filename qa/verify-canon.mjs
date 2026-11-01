@@ -234,7 +234,8 @@ const want6 = ['qixuan', 'houshan', 'mishi', 'tainan', 'huangfeng', 'yaoyuan', '
   'bianjie', 'yinluo', 'jixi', 'zhuimo', 'lingmiao', 'mulan', 'dajin', 'kunwu', 'zhenmo', 'xiaoji',
   'xutian2', 'xinggong', 'kunpeng', 'luoyun2', 'tianlan', 'liudao', 'jiezi', 'feisheng',
   // 灵界篇（V8–V12）：飞升 → 炼虚 → 合体 → 大乘 → 渡劫 → 真仙 → 飞升仙界
-  'anyuan', 'tianyuan', 'heifeng', 'lianxu', 'fengyuan', 'huohu', 'shisan', 'mojin', 'guanghan', 'heti_guan', 'liangzu', 'shengdao', 'mojie', 'moban',
+  'qinluo', 'anyuan', 'luori', 'shanku', 'tianyuan', 'lingdi', 'muzu', 'zhenchan', 'tianpeng', 'minghe',
+  'lianxu', 'fengyuan', 'huohu', 'shisan', 'mojin', 'guanghan', 'heti_guan', 'liangzu', 'shengdao', 'mojie', 'moban',
   'yitian', 'huangquan', 'moyuan', 'xiaoling', 'modajie', 'sanjie', 'jiujie', 'qunqiang', 'xianshi', 'zhenxian', 'zhangtianping', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie',
   // 仙界篇（X1–X5）：风起灵寰 → 重回仙界 → 时空迷踪 → 大罗之争 → 大道归一 → 飞羽
   'linghuan', 'suxing', 'lingyan', 'xiaoping', 'tiangui', 'poxu', 'wumengdao', 'chulong', 'huijie', 'shijin', 'xianyun', 'shuiyan', 'xisha', 'taiyi',

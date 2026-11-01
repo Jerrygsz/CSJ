@@ -40,7 +40,7 @@ async function setup(opts) {
     F.setLevel(o.level);
     F.setStones(o.stones);
     F.addItem('tenglong', o.tenglong);
-    if (o.heifeng) F.clearMap('heifeng');   // 黑凤族领地通关
+    if (o.heifeng) F.clearMap('minghe');   // 黑凤族领地通关
     if (o.skill) F.learn(o.skill);          // 模拟在坊市习得功法
     F.cave('tycave');
     F.caveTab('break');
@@ -88,7 +88,7 @@ check(aInfo.level === 150, 'A. 进图结算：习得功法后成功破境 → �
 await setup({ level: 149, stones: 20000, tenglong: 2, heifeng: true, skill: null });
 const dCave = await caveHtml();
 check(dCave.includes('还差 1 样'), 'D. 洞府面板：缺功法 → 显示「还差 1 样」 (' + dCave.slice(0, 80) + '…)');
-check(dCave.includes('百脉炼宝诀') && dCave.includes('须先习得'), 'D. 洞府面板：功法行「百脉炼宝诀（须先习得·天渊坊市）」');
+check(dCave.includes('百脉炼宝诀') && dCave.includes('须先习得'), 'D. 洞府面板：功法行「百脉炼宝诀（须先习得·随剧情得法诀）」');
 const dBanner = await enterProbe('lianxu');
 check(String(dBanner).includes('还差 1 样'), 'D. 地图安远城外：缺功法 → 弹「还差 1 样」横幅 (banner=' + JSON.stringify(dBanner) + ')');
 const dInfo = await settle();
