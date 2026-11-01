@@ -72,6 +72,9 @@
       stones: 0, cleared: [], unlocked: ['qixuan'], mapId: 'qixuan',
       // 跨地图永久修为：等级与功法只增不减，回刷低级图也不会退回去
       cultivate: { level: 1, xp: 0, skills: { sword: 1 } },
+      // 在洞府「研习」/ 化开法诀而习得的功法（手写册子、掉落所得都走 learnSkill）：
+      // 一旦研习便永久在册，过图剪枝不清。与「地图临图功法（buildPlayerSkills 直写）」区分开。
+      learnedManuals: {},
       // 已装备的槽位（id 需仍在储物袋中）
       equip: { weapon: null, armor: null, trinket: null, talisman: null },
       caves: [], diffClear: {}, lastDiff: 'easy',
@@ -385,6 +388,13 @@
     }
     return !!_uniqueTaught[id];
   }
+  // 玩家「手动研习」过的法诀（洞府研习 / 化开掉落手册，皆走 learnSkill）：一旦研习便永久在册，
+  // 过图剪枝不清。与 unique-taught 同级豁免 —— 这正是「学习了就永久习得、随时可运起」的落点。
+  // 注意：只豁免「手动研习」的，地图临图功法（buildPlayerSkills 直写，从不经 learnSkill）仍照旧可被剪。
+  function isManualLearned(id) {
+    const m = (save && save.learnedManuals) || {};
+    return !!m[id];
+  }
   // 地图打完：只留三门练得最精的功法（等级原样带去下张图），余者散去。
   // 同层随机留 —— 「随机保留三个升级最高的」；剧情传世功法不在此列。
   // 进图前运哪几门，照旧走「战前运功」自选，等级沿用。
@@ -393,7 +403,7 @@
     const ids = Object.keys(c.skills).filter(id => (c.skills[id] || 0) > 0);
     const keep = [];
     const rest = [];
-    for (const id of ids) (isUniqueTaught(id) ? keep : rest).push(id);
+    for (const id of ids) ((isUniqueTaught(id) || isManualLearned(id)) ? keep : rest).push(id);
     if (rest.length + keep.length <= 3 || rest.length <= 3) {
       // 总共不过三门（或可留的不过三门），无需收敛
       return { kept: ids.length, cut: 0 };
@@ -6060,6 +6070,8 @@
     if (!d) return false;
     if (c.skills[id]) { notify('这门已学过'); return false; }
     c.skills[id] = 1;
+    // 标记「手动研习」：过图剪枝豁免，永久在册（书留架上、日后被清也可重学）
+    save.learnedManuals[id] = true;
     // 新学的进攻型功法：槽位还空着就先戴上，省一趟洞府（旧功法不会被带回来）
     if (d.type !== 'passive') {
       const eqNow = c.equipped || (c.equipped = []);
