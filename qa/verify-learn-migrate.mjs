@@ -79,6 +79,14 @@ const migWin = await page.evaluate(() => {
 });
 check(migWin.baimai && migWin.fire, 'A·旧档过图剪枝后 baimai/fire 仍存活（不再被清）');
 
+// 五行合一（炼虚 lv150 破境关＝安远城外·五行合一）门槛：迁移后 baimai 在册，门口判定不再差「功」
+const gate = await page.evaluate(() => {
+  const F = window.__FR;
+  const miss = F.breakMissing(150) || [];
+  return { skillMissing: miss.some(m => m.id === 'baimai' || m.kind === 'skill') };
+});
+check(!gate.skillMissing, 'A·五行合一(炼虚)门槛：迁移后百脉炼宝诀已满足，安远城外门口不再差「功」');
+
 // ---------- 场景 B：洞府「学习」即化开手册（消耗手册、永久习得） ----------
 await page.evaluate(() => {
   const F = window.__FR;
