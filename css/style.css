@@ -837,10 +837,12 @@ body[data-skin="guigu"] {
 }
 /* 世界底：宣白远山，不再深色夜空 */
 body[data-skin="guigu"] #wrap { background: radial-gradient(circle at 50% 40%, #f6f2e6 0%, #ded8c6 70%, #cbc5b3 100%); }
-/* 画布：轻墨滤镜——保留足够饱和度，像素画原配色透出来（水墨中一点艳），场景不过分灰 */
+/* 画布：精灵自己已经墨阶重绘过了（sprites.js 的 inkSprite），这里只做「入纸」——
+   一点点暖调、一点点对比托住轮廓。之前 grayscale(0.28) 是把没墨化的彩色像素往回拉，
+   现在再压一次等于把墨化后的矿物色也洗没了，整屏发土。 */
 body[data-skin="guigu"] #game {
-  background: #d8d3c4;
-  filter: grayscale(0.28) sepia(0.07) saturate(1.24) brightness(1.03) contrast(1.0);
+  background: #e2ddcb;
+  filter: grayscale(0.06) sepia(0.06) saturate(1.02) brightness(1.02) contrast(1.05);
 }
 /* 宣纸肌理覆层：极轻噪点（过重会显斑驳），盖在所有内容之上但不接事件 */
 body[data-skin="guigu"]::after {
@@ -1026,4 +1028,91 @@ body[data-skin="guigu"] #dialogText {
 body[data-skin="guigu"] #dialogHint {
   position: absolute; left: 10px; bottom: 6px; margin: 0;
   writing-mode: horizontal-tb; text-align: left;
+}
+
+/* ================= 水墨皮 · 快捷栏：黑圆盘 → 宣纸墨圈「三联印」 =================
+   原来那三个黑圆盘是整屏最出戏的一块：深色玻璃拟物 + 全圆角，跟宣纸墨线是两套语言。
+   改成"双重墨框小方印"——外粗内细两道线，纸底，键位号用朱砂小字，像一方连着一方的闲章。 */
+body[data-skin="guigu"] .qb {
+  border-radius: 3px;
+  background: linear-gradient(180deg, #f4efe0, #e6dfcc);
+  border: 1px solid rgba(58,53,44,0.66);
+  color: #3a342a;
+  box-shadow: inset 0 0 0 3px #f4efe0, inset 0 0 0 4px rgba(58,53,44,0.28), 0 2px 5px rgba(40,36,28,0.22);
+}
+/* 按下去像盖了一下章 */
+body[data-skin="guigu"] .qb:active { background: linear-gradient(180deg, #e8e1cd, #d9d2bc); transform: scale(0.94); }
+/* 键位号 1/2/3：朱砂小字，落在右下角 */
+body[data-skin="guigu"] .qb::after { color: #a83a2a; opacity: .6; bottom: 1px; }
+body[data-skin="guigu"] .qb.empty::after { opacity: .32; }
+body[data-skin="guigu"] .qb.empty { opacity: .55; }
+/* 冷却遮罩：墨色半掩 + 纸白数字 */
+body[data-skin="guigu"] .qb .qb-cd { border-radius: 2px; background: rgba(52,48,40,0.62); color: #f2ecda; }
+/* 灵宠格：竹青双边，和朱砂格分开 */
+body[data-skin="guigu"] .qb.pet {
+  border-color: rgba(63,89,65,0.72);
+  box-shadow: inset 0 0 0 3px #f4efe0, inset 0 0 0 4px rgba(63,89,65,0.38), 0 2px 5px rgba(40,36,28,0.22);
+}
+/* 左下角功法等级小签：黑方块也翻纸签，等级数用朱砂 */
+body[data-skin="guigu"] .pip {
+  background: rgba(244,239,224,0.9); border-color: rgba(58,53,44,0.45);
+  border-radius: 2px; color: #3a342a; box-shadow: 0 1px 3px rgba(40,36,28,0.2);
+}
+body[data-skin="guigu"] .pip b { color: #a83a2a; }
+
+/* ================= 水墨皮 · 气血/灵力/敌血：色块 → 纸签墨条 =================
+   原来是一条 iOS 胶囊色块。改成"纸签 + 墨框 + 朱砂笔道"，
+   fill 末端加一道 mask 渐隐模拟笔锋提离纸面（飞白收笔）——血量越少，收笔越靠前。 */
+body[data-skin="guigu"] #hpwrap, body[data-skin="guigu"] #xpwrap {
+  background: linear-gradient(180deg, #f4efe0, #e5dfcd);
+  border: 1px solid rgba(58,53,44,0.6); border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(40,36,28,0.28), inset 0 1px 0 rgba(255,255,255,0.5);
+}
+body[data-skin="guigu"] #hpfill {
+  border-radius: 1px;
+  background: linear-gradient(90deg, #7d3f2c, #b23a2c 62%, #c2563f);
+  -webkit-mask-image: linear-gradient(90deg, #000 88%, rgba(0,0,0,0.55) 97%, rgba(0,0,0,0.05) 100%);
+  mask-image: linear-gradient(90deg, #000 88%, rgba(0,0,0,0.55) 97%, rgba(0,0,0,0.05) 100%);
+}
+body[data-skin="guigu"] #xpfill {
+  border-radius: 1px;
+  background: linear-gradient(90deg, #3f5f74, #46687d 62%, #5b8095);
+  -webkit-mask-image: linear-gradient(90deg, #000 88%, rgba(0,0,0,0.55) 97%, rgba(0,0,0,0.05) 100%);
+  mask-image: linear-gradient(90deg, #000 88%, rgba(0,0,0,0.55) 97%, rgba(0,0,0,0.05) 100%);
+}
+/* 敌血：浓墨一道——墨压在纸上，比红块更有压迫感，也最"国画"。
+   注意 fill 的底色是 game.js 每帧写内联的（阶段二还要换色），这里只负责笔锋收尾的 mask。 */
+body[data-skin="guigu"] #bossbar {
+  background: linear-gradient(180deg, #f2eddd, #e2dbc8);
+  border: 1px solid rgba(58,53,44,0.62); border-radius: 2px;
+  box-shadow: 0 1px 4px rgba(40,36,28,0.3), inset 0 1px 0 rgba(255,255,255,0.45);
+}
+body[data-skin="guigu"] #bossbar::after { background: none; }   /* 去掉玻璃高光 */
+body[data-skin="guigu"] #bossfill {
+  border-radius: 1px;
+  /* 两头都收：左端起笔淡入、右端收笔飞白，一整条浓墨横在那里会压掉整幅画 */
+  -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,0.86) 0%, #000 8%, #000 86%, rgba(0,0,0,0.16) 100%);
+  mask-image: linear-gradient(90deg, rgba(0,0,0,0.86) 0%, #000 8%, #000 86%, rgba(0,0,0,0.16) 100%);
+}
+/* Boss 名：中灰渐变在纸上读不出。这里不能再走 background-clip 那套（覆盖 background
+   会把 background-clip 重置回 border-box，字就整个隐了）—— 直接给实心墨字最稳。 */
+body[data-skin="guigu"] #bossname {
+  background: none;
+  color: #2a251d; -webkit-text-fill-color: #2a251d;
+  filter: none;
+}
+/* 纸底上黑投影会糊成脏边，一律去掉 */
+body[data-skin="guigu"] #stats, body[data-skin="guigu"] #mapName { text-shadow: none; }
+/* 血条上的「生命 / 1234」压在朱砂条上会读不出 —— 深墨字 + 一圈纸白晕，
+   不管字落在朱砂条上还是纸底上都立得住（比换色可靠，血量长短不会让字忽隐忽现） */
+body[data-skin="guigu"] .barlabel, body[data-skin="guigu"] .barval {
+  color: #241f16;
+  text-shadow: 0 0 2px #f6f1e2, 0 0 2px #f6f1e2, 0 1px 1px rgba(246,241,226,0.9);
+}
+/* 图标（emoji）在纸底上太跳：压成灰褐剪影，像印上去的图样，形状仍可辨 */
+body[data-skin="guigu"] .qb-icon,
+body[data-skin="guigu"] .pip span,
+body[data-skin="guigu"] #skillrow .pip span {
+  filter: grayscale(1) sepia(0.22) contrast(0.92);
+  opacity: .85;
 }

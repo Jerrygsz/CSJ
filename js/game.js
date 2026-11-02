@@ -4328,8 +4328,11 @@
       lum = (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
     } catch (e) {}
     return lum > 0.42
-      ? { base: '#c9c3b0', a: '#d5d0be', b: '#bcb6a2' }   // 宣纸暖白（a 为晕染亮部）
-      : { base: '#8f8a79', a: '#a29d8b', b: '#7c7767' };  // 淡墨灰
+      ? { base: '#dbd5c3', a: '#e3ddcb', b: '#cdc7b5' }   // 宣纸暖白（a 为晕染亮部）
+      : { base: '#cbc5b3', a: '#d5cfbd', b: '#bcb6a4' };  // 旧纸（暗地图也留纸感，只是略沉一档）
+    // 之前的暗地图走 #8f8a79，整屏成了土黄褐 —— 国画要的是"纸"，纸本来是亮的。
+    // 暗地图的区别只该是"纸旧一点"，不是"纸脏了"。
+    // 纸底刻意比精灵的纸白（239,233,219）压一档：白衣/白骨在纸上才浮得出来，否则白对白一片糊。
   }
   // 一角构图晕墨层（鬼谷水墨皮专用）：四角淡墨 + 底部平远远山，中央留白。
   // 离屏画布一次性烘焙，随皮肤/视口尺寸重建；每帧只多一次 drawImage。
@@ -4346,6 +4349,12 @@
       g.fillStyle = rg; g.fillRect(cx - r, cy - r, r * 2, r * 2);
     };
     const R = Math.max(W, H) * 0.46;
+    // 整屏竖向明暗只在这里做一次（远处高、近处沉），地面平铺就永远平，不会出现循环横带
+    const vg = g.createLinearGradient(0, 0, 0, H);
+    vg.addColorStop(0, 'rgba(62,58,48,0.055)');
+    vg.addColorStop(0.55, 'rgba(62,58,48,0.015)');
+    vg.addColorStop(1, 'rgba(62,58,48,0.085)');
+    g.fillStyle = vg; g.fillRect(0, 0, W, H);
     corner(0, 0, R, 0.14); corner(W, 0, R * 0.85, 0.11);
     corner(0, H, R, 0.15); corner(W, H, R, 0.12);
     // 平远远山：底部两叠淡墨剪影（山势只在中央隆起，两端伏进留白）
@@ -4370,27 +4379,28 @@
     const base = (bg && bg.base) || '#36532f';
     const ca = (bg && bg.a) || '#3c5c34';
     const cb = (bg && bg.b) || '#30492a';
-    const c = document.createElement('canvas'); c.width = 48; c.height = 48;
+    const c = document.createElement('canvas'); c.width = 96; c.height = 96;
     const x = c.getContext('2d');
     if (save && save.skin === 'guigu') {
-      // 水墨意境：竖向晕染渐变 + 极淡的墨晕团，不做斑驳噪点
-      const g2 = x.createLinearGradient(0, 0, 0, 48);
-      g2.addColorStop(0, ca);   // 晕染亮部（远）
-      g2.addColorStop(1, base); // 落纸深部（近）
-      x.fillStyle = g2; x.fillRect(0, 0, 48, 48);
-      for (let i = 0; i < 7; i++) {
-        x.globalAlpha = 0.05;
-        x.fillStyle = cb;
-        const r = 3 + Math.random() * 5;
-        x.beginPath();
-        x.arc(Math.random() * 48, Math.random() * 48, r, 0, 6.29);
-        x.fill();
-      }
+      // 无缝纸纹：整块平涂，只撒极淡的墨点，且每个点都在 3×3 偏移位画一遍 —— 平铺接缝看不见。
+      // （之前这里是一张 48px 的竖向渐变，每 48px 循环一次，在地上形成等间距暗带，
+      //   "斑驳/假"的根源就在这条带子上。竖向明暗改到 washLayer 里整屏做一次，见 washLayerOf。）
+      x.fillStyle = base; x.fillRect(0, 0, 96, 96);
+      const S = 96;
+      const blot = (cx, cy, r, col, a) => {
+        x.globalAlpha = a; x.fillStyle = col;
+        for (let ox = -S; ox <= S; ox += S) for (let oy = -S; oy <= S; oy += S) {
+          x.beginPath(); x.arc(cx + ox, cy + oy, r, 0, 6.2832); x.fill();
+        }
+      };
+      for (let i = 0; i < 26; i++) blot(Math.random() * S, Math.random() * S, 5 + Math.random() * 11, cb, 0.030);
+      for (let i = 0; i < 20; i++) blot(Math.random() * S, Math.random() * S, 1.5 + Math.random() * 3, ca, 0.055);
       x.globalAlpha = 1;
     } else {
-      x.fillStyle = base; x.fillRect(0, 0, 48, 48);
-      for (let i = 0; i < 60; i++) { x.fillStyle = Math.random() < 0.5 ? ca : cb; x.fillRect((Math.random() * 48) | 0, (Math.random() * 48) | 0, 2, 2); }
+      x.fillStyle = base; x.fillRect(0, 0, 96, 96);
+      for (let i = 0; i < 240; i++) { x.fillStyle = Math.random() < 0.5 ? ca : cb; x.fillRect((Math.random() * 96) | 0, (Math.random() * 96) | 0, 2, 2); }
     }
+    buildGrass._tile = c;   // 暴露出来给回归脚本量 tile（有没有循环渐变就是看这里）
     grassPat = ctx.createPattern(c, 'repeat');
   }
   // ---------- 精灵变换（让一张静态网格看起来在动） ----------
@@ -5037,7 +5047,13 @@
       elBosswrap.style.top = stackTop + 'px';
       elBosswrap.style.display = 'block'; elBossname.textContent = G.boss.name;
       elBossfill.style.width = U.clamp(Math.max(0, G.boss.hp) / G.boss.maxhp, 0, 1) * 100 + '%';
-      elBossfill.style.background = G.boss.phase2 ? 'linear-gradient(90deg,#ff1f1f,#ff9a4a)' : 'linear-gradient(90deg,#b03a3a,#ff5a4a)';
+      // 血条底色是每帧写内联的（阶段二还要变色），所以皮肤的配色得在这儿分叉 ——
+      // 只改 CSS 会被这行内联盖掉（踩过一次：#bossfill 的墨条规则写了却从不生效）。
+      // 水墨皮：一阶段浓墨一道，二阶段墨里透朱砂（红了 = 要拼命了）。
+      const p2 = !!G.boss.phase2;
+      elBossfill.style.background = (save.skin === 'guigu')
+        ? (p2 ? 'linear-gradient(90deg,#241c14,#7a2f22)' : 'linear-gradient(90deg,#3a352a,#4a4438 58%,#6b6353)')
+        : (p2 ? 'linear-gradient(90deg,#ff1f1f,#ff9a4a)' : 'linear-gradient(90deg,#b03a3a,#ff5a4a)');
       if (elBossbar) elBossbar.classList.toggle('p2', !!G.boss.phase2);
     }
     else elBosswrap.style.display = 'none';
@@ -7968,6 +7984,7 @@
   function applySkin(skin) {
     save.skin = (skin === 'guigu') ? 'guigu' : 'jin';
     FX_INK.on = (save.skin === 'guigu');   // 特效画笔墨化，与皮同步切换
+    window.SKIN_INK = (save.skin === 'guigu');   // 精灵换墨版（sprites.js 的 Proxy 认这个开关）
     washLayer = null;                       // 晕墨层随皮重建（金皮直接不画）
     try { if (document.body) document.body.dataset.skin = save.skin; } catch (e) {}   // smoke 的 DOM 垫片没有 dataset
     const jin = document.getElementById('skinJin'), gg = document.getElementById('skinGuigu');
@@ -9145,6 +9162,7 @@
     banner(t) { banner(t || '测试横幅'); return !!(elBanner && elBanner.style.display === 'block'); },
     bannerDown() { return !!(elBanner && elBanner.style.display === 'block'); },
     skin(name) { if (name === undefined) return save.skin; applySkin(name === 'guigu' ? 'guigu' : 'jin'); return save.skin; },
+    grassTile() { return buildGrass._tile || null; },
     cave(id) { if (CAVES[id] && save.caves.indexOf(id) < 0) { save.caves.push(id); writeSave(); } openCave(id); return G.caveId; },    openAllCaves() { for (const k in CAVES) if (save.caves.indexOf(k) < 0) save.caves.push(k); writeSave(); renderWorldMap(); return save.caves.length; },
     caveTab(t) { G.caveTab = t; if (G.state === 'cave') renderCave(); return G.caveTab; },
     equip(id) { equipGear(id); return save.equip; },

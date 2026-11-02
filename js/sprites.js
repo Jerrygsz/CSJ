@@ -276,7 +276,139 @@
 
   const map = {};
   for (const d of DEFS) map[d.name] = make(d.rows, d.pal);
-  window.Sprites = map;
+
+  // ---------- 鬼谷水墨 · 精灵墨阶重绘 ----------
+  // 只换 UI 不够：一屏里界面已是宣纸墨线，主角和敌人还是满饱和的彩色像素小人，
+  // 那一眼就"脏"。这里给每张精灵另烘一张「墨阶 + 浅绛设色」版本，切皮时零成本换用。
+  //
+  // 不是简单压灰：袍色是识别符（外门绿、元婴紫、邪修红），压灰就认不出人了。
+  // 走的是国画「随类赋彩」——色相留着，饱和度压到矿物档（朱砂/赭石/枯黄/石绿/花青/墨紫），
+  // 明度按墨阶走：亮处归宣纸、暗处归浓墨。既有墨分五色，又留得住"水墨里一点惊艳"。
+  const MINERAL = [        // 按色相下界排好，取"最后一个不超过 h 的"
+    [  0, 176,  58,  44],  // 朱砂
+    [ 24, 156,  98,  56],  // 赭石
+    [ 52, 148, 128,  74],  // 枯黄
+    [ 95,  94, 122,  88],  // 石绿
+    [175,  70, 104, 122],  // 花青
+    [255, 108,  92, 118]   // 墨紫
+  ];
+  const MO = [239, 233, 219],  // 宣纸白
+        M1 = [185, 179, 164],  // 淡墨
+        M2 = [124, 118, 105],  // 中墨
+        M3 = [ 74,  70,  61],  // 重墨
+        M4 = [ 32,  29,  24];  // 浓墨（轮廓）
+
+  function mixc(a, b, t) {
+    return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+  }
+  function hslOf(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+    const l = (mx + mn) / 2;
+    const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+    let h = 0;
+    if (d !== 0) {
+      if (mx === r) h = ((g - b) / d) % 6;
+      else if (mx === g) h = (b - r) / d + 2;
+      else h = (r - g) / d + 4;
+      h *= 60; if (h < 0) h += 360;
+    }
+    return [h, s, l];
+  }
+  // 单像素归色：低饱和走墨阶五色，高饱和先取矿物色再按明度并到墨阶里
+  function inkPixel(r, g, b) {
+    const hsl = hslOf(r, g, b), h = hsl[0], s = hsl[1], l = hsl[2];
+    if (l < 0.13) return M4;                       // 深色一律浓墨（原描边是深蓝黑，必须归墨）
+    if (s < 0.17) {                                // 无彩色：纯墨阶
+      if (l > 0.74) return MO;
+      if (l > 0.58) return M1;
+      if (l > 0.40) return M2;
+      if (l > 0.22) return M3;
+      return M4;
+    }
+    let c = MINERAL[0];
+    for (const m of MINERAL) { if (h >= m[0]) c = m; }
+    const col = [c[1], c[2], c[3]];
+    if (l > 0.74) return mixc(MO, col, 0.18);      // 高明度：留白，只留一丝色
+    if (l > 0.60) return mixc(M1, col, 0.45);      // 亮面
+    if (l > 0.42) return mixc(M2, col, 0.55);      // 中间调
+    if (l > 0.24) return mixc(M3, col, 0.45);      // 暗面
+    return mixc(M4, col, 0.30);                     // 极暗：浓墨里透一点色
+  }
+  function inkSprite(src) {
+    const w = src.width, h = src.height;
+    if (!w || !h || !src.getContext) return src;
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    const x = c.getContext && c.getContext('2d');
+    if (!x || !x.getImageData) return src;          // 测试垫片没有像素 API：原样返回
+    let img;
+    try {
+      x.drawImage(src, 0, 0);
+      img = x.getImageData(0, 0, w, h);
+    } catch (e) { return src; }
+    const p = img.data, n = w * h;
+    const solid = new Uint8Array(n);
+    for (let i = 0; i < n; i++) solid[i] = p[i * 4 + 3] > 8 ? 1 : 0;
+    // 有描边的精灵先按原样归色，再决定要不要补轮廓
+    const out = new Float32Array(n * 3);
+    let edgeDark = 0, edgeAll = 0, area = 0;
+    for (let i = 0; i < n; i++) {
+      if (!solid[i]) continue;
+      area++;
+      const k = i * 4;
+      const rgb = inkPixel(p[k], p[k + 1], p[k + 2]);
+      out[i * 3] = rgb[0]; out[i * 3 + 1] = rgb[1]; out[i * 3 + 2] = rgb[2];
+    }
+    // 轮廓检测：边缘像素里已经够黑的比例（原图自带的 K 描边）
+    for (let y = 0; y < h; y++) for (let xx = 0; xx < w; xx++) {
+      const i = y * w + xx;
+      if (!solid[i]) continue;
+      const l = (out[i * 3] + out[i * 3 + 1] + out[i * 3 + 2]) / 3;
+      if (xx > 0 && solid[i - 1] && xx < w - 1 && solid[i + 1] &&
+          y > 0 && solid[i - w] && y < h - 1 && solid[i + w]) continue;
+      edgeAll++;
+      if (l < 90) edgeDark++;
+    }
+    // 统一 1px 浓墨轮廓：只对「够大 + 原本没描边」的精灵补，图标太小补一圈就吃没了
+    if (area >= 64 && edgeAll > 0 && edgeDark / edgeAll < 0.45) {
+      for (let y = 0; y < h; y++) for (let xx = 0; xx < w; xx++) {
+        const i = y * w + xx;
+        if (!solid[i]) continue;
+        if ((xx > 0 && solid[i - 1]) && (xx < w - 1 && solid[i + 1]) &&
+            (y > 0 && solid[i - w]) && (y < h - 1 && solid[i + w])) continue;
+        out[i * 3] = M4[0]; out[i * 3 + 1] = M4[1]; out[i * 3 + 2] = M4[2];
+      }
+    }
+    for (let i = 0; i < n; i++) {
+      const k = i * 4;
+      if (!solid[i]) { p[k + 3] = 0; continue; }
+      p[k] = out[i * 3]; p[k + 1] = out[i * 3 + 1]; p[k + 2] = out[i * 3 + 2]; p[k + 3] = 255;
+    }
+    x.putImageData(img, 0, 0);
+    return c;
+  }
+  const inkCache = new WeakMap();   // 原画布 → 墨化画布（同一张只烘一次）
+  function inkOf(src) {
+    if (!src || !src.width) return src;
+    let v = inkCache.get(src);
+    if (v === undefined) {
+      try { v = inkSprite(src); } catch (e) { v = src; }
+      inkCache.set(src, v);
+    }
+    return v || src;
+  }
+  // 用 Proxy 接一层：游戏里 40 多处 Sprites[name] 一处都不用改，
+  // 皮肤一开就整体换墨版，关掉立刻回原色。
+  window.Sprites = new Proxy(map, {
+    get(t, k) {
+      const v = t[k];
+      if (v && typeof v === 'object' && v.width > 0 && window.SKIN_INK === true) return inkOf(v);
+      return v;
+    },
+    set(t, k, v) { t[k] = v; return true; }
+  });
+  window.__inkSprite = inkOf;   // 验收脚本用
 
   // ---------- 主角立绘：袍色随境界，甲色随护甲 ----------
   // 换护甲不是换个数字，是人看得见。同一个身架，改配色与腰带，一眼就知道换了什么。
