@@ -146,6 +146,43 @@ ok(!/178,\s*58,\s*44/.test(jinHp), '切回鎏金：气血条回原版配色', ji
 const jinQb = await page.evaluate(() => getComputedStyle(document.querySelector('#quickbar .qb')).borderRadius);
 ok(jinQb === '50%', '切回鎏金：快捷栏回圆盘', jinQb);
 
+// ---------- 6) P1：卷首退场 / 重击朱砂 / 进图展卷 / 落款 / 地图卡层级 ----------
+await page.evaluate(() => window.__FR.skin('guigu'));
+await page.waitForTimeout(200);
+const p1 = await page.evaluate(() => {
+  const crit = document.getElementById('critFlash');
+  const scroll = document.getElementById('scrollOpen');
+  const anim = (el, cls) => { el.classList.add(cls); const a = getComputedStyle(el).animationName; el.classList.remove(cls); return a; };
+  return {
+    critOn: !!crit, scrollOn: !!scroll,
+    critAnim: crit ? anim(crit, 'go') : null,
+    scrollAnim: scroll ? anim(scroll, 'play') : null,
+    dialogSeal: getComputedStyle(document.getElementById('dialogbox'), '::after').content
+  };
+});
+ok(p1.critOn && p1.critAnim === 'critInk', '重击有朱砂闪光（critInk）', p1);
+ok(p1.scrollOn && p1.scrollAnim === 'scrollUnroll', '进图有展卷动效（scrollUnroll）', p1);
+ok(/凡人/.test(p1.dialogSeal || ''), '对白框右下角有「凡人」落款印', p1.dialogSeal);
+
+// boss 卷首：出场 2.6s 后自己退成背景淡痕（一直亮着会和像素怪抢主体）
+await page.evaluate(() => window.__FR.boss());
+await page.waitForTimeout(5600);   // 2.6s 触发 + 2.4s 淡出过渡，要等它落定
+const artFade = await page.evaluate(() => {
+  const el = document.getElementById('bossArt');
+  return { fade: el.classList.contains('fade'), op: +getComputedStyle(el).opacity };
+});
+ok(artFade.fade && artFade.op < 0.12, 'boss 插画 2.6s 后自动退成淡痕', artFade);
+await page.evaluate(() => window.__FR.killBoss());
+
+// 地图卡：当前卡不再挂 10px 大浮影（纸是贴平的，浮影是"卡片 UI"的语言）
+await page.evaluate(() => window.__FR.start());
+await page.waitForTimeout(500);
+const cardShadow = await page.evaluate(() => {
+  const c = document.querySelector('.mapcard.current') || document.querySelector('.mapcard');
+  return c ? getComputedStyle(c).boxShadow : 'NOEL';
+});
+ok(!/10px/.test(cardShadow), '地图卡去掉大浮影', cardShadow);
+
 console.log('\n────────────────────────');
 if (fail === 0) console.log('全绿：' + pass + ' 通过 / 0 失败');
 else console.log('失败：' + pass + ' 通过 / ' + fail + ' 失败');

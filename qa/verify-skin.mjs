@@ -80,7 +80,7 @@ const m2 = await page.evaluate(() => {
   };
 });
 ok(m2.card && /rgba\(60,\s*56,\s*48/.test(m2.card.border), '地图卡翻墨线边', m2.card && m2.card.border);
-ok(m2.card && m2.card.radius === '3px', '地图卡圆角收方（卷轴纸）', m2.card && m2.card.radius);
+ok(m2.card && m2.card.radius === '2px', '地图卡圆角收方（卷轴纸）', m2.card && m2.card.radius);
 ok(m2.node === '2px', '路线节点变方形印章（圆角 2px）', m2.node);
 ok(m2.numColor && /rgb\(143,\s*47,\s*36\)/.test(m2.numColor), '图号翻朱砂小方印', m2.numColor);
 await page.screenshot({ path: 'qa/shot-skin-map-scroll.png' });

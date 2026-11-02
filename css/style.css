@@ -892,12 +892,13 @@ body[data-skin="guigu"] .wm-route .mapcard.locked::before {
 }
 /* 地图卡：卷轴纸底——上下各一道深墨「轴头」，纸面微黄 */
 body[data-skin="guigu"] .mapcard {
-  border: 1px solid rgba(60,56,48,0.45); border-radius: 3px;
+  border: 1px solid rgba(60,56,48,0.45); border-radius: 2px;
   background:
     linear-gradient(180deg, rgba(60,56,48,0.85) 0%, rgba(60,56,48,0.55) 3px, rgba(60,56,48,0) 7px),
     linear-gradient(0deg, rgba(60,56,48,0.85) 0%, rgba(60,56,48,0.55) 3px, rgba(60,56,48,0) 7px),
-    linear-gradient(180deg, #f1ecdd, #e7e1cf);
-  box-shadow: 0 2px 8px rgba(40,36,28,0.18);
+    linear-gradient(180deg, #f7f2e3, #eee8d6);
+  /* 卷轴是贴平在案子上的，浮起来的投影是"卡片 UI"的语言，不是纸 */
+  box-shadow: 0 1px 3px rgba(40,36,28,0.10);
 }
 body[data-skin="guigu"] .mapcard.current {
   border-color: rgba(95,127,97,0.75);
@@ -1162,4 +1163,49 @@ body[data-skin="guigu"] #scrollOpen.play { display: block; animation: scrollUnro
   0%   { transform: scaleY(0.03); opacity: 1; }
   58%  { transform: scaleY(1);    opacity: 1; }
   100% { transform: scaleY(1);    opacity: 0; }
+}
+
+/* ================= 水墨皮 · 地图卡：把信息层级拉开 =================
+   原来卡名、地点、状态、标签四层几乎同一种灰度，一眼扫过去分不出主次。
+   重排：名浓（墨）、地淡（淡墨）、标签改墨线小签（不用彩色浅底）、
+   状态用竹青（当前）/ 淡墨（未至），已过的图不压成死灰。 */
+body[data-skin="guigu"] .mc-name { color: #1f1b13; font-size: 16px; letter-spacing: 2px; }
+body[data-skin="guigu"] .mc-pos,
+body[data-skin="guigu"] .mc-desc,
+body[data-skin="guigu"] .mc-meta,
+body[data-skin="guigu"] .mc-mini { color: #6a6354; letter-spacing: .5px; }
+/* 标签：彩色描边浅底 → 墨线小签（字色只分四档：墨 / 赭石 / 朱砂 / 花青） */
+body[data-skin="guigu"] .mc-tag {
+  border-radius: 2px; background: transparent; line-height: 1.5;
+  border-color: rgba(58,53,44,0.40); color: #5a5346;
+}
+body[data-skin="guigu"] .mc-tag.story { color: #6a6354; border-color: rgba(58,53,44,0.40); }
+body[data-skin="guigu"] .mc-tag.fight { color: #9c5a2c; border-color: rgba(156,90,44,0.48); }
+body[data-skin="guigu"] .mc-tag.bossfight { color: #a8331f; border-color: rgba(168,51,31,0.55); }
+body[data-skin="guigu"] .mc-tag.market,
+body[data-skin="guigu"] .mc-tag.side { color: #3f5f74; border-color: rgba(63,95,116,0.48); }
+/* 状态：当前所在竹青、未至淡墨（不用系统绿，绿在纸上像屏幕漏光） */
+body[data-skin="guigu"] .mc-state.on, body[data-skin="guigu"] .mc-mini.on { color: #3f7350; }
+body[data-skin="guigu"] .mc-state.off, body[data-skin="guigu"] .mc-mini.off { color: #8d8676; }
+body[data-skin="guigu"] .mc-go { color: #8f4f2e; }
+/* 未解锁的图：压得太灰会把整卷纸弄脏，只压到六成 */
+body[data-skin="guigu"] .mapcard.locked { opacity: .62; filter: grayscale(0.7); }
+/* 洞府 / 支线卡：原本是深蓝底和深紫底，在纸上像两块墨渍 —— 一并翻卷轴纸 */
+body[data-skin="guigu"] .mapcard.home,
+body[data-skin="guigu"] .mapcard.side {
+  background:
+    linear-gradient(180deg, rgba(60,56,48,0.82) 0%, rgba(60,56,48,0.5) 3px, rgba(60,56,48,0) 7px),
+    linear-gradient(0deg, rgba(60,56,48,0.82) 0%, rgba(60,56,48,0.5) 3px, rgba(60,56,48,0) 7px),
+    linear-gradient(180deg, #f7f2e3, #eee8d6);
+  border-color: rgba(60,56,48,0.45);
+  box-shadow: inset 3px 0 0 rgba(63,95,116,0.30), 0 1px 3px rgba(40,36,28,0.10);
+}
+body[data-skin="guigu"] .mapcard.side { box-shadow: inset 3px 0 0 rgba(108,92,120,0.32), 0 1px 3px rgba(40,36,28,0.10); }
+
+/* 大地图底：深黑蒙版在纸上就是"泼了一砚墨"，整张图都发灰。
+   换成一层纸雾——背后战场淡淡透出来，像纸背后有画。 */
+body[data-skin="guigu"] #worldmap { background: rgba(238,232,216,0.88); }
+/* 当前图卡：旧规则还挂着 10px 大浮影，卡片因此显"塑料"；这里只留 1px 竹青内描边 */
+body[data-skin="guigu"] .mapcard.current {
+  box-shadow: inset 0 0 0 1px rgba(95,127,97,0.42), 0 1px 3px rgba(40,36,28,0.10);
 }
