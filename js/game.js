@@ -4420,6 +4420,19 @@
     };
     mountain(H * 0.94, H * 0.10, 0.12, 0.8);
     mountain(H * 0.97, H * 0.06, 0.07, 2.3);
+    // 近景坡石：底部两角各压一撮淡墨石，画面才有「远山—场地—近石」三层。
+    // 只占左右两角，中间那条留给战斗（否则会挡住玩家和掉落物）。
+    const stone = (cx, cy, sw, sh, alpha) => {
+      g.beginPath();
+      g.moveTo(cx - sw / 2, cy + sh);
+      g.quadraticCurveTo(cx - sw * 0.44, cy - sh * 0.2, cx - sw * 0.16, cy - sh * 0.52);
+      g.quadraticCurveTo(cx + sw * 0.04, cy - sh * 0.78, cx + sw * 0.24, cy - sh * 0.36);
+      g.quadraticCurveTo(cx + sw * 0.44, cy - sh * 0.08, cx + sw / 2, cy + sh);
+      g.closePath();
+      g.fillStyle = 'rgba(58,54,46,' + alpha + ')'; g.fill();
+    };
+    stone(W * 0.06, H * 0.975, W * 0.46, H * 0.070, 0.10);
+    stone(W * 0.94, H * 0.988, W * 0.40, H * 0.055, 0.075);
     washLayer = c;
     return c;
   }
