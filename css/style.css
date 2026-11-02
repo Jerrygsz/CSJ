@@ -913,6 +913,36 @@ body[data-skin="guigu"] .mc-name {
 }
 /* 侧线卡墨印翻淡紫墨 */
 body[data-skin="guigu"] .mapcard.side .mc-num { color: #5d5570; background: rgba(160,154,174,0.16); border-color: rgba(93,85,112,0.55); }
+/* 水墨皮 · 盖印：boss 名旁朱砂印，出场时「咚」一下盖落 */
+#bossSeal { display: none; }
+body[data-skin="guigu"] #bossSeal {
+  display: none;   /* 无 boss 时隐藏，.on 才盖 */
+}
+body[data-skin="guigu"] #bossSeal.on {
+  display: flex; align-items: center; justify-content: center;
+  position: absolute; right: 2px; top: -4px;
+  width: 26px; height: 26px; border-radius: 4px;
+  background: #b93325; color: #f4f1e8;
+  font-size: 15px; font-weight: bold; font-family: "KaiTi", "STKaiti", serif;
+  box-shadow: inset 0 0 0 1.5px rgba(244,241,232,0.45), 0 1px 4px rgba(40,36,28,0.35);
+  animation: stampIn 0.5s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+  pointer-events: none;
+}
+@keyframes stampIn {
+  0%   { transform: scale(2.4) rotate(-18deg); opacity: 0; }
+  55%  { opacity: 1; }
+  100% { transform: scale(1) rotate(-6deg); opacity: 0.92; }
+}
+/* 大地图标题旁落一方小印：竖排白文「凡人」 */
+body[data-skin="guigu"] .wm-head h2::after {
+  content: '凡人'; display: inline-block; vertical-align: 8px; margin-left: 10px;
+  padding: 5px 2px; writing-mode: vertical-rl; letter-spacing: 3px;
+  font-size: 11px; line-height: 1; font-weight: normal; font-family: "KaiTi", "STKaiti", serif;
+  color: #f4f1e8; background: #b93325; border-radius: 3px;
+  box-shadow: inset 0 0 0 1px rgba(244,241,232,0.4);
+  transform: rotate(-4deg);
+}
+
 /* 水墨皮 · 异兽卷轴插画层：平时不显示，boss 战浮现（水墨淡染，不挡战斗） */
 #bossArt {
   display: none; position: absolute; pointer-events: none;

@@ -109,17 +109,45 @@ let m4 = await page.evaluate(() => {
 await page.waitForTimeout(500);
 m4 = await page.evaluate(() => {
   const el = document.getElementById('bossArt');
-  return { on: el.classList.contains('on'), bg: getComputedStyle(el).backgroundImage, shown: getComputedStyle(el).display };
+  const seal = document.getElementById('bossSeal');
+  return {
+    on: el.classList.contains('on'), bg: getComputedStyle(el).backgroundImage, shown: getComputedStyle(el).display,
+    sealOn: seal.classList.contains('on'), sealShown: getComputedStyle(seal).display, sealBg: getComputedStyle(seal).backgroundColor
+  };
 });
 ok(m4.on && m4.shown === 'block' && /beast-lang\.png/.test(m4.bg), 'boss 在场：异兽插画浮现且挂图', m4);
+ok(m4.sealOn && m4.sealShown === 'flex' && /rgb\(185,\s*51,\s*37\)/.test(m4.sealBg), 'boss 在场：朱砂印盖落（妖）', m4);
 await page.screenshot({ path: 'qa/shot-skin-boss-art.png' });
 await page.evaluate(() => { window.__FR.killBoss(); });
 await page.waitForTimeout(400);
 m4 = await page.evaluate(() => {
   const el = document.getElementById('bossArt');
-  return { on: el.classList.contains('on'), boss: !!window.__FR.G.boss };
+  const seal = document.getElementById('bossSeal');
+  return { on: el.classList.contains('on'), boss: !!window.__FR.G.boss, sealOn: seal.classList.contains('on') };
 });
-ok(!m4.on && !m4.boss, 'boss 离场：插画退场', m4);
+ok(!m4.on && !m4.boss && !m4.sealOn, 'boss 离场：插画与印退场', m4);
+
+// 2.8) 一角构图晕墨层：战斗画布四角应有淡墨（读画布角像素比中央深）
+const m5 = await page.evaluate(() => {
+  const c = document.getElementById('game');
+  const x = c.getContext('2d');
+  const px = (X, Y) => { const d = x.getImageData(X, Y, 1, 1).data; return d[0] + d[1] + d[2]; };
+  return { corner: px(4, 4), center: px(c.width >> 1, (c.height * 0.45) | 0) };
+});
+ok(m5.corner < m5.center, '一角构图：四角墨色深于中央留白', m5);
+
+// 2.9) 大地图标题旁朱砂小印（凡人）
+await page.evaluate(() => { window.__FR.start(); });
+await page.waitForTimeout(400);
+const m6 = await page.evaluate(() => {
+  const h2 = document.querySelector('.wm-head h2');
+  if (!h2) return null;
+  const cs = getComputedStyle(h2, '::after');
+  return { content: cs.content, bg: cs.backgroundColor, wm: cs.writingMode };
+});
+ok(m6 && /凡人/.test(m6.content) && /rgb\(185,\s*51,\s*37\)/.test(m6.bg) && m6.wm === 'vertical-rl', '大地图标题旁竖排朱砂印「凡人」', m6);
+await page.screenshot({ path: 'qa/shot-skin-map-seal.png' });
+await page.evaluate(() => { window.__FR.enterMap('qixuan'); window.__FR.G.state = 'play'; });
 await page.screenshot({ path: 'qa/shot-skin-guigu.png' });
 
 // 3) 存档持久化：刷新后仍是水墨皮

@@ -60,12 +60,12 @@
       if (h < 0) h += 360;
     }
     let ink;
-    if (h < 18)       ink = [186, 55, 40];   // 朱砂·艳（印泥点彩）
-    else if (h < 42)  ink = [172, 100, 46];  // 赭石·亮
-    else if (h < 72)  ink = [156, 132, 58];  // 枯金·留金意
-    else if (h < 168) ink = [92, 132, 94];   // 竹青·润
-    else if (h < 252) ink = [66, 100, 118];  // 黛青·透
-    else if (h < 330) ink = [124, 94, 156];  // 墨紫·惊艳
+    // 砍色纪律：全场只留「赭石（攻击）+ 花青（法术）」两个主色，朱砂留给点睛（伤红/濒死），其余归墨阶
+    if (h < 18)       ink = [186, 55, 40];   // 朱砂·点睛
+    else if (h < 42)  ink = [172, 100, 46];  // 赭石·攻击
+    else if (h < 72)  ink = [104, 98, 80];   // 金 → 枯墨（归墨阶，不抢色）
+    else if (h < 252) ink = [66, 100, 118];  // 绿/青 → 花青·法术
+    else if (h < 330) ink = [58, 84, 100];   // 紫 → 花青深
     else              ink = [186, 55, 40];
     // 亮芯只轻轻压一档，保留「一点惊艳」的高光
     if (l > 0.72) ink = ink.map(v => Math.round(v * 0.9 + 46 * 0.1));
@@ -4331,6 +4331,39 @@
       ? { base: '#c9c3b0', a: '#d5d0be', b: '#bcb6a2' }   // 宣纸暖白（a 为晕染亮部）
       : { base: '#8f8a79', a: '#a29d8b', b: '#7c7767' };  // 淡墨灰
   }
+  // 一角构图晕墨层（鬼谷水墨皮专用）：四角淡墨 + 底部平远远山，中央留白。
+  // 离屏画布一次性烘焙，随皮肤/视口尺寸重建；每帧只多一次 drawImage。
+  let washLayer = null;
+  function washLayerOf() {
+    if (!save || save.skin !== 'guigu') return null;
+    if (washLayer && washLayer.width === W && washLayer.height === H) return washLayer;
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const g = c.getContext('2d');
+    const corner = (cx, cy, r, a) => {
+      const rg = g.createRadialGradient(cx, cy, 0, cx, cy, r);
+      rg.addColorStop(0, 'rgba(60,56,48,' + a + ')');
+      rg.addColorStop(1, 'rgba(60,56,48,0)');
+      g.fillStyle = rg; g.fillRect(cx - r, cy - r, r * 2, r * 2);
+    };
+    const R = Math.max(W, H) * 0.46;
+    corner(0, 0, R, 0.14); corner(W, 0, R * 0.85, 0.11);
+    corner(0, H, R, 0.15); corner(W, H, R, 0.12);
+    // 平远远山：底部两叠淡墨剪影（山势只在中央隆起，两端伏进留白）
+    const mountain = (baseY, amp, alpha, seedOff) => {
+      g.beginPath(); g.moveTo(-4, H + 4);
+      for (let px = 0; px <= W + 8; px += 8) {
+        const t = px / W;
+        const y = baseY - amp * (0.55 + 0.45 * Math.sin(t * 5.2 + seedOff)) * Math.sin(t * Math.PI);
+        g.lineTo(px, y);
+      }
+      g.lineTo(W + 4, H + 4); g.closePath();
+      g.fillStyle = 'rgba(60,56,48,' + alpha + ')'; g.fill();
+    };
+    mountain(H * 0.94, H * 0.10, 0.12, 0.8);
+    mountain(H * 0.97, H * 0.06, 0.07, 2.3);
+    washLayer = c;
+    return c;
+  }
   function buildGrass(bg) {
     buildGrass._bg = bg || null;
     bg = skinBg(bg);
@@ -4783,6 +4816,9 @@
     ctx.clearRect(0, 0, W, H);
     if (grassPat) { ctx.fillStyle = grassPat; ctx.fillRect(0, 0, W, H); }
     else { ctx.fillStyle = skinBg(G.map && G.map.bg).base; ctx.fillRect(0, 0, W, H); }
+    // 一角构图：素纸上四角淡墨、远山伏底，中央留白让战斗自己说话
+    const wash = washLayerOf();
+    if (wash) ctx.drawImage(wash, 0, 0);
     ctx.save();
     ctx.translate(-G.cam.x + sx, -G.cam.y + sy);
 
@@ -5007,6 +5043,14 @@
     else elBosswrap.style.display = 'none';
     // 鬼谷水墨 · 异兽卷轴插画：boss 在场时浮现，boss 死亡/换图隐去（金皮由 CSS 兜底强隐）
     if (elBossArt) elBossArt.classList.toggle('on', !!(G.boss && save.skin === 'guigu'));
+    if (elBossSeal) {
+      const sealOn = !!(G.boss && save.skin === 'guigu');
+      // 盖章动画只在「从无到有」那一次播：先摘类再下一帧戴上，避免每帧重播
+      if (sealOn && !elBossSeal.classList.contains('on')) {
+        elBossSeal.classList.remove('on');
+        requestAnimationFrame(() => elBossSeal.classList.add('on'));
+      } else if (!sealOn) elBossSeal.classList.remove('on');
+    }
     const playing = G.state === 'play' || G.state === 'dialog' || G.state === 'levelup' || G.state === 'pause';
     elHud.style.display = playing ? 'block' : 'none';
     // 暂停键用 flex 居中两根竖条（图标是 CSS 画的，不是字体字形）
@@ -7777,6 +7821,7 @@
   const elRebirthText = document.getElementById('rebirthText');
   const elAutoSaveChk = document.getElementById('autoSaveChk');
   const elBossArt = document.getElementById('bossArt');   // 鬼谷水墨 · 异兽卷轴插画层
+  const elBossSeal = document.getElementById('bossSeal'); // 鬼谷水墨 · boss 盖印
   const elManualSaveChk = document.getElementById('manualSaveChk');
   const elSaveNowBtn = document.getElementById('saveNowBtn');
   const elSaveHint = document.getElementById('saveHint');
@@ -7923,6 +7968,7 @@
   function applySkin(skin) {
     save.skin = (skin === 'guigu') ? 'guigu' : 'jin';
     FX_INK.on = (save.skin === 'guigu');   // 特效画笔墨化，与皮同步切换
+    washLayer = null;                       // 晕墨层随皮重建（金皮直接不画）
     try { if (document.body) document.body.dataset.skin = save.skin; } catch (e) {}   // smoke 的 DOM 垫片没有 dataset
     const jin = document.getElementById('skinJin'), gg = document.getElementById('skinGuigu');
     if (jin) jin.classList.toggle('on', save.skin !== 'guigu');

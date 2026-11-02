@@ -43,13 +43,13 @@ let m = await page.evaluate(() => ({
   mint: window.__FR.inkify('#8ef0cc'),           // 竹青系 → 竹青
   purple: window.__FR.inkify('#b49cff')          // 紫光 → 墨紫/黛青冷档
 }));
-ok(m.fire === 'rgba(156,132,58,1)', '雷电金 #ffd76a → 枯金·留金意', m.fire);
-ok(m.flame === 'rgba(172,100,46,0.95)', '焰橙 → 赭石·亮且 alpha 保留', m.flame);
-ok(m.hurt === 'rgba(186,55,40,0.55)', '伤红 → 朱砂·艳且 alpha 保留', m.hurt);
-ok(m.pale.startsWith('rgba(145,123,57') || m.pale.startsWith('rgba(156,132,58'), '淡金 #e0d49a → 枯金档', m.pale);
-ok(m.cyan.startsWith('rgba(64,95,111'), '青光 #a8e2ff → 黛青·透', m.cyan);
-ok(m.mint.startsWith('rgba(87,123,89'), '竹青光 #8ef0cc → 竹青·润', m.mint);
-ok(m.purple.startsWith('rgba(116,89,145') || m.purple.startsWith('rgba(124,94,156'), '紫光 → 墨紫·惊艳档', m.purple);
+ok(m.fire === 'rgba(104,98,80,1)', '雷电金 → 枯墨（金归墨阶不抢色）', m.fire);
+ok(m.flame === 'rgba(172,100,46,0.95)', '焰橙 → 赭石·攻击主色且 alpha 保留', m.flame);
+ok(m.hurt === 'rgba(186,55,40,0.55)', '伤红 → 朱砂·点睛且 alpha 保留', m.hurt);
+ok(m.pale.startsWith('rgba(98,93,77') || m.pale.startsWith('rgba(104,98,80'), '淡金 → 墨阶档', m.pale);
+ok(m.cyan.startsWith('rgba(64,95,111'), '青光 → 花青·法术主色', m.cyan);
+ok(m.mint.startsWith('rgba(64,95,111'), '竹青光 → 归花青（砍色纪律）', m.mint);
+ok(m.purple.startsWith('rgba(57,80,95'), '紫光 → 花青深档', m.purple);
 
 // 2) 亮芯压档：高明度暖色再压一档（消火光感）
 m = await page.evaluate(() => ({
@@ -80,7 +80,7 @@ m = await page.evaluate(() => {
   g.restore();
   return { guigu: got };
 });
-ok(/rgba\(156,\s*132,\s*58|rgb\(156,\s*132,\s*58|#9c843a/i.test(m.guigu), 'ctx.fillStyle 实画：鬼谷皮下 #ffd76a 落笔为枯金', m.guigu);
+ok(/rgba\(104,\s*98,\s*80|rgb\(104,\s*98,\s*80|#686250/i.test(m.guigu), 'ctx.fillStyle 实画：鬼谷皮下 #ffd76a 落笔为枯墨', m.guigu);
 
 // 5) 切回鎏金：墨化关闭
 await page.evaluate(() => { window.__FR.skin('jin'); });
@@ -92,7 +92,7 @@ m = await page.evaluate(() => {
   return { fill: got, mapped: window.__FR.inkify('#ffd76a') };
 });
 ok(/#ffd76a/i.test(m.fill), '切回鎏金后画笔不再墨化', m.fill);
-ok(/^rgba\(156,\s*132,\s*58,1\)$/.test(m.mapped), 'inkify 纯函数仍可用（与皮肤开关解耦）', m.mapped);
+ok(/^rgba\(104,\s*98,\s*80,1\)$/.test(m.mapped), 'inkify 纯函数仍可用（与皮肤开关解耦）', m.mapped);
 
 await page.screenshot({ path: 'qa/shot-ink-fx.png' });
 
