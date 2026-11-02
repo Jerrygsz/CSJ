@@ -238,6 +238,8 @@
         gift_tenglong: !!s.gift_tenglong,
         gift_zhilongguo: !!s.gift_zhilongguo,
         gift_heti: !!s.gift_heti,
+        // 外观皮肤：'jin' 鎏金古卷（默认）| 'guigu' 鬼谷水墨
+        skin: (s.skin === 'guigu') ? 'guigu' : 'jin',
         // 移栽品种老存档：没有这个字段就补成空账
         gardenSeed: (s.gardenSeed && typeof s.gardenSeed === 'object') ? s.gardenSeed : {},
         wounded: (s.wounded && typeof s.wounded === 'object') ? s.wounded : null,
@@ -4257,8 +4259,23 @@
 
   // ---------- 渲染 ----------
   let grassPat = null;
+  // 皮肤 · 场景底色：鬼谷水墨皮把各地图的绿底/彩底统一去饱和成宣纸灰调（JS 端与 CSS 滤镜配合）
+  function skinBg(bg) {
+    if (!save || save.skin !== 'guigu') return bg;
+    // 按原底色亮度分两档：亮地图（野外/雪原）用宣纸灰白，暗地图（魔域/深渊）用淡墨灰
+    let lum = 0.3;
+    try {
+      const hex = (bg && bg.base) || '#36532f';
+      const n = parseInt(hex.slice(1), 16);
+      lum = (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
+    } catch (e) {}
+    return lum > 0.42
+      ? { base: '#cfcaba', a: '#bdb8a6', b: '#aaa590' }   // 宣纸灰
+      : { base: '#a8a394', a: '#948f7f', b: '#7f7a6b' };  // 淡墨灰
+  }
   function buildGrass(bg) {
     buildGrass._bg = bg || null;
+    bg = skinBg(bg);
     const base = (bg && bg.base) || '#36532f';
     const ca = (bg && bg.a) || '#3c5c34';
     const cb = (bg && bg.b) || '#30492a';
@@ -4690,7 +4707,7 @@
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, W, H);
     if (grassPat) { ctx.fillStyle = grassPat; ctx.fillRect(0, 0, W, H); }
-    else { ctx.fillStyle = (G.map && G.map.bg && G.map.bg.base) || '#36532f'; ctx.fillRect(0, 0, W, H); }
+    else { ctx.fillStyle = skinBg(G.map && G.map.bg).base; ctx.fillRect(0, 0, W, H); }
     ctx.save();
     ctx.translate(-G.cam.x + sx, -G.cam.y + sy);
 
@@ -7824,6 +7841,21 @@
   }
   document.getElementById('muteTitle').addEventListener('click', () => { Sfx.toggle(); syncMute(); });
   document.getElementById('mutePause').addEventListener('click', () => { Sfx.toggle(); syncMute(); });
+  // ---------- 外观皮肤：鎏金古卷 / 鬼谷水墨（存档记忆） ----------
+  function applySkin(skin) {
+    save.skin = (skin === 'guigu') ? 'guigu' : 'jin';
+    try { if (document.body) document.body.dataset.skin = save.skin; } catch (e) {}   // smoke 的 DOM 垫片没有 dataset
+    const jin = document.getElementById('skinJin'), gg = document.getElementById('skinGuigu');
+    if (jin) jin.classList.toggle('on', save.skin !== 'guigu');
+    if (gg) gg.classList.toggle('on', save.skin === 'guigu');
+    // 战斗中换皮：场地底纹按新皮肤重铺（滤镜/覆层由 CSS data-skin 自动接管）
+    if (typeof buildGrass === 'function' && grassPat) buildGrass(buildGrass._bg);
+    writeSave();
+  }
+  const elSkinJin = document.getElementById('skinJin'), elSkinGuigu = document.getElementById('skinGuigu');
+  if (elSkinJin) elSkinJin.addEventListener('click', () => { if (save.skin !== 'jin') { applySkin('jin'); Sfx.gem(); } });
+  if (elSkinGuigu) elSkinGuigu.addEventListener('click', () => { if (save.skin !== 'guigu') { applySkin('guigu'); Sfx.gem(); } });
+  applySkin(save.skin);   // 读档后按存档落皮（也覆盖老存档缺字段的情况）
   // 转世重修：先算出本次能炼出的余荫给玩家看，再确认
   function fmtRebirthVal(k, v) {
     if (k === 'maxhp') return '+' + Math.round(v);
@@ -8986,6 +9018,7 @@
     // 横幅压测：返回提示是否已被让位（内联 top 让到横幅实测下沿）
     banner(t) { banner(t || '测试横幅'); return !!(elBanner && elBanner.style.display === 'block'); },
     bannerDown() { return !!(elBanner && elBanner.style.display === 'block'); },
+    skin(name) { if (name === undefined) return save.skin; applySkin(name === 'guigu' ? 'guigu' : 'jin'); return save.skin; },
     cave(id) { if (CAVES[id] && save.caves.indexOf(id) < 0) { save.caves.push(id); writeSave(); } openCave(id); return G.caveId; },    openAllCaves() { for (const k in CAVES) if (save.caves.indexOf(k) < 0) save.caves.push(k); writeSave(); renderWorldMap(); return save.caves.length; },
     caveTab(t) { G.caveTab = t; if (G.state === 'cave') renderCave(); return G.caveTab; },
     equip(id) { equipGear(id); return save.equip; },

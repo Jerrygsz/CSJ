@@ -813,3 +813,59 @@ body.fs #wrap { background: #000; }
 .chat-emoji button:disabled { opacity: var(--op-disabled); cursor: not-allowed; }
 /* 表情消息放大显示，一眼看见对方的反应 */
 .chat-line.big { font-size: var(--fs-h1); line-height: 1.35; }
+
+/* ---------- 皮肤系统：鎏金古卷（默认）/ 鬼谷水墨（可选，存档记忆） ----------
+   鬼谷风 Style Bible：淡彩水墨卷轴——灰调泼墨打底，青灰/竹青/赭石/淡粉渗色，
+   宣纸肌理 + 卷轴 UI；70% 墨灰白、20% 淡彩、10% 点彩（朱砂/赤金）。
+   落法：全部走语义 token 覆盖（UI 一键翻皮）+ 画布水墨滤镜（像素画去饱和成墨调）
+   + 场景底色去饱和（JS 端 skinBg 同步翻）+ 宣纸噪点覆层。 */
+body[data-skin="guigu"] {
+  --bg-base: #efeadb;
+  --bg-panel-a: #f4f1e8; --bg-panel-b: #eae5d5;
+  --bg-card-a: #f4f1e8; --bg-card-b: #e7e2d1;
+  --bg-scrim: rgba(28,28,28,0.55);
+  --line-gold: #5a544a; --line-soft: rgba(60,56,48,0.30);
+  --text-1: #1c1c1c; --text-2: #3c3a34; --text-3: #6e7b7a; --text-4: #8b867a;
+  --accent: #b5714b;        /* 赭石为主强调（朱砂留给危险/点彩） */
+  --accent-lite: #c98a5e; --accent-deep: #8f4f2e; --accent-soft: #6e7b7a; --accent-shadow: #4a4438;
+  --ok: #5f7f61; --ok-soft: #cfd8c8;              /* 竹青 */
+  --danger: #c0392b; --danger-deep: #8f2f24;      /* 朱砂 */
+  --hp-a: #c0392b; --hp-b: #d97b62;
+  --mp-a: #6e7b7a; --mp-b: #9fb3ac;               /* 青灰 */
+  --paper: #f4f1e8; --ink: #1c1c1c;
+  --tag-blue: #8fa3ad; --tag-purple: #a09aae; --tag-orange: #b5714b;
+}
+/* 世界底：宣白远山，不再深色夜空 */
+body[data-skin="guigu"] #wrap { background: radial-gradient(circle at 50% 40%, #f6f2e6 0%, #ded8c6 70%, #cbc5b3 100%); }
+/* 画布：整体水墨滤镜——像素画去饱和偏墨，场景/精灵/特效一键入卷轴 */
+body[data-skin="guigu"] #game {
+  background: #d8d3c4;
+  filter: grayscale(0.55) sepia(0.14) brightness(1.05) contrast(0.94);
+}
+/* 宣纸肌理覆层：极轻噪点，盖在所有内容之上但不接事件 */
+body[data-skin="guigu"]::after {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 999; opacity: 0.055;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23p)'/%3E%3C/svg%3E");
+}
+/* 次按钮的白系虚线/浅底在宣白上会隐身 → 翻成墨线 */
+body[data-skin="guigu"] .btn.small { background: rgba(28,28,28,0.05); border: 1px solid rgba(60,56,48,0.38); }
+/* 面板换卷轴气质：墨线边 + 纸影 */
+body[data-skin="guigu"] .panel { border: 1px solid #4a4438; box-shadow: 0 10px 40px rgba(40,36,28,0.35), inset 0 0 0 1px rgba(60,56,48,0.12); }
+/* 皮肤选择钮：选中态用强调色勾边 */
+.skin-btn.on { border-color: var(--accent) !important; color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+/* 水墨皮：顶栏/boss 名与血条的深色底是写死的，翻成纸色墨线 */
+body[data-skin="guigu"] #topbar { background: linear-gradient(180deg, rgba(244,241,232,0.92) 0%, rgba(244,241,232,0.55) 62%, rgba(244,241,232,0) 100%); }
+body[data-skin="guigu"] #hpwrap, body[data-skin="guigu"] #xpwrap { background: rgba(28,28,28,0.14); box-shadow: 0 1px 4px rgba(40,36,28,0.25); }
+body[data-skin="guigu"] #bossname { background: linear-gradient(180deg, #6e7b7a 20%, #4a4438 85%); -webkit-background-clip: text; background-clip: text; }
+body[data-skin="guigu"] #bossname::before { background: linear-gradient(90deg, rgba(74,68,56,0), rgba(74,68,56,0.7)); }
+body[data-skin="guigu"] #bossname::after { background: linear-gradient(270deg, rgba(74,68,56,0), rgba(74,68,56,0.7)); }
+body[data-skin="guigu"] #bossbar { background: rgba(28,28,28,0.22); border-color: rgba(74,68,56,0.6); box-shadow: 0 1px 6px rgba(40,36,28,0.3), inset 0 1px 3px rgba(28,28,28,0.35); }
+/* 水墨皮：横幅/拾取提示/对话speaker 也翻成纸底墨字 */
+body[data-skin="guigu"] #banner { background: rgba(244,241,232,0.95); border-color: rgba(74,68,56,0.55); color: #8f4f2e; box-shadow: 0 6px 20px rgba(40,36,28,0.3); text-shadow: none; }
+body[data-skin="guigu"] .itoast { background: rgba(244,241,232,0.92); box-shadow: 0 2px 10px rgba(40,36,28,0.25); }
+/* 水墨皮：大衍（自动战斗）圆钮同步翻纸底 */
+body[data-skin="guigu"] #autoBtn { border-color: rgba(74,68,56,0.5); background: rgba(244,241,232,0.85); box-shadow: 0 1px 4px rgba(40,36,28,0.25); color: #6e7b7a; }
+body[data-skin="guigu"] #autoBtn.on { color: #8f4f2e; border-color: rgba(143,79,46,0.7); }
+/* 水墨皮：禁制（暂停）圆钮同步翻纸底 */
+body[data-skin="guigu"] #pauseBtn::before { border-color: rgba(74,68,56,0.5); background: rgba(244,241,232,0.85); box-shadow: 0 1px 4px rgba(40,36,28,0.25); }
+body[data-skin="guigu"] #pauseBtn:active::before { background: rgba(234,229,213,0.95); }
