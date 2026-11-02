@@ -237,6 +237,7 @@
         gift_zhuji: !!s.gift_zhuji,
         gift_tenglong: !!s.gift_tenglong,
         gift_zhilongguo: !!s.gift_zhilongguo,
+        gift_heti: !!s.gift_heti,
         // 移栽品种老存档：没有这个字段就补成空账
         gardenSeed: (s.gardenSeed && typeof s.gardenSeed === 'object') ? s.gardenSeed : {},
         wounded: (s.wounded && typeof s.wounded === 'object') ? s.wounded : null,
@@ -391,6 +392,35 @@
     if ((save.inventory.m_zhilongguo || 0) > 0) { writeSave(); return; }
     save.gardenSeed.tygarden = seeded.concat(['m_zhilongguo']);
     pendingZhilongPlant = true;
+    writeSave();
+  })();
+
+  // 老存档补发：万妙丹（heti）。
+  // 旧版的修为引擎把升级循环写死在「lv < 150」，一到炼虚初期就再涨不上去；
+  // 而合体关要修为 ≥ Lv199，于是永远判「修为未达」。偏偏这一关的万妙丹全篇只有广寒界授一枚
+  // 且 noDrop、不可再得，旧版又是三成四的概率冲关、失败即被吞 —— 那一枚一旦赌输了，
+  // 这个存档就再也拿不到第二枚，永久堵在天渊城。引擎的那两处已修（见 addCultivateXp 与 lingjie 的合体关），
+  // 但已经被吞掉的丹补不回来，故读档兜底补发一枚。
+  // 只补一次（gift_heti）：仅当「已到炼虚、未过合体、广寒界已通（丹的来路已走过）、身上一枚都没有」时才补。
+  // 新档 / 正常档不受影响 —— 去广寒界正常领，或早已服丹破境（lv ≥ 200），都不重复给。
+  let pendingHetiGift = false;
+  (function backfillHetiPill() {
+    if (save.gift_heti) return;
+    const cl = save.cleared || [];
+    const lv = (save.cultivate && save.cultivate.level) || 1;
+    // 已过合体那一步：当年是正常领丹冲关的，本就不缺，只落标记不再补
+    if (lv >= 200 || cl.indexOf('heti_guan') >= 0) { save.gift_heti = true; writeSave(); return; }
+    // 还没到炼虚（未打到广寒界）：让他自己正常取丹，先不判定、也不落标记，日后读到再说
+    if (lv < 150) return;
+    // 广寒界还没通：丹还搁在玉台上，正常去取即可
+    if (cl.indexOf('guanghan') < 0) return;
+    save.inventory = save.inventory || {};
+    // 身上还有万妙丹：不缺这一枚（合体关现已必成，留着就能过）
+    if ((save.inventory.heti || 0) > 0) { save.gift_heti = true; writeSave(); return; }
+    save.inventory.heti = (save.inventory.heti || 0) + 1;
+    save.totalItems = (save.totalItems || 0) + 1;
+    save.gift_heti = true;
+    pendingHetiGift = true;
     writeSave();
   })();
 
@@ -9206,6 +9236,10 @@
   if (pendingZhilongPlant) {
     pendingZhilongPlant = false;
     setTimeout(function () { try { banner('旧账 · 灵界药圃补种芝龙果一株'); Sfx.gem(); } catch (e) {} }, 1500);
+  }
+  if (pendingHetiGift) {
+    pendingHetiGift = false;
+    setTimeout(function () { try { banner('旧账 · 补发万妙丹一枚（合体关已可再试）'); Sfx.buff(); } catch (e) {} }, 1700);
   }
   requestAnimationFrame(loop);
 })();
