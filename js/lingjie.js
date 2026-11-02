@@ -384,7 +384,7 @@
       enemies: ['yaoshou2', 'yaoxiu', 'kui2'],
       elites: ['夜叉族战将', '碧眼真蟾'],
       mats: ['m_yaodan', 'm_banyao', 'm_zhenlingxue'],
-      boss: { kind: 'mo', name: '夜叉族·夜叉王', hp: 62000, spd: 70, dmg: 118, r: 24, spr: 'mo', scale: 6.4, summon: 'yaoxiu' },
+      boss: { kind: 'mo', name: '夜叉族·夜叉王', hp: 62000, spd: 70, dmg: 118, r: 24, spr: 'yecha', scale: 6.4, summon: 'yaoxiu' },
       reward: { stones: 14000, mats: [['m_zhenlingxue', 2], ['m_yaodan', 3]] },
       clearTitle: '遁入黑隐',
       clearDesc: '传送阵的白光散尽，脚下换了一片海。风里有铁锈味，远处的山脉是黑的——黑隐山脉。'

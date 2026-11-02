@@ -23,7 +23,9 @@ const LIST = [
   ['nangongwan', '南宫婉'], ['ziling', '紫灵'], ['yuanyao', '元瑶'], ['dayan', '大衍神君'],
   ['luxiong', '陆师兄'], ['qingyan', '青颜真人'], ['rehuo', '热火仙尊'], ['jingyang', '景阳上人'],
   ['xiedaoren', '蟹道人'], ['jintong', '金童'], ['liuleer', '柳乐儿'],
-  ['hanli', '韩立（主角）'], ['wangchan', '王蝉'], ['linmo', '林师兄']
+  ['hanli', '韩立（主角）'], ['wangchan', '王蝉'], ['linmo', '林师兄'],
+  ['yuehuang', '越皇'], ['liudao', '六道·万天明'], ['qianlaomo', '乾老魔'],
+  ['xuangu', '玄骨上人'], ['yecha', '夜叉王'], ['yanyue', '掩月宗大长老']
 ];
 
 async function sheet(skin, out) {

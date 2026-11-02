@@ -350,7 +350,7 @@
       enemies: ['guixiu', 'kui', 'ghoul'],
       elites: ['阴灵', '守殿傀儡'],
       mats: ['m_yanghun', 'm_lingru', 'm_jinlei', 'm_yaodan', 'm_xueyu'],
-      boss: { kind: 'mo', name: '玄骨上人', hp: 8600, spd: 56, dmg: 36, r: 20, spr: 'guixiu', scale: 5.0 },
+      boss: { kind: 'mo', name: '玄骨上人', hp: 8600, spd: 56, dmg: 36, r: 20, spr: 'xuangu', scale: 5.0 },
       reward: { stones: 1400, items: ['t_xutianding', 't_yinyue', 'butian'], mats: [['m_lingru', 2], ['m_yanghun', 2]] },
       clearTitle: '虚天殿闭',
       clearDesc: '玄骨散了，鼎口压着一缕乾蓝的焰。鼎腹里那道银白身影睁了眼，没有出声。'
@@ -412,7 +412,7 @@
       enemies: ['moxiu', 'ghoul', 'assassin', 'guiling'],
       elites: ['血侍·冰妖', '血侍·铁罗', '血侍·青纹', '血侍·叶蛇'],
       mats: ['m_xueyu', 'm_xuesha', 'm_shihui', 'm_hantie'],
-      boss: { kind: 'blood', name: '越皇', hp: 4600, spd: 50, dmg: 28, r: 20, spr: 'mo', scale: 4.6 },
+      boss: { kind: 'blood', name: '越皇', hp: 4600, spd: 50, dmg: 28, r: 20, spr: 'yuehuang', scale: 4.6 },
       extraBoss: [{ kind: 'mo', name: '黑煞教长老', hp: 5000, spd: 58, dmg: 30, r: 20, spr: 'neimen', scale: 5.2, summon: '' }],
       reward: { stones: 520, items: ['t_cantu'], mats: [['m_xuesha', 2], ['m_hantie', 2]] },
       outro: 'heisha_out',

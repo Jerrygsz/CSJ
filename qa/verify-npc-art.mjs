@@ -28,12 +28,15 @@ function ok(cond, name, extra) {
   else { fail++; console.log('  ❌ ' + name + (extra !== undefined ? '  → ' + JSON.stringify(extra) : '')); }
 }
 
-console.log('\n【1】15 个具名 NPC 各有专属精灵');
+console.log('\n【1】具名 NPC 与首领各有专属精灵');
 const WANT = [
   ['mo2', '墨大夫'], ['lifeiyu', '厉飞雨'], ['zhangtie', '张铁'], ['lihuayuan', '李化元'],
   ['nangongwan', '南宫婉'], ['ziling', '紫灵'], ['yuanyao', '元瑶'], ['dayan', '大衍神君'],
   ['luxiong', '陆师兄'], ['qingyan', '青颜真人'], ['rehuo', '热火仙尊'], ['jingyang', '景阳上人'],
-  ['xiedaoren', '蟹道人'], ['jintong', '金童'], ['liuleer', '柳乐儿']
+  ['xiedaoren', '蟹道人'], ['jintong', '金童'], ['liuleer', '柳乐儿'],
+  // 后期首领：原来 12 个 boss 共用一张「内门弟子」、9 个共用一张「魔修」
+  ['yuehuang', '越皇'], ['liudao', '六道·万天明'], ['qianlaomo', '乾老魔'],
+  ['xuangu', '玄骨上人'], ['yecha', '夜叉王'], ['yanyue', '掩月宗大长老']
 ];
 
 // 同时抓每张图的像素指纹：两人撞图最容易发生在复制粘贴时（图一样、名字不同）
@@ -63,7 +66,7 @@ for (const [key, label] of WANT) {
   ok(s && s.colors >= 4, label + ' 用色 ≥4（不是空壳/单色块）', s && s.colors);
 }
 const sigs = WANT.map(([k]) => sprites[k] && sprites[k].sig).filter(Boolean);
-ok(new Set(sigs).size === WANT.length, '15 张形象互不相同（无复制粘贴撞图）', { unique: new Set(sigs).size, want: WANT.length });
+ok(new Set(sigs).size === WANT.length, WANT.length + ' 张形象互不相同（无复制粘贴撞图）', { unique: new Set(sigs).size, want: WANT.length });
 
 console.log('\n【2】人物与精灵的对应没错位');
 // 墨大夫的 boss 必须用 mo2（用回 mo 就变成魔修脸）

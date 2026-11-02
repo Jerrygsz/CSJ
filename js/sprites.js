@@ -488,6 +488,110 @@
       '..KGK..KGK..',
       '..KKK..KKK..',
       '..KKK..KKK..'
+    ] },
+
+    // ================= 具名首领（后期同一个「魔修」「内门弟子」演了二十场的都在这） =================
+    // 越皇：一国之主，冕板、赭黄龙袍、金纹玉带 —— 越国这条线的顶，得穿出「朝廷」而不是「魔修」
+    { name: 'yuehuang', pal: { K: '#1b1b2a', Y: '#e8c452', H: '#2a2018', S: '#e0bc98', W: '#e4e0d4', G: '#b8862a', g: '#8a6320', B: '#5f7a5a' }, rows: [
+      '...KKKKKK...',
+      '..KYYYYYYK..',
+      '..KHHHHHHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '..KSWWWWSK..',
+      '..KGGGGGGK..',
+      '.KGYGGGGYGK.',
+      '.KGGGGGGGGK.',
+      '..KgBBBBgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 六道·万天明：六道传人的本体。玄袍上六点朱砂，腰缠朱带 —— 魔道的「法」都在这几个红点上
+    { name: 'liudao', pal: { K: '#16121a', H: '#1e1a22', S: '#d8c0a0', G: '#241c28', g: '#382e3c', R: '#a8281c' }, rows: [
+      '...KKKKKK...',
+      '..KHHHHHHK..',
+      '..KHSSSSHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KGGGGGGK..',
+      '.KGRGGGGRGK.',
+      '.KGgGGGGgGK.',
+      '..KgRRRRgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 乾老魔：阴罗宗大长老，修「五子同心魔」，真身附在五道白影里。左肩那一片白就是那五道影
+    { name: 'qianlaomo', pal: { K: '#141018', H: '#2a2620', S: '#c8b094', W: '#e0ddd2', G: '#1e1a1e', g: '#2e2a30', B: '#7a2432' }, rows: [
+      '...KKKKKK...',
+      '..KHHHHHHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KWWWWSK...',
+      '..KGGGGGGK..',
+      '.KWGgGGGGgK.',
+      '.KWGgGGGGgK.',
+      '..KgBBBBgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 玄骨上人：原著现身的是一副「少年」面孔，性情却阴狠嗜血。少年白脸 + 玄袍骨白纹，这个反差就是他的识别符
+    { name: 'xuangu', pal: { K: '#141018', H: '#141018', S: '#e6d0b8', G: '#3a2f4c', g: '#251e33', W: '#d8d2c0', B: '#6a5040' }, rows: [
+      '....KKKK....',
+      '...KHHHHK...',
+      '..KHHHHHHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KGGGGGGK..',
+      '.KGgGGGGgGK.',
+      '.KGWGGGGWGK.',
+      '..KgBBBBgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 夜叉王：灵界异族，青面、獠牙、骨甲。整场只有这一个长獠牙的，一眼就认得
+    { name: 'yecha', pal: { K: '#10201a', B: '#3e7a62', T: '#f0ece0', W: '#d8d0bc' }, rows: [
+      '..K.KKKK.K..',
+      '..KKBBBBKK..',
+      '..KBBBBBBK..',
+      '..KBKBBKBK..',
+      '..KBTBBTBK..',
+      '...KBBBBK...',
+      '..KWWWWWWK..',
+      '.KWBWWWWBWK.',
+      '.KWWWWWWWWK.',
+      '..KWBBBBWK..',
+      '..KWWKKWWK..',
+      '..KWK..KWK..',
+      '..KWK..KWK..',
+      '..KKK..KKK..'
+    ] },
+    // 掩月宗大长老：掩月宗是女修宗门，一宗之主是位银发老妇。银发、月白袍、肩上一道青灰披帛
+    { name: 'yanyue', pal: { K: '#1b1b2a', W: '#f4f2ea', S: '#e8c9a4', G: '#b9c6c2', g: '#8e9d99', B: '#546f6b' }, rows: [
+      '...KKKKKK...',
+      '..KWWWWWWK..',
+      '..KWWSSWWK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KGGGGGGK..',
+      '.KBGgGGGGgK.',
+      '.KBGgGGGGgK.',
+      '..KgBBBBgK..',
+      '..KGGGGGGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..',
+      '..KKK..KKK..'
     ] }
   ];
 
