@@ -4868,8 +4868,6 @@
   }
 
   // ---------- HUD ----------
-  // 顶栏之下动态让位栈的缓存：0 = 无 boss（横幅/拾取提示落默认位），>0 = 让到 boss 气血下沿的 px
-  const hudStack = { _below: 0 };
   function fmtTime(t) { const m = Math.floor(t / 60), s = Math.floor(t % 60); return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s; }
   // 生涯累计时长：单局用 mm:ss，几小时的累计再那么写就成了「327:00」，读不出量级
   function fmtSpan(t) {
@@ -4913,29 +4911,8 @@
       elBossfill.style.width = U.clamp(Math.max(0, G.boss.hp) / G.boss.maxhp, 0, 1) * 100 + '%';
       elBossfill.style.background = G.boss.phase2 ? 'linear-gradient(90deg,#ff1f1f,#ff9a4a)' : 'linear-gradient(90deg,#b03a3a,#ff5a4a)';
       if (elBossbar) elBossbar.classList.toggle('p2', !!G.boss.phase2);
-      // 横幅与拾取提示让位到 boss 气血下沿：血条出现时它们写死 152/148 正好压在气血上，
-      // 抽卡弹幕/捡东西提示把血条糊掉，读血读提示两耽误（Jerry 实测）。
-      // 走 CSS 变量发布，值不变就不写（这里每帧都跑，别白拉一次样式重算）。
-      // try/catch：smoke 的 DOM 垫片没有真实 style API，别让它炸回归。
-      const below = Math.round((elBosswrap.offsetTop || 0) + (elBosswrap.offsetHeight || 0)) + 10;
-      if (Number.isFinite(below) && hudStack._below !== below) {
-        hudStack._below = below;
-        try {
-          document.documentElement.style.setProperty('--banner-top', below + 'px');
-          document.documentElement.style.setProperty('--toast-top', below + 'px');
-        } catch (e) {}
-      }
     }
-    else {
-      elBosswrap.style.display = 'none';
-      if (hudStack._below !== 0) {
-        hudStack._below = 0;
-        try {
-          document.documentElement.style.setProperty('--banner-top', '152px');
-          document.documentElement.style.setProperty('--toast-top', '148px');
-        } catch (e) {}
-      }
-    }
+    else elBosswrap.style.display = 'none';
     const playing = G.state === 'play' || G.state === 'dialog' || G.state === 'levelup' || G.state === 'pause';
     elHud.style.display = playing ? 'block' : 'none';
     // 暂停键用 flex 居中两根竖条（图标是 CSS 画的，不是字体字形）
@@ -5693,17 +5670,9 @@
     const hudOn = !!(elHud && elHud.getClientRects().length);
     elBanner.classList.toggle('at-combat', hudOn);
     elBanner.textContent = text; elBanner.style.display = 'block';
-    // 拾取提示让到横幅实测下沿：横幅限宽换行后高度不定（旧版固定 +48px，
-    // 长文案一换行提示框就压回横幅身上）。内联 top 盖过 --toast-top；
-    // 横幅退场时清掉内联值，提示框回落到 boss 让位栈的落点。
-    if (elItemToast) {
-      const bb = elBanner.getBoundingClientRect();
-      elItemToast.style.top = (Math.round(bb.bottom) + 8) + 'px';
-    }
     clearTimeout(banner._t);
     banner._t = setTimeout(() => {
       elBanner.style.display = 'none';
-      if (elItemToast) elItemToast.style.top = '';
     }, 2200);
     return true;
   }
@@ -9015,8 +8984,8 @@
       return { rows: toastRows.length, shown: this.toastCount() };
     },
     // 横幅压测：返回提示是否已被让位（内联 top 让到横幅实测下沿）
-    banner(t) { banner(t || '测试横幅'); return !!(elItemToast && elItemToast.style.top); },
-    bannerDown() { return !!(elItemToast && elItemToast.style.top); },
+    banner(t) { banner(t || '测试横幅'); return !!(elBanner && elBanner.style.display === 'block'); },
+    bannerDown() { return !!(elBanner && elBanner.style.display === 'block'); },
     cave(id) { if (CAVES[id] && save.caves.indexOf(id) < 0) { save.caves.push(id); writeSave(); } openCave(id); return G.caveId; },    openAllCaves() { for (const k in CAVES) if (save.caves.indexOf(k) < 0) save.caves.push(k); writeSave(); renderWorldMap(); return save.caves.length; },
     caveTab(t) { G.caveTab = t; if (G.state === 'cave') renderCave(); return G.caveTab; },
     equip(id) { equipGear(id); return save.equip; },

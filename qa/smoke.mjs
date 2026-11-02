@@ -396,10 +396,10 @@ const demo = F.toastDemo();
 ok(demo.rows >= 8, '连续入袋 8 种道具（内部记录 ' + demo.rows + '）');
 ok(demo.shown <= 4, '屏幕上最多 3 条 + 1 条「另 N 种」', demo.shown);
 ok(F.toasts().length >= 3, '同名道具合并计数可用');
-ok(F.banner('测试横幅') === true, '横幅出现时，右上提示自动让位（加 .below）');
-ok(F.bannerDown() === true, '让位状态可查询');
+ok(F.banner('测试横幅') === true, '横幅出现且可查询显示状态');
+ok(F.bannerDown() === true, '横幅显示中（bannerDown 可查询）');
 frames(160); // 推进 ~2.6 秒虚拟时间，等横幅自动收起
-ok(F.bannerDown() === false, '横幅收起后提示回原位');
+ok(F.bannerDown() === false, '横幅到时自动收起');
 
 console.log('\n== 际遇 / 支线 ==');
 F.clearProgress();
