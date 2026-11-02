@@ -27,6 +27,64 @@
   const ctx = cv.getContext('2d');
   ctx.imageSmoothingEnabled = false;
 
+  // ---------- 鬼谷水墨 · 特效调色（墨痕剑气 / 枯笔闪电） ----------
+  // 只拦主画布这一个 ctx 实例的 strokeStyle / fillStyle：
+  // 鬼谷皮开启时，把战斗特效的暖色画笔（火/金/伤红）映射为墨色系（朱砂/赭石/枯墨金），
+  // 冷色（青/紫/绿）映射为黛青/墨紫/竹青；低饱和中性色（白闪、灰）原样放行。
+  // 离屏精灵烘焙画布不受影响（金皮零开销，切皮即时生效）。
+  const FX_INK = { on: false };
+  function inkify(c) {
+    if (typeof c !== 'string') return c;   // CanvasGradient 等对象原样放行
+    let m;
+    if ((m = c.match(/^#([0-9a-f]{6})$/i))) {
+      const n = parseInt(m[1], 16);
+      return inkRgba((n >> 16) & 255, (n >> 8) & 255, n & 255, 1, c);
+    }
+    if ((m = c.match(/^rgba?\(([^)]+)\)$/i))) {
+      const p = m[1].split(',').map(s => parseFloat(s));
+      return inkRgba(p[0], p[1], p[2], p.length > 3 ? p[3] : 1, c);
+    }
+    return c;   // 命名色等其它写法原样放行
+  }
+  function inkRgba(r, g, b, a, orig) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+    const l = (max + min) / 2;
+    const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+    if (s < 0.22) return orig;   // 白闪/灰等低饱和色：原样放行
+    let h = 0;
+    if (d !== 0) {
+      if (max === r) h = 60 * (((g - b) / d) % 6);
+      else if (max === g) h = 60 * ((b - r) / d + 2);
+      else h = 60 * ((r - g) / d + 4);
+      if (h < 0) h += 360;
+    }
+    let ink;
+    if (h < 18)       ink = [122, 42, 34];   // 浓朱砂（伤红 → 印泥朱）
+    else if (h < 42)  ink = [139, 90, 51];   // 赭石（焰橙）
+    else if (h < 72)  ink = [111, 102, 71];  // 枯墨金（雷电金 → 枯笔淡金）
+    else if (h < 168) ink = [95, 113, 96];   // 竹青
+    else if (h < 262) ink = [78, 92, 102];   // 黛青
+    else if (h < 330) ink = [107, 98, 128];  // 墨紫
+    else              ink = [122, 42, 34];
+    // 亮芯/高频粒子（明度很高）往淡墨档再压一档，消掉火光感
+    if (l > 0.72) ink = ink.map(v => Math.round(v * 0.82 + 46 * 0.18));
+    return 'rgba(' + ink[0] + ',' + ink[1] + ',' + ink[2] + ',' + a + ')';
+  }
+  (function () {
+    if (typeof CanvasRenderingContext2D === 'undefined') return;   // smoke 的 DOM 垫片没有真实画布
+    const proto = CanvasRenderingContext2D.prototype;
+    ['strokeStyle', 'fillStyle'].forEach(prop => {
+      const desc = Object.getOwnPropertyDescriptor(proto, prop);
+      if (!desc || !desc.set) return;
+      Object.defineProperty(ctx, prop, {
+        get() { return desc.get.call(this); },
+        set(v) { desc.set.call(this, FX_INK.on ? inkify(v) : v); },
+        configurable: true, enumerable: true
+      });
+    });
+  })();
+
   // 角落版本水印：取实际加载的 game.js 的 ?v= 缓存串写入 #ver，确保显示「当前这份构建」的版本
   try {
     const _gm = document.querySelector('script[src*="js/game.js"]');
@@ -4930,6 +4988,8 @@
       if (elBossbar) elBossbar.classList.toggle('p2', !!G.boss.phase2);
     }
     else elBosswrap.style.display = 'none';
+    // 鬼谷水墨 · 异兽卷轴插画：boss 在场时浮现，boss 死亡/换图隐去（金皮由 CSS 兜底强隐）
+    if (elBossArt) elBossArt.classList.toggle('on', !!(G.boss && save.skin === 'guigu'));
     const playing = G.state === 'play' || G.state === 'dialog' || G.state === 'levelup' || G.state === 'pause';
     elHud.style.display = playing ? 'block' : 'none';
     // 暂停键用 flex 居中两根竖条（图标是 CSS 画的，不是字体字形）
@@ -7699,6 +7759,7 @@
   const elRebirth = document.getElementById('rebirth');
   const elRebirthText = document.getElementById('rebirthText');
   const elAutoSaveChk = document.getElementById('autoSaveChk');
+  const elBossArt = document.getElementById('bossArt');   // 鬼谷水墨 · 异兽卷轴插画层
   const elManualSaveChk = document.getElementById('manualSaveChk');
   const elSaveNowBtn = document.getElementById('saveNowBtn');
   const elSaveHint = document.getElementById('saveHint');
@@ -7844,6 +7905,7 @@
   // ---------- 外观皮肤：鎏金古卷 / 鬼谷水墨（存档记忆） ----------
   function applySkin(skin) {
     save.skin = (skin === 'guigu') ? 'guigu' : 'jin';
+    FX_INK.on = (save.skin === 'guigu');   // 特效画笔墨化，与皮同步切换
     try { if (document.body) document.body.dataset.skin = save.skin; } catch (e) {}   // smoke 的 DOM 垫片没有 dataset
     const jin = document.getElementById('skinJin'), gg = document.getElementById('skinGuigu');
     if (jin) jin.classList.toggle('on', save.skin !== 'guigu');
@@ -8435,6 +8497,7 @@
   // ---------- 调试 API ----------
   window.__FR = {
     G: G,
+    inkify: c => inkify(c),
     start: () => openWorldMap(),
     fullscreen: () => toggleFullscreen(),
     isFullscreen: () => !!fsElement(),

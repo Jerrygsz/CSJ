@@ -64,6 +64,62 @@ const btnOn = await page.evaluate(() => ({
   jin: document.getElementById('skinJin').classList.contains('on')
 }));
 ok(btnOn.gg && !btnOn.jin, '设置面板按钮选中态切到鬼谷水墨', btnOn);
+
+// 2.5) 卷轴式地图标注：墨线行程 + 印章节点 + 卷轴纸卡 + 朱砂图号印
+await page.evaluate(() => { window.__FR.start(); });   // 打开世界地图
+await page.waitForTimeout(400);
+const m2 = await page.evaluate(() => {
+  const card = document.querySelector('.mapcard:not(.current):not(.side)') || document.querySelector('.mapcard');
+  const node = document.querySelector('.wm-route .mapcard');
+  const num = document.querySelector('.mc-num');
+  const cs = el => el ? getComputedStyle(el) : null;
+  return {
+    card: cs(card) && { border: cs(card).borderColor, radius: cs(card).borderRadius, bg: cs(card).backgroundImage.slice(0, 60) },
+    node: node && cs(node, '::before') ? getComputedStyle(node, '::before').borderRadius : null,
+    numColor: num ? getComputedStyle(num).color : null
+  };
+});
+ok(m2.card && /rgba\(60,\s*56,\s*48/.test(m2.card.border), '地图卡翻墨线边', m2.card && m2.card.border);
+ok(m2.card && m2.card.radius === '3px', '地图卡圆角收方（卷轴纸）', m2.card && m2.card.radius);
+ok(m2.node === '2px', '路线节点变方形印章（圆角 2px）', m2.node);
+ok(m2.numColor && /rgb\(143,\s*47,\s*36\)/.test(m2.numColor), '图号翻朱砂小方印', m2.numColor);
+await page.screenshot({ path: 'qa/shot-skin-map-scroll.png' });
+await page.evaluate(() => { window.__FR.enterMap('qixuan'); window.__FR.G.state = 'play'; });
+
+// 2.6) 竖排对话框：正文/名帖竖排，提示移位
+const m3 = await page.evaluate(() => ({
+  textWM: getComputedStyle(document.getElementById('dialogText')).writingMode,
+  spkWM: getComputedStyle(document.getElementById('dialogSpeaker')).writingMode,
+  hintPos: getComputedStyle(document.getElementById('dialogHint')).position,
+  boxDir: getComputedStyle(document.getElementById('dialogbox')).flexDirection
+}));
+ok(m3.textWM === 'vertical-rl', '对话正文竖排右起（vertical-rl）', m3.textWM);
+ok(m3.spkWM === 'vertical-rl', '说话人名帖竖排', m3.spkWM);
+ok(m3.hintPos === 'absolute', '继续提示改绝对定位（左下角）', m3.hintPos);
+ok(m3.boxDir === 'row-reverse', '对话框改横排卷轴布局（名帖居右）', m3.boxDir);
+
+// 2.7) 异兽卷轴插画：boss 在场浮现 / boss 死亡隐去（真刷 boss）
+await page.evaluate(() => { window.__FR.enterMap('guanghan'); window.__FR.G.state = 'play'; window.__FR.skipStory(); window.__FR.muteStory(true); });
+await page.waitForTimeout(300);
+let m4 = await page.evaluate(() => {
+  const r = window.__FR.boss();
+  if (typeof r !== 'string' || r === 'fail') throw new Error('boss spawn failed: ' + r);
+  return r;
+});
+await page.waitForTimeout(500);
+m4 = await page.evaluate(() => {
+  const el = document.getElementById('bossArt');
+  return { on: el.classList.contains('on'), bg: getComputedStyle(el).backgroundImage, shown: getComputedStyle(el).display };
+});
+ok(m4.on && m4.shown === 'block' && /beast-lang\.png/.test(m4.bg), 'boss 在场：异兽插画浮现且挂图', m4);
+await page.screenshot({ path: 'qa/shot-skin-boss-art.png' });
+await page.evaluate(() => { window.__FR.killBoss(); });
+await page.waitForTimeout(400);
+m4 = await page.evaluate(() => {
+  const el = document.getElementById('bossArt');
+  return { on: el.classList.contains('on'), boss: !!window.__FR.G.boss };
+});
+ok(!m4.on && !m4.boss, 'boss 离场：插画退场', m4);
 await page.screenshot({ path: 'qa/shot-skin-guigu.png' });
 
 // 3) 存档持久化：刷新后仍是水墨皮

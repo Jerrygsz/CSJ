@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>突破面板预览</title>
+<link rel="stylesheet" href="../css/style.css">
+<style> html,body{margin:0;background:#0c0a07;} </style>
+</head>
+<body>
+<div id="break" class="overlay" style="display:flex;">
+  <div class="wm-panel">
+    <div class="wm-head">
+      <h2>突破</h2>
+      <p class="wm-sub">修为已到瓶颈。丹药、材料、灵石、剧情，四样齐备才破得开。</p>
+    </div>
+    <div id="breakBody" class="cave-body"></div>
+    <div class="cave-foot">
+      <button id="breakGo" class="btn small">突破</button>
+      <button id="breakLater" class="btn small">再攒攒</button>
+    </div>
+  </div>
+</div>
+
+<!-- 真实数据：突破道具与主药定义、BREAK_ITEM_HINTS 全部来自 js/late3.js -->
+<script src="../js/late3.js"></script>
+<script>
+  // 模拟存档：筑基阶段，全部缺失（与用户当前进度一致：炼气期十三层）
+  window.Items = { get(id){ return (window.__IT || {})[id] || null; } };
+  window.__IT = {
+    zhuji:     { id:'zhuji',     name:'筑基丹' },
+    m_yusuizhi:{ id:'m_yusuizhi',name:'玉髓芝' },
+    m_zihua:   { id:'m_zihua',   name:'紫猴花' },
+    m_tianling:{ id:'m_tianling',name:'天灵果' },
+    xueling:   { id:'xueling',   name:'雪灵水' },
+    tianhuo:   { id:'tianhuo',   name:'天火液' },
+    jiangchen: { id:'jiangchen', name:'降尘丹' }
+  };
+  window.save = { inventory: {}, stones: 40 };
+
+  // —— 以下函数逐字取自 js/game.js（renderBreakBody / breakRow / showBreakItemHint 等），保证渲染一致 ——
+  function breakNameOf(id){ const it = Items.get(id); return it ? it.name : id; }
+  function breakRow(ok, tag, text, itemId) {
+    const click = itemId ? ' data-item="' + itemId + '"' : '';
+    const q = itemId ? '<em class="brk-q">?</em>' : '';
+    return '<div class="brk-row' + (ok ? ' ok' : '') + (itemId ? ' click' : '') + '"' + click + '>' +
+      '<i>' + tag + '</i><span>' + text + '</span>' + q + '<b>' + (ok ? '齐' : '缺') + '</b></div>';
+  }
+  function renderBreakBody(b) {
+    if (!b) return '<div class="cs-empty">眼前没有要破的关。</div>';
+    let html = '<div class="cs-title">' + (b.from || '') + ' → ' + b.realm + '</div>' +
+      '<div class="cs-note">' + (b.tip || '') + '</div>';
+    html += '<div class="cs-note brk-hint">点道具行可看「去哪取」。</div>';
+    html += '<div class="brk-list">';
+    for (const it of (b.items || [])) {
+      const have = save.inventory[it[0]] || 0;
+      html += breakRow(have >= it[1], '丹', breakNameOf(it[0]) + '　' + have + ' / ' + it[1], it[0]);
+    }
+    for (const mt of (b.mats || [])) {
+      const have = save.inventory[mt[0]] || 0;
+      html += breakRow(have >= mt[1], '材', breakNameOf(mt[0]) + '　' + have + ' / ' + mt[1], mt[0]);
+    }
+    for (const nd of (b.needs || [])) {
+      const have = save.inventory[nd[0]] || 0;
+      html += breakRow(have >= nd[1], '需', breakNameOf(nd[0]) + '　' + have + ' / ' + nd[1], nd[0]);
+    }
+    if (b.stones) html += breakRow((save.stones || 0) >= b.stones, '石', '灵石　' + (save.stones || 0) + ' / ' + b.stones);
+    for (const s of (b.story || [])) {
+      const done = false;
+      html += breakRow(done, '剧', (s.name || s.id) + '（' + (done ? '已通' : '须先通关') + '）');
+    }
+    html += '</div>';
+    return html;
+  }
+  let elBreakTip = null;
+  function ensureBreakTip() {
+    if (elBreakTip) return elBreakTip;
+    elBreakTip = document.createElement('div');
+    elBreakTip.id = 'breakTip';
+    elBreakTip.className = 'break-tip';
+    elBreakTip.style.display = 'none';
+    (document.getElementById('break') || document.body).appendChild(elBreakTip);
+    return elBreakTip;
+  }
+  function showBreakItemHint(id) {
+    const tip = ensureBreakTip();
+    const t = (window.BREAK_ITEM_HINTS || {})[id];
+    const item = Items.get(id);
+    if (!t) { tip.style.display = 'none'; return; }
+    const name = item ? item.name : id;
+    tip.innerHTML = '<b>' + name + '</b><span>' + t + '</span>';
+    tip.style.display = 'block';
+  }
+  function hideBreakTip() { if (elBreakTip) elBreakTip.style.display = 'none'; }
+
+  const elBreakBody = document.getElementById('breakBody');
+  const q = new URLSearchParams(location.search);
+  const gateIdx = Number(q.get('gate') || 0); // 0=筑基(默认，对应用户当前进度) 1=结丹
+  elBreakBody.innerHTML = renderBreakBody(window.BREAKTHROUGH[gateIdx]);
+  // 点击委托（与 js/game.js 完全一致）
+  elBreakBody.addEventListener('click', (e) => {
+    const row = e.target.closest && e.target.closest('.brk-row.click');
+    if (row && row.getAttribute('data-item')) { e.stopPropagation(); showBreakItemHint(row.getAttribute('data-item')); return; }
+    hideBreakTip();
+  });
+  // 预览专用：?click=xxx 自动点开提示，便于截图
+  if (q.get('click')) {
+    const row = elBreakBody.querySelector('.brk-row.click[data-item="' + q.get('click') + '"]');
+    if (row) row.click();
+  }
+</script>
+</body>
+</html>

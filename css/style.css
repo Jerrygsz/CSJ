@@ -869,3 +869,92 @@ body[data-skin="guigu"] #autoBtn.on { color: #8f4f2e; border-color: rgba(143,79,
 /* 水墨皮：禁制（暂停）圆钮同步翻纸底 */
 body[data-skin="guigu"] #pauseBtn::before { border-color: rgba(74,68,56,0.5); background: rgba(244,241,232,0.85); box-shadow: 0 1px 4px rgba(40,36,28,0.25); }
 body[data-skin="guigu"] #pauseBtn:active::before { background: rgba(234,229,213,0.95); }
+/* 水墨皮 · 卷轴式地图标注：行程线变墨线、路线节点变印章、地图卡变卷轴纸 */
+/* 行程线：淡墨虚线（不再是鎏金） */
+body[data-skin="guigu"] .wm-route::before { border-left-color: rgba(60,56,48,0.38); }
+/* 路线节点：圆点 → 方形墨印（印泥感）；已过 = 朱砂印 / 当前 = 竹青印 / 未开 = 淡墨印 */
+body[data-skin="guigu"] .wm-route .mapcard::before {
+  border-radius: 2px; width: 10px; height: 10px;
+  background: rgba(238,233,219,0.9); border: 1.5px solid rgba(60,56,48,0.55); box-shadow: none;
+}
+body[data-skin="guigu"] .wm-route .mapcard.done::before {
+  background: rgba(192,57,43,0.88); border-color: rgba(143,47,36,0.9);   /* 朱砂印 */
+  box-shadow: inset 0 0 0 1px rgba(244,241,232,0.55);
+}
+body[data-skin="guigu"] .wm-route .mapcard.current::before {
+  background: rgba(95,127,97,0.9); border-color: rgba(63,89,65,0.95);    /* 竹青印 */
+  box-shadow: 0 0 6px rgba(95,127,97,0.45), inset 0 0 0 1px rgba(244,241,232,0.55);
+}
+body[data-skin="guigu"] .wm-route .mapcard.locked::before {
+  background: rgba(180,175,160,0.7); border-color: rgba(120,116,104,0.5); box-shadow: none;
+}
+/* 地图卡：卷轴纸底——上下各一道深墨「轴头」，纸面微黄 */
+body[data-skin="guigu"] .mapcard {
+  border: 1px solid rgba(60,56,48,0.45); border-radius: 3px;
+  background:
+    linear-gradient(180deg, rgba(60,56,48,0.85) 0%, rgba(60,56,48,0.55) 3px, rgba(60,56,48,0) 7px),
+    linear-gradient(0deg, rgba(60,56,48,0.85) 0%, rgba(60,56,48,0.55) 3px, rgba(60,56,48,0) 7px),
+    linear-gradient(180deg, #f1ecdd, #e7e1cf);
+  box-shadow: 0 2px 8px rgba(40,36,28,0.18);
+}
+body[data-skin="guigu"] .mapcard.current {
+  border-color: rgba(95,127,97,0.75);
+  box-shadow: 0 2px 10px rgba(40,36,28,0.22), inset 0 0 0 1px rgba(95,127,97,0.35);
+}
+/* 图号：鎏金圆角 → 朱砂小方印 */
+body[data-skin="guigu"] .mc-num {
+  color: #8f2f24; background: rgba(192,57,43,0.10);
+  border: 1px solid rgba(143,47,36,0.55); border-radius: 2px; padding: 0 3px;
+}
+/* 地名：淡墨笔意下划（毛笔扫过的横痕） */
+body[data-skin="guigu"] .mc-name {
+  background: linear-gradient(90deg, rgba(60,56,48,0.42) 0%, rgba(60,56,48,0.10) 92%, rgba(60,56,48,0) 100%) no-repeat left bottom / 100% 2px;
+  padding-bottom: 2px;
+}
+/* 侧线卡墨印翻淡紫墨 */
+body[data-skin="guigu"] .mapcard.side .mc-num { color: #5d5570; background: rgba(160,154,174,0.16); border-color: rgba(93,85,112,0.55); }
+/* 水墨皮 · 异兽卷轴插画层：平时不显示，boss 战浮现（水墨淡染，不挡战斗） */
+#bossArt {
+  display: none; position: absolute; pointer-events: none;
+  left: 50%; bottom: 18%; width: 86%; max-width: 420px; aspect-ratio: 1024 / 1451;
+  transform: translateX(-50%);
+  background-position: center bottom; background-size: contain; background-repeat: no-repeat;
+  z-index: 3; opacity: 0; transition: opacity 1.2s ease;
+  -webkit-mask-image: radial-gradient(ellipse 70% 62% at 50% 58%, #000 30%, transparent 78%);
+  mask-image: radial-gradient(ellipse 70% 62% at 50% 58%, #000 30%, transparent 78%);
+}
+body[data-skin="guigu"] #bossArt.on {
+  display: block; opacity: 0.34;
+  background-image: url("../assets/guigu/beast-lang.png");
+  mix-blend-mode: multiply;
+  filter: sepia(0.10) contrast(0.96);
+}
+/* 金皮强行兜底：即使类名残留也不显示 */
+body:not([data-skin="guigu"]) #bossArt { display: none !important; }
+
+/* 水墨皮 · 竖排对话框：右起左行的竖排正文 + 竖排名帖，宣纸底墨线框 */
+body[data-skin="guigu"] #dialogbox {
+  display: flex; flex-direction: row-reverse; gap: 12px; align-items: stretch;
+  min-height: 240px; max-height: 56vh; position: relative;
+  background: linear-gradient(180deg, #f1ecdd, #e9e3d2);
+  border: 1px solid rgba(60,56,48,0.55); border-radius: 3px;
+  box-shadow: 0 8px 30px rgba(40,36,28,0.4);
+}
+/* 名帖：说话人名字竖排贴右，如卷轴题签 */
+body[data-skin="guigu"] #dialogSpeaker {
+  writing-mode: vertical-rl; text-orientation: upright; letter-spacing: 6px;
+  flex: none; margin: 0; padding: 6px 3px;
+  border-left: 1px solid rgba(60,56,48,0.18); border-radius: 2px;
+  background: rgba(192,57,43,0.07); color: #8f2f24; font-size: var(--fs-body);
+}
+/* 正文：竖排右起，行（列）间用 line-height 拉开墨距 */
+body[data-skin="guigu"] #dialogText {
+  writing-mode: vertical-rl; text-orientation: mixed; letter-spacing: 2px;
+  line-height: 2.1; flex: 1 1 auto; min-height: 0; height: auto;
+  max-height: 100%; overflow: auto; padding: 2px 4px;
+}
+/* 继续提示：竖排版式里移到左下角（阅读终点） */
+body[data-skin="guigu"] #dialogHint {
+  position: absolute; left: 10px; bottom: 6px; margin: 0;
+  writing-mode: horizontal-tb; text-align: left;
+}

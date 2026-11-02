@@ -1,0 +1,125 @@
+
+=== 维度④ 物品/功法传承链 · 全 171 图（主线 148/支线 23）===
+
+【A) 提前出场：具体物名出现在「首次授予之前」的地图】
+  · [提前] tainan(B,序5.0) 提到「筑基丹」，但首次授予在 xuese(序8.0) —— 需人工判是目标/伏笔还是 bug
+  · [提前] huangfeng(B,序6.0) 提到「筑基丹」，但首次授予在 xuese(序8.0) —— 需人工判是目标/伏笔还是 bug
+  · [提前] yaopu(X,序7.5) 提到「筑基丹」，但首次授予在 xuese(序8.0) —— 需人工判是目标/伏笔还是 bug
+  · [提前] miaoyin(E,序19.0) 提到「青竹蜂云剑」，但首次授予在 qingzhu(序20.0) —— 需人工判是目标/伏笔还是 bug
+  · [提前] xinggong(H,序48.0) 提到「元磁神光」，但首次授予在 jiezi(序53.0) —— 需人工判是目标/伏笔还是 bug
+  · [提前] tianyuan(I,序59.0) 提到「真灵之血」，但首次授予在 muzu/zhenchan/tianpeng/lianxu/fengyuan/huohu/shisan/mojin/guanghan/heti_guan/jiuxian/longjia/zhenling/mojie/diyuan2/moban/yitian/tianzhan/xueya/huanxiao/moyuan/modajie/muzu2/sanjie/dashengdian/shiyin/lingzu/xiaoxiuluo/qingyuangong/minghe2/helian/tiandinggong/xuetian/qiangzhe/xiaoling/qunqiang/xianshi/zhangtianping/zhanxian/huimoyuan/daoguo/renzu/linghuang/zhandacheng/shengshi/baiguang/tianmo(序61.0) —— 需人工判是目标/伏笔还是 bug
+  · [提前] jiaoyihui(F,序33.0) 提到「玄天仙藤」，但首次授予在 huangquan/muzu2/minghe2/tiandinggong/xuetian/qiangzhe/xianshi/zhangtianping/zhanxian/diyi/jiujie/zhenxian/fsjie/zhandacheng/heihu/baiguang(序81.0) —— 需人工判是目标/伏笔还是 bug
+  · [提前] mojie(K,序78.0) 提到「净灵莲」，但首次授予在 modajie(序87.0) —— 需人工判是目标/伏笔还是 bug
+  · [提前] muzu2(K,序89.0) 提到「忘情诀」，但首次授予在 qingyuangong/qingyuangong(序95.0) —— 需人工判是目标/伏笔还是 bug
+  · [提前] xuetian(L,序99.0) 提到「万灵血玺」，但首次授予在 zhanxian(序105.0) —— 需人工判是目标/伏笔还是 bug
+  · [提前] tianmo(L,序101.5) 提到「魔光」，但首次授予在 zhanxian(序105.0) —— 需人工判是目标/伏笔还是 bug
+  · [提前] huimoyuan(L,序107.0) 提到「广灵道果」，但首次授予在 daoguo(序108.0) —— 需人工判是目标/伏笔还是 bug
+  · [提前] taisui(M,序133.0) 提到「岁月神灯」，但首次授予在 suidian(序135.0) —— 需人工判是目标/伏笔还是 bug
+
+【B) 幽灵提及：具体物名出现于对白，但全局从未被任何地图授予】
+  · [幽灵] yelang(B,序3.0) 提到「火弹术」（定义：skill:fire），但无地图授予 —— 可能漏发/串台/造词，或属购买/剧情概念
+  · [幽灵] yaoyuan(B,序7.0) 提到「白鹤芝」（定义：item:m_baihezhi），但无地图授予 —— 可能漏发/串台/造词，或属购买/剧情概念
+  · [幽灵] yaoyuan(B,序7.0) 提到「化龙草」（定义：item:m_hualongcao），但无地图授予 —— 可能漏发/串台/造词，或属购买/剧情概念
+  · [幽灵] yaoyuan(B,序7.0) 提到「黄球草」（定义：item:m_huangqiucao），但无地图授予 —— 可能漏发/串台/造词，或属购买/剧情概念
+  · [幽灵] yaoyuan(B,序7.0) 提到「望月草」（定义：item:m_wangyuecao），但无地图授予 —— 可能漏发/串台/造词，或属购买/剧情概念
+  · [幽灵] yaoyuan(B,序7.0) 提到「子夜花」（定义：item:m_ziyehua），但无地图授予 —— 可能漏发/串台/造词，或属购买/剧情概念
+  · [幽灵] yaopu(X,序7.5) 提到「苦莲花」（定义：item:m_kulianhua），但无地图授予 —— 可能漏发/串台/造词，或属购买/剧情概念
+  · [幽灵] yaopu(X,序7.5) 提到「七星草」（定义：item:m_qixingcao），但无地图授予 —— 可能漏发/串台/造词，或属购买/剧情概念
+  · [幽灵] yaopu(X,序7.5) 提到「忘忧果」（定义：item:m_wangyouguo），但无地图授予 —— 可能漏发/串台/造词，或属购买/剧情概念
+  · [幽灵] heisha(X,序10.5) 提到「玄阴经」（定义：skill:xuanyin），但无地图授予 —— 可能漏发/串台/造词，或属购买/剧情概念
+  · [幽灵] jiedan(D,序18.0) 提到「天火液」（定义：item:tianhuo），但无地图授予 —— 可能漏发/串台/造词，或属购买/剧情概念
+  · [幽灵] jiedan(D,序18.0) 提到「雪灵水」（定义：item:xueling），但无地图授予 —— 可能漏发/串台/造词，或属购买/剧情概念
+  · [幽灵] wuzhong(E,序23.0) 提到「玄阴经」（定义：skill:xuanyin），但无地图授予 —— 可能漏发/串台/造词，或属购买/剧情概念
+  · [幽灵] waihai(E,序24.0) 提到「碧焰酒」（定义：item:biyanjiu），但无地图授予 —— 可能漏发/串台/造词，或属购买/剧情概念
+  · [幽灵] sanjian(F,序30.0) 提到「定灵丹」（定义：item:dianling），但无地图授予 —— 可能漏发/串台/造词，或属购买/剧情概念
+  · [幽灵] jieying(F,序32.0) 提到「定灵丹」（定义：item:dianling），但无地图授予 —— 可能漏发/串台/造词，或属购买/剧情概念
+  · [幽灵] jieying(F,序32.0) 提到「九曲灵参丹」（定义：item:jiuqu），但无地图授予 —— 可能漏发/串台/造词，或属购买/剧情概念
+  · [幽灵] lianxu(I,序65.0) 提到「腾龙丹」（定义：item:tenglong），但无地图授予 —— 可能漏发/串台/造词，或属购买/剧情概念
+  · [幽灵] zhanxian(L,序105.0) 提到「洞漩金光」（定义：skill:tongbao），但无地图授予 —— 可能漏发/串台/造词，或属购买/剧情概念
+  · [幽灵] zhanxian(L,序105.0) 提到「金光罩」（定义：skill:orb），但无地图授予 —— 可能漏发/串台/造词，或属购买/剧情概念
+  · [幽灵] xianyun(M,序124.0) 提到「五石丹」（定义：item:t_wushidan），但无地图授予 —— 可能漏发/串台/造词，或属购买/剧情概念
+  · [幽灵] dijiang(M,序128.0) 提到「大五行幻世诀」（定义：skill:dawuxing），但无地图授予 —— 可能漏发/串台/造词，或属购买/剧情概念
+  · [幽灵] daotian(M,序145.0) 提到「大五行幻世诀」（定义：skill:dawuxing），但无地图授予 —— 可能漏发/串台/造词，或属购买/剧情概念
+
+【C) 沉默授予：被地图授予、但名从未出现在任何对白（供 glance，正常亦可）】
+  · [沉默] 「神秘小瓶」授予于 qixuan（序0.0），但无对白提及
+  · [沉默] 「旧木牌」授予于 qixuan（序0.0），但无对白提及
+  · [沉默] 「黄精」授予于 qixuan/huangfeng（序0.0），但无对白提及
+  · [沉默] 「掌天瓶绿液」授予于 houshan（序1.0），但无对白提及
+  · [沉默] 「灵兽袋」授予于 houshan（序1.0），但无对白提及
+  · [沉默] 「云翅鸟卵」授予于 houshan（序1.0），但无对白提及
+  · [沉默] 「养精丹方」授予于 houshan（序1.0），但无对白提及
+  · [沉默] 「青竹剑」授予于 mishi（序2.0），但无对白提及
+  · [沉默] 「炼尸术残卷」授予于 mishi（序2.0），但无对白提及
+  · [沉默] 「精铁」授予于 yelang/mkuang/yanwu（序1.5），但无对白提及
+  · [沉默] 「灵墨」授予于 jiayuan/waihai/luxiong/luoyun/luoyunyaoyuan（序4.0），但无对白提及
+  · [沉默] 「空白符纸」授予于 jiayuan（序4.0），但无对白提及
+  · [沉默] 「黄龙丹方」授予于 tainan（序5.0），但无对白提及
+  · [沉默] 「清心符」授予于 yaoyuan（序7.0），但无对白提及
+  · [沉默] 「妖蟒晶核」授予于 yaoyuan（序7.0），但无对白提及
+  · [沉默] 「墨蛟卵」授予于 xuese（序8.0），但无对白提及
+  · [沉默] 「赤铜」授予于 mkuang（序1.5），但无对白提及
+  · [沉默] 「精铁短剑」授予于 yanwu（序1.5），但无对白提及
+  · [沉默] 「三乌草」授予于 yaopu（序7.5），但无对白提及
+  · [沉默] 「黄精芝」授予于 yaopu（序7.5），但无对白提及
+  · [沉默] 「血煞珠」授予于 xuechi/heisha（序8.5），但无对白提及
+  · [沉默] 「火灵草」授予于 zhuji/jingu（序9.0），但无对白提及
+  · [沉默] 「金骷髅符宝」授予于 yanjia（序10.0），但无对白提及
+  · [沉默] 「云纹法衣」授予于 jingu（序11.0），但无对白提及
+  · [沉默] 「三转重元功」授予于 jingu（序11.0），但无对白提及
+  · [沉默] 「噬金虫袋」授予于 haian（序15.0），但无对白提及
+  · [沉默] 「金髓丸方」授予于 tianxing（序16.0），但无对白提及
+  · [沉默] 「养魂木」授予于 guxiu/xutian/yuanyao/yinming/yinyue/jieying/yinluo/kunwu/zhenmo/minghe（序21.0），但无对白提及
+  · [沉默] 「玛瑙角」授予于 xutian（序22.0），但无对白提及
+  · [沉默] 「疾风九变」授予于 waihai/waihai（序24.0），但无对白提及
+  · [沉默] 「淬骨诀」授予于 waihai/waihai（序24.0），但无对白提及
+  · [沉默] 「血玉蜘蛛卵」授予于 shiku（序10.5），但无对白提及
+  · [沉默] 「尸傀骨粉」授予于 linxiong/shixiao（序7.5），但无对白提及
+  · [沉默] 「梦引术」授予于 yinming/yinming（序26.0），但无对白提及
+  · [沉默] 「剑影分光术」授予于 luoyun/luoyun（序28.0），但无对白提及
+  · [沉默] 「罡银沙」授予于 cangkun/jixi/zhuimo/kunwu/zhenmo/xutian2/xinggong/luoyun2/tianlan/liudao/zijian（序34.0），但无对白提及
+  · [沉默] 「玄玉甲」授予于 yanyue（序35.0），但无对白提及
+  · [沉默] 「阴罗幡」授予于 yinluo（序38.0），但无对白提及
+  · [沉默] 「血影遁」授予于 yinluo/yinluo（序38.0），但无对白提及
+  · [沉默] 「换形诀」授予于 yinluo/yinluo（序38.0），但无对白提及
+  · [沉默] 「大衍诀·后三层」授予于 jixi（序39.0），但无对白提及
+  · [沉默] 「失神刺」授予于 jixi/jixi（序39.0），但无对白提及
+  · [沉默] 「蛟龙甲」授予于 zhuimo（序40.0），但无对白提及
+  · [沉默] 「火蟾兽内丹」授予于 zhuimo（序40.0），但无对白提及
+  · [沉默] 「梵圣真魔功」授予于 dajin/dajin（序43.0），但无对白提及
+  · [沉默] 「离魂术」授予于 kunwu/kunwu（序44.0），但无对白提及
+  · [沉默] 「冰蚕衣」授予于 xutian2（序47.0），但无对白提及
+  · [沉默] 「煞妖诀」授予于 xinggong/xinggong（序48.0），但无对白提及
+  · [沉默] 「血灵钻」授予于 xinggong/xinggong（序48.0），但无对白提及
+  · [沉默] 「血炼神光」授予于 xinggong/xinggong（序48.0），但无对白提及
+  · [沉默] 「天都尸火」授予于 xinggong/xinggong（序48.0），但无对白提及
+  · [沉默] 「托天魔功」授予于 xinggong/xinggong（序48.0），但无对白提及
+  · [沉默] 「身外化身」授予于 xinggong/xinggong（序48.0），但无对白提及
+  · [沉默] 「黑煞修罗功」授予于 xinggong/xinggong（序48.0），但无对白提及
+  · [沉默] 「禁神术」授予于 xinggong/xinggong（序48.0），但无对白提及
+  · [沉默] 「煞丹术」授予于 xinggong/xinggong（序48.0），但无对白提及
+  · [沉默] 「元磁神山核心」授予于 xinggong（序48.0），但无对白提及
+  · [沉默] 「鲲鹏之羽」授予于 kunpeng/feisheng（序49.0），但无对白提及
+  · [沉默] 「腾龙丹方」授予于 muzu（序61.0），但无对白提及
+  · [沉默] 「鲲鹏舍利」授予于 tianpeng（序63.0），但无对白提及
+  · [沉默] 「念剑诀」授予于 heti_guan/heti_guan（序71.0），但无对白提及
+  · [沉默] 「三炼风雷翅」授予于 jiuxian/jiuxian（序73.0），但无对白提及
+  · [沉默] 「洗灵池液」授予于 modajie（序87.0），但无对白提及
+  · [沉默] 「血牙米」授予于 lanpu（序88.0），但无对白提及
+  · [沉默] 「金罡灭魔神雷」授予于 sanjie/sanjie（序90.0），但无对白提及
+  · [沉默] 「元魂灯」授予于 shiyin（序92.0），但无对白提及
+  · [沉默] 「螟虫之母晶核」授予于 shiyin（序92.0），但无对白提及
+  · [沉默] 「山海珠」授予于 xiaoxiuluo（序94.0），但无对白提及
+  · [沉默] 「真魂丹」授予于 zhanxian（序105.0），但无对白提及
+  · [沉默] 「万年金桑液」授予于 daoguo（序108.0），但无对白提及
+  · [沉默] 「真麟留影」授予于 daoguo（序108.0），但无对白提及
+  · [沉默] 「逆灵真阴大法」授予于 fsjie/fsjie（序112.0），但无对白提及
+  · [沉默] 「北极元晶」授予于 huirenjie（序101.5），但无对白提及
+  · [沉默] 「仙元石」授予于 linghuan/lingyan/xiaoping/tiangui/poxu/wumengdao/chulong/huijie/shijin/shuiyan/xisha/taiyi/xingqi/dadi/xiedao/jingong/taisui/chongchao/suidian/daluo/jiuyuan/zaimiao/zhanshi/youming/leihai/fuyao/shifang/daotian/daoyi（序114.0），但无对白提及
+  · [沉默] 「玄黄之气」授予于 lingyan/tiangui/poxu/wumengdao/chulong/huijie/taiyi（序116.0），但无对白提及
+  · [沉默] 「小挪移空间术」授予于 tiangui/tiangui（序118.0），但无对白提及
+  · [沉默] 「天外飞豆」授予于 poxu（序119.0），但无对白提及
+  · [沉默] 「天煞镇狱功」授予于 suidian/suidian（序135.0），但无对白提及
+  · [沉默] 「幽冥鬼爪」授予于 wubao（序137.0），但无对白提及
+
+======== 维度④ 候选：提前出场 13 / 幽灵提及 23 / 沉默授予 79 ========
