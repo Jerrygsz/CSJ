@@ -102,7 +102,7 @@ window.MAPS = [
     enemies: ['bandit', 'assassin'],
     elites: ['野狼帮好手', '金光上人的护法'],
     mats: ['m_jingtie', 'm_xuantie', 'm_lingmo', 'm_shihui'],
-    boss: { kind: 'mo', name: '金光上人', hp: 2600, spd: 54, dmg: 20, r: 19, spr: 'mo', scale: 4.2 },
+    boss: { kind: 'mo', name: '金光上人', hp: 2600, spd: 54, dmg: 20, r: 19, spr: 'jinguang', scale: 4.2 },
     extraBoss: [{ kind: 'mo', name: '野狼帮帮主·贾天龙', hp: 2200, spd: 58, dmg: 18, r: 20, spr: 'bandit', scale: 4.4, summon: 'bandit' }],
     reward: { stones: 240, items: ['t_shengxian'], mats: [['m_jingtie', 3]] },
     clearTitle: '七玄门已解围',

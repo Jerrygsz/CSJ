@@ -17,7 +17,9 @@ const SCAN = ['maps.js', 'late.js', 'late2.js', 'late3.js', 'lingjie.js', 'xianj
 const OWN = ['mo2', 'wangchan', 'lifeiyu', 'zhangtie', 'lihuayuan', 'nangongwan', 'ziling', 'yuanyao', 'dayan',
   'luxiong', 'qingyan', 'rehuo', 'jingyang', 'xiedaoren', 'jintong', 'liuleer', 'yuehuang', 'liudao',
   'qianlaomo', 'xuangu', 'yecha', 'yanyue', 'hanlishang', 'longjia', 'fujia', 'qinglong', 'lizunzhe',
-  'xueguang', 'shouzun', 'yuansha', 'guxiuhai', 'shiyan', 'luanming', 'guanghan'];
+  'xueguang', 'shouzun', 'yuansha', 'guxiuhai', 'shiyan', 'luanming', 'guanghan',
+  'jinguang', 'xiongsiwang', 'tuntian', 'guimu', 'baimu', 'guhuang',
+  'xiaojinhan', 'dongfangbai', 'qimozi', 'miaofa', 'donglihu', 'guhuojin'];
 
 // ---------- ① boss 归并 ----------
 // 注意：extraBoss 是数组，一行里可能挂好几个首领（如 lingjie 的 双修夫妇 / 五光族），

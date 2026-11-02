@@ -8025,6 +8025,10 @@
     '青龙上人': 'qinglong', '力尊者': 'lizunzhe', '血光圣祖': 'xueguang',
     '兽尊殿魔尊': 'shouzun', '元刹圣祖分魂': 'yuansha', '守阵古修遗骸': 'guxiuhai',
     '噬炎': 'shiyan', '噬炎残影': 'shiyan', '通灵傀儡': 'guanghan',
+    '金光上人': 'jinguang', '凶司王': 'xiongsiwang', '吞天圣祖': 'tuntian',
+    '萧晋寒': 'xiaojinhan', '鬼木': 'guimu', '东方白': 'dongfangbai',
+    '奇摩子': 'qimozi', '妙法仙尊': 'miaofa', '东离虎': 'donglihu',
+    '古或今': 'guhuojin', '骨皇': 'guhuang', '百目天鬼': 'baimu',
     '老丈': 'hermit', '老汉': 'hermit', '散修': 'rogue', '魔修': 'mo'
   };
   let faceWho = null;   // 当前头像对应的人，切皮时要按新皮肤重画

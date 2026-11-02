@@ -811,6 +811,227 @@
       '..KGK..KGK..',
       '..KHK..KHK..',
       '..KKK..KKK..'
+    ] },
+
+    // ===== 仙界篇首领（原著 X4/X5 卷）：此前 7 个具名者全共用「魔修 mo」 =====
+    // 古或今：时间道祖、天庭之主。「面如冠玉，眉眼细长，唇边颌下皆生有黑色长须，
+    //   端坐在白玉轮椅之上」→ 冠玉脸、黑色长须压到下巴、白袍金纹
+    { name: 'guhuojin', pal: { K: '#14121a', H: '#14121a', S: '#f2e4d2', G: '#eae7dc', g: '#c6c2b2', B: '#1a1a1a', W: '#d0a850' }, rows: [
+      '....KKKK....',
+      '...KHHHHK...',
+      '..KHHHHHHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '..KBSSSSBK..',
+      '..KBBBBBBK..',
+      '..KGGGGGGK..',
+      '.KGWGGGGWGK.',
+      '.KGGgWWgGGK.',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 奇摩子：天庭仙狱之主。「那位火发男子，正是家师奇摩子」→ 火发是唯一硬特征，
+    //   发顶画成两簇外挑的火苗；袍用暗红（仙狱血色），金饰压一层
+    { name: 'qimozi', pal: { K: '#180c0a', H: '#d84818', S: '#e8c9a4', G: '#2a1414', g: '#1a0c0c', B: '#c8a040', W: '#f09040' }, rows: [
+      '..K.KKKK.K..',
+      '..KKHHHHKK..',
+      '..KHHHHHHK..',
+      '..KHSSSSHK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KGGGGGGK..',
+      '.KGWGGGGWGK.',
+      '.KGgGGGGgGK.',
+      '..KgBBBBgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 妙法仙尊：九元观四大圣使。「绿发少女」→ 绿发、月白仙裙、淡绿腰封。
+    //   全书绿发的只她一个，发色本身就是身份证
+    { name: 'miaofa', pal: { K: '#16201a', H: '#4a9a5a', S: '#f6dcc0', G: '#e8f0e6', g: '#c4d4c8', B: '#8ec49a' }, rows: [
+      '...KKKKKK...',
+      '..KHHHHHHK..',
+      '..KHHHHHHK..',
+      '..KHSSSSHK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KGGGGGGK..',
+      '.KGgGGGGgGK.',
+      '.KGBGGGGBGK.',
+      '..KgBBBBgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 东方白：金源仙宫之主。「身着白色锦袍的中年男子…两鬓微霜，眼眸深邃」→
+    //   白锦袍 + 两鬓灰白（发只在外侧两格灰）+ 金源宫的金冠
+    { name: 'dongfangbai', pal: { K: '#1a1a20', H: '#2e2e34', S: '#e8cfa8', G: '#f2eee2', g: '#cfc9b8', B: '#c8a850', W: '#b8b4aa' }, rows: [
+      '...KBBBBK...',
+      '..KWHHHHWK..',
+      '..KHHHHHHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KGGGGGGK..',
+      '.KGgGGGGgGK.',
+      '.KGBGGGGBGK.',
+      '..KgBBBBgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 东离虎：天庭道祖。「名为东离虎的虬髯大汉」→ 络腮虬髯（两颊 + 颌下满须）、
+    //   宽肩（肩行顶满 12 格）、深褐战甲 + 金边
+    { name: 'donglihu', pal: { K: '#1a140e', H: '#2a1c12', S: '#c98f5a', G: '#3a3026', g: '#241c16', B: '#2a1a10', W: '#b89050' }, rows: [
+      '...KKKKKK...',
+      '..KHHHHHHK..',
+      '..KHHHHHHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '..KBSSSSBK..',
+      '..KBBBBBBK..',
+      '.KGGGGGGGGK.',
+      '.KGWGGGGWGK.',
+      '..KgBBBBgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 萧晋寒：北寒仙宫宫主。「冰晶巨碑顶端，一袭雪袍的萧晋寒，双手拄剑站立其上」→
+    //   雪袍 + 身前一把竖剑（袍中央那条白线就是剑），冰蓝做北寒的点色。
+    //   剑色必须比雪袍深一档：第一版给的是近白色，雪袍上一条白线等于没画
+    { name: 'xiaojinhan', pal: { K: '#1c2430', H: '#33404f', S: '#f0dcc4', G: '#eef2f6', g: '#c4d2dc', B: '#6aa8c8', W: '#86b0c8' }, rows: [
+      '...KKKKKK...',
+      '..KHHHHHHK..',
+      '..KHHHHHHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KGGGGGGK..',
+      '.KGgGGGGgGK.',
+      '.KGBGGGGBGK.',
+      '..KGGWWGGK..',
+      '..KGGWWGGK..',
+      '..KGKWWKGK..',
+      '..KGKWWKGK..',
+      '..KKKWWKKK..'
+    ] },
+    // 鬼木：幽冥界域主座下。「黑袍幽奴…白色小兽歪着头…化为一团白影窜入了鬼木怀里」→
+    //   黑袍 + 面皮青灰（幽奴非人）+ 胸前两行白色小兽
+    { name: 'guimu', pal: { K: '#10141a', H: '#14181e', S: '#bfc8c8', G: '#1c2028', g: '#12151b', B: '#e8ecf0', W: '#5a7a8a' }, rows: [
+      '...KKKKKK...',
+      '..KHHHHHHK..',
+      '..KHHHHHHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KGGGGGGK..',
+      '.KGgGBBgGGK.',
+      '.KGgGBBgGGK.',
+      '..KgWWWWgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 骨皇：幽冥界骨皇。「被他称作骨皇的百骨骷髅」→ 整张脸没有肉，只有黑洞眼窝和
+    //   鼻骨；头顶三根骨冠，肋部横缝；坐骑巨龟交给出场文案，不在小图里塞
+    { name: 'guhuang', pal: { K: '#1a1814', W: '#e8e4d4', w: '#b8b4a4', B: '#8a8474' }, rows: [
+      '..K.KKKK.K..',
+      '..KKWWWWKK..',
+      '..KwWWWWwK..',
+      '..KWWWWWWK..',
+      '..KWKWWKWK..',
+      '..KWWKKWWK..',
+      '..KWWWWWWK..',
+      '.KWWWWWWWWK.',
+      '.KWKWWWWKWK.',
+      '..KwWWWWwK..',
+      '..KWWKKWWK..',
+      '..KWK..KWK..',
+      '..KWK..KWK..',
+      '..KBK..KBK..'
+    ] },
+    // 百目天鬼：「百目」— 全书唯一以眼为名的首领。头顶两对、胸腹四对，黄眼压在
+    //   灰紫身上；不画獠牙不画角，辨识点就是"身上到处是眼睛"
+    { name: 'baimu', pal: { K: '#141018', G: '#4a4258', g: '#332c40', B: '#e8c040' }, rows: [
+      '...KKKKKK...',
+      '..KGGGGGGK..',
+      '..KGGGGGGK..',
+      '..KGBGGBGK..',
+      '..KGBGGBGK..',
+      '...KGGGGK...',
+      '..KGGGGGGK..',
+      '.KGBGBGBGBK.',
+      '.KGGGGGGGGK.',
+      '..KgBGGBgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 金光上人：七玄门篇的幕后仙师。「是一个三尺来高的侏儒」「这红袍侏儒」→
+    //   头大身短（头占 7 行、腿只 3 行）+ 红袍金饰。12px 表现不了三尺，
+    //   就靠头身比和"比谁都矮"的辨识度
+    { name: 'jinguang', pal: { K: '#1a0e0a', H: '#2a1a12', S: '#e8c9a4', G: '#9a2018', g: '#6a1410', B: '#d8b048' }, rows: [
+      '...KKKKKK...',
+      '..KHHHHHHK..',
+      '..KHHHHHHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '..KSSSSSSK..',
+      '...KSSSSK...',
+      '..KGGGGGGK..',
+      '.KGBGGGGBGK.',
+      '.KGgGGGGgGK.',
+      '..KgBBBBgK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..',
+      '..KKK..KKK..'
+    ] },
+    // 凶司王：灵界凶兽化形。「头顶有一对巨大之极的弯角，四肢均都比常人长出一大截，
+    //   赤红双目」→ 角从头顶两侧外翻两格（不贴最外缘，否则被墨轮廓吃掉）、
+    //   手臂多出一行（垂到腰下）、双眼赤红。角是石灰，不能用深色：深色的角贴在黑身上等于没长
+    { name: 'xiongsiwang', pal: { K: '#0e0a0e', G: '#1e1a24', g: '#141018', B: '#8a8098', R: '#e03020' }, rows: [
+      '.KB......BK.',
+      '..KBGGGGBK..',
+      '..KGGGGGGK..',
+      '..KGGGGGGK..',
+      '..KGRGGRGK..',
+      '...KGGGGK...',
+      '..KGGGGGGK..',
+      '.KGgGGGGgGK.',
+      'KGGgGGGGgGGK',
+      'KGGgGGGGgGGK',
+      '..KgBBBBgK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 吞天圣祖：魔界圣祖。「白发老翁，一身皂袍，两手奇长过膝」→ 白发白须、
+    //   皂袍、手臂多垂一行到腰下。圣祖的排场交给出场文案
+    { name: 'tuntian', pal: { K: '#141210', H: '#e8e4dc', S: '#e0c4a0', G: '#242220', g: '#161412', B: '#e8e4dc' }, rows: [
+      '...KKKKKK...',
+      '..KHHHHHHK..',
+      '..KHHHHHHK..',
+      '..KHSSSSHK..',
+      '..KSKSSKSK..',
+      '..KBSSSSBK..',
+      '..KBBBBBBK..',
+      '..KGGGGGGK..',
+      '.KGGgGGgGGK.',
+      'KGgBBBBBBgGK',
+      'KGgGGKKGGgGK',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
     ] }
   ];
 

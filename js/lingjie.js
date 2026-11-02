@@ -792,7 +792,7 @@
       enemies: ['gui2', 'moxiu2', 'guixiu'],
       elites: ['魔族魔修', '圣祖化身'],
       mats: ['m_zhenlingxue', 'm_yimojin', 'm_yaodan'],
-      boss: { kind: 'mo', name: '吞天圣祖·化身', hp: 185000, spd: 78, dmg: 196, r: 27, spr: 'mo', scale: 7.0 },
+      boss: { kind: 'mo', name: '吞天圣祖·化身', hp: 185000, spd: 78, dmg: 196, r: 27, spr: 'tuntian', scale: 8.0 },
       reward: { stones: 104000, mats: [['m_yimojin', 4], ['m_zhenlingxue', 4], ['m_xuantianteng', 1]] },
       clearTitle: '木族没落',
       clearDesc: '二号阵眼守住了，圣树没守住。木族自己炸了三十六天绝阵，从此灵界再无木族。他转身找了处荒山——该冲大乘了。'
@@ -968,7 +968,7 @@
       enemies: ['dajinxiu', 'moxiu2', 'zhengdao'],
       elites: ['凶司王亲卫', '佛骨门徒'],
       mats: ['m_zhenlingxue', 'm_xuantianteng', 'm_zhenlinglin'],
-      boss: { kind: 'mo', name: '凶司王', hp: 240000, spd: 80, dmg: 220, r: 27, spr: 'mo', scale: 7.0 },
+      boss: { kind: 'mo', name: '凶司王', hp: 240000, spd: 80, dmg: 220, r: 27, spr: 'xiongsiwang', scale: 8.0 },
       extraBoss: [{ kind: 'mo', name: '佛骨王', hp: 200000, spd: 74, dmg: 205, r: 26, spr: 'neimen', scale: 6.8, summon: '' }],
       reward: { stones: 118000, mats: [['m_zhenlingxue', 5], ['m_xuantianteng', 1]] },
       clearTitle: '元罡罩',

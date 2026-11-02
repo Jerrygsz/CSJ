@@ -107,7 +107,7 @@
     lh_hanbing:   { name: '冷焰宗弟子', hp: 13000, spd: 54, dmg: 155, r: 15, xp: 55, spr: 'disciple', drop: 0.12, tier: 0, mats: ['m_xianyuanshi'] },
     lh_lingzhu:   { name: '灵寰灵族', hp: 17000, spd: 60, dmg: 185, r: 16, xp: 70, spr: 'neimen', drop: 0.12, tier: 0, mats: ['m_xianyuanshi', 'm_xuanhuang'] },
     lh_baishi:    { name: '白石真人', hp: 62000, spd: 68, dmg: 230, r: 23, xp: 300, spr: 'hermit', drop: 0.5, tier: 2, mats: ['m_xianyuanshi', 'm_xuanhuang'] },
-    lh_tiangui:   { name: '百目天鬼', hp: 88000, spd: 74, dmg: 268, r: 25, xp: 420, spr: 'guixiu', drop: 0.6, tier: 2, mats: ['m_xianyuanshi', 'm_xuanhuang'] },
+    lh_tiangui:   { name: '百目天鬼', hp: 88000, spd: 74, dmg: 268, r: 25, xp: 420, spr: 'baimu', drop: 0.6, tier: 2, mats: ['m_xianyuanshi', 'm_xuanhuang'] },
     // 卷四档（太岁府 / 虫巢 / 九元城）：此时韩立仍是太乙巅峰，对手已经开始是大罗的东西。
     // 九元观影卫（X4C1035，4 次）、金仙修士（金仙 1333 次；五子作精英名）、火岁萤虫（114 次）、
     // 金甲道兵（X4C1109《道兵阵》，10 次）。
@@ -188,7 +188,7 @@
       enemies: ['lh_lingzhu', 'lh_hanbing', 'lh_xiongshou'],
       elites: ['天鬼·分魂', '凶兽'],
       mats: ['m_xianyuanshi', 'm_xuanhuang'],
-      boss: { kind: 'mo', name: '百目天鬼', hp: 88000, spd: 74, dmg: 268, r: 25, spr: 'guixiu', scale: 5.8 },
+      boss: { kind: 'mo', name: '百目天鬼', hp: 88000, spd: 74, dmg: 268, r: 25, spr: 'baimu', scale: 5.8 },
       reward: { stones: 200000, items: ['t_xuanhuangs', 't_lingyingjianfu'], mats: [['m_xianyuanshi', 5], ['m_xuanhuang', 3]] },
       clearTitle: '天鬼认主',
       clearDesc: '玄黄之索缠上去，百目天鬼不再挣扎。连同那具大乘傀儡，一起收进了袖里。'
@@ -231,7 +231,7 @@
       enemies: ['xj_lunhui', 'xj_tianwei', 'xj_daozhu'],
       elites: ['烛龙道·长老', '轮回殿·影卫'],
       mats: ['m_xianyuanshi', 'm_xuanhuang'],
-      boss: { kind: 'mo', name: '萧晋寒·天庭使者', hp: 330000, spd: 92, dmg: 360, r: 28, spr: 'mo', scale: 7.4 },
+      boss: { kind: 'mo', name: '萧晋寒·天庭使者', hp: 330000, spd: 92, dmg: 360, r: 28, spr: 'xiaojinhan', scale: 8.5 },
       reward: { stones: 320000, mats: [['m_xianyuanshi', 8], ['m_xuanhuang', 4]] },
       clearTitle: '烛龙道',
       clearDesc: '第一道主还在，天庭与道主们还在互相掣肘。他从峰顶退出去时，谁也没多看他一眼。'
@@ -329,7 +329,7 @@
       elites: ['九幽族长老', '九幽族修士'],
       mats: ['m_xianyuanshi', 'm_shijian'],
       // 鬼木：九幽族大罗。八张黑色符箓化八根漆黑巨兵，「每一根散发的气息，都不逊于一件入品仙器」。
-      boss: { kind: 'mo', name: '鬼木', hp: 440000, spd: 92, dmg: 440, r: 27, spr: 'mo', scale: 7.2 },
+      boss: { kind: 'mo', name: '鬼木', hp: 440000, spd: 92, dmg: 440, r: 27, spr: 'guimu', scale: 8.2 },
       // 洗煞池洗的是煞气。身上若还压着「五鬼锁魂」这类煞气封印，这一池水一并洗掉。
       reward: { stones: 480000, unseal: true, mats: [['m_xianyuanshi', 14], ['m_shijian', 4]] },
       clearTitle: '洗煞',
@@ -432,7 +432,7 @@
       enemies: ['x4_yingwei', 'x4_tianyin', 'xj_tianwei'],
       elites: ['金源仙宫·侍卫', '天阴五子'],
       mats: ['m_xianyuanshi', 'm_shijian'],
-      boss: { kind: 'mo', name: '东方白·金源宫主', hp: 520000, spd: 98, dmg: 440, r: 30, spr: 'mo', scale: 8.2 },
+      boss: { kind: 'mo', name: '东方白·金源宫主', hp: 520000, spd: 98, dmg: 440, r: 30, spr: 'dongfangbai', scale: 9.4 },
       reward: { stones: 720000, mats: [['m_xianyuanshi', 16], ['m_shijian', 3]] },
       clearTitle: '诛五恶',
       clearDesc: '五枚戒指上刻着五个字。五个人的账，他一笔一笔算完，然后推开里面那扇门。'
@@ -479,7 +479,7 @@
       enemies: ['x4_daobing', 'x4_yingwei', 'x5_guiwu'],
       elites: ['岁月殿·金甲道兵', '石剑残影'],
       mats: ['m_xianyuanshi', 'm_shijian'],
-      boss: { kind: 'mo', name: '奇摩子', hp: 780000, spd: 104, dmg: 500, r: 32, spr: 'mo', scale: 9.0 },
+      boss: { kind: 'mo', name: '奇摩子', hp: 780000, spd: 104, dmg: 500, r: 32, spr: 'qimozi', scale: 10.3 },
       extraBoss: [{ kind: 'mo', name: '黑天魔祖', hp: 720000, spd: 100, dmg: 520, r: 30, spr: 'mo', scale: 8.6, summon: '' }, { kind: 'mo', name: '柳自在', hp: 820000, spd: 102, dmg: 540, r: 31, spr: 'neimen', scale: 8.8, summon: '' }],
       reward: { stones: 980000, items: ['t_suiyueshendeng'], mats: [['m_xianyuanshi', 20], ['m_shijian', 8]] },
       clearTitle: '入手神灯',
@@ -549,7 +549,7 @@
       enemies: ['x4_yingwei', 'xj_xuechi', 'x5_guiwu'],
       elites: ['九元观·影卫', '妙法座下'],
       mats: ['m_xianyuanshi', 'm_shijian'],
-      boss: { kind: 'mo', name: '妙法仙尊', hp: 960000, spd: 108, dmg: 560, r: 33, spr: 'mo', scale: 9.6 },
+      boss: { kind: 'mo', name: '妙法仙尊', hp: 960000, spd: 108, dmg: 560, r: 33, spr: 'miaofa', scale: 11.0 },
       reward: { stones: 1500000, mats: [['m_xianyuanshi', 22], ['m_shijian', 10]] },
       clearTitle: '不留情面',
       clearDesc: '这一回他没有跑。跑了几百年，总得有一次把话说清楚。'
@@ -578,7 +578,7 @@
       enemies: ['x5_guiwu', 'x5_guibing', 'x5_huanghun'],
       elites: ['鬼将', '骨皇卫士'],
       mats: ['m_xianyuanshi', 'm_shijian'],
-      boss: { kind: 'mo', name: '骨皇', hp: 1150000, spd: 110, dmg: 600, r: 34, spr: 'guixiu', scale: 10.0 },
+      boss: { kind: 'mo', name: '骨皇', hp: 1150000, spd: 110, dmg: 600, r: 34, spr: 'guhuang', scale: 11.4 },
       reward: { stones: 1800000, mats: [['m_xianyuanshi', 24], ['m_shijian', 12]] },
       clearTitle: '轮回之争',
       clearDesc: '轮回大阵顶得住骨皇，不是因为阵有多强——是阵里站的那两个人，谁也没打算先走。'
@@ -625,7 +625,7 @@
       enemies: ['x5_huanghun', 'x5_guibing', 'x4_daobing'],
       elites: ['天庭·仙使', '天道七君座下'],
       mats: ['m_xianyuanshi', 'm_shijian'],
-      boss: { kind: 'mo', name: '东离虎·道祖', hp: 1400000, spd: 112, dmg: 640, r: 35, spr: 'mo', scale: 10.6 },
+      boss: { kind: 'mo', name: '东离虎·道祖', hp: 1400000, spd: 112, dmg: 640, r: 35, spr: 'donglihu', scale: 12.1 },
       extraBoss: [{ kind: 'mo', name: '紫杉', hp: 1250000, spd: 110, dmg: 610, r: 32, spr: 'neimen', scale: 9.8, summon: '' },
         { kind: 'mo', name: '朱颜', hp: 1250000, spd: 108, dmg: 620, r: 32, spr: 'guixiu', scale: 9.8, summon: '' }],
       reward: { stones: 2400000, mats: [['m_xianyuanshi', 30], ['m_shijian', 16]] },
@@ -659,7 +659,7 @@
       enemies: ['x5_huanghun', 'x5_guiwu', 'x4_daobing'],
       elites: ['天道残影', '混沌化身'],
       mats: ['m_xianyuanshi', 'm_shijian'],
-      boss: { kind: 'mo', name: '古或今·混沌之身', hp: 1800000, spd: 116, dmg: 700, r: 36, spr: 'mo', scale: 11.2 },
+      boss: { kind: 'mo', name: '古或今·混沌之身', hp: 1800000, spd: 116, dmg: 700, r: 36, spr: 'guhuojin', scale: 12.8 },
       reward: { stones: 3200000, mats: [['m_xianyuanshi', 36], ['m_shijian', 20]] },
       clearTitle: '大道归一',
       clearDesc: '三千大道拧成一股的时候，站在正中间的那个人，开始不太像人了。'

@@ -41,7 +41,13 @@ const WANT = [
   ['hanlishang', '寒骊上人'], ['longjia', '陇家老祖'], ['fujia', '付家家主'],
   ['qinglong', '青龙上人'], ['lizunzhe', '力尊者'], ['xueguang', '血光圣祖'],
   ['shouzun', '兽尊殿·魔尊'], ['yuansha', '元刹圣祖分魂'], ['guxiuhai', '守阵古修遗骸'],
-  ['shiyan', '落日之墓·噬炎'], ['luanming', '鸾鸣门双修夫妇'], ['guanghan', '广寒界通灵傀儡']
+  ['shiyan', '落日之墓·噬炎'], ['luanming', '鸾鸣门双修夫妇'], ['guanghan', '广寒界通灵傀儡'],
+  // 三批：原著外貌最硬的 12 位。仙界篇 7 位此前全共用「魔修 mo」，
+  // 反而比灵界首领更没辨识度 —— 这批的核心就是「火发/绿发/雪袍/黑须」各自站住
+  ['jinguang', '金光上人'], ['xiongsiwang', '凶司王'], ['tuntian', '吞天圣祖'],
+  ['guimu', '鬼木'], ['baimu', '百目天鬼'], ['guhuang', '骨皇'],
+  ['xiaojinhan', '萧晋寒'], ['dongfangbai', '东方白'], ['qimozi', '奇摩子'],
+  ['miaofa', '妙法仙尊'], ['donglihu', '东离虎'], ['guhuojin', '古或今']
 ];
 
 // 同时抓每张图的像素指纹：两人撞图最容易发生在复制粘贴时（图一样、名字不同）
@@ -146,7 +152,15 @@ const BOSS_SPR = [
   ['js/lingjie.js', '力尊者', 'lizunzhe'], ['js/lingjie.js', '血光圣祖', 'xueguang'],
   ['js/lingjie.js', '兽尊殿', 'shouzun'], ['js/late2.js', '元刹圣祖', 'yuansha'],
   ['js/late.js', '守阵古修', 'guxiuhai'], ['js/lingjie.js', '噬炎', 'shiyan'],
-  ['js/late2.js', '鸾鸣门', 'luanming'], ['js/lingjie.js', '通灵傀儡', 'guanghan']
+  ['js/late2.js', '鸾鸣门', 'luanming'], ['js/lingjie.js', '通灵傀儡', 'guanghan'],
+  // 三批：仙界篇 7 位 + 人界/灵界 5 位。仙界篇原本全挂在「mo」上 ——
+  // 6 个最高境界的道祖共用一张黑魔修图，是整份名单里最不合理的撞图
+  ['js/maps.js', '金光上人', 'jinguang'], ['js/lingjie.js', '凶司王', 'xiongsiwang'],
+  ['js/lingjie.js', '吞天圣祖', 'tuntian'], ['js/xianjie.js', '鬼木', 'guimu'],
+  ['js/xianjie.js', '百目天鬼', 'baimu'], ['js/xianjie.js', '骨皇', 'guhuang'],
+  ['js/xianjie.js', '萧晋寒', 'xiaojinhan'], ['js/xianjie.js', '东方白', 'dongfangbai'],
+  ['js/xianjie.js', '奇摩子', 'qimozi'], ['js/xianjie.js', '妙法仙尊', 'miaofa'],
+  ['js/xianjie.js', '东离虎', 'donglihu'], ['js/xianjie.js', '古或今', 'guhuojin']
 ];
 for (const [file, who, spr] of BOSS_SPR) {
   const src = fs.readFileSync(join(root, file), 'utf8').split('\n');
@@ -154,6 +168,22 @@ for (const [file, who, spr] of BOSS_SPR) {
   const okAll = hits.length > 0 && hits.every(l => l.includes("spr: '" + spr + "'"));
   ok(okAll, who + ' 出场用 ' + spr, hits.map(l => (l.match(/spr: '[^']+'/) || [''])[0]));
 }
+
+// 仙界篇此前 14 个首领零专属，是整份名单里覆盖率最低的一段。
+// 这里只钉住「已画的必须一直在用」，避免哪天又被改回通用图。
+console.log('\n【2c】仙界篇专属覆盖率');
+const XJ_OWN = ['guhuojin', 'qimozi', 'miaofa', 'dongfangbai', 'donglihu',
+  'xiaojinhan', 'guimu', 'guhuang', 'baimu'];
+const xjLines = fs.readFileSync(join(root, 'js/xianjie.js'), 'utf8').split('\n');
+let xjOwned = 0, xjTotal = 0;
+for (const l of xjLines) {
+  if (!/boss/i.test(l)) continue;
+  for (const m of l.matchAll(/spr:\s*'([^']*)'/g)) {
+    xjTotal++;
+    if (XJ_OWN.includes(m[1])) xjOwned++;
+  }
+}
+ok(xjOwned >= 9, '仙界篇已有 ' + xjOwned + '/' + xjTotal + ' 个首领用专属外观', { xjOwned, xjTotal });
 
 console.log('\n【3】对话小像：按人对，不按人不出');
 async function faceOf(who, text, skin) {

@@ -29,7 +29,12 @@ const LIST = [
   ['hanlishang', '寒骊上人'], ['longjia', '陇家老祖'], ['fujia', '付家家主'],
   ['qinglong', '青龙上人'], ['lizunzhe', '力尊者'], ['xueguang', '血光圣祖'],
   ['shouzun', '兽尊殿·魔尊'], ['yuansha', '元刹圣祖分魂'], ['guxiuhai', '守阵古修遗骸'],
-  ['shiyan', '落日之墓·噬炎'], ['luanming', '鸾鸣门双修夫妇'], ['guanghan', '广寒界通灵傀儡']
+  ['shiyan', '落日之墓·噬炎'], ['luanming', '鸾鸣门双修夫妇'], ['guanghan', '广寒界通灵傀儡'],
+  // 第一档补画：原著描写最硬的 12 位（此前全共用「魔修/鬼修」轮换图）
+  ['jinguang', '金光上人'], ['xiongsiwang', '凶司王'], ['tuntian', '吞天圣祖'],
+  ['guimu', '鬼木'], ['baimu', '百目天鬼'], ['guhuang', '骨皇'],
+  ['xiaojinhan', '萧晋寒'], ['dongfangbai', '东方白'], ['qimozi', '奇摩子'],
+  ['miaofa', '妙法仙尊'], ['donglihu', '东离虎'], ['guhuojin', '古或今']
 ];
 
 async function sheet(skin, out) {
