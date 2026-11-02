@@ -4409,14 +4409,26 @@
     corner(0, H, R, 0.15); corner(W, H, R, 0.12);
     // 平远远山：底部两叠淡墨剪影（山势只在中央隆起，两端伏进留白）
     const mountain = (baseY, amp, alpha, seedOff) => {
+      const pts = [];
       g.beginPath(); g.moveTo(-4, H + 4);
       for (let px = 0; px <= W + 8; px += 8) {
         const t = px / W;
         const y = baseY - amp * (0.55 + 0.45 * Math.sin(t * 5.2 + seedOff)) * Math.sin(t * Math.PI);
+        pts.push([px, y]);
         g.lineTo(px, y);
       }
       g.lineTo(W + 4, H + 4); g.closePath();
       g.fillStyle = 'rgba(60,56,48,' + alpha + ')'; g.fill();
+      // 山脊线：一团平涂的灰是「沙丘」，压一道脊线才是山。两端用渐变淡出，不落成一条硬边。
+      const lg = g.createLinearGradient(0, 0, W, 0);
+      const c0 = 'rgba(52,48,40,';
+      lg.addColorStop(0, c0 + '0)');
+      lg.addColorStop(0.16, c0 + (alpha * 1.5).toFixed(3) + ')');
+      lg.addColorStop(0.84, c0 + (alpha * 1.25).toFixed(3) + ')');
+      lg.addColorStop(1, c0 + '0)');
+      g.beginPath();
+      pts.forEach(([px, y], i) => { if (i === 0) g.moveTo(px, y); else g.lineTo(px, y); });
+      g.strokeStyle = lg; g.lineWidth = 1.25; g.lineJoin = 'round'; g.stroke();
     };
     mountain(H * 0.94, H * 0.10, 0.12, 0.8);
     mountain(H * 0.97, H * 0.06, 0.07, 2.3);
@@ -4433,6 +4445,134 @@
     };
     stone(W * 0.06, H * 0.975, W * 0.46, H * 0.070, 0.10);
     stone(W * 0.94, H * 0.988, W * 0.40, H * 0.055, 0.075);
+
+    // ─────────── 中景：坡岸笔触 + 寒林枯树 ───────────
+    // 干笔一道：沿二次贝塞尔分段，起笔按下、收笔提起——线宽与浓度逐段衰减，末段自然成飞白。
+    // 国画的线从来不是等粗的，「一根均匀的线」是矢量图的语言。
+    const brush = (x0, y0, cx, cy, x1, y1, w0, w1, a) => {
+      const N = 14, at = (t) => {
+        const u = 1 - t;
+        return [u * u * x0 + 2 * u * t * cx + t * t * x1, u * u * y0 + 2 * u * t * cy + t * t * y1];
+      };
+      // 一次填充笔形轮廓，而不是分段 stroke：
+      // 分段 stroke 时相邻两段的 alpha 会叠加，一棵树就会长出一圈一圈的「竹节纹」。
+      // 笔的提按交给宽度本身（国画里粗细就是浓淡），墨色保持一个值——这样线条才是连贯的一笔。
+      const L = [], Rr = [];
+      for (let i = 0; i <= N; i++) {
+        const t = i / N, p0 = at(t);
+        const pa = at(Math.max(0, t - 0.02)), pb = at(Math.min(1, t + 0.02));
+        const dx = pb[0] - pa[0], dy = pb[1] - pa[1];
+        const len = Math.hypot(dx, dy) || 1;
+        const w = (w0 + (w1 - w0) * t) / 2;
+        L.push([p0[0] - dy / len * w, p0[1] + dx / len * w]);
+        Rr.push([p0[0] + dy / len * w, p0[1] - dx / len * w]);
+      }
+      g.beginPath();
+      g.moveTo(L[0][0], L[0][1]);
+      for (let i = 1; i < L.length; i++) g.lineTo(L[i][0], L[i][1]);
+      for (let i = Rr.length - 1; i >= 0; i--) g.lineTo(Rr[i][0], Rr[i][1]);
+      g.closePath();
+      g.fillStyle = 'rgba(46,42,34,' + a.toFixed(3) + ')';
+      g.fill();
+    };
+    // 皴笔：同一组短斜笔重一点、轻一点地叠在石面上，石头才有「劈」出来的体积
+    const cun = (cx, cy, w, n, seed) => {
+      let sd = seed;
+      const rnd = () => (sd = (sd * 9301 + 49297) % 233280) / 233280;
+      for (let i = 0; i < n; i++) {
+        const x = cx + (rnd() - 0.5) * w, y = cy + (rnd() - 0.5) * w * 0.26;
+        const len = w * (0.06 + rnd() * 0.05);
+        brush(x, y, x + len * 0.42, y - len * 0.32, x + len * 0.95, y - len * 0.72, 2.0, 0.5, 0.16);
+      }
+    };
+    // 坡岸：只在左右两段露岸沿，中间断开留给战斗区（一条横贯全屏的线会把画切两半）
+    const bank = (x0, x1, yb, amp, a) => {
+      g.beginPath();
+      for (let px = x0; px <= x1; px += 8) {
+        const t = (px - x0) / (x1 - x0);
+        const y = yb - amp * Math.sin(t * Math.PI) * (0.7 + 0.3 * Math.sin(t * 7.5));
+        if (px === x0) g.moveTo(px, y); else g.lineTo(px, y);
+      }
+      g.strokeStyle = 'rgba(52,48,40,' + a + ')';
+      g.lineWidth = 1.15; g.lineCap = 'round'; g.stroke();
+    };
+    // 寒林枯树：一挺主干、四五分枝、枝梢疏点枯叶。只立在左右两侧，中央留白给战斗。
+    // 树是淡墨立在背景层（wash 画在精灵之前），所以角色从树前过不会被挡。
+    const tree = (bx, by, h, lean, a, seed) => {
+      let sd = seed;
+      const rnd = () => (sd = (sd * 9301 + 49297) % 233280) / 233280;
+      const topX = bx + lean, topY = by - h;
+      // 主干：根部按下、梢部提起。走一条 C 形（不画直线——直杆子叫电线杆，不叫树）
+      brush(bx, by, bx + lean * 0.30 - lean * 0.16, by - h * 0.55, topX, topY,
+        Math.max(2.8, h * 0.029), Math.max(0.5, h * 0.0038), a);
+      // 根：左右各挑一笔，把主干压在地上——不然树像一根插进去的杆子
+      brush(bx, by - h * 0.022, bx - h * 0.048, by - h * 0.004, bx - h * 0.086, by - h * 0.014,
+        Math.max(1.2, h * 0.0075), 0.35, a * 0.72);
+      brush(bx, by - h * 0.022, bx + h * 0.052, by - h * 0.002, bx + h * 0.092, by - h * 0.012,
+        Math.max(1.2, h * 0.0075), 0.35, a * 0.72);
+      // 苔点：主干下部点两三处短横点。国画树干全靠这点「糙」立住，光杆子太滑。
+      for (let k = 0; k < 3; k++) {
+        const t = 0.09 + k * 0.17 + rnd() * 0.05;
+        const tx = bx + (topX - bx) * t, ty = by - h * t;
+        const w = Math.max(1.8, h * 0.020 * (1 - t));
+        g.beginPath();
+        g.ellipse(tx + (rnd() - 0.5) * w * 0.6, ty, w * 0.60, w * 0.22, (rnd() - 0.5) * 0.6, 0, 6.29);
+        g.fillStyle = 'rgba(46,42,34,' + Math.min(1, a * 1.2).toFixed(3) + ')';
+        g.fill();
+      }
+      const tips = [];
+      // 一级枝：左右交替斜出，越往上越短；先下压再上挑，才成「鹿角」
+      for (let k = 0; k < 5; k++) {
+        const t = 0.34 + k * 0.132 + rnd() * 0.028;
+        const sx = bx + (topX - bx) * t - lean * 0.10 * Math.sin(t * 3), sy = by - h * t;
+        const dir = (k % 2) ? 1 : -1;
+        const len = h * (0.34 - k * 0.046) * (0.85 + rnd() * 0.3);
+        const ex = sx + dir * len, ey = sy - len * (0.34 + rnd() * 0.26);
+        // 中段控制点往横向拉、往低压，枝就有外张的弧，不是一根斜棍
+        brush(sx, sy, sx + dir * len * 0.62, sy - len * 0.06, ex, ey,
+          Math.max(1.6, h * 0.013), Math.max(0.45, h * 0.0028), a * 0.96);
+        tips.push([ex, ey]);
+        // 二级枝：一级枝中段向上反挑，枯树的「骨」全在这一笔
+        if (k < 4) {
+          const mx = sx + (ex - sx) * 0.58, my = sy + (ey - sy) * 0.58;
+          const l2 = len * (0.44 + rnd() * 0.2);
+          const t2x = mx + dir * l2 * 0.42, t2y = my - l2 * 0.92;
+          brush(mx, my, mx + dir * l2 * 0.34, my - l2 * 0.30, t2x, t2y,
+            Math.max(0.9, h * 0.0075), Math.max(0.35, h * 0.0016), a * 0.82);
+          tips.push([t2x, t2y]);
+          // 三级：细到几乎断，只交代「末梢」
+          if (k % 2 === 0) {
+            brush(t2x, t2y, t2x + dir * l2 * 0.20, t2y - l2 * 0.22, t2x + dir * l2 * 0.30, t2y - l2 * 0.50,
+              Math.max(0.6, h * 0.004), 0.3, a * 0.7);
+            tips.push([t2x + dir * l2 * 0.30, t2y - l2 * 0.50]);
+          }
+        }
+      }
+      // 枯叶：枝梢只点几笔疏叶，画成团就成了「树丛」，倪瓒的树贵在疏
+      for (let k = 0; k < tips.length; k++) {
+        if (rnd() > 0.55) continue;
+        const [tx, ty] = tips[k];
+        for (let m = 0, n = 2 + ((rnd() * 3) | 0); m < n; m++) {
+          const px = tx + (rnd() - 0.5) * h * 0.085, py = ty + (rnd() - 0.5) * h * 0.06;
+          g.beginPath();
+          g.ellipse(px, py, h * (0.009 + rnd() * 0.006), h * (0.005 + rnd() * 0.004), (rnd() - 0.5) * 1.4, 0, 6.29);
+          g.fillStyle = 'rgba(46,42,34,' + (a * 0.62).toFixed(3) + ')';
+          g.fill();
+        }
+      }
+    };
+
+    bank(0, W * 0.32, H * 0.900, H * 0.022, 0.165);
+    bank(W * 0.70, W, H * 0.912, H * 0.017, 0.135);
+    cun(W * 0.10, H * 0.955, W * 0.30, 10, 11);
+    cun(W * 0.90, H * 0.970, W * 0.22, 8, 23);
+    // 左株高、右株矮，两侧不对称才像自然长出来的（都竖直平行就成篱笆了）
+    tree(W * 0.150, H * 0.958, H * 0.240, W * 0.056, 0.46, 7);
+    tree(W * 0.868, H * 0.985, H * 0.180, -W * 0.046, 0.36, 19);
+    // 更远的两株：极淡，只交代中景纵深，不与近株争浓淡
+    tree(W * 0.285, H * 0.920, H * 0.140, W * 0.030, 0.21, 31);
+    tree(W * 0.752, H * 0.934, H * 0.120, -W * 0.024, 0.17, 43);
+
     washLayer = c;
     return c;
   }
@@ -9239,6 +9379,7 @@
     bannerDown() { return !!(elBanner && elBanner.style.display === 'block'); },
     skin(name) { if (name === undefined) return save.skin; applySkin(name === 'guigu' ? 'guigu' : 'jin'); return save.skin; },
     grassTile() { return buildGrass._tile || null; },
+    wash() { return washLayerOf(); },
     cave(id) { if (CAVES[id] && save.caves.indexOf(id) < 0) { save.caves.push(id); writeSave(); } openCave(id); return G.caveId; },    openAllCaves() { for (const k in CAVES) if (save.caves.indexOf(k) < 0) save.caves.push(k); writeSave(); renderWorldMap(); return save.caves.length; },
     caveTab(t) { G.caveTab = t; if (G.state === 'cave') renderCave(); return G.caveTab; },
     equip(id) { equipGear(id); return save.equip; },

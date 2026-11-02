@@ -183,6 +183,43 @@ const cardShadow = await page.evaluate(() => {
 });
 ok(!/10px/.test(cardShadow), '地图卡去掉大浮影', cardShadow);
 
+// ---------- 7) 中景：寒林枯树 + 坡岸笔触 ----------
+await page.evaluate(() => { window.__FR.skin('guigu'); window.__FR.enterMap('qixuan'); window.__FR.G.state = 'play'; });
+await page.waitForTimeout(700);
+const wash = await page.evaluate(() => {
+  const c = window.__FR.wash();
+  if (!c) return null;
+  const g = c.getContext('2d');
+  // 取一小块区域的平均不透明度：0 = 素纸留白，>0.02 = 有墨
+  const ink = (cx, cy, r) => {
+    const x = Math.max(0, (cx - r) | 0), y = Math.max(0, (cy - r) | 0);
+    const w = Math.min(c.width - x, r * 2) | 0, h = Math.min(c.height - y, r * 2) | 0;
+    const d = g.getImageData(x, y, w, h).data;
+    let s = 0, n = 0;
+    for (let i = 3; i < d.length; i += 4) { s += d[i]; n++; }
+    return n ? s / n / 255 : 0;
+  };
+  return {
+    w: c.width, h: c.height,
+    leftTree: ink(c.width * 0.15, c.height * 0.86, 34),   // 左株枯树冠部
+    rightTree: ink(c.width * 0.87, c.height * 0.90, 30),  // 右株
+    center: ink(c.width * 0.50, c.height * 0.50, 46),     // 中央战斗区必须留白
+    bottom: ink(c.width * 0.50, c.height * 0.97, 40)      // 底部远山
+  };
+});
+ok(!!wash, '晕墨层可取（guigu 皮烘焙成功）', wash && wash.w);
+ok(wash && wash.leftTree > 0.06, '左侧中景有枯树墨迹', wash && wash.leftTree.toFixed(3));
+ok(wash && wash.rightTree > 0.03, '右侧中景有枯树墨迹', wash && wash.rightTree.toFixed(3));
+ok(wash && wash.bottom > wash.center, '底部远山比画面中央重（一角构图：中空边重）', wash && [wash.bottom.toFixed(3), wash.center.toFixed(3)]);
+ok(wash && wash.center < 0.05, '画面中央保持留白（不压战斗区）', wash && wash.center.toFixed(3));
+
+// 切回金皮：晕墨层不再生成，底部不该残留水墨树
+await page.evaluate(() => window.__FR.skin('jin'));
+await page.waitForTimeout(400);
+const washJin = await page.evaluate(() => window.__FR.wash());
+ok(!washJin, '金皮下不生成晕墨层（切皮隔离）', washJin);
+await page.evaluate(() => window.__FR.skin('guigu'));
+
 console.log('\n────────────────────────');
 if (fail === 0) console.log('全绿：' + pass + ' 通过 / 0 失败');
 else console.log('失败：' + pass + ' 通过 / ' + fail + ' 失败');
