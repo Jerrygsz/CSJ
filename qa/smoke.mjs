@@ -1140,7 +1140,7 @@ ok(isFinite(after.hp) && after.hp > 0, '血量正常', after.hp);
 
 console.log('\n== 多 Boss 续战 ==');
 const EB = {
-  houshan: '狼妖|山贼头目', waihai: '八级妖兽·毒蛟|妙鹤真人', heisha: '越皇|令狐老祖',
+  houshan: '狼妖|山贼头目', waihai: '八级妖兽·毒蛟|妙鹤真人', heisha: '越皇|黑煞教长老',
   kunwu: '阴罗宗大长老·乾老魔|银翅夜叉', zhenmo: '元刹圣祖分魂|敖啸老祖', xiaoji: '寒骊上人|冰凤',
   luoyun2: '鸾鸣门·双修夫妇|至阳上人'
 };

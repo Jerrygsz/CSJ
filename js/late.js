@@ -413,7 +413,7 @@
       elites: ['血侍·冰妖', '血侍·铁罗', '血侍·青纹', '血侍·叶蛇'],
       mats: ['m_xueyu', 'm_xuesha', 'm_shihui', 'm_hantie'],
       boss: { kind: 'blood', name: '越皇', hp: 4600, spd: 50, dmg: 28, r: 20, spr: 'mo', scale: 4.6 },
-      extraBoss: [{ kind: 'mo', name: '令狐老祖', hp: 5000, spd: 58, dmg: 30, r: 20, spr: 'neimen', scale: 5.2, summon: '' }],
+      extraBoss: [{ kind: 'mo', name: '黑煞教长老', hp: 5000, spd: 58, dmg: 30, r: 20, spr: 'neimen', scale: 5.2, summon: '' }],
       reward: { stones: 520, items: ['t_cantu'], mats: [['m_xuesha', 2], ['m_hantie', 2]] },
       outro: 'heisha_out',
       clearTitle: '黑煞教已灭',
@@ -521,7 +521,7 @@
     luxiong_out: [
       ['旁白', '陆师兄倒在草丛里。储物袋散开，几株灵药滚出来。'],
       ['韩立', '（紫猴花、天灵果、玉髓芝。他从别处抢来的，正好凑我的炉。）'],
-      ['旁白', '陈巧倩醒来时眼神是散的。韩立把一粒忘忧丹喂进她嘴里。'],
+      ['旁白', '陈巧倩醒来时眼神是散的。韩立把一粒丹药喂进她嘴里，让她睡过去。'],
       ['韩立', '（这一夜的事，她不必记得。记得了，对她对我都不是好事。）'],
       ['旁白', '人埋进岔道边的土里。剑收进储物袋，丹房的牌子摘下来扔了。'],
       ['韩立', '（谷里少一个内门弟子，不会有人来问一个药农。）']

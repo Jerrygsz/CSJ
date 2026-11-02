@@ -186,14 +186,14 @@ window.MAPS = [
   {
     id: 'mkuang', side: true, sorder: 1, name: '后山·废弃矿洞', pos: '青牛山北麓 旧矿脉',
     type: 'combat', tag: '支线', unlockBy: 'e_zhou',
-    desc: '山塌了半边，铁矿石露在外头。洞底挖出了几具石人，把矿道当成了自己的窝。',
+    desc: '山塌了半边，铁矿石露在外头。洞底爬出来几只石甲兽，把矿道当成了自己的窝。',
     startLevel: 3, startSkills: { sword: 1 },
     unlock: null, next: null,
     diff: 1.05, bossAt: 95,
     enemies: ['bat', 'snake', 'shigui', 'bandit'],
-    elites: ['矿洞石人'],
+    elites: ['矿洞石甲兽'],
     mats: ['m_jingtie', 'm_chitong', 'm_xuantie', 'm_yusui'],
-    boss: { kind: 'beast', name: '石人王', hp: 980, spd: 52, dmg: 14, r: 20, spr: 'shigui', scale: 3.2, summon: 'shigui' },
+    boss: { kind: 'beast', name: '石甲兽', hp: 980, spd: 52, dmg: 14, r: 20, spr: 'shigui', scale: 3.2, summon: 'shigui' },
     reward: { stones: 70, items: [], mats: [['m_jingtie', 4], ['m_chitong', 2]] },
     clearTitle: '矿洞已清',
     clearDesc: '矿道通了。碎石堆里挑出来的铁，够打两件好器。'

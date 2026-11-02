@@ -904,7 +904,7 @@
       clearDesc: '付家灭了。辛如音的骨灰埋在堡后的梅树下，算是还了。'
     },
     {
-      id: 'huixiang', side: true, sorder: 12, name: '越国·韩家村', pos: '越国·镜州 山边小村',
+      id: 'huixiang', side: true, sorder: 12, name: '越国·五里沟', pos: '越国·镜州 五里沟',
       type: 'story', tag: '支线', unlockBy: 'e_huixiang', arc: 'F',
       desc: '走了这么多年，村口那棵老树还在。',
       startLevel: 82, startSkills: { sword: 6, fire: 4, orb: 4, nova: 4, frost: 4 },
@@ -1108,7 +1108,7 @@
 (function () {
   Object.assign(window.MAP_STORIES, {
     huixiang: [
-      ['旁白', '越国·镜州。青牛山下的村子，比记忆里小了一圈。'],
+      ['旁白', '越国·镜州。五里沟的村子，比记忆里小了一圈。'],
       ['韩立', '（村口那棵老树还在。树底下那块石头，是我小时候坐过的。）'],
       ['旁白', '祠堂里挂着两块牌位。坟头的草，被人割过。'],
       ['韩立', '（父母走的时候，我在乱星海。那时候连一封信都送不回来。）'],
