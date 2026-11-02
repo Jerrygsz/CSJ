@@ -218,7 +218,7 @@ window.MAPS = [
     enemies: ['disciple', 'bandit'],
     elites: ['外门弟子'],
     mats: ['m_jingtie', 'm_chitong'],
-    boss: { kind: 'mo', name: '厉飞雨（切磋）', hp: 1900, spd: 58, dmg: 13, r: 18, spr: 'disciple', scale: 2.4 },
+    boss: { kind: 'mo', name: '厉飞雨（切磋）', hp: 1900, spd: 58, dmg: 13, r: 18, spr: 'lifeiyu', scale: 2.4 },
     reward: { stones: 120, items: ['jingtie'], mats: [['m_jingtie', 3]] },
     clearTitle: '演武已毕',
     clearDesc: '木剑断了三根。厉飞雨把剑一扔，只说了一句：还行。'

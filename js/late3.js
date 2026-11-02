@@ -141,13 +141,13 @@
   // 厉飞雨不在此列：原著他七玄门时期病逝，游戏改为「双身份化名系统」（见下方 LIFEIYU）。
   // 分类标签：companion 同伴 / puppet 傀儡 / spirit 器灵 / avatar 化身（见 P2-12 重构）
   window.MATES = [
-    { id: 'm_nangongwan', icon: '🌸', name: '南宫婉', spr: 'nvxiu', scale: 1.6, dmg: 0.75, rate: 1.0, cat: 'companion',
+    { id: 'm_nangongwan', icon: '🌸', name: '南宫婉', spr: 'nangongwan', scale: 1.6, dmg: 0.75, rate: 1.0, cat: 'companion',
       desc: '掩月宗结丹女修。血色禁地那一夜，是两人都不愿再提、也忘不掉的。', from: '血色禁地',
       leave: '掩月宗线后冰封期，强制离队（剧情）；解冻前不可出战。' },
-    { id: 'm_yuanyao', icon: '🎐', name: '元瑶', spr: 'linmo', scale: 1.55, dmg: 0.62, rate: 1.05, cat: 'companion',
+    { id: 'm_yuanyao', icon: '🎐', name: '元瑶', spr: 'yuanyao', scale: 1.55, dmg: 0.62, rate: 1.05, cat: 'companion',
       desc: '魁星岛的小门派女修。为了师姐，什么都肯做。', from: '乱星海',
       leave: '借尸还魂修行期，强制离队（剧情）；还魂功成前不可出战。' },
-    { id: 'm_dayanshenjun', icon: '📿', name: '大衍神君', spr: 'hermit', scale: 1.7, dmg: 0.95, rate: 1.35, cat: 'spirit',
+    { id: 'm_dayanshenjun', icon: '📿', name: '大衍神君', spr: 'dayan', scale: 1.7, dmg: 0.95, rate: 1.35, cat: 'spirit',
       desc: '千竹教的大衍诀是他写的。如今只剩一缕神念，住在袖子里指手画脚。', from: '极西之地' }
   ];
 

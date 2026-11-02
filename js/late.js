@@ -959,7 +959,7 @@
       reward: { stones: 100 }
     },
     {
-      id: 'e_yuyao', map: 'ningcui', name: '女修 元瑶', spr: 'nvxiu', scale: 1.8,
+      id: 'e_yuyao', map: 'ningcui', name: '女修 元瑶', spr: 'yuanyao', scale: 1.8,
       cond: { level: 50, cleared: ['liulian'] },
       lines: [
         ['旁白', '礁石后头转出个女修，一身水气，腰间挂着一只旧玉瓶。'],

@@ -416,8 +416,8 @@ ok(!gates.yuanying.items.includes('m_yanghun') && !gates.yuanying.items.includes
   '元婴门不再硬塞养魂木/灵烛果', gates.yuanying.items);
 ok(!gates.huashen.items.includes('m_jinlei') && gates.huashen.items.includes('m_hanhuo') && gates.huashen.items.includes('m_yuanci'),
   '化神材料=五色寒焰+元磁神山核心（金雷竹已降级）', gates.huashen.items);
-ok(gates.huashen.story.includes('jixi') && gates.huashen.story.includes('tianxing'),
-  '化神=元磁神山前置+天星城闭关（不再是坠魔谷）', gates.huashen.story);
+ok(gates.huashen.story.includes('xinggong'),
+  '化神前置=乱星海星宫（元磁神山核心所在，不再是坠魔谷/极西之地）', gates.huashen.story);
 
 // 新丹药/功法/材料都真实存在且可炼
 const newItems = await page.evaluate(() => {

@@ -101,7 +101,7 @@
     shixiao: { name: '尸魈',     hp: 700, spd: 58, dmg: 44, r: 12, xp: 15, spr: 'ghoul',    drop: 0.09, tier: 0, dash: true, mats: ['m_shihui', 'm_yusui'] },
     moxiu2:  { name: '魔修', hp: 760, spd: 62, dmg: 46, r: 11, xp: 16, spr: 'mo',       drop: 0.10, tier: 0, mats: ['m_xueyu', 'm_hantie'] },
     fashi:   { name: '慕兰法士', hp: 820, spd: 70, dmg: 50, r: 11, xp: 17, spr: 'neimen',   drop: 0.09, tier: 0, mats: ['m_yusui', 'm_xuantie'] },
-    dajinxiu:{ name: '散修', hp: 900, spd: 64, dmg: 52, r: 11, xp: 18, spr: 'linmo',    drop: 0.10, tier: 0, mats: ['m_xuantie', 'm_yusui'] },
+    dajinxiu:{ name: '散修', hp: 900, spd: 64, dmg: 52, r: 11, xp: 18, spr: 'rogue',    drop: 0.10, tier: 0, mats: ['m_xuantie', 'm_yusui'] },
     yaoshou2:{ name: '妖兽', hp: 1000, spd: 60, dmg: 56, r: 13, xp: 20, spr: 'haishou', drop: 0.11, tier: 0, mats: ['m_yaodan', 'm_banyao'] },
     yaoxiu:  { name: '妖修',   hp: 980, spd: 66, dmg: 54, r: 11, xp: 19, spr: 'mo',       drop: 0.10, tier: 0, mats: ['m_zhenlinglin', 'm_yaodan'] },
     gui2:    { name: '魔物', hp: 1200, spd: 54, dmg: 62, r: 14, xp: 24, spr: 'mo',       drop: 0.12, tier: 0, mats: ['m_xueyu', 'm_yanghun'] },
@@ -500,7 +500,7 @@
       enemies: ['gui2', 'moxiu2', 'dajinxiu'],
       elites: ['阴罗宗执事', '炼尸'],
       mats: ['m_xueyu', 'm_yanghun', 'm_gengjing'],
-      boss: { kind: 'mo', name: '阴罗宗四长老', hp: 20000, spd: 62, dmg: 58, r: 21, spr: 'linmo', scale: 5.4 },
+      boss: { kind: 'mo', name: '阴罗宗四长老', hp: 20000, spd: 62, dmg: 58, r: 21, spr: 'mo', scale: 4.7 },
       reward: { stones: 3800, items: ['t_guiluo', 't_yinluo'], mats: [['m_yanghun', 3]] },
       clearTitle: '咒未解，仇先了',
       clearDesc: '鬼罗幡、阴罗蟠都到手了。可封魂咒的解药在大晋，不在天南。'
@@ -1072,7 +1072,7 @@
       reward: { stones: 0 }
     },
     {
-      id: 'e_zijian', map: 'zhuimo', name: '妙音门 紫灵', spr: 'nvxiu', scale: 1.8,
+      id: 'e_zijian', map: 'zhuimo', name: '妙音门 紫灵', spr: 'ziling', scale: 1.8,
       cond: { level: 90, cleared: ['jixi'] },
       lines: [
         ['旁白', '坠魔谷外的石亭里，一个女修在等。纱帘后头的眼睛，还是那么静。'],
