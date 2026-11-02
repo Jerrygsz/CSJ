@@ -86,7 +86,12 @@
     // 韩立的玄天之宝就是玄天斩灵剑一件，泛称再挂一把等于凭空多出第二件，本轮换成原著实有的齐天锣。
     { id: 't_qitianluo', name: '齐天锣', rarity: 5, icon: '🥁', slot: 'trinket', req: 210, unique: true, noDrop: true,
       desc: '黑域交换会上换来的音波之宝。锣面上一层薄锈，一敲下去，半座城的屋檐都在抖；同阶修士的神识，先晃三分（V10C1814）。伤害 +10%，护体 +8%，出手快 +6%。',
-      effect: { dmg: 0.10, armor: 0.08, atkSpd: 0.06 } }
+      effect: { dmg: 0.10, armor: 0.08, atkSpd: 0.06 } },
+    // 聚灵桩：与齐天锣同批在黑域交换会换来的偏门器物（V10C1794《聚灵桩》）。一根石桩，插在地上便自行聚拢灵气，
+    // 历练途中下榻时省去许多布阵的功夫。与齐天锣同批入手，归在黑域交换会这一段。
+    { id: 'julingzhuan', name: '聚灵桩', rarity: 4, icon: '🪵', slot: 'trinket', req: 200, unique: true, noDrop: true,
+      desc: '黑域交换会上换来的偏门器物，一根石桩，插地便自行聚拢灵气（V10C1794）。伤害 +6%，修为 +10%。',
+      effect: { dmg: 0.06, xpMul: 0.10 } }
   );
   // 噬金虫王：以数千成熟体噬金虫育化而成的虫王，传闻一成连真仙也要退避三尺（V9C1522 / V10C1866）。
   window.PETS.push(
@@ -549,7 +554,7 @@
       desc: '黑域没有城，只有一座座石屋。交换会不看修为只看货，台上摆的东西一件比一件邪门。',
       startLevel: 205, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
       unlock: 'jiuxian', next: 'longjia',
-      reward: { stones: 40000, items: ['t_wansen'], mats: [['m_zhenlinglin', 3]] },
+      reward: { stones: 40000, items: ['t_wansen', 't_qitianluo', 'julingzhuan'], mats: [['m_zhenlinglin', 3]] },
       clearTitle: '冰凤',
       clearDesc: '台上那只冰凤笼子被人抬下去的时候，他出了一次手。齐天锣、聚灵桩、万森法盘，也一并落进袖里。'
     },
@@ -572,15 +577,15 @@
     },
     {
       // 原著（V10C1807《圣岛》–C1821）：圣岛迷天楼，人族藏宝之地。韩立在那里见着秦氏姐妹，
-      // 用广寒界带出来的灵药换了几样偏门东西——齐天锣、聚灵桩都在这一段里露面。
+      // 用广寒界带出来的灵药换了几样不值钱的偏门物事。（齐天锣、聚灵桩另有出处，在黑域交换会那段。）
       id: 'shengdao', name: '圣岛·迷天楼', pos: '灵界·圣岛', arc: 'K',
       type: 'story', tag: '剧情',
       desc: '圣岛在海中央，白得晃眼。迷天楼七层，一层比一层难上；楼上摆的东西，楼下的人连名字都叫不出。',
       startLevel: 210, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
       unlock: 'longjia', next: 'zhenling',
-      reward: { stones: 48000, items: ['t_qitianluo'], mats: [['m_zhenlingpo', 1], ['m_zhenlinglin', 3]] },
+      reward: { stones: 48000, mats: [['m_zhenlingpo', 1], ['m_zhenlinglin', 3]] },
       clearTitle: '迷天楼',
-      clearDesc: '广寒界带出来的灵药换成了一面齐天锣、一根聚灵桩。秦氏姐妹下楼时回头看了他一眼，没说话。'
+      clearDesc: '广寒界带出来的灵药，在迷天楼换了几样不值钱的偏门物事。秦氏姐妹下楼时回头看了他一眼，没说话。'
     },
     {
       // 原著（1611 岁，V10C1825《万灵台》–C1832）：真灵世家大典，万灵台血祭、世家比斗，

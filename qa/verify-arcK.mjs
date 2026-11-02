@@ -143,7 +143,7 @@ const reload = async () => { await page.reload(); await page.waitForTimeout(1100
 
   // ---------- ④ 物品来路 ----------
   const byId = id => data.arc.find(x => x.id === id);
-  ok(byId('shengdao').items.indexOf('t_qitianluo') >= 0, '齐天锣出在圣岛（V10C1814）', byId('shengdao').items);
+  ok(byId('heiyu').items.indexOf('t_qitianluo') >= 0, '齐天锣出在黑域交换会（V10C1814，与游戏内注释一致）', byId('heiyu').items);
   ok(byId('huangquan').items.indexOf('t_zhenmosuo') >= 0, '镇魔锁出在三尊者那一战（V10）', byId('huangquan').items);
   ok(byId('diyuan2').mats.some(m => m[0] === 'm_mingheshenru'), '冥河神乳出在地渊（青元子所赠）', byId('diyuan2').mats);
   ok(byId('lanpu').mats.some(m => m[0] === 'm_wuxingzhenguang') && byId('lanpu').mats.some(m => m[0] === 'm_xueyami'),
