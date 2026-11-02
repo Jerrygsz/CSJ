@@ -1295,9 +1295,30 @@
     if (lc > 0 && G.player && G.player.hp > 0) {
       G.player.hp = Math.min(G.player.maxhp, G.player.hp + d * Math.min(0.2, lc));
     }
-    spawnText(e.x, e.y - e.r - 4, Math.round(d), crit ? '#ffd24a' : '#fff', crit ? 18 : 13);
+    // 飘字配色要分皮：白字在宣纸上等于隐形（纸底亮度 220+），墨皮下必须换成深墨。
+    // 暴击走朱砂 —— 画布画笔那边还会把暖红统一映射成印泥朱（FX_INK），落笔就是真朱砂。
+    const ink = save.skin === 'guigu';
+    spawnText(e.x, e.y - e.r - 4, Math.round(d),
+      crit ? (ink ? '#cf3a22' : '#ffd24a') : (ink ? '#3a332a' : '#fff'),
+      crit ? (ink ? 21 : 18) : 13);
     if (G.coopRole === 'host' && window.Coop) window.Coop.queueDmg(e.x, e.y - e.r - 4, Math.round(d), crit);
-    if (crit) G.hitStop = Math.max(G.hitStop, 0.018);
+    if (crit) {
+      G.hitStop = Math.max(G.hitStop, 0.018);
+      flashCritInk();
+      // 水墨皮：朱砂爆点落在怪身上（不是只有全屏泛红 —— 那看着像自己挨打）。
+      // 两圈印泥 + 几粒碎朱，颜色会被 FX_INK 统一映射成真朱砂。
+      if (ink) {
+        G.parts.push({ ring: true, x: e.x, y: e.y, r: 3, maxr: e.r * 3.4, life: 0.30, maxlife: 0.30, color: '#c0352a' });
+        G.parts.push({ ring: true, x: e.x, y: e.y, r: 1.5, maxr: e.r * 1.7, life: 0.20, maxlife: 0.20, color: '#e0573a' });
+        for (let i = 0; i < 6; i++) {
+          const a = (i / 6) * 6.283 + Math.random() * 0.5;
+          G.parts.push({
+            x: e.x, y: e.y, vx: Math.cos(a) * U.rand(80, 150), vy: Math.sin(a) * U.rand(80, 150) - 40,
+            life: 0.32, maxlife: 0.32, size: 3, color: i % 2 ? '#e0573a' : '#a8281e'
+          });
+        }
+      }
+    }
     // Boss 二阶段触发
     if (e === G.boss && !e.phase2 && e.hp <= e.maxhp * 0.6 && e.hp > 0) startPhase2();
     if (e.hp <= 0) killEnemy(e);
@@ -2990,6 +3011,35 @@
     });
   }
   function spawnText(x, y, text, color, size) { G.texts.push({ x, y, vy: -30, life: 0.8, maxlife: 0.8, text: String(text), color, size }); }
+  // 重击的「惊艳一刻」：纸面透一层朱砂晕，0.32 秒散尽。
+  // 节流 300ms —— 攻速拉起来后几乎每刀都暴击，不节流就成了"一直泛红"，反而不惊艳。
+  const elCritFlash = document.getElementById('critFlash');
+  let _critFlashAt = 0;
+  function flashCritInk() {
+    if (!elCritFlash || !save || save.skin !== 'guigu') return;
+    const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    if (now - _critFlashAt < 300) return;
+    _critFlashAt = now;
+    try {
+      elCritFlash.classList.remove('go');
+      void elCritFlash.offsetWidth;   // 强制重排，同一段动画才能连着播
+      elCritFlash.classList.add('go');
+    } catch (e) {}
+  }
+  // 进图仪式：宣纸从上往下展开，铺满即化开（0.66s）。原来是硬切，没有"翻开一页"的感觉。
+  const elScrollOpen = document.getElementById('scrollOpen');
+  let _scrollAt = 0;
+  function openScroll() {
+    if (!elScrollOpen || !save || save.skin !== 'guigu') return;
+    const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    if (now - _scrollAt < 400) return;   // 连点两个图时不要叠成两层纸
+    _scrollAt = now;
+    try {
+      elScrollOpen.classList.remove('play');
+      void elScrollOpen.offsetWidth;
+      elScrollOpen.classList.add('play');
+    } catch (e) {}
+  }
   function updateParts(dt) {
     for (let i = G.parts.length - 1; i >= 0; i--) {
       const p = G.parts[i]; p.life -= dt;
@@ -5057,8 +5107,20 @@
       if (elBossbar) elBossbar.classList.toggle('p2', !!G.boss.phase2);
     }
     else elBosswrap.style.display = 'none';
-    // 鬼谷水墨 · 异兽卷轴插画：boss 在场时浮现，boss 死亡/换图隐去（金皮由 CSS 兜底强隐）
-    if (elBossArt) elBossArt.classList.toggle('on', !!(G.boss && save.skin === 'guigu'));
+    // 鬼谷水墨 · 异兽卷轴插画：boss 出场时"展卷"浮起，约 2.6 秒后自己退成背景淡痕
+    // （一直保持高透明度会和屏上的像素怪抢主体，两者都不是主角了）。金皮由 CSS 兜底强隐。
+    if (elBossArt) {
+      const artOn = !!(G.boss && save.skin === 'guigu');
+      if (artOn && !elBossArt.classList.contains('on')) {
+        elBossArt.classList.remove('fade');
+        elBossArt.classList.add('on');
+        clearTimeout(elBossArt._fadeT);
+        elBossArt._fadeT = setTimeout(() => elBossArt.classList.add('fade'), 2600);
+      } else if (!artOn && elBossArt.classList.contains('on')) {
+        clearTimeout(elBossArt._fadeT);
+        elBossArt.classList.remove('on', 'fade');
+      }
+    }
     if (elBossSeal) {
       const sealOn = !!(G.boss && save.skin === 'guigu');
       // 盖章动画只在「从无到有」那一次播：先摘类再下一帧戴上，避免每帧重播
@@ -5253,6 +5315,7 @@
     G.diff = diffById(diffId || save.lastDiff || 'easy');
     if (diffId) save.lastDiff = G.diff.id;
     save.mapId = id;
+    openScroll();       // 墨皮才有：宣纸展开一页，替代硬切
     resetRun();
     setupAlchQuota();   // 破境药材：按本图 + 本难度定这一趟的产量
 

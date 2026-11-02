@@ -993,6 +993,10 @@ body[data-skin="guigu"] #bossArt.on {
   mix-blend-mode: multiply;
   filter: sepia(0.10) contrast(0.96);
 }
+/* 卷首退场：一张插画和屏上的像素怪同时抢眼，两者互相打架。
+   所以只在 boss 出场那一刻「展卷」——浮起约 2.6 秒后退成一层极淡的墨痕，
+   当背景用，不与像素怪争主体。 */
+body[data-skin="guigu"] #bossArt.on.fade { opacity: 0.09; transition: opacity 2.4s ease; }
 /* 金皮强行兜底：即使类名残留也不显示 */
 body:not([data-skin="guigu"]) #bossArt { display: none !important; }
 
@@ -1018,11 +1022,21 @@ body[data-skin="guigu"] #dialogSpeaker {
   border-left: 1px solid rgba(60,56,48,0.18); border-radius: 2px;
   background: rgba(192,57,43,0.07); color: #8f2f24; font-size: var(--fs-body);
 }
-/* 正文：竖排右起，行（列）间用 line-height 拉开墨距 */
+/* 正文：竖排右起，行（列）间用 line-height 拉开墨距。
+   楷体笔画本来就细，17px 在纸上偏"虚"——放大一档并压实墨色，读起来才有纸上的分量。 */
 body[data-skin="guigu"] #dialogText {
-  writing-mode: vertical-rl; text-orientation: mixed; letter-spacing: 2px;
-  line-height: 2.1; flex: 1 1 auto; min-height: 0; height: auto;
+  writing-mode: vertical-rl; text-orientation: mixed; letter-spacing: 3px;
+  line-height: 2.15; flex: 1 1 auto; min-height: 0; height: auto;
   max-height: 100%; overflow: auto; padding: 2px 4px;
+  font-size: 18px; color: #241f16;
+}
+/* 落款：框右下角一方淡朱砂小印，补掉竖排短句后的大片空，像画上题跋 */
+body[data-skin="guigu"] #dialogbox::after {
+  content: '凡人'; position: absolute; right: 9px; bottom: 8px;
+  writing-mode: vertical-rl; text-orientation: upright;
+  font-size: 10px; line-height: 1; letter-spacing: 2px;
+  color: rgba(168,58,42,0.55); border: 1px solid rgba(168,58,42,0.42);
+  border-radius: 2px; padding: 3px 2px; pointer-events: none;
 }
 /* 继续提示：竖排版式里移到左下角（阅读终点） */
 body[data-skin="guigu"] #dialogHint {
@@ -1115,4 +1129,37 @@ body[data-skin="guigu"] .pip span,
 body[data-skin="guigu"] #skillrow .pip span {
   filter: grayscale(1) sepia(0.22) contrast(0.92);
   opacity: .85;
+}
+
+/* ================= 水墨皮 · 重击的「惊艳一刻」 =================
+   暴击原来是金色大字 + 顿帧，在墨色画面里没有分量。改成朱砂：
+   数字用印泥红，纸面同时透一层朱砂晕（像一滴朱砂落在宣纸上化开），0.3 秒散尽。
+   金皮下这条不启用（那个皮有自己的金色爆点）。 */
+#critFlash {
+  position: absolute; inset: 0; pointer-events: none; opacity: 0; z-index: 46;
+  background: radial-gradient(ellipse 85% 62% at 50% 46%, rgba(178,58,44,0) 45%, rgba(178,58,44,0.24) 100%);
+}
+body[data-skin="guigu"] #critFlash.go { animation: critInk 0.32s ease-out; }
+@keyframes critInk {
+  0%   { opacity: 1; transform: scale(1.03); }
+  60%  { opacity: 0.45; }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+/* ================= 水墨皮 · 进图仪式：展卷 =================
+   原来是硬切：上一帧还在选图，下一帧人已经站在野地里，没有"翻开一页"的过渡。
+   加一张纸从顶部向下展开（transform-origin: top，纸的上下各有一道深墨轴头），
+   铺满全屏后立刻化开 —— 0.66 秒，不挡操作。 */
+#scrollOpen { display: none; position: absolute; inset: 0; pointer-events: none; z-index: 58;
+  transform-origin: top center; opacity: 0;
+  background:
+    linear-gradient(180deg, rgba(58,53,44,0.92) 0, rgba(58,53,44,0.55) 3px, rgba(58,53,44,0) 7px),
+    linear-gradient(0deg, rgba(58,53,44,0.92) 0, rgba(58,53,44,0.55) 3px, rgba(58,53,44,0) 7px),
+    linear-gradient(180deg, #f3eddb, #ddd6c3);
+}
+body[data-skin="guigu"] #scrollOpen.play { display: block; animation: scrollUnroll .66s cubic-bezier(.2,.85,.3,1) forwards; }
+@keyframes scrollUnroll {
+  0%   { transform: scaleY(0.03); opacity: 1; }
+  58%  { transform: scaleY(1);    opacity: 1; }
+  100% { transform: scaleY(1);    opacity: 0; }
 }
