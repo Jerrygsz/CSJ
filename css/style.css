@@ -963,17 +963,24 @@ body[data-skin="guigu"] #bossArt.on {
 body:not([data-skin="guigu"]) #bossArt { display: none !important; }
 
 /* 水墨皮 · 竖排对话框：右起左行的竖排正文 + 竖排名帖，宣纸底墨线框 */
+/* 让位快捷栏：底部抬高过物品栏、右侧让开技能钮（结印场景居中排版不受此限） */
+body[data-skin="guigu"] #dialog:not(.break-scene) {
+  padding-bottom: 118px;
+  padding-right: 86px;
+}
 body[data-skin="guigu"] #dialogbox {
   display: flex; flex-direction: row-reverse; gap: 12px; align-items: stretch;
-  min-height: 240px; max-height: 56vh; position: relative;
+  /* 固定框高：竖排文本量多变高会「时高时低」，统一 46vh，文本内部滚动 */
+  height: 46vh; min-height: 0; max-height: none; position: relative;
   background: linear-gradient(180deg, #f1ecdd, #e9e3d2);
   border: 1px solid rgba(60,56,48,0.55); border-radius: 3px;
   box-shadow: 0 8px 30px rgba(40,36,28,0.4);
 }
-/* 名帖：说话人名字竖排贴右，如卷轴题签 */
+/* 名帖：说话人名字竖排贴右，如卷轴题签（只占顶部一段，不拉通全框） */
 body[data-skin="guigu"] #dialogSpeaker {
   writing-mode: vertical-rl; text-orientation: upright; letter-spacing: 6px;
-  flex: none; margin: 0; padding: 6px 3px;
+  flex: none; align-self: flex-start; max-height: 62%; overflow: hidden;
+  margin: 0; padding: 6px 3px;
   border-left: 1px solid rgba(60,56,48,0.18); border-radius: 2px;
   background: rgba(192,57,43,0.07); color: #8f2f24; font-size: var(--fs-body);
 }

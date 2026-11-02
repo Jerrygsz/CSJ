@@ -91,12 +91,17 @@ const m3 = await page.evaluate(() => ({
   textWM: getComputedStyle(document.getElementById('dialogText')).writingMode,
   spkWM: getComputedStyle(document.getElementById('dialogSpeaker')).writingMode,
   hintPos: getComputedStyle(document.getElementById('dialogHint')).position,
-  boxDir: getComputedStyle(document.getElementById('dialogbox')).flexDirection
+  boxDir: getComputedStyle(document.getElementById('dialogbox')).flexDirection,
+  boxH: getComputedStyle(document.getElementById('dialogbox')).height,
+  dlgPadB: getComputedStyle(document.getElementById('dialog')).paddingBottom,
+  dlgPadR: getComputedStyle(document.getElementById('dialog')).paddingRight
 }));
 ok(m3.textWM === 'vertical-rl', '对话正文竖排右起（vertical-rl）', m3.textWM);
 ok(m3.spkWM === 'vertical-rl', '说话人名帖竖排', m3.spkWM);
 ok(m3.hintPos === 'absolute', '继续提示改绝对定位（左下角）', m3.hintPos);
 ok(m3.boxDir === 'row-reverse', '对话框改横排卷轴布局（名帖居右）', m3.boxDir);
+ok(m3.boxH !== 'auto' && parseInt(m3.boxH) > 100, '对白框固定高度（不再时高时低）', m3.boxH);
+ok(parseInt(m3.dlgPadB) >= 100 && parseInt(m3.dlgPadR) >= 80, '对白框让位快捷栏（底部/右侧留白）', { b: m3.dlgPadB, r: m3.dlgPadR });
 
 // 2.7) 异兽卷轴插画：boss 在场浮现 / boss 死亡隐去（真刷 boss）
 await page.evaluate(() => { window.__FR.enterMap('guanghan'); window.__FR.G.state = 'play'; window.__FR.skipStory(); window.__FR.muteStory(true); });
