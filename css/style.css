@@ -241,9 +241,22 @@ body.fs #wrap { background: #000; }
 
 /* ---------- 对话 ---------- */
 #dialog { background: rgba(8,10,14,0.35); justify-content: flex-end; padding-bottom: 8%; }
-#dialogbox { width: 92%; max-width: 460px; background: var(--paper); color: var(--ink); border: 2px solid var(--line-gold); border-radius: var(--r-lg); padding: var(--sp-4); text-align: left; box-shadow: 0 8px 30px rgba(0,0,0,0.6); cursor: pointer; }
+#dialogbox { position: relative; width: 92%; max-width: 460px; background: var(--paper); color: var(--ink); border: 2px solid var(--line-gold); border-radius: var(--r-lg); padding: var(--sp-4); text-align: left; box-shadow: 0 8px 30px rgba(0,0,0,0.6); cursor: pointer; }
 /* 纸底按下去只压一点亮度：整框缩放会让对话文字跟着抖 */
 #dialogbox:active { filter: brightness(0.955); }
+/* 对话头像：说话人小像。像素精灵原尺寸画进 canvas，靠 CSS 放大 —— 放大倍数越高越糊，
+   所以只放大到 4 倍上下（44~52px），保留像素颗粒，正好是「书页小插图」的尺寸。 */
+#dialogFace {
+  position: absolute; left: 10px; top: 10px;
+  width: 56px; height: 64px; display: none;
+  align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.28); border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 4px; overflow: hidden;
+}
+#dialogbox.has-face #dialogFace { display: flex; }
+/* 头像占左侧一条，整个内容区右移让位（只给名字让位不够：正文照样从框边起排，会被压住） */
+#dialogbox.has-face { padding-left: 78px; }
+#dialogFace canvas { height: 52px; width: auto; image-rendering: pixelated; image-rendering: crisp-edges; }
 #dialogSpeaker { color: var(--danger-deep); font-weight: bold; font-size: var(--fs-h2); margin-bottom: 8px; }
 #dialogText { font-size: var(--fs-h2); line-height: 1.7; min-height: 54px; }
 #dialogHint { text-align: right; color: var(--text-3); font-size: var(--fs-cap); margin-top: 4px; }
@@ -1209,3 +1222,16 @@ body[data-skin="guigu"] #worldmap { background: rgba(238,232,216,0.88); }
 body[data-skin="guigu"] .mapcard.current {
   box-shadow: inset 0 0 0 1px rgba(95,127,97,0.42), 0 1px 3px rgba(40,36,28,0.10);
 }
+
+/* 水墨皮 · 对话头像：卷首小像（宣纸底 + 墨线框，贴在右起竖排名帖的左侧） */
+body[data-skin="guigu"] #dialogFace {
+  position: static; order: 2; flex: none; align-self: flex-start;
+  width: auto; height: auto; padding: 5px;
+  background: linear-gradient(180deg, #f7f2e3, #e9e3d2);
+  border: 1px solid rgba(60,56,48,0.45); border-radius: 2px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5);
+  overflow: visible;
+}
+/* 水墨皮下头像是 flex 项（不是浮层），不需要那 78px 的左内边距 */
+body[data-skin="guigu"] #dialogbox.has-face { padding-left: var(--sp-4); }
+body[data-skin="guigu"] #dialogFace canvas { height: 72px; }

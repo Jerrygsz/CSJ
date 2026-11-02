@@ -452,7 +452,7 @@
     enemies: ['disciple', 'assassin'],
     elites: ['陆师兄的随从', '丹房护卫'],
     mats: ['m_yusui', 'm_hantie', 'm_lingmo', 'm_fuzhi'],
-    boss: { kind: 'mo', name: '同门 陆师兄', hp: 2800, spd: 56, dmg: 17, r: 18, spr: 'neimen', scale: 5.6 },
+    boss: { kind: 'mo', name: '同门 陆师兄', hp: 2800, spd: 56, dmg: 17, r: 18, spr: 'luxiong', scale: 5.6 },
     reward: { stones: 260, mats: [['m_yusui', 2], ['m_hantie', 2], ['m_lingmo', 2]] },
     outro: 'luxiong_out',
     clearTitle: '岔道已静',

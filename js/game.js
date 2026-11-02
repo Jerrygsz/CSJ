@@ -2358,7 +2358,7 @@
     banner('⚔ ' + cfg.name + ' 现身' + (dm.id !== 'easy' ? '　·　' + dm.name : '')); Sfx.boss();
   }
   function spawnBoss() {
-    const cfg = (G.map && G.map.boss) || { kind: 'mo', name: '墨大夫', hp: 1800, spd: 40, dmg: 18, r: 20, spr: 'mo', scale: 1.8 };
+    const cfg = (G.map && G.map.boss) || { kind: 'mo', name: '墨大夫', hp: 1800, spd: 40, dmg: 18, r: 20, spr: 'mo2', scale: 1.8 };
     spawnBossFrom(cfg);
   }
 
@@ -3183,7 +3183,15 @@
     // 否则客机本地的 checkStory 会凭「时间已到 + done 仍为 false」把同一段对话再弹一遍。
     if (window.Coop && window.Coop.sendDlg) window.Coop.sendDlg({ on: 1, lines: lines, i: 0, id: id || null });
   }
-  function showDialog(line) { elDialogSpeaker.textContent = line[0]; elDialogText.textContent = line[1]; elDialog.style.display = 'flex'; Sfx.dialog(line[0]); }
+  function showDialog(line) {
+    elDialogSpeaker.textContent = line[0];
+    elDialogText.textContent = line[1];
+    // 说话人有登记就出小像（旁白/路人不出）。drawFace 的元素引用在文件后段声明，
+    // 这里用 try 兜住「初始化早期就被调用」的极端情况。
+    try { drawFace(line[0]); } catch (e) { }
+    elDialog.style.display = 'flex';
+    Sfx.dialog(line[0]);
+  }
   function advanceDialog() {
     const lines = G.dialogLines; if (!lines) return;
     if (G.dialogIsChoice) return;   // 抉择未选前，点击不推进剧情
@@ -3214,6 +3222,7 @@
     G.dialogChoiceOpts = options;
     elDialogSpeaker.textContent = '抉择';
     elDialogText.textContent = prompt;
+    try { drawFace(null); } catch (e) { }   // 抉择不是人，撤掉小像
     let row = document.getElementById('dialogChoices');
     if (!row) {
       row = document.createElement('div');
@@ -8000,6 +8009,37 @@
   const elBanner = document.getElementById('banner');
   const elDialog = document.getElementById('dialog');
   const elDialogSpeaker = document.getElementById('dialogSpeaker');
+  const elDialogFace = document.getElementById('dialogFace');
+  const elFaceCv = document.getElementById('faceCv');
+  const elDialogBox = document.getElementById('dialogbox');
+  // 说话人 → 精灵。没登记的人（旁白、路人、无名弟子）就不出像，框照旧。
+  // 名字必须和 story/encounters 里写的那个字符串一字不差 —— 差一个字像就没了。
+  const NPC_FACE = {
+    '韩立': 'hanli', '墨大夫': 'mo2', '厉飞雨': 'lifeiyu', '张铁': 'zhangtie',
+    '李化元': 'lihuayuan', '南宫婉': 'nangongwan', '紫灵': 'ziling', '元瑶': 'yuanyao',
+    '大衍神君': 'dayan', '陆师兄': 'luxiong', '林师兄': 'linmo', '青颜真人': 'qingyan',
+    '热火仙尊': 'rehuo', '景阳上人': 'jingyang', '蟹道人': 'xiedaoren',
+    '金童': 'jintong', '柳乐儿': 'liuleer', '银月': 'yinyuepet', '啼魂': 'tihun',
+    '王蝉': 'wangchan', '金青': 'jinqing', '柳岐老祖': 'haishou',
+    '老丈': 'hermit', '老汉': 'hermit', '散修': 'rogue', '魔修': 'mo'
+  };
+  let faceWho = null;   // 当前头像对应的人，切皮时要按新皮肤重画
+  function drawFace(who) {
+    faceWho = who || null;
+    const spr = faceWho ? Sprites[NPC_FACE[faceWho]] : null;
+    if (!elDialogFace || !elFaceCv || !elDialogBox) return;
+    if (!spr) { elDialogBox.classList.remove('has-face'); return; }
+    elDialogBox.classList.add('has-face');
+    // 精灵有 12 宽也有 14 宽，canvas 尺寸跟着它走（CSS 只管放大，不管比例）
+    if (elFaceCv.width !== spr.width || elFaceCv.height !== spr.height) {
+      elFaceCv.width = spr.width; elFaceCv.height = spr.height;
+    }
+    const g = elFaceCv.getContext('2d');
+    if (!g) return;
+    g.clearRect(0, 0, elFaceCv.width, elFaceCv.height);
+    g.imageSmoothingEnabled = false;
+    g.drawImage(spr, 0, 0);
+  }
   const elDialogText = document.getElementById('dialogText');
   const elLevelup = document.getElementById('levelup');
   const elCards = document.getElementById('cards');
@@ -8208,6 +8248,9 @@
     if (gg) gg.classList.toggle('on', save.skin === 'guigu');
     // 战斗中换皮：场地底纹按新皮肤重铺（滤镜/覆层由 CSS data-skin 自动接管）
     if (typeof buildGrass === 'function' && grassPat) buildGrass(buildGrass._bg);
+    // 头像也要重画：Sprites 的 Proxy 已切到墨版/原版，但画进 canvas 的那一份还是旧像素，
+    // 不重画就会「界面翻成纸了，头像还是彩色的」
+    try { if (faceWho) drawFace(faceWho); } catch (e) {}
     writeSave();
   }
   const elSkinJin = document.getElementById('skinJin'), elSkinGuigu = document.getElementById('skinGuigu');

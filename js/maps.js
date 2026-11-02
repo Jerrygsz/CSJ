@@ -84,7 +84,7 @@ window.MAPS = [
     enemies: ['ghoul', 'assassin'],
     elites: ['炼尸·铁奴', '血尸·张铁'],
     mats: ['m_shihui', 'm_xuesha', 'm_lingmo', 'm_yusui', 'm_jingtie'],
-    boss: { kind: 'mo', name: '墨大夫·墨居仁', hp: 1500, spd: 40, dmg: 18, r: 20, spr: 'mo', scale: 2.9 },
+    boss: { kind: 'mo', name: '墨大夫·墨居仁', hp: 1500, spd: 40, dmg: 18, r: 20, spr: 'mo2', scale: 3.1 },
     reward: { stones: 160, items: ['qingzhu', 'lianzhi'] },
     clearTitle: '墨居仁已除',
     clearDesc: '密室空了。铁奴揭下面具，是张铁。墨大夫留了一封信，指向嘉元城。'

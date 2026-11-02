@@ -226,6 +226,268 @@
       '.....KKK.....', '....KWWWK....', '....KWWEK....', '..KKKWWWKKK..',
       '.KWWKWWWKWWK.', 'KWWWWWWWWWWWK', '.KWDWWWWWDWK.', '..KWWWWWWWK..',
       '....KYYYK....'
+    ] },
+
+    // ================= 具名人物（按原著描写各画一张） =================
+    // 共用模板的毛病：青颜真人、热火仙尊、景阳上人、采药老汉全是同一个 hermit，
+    // 十二个 boss 共用一张 mo —— 玩家分不出谁是谁，人物就白写了。
+    // 这里每人一张，骨架仍是同一套 12/14 宽小人（风格不散），
+    // 差异全落在「头顶轮廓 + 面容 + 袍色 + 腰饰」这四处，也是像素小人唯一看得清的四处。
+
+    // 墨大夫：原著「面色焦黄、病怏怏」「脸上黑气」「手上有老茧」→ 医者方巾、枯黄脸、下巴一团黑气、腰挂药囊
+    { name: 'mo2', pal: { K: '#12161a', W: '#cfcbbc', S: '#d9bd86', M: '#6b6350', G: '#7e848c', g: '#575d66', B: '#8a6a2a' }, rows: [
+      '...KKKKKK...',
+      '..KWWWWWWK..',
+      '..KWSSSSWK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSMMSK...',
+      '..KGGGGGGK..',
+      '.KGgGGGGgGK.',
+      '.KGgGGGGgGK.',
+      '..KgBBBBgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 厉飞雨：瘦削俊秀、剑使得最利落。高束发（剑客束发才利落）、深蓝劲装、皮带束腰
+    { name: 'lifeiyu', pal: { K: '#1b1b2a', H: '#23202a', S: '#e2bd97', G: '#2b3a5c', g: '#1b2740', B: '#7a5a3a' }, rows: [
+      '....KHHK....',
+      '...KHHHHK...',
+      '..KSHHHHSK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KGGGGGGK..',
+      '.KGgGGGGgGK.',
+      '.KGgGGGGgGK.',
+      '..KgBBBBgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 张铁：百锻堂的铁匠，后来被炼成巨汉。光头、赤膊宽肩、皮围裙
+    { name: 'zhangtie', pal: { K: '#1a1614', S: '#d9ab7e', B: '#7a5a3a', b: '#573c24', s: '#3e2c1a' }, rows: [
+      '...KSSSSK...',
+      '..KSSSSSSK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KSSSSSSK..',
+      '.KSSSSSSSSK.',
+      '.KBBBBBBBBK.',
+      '.KBbbbbbbBK.',
+      '.KBbbbbbbBK.',
+      '..KssKKssK..',
+      '..KsK..KsK..',
+      '..KsK..KsK..',
+      '..KKK..KKK..'
+    ] },
+    // 李化元：黄枫谷韩立的师傅。玉冠、灰发、白须、赭黄袍、玉带 —— 门里长老的分量
+    { name: 'lihuayuan', pal: { K: '#1b1b2a', Y: '#c8d4d0', H: '#3a3630', S: '#d8b48f', W: '#e2e0d6', G: '#a8823c', g: '#7d5e26', B: '#5f8a7c' }, rows: [
+      '...KKKKKK...',
+      '..KYYYYYYK..',
+      '..KHHHHHHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '..KSWWWWSK..',
+      '..KGGGGGGK..',
+      '.KGgGGGGgGK.',
+      '.KGgGGGGgGK.',
+      '..KgBBBBgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 南宫婉：掩月宗。「面容娇艳欲滴」「常年头戴面纱」→ 面纱是她的招牌，白衣是掩月宗的色
+    { name: 'nangongwan', pal: { K: '#1b1b2a', H: '#1d1a22', S: '#f0cfab', W: '#adc2bd', G: '#e8e8e2', g: '#c0c2bc', B: '#7c9e96' }, rows: [
+      '....KKKK....',
+      '...KHHHHK...',
+      '..KHHHHHHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '..KWWWWWWK..',
+      '..KGGGGGGK..',
+      '.KGgGGGGgGK.',
+      '.KGgGGGGgGK.',
+      '..KgBBBBgK..',
+      '..KGGGGGGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..',
+      '..KKK..KKK..'
+    ] },
+    // 紫灵：乱星海最出名的美人，「衣裳偏紫」。高髻、紫衣、金带 —— 一看就是被人围着的那位
+    { name: 'ziling', pal: { K: '#1b1b2a', H: '#241a2c', S: '#f4d8bc', G: '#7a4a8c', g: '#563068', B: '#c8a850' }, rows: [
+      '.....KK.....',
+      '....KHHK....',
+      '...KHHHHK...',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KGGGGGGK..',
+      '.KGgGGGGgGK.',
+      '.KGgGGGGgGK.',
+      '..KgBBBBgK..',
+      '..KGGGGGGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..',
+      '..KKK..KKK..'
+    ] },
+    // 元瑶：「肌肤赛雪」「黑衣黑裙」「婀娜身段」→ 黑裙、露肩、雪肤、暗红腰带
+    { name: 'yuanyao', pal: { K: '#12100f', H: '#16141a', S: '#f8e0c8', G: '#1e1c22', g: '#2e2c34', B: '#8a2438' }, rows: [
+      '....KKKK....',
+      '..KHHHHHHK..',
+      '..KHHSSHHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '..KSSSSSSK..',
+      '..KGGGGGGK..',
+      '.KGSGGGGSGK.',
+      '.KGgGGGGgGK.',
+      '..KGBBBBGK..',
+      '..KGGGGGGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..',
+      '..KKK..KKK..'
+    ] },
+    // 大衍神君：寄身傀儡，「一身黄衫，肌肤如玉，神情冰冷，一丝笑容都没有」→ 玉肤、黄衫、面无表情
+    { name: 'dayan', pal: { K: '#1b1b2a', H: '#2b2820', S: '#f0e8dc', G: '#c8a84a', g: '#9a7d2c', B: '#6a6250' }, rows: [
+      '....KKKK....',
+      '...KHHHHK...',
+      '..KHHHHHHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KGGGGGGK..',
+      '.KGgGGGGgGK.',
+      '.KGgGGGGgGK.',
+      '..KgBBBBgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 陆师兄：内门弟子，白玉冠、白袍、玉带。比白袍杂役多一顶冠、一条宽玉带
+    { name: 'luxiong', pal: { K: '#1b1b2a', W: '#eef2f4', H: '#2c2c34', S: '#e8c8a4', G: '#e6e8e4', g: '#b8bcc0', B: '#7aa0a8' }, rows: [
+      '...KKKKKK...',
+      '..KWWWWWWK..',
+      '..KHHHHHHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KGGGGGGK..',
+      '.KGGGGGGGGK.',
+      '.KGgGGGGgGK.',
+      '..KBBBBBBK..',
+      '..KGGGGGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 青颜真人：散修里的「真人」，道髻、青袍、白须。青是被叫「青颜」的那个青
+    { name: 'qingyan', pal: { K: '#1b1b2a', H: '#33302a', S: '#dcc09a', W: '#e4e2d6', G: '#2e6b62', g: '#1d4a44', B: '#8a7a4a' }, rows: [
+      '....KKKK....',
+      '...KHHHHK...',
+      '..KHHHHHHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '..KSWWWWSK..',
+      '..KGGGGGGK..',
+      '.KGgGGGGgGK.',
+      '.KGgGGGGgGK.',
+      '..KgBBBBgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 热火仙尊：赤袍裹身，袍上两道暗火纹，金带。仙尊得有点压人的红
+    { name: 'rehuo', pal: { K: '#1b1b2a', H: '#2a2028', S: '#e0b89a', R: '#b8362a', r: '#8a2418', B: '#e8c452' }, rows: [
+      '...KKKKKK...',
+      '..KHHHHHHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KRRRRRRK..',
+      '.KRRRRRRRRK.',
+      '.KRrRRRRrRK.',
+      '..KRRRRRRK..',
+      '..KgBBBBgK..',
+      '..KRRKKRRK..',
+      '..KRK..KRK..',
+      '..KRK..KRK..',
+      '..KKK..KKK..'
+    ] },
+    // 景阳上人：寿眉长垂的老修士，素袍，不张扬
+    { name: 'jingyang', pal: { K: '#1b1b2a', H: '#4a463c', S: '#dcc4a0', W: '#f2f0e6', G: '#d6d4c8', g: '#a8a89c', B: '#6a7a6a' }, rows: [
+      '...KKKKKK...',
+      '..KHHHHHHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '..KSWWWWSK..',
+      '...KSSSSK...',
+      '..KGGGGGGK..',
+      '.KGgGGGGgGK.',
+      '.KGgGGGGgGK.',
+      '..KgBBBBgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 蟹道人：原著「面容儒雅的中年男子」「脸色木然」。方巾、褐袍，越朴素越像他
+    { name: 'xiedaoren', pal: { K: '#1b1b2a', W: '#8a7a62', S: '#d8b892', G: '#6a5844', g: '#4a3c2c', B: '#3e3428' }, rows: [
+      '...KKKKKK...',
+      '..KWWWWWWK..',
+      '..KWSSSSWK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KGGGGGGK..',
+      '.KGgGGGGgGK.',
+      '.KGgGGGGgGK.',
+      '..KgBBBBgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 金童：原著「约莫八九岁年纪的女童，头顶一束金色毛发高高竖立，粉雕玉琢」→ 那一束金毛就是她的身份
+    { name: 'jintong', pal: { K: '#241a08', Y: '#e8c040', S: '#f6ddc4', G: '#c8a848', g: '#a8862a', B: '#8a5a2a' }, rows: [
+      '......Y.....',
+      '.....YY.....',
+      '...KKKKKK...',
+      '..KYYYYYYK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KGGGGGGK..',
+      '.KGgGGGGgGK.',
+      '..KgBBBBgK..',
+      '..KGGGGGGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..',
+      '..KKK..KKK..'
+    ] },
+    // 柳乐儿：「瓷娃娃般精致面容」的女童。深褐发、瓷白脸、青布衫
+    { name: 'liuleer', pal: { K: '#1b1b2a', H: '#241c18', S: '#f8e4d0', G: '#8a9a76', g: '#66755a', B: '#a8845a' }, rows: [
+      '....KKKK....',
+      '...KHHHHK...',
+      '..KHHHHHHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KGGGGGGK..',
+      '.KGgGGGGgGK.',
+      '..KgBBBBgK..',
+      '..KGGGGGGK..',
+      '..KGGGGGGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..',
+      '..KKK..KKK..'
     ] }
   ];
 
@@ -329,8 +591,12 @@
     let c = MINERAL[0];
     for (const m of MINERAL) { if (h >= m[0]) c = m; }
     const col = [c[1], c[2], c[3]];
-    if (l > 0.74) return mixc(MO, col, 0.18);      // 高明度：留白，只留一丝色
-    if (l > 0.60) return mixc(M1, col, 0.45);      // 亮面
+    // 肤色单列一档：赭石相、中高饱和、中高明度。
+    // 不单列的话，一张脸和白袍在纸上归到同一个宣纸白，人就只剩个黑轮廓，认不出是谁。
+    const skin = h >= 10 && h <= 46 && s > 0.20 && l > 0.52;
+    const k = skin ? 0.34 : 0.18;                   // 高明度档的掺色比例
+    if (l > 0.74) return mixc(MO, col, k);          // 高明度：留白，只留一丝色
+    if (l > 0.60) return mixc(M1, col, skin ? 0.58 : 0.45);   // 亮面
     if (l > 0.42) return mixc(M2, col, 0.55);      // 中间调
     if (l > 0.24) return mixc(M3, col, 0.45);      // 暗面
     return mixc(M4, col, 0.30);                     // 极暗：浓墨里透一点色

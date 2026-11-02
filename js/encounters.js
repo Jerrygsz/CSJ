@@ -26,7 +26,7 @@ window.ENCOUNTERS = [
     reward: { stones: 20, mats: [['m_chijing', 2]] }
   },
   {
-    id: 'e_li', map: 'houshan', name: '同门 厉飞雨', spr: 'disciple', scale: 1.9,
+    id: 'e_li', map: 'houshan', name: '同门 厉飞雨', spr: 'lifeiyu', scale: 1.9,
     cond: { level: 8 },
     lines: [
       ['厉飞雨', '韩立！可算逮着你了。'],
@@ -91,7 +91,7 @@ window.ENCOUNTERS = [
   },
 
   {
-    id: 'e_qingyan', map: 'tainan', name: '青颜真人', spr: 'hermit', scale: 1.9,
+    id: 'e_qingyan', map: 'tainan', name: '青颜真人', spr: 'qingyan', scale: 1.9,
     lines: [
       ['旁白', '石阶上坐着个青衣老者，膝头摊一本薄册，专替散修看路引。'],
       ['青颜真人', '小友面生。也是来赴升仙大会的？'],
@@ -120,7 +120,7 @@ window.ENCOUNTERS = [
     reward: { stones: 30 }
   },
   {
-    id: 'e_luxiong', map: 'yaoyuan', name: '内门弟子 陆师兄', spr: 'neimen', scale: 1.95,
+    id: 'e_luxiong', map: 'yaoyuan', name: '内门弟子 陆师兄', spr: 'luxiong', scale: 1.95,
     cond: { level: 12, cleared: ['huangfeng'] },
     lines: [
       ['旁白', '药田埂上站着个内门弟子，袍子是新的，靴底没沾泥。'],
@@ -195,7 +195,7 @@ window.ENCOUNTERS = [
   // 闲了下棋、喝酒、听琴。四个隐士没有一个问过他的来历——山里有规矩：不问过往。
   // 坊市与洞府才摆得下「走不动路」的人，所以这两条挂在 market 图上，走「际遇」按钮。
   {
-    id: 'e_rehuo', map: 'xianyun', name: '热火仙尊', spr: 'hermit', scale: 1.9,
+    id: 'e_rehuo', map: 'xianyun', name: '热火仙尊', spr: 'rehuo', scale: 1.9,
     cond: { level: 460 },
     lines: [
       ['旁白', '韩立（厉飞雨）踏上巨石时，热火仙尊刚赢了棋局——对弈的段与哉认输收子。'],
@@ -210,7 +210,7 @@ window.ENCOUNTERS = [
     reward: { stones: 30000, items: ['t_wushidan'] }
   },
   {
-    id: 'e_jingyang', map: 'xianyun', name: '景阳上人', spr: 'hermit', scale: 1.85,
+    id: 'e_jingyang', map: 'xianyun', name: '景阳上人', spr: 'jingyang', scale: 1.85,
     cond: { level: 460 },
     lines: [
       ['旁白', '褐衣老者抱着酒壶蹲在石头后头，见他来了，眼睛先亮了。'],
@@ -231,7 +231,7 @@ window.ENCOUNTERS = [
   // 韩立靠八灵缸感应到他的神魂气息才找回来。找回之后就一直跟着——
   // 深渊里替他挡噬金仙，坊市里替他算价。这里给的是「找回来之后」的那一段。
   {
-    id: 'e_xiedaoren', map: 'dijiang', name: '蟹道人', spr: 'kui', scale: 1.95,
+    id: 'e_xiedaoren', map: 'dijiang', name: '蟹道人', spr: 'xiedaoren', scale: 1.95,
     cond: { level: 520 },
     lines: [
       ['旁白', '坊市拐角，一个金色皮肤的高大男子站在摊子前，盯着货看，一动不动。'],
