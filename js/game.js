@@ -60,15 +60,15 @@
       if (h < 0) h += 360;
     }
     let ink;
-    if (h < 18)       ink = [122, 42, 34];   // 浓朱砂（伤红 → 印泥朱）
-    else if (h < 42)  ink = [139, 90, 51];   // 赭石（焰橙）
-    else if (h < 72)  ink = [111, 102, 71];  // 枯墨金（雷电金 → 枯笔淡金）
-    else if (h < 168) ink = [95, 113, 96];   // 竹青
-    else if (h < 262) ink = [78, 92, 102];   // 黛青
-    else if (h < 330) ink = [107, 98, 128];  // 墨紫
-    else              ink = [122, 42, 34];
-    // 亮芯/高频粒子（明度很高）往淡墨档再压一档，消掉火光感
-    if (l > 0.72) ink = ink.map(v => Math.round(v * 0.82 + 46 * 0.18));
+    if (h < 18)       ink = [186, 55, 40];   // 朱砂·艳（印泥点彩）
+    else if (h < 42)  ink = [172, 100, 46];  // 赭石·亮
+    else if (h < 72)  ink = [156, 132, 58];  // 枯金·留金意
+    else if (h < 168) ink = [92, 132, 94];   // 竹青·润
+    else if (h < 252) ink = [66, 100, 118];  // 黛青·透
+    else if (h < 330) ink = [124, 94, 156];  // 墨紫·惊艳
+    else              ink = [186, 55, 40];
+    // 亮芯只轻轻压一档，保留「一点惊艳」的高光
+    if (l > 0.72) ink = ink.map(v => Math.round(v * 0.9 + 46 * 0.1));
     return 'rgba(' + ink[0] + ',' + ink[1] + ',' + ink[2] + ',' + a + ')';
   }
   (function () {
@@ -4317,10 +4317,10 @@
 
   // ---------- 渲染 ----------
   let grassPat = null;
-  // 皮肤 · 场景底色：鬼谷水墨皮把各地图的绿底/彩底统一去饱和成宣纸灰调（JS 端与 CSS 滤镜配合）
+  // 皮肤 · 场景底色：鬼谷水墨皮把各地图的绿底/彩底统一晕染成宣纸淡墨调（JS 端与 CSS 滤镜配合）
   function skinBg(bg) {
     if (!save || save.skin !== 'guigu') return bg;
-    // 按原底色亮度分两档：亮地图（野外/雪原）用宣纸灰白，暗地图（魔域/深渊）用淡墨灰
+    // 按原底色亮度分两档：亮地图（野外/雪原）用宣纸暖白晕染，暗地图（魔域/深渊）用淡墨灰晕染
     let lum = 0.3;
     try {
       const hex = (bg && bg.base) || '#36532f';
@@ -4328,8 +4328,8 @@
       lum = (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
     } catch (e) {}
     return lum > 0.42
-      ? { base: '#cfcaba', a: '#bdb8a6', b: '#aaa590' }   // 宣纸灰
-      : { base: '#a8a394', a: '#948f7f', b: '#7f7a6b' };  // 淡墨灰
+      ? { base: '#c9c3b0', a: '#d5d0be', b: '#bcb6a2' }   // 宣纸暖白（a 为晕染亮部）
+      : { base: '#8f8a79', a: '#a29d8b', b: '#7c7767' };  // 淡墨灰
   }
   function buildGrass(bg) {
     buildGrass._bg = bg || null;
@@ -4339,8 +4339,25 @@
     const cb = (bg && bg.b) || '#30492a';
     const c = document.createElement('canvas'); c.width = 48; c.height = 48;
     const x = c.getContext('2d');
-    x.fillStyle = base; x.fillRect(0, 0, 48, 48);
-    for (let i = 0; i < 60; i++) { x.fillStyle = Math.random() < 0.5 ? ca : cb; x.fillRect((Math.random() * 48) | 0, (Math.random() * 48) | 0, 2, 2); }
+    if (save && save.skin === 'guigu') {
+      // 水墨意境：竖向晕染渐变 + 极淡的墨晕团，不做斑驳噪点
+      const g2 = x.createLinearGradient(0, 0, 0, 48);
+      g2.addColorStop(0, ca);   // 晕染亮部（远）
+      g2.addColorStop(1, base); // 落纸深部（近）
+      x.fillStyle = g2; x.fillRect(0, 0, 48, 48);
+      for (let i = 0; i < 7; i++) {
+        x.globalAlpha = 0.05;
+        x.fillStyle = cb;
+        const r = 3 + Math.random() * 5;
+        x.beginPath();
+        x.arc(Math.random() * 48, Math.random() * 48, r, 0, 6.29);
+        x.fill();
+      }
+      x.globalAlpha = 1;
+    } else {
+      x.fillStyle = base; x.fillRect(0, 0, 48, 48);
+      for (let i = 0; i < 60; i++) { x.fillStyle = Math.random() < 0.5 ? ca : cb; x.fillRect((Math.random() * 48) | 0, (Math.random() * 48) | 0, 2, 2); }
+    }
     grassPat = ctx.createPattern(c, 'repeat');
   }
   // ---------- 精灵变换（让一张静态网格看起来在动） ----------
