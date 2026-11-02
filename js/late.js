@@ -335,7 +335,7 @@
       enemies: ['kui', 'guixiu', 'ghoul'],
       elites: ['守阵傀儡', '古修尸身'],
       mats: ['m_yanghun', 'm_lingru', 'm_xueyu', 'm_yusui'],
-      boss: { kind: 'mo', name: '守阵古修遗骸', hp: 8600, spd: 50, dmg: 36, r: 21, spr: 'guixiu', scale: 5.0 },
+      boss: { kind: 'mo', name: '守阵古修遗骸', hp: 8600, spd: 50, dmg: 36, r: 21, spr: 'guxiuhai', scale: 5.0 },
       reward: { stones: 1400, items: ['t_honghuang'], mats: [['m_yanghun', 1], ['m_lingru', 1]] },
       clearTitle: '遗址已开',
       clearDesc: '洪荒古宝到手，曲魂却被那缕残魂夺走了——玄骨上人。他在石壁上留了一幅残图，指的就是虚天殿。'

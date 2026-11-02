@@ -320,7 +320,7 @@
       enemies: ['shixiao', 'guiwu', 'yaoshou2'],
       elites: ['守墓阴兽', '噬炎残影'],
       mats: ['m_yaodan', 'm_yanghun', 'm_xueyu'],
-      boss: { kind: 'beast', name: '落日之墓·噬炎', hp: 46000, spd: 62, dmg: 92, r: 22, spr: 'guixiu', scale: 6.0, summon: 'guiwu' },
+      boss: { kind: 'beast', name: '落日之墓·噬炎', hp: 46000, spd: 62, dmg: 92, r: 22, spr: 'shiyan', scale: 6.0, summon: 'guiwu' },
       reward: { stones: 8000, mats: [['m_yaodan', 2]] },
       clearTitle: '噬灵天火',
       clearDesc: '太阴真火吞了太阳精火，又吞了灵族本源，烧成一团青白。墓外两道炼虚气息正压过来——他抱起小兽，退进荒山。'
@@ -504,7 +504,7 @@
       enemies: ['kui2', 'dajinxiu', 'zhengdao'],
       elites: ['广寒界守卫', '寒魄傀儡'],
       mats: ['m_zhenlingxue', 'm_zhenlinglin', 'm_yaodan'],
-      boss: { kind: 'mo', name: '广寒界·通灵傀儡', hp: 68000, spd: 68, dmg: 112, r: 24, spr: 'neimen', scale: 6.2 },
+      boss: { kind: 'mo', name: '广寒界·通灵傀儡', hp: 68000, spd: 68, dmg: 112, r: 24, spr: 'guanghan', scale: 6.2 },
       reward: { stones: 30000, items: ['heti'], mats: [['m_zhenlingxue', 2], ['m_zhenlinglin', 2]] },
       clearTitle: '广寒界开',
       clearDesc: '傀儡碎了一地。玉台上，一枚万妙丹静静躺着，殿后是满界的灵药与那座太乙青山。'
@@ -573,7 +573,7 @@
       enemies: ['kui2', 'dajinxiu', 'zhengdao'],
       elites: ['陇家死士', '陇家供奉'],
       mats: ['m_zhenlingxue', 'm_zhenlinglin', 'm_yaodan'],
-      boss: { kind: 'mo', name: '陇家老祖', hp: 90000, spd: 70, dmg: 136, r: 25, spr: 'neimen', scale: 6.4 },
+      boss: { kind: 'mo', name: '陇家老祖', hp: 90000, spd: 70, dmg: 136, r: 25, spr: 'longjia', scale: 6.4 },
       reward: { stones: 46000, mats: [['m_zhenlingxue', 2], ['m_zhenlinglin', 3]] },
       clearTitle: '巨猿战老祖',
       clearDesc: '一记对轰，山门塌了半边。陇家老祖退了半步，器灵子被拎了出来。'
@@ -660,7 +660,7 @@
       enemies: ['gui2', 'moxiu2', 'guixiu'],
       elites: ['魔尊亲卫', '血魔'],
       mats: ['m_yimojin', 'm_yaodan', 'm_zhenlingxue'],
-      boss: { kind: 'mo', name: '力尊者', hp: 105000, spd: 72, dmg: 150, r: 25, spr: 'mo', scale: 6.6 },
+      boss: { kind: 'mo', name: '力尊者', hp: 105000, spd: 72, dmg: 150, r: 25, spr: 'lizunzhe', scale: 5.7 },
       extraBoss: [{ kind: 'mo', name: '米尊者', hp: 92000, spd: 68, dmg: 144, r: 24, spr: 'guixiu', scale: 6.4, summon: '' }],
       reward: { stones: 62000, items: ['t_zhenmosuo'], mats: [['m_yimojin', 2], ['m_xuantianteng', 1]] },
       clearTitle: '镇魔锁',
@@ -678,7 +678,7 @@
       enemies: ['gui2', 'moxiu2', 'dajinxiu'],
       elites: ['魔族魔修', '血魔'],
       mats: ['m_yimojin', 'm_yaodan', 'm_zhenlingxue'],
-      boss: { kind: 'mo', name: '血光圣祖·阳刹化身', hp: 118000, spd: 74, dmg: 160, r: 25, spr: 'mo', scale: 6.6 },
+      boss: { kind: 'mo', name: '血光圣祖·阳刹化身', hp: 118000, spd: 74, dmg: 160, r: 25, spr: 'xueguang', scale: 6.6 },
       reward: { stones: 66000, mats: [['m_yimojin', 3], ['m_zhenlingxue', 2]] },
       clearTitle: '倚天城破',
       clearDesc: '血光附在阳刹身上降下来的时候，城墙就开始塌了。他退了——这一战，灵界输了。'
@@ -695,7 +695,7 @@
       enemies: ['gui2', 'moxiu2', 'guixiu'],
       elites: ['魔族魔修', '青龙卫'],
       mats: ['m_yimojin', 'm_zhenlingxue', 'm_yaodan'],
-      boss: { kind: 'mo', name: '青龙上人', hp: 130000, spd: 76, dmg: 168, r: 26, spr: 'neimen', scale: 6.8 },
+      boss: { kind: 'mo', name: '青龙上人', hp: 130000, spd: 76, dmg: 168, r: 26, spr: 'qinglong', scale: 6.8 },
       extraBoss: [{ kind: 'mo', name: '第一魔尊', hp: 140000, spd: 78, dmg: 176, r: 26, spr: 'mo', scale: 6.8, summon: '' }],
       reward: { stones: 72000, mats: [['m_yimojin', 3], ['m_zhenlingxue', 3]] },
       clearTitle: '合体后期',
@@ -724,7 +724,7 @@
       enemies: ['gui2', 'moxiu2', 'moxiu2'],
       elites: ['兽尊殿魔修', '沙兽'],
       mats: ['m_yimojin', 'm_zhenlingxue', 'm_yaodan'],
-      boss: { kind: 'mo', name: '兽尊殿·魔尊', hp: 140000, spd: 76, dmg: 172, r: 26, spr: 'mo', scale: 6.8 },
+      boss: { kind: 'mo', name: '兽尊殿·魔尊', hp: 140000, spd: 76, dmg: 172, r: 26, spr: 'shouzun', scale: 6.8 },
       reward: { stones: 80000, mats: [['m_zhenlingxue', 3], ['m_yimojin', 2]] },
       clearTitle: '青鸾真血',
       clearDesc: '一滴青鸾真血落在掌心，惊蛰十二变在经脉里滚了一圈。沙漠尽头，海是灰的。'
@@ -1170,7 +1170,7 @@
       elites: ['妖修', '灵将'],
       mats: ['m_zhenlinglin', 'm_yaodan', 'm_gengjing'],
       boss: { kind: 'mo', name: '灵将', hp: 80000, spd: 68, dmg: 125, r: 23, spr: 'neimen', scale: 6.2 },
-      extraBoss: [{ kind: 'mo', name: '陇家老祖', hp: 76000, spd: 62, dmg: 130, r: 23, spr: 'neimen', scale: 6.2, summon: '' }, { kind: 'mo', name: '银光仙子', hp: 68000, spd: 66, dmg: 120, r: 22, spr: 'nvxiu', scale: 6.0, summon: '' }],
+      extraBoss: [{ kind: 'mo', name: '陇家老祖', hp: 76000, spd: 62, dmg: 130, r: 23, spr: 'longjia', scale: 6.2, summon: '' }, { kind: 'mo', name: '银光仙子', hp: 68000, spd: 66, dmg: 120, r: 22, spr: 'nvxiu', scale: 6.0, summon: '' }],
       reward: { stones: 45000, mats: [['m_zhenlingxue', 1], ['m_zhenlinglin', 2]] },
       clearTitle: '擂主已下',
       clearDesc: '台上只剩他一个人。名分这种东西，打出来比求来快。'

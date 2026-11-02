@@ -8021,6 +8021,10 @@
     '热火仙尊': 'rehuo', '景阳上人': 'jingyang', '蟹道人': 'xiedaoren',
     '金童': 'jintong', '柳乐儿': 'liuleer', '银月': 'yinyuepet', '啼魂': 'tihun',
     '王蝉': 'wangchan', '金青': 'jinqing', '柳岐老祖': 'haishou',
+    '寒骊上人': 'hanlishang', '陇家老祖': 'longjia', '付家家主': 'fujia',
+    '青龙上人': 'qinglong', '力尊者': 'lizunzhe', '血光圣祖': 'xueguang',
+    '兽尊殿魔尊': 'shouzun', '元刹圣祖分魂': 'yuansha', '守阵古修遗骸': 'guxiuhai',
+    '噬炎': 'shiyan', '噬炎残影': 'shiyan', '通灵傀儡': 'guanghan',
     '老丈': 'hermit', '老汉': 'hermit', '散修': 'rogue', '魔修': 'mo'
   };
   let faceWho = null;   // 当前头像对应的人，切皮时要按新皮肤重画

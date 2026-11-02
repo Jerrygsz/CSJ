@@ -36,7 +36,12 @@ const WANT = [
   ['xiedaoren', '蟹道人'], ['jintong', '金童'], ['liuleer', '柳乐儿'],
   // 后期首领：原来 12 个 boss 共用一张「内门弟子」、9 个共用一张「魔修」
   ['yuehuang', '越皇'], ['liudao', '六道·万天明'], ['qianlaomo', '乾老魔'],
-  ['xuangu', '玄骨上人'], ['yecha', '夜叉王'], ['yanyue', '掩月宗大长老']
+  ['xuangu', '玄骨上人'], ['yecha', '夜叉王'], ['yanyue', '掩月宗大长老'],
+  // 二批：剩 12 位有名有姓的首领，也是「内门弟子 / 魔修 / 鬼修」三种轮换图的最后一批
+  ['hanlishang', '寒骊上人'], ['longjia', '陇家老祖'], ['fujia', '付家家主'],
+  ['qinglong', '青龙上人'], ['lizunzhe', '力尊者'], ['xueguang', '血光圣祖'],
+  ['shouzun', '兽尊殿·魔尊'], ['yuansha', '元刹圣祖分魂'], ['guxiuhai', '守阵古修遗骸'],
+  ['shiyan', '落日之墓·噬炎'], ['luanming', '鸾鸣门双修夫妇'], ['guanghan', '广寒界通灵傀儡']
 ];
 
 // 同时抓每张图的像素指纹：两人撞图最容易发生在复制粘贴时（图一样、名字不同）
@@ -68,6 +73,55 @@ for (const [key, label] of WANT) {
 const sigs = WANT.map(([k]) => sprites[k] && sprites[k].sig).filter(Boolean);
 ok(new Set(sigs).size === WANT.length, WANT.length + ' 张形象互不相同（无复制粘贴撞图）', { unique: new Set(sigs).size, want: WANT.length });
 
+// 水墨皮最容易翻车的一处：四个"白袍"在墨阶下会不会并成同一档。
+// 判据取每张图出现最多的非轮廓色（也就是袍色），要求四人不撞。
+console.log('\n【1b】水墨皮：近中性色靠"淡彩"仍分得开');
+const robeTone = await page.evaluate((names) => {
+  window.__FR.skin('guigu');
+  const out = {};
+  for (const n of names) {
+    const c = window.Sprites[n];
+    if (!c) { out[n] = null; continue; }
+    const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+    const cnt = new Map();
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i + 3] < 8) continue;
+      const lum = (d[i] + d[i + 1] + d[i + 2]) / 3;
+      if (lum < 70) continue;                     // 轮廓/浓墨不算袍色
+      const k = (d[i] >> 2) + ',' + (d[i + 1] >> 2) + ',' + (d[i + 2] >> 2);
+      cnt.set(k, (cnt.get(k) || 0) + 1);
+    }
+    let best = null, bn = -1;
+    for (const [k, v] of cnt) if (v > bn) { bn = v; best = k; }
+    out[n] = { tone: best, n: bn };
+  }
+  return out;
+}, ['nangongwan', 'jingyang', 'luxiong', 'yanyue']);
+const WHITES = [['nangongwan', '南宫婉'], ['jingyang', '景阳上人'], ['luxiong', '陆师兄'], ['yanyue', '掩月宗大长老']];
+for (const [k, label] of WHITES) {
+  ok(robeTone[k] && robeTone[k].tone, '水墨皮 ' + label + ' 取得到袍色', robeTone[k]);
+}
+const tones = WHITES.map(([k]) => robeTone[k] && robeTone[k].tone);
+ok(new Set(tones).size === WHITES.length, '四个白袍人物在墨阶下互不同色（淡彩生效）', tones);
+
+// 1px 识别特征不能贴最外缘：贴边会被补的浓墨轮廓整格覆盖（陇家金肩章/鸾鸣赤凤羽/元刹双角都这么丢过）
+const edgeFeat = await page.evaluate(() => {
+  const topLum = (n) => {
+    const c = window.Sprites[n];
+    const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+    let mx = 0;
+    for (let x = 0; x < c.width; x++) {
+      const i = x * 4;
+      if (d[i + 3] < 8) continue;
+      mx = Math.max(mx, (d[i] + d[i + 1] + d[i + 2]) / 3);
+    }
+    return mx;
+  };
+  return { horn: topLum('yuansha'), plain: topLum('xuangu') };
+});
+ok(edgeFeat.horn > 100, '元刹分魂头顶的双角在墨化后仍有亮度（没被轮廓吃掉）', edgeFeat);
+ok(edgeFeat.horn > edgeFeat.plain + 50, '有角与无角两张图在头顶行上亮度不同（角真的画上去了）', edgeFeat);
+
 console.log('\n【2】人物与精灵的对应没错位');
 // 墨大夫的 boss 必须用 mo2（用回 mo 就变成魔修脸）
 await page.evaluate(() => {
@@ -82,6 +136,24 @@ const moSpr = await page.evaluate(() => {
   return window.__FR.G.boss ? window.__FR.G.boss.spr : null;
 });
 ok(moSpr === 'mo2', '墨大夫出场用专属精灵 mo2（不是共用的魔修 mo）', moSpr);
+
+// 首领图是直接写在地图数据里的，光有精灵不算数 —— 数据没改就还是那张轮换图。
+// 逐条扫源文件，断言"名字出现的那一行"上的 spr 就是专属的那张。
+console.log('\n【2b】首领数据指向专属精灵（不是画了没用上）');
+const BOSS_SPR = [
+  ['js/late2.js', '寒骊上人', 'hanlishang'], ['js/lingjie.js', '陇家老祖', 'longjia'],
+  ['js/late2.js', '付家家主', 'fujia'], ['js/lingjie.js', '青龙上人', 'qinglong'],
+  ['js/lingjie.js', '力尊者', 'lizunzhe'], ['js/lingjie.js', '血光圣祖', 'xueguang'],
+  ['js/lingjie.js', '兽尊殿', 'shouzun'], ['js/late2.js', '元刹圣祖', 'yuansha'],
+  ['js/late.js', '守阵古修', 'guxiuhai'], ['js/lingjie.js', '噬炎', 'shiyan'],
+  ['js/late2.js', '鸾鸣门', 'luanming'], ['js/lingjie.js', '通灵傀儡', 'guanghan']
+];
+for (const [file, who, spr] of BOSS_SPR) {
+  const src = fs.readFileSync(join(root, file), 'utf8').split('\n');
+  const hits = src.filter(l => l.includes(who) && l.includes('spr:'));
+  const okAll = hits.length > 0 && hits.every(l => l.includes("spr: '" + spr + "'"));
+  ok(okAll, who + ' 出场用 ' + spr, hits.map(l => (l.match(/spr: '[^']+'/) || [''])[0]));
+}
 
 console.log('\n【3】对话小像：按人对，不按人不出');
 async function faceOf(who, text, skin) {

@@ -59,7 +59,7 @@
     { name: 'blacklord', pal: { K, H: '#2a2a36', S: '#e9bd97', R: '#b03a3a', r: '#7a2020' }, rows: [
       '....KKKKKK....', '...KHHHHHHK...', '..KHHHHHHHHK..', '..KHSSSSSSHK..', '...KSSSSSSK...',
       '..KRRRRRRRRK..', '.KRRRRRRRRRRK.', '.KRrRRRRRrRRK.', '.KRRRRRRRRRRK.', '..KRRRRRRRRK..',
-      '..KRKRRRRKRK..', '..KRK..KRK...', '..KRK..KRK...', '..KKK..KKK...', '............', '............'
+      '..KRKRRRRKRK..', '...KRK..KRK...', '...KRK..KRK...', '...KKK..KKK...', '..............', '..............'
     ] },
     { name: 'mo', pal: { K, H: '#d8d8e0', S: '#e9bd97', G: '#8a93a3', g: '#5a6478' }, rows: [
       '......KKKK......', '.....KHHHHK.....', '....KHHHHHHK....', '....KSSSSSSK....', '....KSKSKSKS....',
@@ -303,16 +303,18 @@
       '..KKK..KKK..'
     ] },
     // 南宫婉：掩月宗。「面容娇艳欲滴」「常年头戴面纱」→ 面纱是她的招牌，白衣是掩月宗的色
-    { name: 'nangongwan', pal: { K: '#1b1b2a', H: '#1d1a22', S: '#f0cfab', W: '#adc2bd', G: '#e8e8e2', g: '#c0c2bc', B: '#7c9e96' }, rows: [
+    // 面纱原本只占下巴一行，在纸上读不出来；改成罩住口鼻、两侧垂到胸前，
+    // 纱色调到 s≈0.18，墨化后才落得到石绿档（再淡就整片归宣纸白，和白袍糊在一起）
+    { name: 'nangongwan', pal: { K: '#1b1b2a', H: '#1d1a22', S: '#f0cfab', W: '#9fbcb4', G: '#e8e8e2', g: '#c0c2bc', B: '#7c9e96' }, rows: [
       '....KKKK....',
       '...KHHHHK...',
       '..KHHHHHHK..',
       '..KSSSSSSK..',
       '..KSKSSKSK..',
       '..KWWWWWWK..',
-      '..KGGGGGGK..',
-      '.KGgGGGGgGK.',
-      '.KGgGGGGgGK.',
+      '..KWGGGGWK..',
+      '.KWgGGGGgWK.',
+      '.KWgGGGGgWK.',
       '..KgBBBBgK..',
       '..KGGGGGGK..',
       '..KGK..KGK..',
@@ -337,7 +339,9 @@
       '..KKK..KKK..'
     ] },
     // 元瑶：「肌肤赛雪」「黑衣黑裙」「婀娜身段」→ 黑裙、露肩、雪肤、暗红腰带
-    { name: 'yuanyao', pal: { K: '#12100f', H: '#16141a', S: '#f8e0c8', G: '#1e1c22', g: '#2e2c34', B: '#8a2438' }, rows: [
+    // 腰带原来是 h≈348 的暗红，墨化落到"墨紫"档，跟黑裙并成一片，等于没系；
+    // 挪到 h≈3 的正朱砂相（#a02a24），才压得住黑
+    { name: 'yuanyao', pal: { K: '#12100f', H: '#16141a', S: '#f8e0c8', G: '#1e1c22', g: '#2e2c34', B: '#a02a24' }, rows: [
       '....KKKK....',
       '..KHHHHHHK..',
       '..KHHSSHHK..',
@@ -592,6 +596,221 @@
       '..KGK..KGK..',
       '..KKK..KKK..',
       '..KKK..KKK..'
+    ] },
+    // 寒骊上人：小极宫大长老，「声音犹若婴儿」，北地修寒焰；后现真身是「身高丈许、年轻数十岁的壮汉」。
+    // 画的是他平日那副样子：玉冠、雪白须发、寒青袍 —— 小极宫在北地，一身冷色
+    { name: 'hanlishang', pal: { K: '#1b2430', H: '#e8ecec', S: '#e0c8a8', W: '#f4f4ee', G: '#7fa8b4', g: '#4e7684', B: '#dfe8e8' }, rows: [
+      '...KWWWWK...',
+      '..KHHHHHHK..',
+      '..KHSSSSHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KGWWWWGK..',
+      '.KGgGGGGgGK.',
+      '.KGWGGGGWGK.',
+      '..KgBBBBgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 陇家老祖：真灵第一世家陇家之主。原著只给了一个硬特征——「面色淡金的中年修士」，
+    // 外加「一股非人的冰冷气息」。淡金脸 + 黑金袍 + 金肩章，人界篇里没有第二张金脸
+    { name: 'longjia', pal: { K: '#14140f', H: '#2a2418', S: '#d8b060', G: '#241f18', g: '#171410', B: '#c8a850', W: '#f0d478' }, rows: [
+      '...KKKKKK...',
+      '..KHHHHHHK..',
+      '..KHSSSSHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KGGGGGGK..',
+      '.KGgGGGGgGK.',
+      '.KGgGWGGgGK.',
+      '..KgBBBBgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 付家家主付天化：紫道山付家老祖，四百岁寿诞，「精神抖擞，红光满面」，
+    // 平日是「严厉面孔」。红润脸 + 白须 + 紫袍，和别的老者区分在这张脸上
+    { name: 'fujia', pal: { K: '#1a1420', H: '#d8d4cc', S: '#e8a878', G: '#5a3a6a', g: '#3f2850', B: '#c8a850', W: '#e8e4d8' }, rows: [
+      '...KHHHHK...',
+      '..KHHHHHHK..',
+      '..KHSSSSHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KGWWWWGK..',
+      '.KGgGGGGgGK.',
+      '.KGgGGGGgGK.',
+      '..KgBBBBgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 青龙上人：九星宗合体修士。九仙山初见是「黄袍儒生」，倚天城再遇是「四十来岁、面容方正威严的青袍中年人」，
+    // 「单手持着一本白玉厚书」。青袍 + 黄带（两处描写的折中）+ 手上一册白玉书
+    { name: 'qinglong', pal: { K: '#141a20', H: '#241c14', S: '#e8c8a0', G: '#2f6a6a', g: '#1e4a4a', B: '#c8a040', W: '#f0f4f4' }, rows: [
+      '...KWWWWK...',
+      '..KHHHHHHK..',
+      '..KHSSSSHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KGGGGGGK..',
+      '.KWGgGGGGgK.',
+      '.KWGgGGGGgK.',
+      '..KgBBBBgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 力尊者：魔界三尊者之一，「独角老者」，使一根黑色长棍，能化「三头六臂」。
+    // 独角是他在原著里唯一的外形硬指标，所以画得比别人高一截（14×15），把角留出来；
+    // 三头六臂这种东西 12 像素宽画不出来，画了也是糊的 —— 那一层交给战斗里的分身表现
+    { name: 'lizunzhe', pal: { K: '#12100c', H: '#3a2c20', S: '#8a7a68', G: '#4a4438', g: '#332e26', B: '#1a1712', W: '#e0d8c8' }, rows: [
+      '.....KWWK.....',
+      '....KKKKKK....',
+      '...KHHHHHHK...',
+      '..KHHHHHHHHK..',
+      '..KHSSSSSSHK..',
+      '..KSSSSSSSSK..',
+      '..KSKSSSSKSK..',
+      '..KSWWSSWWSK..',
+      '...KSSSSSSK...',
+      '..KGGGGGGGGK..',
+      '.KGGGgGGgGGGK.',
+      '.KGGKgBBgKGGK.',
+      '.KGGKGggGKGGK.',
+      '..KKGK..KGKK..',
+      '...KKK..KKK...'
+    ] },
+    // 血光圣祖：「身穿血袍的清秀少年」，目光「犹如寂空中的一对残月」。
+    // 血袍的色相要压到 h≈2 的正朱砂相，原来的 348 会落进"墨紫"档，墨化后跟黑魔修并成一片
+    { name: 'xueguang', pal: { K: '#1a0e12', H: '#1a1418', S: '#f0dcc8', G: '#9a1e1a', g: '#6a1210', B: '#3a2a2a', R: '#e03020' }, rows: [
+      '...KKKKKK...',
+      '..KHHHHHHK..',
+      '..KHSSSSHK..',
+      '..KSSSSSSK..',
+      '..KSRSSRSK..',
+      '...KSSSSK...',
+      '..KGGGGGGK..',
+      '.KGgGGGGgGK.',
+      '.KGgGGGGgGK.',
+      '..KgBBBBgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 兽尊殿·魔尊：灵界魔道兽尊殿的「老怪物」，原著里殿中老者是「须发赤红」。
+    // 赤红须发 + 兽骨肩甲，是这批魔尊里唯一带兽气的
+    { name: 'shouzun', pal: { K: '#180f0c', H: '#b03a24', S: '#c09a78', G: '#4a3a28', g: '#332618', B: '#e0d8c0', W: '#e8dcc4' }, rows: [
+      '...KHHHHK...',
+      '..KHHHHHHK..',
+      '..KHSSSSHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '..KHSSSSHK..',
+      '..KGGGGGGK..',
+      '.KWGgGGgGWK.',
+      '.KGgGGGGgGK.',
+      '..KgBBBBgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 元刹圣祖分魂：魔界圣祖之一，分魂降临只余一团魔气。双角、紫黑魔身、赤目
+    { name: 'yuansha', pal: { K: '#0e0a14', H: '#241a30', S: '#c8b0c0', G: '#2a1c38', g: '#1a1024', B: '#5c3a6a', T: '#8f7ab0', R: '#e03020' }, rows: [
+      '..TKKKKKKT..',
+      '..KHHHHHHK..',
+      '..KHSSSSHK..',
+      '..KSSSSSSK..',
+      '..KSRSSRSK..',
+      '...KSSSSK...',
+      '..KGGGGGGK..',
+      '.KWGgGGgGWK.',
+      '.KGgGGGGgGK.',
+      '..KgBBBBgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 守阵古修遗骸：守阵守到只剩一副枯骨的古修。骨色头身 + 残破青灰道袍 + 胸前两点阵纹
+    { name: 'guxiuhai', pal: { K: '#14161a', H: '#d8ccb0', S: '#d8ccb0', G: '#4a5250', g: '#333a38', B: '#8a3a2a' }, rows: [
+      '....KKKK....',
+      '...KHHHHK...',
+      '..KHHHHHHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KGGGGGGK..',
+      '.KGgGBBGgGK.',
+      '.KGgGBBGgGK.',
+      '..KgGGGGgK..',
+      '..KGKKKGKK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..',
+      '..KKK..KKK..'
+    ] },
+    // 落日之墓·噬炎：灵族的壮汉外形，本体却是一颗「噬火珠」。赤褐皮 + 胸口那颗赤珠
+    { name: 'shiyan', pal: { K: '#1a0e08', H: '#2a180e', S: '#c88a5a', G: '#6a3a24', g: '#4a2616', B: '#3a2018', R: '#fff0c0' }, rows: [
+      '...KKKKKK...',
+      '..KHHHHHHK..',
+      '..KHSSSSHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KGGGGGGK..',
+      '.KGgGRRgGGK.',
+      '.KGgGRRgGGK.',
+      '..KgBBBBgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 鸾鸣门·双修夫妇：龙晗「一身灰袍，相貌伟奇，骨骼宽大」，与道侣凤冰联手可抗元婴后期。
+    // 一个人一条 12 像素宽的身子画不下两位，所以画的是龙晗：宽肩（顶到边）+ 双肩赤凤羽，凤冰在那两道羽里
+    { name: 'luanming', pal: { K: '#16161c', H: '#20201c', S: '#e0bc94', G: '#6a6a66', g: '#48484a', B: '#c8a040', R: '#b83028' }, rows: [
+      '...KKKKKK...',
+      '..KHHHHHHK..',
+      '..KHSSSSHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '.KGGRGGRGGK.',
+      '.KGGgGGgGGK.',
+      '.KGGgGGgGGK.',
+      '..KgBBBBgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 广寒界·通灵傀儡：广寒界的冰玉傀儡。没有脸，只有两道蓝眼缝；关节镶铜（兼作墨化后的第四档色），
+    // 让人一看就知道是"做出来的东西"而不是人
+    { name: 'guanghan', pal: { K: '#16202a', G: '#cfe0e8', g: '#9fbcc8', H: '#8a7a5a', B: '#3a7a9a' }, rows: [
+      '....KKKK....',
+      '...KGGGGK...',
+      '..KGGGGGGK..',
+      '..KGGGGGGK..',
+      '..KBKGGKBK..',
+      '...KGGGGK...',
+      '..KGGGGGGK..',
+      '.KGKGBBGKGK.',
+      '.KGKGGGGKGK.',
+      '..KGHHHHGK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KHK..KHK..',
+      '..KKK..KKK..'
     ] }
   ];
 
@@ -656,7 +875,7 @@
     [ 52, 148, 128,  74],  // 枯黄
     [ 95,  94, 122,  88],  // 石绿
     [175,  70, 104, 122],  // 花青
-    [255, 108,  92, 118]   // 墨紫
+    [255, 116,  86, 138]   // 墨紫（比原来提纯一档：0.07 的饱和度在纸上读不出是紫）
   ];
   const MO = [239, 233, 219],  // 宣纸白
         M1 = [185, 179, 164],  // 淡墨
@@ -682,15 +901,25 @@
     return [h, s, l];
   }
   // 单像素归色：低饱和走墨阶五色，高饱和先取矿物色再按明度并到墨阶里
+  //
+  // 画精灵时踩过的两个坑，写在这里省得再踩：
+  // ① 1px 的识别特征别贴最外缘 —— inkSprite 会给边缘补一圈浓墨轮廓，贴在边上的那格直接被覆盖掉
+  //    （陇家老祖的金肩章、鸾鸣门的赤凤羽、元刹的双角都这么丢过一次）。往里收一格才留得住。
+  // ② 红要压在 h≈0~12 之间。h≈345~360 的"深红"在色相环上归的是墨紫档，
+  //    墨化后跟黑魔修并成一片 —— 元瑶的腰带、血光圣祖的赤目都吃过这个亏。
   function inkPixel(r, g, b) {
     const hsl = hslOf(r, g, b), h = hsl[0], s = hsl[1], l = hsl[2];
     if (l < 0.13) return M4;                       // 深色一律浓墨（原描边是深蓝黑，必须归墨）
-    if (s < 0.17) {                                // 无彩色：纯墨阶
-      if (l > 0.74) return MO;
-      if (l > 0.58) return M1;
-      if (l > 0.40) return M2;
-      if (l > 0.22) return M3;
-      return M4;
+    // 近中性色不能一棍子打成灰：白袍/面纱/银发原本靠"是哪种白"区分，
+    // 全归同一档之后四个人就只剩一个轮廓。国画本来就有淡彩设色（淡青/淡赭/淡花青），
+    // 所以 s 在 0.07~0.17 之间按色相掺一档淡彩；s<0.07 才是真无彩，仍走纯墨阶，纸不会发脏。
+    if (s < 0.17) {
+      const base = l > 0.74 ? MO : l > 0.58 ? M1 : l > 0.40 ? M2 : l > 0.22 ? M3 : M4;
+      const tint = s < 0.07 ? 0 : (s - 0.07) / 0.10;
+      if (tint <= 0) return base;
+      let mc = MINERAL[0];
+      for (const m of MINERAL) { if (h >= m[0]) mc = m; }
+      return mixc(base, [mc[1], mc[2], mc[3]], tint * (l > 0.74 ? 0.30 : 0.24));
     }
     let c = MINERAL[0];
     for (const m of MINERAL) { if (h >= m[0]) c = m; }
