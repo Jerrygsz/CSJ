@@ -845,7 +845,7 @@
     if (!canUse(item)) {
       addToBag(item, { silent: true });
       if (!silent) {
-        itemToast(item, '境界不足 · 需' + realmName(item.req));
+        itemToast(item);
         Sfx.warn();
       }
       return;
@@ -3421,7 +3421,7 @@
       banner('支线已开 · ' + opened.name);
       // 横幅与右上的拾取提示会撞在同一个高度，错开一拍再弹
       setTimeout(() => {
-        itemToast({ id: 'sideopen_' + opened.id, name: '支线 · ' + opened.name, rarity: 3, desc: '已现于修行图' }, '因缘');
+        itemToast({ id: 'sideopen_' + opened.id, name: '支线 · ' + opened.name, rarity: 3 });
       }, 2400);
     } else if (rw.stones || rw.mats) Sfx.gem();
     renderWorldMap();
@@ -5707,16 +5707,9 @@
     }, 2200);
     return true;
   }
-  // 拾取提示：同名合并、最多三条、战斗中不写说明 —— 免得糊住半屏
+  // 拾取提示：只报道具名（Jerry：提示道具名即可，别糊屏）——同名合并、最多三条
   const TOAST_KEEP = 3;
   const toastRows = [];
-  function toastSub(item, extra) {
-    if (extra) return extra + (item.desc ? '　' + item.desc : '');
-    if (item.slot) { const sl = SLOTS.find(x => x.id === item.slot); return '【' + (sl ? sl.name : '装备') + '】需至洞府佩戴'; }
-    if (item.req && !canUse(item)) return '境界不足 · 需' + realmName(item.req);
-    if (G.state === 'play' && item.rarity < 4) return '';
-    return item.desc || '';
-  }
   function toastRender() {
     if (!elItemToast) return;
     const rows = toastRows.slice(-TOAST_KEEP);
@@ -5727,7 +5720,7 @@
       const rar = RARITY[r.item.rarity] || RARITY[0];
       html += '<div class="itoast" style="border-color:' + rar.color + '">' +
         '<b style="color:' + rar.color + '">' + r.item.name + (r.n > 1 ? '<i>×' + r.n + '</i>' : '') + '</b>' +
-        (r.sub ? '<span>' + r.sub + '</span>' : '') + '</div>';
+        '</div>';
     }
     elItemToast.innerHTML = html;
   }
@@ -5740,13 +5733,12 @@
     if (changed) toastRender();
     toastTick._t = toastRows.length ? setTimeout(toastTick, 500) : 0;
   }
-  function itemToast(item, extra) {
+  function itemToast(item) {
     if (!elItemToast || !item) return;
-    const sub = toastSub(item, extra);
-    const key = item.id + '|' + sub;
+    const key = item.id;
     const hit = toastRows.find(r => r.key === key);
     if (hit) { hit.n++; hit.at = Date.now(); }
-    else toastRows.push({ key: key, item: item, sub: sub, n: 1, at: Date.now() });
+    else toastRows.push({ key: key, item: item, n: 1, at: Date.now() });
     while (toastRows.length > 8) toastRows.shift();
     toastRender();
     if (!toastTick._t) toastTick._t = setTimeout(toastTick, 500);
@@ -7424,7 +7416,7 @@
       save.inventory[mid] = (save.inventory[mid] || 0) + got[mid];
       save.totalItems = (save.totalItems || 0) + got[mid];
       names.push((mi ? mi.name : mid) + '×' + got[mid]);
-      if (mi) itemToast(mi, '拆得');
+      if (mi) itemToast(mi);
     }
     writeSave(); Sfx.buff();
     notify('拆解 · ' + it.name + (k > 1 ? ' ×' + k : '') + ' → ' + names.join(' '));
@@ -7517,7 +7509,7 @@
     }
     Sfx.buff(); Sfx.levelup();
     notify('炼成 · ' + r.name + (made > 1 ? ' ×' + made : ''));
-    if (out) itemToast(out, '炼成');
+    if (out) itemToast(out);
     renderCave();
   }
   function addCultivateXp(amount) {
