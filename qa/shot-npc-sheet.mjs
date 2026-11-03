@@ -45,7 +45,11 @@ const LIST = [
   ['moyuanbeast', '魔金山脉·魔猿'], ['mingchong', '螟虫之母·元神'], ['xiuluo', '修罗蛛·族母'],
   // 第五档：类型骨架 + 原著写明的九尾白狐
   ['liuqi', '柳岐老祖·九尾白狐'], ['beast4', '兽骨架·中型'], ['beast4big', '兽骨架·大型'],
-  ['beast4low', '兽骨架·低伏'], ['woodling', '银阶木族']
+  ['beast4low', '兽骨架·低伏'], ['woodling', '银阶木族'],
+  // 第六档：有原著描写但一直没脸的台词角色
+  ['lunhui', '轮回殿主'], ['jiaosan', '蛟三'], ['ganjiuzhen', '甘九真'],
+  ['hanqiu', '寒丘'], ['chenruyan', '陈如烟'], ['wenzhong', '文仲'],
+  ['qingyuanzi', '青元子'], ['liujing', '刘靖'], ['fengxi', '风希'], ['lingyuling', '凌玉灵']
 ];
 
 async function sheet(skin, out) {

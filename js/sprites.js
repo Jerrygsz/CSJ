@@ -409,7 +409,7 @@
       '..KKK..KKK..'
     ] },
     // 热火仙尊：赤袍裹身，袍上两道暗火纹，金带。仙尊得有点压人的红
-    { name: 'rehuo', pal: { K: '#1b1b2a', H: '#2a2028', S: '#e0b89a', R: '#b8362a', r: '#8a2418', B: '#e8c452' }, rows: [
+    { name: 'rehuo', pal: { K: '#1b1b2a', H: '#2a2028', S: '#e0b89a', R: '#b8362a', r: '#8a2418', g: '#8a2418', B: '#e8c452' }, rows: [
       '...KKKKKK...',
       '..KHHHHHHK..',
       '..KSSSSSSK..',
@@ -726,7 +726,7 @@
       '..KKK..KKK..'
     ] },
     // 元刹圣祖分魂：魔界圣祖之一，分魂降临只余一团魔气。双角、紫黑魔身、赤目
-    { name: 'yuansha', pal: { K: '#0e0a14', H: '#241a30', S: '#c8b0c0', G: '#2a1c38', g: '#1a1024', B: '#5c3a6a', T: '#8f7ab0', R: '#e03020' }, rows: [
+    { name: 'yuansha', pal: { K: '#0e0a14', H: '#241a30', S: '#c8b0c0', G: '#2a1c38', g: '#1a1024', B: '#5c3a6a', T: '#8f7ab0', W: '#8f7ab0', R: '#e03020' }, rows: [
       '..TKKKKKKT..',
       '..KHHHHHHK..',
       '..KHSSSSHK..',
@@ -1505,6 +1505,196 @@
       '.....KBbBK......',
       '....KBBKBBK.....',
       '...KKK..KKK.....'
+    ] },
+
+    // ============ 第四档：有台词、有原著描写、却一直没有脸的 NPC ============
+    // 这批不是 boss，是「说话的人」。此前 NPC_FACE 只登记了 71 个名字，
+    // 全库扫下来还有 148 个有名字的说话人在对话时没有头像 —— 游戏不报错，
+    // 只是安静地少一张像。这里只画原著写明了长相的那十个；
+    // 没依据的一个都不画（口径与前面各档一致）。
+    //
+    // 轮迥殿主：「头大硕大斗笠，身披厚重蓑衣」，斗笠「始终遮掩面容」。
+    //   第一版实拍读成「戴方帽穿背心」—— 两个错：
+    //   ① 斗笠只有 8 格宽、和肩同宽，读成帽子。斗笠必须宽过肩（10 格、出到画布两侧），
+    //      才是「硕大」；② 蓑衣只有一种褐色，整件是块布。加亮/暗交替行，
+    //      竖条读成背带，横纹才读成草编。
+    //   脸只留下巴一行：笠影（h）盖住眉到鼻，眼睛根本不出现 —— 这是他的识别点。
+    { name: 'lunhui', pal: { K: '#1a1712', D: '#6a5a44', d: '#3e3326', h: '#332d24', S: '#d8bc9a' }, rows: [
+      '.....KK.....',
+      '...KKDDKK...',
+      '.KDDDDDDDDK.',
+      'KDDDDDDDDDDK',
+      '..KhhhhhhK..',
+      '...KSSSSK...',
+      '..KddddddK..',
+      '.KdddDDdddK.',
+      '.KDDdDDdDDK.',
+      '.KdddDDdddK.',
+      '.KDDdDDdDDK.',
+      '..KDDDDDDK..',
+      '..KDDKKDDK..',
+      '..KKK..KKK..'
+    ] },
+    // 蛟三：「头戴蛟三面具的红袍男子」。前两版面具铺满整张脸，读成「动物头套」。
+    //   面具只到下颌（收成 4 格），露出颈线，头套才变回面具；红袍补一条深腰带。
+    { name: 'jiaosan', pal: { K: '#17130f', M: '#6e6054', R: '#a8302c', r: '#7a1f1e', d: '#4e1515' }, rows: [
+      '.KM......MK.',
+      '..KMK..KMK..',
+      '..KMMMMMMK..',
+      '..KMKMMKMK..',
+      '..KMMMMMMK..',
+      '...KMMMMK...',
+      '..KRRRRRRK..',
+      '.KRRRRRRRRK.',
+      '.KRrRRRRrRK.',
+      '..KddddddK..',
+      '..KRRRRRRK..',
+      '..KRRKKRRK..',
+      '..KRK..KRK..',
+      '..KKK..KKK..'
+    ] },
+    // 甘九真：「红纱遮盖下的面容上闪过一丝鄙夷」—— 这句话说明眼睛是可见的。
+    //   第二版把纱盖在眼上、露出下巴，读成「嘴里含着东西」。改成纱盖口鼻、上露双眼，
+    //   人才立起来；红裙补深腰带。
+    { name: 'ganjiuzhen', pal: { K: '#1a1216', H: '#3a2a2e', S: '#e0c0a4', R: '#b03a2a', r: '#8a2520', d: '#6a1c18' }, rows: [
+      '...KKKKKK...',
+      '..KHHHHHHK..',
+      '..KHSSSSHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KRRRRK...',
+      '..KRRRRRRK..',
+      '.KRrRRRRrRK.',
+      '..KddddddK..',
+      '..KRRRRRRK..',
+      '.KRRRRRRRRK.',
+      '..KRRRRRRK..',
+      '..KRK..KRK..',
+      '..KKK..KKK..'
+    ] },
+    { name: 'hanqiu', pal: { K: '#12181c', W: '#94a8b4', w: '#6c8090', X: '#333f48' }, rows: [
+      '..KKKKKKKK..',
+      '..KWWWWWWK..',
+      '..KWwWWwWK..',
+      '..KWWWWWWK..',
+      '..KWKWWKWK..',
+      '..KWWWWWWK..',
+      '...KWWWWK...',
+      '.KWWWWWWWWK.',
+      '.KWwWWWWwWK.',
+      '..KXXXXXXK..',
+      '..KWWWWWWK..',
+      '..KWWKKWWK..',
+      '..KWWK.KWWK.',
+      '..KKKK.KKKK.'
+    ] },
+    { name: 'chenruyan', pal: { K: '#16201c', J: '#4a6a5a', H: '#2e2a34', S: '#e8c8a8', B: '#5a9ab0', b: '#3a7088', W: '#dce8ec' }, rows: [
+      '.JJ......JJ.',
+      '.JJ......JJ.',
+      '..JKKKKKKJ..',
+      '..KHHHHHHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KBBBBBBK..',
+      '.KBbBBBBbBK.',
+      '..KWWWWWWK..',
+      '..KBBBBBBK..',
+      '..KBBKKBBK..',
+      '..KBK..KBK..',
+      '..KKK..KKK..'
+    ] },
+    // 文仲：通天剑派执剑长老，「俊美青年」。原著没写衣服，按门派给月白袍。
+    //   #dfe8f0 走冷调：偏暖的高明度白会被墨化成肤色（至阳上人踩过）。
+    { name: 'wenzhong', pal: { K: '#1b1e26', H: '#2a2a32', S: '#f0d2b4', W: '#dfe8f0', w: '#a8b6c4', G: '#c8a850' }, rows: [
+      '...KKKKKK...',
+      '..KHHHHHHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KWWWWWWK..',
+      '.KWWWWWWWWK.',
+      '.KWwWWWWwWK.',
+      '..KGGGGGGK..',
+      '..KWWWWWWK..',
+      '..KWWKKWWK..',
+      '..KWK..KWK..',
+      '..KWK..KWK..',
+      '..KKK..KKK..'
+    ] },
+    // 青元子：「身穿一件灰袍，背着一口绿莹莹的小剑，面容普通却留有长髯」。
+    //   和已有的青颜真人（青袍白须）最容易撞图 —— 区分点是
+    //   ① 袍色灰 vs 青 ② 背后露出的绿剑（右侧一列 L）。
+    //   剑只露三格：画长了就变成「身侧立着一个人」，不是背在背后。
+    { name: 'qingyuanzi', pal: { K: '#17170f', H: '#3a3630', S: '#d8bc9a', W: '#e8e8e4', G: '#6a6a66', g: '#4a4a46', L: '#3a8a5a' }, rows: [
+      '....KKKK....',
+      '...KHHHHK...',
+      '..KHHHHHHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '..KSWWWWSK..',
+      '..KGGGGGGK.L',
+      '.KGgGGGGgGKL',
+      '.KGgGGGGgGK.',
+      '.KGgGGGGgGK.',
+      '..KgGGGGgK..',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 刘靖：「儒雅的面容」，越京血祭一战的布阵者。儒雅靠浅青长衫 + 齐整发冠表达，
+    //   不加胡须 —— 加须就老了，原著里他是同辈师兄。
+    { name: 'liujing', pal: { K: '#1a2024', H: '#3a3a44', S: '#e8c8a4', C: '#a8c0c8', c: '#7a949c' }, rows: [
+      '....KKKK....',
+      '...KHHHHK...',
+      '..KHHHHHHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KCCCCCCK..',
+      '.KCcCCCCcCK.',
+      '.KCcCCCCcCK.',
+      '..KcCCCCcK..',
+      '..KCCKKCCK..',
+      '..KCK..KCK..',
+      '..KCK..KCK..',
+      '..KKK..KKK..'
+    ] },
+    // 风希：「高瘦的身影」，裂风一族大妖。瘦靠收窄肩线（只 6 格）表达，
+    //   翅膀只给肩侧两格羽 —— 12 格里画满一对翅，人就没了。
+    { name: 'fengxi', pal: { K: '#161a18', H: '#2a2620', S: '#c8b090', G: '#4a5a68', W: '#b8bcc0' }, rows: [
+      '...KKKKKK...',
+      '..KHHHHHHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KGGGGGGK..',
+      'KKWGGGGGGWKK',
+      'KWWGGGGGGWWK',
+      '.KWGGGGGGWK.',
+      '..KGGKKGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..',
+      '............'
+    ] },
+    // 凌玉灵：「艳美的脸」「艳丽面容」。原著没给衣色，用绛紫而非红 ——
+    //   同场的甘九真已经是红裙，两个红衣女子并肩出现就是撞色。
+    { name: 'lingyuling', pal: { K: '#1d1620', H: '#3a2a3a', S: '#f2d4bc', P: '#8a4a7a', p: '#5e2f54' }, rows: [
+      '...KKKKKK...',
+      '..KHHHHHHK..',
+      '..KHSSSSHK..',
+      '..KSSSSSSK..',
+      '..KSKSSKSK..',
+      '...KSSSSK...',
+      '..KPPPPPPK..',
+      '.KPpPPPPpPK.',
+      '.KPpPPPPpPK.',
+      '..KPPPPPPK..',
+      '..KPPKKPPK..',
+      '..KPK..KPK..',
+      '..KPK..KPK..',
+      '..KKK..KKK..'
     ] }
   ];
 
