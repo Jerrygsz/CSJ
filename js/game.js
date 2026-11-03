@@ -1178,12 +1178,23 @@
     let nx = p.x + dx * DASH_DIST, ny = p.y + dy * DASH_DIST;
     // 不许闪进 Boss 身体里（闪过去等于送脸）；撞上就原地闪，无敌帧照样给
     if (G.boss && U.dist(nx, ny, G.boss.x, G.boss.y) < (G.boss.r || 24) + 22) { nx = p.x; ny = p.y; }
+    // 记下「从哪出发」：镜头是硬跟随（每帧把玩家钉在屏幕中心），只改坐标的话角色在屏幕上
+    // 纹丝不动，玩家根本感觉不到自己闪了。得在起点留一条光带 + 残影，把「位移」画出来。
+    const sx = p.x, sy = p.y, ang = Math.atan2(dy, dx);
     p.x = nx; p.y = ny;
     p.iv = DASH_IV;              // 复用受击无敌帧：hitPlayer 里 iv>0 直接免伤
     p.dashFx = 0.22;
     G.dashCd = DASH_CD;
-    G.parts.push({ ring: true, x: p.x, y: p.y, r: 8, maxr: 48, life: 0.3, maxlife: 0.3, color: '#bfe9ff' });
-    spawnText(p.x, p.y - 30, '闪', '#bfe9ff', 13);
+    // 起点扩散环 + 一条从起点射向终点的光带：光带是「闪」最直观的视觉语言
+    G.parts.push({ ring: true, x: sx, y: sy, r: 6, maxr: 40, life: 0.24, maxlife: 0.24, color: '#bfe9ff' });
+    G.parts.push({ ray: true, x: sx, y: sy, ang: ang, len: DASH_DIST, life: 0.22, maxlife: 0.22, color: '#bfe9ff' });
+    // 路径上两个残影，接住「从 A 到 B」的连贯感
+    for (let k = 1; k <= 2; k++) {
+      G.parts.push({ ring: true, x: sx + dx * DASH_DIST * k / 3, y: sy + dy * DASH_DIST * k / 3, r: 5, maxr: 16, life: 0.18, maxlife: 0.18, color: '#9ad8ff' });
+    }
+    // 终点落地环：比起点更亮更大，收束在落脚点
+    G.parts.push({ ring: true, x: p.x, y: p.y, r: 8, maxr: 56, life: 0.32, maxlife: 0.32, color: '#bfe9ff' });
+    spawnText(p.x, p.y - 30, '闪', '#cfefff', 16);
     Sfx.dodge();
     return true;
   }
