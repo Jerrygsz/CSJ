@@ -101,7 +101,7 @@
     // 卷三档（大墟 / 五城会武 / 魔域）
     xj_shimei:   { name: '尸魅', hp: 240000, spd: 84, dmg: 290, r: 23, xp: 880, spr: 'shigui', drop: 0.35, tier: 1, mats: ['m_xianyuanshi'] },
     xj_xuechi:   { name: '血池傀儡', hp: 260000, spd: 80, dmg: 305, r: 24, xp: 940, spr: 'assassin', drop: 0.4, tier: 2, mats: ['m_xianyuanshi', 'm_shijian'] },
-    xj_linv:     { name: '鳞犼守门', hp: 300000, spd: 78, dmg: 330, r: 26, xp: 1100, spr: 'haishou', drop: 0.45, tier: 2, mats: ['m_xianyuanshi', 'm_shijian'] },
+    xj_linv:     { name: '鳞犼守门', hp: 300000, spd: 78, dmg: 330, r: 26, xp: 1100, spr: 'beast4', drop: 0.45, tier: 2, mats: ['m_xianyuanshi', 'm_shijian'] },
     xj_yizhou:   { name: '灰界傀儡', hp: 180000, spd: 70, dmg: 250, r: 24, xp: 700, spr: 'kui', drop: 0.35, tier: 1, mats: ['m_xianyuanshi'] },
     lh_xiongshou: { name: '灵寰凶兽', hp: 9000, spd: 46, dmg: 120, r: 15, xp: 40, spr: 'wolf', drop: 0.10, tier: 0, mats: ['m_xianyuanshi'] },
     lh_hanbing:   { name: '冷焰宗弟子', hp: 13000, spd: 54, dmg: 155, r: 15, xp: 55, spr: 'disciple', drop: 0.12, tier: 0, mats: ['m_xianyuanshi'] },
@@ -395,7 +395,7 @@
       enemies: ['xj_shimei', 'xj_xuechi', 'xj_linv'],
       elites: ['大墟炼尸', '血门守卫'],
       mats: ['m_xianyuanshi', 'm_shijian'],
-      boss: { kind: 'mo', name: '血池·鳞犼像', hp: 420000, spd: 94, dmg: 400, r: 29, spr: 'haishou', scale: 7.8 },
+      boss: { kind: 'mo', name: '血池·鳞犼像', hp: 420000, spd: 94, dmg: 400, r: 29, spr: 'beast4', scale: 6.2 },
       reward: { stones: 560000, mats: [['m_xianyuanshi', 14], ['m_shijian', 4]] },
       clearTitle: '大墟',
       clearDesc: '血池见了底，五座石像的鳞纹还红着。真正的门在它们身后。'

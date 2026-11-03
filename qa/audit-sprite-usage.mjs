@@ -24,7 +24,14 @@ const OWN = ['mo2', 'wangchan', 'lifeiyu', 'zhangtie', 'lihuayuan', 'nangongwan'
   'yuanyan', 'baohua', 'huangyuanzi', 'yinchiyecha', 'aoxiao', 'zhiyang', 'liuzizai',
   'bumietianzun', 'guilingzi', 'lufuren', 'maliang', 'miaohe', 'lengyan', 'heitian',
   // 第三档兽形（16x16），此前 9 个 beast 型 boss 全共用 haishou
-  'moyuanbeast', 'mingchong', 'xiuluo'];
+  'moyuanbeast', 'mingchong', 'xiuluo',
+  // 第四档：类型骨架（不是某个具体妖兽的长相，但也不是通用轮换图）
+  //   beast4/beast4big/beast4low 给「原著没写长相的兽」按体型分档，woodling 给「木族」这一族
+  'beast4', 'beast4big', 'beast4low', 'woodling',
+  // 柳岐老祖：原著写明「九条尾巴的雪白巨狐」，此前一直挂着 haishou 蛟龙图
+  'liuqi',
+  // 这两张一直是专属图，只是没人登记，导致审计把「啼魂」「噬金虫王」算成挂通用图
+  'tihun', 'shijin'];
 
 // ---------- ① boss 归并 ----------
 // 注意：extraBoss 是数组，一行里可能挂好几个首领（如 lingjie 的 双修夫妇 / 五光族），
@@ -88,3 +95,31 @@ for (const n of OWN) {
 }
 console.log('\n=== 一次都没引用的（画了没用上） ===');
 console.log(dead.length ? '  ' + dead.join(' ') : '  （无）');
+
+// ---------- ③ 际遇具名角色 / 宠物 ----------
+// 前两段只看 boss:{...} 字段，所以 encounters.js 里的际遇角色整片漏检 ——
+// 柳岐老祖（原著「九条尾巴的雪白巨狐」）就挂在 haishou 蛟龙图上整整半年没人发现。
+// 这里把「际遇角色」和「宠物」单列出来：它们是有名有姓的具名者，
+// 挂通用图就是撞图，比 boss 更需要专属。
+const extras = [];
+{
+  const src = fs.readFileSync(path.join(DIR, 'encounters.js'), 'utf8');
+  src.split('\n').forEach((l, i) => {
+    const m = l.match(/id:\s*'(e_[^']+)'[\s\S]*?name:\s*'([^']*)'[\s\S]*?spr:\s*'([^']*)'/);
+    if (m) extras.push({ kind: '际遇', id: m[1], name: m[2], spr: m[3], at: 'encounters:' + (i + 1) });
+  });
+}
+{
+  // 宠物在 lingjie.js 里是 window.PETS.push(...) 的数组元素，跨行，逐行抓不到
+  const src = fs.readFileSync(path.join(DIR, 'lingjie.js'), 'utf8');
+  const re = /\{\s*id:\s*'(p_[^']+)'[^}]*?name:\s*'([^']*)'[^}]*?spr:\s*'([^']*)'/g;
+  let m;
+  while ((m = re.exec(src))) {
+    const at = 'lingjie:' + (src.slice(0, m.index).split('\n').length);
+    extras.push({ kind: '宠物', id: m[1], name: m[2], spr: m[3], at });
+  }
+}
+
+const badExtras = extras.filter(e => !OWN.includes(e.spr) && !['grave', 'bag'].includes(e.spr));
+console.log('\n=== 际遇 / 宠物具名角色 ' + extras.length + ' 个，其中挂通用图的 ' + badExtras.length + ' 个 ===');
+for (const e of badExtras) console.log('  [' + e.kind + '] ' + e.name.padEnd(12) + ' spr=' + e.spr.padEnd(12) + ' ' + e.at);

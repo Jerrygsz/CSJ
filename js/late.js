@@ -273,7 +273,7 @@
       elites: ['七级妖兽', '妖蟒'],
       mats: ['m_yaodan', 'm_banyao', 'm_jinlei', 'm_yusui'],
       // 原著凝翠岛只写「杀妖取丹五年」，未点名是哪一种妖兽 —— 不臆造具体种名
-      boss: { kind: 'beast', name: '七级妖兽', hp: 6400, spd: 60, dmg: 30, r: 22, spr: 'haishou', scale: 5.4, summon: 'haishou' },
+      boss: { kind: 'beast', name: '七级妖兽', hp: 6400, spd: 60, dmg: 30, r: 22, spr: 'beast4big', scale: 4.6, summon: 'haishou' },
       reward: { stones: 900, mats: [['m_yaodan', 4], ['m_jinlei', 1]] },
       outro: 'ningcui_out',
       clearTitle: '妖丹已足',

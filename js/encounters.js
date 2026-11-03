@@ -266,7 +266,7 @@ window.ENCOUNTERS = [
     reward: { stones: 30000, mats: [['m_shijian', 2]] }
   },
   {
-    id: 'e_liuqi', map: 'xisha', name: '柳岐老祖', spr: 'haishou', scale: 2.6,
+    id: 'e_liuqi', map: 'xisha', name: '柳岐老祖', spr: 'liuqi', scale: 2.4,
     cond: { level: 470 },
     lines: [
       ['旁白', '木架上的巨狐睁开一只眼。淡灰色的瞳孔慢慢转过来，落在他身上。'],

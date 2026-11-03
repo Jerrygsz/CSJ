@@ -33,8 +33,11 @@ await page.waitForFunction(() => !!window.__FR, { timeout: 20000 });
 // 缩放换算过的这批（16x16 -> 12x14）必须实拍：图鉴只能证明画得对，
 // 证明不了进战斗后会不会悬空、被裁、或体量突然放大
 const cases = [
-  ['mojin', '魔猿', 'jin'],
-  ['mojin', '魔猿', 'guigu'],
+  ['ningcui', '七级妖兽', 'jin'],
+  ['muzu', '银阶木族', 'jin'],
+  ['zhenling', '万灵兽', 'jin'],
+  ['daoguo', '天象尊者', 'jin'],
+  ['dadi', '鳞犼像', 'guigu'],
 ];
 let i = 0;
 for (const [mapId, who, skin] of cases) {

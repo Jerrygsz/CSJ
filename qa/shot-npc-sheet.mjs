@@ -42,7 +42,10 @@ const LIST = [
   ['lufuren', '陆夫人'], ['maliang', '马良'], ['miaohe', '妙鹤真人'],
   ['lengyan', '冷焰老祖'], ['heitian', '黑天魔祖'],
   // 第三档兽形（16x16 画布：12x14 的 168 格装不下非人形）
-  ['moyuanbeast', '魔金山脉·魔猿'], ['mingchong', '螟虫之母·元神'], ['xiuluo', '修罗蛛·族母']
+  ['moyuanbeast', '魔金山脉·魔猿'], ['mingchong', '螟虫之母·元神'], ['xiuluo', '修罗蛛·族母'],
+  // 第五档：类型骨架 + 原著写明的九尾白狐
+  ['liuqi', '柳岐老祖·九尾白狐'], ['beast4', '兽骨架·中型'], ['beast4big', '兽骨架·大型'],
+  ['beast4low', '兽骨架·低伏'], ['woodling', '银阶木族']
 ];
 
 async function sheet(skin, out) {

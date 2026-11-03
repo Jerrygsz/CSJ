@@ -138,7 +138,7 @@
   );
   window.PETS.push(
     // 蟹道人：魔源海雷海之禁尽头那头真灵级大螃蟹，苦灵岛外替韩立拍死了涅槃圣祖化身，此后随行（V10）。
-    { id: 'p_xiedaoren', icon: '🦀', name: '蟹道人', spr: 'haishou', scale: 2.1, dmg: 1.4, rate: 1.1, cat: 'pet',
+    { id: 'p_xiedaoren', icon: '🦀', name: '蟹道人', spr: 'xiedaoren', scale: 2.1, dmg: 1.4, rate: 1.1, cat: 'pet',
       desc: '魔源海尽头那头黄金壳的大螃蟹，真灵一级。一口蟹钳夹碎过圣祖化身，此后自称「蟹道人」跟着韩立（V10）。',
       from: '苦灵岛' }
   );
@@ -364,7 +364,7 @@
       enemies: ['yaoshou2', 'yaoxiu', 'dajinxiu'],
       elites: ['木族守卫', '影族刺客'],
       mats: ['m_zhenlinglin', 'm_zhenlingxue', 'm_yaodan', 'm_gengjing'],
-      boss: { kind: 'beast', name: '银阶木族', hp: 52000, spd: 66, dmg: 96, r: 23, spr: 'haishou', scale: 6.2, summon: 'yaoshou2' },
+      boss: { kind: 'beast', name: '银阶木族', hp: 52000, spd: 66, dmg: 96, r: 23, spr: 'woodling', scale: 5.2, summon: 'yaoshou2' },
       // 原著口径：芝龙果「同行诸人各分一枚」——韩立手上就只有一枚，不再为爽感多发。
       // 这一枚当场留种移入灵界药圃（绿液催着，此后定期采收），持久供给靠药圃，不靠白送。
       reward: { stones: 18000, items: ['f_tenglong'], mats: [['m_zhilongguo', 1], ['m_zhenlingxue', 2], ['m_zhenlinglin', 6]] },
@@ -602,7 +602,7 @@
       enemies: ['kui2', 'dajinxiu', 'zhengdao'],
       elites: ['世家子弟', '万灵台死士'],
       mats: ['m_zhenlingxue', 'm_zhenlinglin', 'm_zhenlingpo'],
-      boss: { kind: 'beast', name: '万灵台·万灵兽', hp: 96000, spd: 72, dmg: 142, r: 25, spr: 'haishou', scale: 6.6 },
+      boss: { kind: 'beast', name: '万灵台·万灵兽', hp: 96000, spd: 72, dmg: 142, r: 25, spr: 'beast4big', scale: 5.4 },
       reward: { stones: 52000, mats: [['m_zhenlingxue', 3], ['m_zhenlingpo', 1]] },
       clearTitle: '万灵台上一场',
       clearDesc: '血槽流了三日。他代谷家上台，走下来的时候，陇家老祖在台下等着，只说了一句：魔界的门，一起去看。'
@@ -631,7 +631,7 @@
       enemies: ['gui2', 'kui2', 'dajinxiu'],
       elites: ['地渊凶兽', '冥河阴魂'],
       mats: ['m_zhenlingxue', 'm_yaodan', 'm_gangyin'],
-      boss: { kind: 'beast', name: '地渊·刑兽', hp: 100000, spd: 74, dmg: 146, r: 25, spr: 'haishou', scale: 6.6 },
+      boss: { kind: 'beast', name: '地渊·刑兽', hp: 100000, spd: 74, dmg: 146, r: 25, spr: 'beast4low', scale: 5.4 },
       reward: { stones: 56000, mats: [['m_mingheshenru', 2], ['m_zhenlingxue', 2]] },
       clearTitle: '冥河神乳',
       clearDesc: '刑兽伏在河边不动了。青元子把一壶冥河神乳推过来，另附一册《育虫王之法》——他要的东西，韩立带来了。'
@@ -774,7 +774,7 @@
       enemies: ['gui2', 'moxiu2', 'guixiu'],
       elites: ['矿脉魔修', '磁光兽'],
       mats: ['m_yimojin', 'm_xueyami', 'm_zhenlingxue'],
-      boss: { kind: 'beast', name: '矿脉·磁光兽', hp: 175000, spd: 76, dmg: 190, r: 26, spr: 'haishou', scale: 6.9 },
+      boss: { kind: 'beast', name: '矿脉·磁光兽', hp: 175000, spd: 76, dmg: 190, r: 26, spr: 'beast4low', scale: 5.6 },
       reward: { stones: 98000, mats: [['m_wuxingzhenguang', 1], ['m_xueyami', 3], ['m_yimojin', 4]] },
       clearTitle: '阴阳大五行真光',
       clearDesc: '磁光兽倒在矿脉底下，五色真光收进玉瓶。紫灵在斋门口站着，只说：等我脱了身，你得来接我。'
@@ -1089,7 +1089,7 @@
       enemies: ['kui2', 'yaoshou2', 'dajinxiu'],
       elites: ['化木为灵·巨人', '异界大乘'],
       mats: ['m_zhenlingxue', 'm_zhenlinglin'],
-      boss: { kind: 'mo', name: '天象尊者', hp: 200000, spd: 80, dmg: 210, r: 27, spr: 'haishou', scale: 6.8 },
+      boss: { kind: 'mo', name: '天象尊者', hp: 200000, spd: 80, dmg: 210, r: 27, spr: 'mo', scale: 6.4 },
       reward: { stones: 210000, items: ['dan_guangling', 't_wannianjingsang', 't_zhenlinliuying'], mats: [['m_daopai', 1], ['m_zhenlingxue', 2]] },
       clearTitle: '得果',
       clearDesc: '一百零八枚牌子换到一枚广灵道果。此果不宜久露在外，他收好了，留着配合其他灵物再服食。'
@@ -2355,7 +2355,7 @@
       enemies: ['yaoshou2', 'kui2', 'moxiu2'],
       elites: ['妖修', '妖修'],
       mats: ['m_banyao', 'm_yaodan'],
-      boss: { kind: 'mo', name: '虞阳城·妖修', hp: 75000, spd: 66, dmg: 120, r: 22, spr: 'haishou', scale: 6.0 },
+      boss: { kind: 'mo', name: '虞阳城·妖修', hp: 75000, spd: 66, dmg: 120, r: 22, spr: 'mo', scale: 6.0 },
       reward: { stones: 50000, mats: [['m_banyao', 2], ['m_yaodan', 1]] },
       clearTitle: '城斗已了',
       clearDesc: '魁首认了输。围观的妖族哄一声散了，没人赖账——妖族城里，输赢比人族讲规矩。'
