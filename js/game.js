@@ -5858,7 +5858,10 @@
       showLines(MAP_STORIES[m.intro], () => {
         G.state = 'play'; last = performance.now();
         G.coopRole = (window.Net && window.Net.self() && window.Net.isHost()) ? 'host' : (window.Net && window.Net.self() ? 'client' : null);
-        spawnBoss();
+        // 剧情战（type:'boss'）：开门即 Boss，无小怪阶段，过场播完直接放 Boss。
+        // 战斗图（type:'combat'）：intro 只是过场，播完必须回到正常战斗循环——
+        //   先刷小怪、到点（bossAt）再放 Boss；在此直接 spawnBoss() 会把整个小怪阶段跳过（peak=0）。
+        if (m.type === 'boss') spawnBoss();
       }, 'map:' + id);
       return;
     }
