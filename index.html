@@ -9,7 +9,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <title>凡人·长生劫 — 炼气期 · 筑基 · 结丹 · 元婴 · 化神</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%23131821%22/%3E%3Ctext x=%2216%22 y=%2223%22 font-size=%2220%22 text-anchor=%22middle%22 fill=%22%23ffd24a%22%3E凡%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="css/style.css?v=20261103G">
+  <link rel="stylesheet" href="css/style.css?v=20261103H">
 </head>
 <body>
   <div id="wrap">
@@ -38,6 +38,8 @@
           <div id="skillrow"></div>
           <!-- 限时增益：服丹 / 催符之后在身的属性，到点自散 -->
           <div id="buffrow"></div>
+          <!-- 闪身（罗烟步）：战斗里唯一的主动操作，右下角拇指位 -->
+          <button id="dashBtn" aria-label="闪身" title="闪身 · 罗烟步（空格 或 点一下）"><i>闪</i><span class="dash-cd"></span></button>
           <!-- 右侧快捷栏：三格，装灵宠或消耗道具，点一下就放 -->
           <div id="quickbar">
             <button class="qb empty" data-q="0"><i class="qb-icon">·</i><i class="qb-cd"></i></button>
@@ -170,9 +172,9 @@
         <div id="gameover" class="overlay">
           <div class="panel">
             <h2>道陨</h2>
-            <p>长生路远，今日先折于此。</p>
+            <p>长生路远，今日先折于此。<span class="hint">前番顿悟不会全白费。</span></p>
             <div class="stats2"><span>存活 <b id="goTime"></b></span><span>斩敌 <b id="goKills"></b></span><span>境界 <b id="goLevel"></b></span></div>
-            <button id="goRetry" class="btn">重试此图</button>
+            <button id="goRetry" class="btn">再战此图 · 留一半顿悟</button>
             <button id="goBack" class="btn small">返回修行图</button>
           </div>
         </div>
@@ -339,37 +341,37 @@
     </div>
   </div>
 
-  <div id="ver">v20261103G</div>
+  <div id="ver">v20261103H</div>
 
-  <script src="js/utils.js?v=20261103G"></script>
-  <script src="js/audio.js?v=20261103G"></script>
-  <script src="js/sprites.js?v=20261103G"></script>
-  <script src="js/skills.js?v=20261103G"></script>
-  <script src="js/enemies.js?v=20261103G"></script>
-  <script src="js/story.js?v=20261103G"></script>
-  <script src="js/items.js?v=20261103G"></script>
-  <script src="js/maps.js?v=20261103G"></script>
-  <script src="js/recipes.js?v=20261103G"></script>
-  <script src="js/encounters.js?v=20261103G"></script>
-  <script src="js/late.js?v=20261103G"></script>
-  <script src="js/late2.js?v=20261103G"></script>
-  <script src="js/late3.js?v=20261103G"></script>
-  <script src="js/lingjie.js?v=20261103G"></script>
-  <script src="js/xianjie.js?v=20261103G"></script>
-  <script src="js/balance.js?v=20261103G"></script>
-  <script src="js/sources.js?v=20261103G"></script>
-  <script src="js/value.js?v=20261103G"></script>
-  <script src="js/game.js?v=20261103G"></script>
-  <script src="js/debugapi.js?v=20261103G"></script>
-  <script src="js/net.js?v=20261103G"></script>
-  <script src="js/coop.js?v=20261103G"></script>
-  <script src="js/chat.js?v=20261103G"></script>
+  <script src="js/utils.js?v=20261103H"></script>
+  <script src="js/audio.js?v=20261103H"></script>
+  <script src="js/sprites.js?v=20261103H"></script>
+  <script src="js/skills.js?v=20261103H"></script>
+  <script src="js/enemies.js?v=20261103H"></script>
+  <script src="js/story.js?v=20261103H"></script>
+  <script src="js/items.js?v=20261103H"></script>
+  <script src="js/maps.js?v=20261103H"></script>
+  <script src="js/recipes.js?v=20261103H"></script>
+  <script src="js/encounters.js?v=20261103H"></script>
+  <script src="js/late.js?v=20261103H"></script>
+  <script src="js/late2.js?v=20261103H"></script>
+  <script src="js/late3.js?v=20261103H"></script>
+  <script src="js/lingjie.js?v=20261103H"></script>
+  <script src="js/xianjie.js?v=20261103H"></script>
+  <script src="js/balance.js?v=20261103H"></script>
+  <script src="js/sources.js?v=20261103H"></script>
+  <script src="js/value.js?v=20261103H"></script>
+  <script src="js/game.js?v=20261103H"></script>
+  <script src="js/debugapi.js?v=20261103H"></script>
+  <script src="js/net.js?v=20261103H"></script>
+  <script src="js/coop.js?v=20261103H"></script>
+  <script src="js/chat.js?v=20261103H"></script>
 
   <script>
     // 注册 Service Worker：每次发版自动拉最新 index.html，绕开中间代理缓存
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function () {
-        navigator.serviceWorker.register('sw.js?v=20261103G').catch(function () {
+        navigator.serviceWorker.register('sw.js?v=20261103H').catch(function () {
           /* 注册失败不影响游戏本体 */
         });
       });

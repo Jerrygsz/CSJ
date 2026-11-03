@@ -530,6 +530,7 @@
     frostR: 0, shake: 0, flash: 0, god: false, ts: 1,
     bonus: {}, realm: { dmg: 0, atk: 0, spd: 0 }, realmIdx: 0, realmHp: 0, gear: {},
     combo: 0, comboT: 0, hitStop: 0, lastCombo: -1, comboTier: 0,
+    dashCd: 0,                 // 闪身冷却（秒）
     vacuumT: 0, pendingEnding: false, runLoot: [], lastAutoSave: 0,
     shopTab: 'buy', shopCat: 'dan',
     caveId: null, caveTab: 'stat', diffPick: null,
@@ -1119,6 +1120,44 @@
     return v;
   }
 
+  // ---------- 闪身（罗烟步）：战斗里唯一的主动操作 ----------
+  // 为什么要加它：这个游戏里玩家能按的只有方向键，被十几只怪围住时唯一的选择是「继续挨打」。
+  // 一个 90px 的瞬移 + 0.3 秒无敌，把「我只能跑」变成「我能脱身」—— 成本极低，体感差别极大。
+  // 位移距离约三个身位，正好穿过一层包围圈；冷却 2.5 秒，逼玩家挑时机而不是无脑连闪。
+  const DASH_CD = 2.5;      // 冷却（秒）
+  const DASH_DIST = 90;     // 位移距离
+  const DASH_IV = 0.30;     // 无敌帧：够穿过一圈怪，但不够硬吃 Boss 连招
+  function dashPlayer() {
+    const p = G.player;
+    if (!p || G.state !== 'play') return false;
+    if ((G.dashCd || 0) > 0) {
+      spawnText(p.x, p.y - 34, '回气中 · ' + Math.ceil(G.dashCd), '#9aa7b8', 12);
+      return false;
+    }
+    // 方向：当前输入方向；没有输入就朝「背对最近之敌」的方向（被围时的本能反应）
+    let dx = 0, dy = 0;
+    if (keys.left) dx--; if (keys.right) dx++; if (keys.up) dy--; if (keys.down) dy++;
+    if (jx !== 0 || jy !== 0) { dx = jx; dy = jy; }
+    if (Math.abs(dx) < 0.01 && Math.abs(dy) < 0.01) {
+      const near = nearestEnemy(460);
+      if (near) { dx = p.x - near.x; dy = p.y - near.y; }
+      else { dx = p.dir || 1; dy = 0; }
+    }
+    const len = Math.hypot(dx, dy) || 1;
+    dx /= len; dy /= len;
+    let nx = p.x + dx * DASH_DIST, ny = p.y + dy * DASH_DIST;
+    // 不许闪进 Boss 身体里（闪过去等于送脸）；撞上就原地闪，无敌帧照样给
+    if (G.boss && U.dist(nx, ny, G.boss.x, G.boss.y) < (G.boss.r || 24) + 22) { nx = p.x; ny = p.y; }
+    p.x = nx; p.y = ny;
+    p.iv = DASH_IV;              // 复用受击无敌帧：hitPlayer 里 iv>0 直接免伤
+    p.dashFx = 0.22;
+    G.dashCd = DASH_CD;
+    G.parts.push({ ring: true, x: p.x, y: p.y, r: 8, maxr: 48, life: 0.3, maxlife: 0.3, color: '#bfe9ff' });
+    spawnText(p.x, p.y - 30, '闪', '#bfe9ff', 13);
+    Sfx.dodge();
+    return true;
+  }
+
   function fireWeapons(dt) {
     const p = G.player;
     for (const e of equippedActives()) {
@@ -1595,11 +1634,27 @@
     const d = Math.max(W, H) / 2 + 50;
     return { x: G.player.x + Math.cos(a) * d, y: G.player.y + Math.sin(a) * d };
   }
+  // 本图怪物的「硬度基准」：敌人表里的 def.hp 从狼 12 一路写到幽奴 28 万，
+  // 本身就是一条跨图成长曲线；hpMulBase 又按等级标了一条。两条曲线相乘 = 双重复利，
+  // 结果 lv36 的小怪血量是设计意图的 11 倍（实测鬼灵门弟子 765 血 / 玩家秒伤 70 = 一只打 11 秒），
+  // lv460 更是 1000 倍以上 —— 中后期全线「打不动」。这里把 def.hp 压成「相对本图平均的硬度」：
+  // 同一张图里该厚的仍然厚，但不再跨图复利。
+  const ENEMY_BASE_HP = 12;   // lv1 基准怪（狼）的设计血量
+  function refHpOfMap() {
+    if (G._refHp != null) return G._refHp;
+    const list = (G.map && G.map.enemies) || [];
+    let sum = 0, n = 0;
+    for (const t of list) { const d = ENEMY_TYPES[t]; if (d && d.hp > 0) { sum += d.hp; n++; } }
+    G._refHp = n ? sum / n : ENEMY_BASE_HP;
+    return G._refHp;
+  }
   function makeEnemy(type, x, y, hpMul, dmgMul) {
     const def = ENEMY_TYPES[type];
+    const rel = Math.pow(def.hp / refHpOfMap(), 0.5);   // 同图内的相对硬度，开方压缩差距
     const e = {
       _id: ++enemySeq,
-      type, x, y, hp: def.hp * hpMul, maxhp: def.hp * hpMul, spd: def.spd * (curDiff().spd || 1), dmg: def.dmg * dmgMul,
+      type, x, y, hp: ENEMY_BASE_HP * hpMul * rel, maxhp: ENEMY_BASE_HP * hpMul * rel,
+      spd: def.spd * (curDiff().spd || 1), dmg: def.dmg * dmgMul,
       r: def.r, xpVal: def.xp, spr: def.spr, wob: def.wob, charge: def.charge, dash: def.dash,
       hitFlash: 0, t: 0, dashT: U.rand(1, 3), _orbCd: {}
     };
@@ -2580,11 +2635,23 @@
   }
 
   // ---------- 生成调度 ----------
+  // 旧逻辑是「按时间硬刷」：1 只/秒起步，110 秒时 3 只/秒，跟玩家打得快慢无关。
+  // 实测（qa/pacing.mjs）：玩家每秒只能清 0.4~1.3 只，刷怪 1~3 只/秒，缺口只增不减，
+  // 几十秒后场上堆到 77~126 只（开无敌测的上限）—— 那不是「怪多」，是「被淹」。
+  // 现在改成缺口驱动：场上少于目标就补，补到目标就停。怪的数量跟着玩家清场能力走，
+  // 玩家变强 → 场上自动变挤 → 压力回到「打得爽」而不是「被围死」。
+  const PACK_MIN = 8;      // 开局让玩家看到的量（够打，又不至于一进来就被围）
+  const PACK_MAX = 26;     // 单屏同时压多少只：再多就只剩躲，没有打
+  const PACK_GROW = 0.16;  // 每秒抬高多少目标（110 秒的图正好爬到上限）
+  const PACK_HARD = 44;    // 硬顶：难度系数叠上去也不许超过这个数（性能与可读性）
   function budget() {
     const t = G.time;
-    const interval = Math.max(0.26, 1.0 - t * 0.0032);
+    const interval = Math.max(0.30, 0.9 - t * 0.0032);
     const cnt = curDiff().cnt || 1;
-    const batch = Math.max(1, Math.round((1 + Math.floor(t / 70)) * cnt));
+    const want = Math.min(PACK_HARD, Math.min(PACK_MAX, PACK_MIN + t * PACK_GROW) * cnt);
+    const gap = want - G.enemies.length;
+    // 只补缺口的一半、单拍最多 6 只：一次灌满会把画面瞬间糊住
+    const batch = Math.max(0, Math.min(6, Math.round(gap * 0.5)));
     return { interval, batch };
   }
   function pickType() {
@@ -3760,6 +3827,7 @@
     G.sha = { v: 0, need: SHA_NEED, dmgT: 0, x2T: 0, sayT: 24 + Math.random() * 12 };
     G.insight = { skills: {}, n: 0, refine: 0 };
     G.summon = null;
+    G.dashCd = 0;
   }
   // 每顿悟一次，下一次门槛抬 6%：抬太多的话清怪慢的图一局撑不到 9 次
   // （120 → 127 → 135 → 143 → 151…，第 9 次约需 1380 点，一局正好在 9~13 次之间）
@@ -3774,22 +3842,32 @@
   function ownSkills() { return SKILLS.filter(s => (G.player.skills[s.id] || 0) > 0); }
   function newSkills() { return SKILLS.filter(s => !(G.player.skills[s.id] || 0) && (!s.minLv || G.player.level >= s.minLv)); }
 
-  // 顿悟抽卡：A 技能升级 40% / B 新神通 25% / C 被动 20% / D 灵石 10% / E 特殊 5%
+  // 顿悟抽卡：A 技能升级 45% / B 新神通 20% / C 被动 20% / D 灵石 8% / E 特殊 7%
+  // 旧配比是 40/25/20/10/5，但实测截到的卡里近一半是「灵石 +30」「移速 +10%」这类
+  // 与「打得更狠」无关的东西 —— 玩家停下来选一张，选完屏幕上什么都没变。
+  // 现在把 A 提到 45%、灵石压到 8%，并且 A 内部按「看得见程度」加权（见 w）。
   const SKILL_MODS = [
-    { k: 'dmg', v: 0.25, name: '伤害 +25%' },
-    { k: 'range', v: 0.30, name: '范围 +30%' },
-    { k: 'cd', v: 0.20, name: '攻速 +20%' },
-    { k: 'count', v: 1, name: '多打一发' },
-    { k: 'dur', v: 0.50, name: '持续 +50%' }
+    { k: 'count', v: 1, name: '多打一发', w: 3 },     // 唯一一眼看得见的成长：出手变多
+    { k: 'dmg', v: 0.30, name: '伤害 +30%', w: 3 },   // 飘字变大，也算看得见
+    { k: 'cd', v: 0.25, name: '攻速 +25%', w: 2 },    // 出手术肉眼可感
+    { k: 'range', v: 0.30, name: '范围 +30%', w: 1 }, // 锁敌变远，画面上不明显，降权
+    { k: 'dur', v: 0.50, name: '持续 +50%', w: 0.5 }  // 弹道多飞一会儿，最不可感，压到最低
   ];
   const PASSIVE_MODS = [
     { k: 'spd', v: 0.10, cap: 0.6, name: '移速 +10%' },
     { k: 'leech', v: 0.04, cap: 0.2, name: '吸血 +4%' },
     { k: 'armor', v: 0.08, cap: 0.35, name: '减伤 +8%' },
-    { k: 'pickup', v: 0.30, cap: null, name: '拾取范围 +30%' },
     { k: 'maxhp', v: 15, cap: 300, name: '气血上限 +15' },
     { k: 'shaGain', v: 0.15, cap: 1.2, name: '煞气 +15%' }
   ];
+  // 加权抽：w 越大概率越高。拾取范围那张卡已经删了 —— 它归装备管，占一次顿悟纯属浪费
+  function pickWeighted(arr) {
+    let tot = 0;
+    for (const m of arr) tot += (m.w || 1);
+    let r = Math.random() * tot;
+    for (const m of arr) { r -= (m.w || 1); if (r <= 0) return m; }
+    return arr[arr.length - 1];
+  }
   // 只抽「这门功法真吃得下」的加成：被动没有 atk，抽伤害是空转；
   // burst/field 没有弹数与弹寿命，抽「多打一发 / 持续」也是空转。
   function skillModsFor(s) {
@@ -3804,7 +3882,7 @@
   function optSkillUp() {
     // 被动功法没有施展参数，不该出现在「技能升级」牌里（否则“伤害 +25%”空转）
     const own = ownSkills().filter(s => s.atk); if (!own.length) return optNewSkill();
-    const s = U.pick(own), m = U.pick(skillModsFor(s));
+    const s = U.pick(own), m = pickWeighted(skillModsFor(s));
     return { key: 'A' + s.id + m.k, kind: 'A', id: s.id, icon: s.icon || '⚔', mod: m,
       name: s.name + ' · ' + m.name, desc: '本局内永久生效' };
   }
@@ -3850,10 +3928,10 @@
     let guard = 0;
     while (out.length < 3 && guard++ < 80) {
       const r = Math.random() * 100;
-      if (r < 40) push(optSkillUp());
+      if (r < 45) push(optSkillUp());
       else if (r < 65) push(optNewSkill());
       else if (r < 85) push(optPassive());
-      else if (r < 95) push(optStone());
+      else if (r < 93) push(optStone());
       else push(optSpecial());
     }
     while (out.length < 3) push(optStone());
@@ -4372,6 +4450,8 @@
     const rg = rb('regen') + passiveSum('regen') + buffSum('regen') + (G.bonus.regen || 0) + gb('regen');
     if (rg > 0 && p.hp < p.maxhp) p.hp = Math.min(p.maxhp, p.hp + rg * dt);
     if (p.iv > 0) p.iv -= dt;
+    if (p.dashFx > 0) p.dashFx -= dt;
+    if (G.dashCd > 0) G.dashCd -= dt;
     if (p.hurtFlash > 0) p.hurtFlash -= dt;
     if (p.atkAnim > 0) p.atkAnim -= dt;
     if (p.atkCd > 0) p.atkCd -= dt;
@@ -5359,6 +5439,14 @@
       const fightMap = G.map && (G.map.type === 'combat' || G.map.type === 'boss' || G.map.type === 'chase');
       elQuick.classList.toggle('on', !!fightMap && (G.state === 'play' || G.state === 'dialog'));
     }
+    // 闪身：跟快捷栏同一条命（能打的图 + 战斗态），冷却时压暗走秒
+    if (elDash) {
+      const fightMap = G.map && (G.map.type === 'combat' || G.map.type === 'boss' || G.map.type === 'chase');
+      elDash.classList.toggle('on', !!fightMap && (G.state === 'play' || G.state === 'dialog'));
+      const cd = G.dashCd || 0;
+      elDash.classList.toggle('cooling', cd > 0);
+      if (cd > 0) { const t = elDash.querySelector('.dash-cd'); if (t) t.textContent = Math.ceil(cd); }
+    }
     elSkillrow.innerHTML = '';
     for (const s of SKILLS) { const lv = skillLv(s.id); if (lv > 0) { const d = document.createElement('div'); d.className = 'pip'; d.innerHTML = '<span>' + s.icon + '</span><b>' + lv + '</b>'; elSkillrow.appendChild(d); } }
     if (G.boss) {
@@ -5582,6 +5670,7 @@
     }
 
     G.mapId = id; G.map = m;
+    G._refHp = null;   // 本图怪物的硬度基准要重算（见 refHpOfMap）
     G.diff = diffById(diffId || save.lastDiff || 'easy');
     if (diffId) save.lastDiff = G.diff.id;
     save.mapId = id;
@@ -8055,6 +8144,10 @@
       // 战斗快捷栏：按 1/2/3 用第 1/2/3 格（小键盘同键位）
       if (G.state === 'play' || G.state === 'dialog') { e.preventDefault(); useQuick(+k - 1); }
     }
+    else if (k === ' ' || k === 'spacebar' || k === 'shift') {
+      // 闪身：空格或 Shift，桌面端不用去点右下角那颗按钮
+      if (G.state === 'play' || G.state === 'dialog') { e.preventDefault(); dashPlayer(); }
+    }
     else if (k === 'escape' || k === 'p') { if (G.state === 'play') doPause(); else if (G.state === 'pause') doResume(); }
   });
   window.addEventListener('keyup', e => {
@@ -8097,6 +8190,10 @@
   const elBuffrow = document.getElementById('buffrow');
   const elQuick = document.getElementById('quickbar');
   const elQuickBtns = elQuick ? Array.prototype.slice.call(elQuick.querySelectorAll('.qb')) : [];
+  const elDash = document.getElementById('dashBtn');
+  if (elDash) {
+    elDash.addEventListener('pointerdown', ev => { ev.preventDefault(); ev.stopPropagation(); dashPlayer(); });
+  }
   // 战斗右侧三格：按下即放。之前这三颗按钮只画了图标，一个监听都没挂，
   // 所以丹药符箓摆上去点不出任何反应 —— 这里把「点」和「按 1/2/3」都接上。
   elQuickBtns.forEach((btn, i) => {
@@ -8376,8 +8473,42 @@
   }
   function syncMute() { const t = Sfx.muted ? '🔇 音效：关' : '🔊 音效：开'; document.getElementById('muteTitle').textContent = t; document.getElementById('mutePause').textContent = t; }
 
+  // 失败重来：跳过剧情、保留本局顿悟的一半、煞气进度留一半。
+  // 原来的「重试此图」= 从剧情第一句重新读，再从头攒煞气，最快也要一分钟才回到刚才那一刀，
+  // 代价全是「等待」而不是「难度」—— 玩家感受不到惩罚，只感到被浪费。
+  // 现在失败变成「有进度的重试」：白打的那半局不算全白，但也不是满血复活。
+  function retryMap() {
+    const keep = G.insight && G.insight.skills ? JSON.parse(JSON.stringify(G.insight.skills)) : null;
+    const keepSha = G.sha ? { v: G.sha.v || 0, done: G.sha.done || 0 } : null;
+    const id = G.mapId || save.mapId || 'qixuan';
+    const d = G.diff ? G.diff.id : (save.lastDiff || 'easy');
+    elGameover.style.display = 'none';
+    save.deaths = (save.deaths || 0) + 1;
+    startMap(id, d);
+    // startMap 已经把本局顿悟清干净了，这里回填一半
+    if (keep) {
+      const half = {};
+      for (const k in keep) {
+        const m = keep[k] || {}, o = {};
+        for (const kk in m) o[kk] = m[kk] * 0.5;
+        half[k] = o;
+      }
+      G.insight = { skills: half, n: 0, refine: 0 };
+    }
+    if (keepSha) { G.sha.done = Math.floor(keepSha.done / 2); G.sha.v = keepSha.v * 0.5; }
+    // 剧情不再重放：读过一遍的人不需要再读
+    let n = 0;
+    const hop = () => {
+      if (G.state === 'dialog') { let g = 0; while (G.state === 'dialog' && !G.dialogIsChoice && g++ < 80) advanceDialog(); }
+      if (++n < 40 && G.state !== 'play') requestAnimationFrame(hop);
+    };
+    requestAnimationFrame(hop);
+    banner('再战 · 前番顿悟留了一半');
+    Sfx.buff();
+  }
+
   document.getElementById('startBtn').addEventListener('click', openWorldMap);
-  document.getElementById('goRetry').addEventListener('click', () => startMap(save.mapId || 'qixuan'));
+  document.getElementById('goRetry').addEventListener('click', retryMap);
   document.getElementById('goBack').addEventListener('click', openWorldMap);
   document.getElementById('vRetry').addEventListener('click', () => startMap(G.mapId || save.mapId || 'qixuan'));
   document.getElementById('vBack').addEventListener('click', openWorldMap);
@@ -9717,6 +9848,7 @@
     openRefine() { openRefine(); return G.state; },
     stage() { return G.player ? stageLabel(G.player) : ''; },
     resetRunBuffs() { resetRunBuffs(); return true; },
+    dash() { return dashPlayer(); },
     summon() { spawnSummon(); return G.summon ? { name: G.summon.name, spr: G.summon.spr, max: G.summon.max } : null; },
     summonState() { const s = G.summon; return s ? { t: +s.t.toFixed(2), max: s.max, name: s.name, spr: s.spr } : null; },
     summonBullets() { return G.bullets.filter(b => b.summon).length; },

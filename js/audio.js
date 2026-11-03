@@ -53,6 +53,8 @@ window.Sfx = (function () {
     heal() { tone(880, 0.08, 'triangle', 0.06); setTimeout(() => tone(1320, 0.14, 'triangle', 0.06), 80); },
     buff() { tone(660, 0.08, 'square', 0.06); setTimeout(() => tone(990, 0.1, 'square', 0.06), 70); setTimeout(() => tone(1320, 0.12, 'square', 0.06), 140); },
     burst() { tone(220, 0.16, 'square', 0.05, 640); noise(0.1, 0.03, 1600); },
+    // 闪身：一声短促上滑的风声，比受击音更「轻」，玩家才知道自己闪过去了
+    dodge() { tone(520, 0.1, 'sine', 0.05, 1180); noise(0.07, 0.03, 2600); },
 
     // 受击 / 死亡
     hurt() { tone(190, 0.18, 'sawtooth', 0.09, 90); noise(0.1, 0.05); },

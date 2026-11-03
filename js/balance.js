@@ -202,7 +202,7 @@
     // 这个数是量出来的：倍率给到 17 倍时（lv46），单目标功法会一直咬着身边的小怪，
     // Boss 反而打不着 —— 小怪太厚不只是拖节奏，是直接抢走了输出。
     // 指数 0.94：玩家秒伤比小怪血量涨得稍快，越到后期越能「一扫一片」。
-    trashHpK: function (lv) { return Math.pow(interp(lv).k, 0.94) * 0.55; },
+    trashHpK: function (lv) { return Math.pow(interp(lv).k, 0.94) * 0.22; },
     // 单击：占该级气血 3.5%（裸装 29 击才死；一群围上来才真的掉血）
     trashDmgK: function (lv) { return interp(lv).hp / 100 * 0.583; },
 
