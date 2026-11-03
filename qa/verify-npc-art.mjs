@@ -55,7 +55,9 @@ const WANT = [
   ['yinchiyecha', '银翅夜叉'], ['aoxiao', '敖啸老祖'], ['zhiyang', '至阳上人'],
   ['liuzizai', '柳自在'], ['bumietianzun', '不灭天尊'], ['guilingzi', '鬼灵子'],
   ['lufuren', '陆夫人'], ['maliang', '马良'], ['miaohe', '妙鹤真人'],
-  ['lengyan', '冷焰老祖'], ['heitian', '黑天魔祖']
+  ['lengyan', '冷焰老祖'], ['heitian', '黑天魔祖'],
+  // 第三档兽形（16x16 画布：12x14 的 168 格装不下非人形）
+  ['moyuanbeast', '魔金山脉·魔猿'], ['mingchong', '螟虫之母·元神'], ['xiuluo', '修罗蛛·族母']
 ];
 
 // 同时抓每张图的像素指纹：两人撞图最容易发生在复制粘贴时（图一样、名字不同）
@@ -236,7 +238,12 @@ const BOSS_SPR = [
   ['js/lingjie.js', '黄元子', 'huangyuanzi'], ['js/lingjie.js', '不灭天尊', 'bumietianzun'],
   ['js/lingjie.js', '马良·真仙之身', 'maliang'], ['js/lingjie.js', '马良·九元观真仙', 'maliang'],
   ['js/xianjie.js', '冷焰老祖', 'lengyan'], ['js/xianjie.js', '黑天魔祖', 'heitian'],
-  ['js/xianjie.js', '柳自在', 'liuzizai'], ['js/xianjie.js', '鬼灵子', 'guilingzi']
+  ['js/xianjie.js', '柳自在', 'liuzizai'], ['js/xianjie.js', '鬼灵子', 'guilingzi'],
+  // 五批：第三档兽形。此前 9 个 beast 型 boss 全共用 haishou（16x10 横躺的蛟龙），
+  // 拿横躺的蛟去当站立的魔猿/虫母/蛛母，是形状层面的错，比撞色严重
+  ['js/lingjie.js', '魔金山脉·魔猿', 'moyuanbeast'],
+  ['js/lingjie.js', '螟虫之母·元神', 'mingchong'],
+  ['js/lingjie.js', '修罗蛛·族母', 'xiuluo']
 ];
 for (const [file, who, spr] of BOSS_SPR) {
   const src = fs.readFileSync(join(root, file), 'utf8').split('\n');
@@ -244,6 +251,52 @@ for (const [file, who, spr] of BOSS_SPR) {
   const okAll = hits.length > 0 && hits.every(l => l.includes("spr: '" + spr + "'"));
   ok(okAll, who + ' 出场用 ' + spr, hits.map(l => (l.match(/spr: '[^']+'/) || [''])[0]));
 }
+
+// 兽形这三张的成败全在几何关系上（肉眼看不准），直接量像素：
+// ① 魔猿三只角都要立住 —— 角如果被 outline 的浓墨轮廓吃掉，头顶就成一条黑边；
+// ② 螟虫之母的头要比身体宽一倍，那是「女童」唯一的读法；
+// ③ 修罗蛛的蛛腹要比上身宽，剪影才不是「一个人」。
+console.log('\n【2b2】兽形几何关系');
+const beast = await page.evaluate(() => {
+  window.__FR.skin('jin');
+  const W = (n) => window.Sprites[n].width;
+  const scanRow = (n, y) => {
+    const c = window.Sprites[n];
+    const d = c.getContext('2d').getImageData(0, y, c.width, 1).data;
+    const out = [];
+    for (let x = 0; x < c.width; x++) if (d[x * 4 + 3] > 40) out.push(x);
+    return out;
+  };
+  // 魔猿：第 0 行是三个角尖，必须是三簇互不相连的像素
+  const r0 = scanRow('moyuanbeast', 0);
+  const groups = [];
+  for (const x of r0) {
+    if (groups.length && x - groups[groups.length - 1][groups[groups.length - 1].length - 1] === 1) {
+      groups[groups.length - 1].push(x);
+    } else groups.push([x]);
+  }
+  // 螟虫之母：头最宽那行 vs 身体最宽那行
+  const widthAt = (n, y) => scanRow(n, y).length;
+  const mc = window.Sprites.mingchong;
+  const mcHead = Math.max(...[3, 4, 5].map(y => widthAt('mingchong', y)));
+  const mcBody = Math.max(...[9, 10, 11].map(y => widthAt('mingchong', y)));
+  // 修罗蛛：上身（r7）vs 蛛腹（r11）
+  const xlUp = widthAt('xiuluo', 7);
+  const xlBelly = widthAt('xiuluo', 11);
+  // 螟虫之母：头高 = 从顶行到下颌（身体第一行之前那行）
+  const mcH = window.Sprites.mingchong.height;
+  let headRows = 0;
+  for (let y = 0; y < mcH; y++) {
+    if (widthAt('mingchong', y) > 6) headRows++;   // 宽过 6 的行算头部
+  }
+  return { hornGroups: groups.length, r0, mcHead, mcBody, headRows, mcH, xlUp, xlBelly };
+});
+ok(beast.hornGroups === 3, '魔猿头顶三只角在墨轮廓下各自独立（没被吃成一条黑边）', beast);
+// 儿童与成人的差别主要是头占全身的比例（成人约 1/7，幼儿可到 1/2），
+// 比「头宽 vs 身宽」更接近这件事本身
+ok(beast.mcHead >= beast.mcBody * 1.6, '螟虫之母的头明显宽于身体', { head: beast.mcHead, body: beast.mcBody });
+ok(beast.headRows / beast.mcH >= 0.5, '螟虫之母的头占全身一半以上（女童头身比，成人约 1/7）', { headRows: beast.headRows, total: beast.mcH });
+ok(beast.xlBelly > beast.xlUp, '修罗蛛的蛛腹比上身宽（剪影不是「一个人」）', { up: beast.xlUp, belly: beast.xlBelly });
 
 // 仙界篇此前 14 个首领零专属，是整份名单里覆盖率最低的一段。
 // 这里只钉住「已画的必须一直在用」，避免哪天又被改回通用图。

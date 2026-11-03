@@ -22,7 +22,9 @@ const OWN = ['mo2', 'wangchan', 'lifeiyu', 'zhangtie', 'lihuayuan', 'nangongwan'
   'xiaojinhan', 'dongfangbai', 'qimozi', 'miaofa', 'donglihu', 'guhuojin',
   // 第二档 14 张（元魇铺 2 个化身位、马良铺 2 个形态位）
   'yuanyan', 'baohua', 'huangyuanzi', 'yinchiyecha', 'aoxiao', 'zhiyang', 'liuzizai',
-  'bumietianzun', 'guilingzi', 'lufuren', 'maliang', 'miaohe', 'lengyan', 'heitian'];
+  'bumietianzun', 'guilingzi', 'lufuren', 'maliang', 'miaohe', 'lengyan', 'heitian',
+  // 第三档兽形（16x16），此前 9 个 beast 型 boss 全共用 haishou
+  'moyuanbeast', 'mingchong', 'xiuluo'];
 
 // ---------- ① boss 归并 ----------
 // 注意：extraBoss 是数组，一行里可能挂好几个首领（如 lingjie 的 双修夫妇 / 五光族），

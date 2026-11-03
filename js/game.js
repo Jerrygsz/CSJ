@@ -8037,6 +8037,8 @@
     '萧晋寒': 'xiaojinhan', '鬼木': 'guimu', '东方白': 'dongfangbai',
     '奇摩子': 'qimozi', '妙法仙尊': 'miaofa', '东离虎': 'donglihu',
     '古或今': 'guhuojin', '骨皇': 'guhuang', '百目天鬼': 'baimu',
+    // 第三档兽形：只补真正有台词的。魔猿全场没说话；「螟虫之将」是另一只，别错挂到虫母身上
+    '修罗蛛': 'xiuluo', '修罗蛛族母': 'xiuluo', '螟虫之母': 'mingchong',
     '老丈': 'hermit', '老汉': 'hermit', '散修': 'rogue', '魔修': 'mo'
   };
   let faceWho = null;   // 当前头像对应的人，切皮时要按新皮肤重画

@@ -40,7 +40,9 @@ const LIST = [
   ['yinchiyecha', '银翅夜叉'], ['aoxiao', '敖啸老祖'], ['zhiyang', '至阳上人'],
   ['liuzizai', '柳自在'], ['bumietianzun', '不灭天尊'], ['guilingzi', '鬼灵子'],
   ['lufuren', '陆夫人'], ['maliang', '马良'], ['miaohe', '妙鹤真人'],
-  ['lengyan', '冷焰老祖'], ['heitian', '黑天魔祖']
+  ['lengyan', '冷焰老祖'], ['heitian', '黑天魔祖'],
+  // 第三档兽形（16x16 画布：12x14 的 168 格装不下非人形）
+  ['moyuanbeast', '魔金山脉·魔猿'], ['mingchong', '螟虫之母·元神'], ['xiuluo', '修罗蛛·族母']
 ];
 
 async function sheet(skin, out) {

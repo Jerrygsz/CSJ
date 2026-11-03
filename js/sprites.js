@@ -1297,6 +1297,77 @@
       'KGgGKGGKgGGK',
       'KGK.GGGG.KGK',
       '.K...KK...K.'
+    ] },
+    // 魔猿 16x16（兽形要更多格）：「身穿紫色战甲的黑色魔猿」「头生三只独角，阔口獠牙，
+    //   双臂奇长过膝」→ 12x14 的 168 格分不下来；前六版在「紫衣人 / 黑块」之间反复。
+    //   三只尖角间隔 4 格；脸 7 行 x 12 宽吃满面积；阔口 2 行高、上下各两枚獠牙
+    //   （只画一行白牙是白胡子）。四条硬约束：
+    //   ① 躯干收成梯形（肩宽 → 胸 → 收腰），矩形紫甲 + 两根柱子读成「两个方块叠着」；
+    //   ② 手臂要做手（末端比臂宽一格）+ 肘内收 —— 直通到底的柱子读不出是手臂；
+    //   ③ 四肢 2 格宽（1 格宽被 outline 沿边补 K，走成一串点）；
+    //   ④ 毛色比躯干亮一档（全黑会糊在深色背景里）
+    { name: 'moyuanbeast', pal: { K: '#0b0910', H: '#241f2a', M: '#3d3646', S: '#7a5c4e', G: '#6a3690', g: '#43215e', B: '#f2eee0', W: '#b8b0c4', R: '#e03018' }, rows: [
+      '...KWK.KWK.KWK..',
+      '..KWWWKWWWKWWWK.',
+      '.KHHHHHHHHHHHHK.',
+      '.KHHHHHHHHHHHHK.',
+      '.KSSHHHHHHHHSSK.',
+      '.KHHSSSSSSSSHHK.',
+      '.KHHSRSSSSRSHHK.',
+      '.KHHHSSSSSSHHHK.',
+      '.KHHSSSSSSSSHHK.',
+      '.KSSBKKKKKKBSSK.',
+      '.KSSSBKKKKBSSSK.',
+      'KMMMMHHHHHHMMMMK',
+      'MMKKGGGGGGGGKKMM',
+      'MMKGGGGGGGGGGKMM',
+      'KMMGGggggggGGMMK',
+      'MMMKHHHKKHHHHMMM'
+    ] },
+    // 修罗蛛·族母 16x16：「玉手一动的往发髻上一抚而过，竟掐下了一小缕长发」→ 上身人形
+    //   （发髻金簪、两鬓长发、腹上修罗之心），下身人首蛛腹 + 两侧各两条腿。
+    //   12x14 里蛛腿怎么摆都读成护肩/护耳/珠串（蛛腹和上身同宽，腿没伸展空间）。
+    //   16 宽下蛛腹 8 格、上身 6 格，剪影上窄下宽。
+    //   蛛腿 2 格宽、只给 2 行（3 行 6 格的块读成两片翅膀）；另给蛛腹加两道横纹 ——
+    //   分节的腹部是蛛最强的符号，比腿更能在小尺寸下读出来
+    { name: 'xiuluo', pal: { K: '#120a12', H: '#241826', S: '#f4e2cc', G: '#4a2642', g: '#2a1430', B: '#d0a840', W: '#f0ecf8', T: '#a082ac' }, rows: [
+      '.....KBBBBK.....',
+      '....KHHHHHHK....',
+      '...KHHHHHHHHK...',
+      '...KHSKSSKSHK...',
+      '...KHSSSSSSHK...',
+      '...KHHSSSSHHK...',
+      '...KHGGGGGGHK...',
+      '....KGggggGK....',
+      '..KKKGGGGGGKKK..',
+      '.KTTKGGGGGGKTTK.',
+      'KTTTKggggggKTTTK',
+      'KKTGGGWWGGGTKK..',
+      '.KGGGGWWGGGGK...',
+      '.KTGGGGGGGGTK...',
+      'KTTKggggggKTTK..',
+      'KKKKGGGGGGKKKK..'
+    ] },
+    // 螟虫之母·元神：「那矮小身影，赫然是螟虫之母元神幻化的女童」→
+    //   头 8 宽 8 行、身体 4 宽 6 行，差一倍才读得出是小孩。头发只给 3 行
+    //   （5 行会把脸压没），眼睛 2x2 整块不画瞳（瞳在眼角会左右不对称，读成斜视）。
+    //   发近黑 + 脸苍白 + 深眼窝：第一版用了亮绿眼和腮红，读成青蛙绿娃娃。
+    //   她是封在晶核里的元神，不是吉祥物。不画虫子形态 —— 出场的就是女童
+    { name: 'mingchong', pal: { K: '#0a0d0c', H: '#14171a', S: '#cdd4c4', E: '#2a3a2e', G: '#2e4038', g: '#1c2822' }, rows: [
+      '..KHHHHHHK..',
+      '.KHHHHHHHHK.',
+      '.KHHHHHHHHK.',
+      '.KHHHHHHHHK.',
+      '.KHHHHHHHHK.',
+      '.KSEESSEESK.',
+      '.KSEESSEESK.',
+      '.KSSSKKSSSK.',
+      '..KKGGGGKK..',
+      '...KggggK...',
+      '...KGGGGK...',
+      '...KGGGGK...',
+      '...KggggK...',
+      '...KggggK...'
     ] }
   ];
 
