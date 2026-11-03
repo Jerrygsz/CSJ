@@ -1185,6 +1185,10 @@
     p.iv = DASH_IV;              // 复用受击无敌帧：hitPlayer 里 iv>0 直接免伤
     p.dashFx = 0.22;
     G.dashCd = DASH_CD;
+    // 镜头滞后：硬跟随每帧把玩家钉在中心，只改坐标画面纹丝不动。这里给镜头记一个「反方向偏移」，
+    // 让它在闪身瞬间先停在原地（玩家相对中心滑出 90px，位移一眼可见），再平滑追上去恢复硬跟随。
+    // 偏移量 = 旧位置 - 新位置：原地闪（撞 Boss）时自动为 0，不产生镜头晃动。
+    G.camLag = { x: sx - p.x, y: sy - p.y, hold: 0.05 };
     // 起点扩散环 + 一条从起点射向终点的光带：光带是「闪」最直观的视觉语言
     G.parts.push({ ring: true, x: sx, y: sy, r: 6, maxr: 40, life: 0.24, maxlife: 0.24, color: '#bfe9ff' });
     G.parts.push({ ray: true, x: sx, y: sy, ang: ang, len: DASH_DIST, life: 0.22, maxlife: 0.22, color: '#bfe9ff' });
@@ -4510,7 +4514,21 @@
     updateAuras(dt);
     tickAlchQuota(dt);
 
-    G.cam.x = p.x - W / 2; G.cam.y = p.y - H / 2;
+    // 硬跟随 + 闪身镜头滞后：先停一拍（hold），再按指数平滑追上，帧率无关、不掉帧
+    if (G.camLag) {
+      if (G.camLag.hold > 0) {
+        G.camLag.hold -= dt;
+      } else {
+        const ease = 1 - Math.exp(-dt * 18);
+        G.camLag.x -= G.camLag.x * ease;
+        G.camLag.y -= G.camLag.y * ease;
+        if (Math.abs(G.camLag.x) < 0.5 && Math.abs(G.camLag.y) < 0.5) G.camLag = null;
+      }
+      G.cam.x = p.x - W / 2 + (G.camLag ? G.camLag.x : 0);
+      G.cam.y = p.y - H / 2 + (G.camLag ? G.camLag.y : 0);
+    } else {
+      G.cam.x = p.x - W / 2; G.cam.y = p.y - H / 2;
+    }
     ensureDecor();
 
     // 双人联机 P2：发本地位置 + 插值队友
@@ -5582,7 +5600,7 @@
     G.fxBullets.length = 0; G.coopFrozen = false; G.dialogSynced = false;
     G.boss = null; G.bossActive = false; G.bossSpawned = false; G.bossWarned = false; G.extraIdx = 0;
     G.fieldSlow = []; G.shake = 0; G.flash = 0; G.hitStop = 0;
-    G.decor = []; G.chunkMap = {}; G.cam = { x: -W / 2, y: -H / 2 }; G.orbPos = [];
+    G.decor = []; G.chunkMap = {}; G.cam = { x: -W / 2, y: -H / 2 }; G.orbPos = []; G.camLag = null;
     G.vacuumT = 0; G.pendingEnding = false; G.runLoot = []; G.matGain = 0; G.lastAutoSave = 0;
     G.alch = null; G.alchWet = false;   // 破境药材配额，进图时按图重算
     G.breakHinted = false;   // 瓶颈弹幕每图只提一次
