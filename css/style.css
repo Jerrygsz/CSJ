@@ -688,28 +688,6 @@ body.fs #wrap { background: #000; }
 .qb.pet { border-color: rgba(140,220,255,0.55); }
 .qb:active { transform: scale(var(--press-sm)); }
 
-/* 闪身：右下角拇指位，压在飞鸽传书上方。战斗中才出现，冷却时压暗并走秒。 */
-#dashBtn {
-  position: absolute; right: 12px; bottom: 70px; width: 60px; height: 60px;
-  padding: 0; border-radius: 50%; border: 1px solid rgba(140, 220, 255, 0.55);
-  background: rgba(10, 12, 18, 0.74); color: #bfe9ff;
-  font-size: 17px; line-height: 1; display: none; align-items: center; justify-content: center;
-  cursor: pointer; z-index: var(--z-combat); overflow: hidden;
-  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
-}
-#dashBtn i { font-style: normal; }
-#dashBtn.on { display: flex; }
-#dashBtn.cooling { opacity: .5; }
-#dashBtn.cooling .dash-cd {
-  position: absolute; inset: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  background: rgba(0, 0, 0, 0.58); font-size: var(--fs-cap); color: #bfe9ff;
-}
-#dashBtn:active { transform: scale(0.92); }
-body[data-skin="guigu"] #dashBtn {
-  border-color: rgba(168, 58, 42, 0.45); background: linear-gradient(180deg, #efe8d6, #ddd5bf); color: #a83a2a;
-}
-body[data-skin="guigu"] #dashBtn.cooling .dash-cd { background: rgba(52, 48, 40, 0.62); color: #f2ecda; }
-
 .qb-picks { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: 4px; }
 
 /* 战前运功面板：功法再多也只在面板内滚动，绝不顶出屏幕 */

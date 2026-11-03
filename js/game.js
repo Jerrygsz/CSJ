@@ -1157,21 +1157,26 @@
   const DASH_CD = 2.5;      // 冷却（秒）
   const DASH_DIST = 90;     // 位移距离
   const DASH_IV = 0.30;     // 无敌帧：够穿过一圈怪，但不够硬吃 Boss 连招
-  function dashPlayer() {
+  // dir 可选：双击屏幕时传入（已归一化的方向），优先用；否则走方向键/摇杆/背对敌人
+  function dashPlayer(dir) {
     const p = G.player;
     if (!p || G.state !== 'play') return false;
     if ((G.dashCd || 0) > 0) {
       spawnText(p.x, p.y - 34, '回气中 · ' + Math.ceil(G.dashCd), '#9aa7b8', 12);
       return false;
     }
-    // 方向：当前输入方向；没有输入就朝「背对最近之敌」的方向（被围时的本能反应）
     let dx = 0, dy = 0;
-    if (keys.left) dx--; if (keys.right) dx++; if (keys.up) dy--; if (keys.down) dy++;
-    if (jx !== 0 || jy !== 0) { dx = jx; dy = jy; }
-    if (Math.abs(dx) < 0.01 && Math.abs(dy) < 0.01) {
-      const near = nearestEnemy(460);
-      if (near) { dx = p.x - near.x; dy = p.y - near.y; }
-      else { dx = p.dir || 1; dy = 0; }
+    if (dir && (Math.abs(dir.dx) > 0.01 || Math.abs(dir.dy) > 0.01)) {
+      dx = dir.dx; dy = dir.dy;
+    } else {
+      // 方向：当前输入方向；没有输入就朝「背对最近之敌」的方向（被围时的本能反应）
+      if (keys.left) dx--; if (keys.right) dx++; if (keys.up) dy--; if (keys.down) dy++;
+      if (jx !== 0 || jy !== 0) { dx = jx; dy = jy; }
+      if (Math.abs(dx) < 0.01 && Math.abs(dy) < 0.01) {
+        const near = nearestEnemy(460);
+        if (near) { dx = p.x - near.x; dy = p.y - near.y; }
+        else { dx = p.dir || 1; dy = 0; }
+      }
     }
     const len = Math.hypot(dx, dy) || 1;
     dx /= len; dy /= len;
@@ -5511,14 +5516,6 @@
       const fightMap = G.map && (G.map.type === 'combat' || G.map.type === 'boss' || G.map.type === 'chase');
       elQuick.classList.toggle('on', !!fightMap && (G.state === 'play' || G.state === 'dialog'));
     }
-    // 闪身：跟快捷栏同一条命（能打的图 + 战斗态），冷却时压暗走秒
-    if (elDash) {
-      const fightMap = G.map && (G.map.type === 'combat' || G.map.type === 'boss' || G.map.type === 'chase');
-      elDash.classList.toggle('on', !!fightMap && (G.state === 'play' || G.state === 'dialog'));
-      const cd = G.dashCd || 0;
-      elDash.classList.toggle('cooling', cd > 0);
-      if (cd > 0) { const t = elDash.querySelector('.dash-cd'); if (t) t.textContent = Math.ceil(cd); }
-    }
     elSkillrow.innerHTML = '';
     for (const s of SKILLS) { const lv = skillLv(s.id); if (lv > 0) { const d = document.createElement('div'); d.className = 'pip'; d.innerHTML = '<span>' + s.icon + '</span><b>' + lv + '</b>'; elSkillrow.appendChild(d); } }
     if (G.boss) {
@@ -8264,10 +8261,6 @@
   const elBuffrow = document.getElementById('buffrow');
   const elQuick = document.getElementById('quickbar');
   const elQuickBtns = elQuick ? Array.prototype.slice.call(elQuick.querySelectorAll('.qb')) : [];
-  const elDash = document.getElementById('dashBtn');
-  if (elDash) {
-    elDash.addEventListener('pointerdown', ev => { ev.preventDefault(); ev.stopPropagation(); dashPlayer(); });
-  }
   // 战斗右侧三格：按下即放。之前这三颗按钮只画了图标，一个监听都没挂，
   // 所以丹药符箓摆上去点不出任何反应 —— 这里把「点」和「按 1/2/3」都接上。
   elQuickBtns.forEach((btn, i) => {
@@ -9104,21 +9097,39 @@
     });
   });
 
-  // 双击舞台顶部（约上 9% 高度）切换全屏
-  let tapTime = 0, tapX = 0, lastTapX = 0;
+  // 双击手势：
+  // - 战斗态（play）：双击屏幕任意处 → 闪身，方向 = 双击点相对屏幕中心（硬跟随下玩家就在中心）
+  // - 其他状态：双击舞台顶部（约上 9% 高度）→ 切换全屏
+  let tapTime = 0, lastTapX = 0, lastTapY = 0;
   elStage.addEventListener('pointerdown', ev => {
     if (ev.isPrimary === false) return;
     if (ev.target.closest('button, input, select, label, a')) return;
     const r = elStage.getBoundingClientRect();
+    const now = performance.now();
+    // 战斗里双击 = 闪身：两次点击够快（380ms）且落点够近（80px）才算，避免把走位摇杆误判成双击
+    if (G.state === 'play') {
+      if (tapTime && now - tapTime < 380 && Math.hypot(ev.clientX - lastTapX, ev.clientY - lastTapY) < 80) {
+        tapTime = 0;
+        const dx = ev.clientX - (r.left + r.width / 2);
+        const dy = ev.clientY - (r.top + r.height / 2);
+        const len = Math.hypot(dx, dy);
+        // 落在屏幕正中心附近（len 太小）没有明确方向，交给 dashPlayer 背对敌人兜底
+        if (len > 14) dashPlayer({ dx: dx / len, dy: dy / len });
+        else dashPlayer();
+      } else {
+        tapTime = now; lastTapX = ev.clientX; lastTapY = ev.clientY;
+      }
+      return;
+    }
+    // 非战斗：只认顶部区域，双击切全屏
     const bandH = Math.max(58, Math.round(r.height * 0.085));
     if (ev.clientY - r.top > bandH) { tapTime = 0; return; }
     if (joy.active) { tapTime = 0; return; }          // 正在拖拽摇杆，不算点击
-    const now = performance.now();
     if (tapTime && now - tapTime < 380 && Math.abs(ev.clientX - lastTapX) < 80) {
-      tapTime = 0; lastTapX = 0;
+      tapTime = 0; lastTapX = 0; lastTapY = 0;
       toggleFullscreen();
     } else {
-      tapTime = now; lastTapX = ev.clientX;
+      tapTime = now; lastTapX = ev.clientX; lastTapY = ev.clientY;
     }
   }, { passive: true });
 
