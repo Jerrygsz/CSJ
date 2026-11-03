@@ -1574,8 +1574,22 @@
     const over = Math.max(0, G.player.level - rec);
     return 1 + over * d.levelScale;
   }
-  function hpMulBase() { const d = curDiff(); return (1 + G.time / 70 * 0.4) * mapDiff() * (d.hp || 1) * levelPad(); }
-  function dmgMulBase() { const d = curDiff(); return (1 + G.time / 120 * 0.15) * (1 + (mapDiff() - 1) * 0.55) * (d.dmg || 1); }
+  // 小怪强度的「等级锚」：按本图推荐等级取，不看玩家当前等级。
+  // 原先只有 mapDiff（每图手写的 1.0~7.0），它跟等级正相关，却远跟不上玩家输出——
+  // 结果 640 级的小怪还是 lv80 的硬度。现在由 js/balance.js 的 ANCHOR 表统一给。
+  function mapLv() { return (G.map && G.map.startLevel) || (G.player && G.player.level) || 1; }
+  function hpMulBase() {
+    const d = curDiff();
+    const B = window.BALANCE;
+    const k = B ? B.trashHpK(mapLv()) : mapDiff();
+    return (1 + G.time / 70 * 0.4) * k * (d.hp || 1) * levelPad();
+  }
+  function dmgMulBase() {
+    const d = curDiff();
+    const B = window.BALANCE;
+    const k = B ? B.trashDmgK(mapLv()) : (1 + (mapDiff() - 1) * 0.55);
+    return (1 + G.time / 120 * 0.15) * k * (d.dmg || 1);
+  }
   function spawnPos() {
     const a = Math.random() * Math.PI * 2;
     const d = Math.max(W, H) / 2 + 50;
@@ -1602,21 +1616,26 @@
     const pos = spawnPos();
     const names = (G.map && G.map.elites) || ['精英·狼王', '精英·厉无极'];
     const k = 1 + idx * 0.22;
-    const diff = mapDiff();
     const dm = curDiff();
-    const dHp = (dm.hp || 1) * levelPad(), dDmg = dm.dmg || 1;
+    // 精英血量按「该级玩家 6 秒输出」定，不吃 mapDiff：
+    // 原先 300 + 时间×2.4 是绝对数，到元婴期就只是一只稍胖的狼。
+    const B = window.BALANCE;
+    const baseHp = B ? B.eliteHp(mapLv()) : (300 + G.time * 2.4);
+    const baseDmg = B ? B.eliteDmg(mapLv()) : (11 + G.time * 0.06);
+    const dHp = (dm.hp || 1) * levelPad() * (1 + G.time / 150 * 0.3);
+    const dDmg = dm.dmg || 1;
     if (idx % 2 === 0) {
-      const hp = (300 + G.time * 2.4) * k * (0.7 + diff * 0.4) * dHp;
+      const hp = baseHp * k * dHp;
       const e = {
         type: 'wolfking', x: pos.x, y: pos.y, hp, maxhp: hp,
-        spd: 66 * (dm.spd || 1), dmg: (11 + G.time * 0.06) * diff * dDmg, r: 15, xpVal: 30, spr: 'wolf', scale: 2,
+        spd: 66 * (dm.spd || 1), dmg: baseDmg * k * dDmg, r: 15, xpVal: 30, spr: 'wolf', scale: 2,
         wob: false, charge: true, dash: false, hitFlash: 0, t: 0, howlT: 7, _orbCd: {}, elite: true, name: names[idx] || names[0] || '头狼'
       };
       G.enemies.push(e); banner('⚠ 精英 · ' + e.name); Sfx.warn();
     } else {
-      const hp = (380 + G.time * 2.8) * k * (0.7 + diff * 0.4) * dHp;
+      const hp = baseHp * k * 1.12 * dHp;
       const e = {
-        type: 'blacklord', x: pos.x, y: pos.y, hp, maxhp: hp, spd: 44 * (dm.spd || 1), dmg: (10 + G.time * 0.05) * diff * dDmg, r: 14,
+        type: 'blacklord', x: pos.x, y: pos.y, hp, maxhp: hp, spd: 44 * (dm.spd || 1), dmg: baseDmg * k * 0.9 * dDmg, r: 14,
         xpVal: 45, spr: 'blacklord', scale: 1.4, wob: false, charge: false, dash: false, hitFlash: 0,
         t: 0, shootT: 1.5, _orbCd: {}, elite: true, name: names[idx] || names[1] || '厉无极', ranged: true
       };
@@ -2344,12 +2363,19 @@
   }
 
   // ---------- Boss（按地图配置，四种打法） ----------
-  function spawnBossFrom(cfg) {
+  function spawnBossFrom(cfg, isExtra) {
     const p = G.player;
     const dm = curDiff();
     // Boss 单独吃一档倍率：凡境不变，险境 ×1.5，死境 ×2（Jerry 定：中高难度 Boss 要更硬）
-    const bhp = Math.round(cfg.hp * (dm.hp || 1) * (dm.bossHp || 1) * levelPad());
-    const bdmg = cfg.dmg * (dm.dmg || 1) * (dm.bossDmg || 1);
+    // 基准血量与单击伤害来自 js/balance.js 的 BOSS 表（按该图推荐等级的玩家战力推导）；
+    // 表里没有的图（新图还没标定）退回地图上写的绝对值。
+    const bal = (window.BALANCE && window.BALANCE.BOSS[G.mapId]) || null;
+    const hpk = bal ? (isExtra ? window.BALANCE.extraHp : 1) : 1;
+    const dpk = bal ? (isExtra ? window.BALANCE.extraDmg : 1) : 1;
+    const baseHp = bal ? bal[0] * hpk : cfg.hp;
+    const baseDmg = bal ? bal[1] * dpk : cfg.dmg;
+    const bhp = Math.round(baseHp * (dm.hp || 1) * (dm.bossHp || 1) * levelPad());
+    const bdmg = baseDmg * (dm.dmg || 1) * (dm.bossDmg || 1);
     G.boss = {
       _id: ++enemySeq,
       type: cfg.kind, kind: cfg.kind, name: cfg.name,
@@ -2388,6 +2414,11 @@
     const a = Math.atan2(e.y - fy, e.x - fx);
     e.x += Math.cos(a) * (force * 0.2); e.y += Math.sin(a) * (force * 0.2);
   }
+  // 弹幕伤害 = Boss 单击伤害 × 系数。
+  // 别再写死 12/14：这两个数从第一版留到现在，lv520 的 Boss 单击已经 4.6 万，
+  // 弹幕还在打 14 点 —— 后期法师系 Boss 等于不会伤人，危机感直接归零。
+  // 散射单发低一些（一轮打出去十几发），环形再低一档（贴身会被套好几圈）。
+  function bShot(b, k) { return Math.max(1, Math.round((b && b.dmg || 0) * k)); }
   function ringBurst(x, y, n, spd, dmg) {
     for (let k = 0; k < n; k++) { const a = k / n * 6.28; G.ebullets.push({ x, y, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd, r: 7, dmg: dmg || 12, life: 4 }); }
   }
@@ -2443,7 +2474,7 @@
       }
       if (phase2) {
         b.burstT -= dt;
-        if (b.burstT <= 0) { b.burstT = 3.4; ringBurst(b.x, b.y, 14, 185, 12); G.shake = 6; Sfx.burst(); }
+        if (b.burstT <= 0) { b.burstT = 3.4; ringBurst(b.x, b.y, 14, 185, bShot(b, 0.28)); G.shake = 6; Sfx.burst(); }
       }
     } else if (b.kind === 'mo') {
       // 散射
@@ -2452,7 +2483,7 @@
       b.shootT -= dt;
       if (b.shootT <= 0) {
         b.shootT = shootInt;
-        aimFan(b.x, b.y, Math.atan2(p.y - b.y, p.x - b.x), n, phase2 ? 0.26 : 0.18, 190, 14);
+        aimFan(b.x, b.y, Math.atan2(p.y - b.y, p.x - b.x), n, phase2 ? 0.26 : 0.18, 190, bShot(b, 0.42));
         Sfx.shoot();
       }
       // 瞬移 + 环形弹幕
@@ -2461,7 +2492,7 @@
         b.teleT = phase2 ? 4 : 6;
         const a = Math.random() * 6.28;
         b.x = p.x + Math.cos(a) * 180; b.y = p.y + Math.sin(a) * 180;
-        ringBurst(b.x, b.y, phase2 ? 14 : 10, 150);
+        ringBurst(b.x, b.y, phase2 ? 14 : 10, 150, bShot(b, 0.28));
         G.shake = 6; Sfx.burst();
       }
       // 召唤尸傀
@@ -2469,7 +2500,7 @@
       if (b.sumT <= 0) { b.sumT = phase2 ? 7 : 9; summonAt(b, 'ghoul', phase2 ? 3 : 2, phase2 ? 5 : 4); }
       if (phase2) {
         b.burstT -= dt;
-        if (b.burstT <= 0) { b.burstT = 3.2; ringBurst(b.x, b.y, 16, 170, 12); G.shake = 5; Sfx.burst(); }
+        if (b.burstT <= 0) { b.burstT = 3.2; ringBurst(b.x, b.y, 16, 170, bShot(b, 0.28)); G.shake = 5; Sfx.burst(); }
       }
     } else if (b.kind === 'swarm') {
       // 螺旋弹幕
@@ -2489,7 +2520,7 @@
       if (b.sumT <= 0) { b.sumT = phase2 ? 6.5 : 9.5; summonAt(b, 'bat', phase2 ? 4 : 3, phase2 ? 12 : 9); }
       if (phase2) {
         b.burstT -= dt;
-        if (b.burstT <= 0) { b.burstT = 3.8; ringBurst(b.x, b.y, 18, 165, 11); G.shake = 5; Sfx.burst(); }
+        if (b.burstT <= 0) { b.burstT = 3.8; ringBurst(b.x, b.y, 18, 165, bShot(b, 0.26)); G.shake = 5; Sfx.burst(); }
       }
     } else {
       // blood：瞬移 + 交错弹幕 + 血环
@@ -2497,8 +2528,8 @@
       if (b.shootT <= 0) {
         b.shootT = phase2 ? 0.85 : 1.25;
         const base = Math.atan2(p.y - b.y, p.x - b.x);
-        if (Math.random() < 0.5) aimFan(b.x, b.y, base, phase2 ? 9 : 7, 0.2, 210, 15);
-        else ringBurst(b.x, b.y, phase2 ? 16 : 12, 165, 13);
+        if (Math.random() < 0.5) aimFan(b.x, b.y, base, phase2 ? 9 : 7, 0.2, 210, bShot(b, 0.42));
+        else ringBurst(b.x, b.y, phase2 ? 16 : 12, 165, bShot(b, 0.28));
         Sfx.shoot();
       }
       b.teleT -= dt;
@@ -2512,7 +2543,7 @@
       if (b.sumT <= 0) { b.sumT = phase2 ? 8 : 11; summonAt(b, 'assassin', phase2 ? 3 : 2, phase2 ? 6 : 4); }
       if (phase2) {
         b.burstT -= dt;
-        if (b.burstT <= 0) { b.burstT = 2.8; ringBurst(b.x, b.y, 18, 190, 12); G.shake = 6; Sfx.burst(); }
+        if (b.burstT <= 0) { b.burstT = 2.8; ringBurst(b.x, b.y, 18, 190, bShot(b, 0.28)); G.shake = 6; Sfx.burst(); }
       }
     }
 
@@ -2529,7 +2560,7 @@
       G.shake = 16; G.flash = 0.7; G.hitStop = 0.1;
       for (let i = 0; i < 14; i++) { const a = Math.random() * 6.28, dd = U.rand(20, 140); G.gems.push({ x: G.player.x + Math.cos(a) * dd, y: G.player.y + Math.sin(a) * dd, r: 5, val: 4 }); }
       banner(name + ' 已伏诛 · ' + cfg.name + ' 现身');
-      spawnBossFrom(cfg);
+      spawnBossFrom(cfg, true);
       return;
     }
     G.shake = 18; G.flash = 0.85; G.hitStop = 0.14;

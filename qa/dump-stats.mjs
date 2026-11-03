@@ -37,6 +37,8 @@ const data = await page.evaluate(() => {
     type: m.type, startLevel: m.startLevel || 1, endLevel: m.endLevel || null,
     diff: m.diff || null, bossAt: m.bossAt != null ? m.bossAt : null,
     enemies: m.enemies || [], boss: m.boss || null,
+    // 实际生效的 Boss 数值在 js/balance.js 里（按等级曲线 + 实测量校准），地图上的 boss.hp 只是历史残值
+    bal: (W.BALANCE && W.BALANCE.BOSS[m.id]) || null,
     shop: m.shop || null, auction: m.auction || null,
     unlock: m.unlock || null, next: m.next || null, unlockBy: m.unlockBy || null,
     reward: m.reward || null

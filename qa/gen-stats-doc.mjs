@@ -67,7 +67,10 @@ for (const m of D.maps) {
   const en = (m.enemies || []).map(nm).join('、') || '—';
   const b = m.boss;
   const bn = b ? b.name : (m.type === 'market' ? '—（坊市）' : '—');
-  s += `| ${m.id} | ${m.name} | ${typeCn(m.type)}${m.side ? '·支线' : ''} | ${lv} | ${m.diff != null ? m.diff : '—'} | ${en} | ${bn} | ${b && b.hp ? b.hp : '—'} | ${b && b.dmg ? b.dmg : '—'} |\n`;
+  // 血量/伤害以 BALANCE 表为准（游戏里真用的是这两个数），地图里的 boss.hp 只是历史残值
+  const bhp = m.bal ? m.bal[0] : (b && b.hp ? b.hp : null);
+  const bdmg = m.bal ? m.bal[1] : (b && b.dmg ? b.dmg : null);
+  s += `| ${m.id} | ${m.name} | ${typeCn(m.type)}${m.side ? '·支线' : ''} | ${lv} | ${m.diff != null ? m.diff : '—'} | ${en} | ${bn} | ${bhp != null ? bhp : '—'} | ${bdmg != null ? bdmg : '—'} |\n`;
 }
 
 // ===== 五、NPC =====
