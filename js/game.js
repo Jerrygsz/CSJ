@@ -689,14 +689,44 @@
   // 一屏要多大半径才算「全屏拾取」：视口半对角线再放一点余量。
   // W/H 是逻辑视口且随设备伸展（480×864 起，长屏可到 480×1120），故实时算，不写死。
   function viewPickR() { return Math.sqrt(W * W + H * H) / 2 + 24; }
+  // ---------- 驱物术的第二个功用：神念拾取 ----------
+  // 顿悟池里「拾取范围 +30%」那张卡在上一轮被删了（它和「变强打怪」无关，属于噪音），
+  // 但拾取本身不能没着落 —— 宝石飞不进来，玩家就得靠脚一个个去踩，走位压力反而变形。
+  // 所以把它挂到驱物术上：御剑的同一条神念，顺手把四周的灵物摄过来。
+  //
+  // 曲线按「面积等分」而不是半径等分：每升一重多覆盖同样一片地，
+  // 否则 1→2 重半径直接翻倍（体感突兀），5→6 重几乎没有变化（升级没回报）。
+  //   1 重 20.4%  2 重 28.9%  3 重 35.4%  4 重 40.8%  5 重 45.6%  6 重 50.0%
+  // 满级 50% 是相对「全屏拾取半径」（视口半对角线 +24）而言：
+  // 480×864 上即 259px，比半屏宽（240）还多一点，左右两侧的掉落基本都能吸到。
+  const SWORD_PICK_FULL = 0.50;   // 满级占全屏拾取半径的比例
+  function swordPickupR() {
+    // 局内读本局运转的驱物术（buildPlayerSkills 保证它一定在），局外（洞府面板）读修炼层数
+    const p = G.player;
+    const lv = (p && p.skills && p.skills.sword)
+      || ((save.cultivate && save.cultivate.skills && save.cultivate.skills.sword) || 0);
+    if (lv <= 0) return 0;
+    const s = SKILLS.find(x => x.id === 'sword');
+    const cap = (s && s.max) || 6;
+    return viewPickR() * SWORD_PICK_FULL * Math.sqrt(Math.min(lv, cap) / cap);
+  }
+  // 驱物术升了一重：把神念圈再露一下，告诉玩家「御剑」确实让拾取范围变大了。
+  // talk 为真才补一句 banner —— 境界授功那条有统一 banner，这里只闪圈不抢话。
+  function bumpSwordPick(talk) {
+    G.pickPulseAt = G.time;
+    if (talk) banner('神念更广 · 拾取 ' + Math.round(pickupR()) + 'px');
+  }
   // 被动加成全部走「功法属性」聚合：新旧被动功法一起算，练到几层就给几层的力
   function hasteMul() { return Math.pow(0.92, (passiveSum('atkSpd') + buffSum('atkSpd')) / 0.08); }
   function spdMul() { return 1 + rb('spd') + passiveSum('spd') + buffSum('spd') + G.realm.spd + gb('spd') + rp('spd'); }
   function atkMul() { return 1 / (1 + rb('atkSpd') + (G.bonus.atkSpd || 0) + gb('atkSpd') + G.realm.atk); }
   function dmgMul() { return (1 + rb('dmg') + (G.bonus.dmg || 0) + gb('dmg')) * (1 + G.realm.dmg) * (1 + passiveSum('dmg') + buffSum('dmg')); }
-  // 拾取半径原始值（不封顶）：顿悟卡 rp('pickup') 无上限，可以一直往上叠
+  // 拾取半径原始值（不封顶）：装备/丹药/顿悟卡的加成可以一直往上叠
+  // 基础值不再写死 46：驱物术练过就用它的神念半径当底子（见 swordPickupR），
+  // 没练驱物术的走位才全靠脚。装备的 pickup 加成仍在这个底子上乘，不与技能冲突。
+  function pickupBase() { return Math.max(46, swordPickupR()); }
   function pickupRaw() {
-    return 46 * (1 + passiveSum('pickup') + buffSum('pickup')) * (1 + rb('pickup') + (G.bonus.pickup || 0) + gb('pickup') + rp('pickup'));
+    return pickupBase() * (1 + passiveSum('pickup') + buffSum('pickup')) * (1 + rb('pickup') + (G.bonus.pickup || 0) + gb('pickup') + rp('pickup'));
   }
   // 实际拾取半径：叠到覆盖整屏就锁在「全屏」不再涨（再大也只是白算距离）
   function pickupR() { const r = pickupRaw(), full = viewPickR(); return r >= full ? full : r; }
@@ -3774,6 +3804,7 @@
       if (s) {
         p.skills[s.id] = Math.min(s.max, (p.skills[s.id] || 0) + 1);
         text += '　得授 ' + s.name;
+        if (s.id === 'sword' && !silent) bumpSwordPick(false);
         if (!silent) Sfx.buff();
       }
     } else if (r.note) text += '　' + r.note;
@@ -4375,6 +4406,7 @@
   function chooseCard(c) {
     if (c.kind === 'skill') {
       G.player.skills[c.id] = (G.player.skills[c.id] || 0) + 1;
+      if (c.id === 'sword') bumpSwordPick(true);
       syncCultivate();
     } else if (c.kind === 'heal') G.player.hp = Math.min(G.player.maxhp, G.player.hp + G.player.maxhp * 0.5);
     else if (c.kind === 'rain') {
@@ -4383,8 +4415,8 @@
     } else if (c.kind === 'fortune') {
       const capNow = (s) => window.skillCapById ? window.skillCapById(s.id, G.player.level) : s.max;
       const own = SKILLS.filter(s => (!s.minLv || G.player.level >= s.minLv) && (G.player.skills[s.id] || 0) > 0 && (G.player.skills[s.id] || 0) < capNow(s));
-      if (own.length) { const s = U.pick(own); G.player.skills[s.id]++; }
-      else { const ns = SKILLS.find(s => !(G.player.skills[s.id])); if (ns) G.player.skills[ns.id] = 1; }
+      if (own.length) { const s = U.pick(own); G.player.skills[s.id]++; if (s.id === 'sword') bumpSwordPick(true); }
+      else { const ns = SKILLS.find(s => !(G.player.skills[s.id])); if (ns) { G.player.skills[ns.id] = 1; if (ns.id === 'sword') bumpSwordPick(true); } }
       recalcMaxhp(); syncCultivate();
     }
     elLevelup.style.display = 'none';
@@ -5348,6 +5380,17 @@
         ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 1.5, 0, 6.28); ctx.fill();
         ctx.globalAlpha = 1;
       }
+      // 神念拾取圈：进图头 1.2 秒露一下，让玩家看见驱物术的拾取范围到哪
+      // 拾取本身每帧都在生效，圈只是提示，不常驻 —— 常驻会跟受击红边、境界光环打架
+      if (G.pickPulseAt != null && G.time - G.pickPulseAt < 1.3) {
+        const k = 1 - (G.time - G.pickPulseAt) / 1.3;
+        const rr = pickupR();
+        ctx.strokeStyle = 'rgba(140,220,255,' + (0.28 * k) + ')';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(p.x, p.y, rr, 0, 6.28); ctx.stroke();
+        ctx.fillStyle = 'rgba(140,220,255,' + (0.06 * k) + ')';
+        ctx.beginPath(); ctx.arc(p.x, p.y, rr, 0, 6.28); ctx.fill();
+      }
       // 境界光环：层数越高越亮
       if (G.realmIdx > 1) {
         const pw = Math.min(0.5, 0.05 * G.realmIdx);
@@ -5524,6 +5567,7 @@
     G.player = newPlayer();
     G.enemies = []; G.bullets = []; G.ebullets = []; G.gems = []; G.herbs = []; G.parts = []; G.texts = []; G.loot = [];
     G.time = 0; G.kills = 0; G.spawnT = 1; G.nextEliteT = 100; G.eliteIdx = 0;
+    G.pickPulseAt = 0;   // 进图头 1.2 秒展示一次神念拾取圈
     G.fxBullets.length = 0; G.coopFrozen = false; G.dialogSynced = false;
     G.boss = null; G.bossActive = false; G.bossSpawned = false; G.bossWarned = false; G.extraIdx = 0;
     G.fieldSlow = []; G.shake = 0; G.flash = 0; G.hitStop = 0;
@@ -6724,7 +6768,8 @@
       ['重击', Math.round(crit * 100) + '%'],
       ['减伤', Math.round(armor * 100) + '%'],
       ['每秒回血', ((0.7 * ((save.cultivate.skills || {}).regen || 0)) + rb('regen') + (save.bonuses.regen || 0) + (g.regen || 0)).toFixed(1)],
-      ['拾取范围', '×' + (1 + rb('pickup') + (save.bonuses.pickup || 0) + (g.pickup || 0)).toFixed(2)],
+      // 底子由驱物术的神念决定（练得越深越广），装备与丹药的加成在其上乘
+      ['拾取范围', Math.round(Math.max(46, swordPickupR()) * (1 + rb('pickup') + (save.bonuses.pickup || 0) + (g.pickup || 0))) + 'px'],
       ['修为加成', pct(rb('xpMul') + (save.bonuses.xpMul || 0) + (g.xpMul || 0))],
       ['已佩法器', equippedCount() + ' / 4']
     ];

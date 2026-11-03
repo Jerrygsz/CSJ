@@ -26,7 +26,7 @@ window.SKILLS = [
   // ============ 炼气期：七玄门根基 → 太南小会 → 血色禁地 → 天星城 ============
   { id: 'sword', name: '驱物术', icon: '💫', max: 6, minLv: 1, main: true, type: 'ranged',
     atk: { kind: 'beam', base: 8, perLv: 3, cd: 0.85, countBase: 1, countPerLv: 0.34, pierceBase: 3, piercePerLv: 1 / 3, range: 360, home: false, life: 1.4, vfx: 'qingmang' },
-    desc: '以神念御物，一道青光直取最近的敌人。与御风诀、定神符同属长春功所含的三门基础法术，韩立起步就靠它' },
+    desc: '以神念御物，一道青光直取最近的敌人；同一缕神念也顺手把四周的灵物摄来，修得越深，神念所及越广。与御风诀、定神符同属长春功所含的三门基础法术，韩立起步就靠它' },
   { id: 'fire', name: '火弹术', icon: '☄️', max: 5, minLv: 5, type: 'ranged_aoe',
     atk: { kind: 'beam', base: 14, perLv: 6, cd: 1.5, countBase: 1, countPerLv: 0.5, range: 520, home: false, life: 1.5, pierceBase: 1, vfx: 'fire' },
     desc: '长春功所含的基础法术：弹出一团红火球，直直打出去。韩立最早会的攻击手段' },
