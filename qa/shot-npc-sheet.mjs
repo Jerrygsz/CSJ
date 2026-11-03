@@ -49,7 +49,9 @@ const LIST = [
   // 第六档：有原著描写但一直没脸的台词角色
   ['lunhui', '轮回殿主'], ['jiaosan', '蛟三'], ['ganjiuzhen', '甘九真'],
   ['hanqiu', '寒丘'], ['chenruyan', '陈如烟'], ['wenzhong', '文仲'],
-  ['qingyuanzi', '青元子'], ['liujing', '刘靖'], ['fengxi', '风希'], ['lingyuling', '凌玉灵']
+  ['qingyuanzi', '青元子'], ['liujing', '刘靖'], ['fengxi', '风希'], ['lingyuling', '凌玉灵'],
+  // 第七档：无名职业的类型骨架（只给身份，不给个体长相）
+  ['guard', '守卫骨架'], ['daobing', '道兵骨架'], ['guijiang', '鬼将骨架'], ['zhishi', '执事骨架']
 ];
 
 async function sheet(skin, out) {
