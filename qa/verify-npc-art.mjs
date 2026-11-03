@@ -47,7 +47,15 @@ const WANT = [
   ['jinguang', '金光上人'], ['xiongsiwang', '凶司王'], ['tuntian', '吞天圣祖'],
   ['guimu', '鬼木'], ['baimu', '百目天鬼'], ['guhuang', '骨皇'],
   ['xiaojinhan', '萧晋寒'], ['dongfangbai', '东方白'], ['qimozi', '奇摩子'],
-  ['miaofa', '妙法仙尊'], ['donglihu', '东离虎'], ['guhuojin', '古或今']
+  ['miaofa', '妙法仙尊'], ['donglihu', '东离虎'], ['guhuojin', '古或今'],
+  // 四批：有原著硬外貌的 14 位（第二档）。查不到描写的 10 位（黑枭王/佛骨王/紫杉/
+  // 大罗鬼王/第一魔尊/天外魔君/米尊者/天象尊者/古魔主魂/银阶木族）继续共用轮换图，
+  // 这不是漏做，是没有依据就不画
+  ['yuanyan', '元魇始祖'], ['baohua', '宝花圣祖'], ['huangyuanzi', '黄元子'],
+  ['yinchiyecha', '银翅夜叉'], ['aoxiao', '敖啸老祖'], ['zhiyang', '至阳上人'],
+  ['liuzizai', '柳自在'], ['bumietianzun', '不灭天尊'], ['guilingzi', '鬼灵子'],
+  ['lufuren', '陆夫人'], ['maliang', '马良'], ['miaohe', '妙鹤真人'],
+  ['lengyan', '冷焰老祖'], ['heitian', '黑天魔祖']
 ];
 
 // 同时抓每张图的像素指纹：两人撞图最容易发生在复制粘贴时（图一样、名字不同）
@@ -110,6 +118,65 @@ for (const [k, label] of WHITES) {
 const tones = WHITES.map(([k]) => robeTone[k] && robeTone[k].tone);
 ok(new Set(tones).size === WHITES.length, '四个白袍人物在墨阶下互不同色（淡彩生效）', tones);
 
+// 这批新增的三件浅色袍：宝花是冷白裙、至阳是冷白道袍（原象牙白被 inkPixel 判成肤色，
+// 和脸同色成了实心米板）、马良是淡金白。三件"白"必须还在三个档上
+const whites2 = await page.evaluate((names) => {
+  window.__FR.skin('guigu');
+  const out = {};
+  for (const n of names) {
+    const c = window.Sprites[n];
+    if (!c) { out[n] = null; continue; }
+    const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+    const cnt = new Map();
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i + 3] < 40) continue;
+      const k = d[i] + ',' + d[i + 1] + ',' + d[i + 2];
+      cnt.set(k, (cnt.get(k) || 0) + 1);
+    }
+    // 袍色 = 最亮的那个高频色（脸比袍子暗一档，取最亮就跳过脸）
+    let best = null, bl = -1;
+    for (const [k, v] of cnt) {
+      if (v < 10) continue;
+      const [r, g, b] = k.split(',').map(Number);
+      const l = (r + g + b) / 3;
+      if (l > bl) { bl = l; best = k; }
+    }
+    out[n] = best;
+  }
+  return out;
+}, ['baohua', 'zhiyang', 'maliang']);
+const w2 = ['baohua', 'zhiyang', 'maliang'].map(k => whites2[k]);
+ok(w2.every(Boolean), '宝花/至阳/马良 取得到袍色', whites2);
+ok(new Set(w2).size === 3, '宝花冷白 / 至阳冷白 / 马良淡金白 三件白袍互不同色', w2);
+
+// 黑袍角色最大的坑：色值明度低于 0.13 会被 inkPixel 一开始就判成浓墨，
+// 整件袍子消失，只剩脸浮在黑块上（元魇第一版就是这样）。抬到 0.17 才留得住紫/青
+const darkRobe = await page.evaluate(() => {
+  window.__FR.skin('guigu');
+  // 取袍身正中那一格（不是"最高频色"——最高频永远是浓墨描边）
+  const at = (n, x, y) => {
+    const c = window.Sprites[n];
+    const d = c.getContext('2d').getImageData(x, y, 1, 1).data;
+    return d[0] + ',' + d[1] + ',' + d[2];
+  };
+  return { yuanyan: at('yuanyan', 5, 10), lufuren: at('lufuren', 5, 10), heitian: at('heitian', 5, 9) };
+});
+// 32,29,24 就是浓墨本体。元魇/陆夫人必须比它亮，黑天则本来就该是浓墨
+ok(darkRobe.yuanyan !== '32,29,24', '元魇的黑袍墨化后不是纯浓墨（墨里透紫）', darkRobe.yuanyan);
+ok(darkRobe.lufuren !== '32,29,24', '陆夫人的黑袍墨化后不是纯浓墨（墨里透青）', darkRobe.lufuren);
+ok(darkRobe.yuanyan !== darkRobe.lufuren, '元魇的紫与陆夫人的青在墨阶下不同色', darkRobe);
+
+// 黄元子的白须第一版用了 #d8d0c0，hsl 正好落进"肤色"判定，墨化后和枯黄脸一模一样，
+// 须整个消失。改成冷灰走淡彩才分得开
+const beard = await page.evaluate(() => {
+  window.__FR.skin('guigu');
+  const c = window.Sprites.huangyuanzi;
+  const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+  const at = (x, y) => { const i = (y * c.width + x) * 4; return d[i] + ',' + d[i + 1] + ',' + d[i + 2]; };
+  return { face: at(5, 4), beard: at(5, 6) };
+});
+ok(beard.face !== beard.beard, '黄元子的白须与枯黄脸在墨阶下不同色（须没消失）', beard);
+
 // 1px 识别特征不能贴最外缘：贴边会被补的浓墨轮廓整格覆盖（陇家金肩章/鸾鸣赤凤羽/元刹双角都这么丢过）
 const edgeFeat = await page.evaluate(() => {
   const topLum = (n) => {
@@ -160,7 +227,16 @@ const BOSS_SPR = [
   ['js/xianjie.js', '百目天鬼', 'baimu'], ['js/xianjie.js', '骨皇', 'guhuang'],
   ['js/xianjie.js', '萧晋寒', 'xiaojinhan'], ['js/xianjie.js', '东方白', 'dongfangbai'],
   ['js/xianjie.js', '奇摩子', 'qimozi'], ['js/xianjie.js', '妙法仙尊', 'miaofa'],
-  ['js/xianjie.js', '东离虎', 'donglihu'], ['js/xianjie.js', '古或今', 'guhuojin']
+  ['js/xianjie.js', '东离虎', 'donglihu'], ['js/xianjie.js', '古或今', 'guhuojin'],
+  // 四批：14 张精灵铺到 16 个 boss 位（元魇两张化身、马良两个形态各共用一张）
+  ['js/late.js', '妙鹤真人', 'miaohe'], ['js/late2.js', '陆夫人', 'lufuren'],
+  ['js/late2.js', '银翅夜叉', 'yinchiyecha'], ['js/late2.js', '敖啸老祖', 'aoxiao'],
+  ['js/late2.js', '至阳上人', 'zhiyang'], ['js/lingjie.js', '元魇始祖', 'yuanyan'],
+  ['js/lingjie.js', '宝花圣祖', 'baohua'], ['js/lingjie.js', '元魇圣祖', 'yuanyan'],
+  ['js/lingjie.js', '黄元子', 'huangyuanzi'], ['js/lingjie.js', '不灭天尊', 'bumietianzun'],
+  ['js/lingjie.js', '马良·真仙之身', 'maliang'], ['js/lingjie.js', '马良·九元观真仙', 'maliang'],
+  ['js/xianjie.js', '冷焰老祖', 'lengyan'], ['js/xianjie.js', '黑天魔祖', 'heitian'],
+  ['js/xianjie.js', '柳自在', 'liuzizai'], ['js/xianjie.js', '鬼灵子', 'guilingzi']
 ];
 for (const [file, who, spr] of BOSS_SPR) {
   const src = fs.readFileSync(join(root, file), 'utf8').split('\n');

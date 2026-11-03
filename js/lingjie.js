@@ -755,8 +755,8 @@
       enemies: ['gui2', 'moxiu2', 'guixiu'],
       elites: ['始祖魔卫', '苦灵岛守卫'],
       mats: ['m_yimojin', 'm_zhenlingxue', 'm_yaodan'],
-      boss: { kind: 'mo', name: '元魇始祖·化身', hp: 165000, spd: 78, dmg: 186, r: 26, spr: 'mo', scale: 6.9 },
-      extraBoss: [{ kind: 'mo', name: '宝花圣祖', hp: 150000, spd: 62, dmg: 196, r: 25, spr: 'nvxiu', scale: 6.6, summon: '' }],
+      boss: { kind: 'mo', name: '元魇始祖·化身', hp: 165000, spd: 78, dmg: 186, r: 26, spr: 'yuanyan', scale: 7.9 },
+      extraBoss: [{ kind: 'mo', name: '宝花圣祖', hp: 150000, spd: 62, dmg: 196, r: 25, spr: 'baohua', scale: 6.6, summon: '' }],
       reward: { stones: 92000, items: ['t_jinglinglian'], pets: ['p_xiedaoren'],
         mats: [['m_xilingchi', 2], ['m_zhenlingxue', 3], ['m_yimojin', 2]] },
       clearTitle: '洗灵池三日',
@@ -849,7 +849,7 @@
       elites: ['螟虫之将', '异界大乘'],
       mats: ['m_yimojin', 'm_zhenlingxue', 'm_yaodan'],
       boss: { kind: 'beast', name: '螟虫之母·元神', hp: 230000, spd: 80, dmg: 215, r: 28, spr: 'haishou', scale: 7.4 },
-      extraBoss: [{ kind: 'mo', name: '元魇圣祖·化身', hp: 120000, spd: 66, dmg: 175, r: 24, spr: 'mo', scale: 6.6, summon: '' }],
+      extraBoss: [{ kind: 'mo', name: '元魇圣祖·化身', hp: 120000, spd: 66, dmg: 175, r: 24, spr: 'yuanyan', scale: 7.5, summon: '' }],
       reward: { stones: 96000, items: ['t_yuanhundeng'], mats: [['m_mingmuhe', 1], ['m_yimojin', 3], ['m_zhenlingxue', 4]] },
       clearTitle: '始印已开',
       clearDesc: '井底的阵松了。莫简离扶着敖啸走出来，宝花站在雾里没动。紫灵站得更远，只摇了摇头。'
@@ -909,8 +909,8 @@
       enemies: ['moxiu2', 'dajinxiu', 'guixiu'],
       elites: ['黄元子门人', '不灭天尊随侍'],
       mats: ['m_zhenlingxue', 'm_yaodan', 'm_zhenlinglin'],
-      boss: { kind: 'mo', name: '黄元子', hp: 200000, spd: 76, dmg: 205, r: 26, spr: 'neimen', scale: 6.9 },
-      extraBoss: [{ kind: 'mo', name: '不灭天尊', hp: 150000, spd: 72, dmg: 190, r: 25, spr: 'mo', scale: 6.6, summon: '' }],
+      boss: { kind: 'mo', name: '黄元子', hp: 200000, spd: 76, dmg: 205, r: 26, spr: 'huangyuanzi', scale: 6.9 },
+      extraBoss: [{ kind: 'mo', name: '不灭天尊', hp: 150000, spd: 72, dmg: 190, r: 25, spr: 'bumietianzun', scale: 7.5, summon: '' }],
       reward: { stones: 100000, mats: [['m_zhenlingxue', 4], ['m_xuantianteng', 1]] },
       clearTitle: '冥河三敌',
       clearDesc: '两死一逃，河面上的劫云散了。青元子看着他，半天才说出一句：你这一身，已不是合体了。'
@@ -1025,7 +1025,7 @@
       enemies: ['gui2', 'moxiu2', 'guixiu'],
       elites: ['九元观随从', '金色甲士'],
       mats: ['m_zhenlingxue', 'm_xuantianteng'],
-      boss: { kind: 'mo', name: '马良·真仙之身', hp: 260000, spd: 86, dmg: 300, r: 27, spr: 'mo', scale: 7.0 },
+      boss: { kind: 'mo', name: '马良·真仙之身', hp: 260000, spd: 86, dmg: 300, r: 27, spr: 'maliang', scale: 8.0 },
       reward: { stones: 220000, items: ['t_zhangtianping', 't_daotianping'], mats: [['m_xuantianteng', 1], ['m_zhenlingxue', 3]] },
       clearTitle: '掌天瓶',
       clearDesc: '青瓶与墨绿瓶之间的嗡鸣声越来越响，像两头隔着水面互相呼唤的兽。原来它有名字。'
@@ -1043,7 +1043,7 @@
       enemies: ['gui2', 'moxiu2', 'guixiu'],
       elites: ['万灵血龙', '九元观随从'],
       mats: ['m_zhenlingxue', 'm_xuantianteng'],
-      boss: { kind: 'mo', name: '马良·九元观真仙', hp: 300000, spd: 88, dmg: 320, r: 28, spr: 'mo', scale: 7.2 },
+      boss: { kind: 'mo', name: '马良·九元观真仙', hp: 300000, spd: 88, dmg: 320, r: 28, spr: 'maliang', scale: 8.2 },
       reward: { stones: 240000, items: ['t_wanlingxueyi', 't_moguang', 't_huoxuzi', 'dan_zhihun'], mats: [['m_xuantianteng', 2], ['m_zhenlingxue', 4]] },
       clearTitle: '斩仙',
       clearDesc: '墨绿细线从脖颈一闪而过，一颗头颅滚落下来。灵界最后一场硬仗，打完了。'

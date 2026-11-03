@@ -382,7 +382,7 @@
       elites: ['化形妖', '深海巨兽'],
       mats: ['m_yaodan', 'm_banyao', 'm_jinlei', 'm_yanghun'],
       boss: { kind: 'beast', name: '八级妖兽·毒蛟', hp: 9800, spd: 64, dmg: 40, r: 23, spr: 'dujiao', scale: 6.6, summon: 'yuyao' },
-      extraBoss: [{ kind: 'mo', name: '妙鹤真人', hp: 9200, spd: 58, dmg: 44, r: 20, spr: 'neimen', scale: 5.2, summon: '' }],
+      extraBoss: [{ kind: 'mo', name: '妙鹤真人', hp: 9200, spd: 58, dmg: 44, r: 20, spr: 'miaohe', scale: 5.2, summon: '' }],
       reward: { stones: 2000, items: ['fb_fenglei'], mats: [['m_jinlei', 2], ['m_yaodan', 4], ['m_lingmo', 4], ['m_xueyu', 2]] },
       clearTitle: '风雷翅已夺',
       clearDesc: '三妖喝了掺绿液的万年灵乳，毒蛟先倒。风雷翅到手，风希与妙鹤追了半个外星海——最后是妙音门的传送阵把他送回了内星海。'

@@ -1032,6 +1032,271 @@
       '..KGK..KGK..',
       '..KGK..KGK..',
       '..KKK..KKK..'
+    ] },
+
+    // ---------- 第二档：有原著硬外貌依据的具名首领 ----------
+    // 依据核实原则：只认"人名与长相词同句出现"的原文。查不到的一律不画——
+    //   黑枭王、佛骨王、紫杉、大罗鬼王、第一魔尊、天外魔君、米尊者、天象尊者、
+    //   古魔主魂、银阶木族，全书没有一句写他们长什么样，硬画就是编造。
+
+    // 元魇：魔界三大始祖之一。§2087「黑袍青年」（灵王虚影冲其抱拳、宝花称其"道友"）→
+    //   黑袍青年 + 披发垂肩 + 胸前血玉。和玄骨/六道同为黑袍，靠披发轮廓与胸前那块朱玉分开
+    { name: 'yuanyan', pal: { K: '#0e0c12', H: '#16121c', S: '#e6d8d0', G: '#2a2434', g: '#1a1626', B: '#3a2040', W: '#d02018' }, rows: [
+      '...KKKKKK...',
+      '..KHHHHHHK..',
+      '..KHHHHHHK..',
+      '..KHSSSSHK..',
+      '..KSKSSKSK..',
+      '..KSSSSSSK..',
+      '..KGGGGGGK..',
+      '.KHgGWWGgHK.',
+      '.KHgGWWGgHK.',
+      '..KgBBBBgK..',
+      '..KGGGGGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 宝花圣祖：魔界三大始祖。「白裙女子」「本圣祖」「美眸晶光闪动」→
+    //   白裙 + 黑发高髻 + 朱红披帛垂两侧 + 额间花钿。全身只两处朱，墨化后是整张图上最跳的点
+    { name: 'baohua', pal: { K: '#241c1c', H: '#141018', S: '#f4dcc8', G: '#eef2f0', g: '#c4ccc8', B: '#c02820', W: '#d8b048' }, rows: [
+      '....KKKK....',
+      '...KHHHHK...',
+      '..KHHHHHHK..',
+      '..KHSSSSHK..',
+      '..KHSBBSHK..',
+      '..KSKSSKSK..',
+      '..KSSSSSSK..',
+      '.KBGGGGGGBK.',
+      '.KBGGGGGGBK.',
+      '.KBGgWWgGBK.',
+      '..KGGGGGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 黄元子：大乘。「枯瘦男子」「黄袍男子」「身材瘦削」→
+    //   整个人收窄两格（肩只有 4 格宽）+ 藤黄袍 + 白须从颌下一直垂到胸口盖住肩线
+    { name: 'huangyuanzi', pal: { K: '#1a1610', H: '#2a2418', S: '#dcc0a0', G: '#b89020', g: '#8a6a10', B: '#4a3a20', W: '#d0d8dc' }, rows: [
+      '...KKKKKK...',
+      '..KHHHHHHK..',
+      '..KHHHHHHK..',
+      '..KHSSSSHK..',
+      '..KSKSSKSK..',
+      '..KSSSSSSK..',
+      '..KWWWWWWK..',
+      '...KGGGGK...',
+      '..KGgGGgGK..',
+      '..KGgBBgGK..',
+      '...KGGGGK...',
+      '...KGKKGK...',
+      '...KGKKGK...',
+      '...KKKKKK...'
+    ] },
+    // 银翅夜叉：鬼物。「背后一只银翅却从后一伸的挡在其身前」「嘴边獠牙暴涨倍许，
+    //   双目迸射万道银芒」→ 造型的全部就是那对翅：占到 14 宽，两片银翅各两格、
+    //   从肩垂到膝盖，獠牙与双目的银是同一档色
+    { name: 'yinchiyecha', pal: { K: '#14161a', H: '#2a3038', S: '#9aa4ac', G: '#2a3038', g: '#1a1f24', B: '#c8d4dc', W: '#e8eef2' }, rows: [
+      '....KKKKKK....',
+      '...KHHHHHHK...',
+      '...KHHHHHHK...',
+      '...KHSSSSHK...',
+      '...KSKSSKSK...',
+      '...KSWSSWSK...',
+      'KWWKGGGGGGKWWK',
+      'KWWKGggggGKWWK',
+      'KWWKGgBBgGKWWK',
+      'KWWKGGGGGGKWWK',
+      'KWWKGGGGGGKWWK',
+      '.KWKGGGGGGKWK.',
+      '...KGGKKGGK...',
+      '....KK..KK....'
+    ] },
+    // 敖啸老祖：妖族大乘。「敖啸那头老狼」「敖啸妖王是家祖」+「清秀异常脸孔」
+    //   「清秀儒雅的面孔」→ 银月一族狼妖，所以银发有出处（不是给老祖硬加白发）：
+    //   银发 + 清秀年轻脸 + 深青袍 + 玉带。和白须青颜真人同是青袍，
+    //   靠"银发而非白须、脸是青年而非老者"分开
+    { name: 'aoxiao', pal: { K: '#141a1c', H: '#c8d0d4', S: '#f0dcc8', G: '#1e3a3c', g: '#122426', B: '#7ab0a8', W: '#e0e8e8' }, rows: [
+      '..K.KKKK.K..',
+      '..KKHHHHKK..',
+      '..KHHHHHHK..',
+      '..KHSSSSHK..',
+      '..KSKSSKSK..',
+      '..KSSSSSSK..',
+      '..KGGGGGGK..',
+      '.KGgGGGGgGK.',
+      '.KGgBBBBgGK.',
+      '..KGgGGgGK..',
+      '..KGGGGGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 至阳上人：正道盟太真门。「约四十余岁，皮肤晶莹洁白，五官端正儒雅」→
+    //   皮肤是全库最亮的一档（#faf0e4，故意比别的角色白一档）+ 象牙白道袍 + 朱红领缘
+    //   与腰带 + 玉簪穿道髻
+    { name: 'zhiyang', pal: { K: '#1c1a16', H: '#2a2620', S: '#faf0e4', G: '#e6e8ee', g: '#c0c4cc', B: '#c02820', W: '#d8ece0' }, rows: [
+      '...KKKKKK...',
+      '...KHWHHK...',
+      '..KHHHHHHK..',
+      '..KHSSSSHK..',
+      '..KSKSSKSK..',
+      '..KSSSSSSK..',
+      '..KBGGGGBK..',
+      '.KGgGGGGgGK.',
+      '.KGgGGGGgGK.',
+      '..KgBBBBgK..',
+      '..KGGGGGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 柳自在：天狐一族大罗。「青袍中年男子」→ 青袍（偏冷石青，不是青颜的草青）+
+    //   两鬓银灰 + 玉带。狐族不靠耳朵（原文没写），靠细长眼与银鬓区分
+    { name: 'liuzizai', pal: { K: '#141a1c', H: '#22282a', S: '#ecd8c4', G: '#2a4a58', g: '#1a3038', B: '#c8b070', W: '#c8ccd0' }, rows: [
+      '...KKKKKK...',
+      '..KHHHHHHK..',
+      '..KHHHHHHK..',
+      '..KHSSSSHK..',
+      '..KSKSSKSK..',
+      '..KSSSSSSK..',
+      '..KGGGGGGK..',
+      '.KGWGGGGWGK.',
+      '.KGgBBBBgGK.',
+      '..KGgGGgGK..',
+      '..KGGGGGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 不灭天尊：大乘。「幻化出一名满脸蛇纹的青年道士，双目赫然瞳孔倒竖和巨蟒一般无二」→
+    //   原著把长相写死了：满脸青绿蛇纹 + 金色竖瞳。蛇纹是这张图唯一的身份证明，
+    //   所以整张脸都铺纹，只留眼周一圈干净好让金瞳跳出来
+    { name: 'bumietianzun', pal: { K: '#101a14', H: '#1a2a20', S: '#d8dcc8', G: '#1e3024', g: '#121e16', B: '#4a8a50', W: '#e0b030' }, rows: [
+      '...KKKKKK...',
+      '..KHHHHHHK..',
+      '..KHHHHHHK..',
+      '..KHSSSSHK..',
+      '..KSKSSKSK..',
+      '..KSBSSBSK..',
+      '..KBSSSSBK..',
+      '..KGGGGGGK..',
+      '.KGgBBGGgGK.',
+      '..KgBBBBgK..',
+      '..KGGGGGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 鬼灵子：仙界鬼修首脑。「本就苍白的脸」「身形一散，化作一片鬼雾」→
+    //   惨白面孔 + 灰紫鬼雾。下半身不收腿，直接收成一根锥形雾尾——这是"化雾"
+    //   唯一在 12 格内的表达方式，也是它和其他所有鬼修的分水岭
+    { name: 'guilingzi', pal: { K: '#1a1620', H: '#2a2430', S: '#e8e4ec', G: '#7a6a88', g: '#544a60', B: '#8a7a98', W: '#b8acc4' }, rows: [
+      '...KKKKKK...',
+      '..KHHHHHHK..',
+      '..KHHHHHHK..',
+      '..KHSSSSHK..',
+      '..KSKSSKSK..',
+      '..KSSSSSSK..',
+      '..KGGGGGGK..',
+      '.KGgGGGGgGK.',
+      '.KGgBBBBgGK.',
+      '..KWGWWGWK..',
+      '..KWGWWGWK..',
+      '...KWWWWK...',
+      '....KWWK....',
+      '.....KK.....'
+    ] },
+    // 陆夫人：御灵宗。「对一旁的黑袍女子说道」→ 黑袍女子 + 高髻 + 银冠。
+    //   和元魇同是黑袍，她是女性高髻配银饰、腰封是银，元魇是披发配胸前朱玉
+    { name: 'lufuren', pal: { K: '#0e0c10', H: '#181418', S: '#e8d8d0', G: '#1e2a30', g: '#141c22', B: '#a8b0b8', W: '#3a2a38' }, rows: [
+      '....KKKK....',
+      '...KHHHHK...',
+      '..KBBBBBBK..',
+      '..KHSSSSHK..',
+      '..KSKSSKSK..',
+      '..KSSSSSSK..',
+      '..KGGGGGGK..',
+      '.KGgGGGGgGK.',
+      '.KGgGGGGgGK.',
+      '..KgBBBBgK..',
+      '..KGGGGGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 马良：九元观真仙。「一名被符链捆束的俊美青年，眉宇间处的金色灵纹骤然闪了一下」→
+    //   俊美青年 + 眉间金纹 + 金冠。袍色是淡金白（#f0e8c8）——和宝花的冷白、
+    //   至阳的赭白凑成三档不同的"白"，墨化后各走各的淡彩
+    { name: 'maliang', pal: { K: '#2a2418', H: '#1e1a14', S: '#f6e4d0', G: '#f6f2e2', g: '#d8d2bc', B: '#a88020', W: '#a88020' }, rows: [
+      '...KKBBKK...',
+      '..KHHHHHHK..',
+      '..KHHHHHHK..',
+      '..KHSBBSHK..',
+      '..KSWSSWSK..',
+      '..KSSSSSSK..',
+      '..KGGGGGGK..',
+      '.KGgGGGGgGK.',
+      '.KGgGGGGgGK.',
+      '..KgBBBBgK..',
+      '..KGGGGGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 妙鹤真人：「这道士」「面容变得如此年轻，容貌却和当年没有多大改变」→
+    //   道士髻 + 青年面孔 + 灰蓝道袍 + 胸前白鹤纹（"妙鹤"落在衣上，不在脸上）
+    { name: 'miaohe', pal: { K: '#161a1c', H: '#242a2c', S: '#f0dcc4', G: '#4a5a68', g: '#303c46', B: '#8ab0b8', W: '#e4ecec' }, rows: [
+      '...KKKKKK...',
+      '..KHHHHHHK..',
+      '..KHHHHHHK..',
+      '..KHSSSSHK..',
+      '..KSKSSKSK..',
+      '..KSSSSSSK..',
+      '..KGGGGGGK..',
+      '.KGgGGGGgGK.',
+      '.KGgWWWWgGK.',
+      '..KgBBBBgK..',
+      '..KGGGGGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 冷焰老祖：「面孔方正，双目炯然」→ 方正的脸（下巴收成直角，不尖）+
+    //   冷青焰色袍。名号里那个"焰"落在袍上的青蓝火苗上，不画成红火
+    { name: 'lengyan', pal: { K: '#12181c', H: '#1e2830', S: '#e8d4bc', G: '#5a7a92', g: '#3c5668', B: '#6ac8d8', W: '#d0f0f8' }, rows: [
+      '...KKKKKK...',
+      '..KHHHHHHK..',
+      '..KHHHHHHK..',
+      '..KHSSSSHK..',
+      '..KSWSSWSK..',
+      '..KSSSSSSK..',
+      '..KGGGGGGK..',
+      '.KGgGGGGgGK.',
+      '.KGgGGGGgGK.',
+      '..KgBWWBgK..',
+      '..KGGWWGGK..',
+      '..KGK..KGK..',
+      '..KGK..KGK..',
+      '..KKK..KKK..'
+    ] },
+    // 黑天魔祖：「身形砰然碎裂，化为了一片黑色烟雾」「黑雾凝结，化作一只巨大手掌」→
+    //   整个人是一团凝住的黑雾：轮廓比常人宽一格，下摆散成一缕缕，只有一对眼睛是实色
+    { name: 'heitian', pal: { K: '#0c0a0e', H: '#141018', S: '#3a3038', G: '#1a1620', g: '#100c14', B: '#d03018', W: '#4a4048' }, rows: [
+      '...KKKKKK...',
+      '..KHHHHHHK..',
+      '..KHHHHHHK..',
+      '..KHSSSSHK..',
+      '..KSKBBKSK..',
+      '..KSSSSSSK..',
+      '..KGGGGGGK..',
+      '.KGgGGGGgGK.',
+      '.KGgGGGGgGK.',
+      '.KGgGGGGgGK.',
+      '.KGGGGGGGGK.',
+      'KGgGKGGKgGGK',
+      'KGK.GGGG.KGK',
+      '.K...KK...K.'
     ] }
   ];
 

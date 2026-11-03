@@ -34,7 +34,13 @@ const LIST = [
   ['jinguang', '金光上人'], ['xiongsiwang', '凶司王'], ['tuntian', '吞天圣祖'],
   ['guimu', '鬼木'], ['baimu', '百目天鬼'], ['guhuang', '骨皇'],
   ['xiaojinhan', '萧晋寒'], ['dongfangbai', '东方白'], ['qimozi', '奇摩子'],
-  ['miaofa', '妙法仙尊'], ['donglihu', '东离虎'], ['guhuojin', '古或今']
+  ['miaofa', '妙法仙尊'], ['donglihu', '东离虎'], ['guhuojin', '古或今'],
+  // 第二档：原著有硬外貌的 14 位（此前共用「魔修/内门/女修/鬼修」）
+  ['yuanyan', '元魇始祖'], ['baohua', '宝花圣祖'], ['huangyuanzi', '黄元子'],
+  ['yinchiyecha', '银翅夜叉'], ['aoxiao', '敖啸老祖'], ['zhiyang', '至阳上人'],
+  ['liuzizai', '柳自在'], ['bumietianzun', '不灭天尊'], ['guilingzi', '鬼灵子'],
+  ['lufuren', '陆夫人'], ['maliang', '马良'], ['miaohe', '妙鹤真人'],
+  ['lengyan', '冷焰老祖'], ['heitian', '黑天魔祖']
 ];
 
 async function sheet(skin, out) {
@@ -45,7 +51,7 @@ async function sheet(skin, out) {
     document.querySelectorAll('.overlay').forEach(e => { if (e.id !== 'dialog') e.style.display = 'none'; });
     let box = document.getElementById('__sheet');
     if (!box) { box = document.createElement('div'); box.id = '__sheet'; document.body.appendChild(box); }
-    box.style.cssText = 'position:fixed;inset:0;z-index:99999;background:' +
+    box.style.cssText = 'position:absolute;top:0;left:0;right:0;z-index:99999;background:' +
       (skin === 'guigu' ? '#e8e2d0' : '#10131a') +
       ';display:flex;flex-wrap:wrap;gap:10px;padding:20px;align-content:flex-start;font-family:sans-serif';
     box.innerHTML = '';
@@ -65,7 +71,11 @@ async function sheet(skin, out) {
     }
   }, { skin, LIST });
   await page.waitForTimeout(400);
-  await page.screenshot({ path: root + '/qa/' + out });
+  // 人物已到 62 个，fixed 布局会被视口切掉最后一行；改成整页截图
+  const h = await page.evaluate(() => document.getElementById('__sheet').getBoundingClientRect().height);
+  await page.setViewportSize({ width: 1100, height: Math.max(900, Math.ceil(h) + 20) });
+  await page.waitForTimeout(250);
+  await page.screenshot({ path: root + '/qa/' + out, fullPage: true });
 }
 await sheet('guigu', 'shot-npc-sheet-guigu.png');
 await sheet('jin', 'shot-npc-sheet-jin.png');
