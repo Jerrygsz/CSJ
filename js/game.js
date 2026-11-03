@@ -1225,12 +1225,22 @@
   }
   function novaBlast(x, y, rad, dmg, vfx) {
     G.parts.push({ ring: true, x, y, r: 10, maxr: rad, life: 0.4, maxlife: 0.4,
-      color: vfx === 'qingmang' ? '#9df0d0' : vfx === 'corpsefire' ? '#5fe08a' : vfx === 'soul' ? '#c9a6ff' : '#ffe98a' });
+      color: vfx === 'qingmang' ? '#9df0d0' : vfx === 'corpsefire' ? '#5fe08a'
+        : vfx === 'soul' ? '#c9a6ff' : vfx === 'shasha' ? '#4a3252' : '#ffe98a' });
     // 金光爆发：环之外再放一圈放射光条，像光从身上炸开
     if (vfx === 'gold') {
       for (let i = 0; i < 12; i++) {
         const ang = i * Math.PI / 6;
         G.parts.push({ ray: true, x, y, ang, len: rad * 0.92, life: 0.3, maxlife: 0.3, color: i % 2 ? '#fff6c8' : '#ffd76a' });
+      }
+    }
+    // 黑煞修罗功：「一身黑煞鼓到极处炸开，三尺之内尽成血雾」——
+    // 黑气环外放放射状煞条，黑红相间：黑是主调，血雾只占一半。
+    // 第一版 0.34s 太短，280ms 后实拍已经散尽 —— 玩家根本来不及看清，拉到 0.5s。
+    if (vfx === 'shasha') {
+      for (let i = 0; i < 12; i++) {
+        const ang = i * Math.PI / 6;
+        G.parts.push({ ray: true, x, y, ang, len: rad * 0.88, life: 0.45, maxlife: 0.45, color: i % 2 ? '#2e2038' : '#7a1626' });
       }
     }
     for (const e of allEnemies()) if (U.dist(x, y, e.x, e.y) < rad + e.r) damageEnemy(e, dmg);
@@ -2788,8 +2798,60 @@
         G.parts.push({ x: b.x - b.vx * 0.012 * (1 + t), y: b.y - b.vy * 0.012 * (1 + t),
           vx: -b.vx * 0.05, vy: -b.vy * 0.05, life: 0.24, maxlife: 0.24, r: 2.6 - t, color: '#5fe08a' });
       }
+    } else if (vfx === 'drill') {
+      // 血灵钻：原著「将体内的真元慢慢凝练压缩数十倍，暗藏体内出其不意杀人用」——
+      // 一次性暗器，不是剑芒。第一版小锥体+旋纹+血雾，实拍读成「红色飞溅」——
+      // 三种红色元素叠在 10px 里互相打架。钻的读法是「螺纹」：一个宽根尖头的锥体，
+      // 身上两道同向螺纹斜线（不是交叉线），随飞行微微前移出旋转感。别的全砍。
+      const spin = (G.time || 0) * 14 + (b.phase || 0);
+      ctx.globalAlpha = a0;
+      vfxTrail(b.x, b.y, ang, 12, 'rgba(255,60,80,0.45)', a0 * 0.35);
+      ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(ang);
+      ctx.fillStyle = 'rgba(146,20,36,0.96)';                        // 锥体（暗血）
+      ctx.beginPath(); ctx.moveTo(16, 0); ctx.lineTo(-7, 5.5); ctx.lineTo(-7, -5.5); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,120,140,0.85)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(-6, 0);         // 中芯亮线：密度感
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,150,160,0.95)'; ctx.lineWidth = 1.4;
+      const th = (spin % 4) - 2;                                     // 螺纹沿轴前移，转起来（收在锥体内部，不出缘）
+      ctx.beginPath();
+      ctx.moveTo(-1 + th, 3.4); ctx.lineTo(3 + th, 0.8);             // 螺纹一
+      ctx.moveTo(-5 + th, 2.8); ctx.lineTo(-1 + th, 0.5);            // 螺纹二
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(255,225,225,0.95)';                      // 钻尖一点亮，指明杀伤方向
+      ctx.beginPath(); ctx.arc(14.5, 0, 1.6, 0, 6.28); ctx.fill();
+      ctx.restore();
+    } else if (vfx === 'seal') {
+      // 禁神术：原著「施下禁神术」「禁制扣住神识」—— 是一道符禁，不是一颗金珠。
+      // 弹体画成竖置金符：符身 + 三道横纹（箓纹）+ 四角短须。锁的是神，
+      // 所以符外再罩一圈很淡的青白灵光（神识的冷色），金在里、冷在外，别画反。
+      vfxTrail(b.x, b.y, ang, 20, 'rgba(255,225,120,0.55)', a0 * 0.5);
+      ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(ang);
+      ctx.globalAlpha = a0 * 0.3; ctx.strokeStyle = '#cfe8ff'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.arc(0, 0, 9, 0, 6.28); ctx.stroke();
+      ctx.globalAlpha = a0;
+      ctx.fillStyle = '#e8c44a';
+      ctx.fillRect(-4.6, -6.2, 9.2, 12.4);                           // 符身
+      ctx.strokeStyle = '#7a5a12'; ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(-2.8, -3); ctx.lineTo(2.8, -3);
+      ctx.moveTo(-2.8, 0); ctx.lineTo(2.8, 0);
+      ctx.moveTo(-2.8, 3); ctx.lineTo(2.8, 3);                       // 三道箓纹
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(255,240,180,0.9)';
+      ctx.fillRect(-1, -8.4, 2, 2.2); ctx.fillRect(-1, 6.2, 2, 2.2); // 上下符头
+      ctx.restore();
+    } else if (vfx === 'dream') {
+      // 梦引术：原著施法时「脸上青气一闪」—— 引梦之气是青的，
+      // 不是惊神刺那一门的紫。青魂光 + 更缓的波动（梦是缠上去的，不是扎进去的）
+      const pl = 0.5 + 0.5 * Math.sin((G.time || 0) * 5 + (b.phase || 0));
+      ctx.fillStyle = `rgba(120,230,200,${0.28 + pl * 0.12})`;
+      ctx.beginPath(); ctx.arc(b.x, b.y, 7.5 + pl * 1.5, 0, 6.28); ctx.fill();
+      ctx.fillStyle = 'rgba(225,255,245,0.9)';
+      ctx.beginPath(); ctx.arc(b.x, b.y, 2.4, 0, 6.28); ctx.fill();
+      vfxTrail(b.x, b.y, ang, 24, 'rgba(120,230,200,0.5)', a0 * 0.5);
     } else if (vfx === 'soul') {
-      // 神识类（惊神刺/失神刺/离魂术/梦引术/念剑诀）：原著里全是无形神念，
+      // 神识类（惊神刺/失神刺/离魂术）：原著里全是无形神念，
       // 没有实体弹道 —— 半透明的紫魂光，核小影淡，像一眼看过去就“进了脑子”
       ctx.fillStyle = 'rgba(190,150,255,0.4)';
       ctx.beginPath(); ctx.arc(b.x, b.y, 7, 0, 6.28); ctx.fill();
@@ -2899,6 +2961,19 @@
       ctx.globalAlpha = 0.55; ctx.strokeStyle = '#ffe98a'; ctx.lineWidth = 1.4;
       ctx.beginPath(); ctx.arc(o.x, o.y, 9.5, 0, 6.28); ctx.stroke();
       ctx.globalAlpha = 1;
+    } else if (o.vfx === 'shasha') {
+      // 煞妖诀：原著是「炼煞气为攻杀」「煞气绕身」—— 黑煞，不是血红。
+      // 深黑紫气团 + 暗红细环：黑为主体（煞），红只留一线（妖），比例别画反。
+      const pl = 0.5 + 0.5 * Math.sin((G.time || 0) * 7 + (o.i || 0) * 1.7);
+      ctx.globalAlpha = 0.5 + pl * 0.2;
+      ctx.fillStyle = '#241a2e';
+      ctx.beginPath(); ctx.arc(o.x, o.y, 7 + pl * 1.6, 0, 6.28); ctx.fill();
+      ctx.globalAlpha = 0.8;
+      ctx.fillStyle = '#4a3252';
+      ctx.beginPath(); ctx.arc(o.x, o.y, 4, 0, 6.28); ctx.fill();
+      ctx.globalAlpha = 0.5; ctx.strokeStyle = '#8a2438'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.arc(o.x, o.y, 9 + pl, 0, 6.28); ctx.stroke();
+      ctx.globalAlpha = 1;
     } else {
       // 庚金玄罡：金青色的气团，外面一圈细光
       ctx.globalAlpha = 0.85;
@@ -2942,7 +3017,9 @@
     sword: '#ffffff', qingmang: '#9df0d0', blood: '#ff6a7a',
     snake: '#ffb347', fan: '#ffd05a', gold: '#ffe98a', ice: '#9ad8ff',
     gravity: '#b49cff', gang: '#dfefc0', thunder: '#ffe08a',
-    corpsefire: '#7dff9e', soul: '#c9a6ff', magnet: '#e0d49a'
+    corpsefire: '#7dff9e', soul: '#c9a6ff', magnet: '#e0d49a',
+    swordarray: '#9df0d0',
+    shasha: '#6a4a78', drill: '#ff8090', seal: '#ffd76a', dream: '#8ae8cc'
   };
 
   // 火花：沿来向拖一道细线。比方块贵一点（多一次 stroke），
