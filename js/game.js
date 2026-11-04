@@ -3308,6 +3308,18 @@
     }
   }
 
+  // 柱高兜底：Boss 体型越大，光柱越高 —— 但**不做等比放大**。
+  // 逻辑屏 480×864、相机把玩家放在画面中部，从玩家脚底往上的可用高度只有 400 上下；
+  // 真按体型等比推到 500+，柱顶直接出画 —— 玩家看不到顶端那道收束，
+  // 柱子就退化成"从屏幕外插进来的光条"，丢掉"这一片地被一座光柱占了"的形体。
+  // 所以区间夹在 185~300：底座拿 r（体型）+ scale（视觉体量）双算，
+  // 两者都算是因为有反例 —— 磁光兽 r=26 但 scale 只有 5.6，是本作唯一「碰撞大、看着小」的 Boss。
+  function pillarHOf(b) {
+    const r = (b && b.r) || 22, sc = (b && b.scale) || 6;
+    const h = 200 + (r - 21) * 3.6 + (sc - 5.4) * 2.4;
+    return Math.round(Math.max(185, Math.min(300, h)) / 5) * 5;
+  }
+
   function castBossSkill(b, sk, tgt) {
     const p = G.player; if (!p || !b) return;
     const ang = Math.atan2(p.y - b.y, p.x - b.x);
@@ -3357,12 +3369,14 @@
       case 'pillar': {
         // 光柱：定桩持续招。柱子落在「前摇开始时玩家站的地方」，所以看见预警圈就得走开。
         // 这是本轮唯一真正持续扣血的招式——不是打一发就走，是"这一片地被占了"。
+        // 柱高 sk.h 已按 Boss 体型分档填好（道祖 280 / 大乘 220 / 元婴 200 / 磁光兽 185）；
+        // 没填的新 Boss 走 pillarHOf 兜底，不许再回到"所有 Boss 一样高"。
         const tx = (tgt && tgt.x !== undefined) ? tgt.x : p.x;
         const ty = (tgt && tgt.y !== undefined) ? tgt.y : p.y;
         const rad = sk.rad || 46, dur = sk.dur || 1.7;
         addHazard({
           kind: 'pillar', x: tx, y: ty, r: rad, t: dur, dur: dur, dmg: dmg,
-          tick: sk.tick || 0.40, color: sk.c || '#ffe6a0', h: sk.h || 200
+          tick: sk.tick || 0.40, color: sk.c || '#ffe6a0', h: sk.h || pillarHOf(b)
         });
         G.parts.push({ ring: true, x: tx, y: ty, r: rad * 0.35, maxr: rad * 2.3, life: 0.40, maxlife: 0.40, color: '#ffe6a0' });
         G.parts.push({ ring: true, x: tx, y: ty, r: rad * 1.5, maxr: rad * 0.7, life: 0.30, maxlife: 0.30, color: '#fff4d0' });

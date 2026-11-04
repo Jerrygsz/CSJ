@@ -1,0 +1,66 @@
+[
+  {
+    "tier": "矮档 185",
+    "map": "lanpu",
+    "boss": "矿脉·磁光兽",
+    "r": 26,
+    "scale": 5.6,
+    "h": 185,
+    "rad": 46,
+    "topScreen": 767,
+    "kit": [
+      "磁光柱(pillar h=185)",
+      "磁力牵引(pull)",
+      "磁光散射(fan)"
+    ],
+    "file": "qa/shots/pillar-h-0.png"
+  },
+  {
+    "tier": "低阶 210",
+    "map": "fengyuan",
+    "boss": "血云·血祭大阵",
+    "r": 23,
+    "scale": 6,
+    "h": 210,
+    "rad": 50,
+    "topScreen": 742,
+    "kit": [
+      "血柱冲天(pillar h=210)",
+      "血雾弥漫(mist)",
+      "血祭吸元(pull)"
+    ],
+    "file": "qa/shots/pillar-h-1.png"
+  },
+  {
+    "tier": "大乘 225",
+    "map": "daoguo",
+    "boss": "天象尊者",
+    "r": 27,
+    "scale": 6.4,
+    "h": 225,
+    "rad": 48,
+    "topScreen": 727,
+    "kit": [
+      "星辰光柱(pillar h=225)",
+      "天象轮转(ring)",
+      "陨星坠落(rain)"
+    ],
+    "file": "qa/shots/pillar-h-2.png"
+  },
+  {
+    "tier": "道祖 280",
+    "map": "shifang",
+    "boss": "东离虎·道祖",
+    "r": 35,
+    "scale": 12.1,
+    "h": 280,
+    "rad": 52,
+    "topScreen": 672,
+    "kit": [
+      "道祖法域(pillar h=280)",
+      "虎啸山河(nova)",
+      "虎爪裂天(fan)"
+    ],
+    "file": "qa/shots/pillar-h-3.png"
+  }
+]

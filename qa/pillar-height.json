@@ -1,0 +1,164 @@
+[
+  {
+    "boss": "至阳上人",
+    "skill": "至阳火柱",
+    "rad": 48,
+    "hasH": false,
+    "r": 21,
+    "scale": 5.4,
+    "h": 150
+  },
+  {
+    "boss": "银光仙子",
+    "skill": "银光落柱",
+    "rad": 44,
+    "hasH": false,
+    "r": 22,
+    "scale": 6,
+    "h": 160
+  },
+  {
+    "boss": "白光界·土皇钉",
+    "skill": "白光贯地",
+    "rad": 46,
+    "hasH": false,
+    "r": 24,
+    "scale": 6.4,
+    "h": 170
+  },
+  {
+    "boss": "冷焰老祖",
+    "skill": "冷焰火柱",
+    "rad": 46,
+    "hasH": false,
+    "r": 22,
+    "scale": 6.4,
+    "h": 160
+  },
+  {
+    "boss": "血云·血祭大阵",
+    "skill": "血柱冲天",
+    "rad": 50,
+    "hasH": false,
+    "r": 23,
+    "scale": 6,
+    "h": 170
+  },
+  {
+    "boss": "米尊者",
+    "skill": "佛光普照",
+    "rad": 48,
+    "hasH": false,
+    "r": 24,
+    "scale": 6.4,
+    "h": 170
+  },
+  {
+    "boss": "第一魔尊",
+    "skill": "魔焰冲天",
+    "rad": 50,
+    "hasH": false,
+    "r": 26,
+    "scale": 6.8,
+    "h": 190
+  },
+  {
+    "boss": "矿脉·磁光兽",
+    "skill": "磁光柱",
+    "rad": 46,
+    "hasH": false,
+    "r": 26,
+    "scale": 5.6,
+    "h": 190
+  },
+  {
+    "boss": "不灭天尊",
+    "skill": "灭世光柱",
+    "rad": 52,
+    "hasH": false,
+    "r": 25,
+    "scale": 7.5,
+    "h": 180
+  },
+  {
+    "boss": "灵界第一大乘",
+    "skill": "天地灵气柱",
+    "rad": 50,
+    "hasH": false,
+    "r": 26,
+    "scale": 6.8,
+    "h": 190
+  },
+  {
+    "boss": "天象尊者",
+    "skill": "星辰光柱",
+    "rad": 48,
+    "hasH": false,
+    "r": 27,
+    "scale": 6.4,
+    "h": 190
+  },
+  {
+    "boss": "萧晋寒·天庭使者",
+    "skill": "天罚雷柱",
+    "rad": 48,
+    "hasH": false,
+    "r": 28,
+    "scale": 8.5,
+    "h": 200
+  },
+  {
+    "boss": "血池·鳞犼像",
+    "skill": "血柱喷涌",
+    "rad": 50,
+    "hasH": false,
+    "r": 29,
+    "scale": 6.2,
+    "h": 210
+  },
+  {
+    "boss": "东方白·金源宫主",
+    "skill": "金源光柱",
+    "rad": 48,
+    "hasH": false,
+    "r": 30,
+    "scale": 9.4,
+    "h": 220
+  },
+  {
+    "boss": "黑天魔祖",
+    "skill": "魔焰柱",
+    "rad": 50,
+    "hasH": false,
+    "r": 30,
+    "scale": 10.4,
+    "h": 220
+  },
+  {
+    "boss": "东离虎·道祖",
+    "skill": "道祖法域",
+    "rad": 52,
+    "hasH": false,
+    "r": 35,
+    "scale": 12.1,
+    "h": 250
+  },
+  {
+    "boss": "紫杉",
+    "skill": "紫气东来",
+    "rad": 48,
+    "hasH": false,
+    "r": 32,
+    "scale": 9.8,
+    "h": 230
+  },
+  {
+    "boss": "朱颜",
+    "skill": "朱红光柱",
+    "rad": 48,
+    "hasH": false,
+    "r": 32,
+    "scale": 9.8,
+    "h": 230
+  }
+]
