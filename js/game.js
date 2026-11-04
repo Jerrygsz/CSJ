@@ -27,6 +27,20 @@
   const ctx = cv.getContext('2d');
   ctx.imageSmoothingEnabled = false;
 
+  // 渲染分辨率倍率。逻辑坐标永远是 480×H，像素密度由 PR 决定：
+  //   1 = 历史行为（画布 480 宽，靠 CSS 放大上屏）；2/3 = 提高采样密度换清晰度。
+  // 手机上 480 宽会被拉伸到 DPR 倍，墨线与像素特效都会糊，所以给一个可实测的开关。
+  let PR = 1;
+  function renderPR() {
+    try {
+      const q = new URLSearchParams(location.search).get('pr');
+      if (q === 'auto') return Math.min(3, Math.max(1, devicePixelRatio || 1));
+      const n = parseFloat(q);
+      if (n > 0) return Math.min(3, Math.max(1, n));
+    } catch (e) {}
+    return 1;
+  }
+
   // ---------- 鬼谷水墨 · 特效调色（墨痕剑气 / 枯笔闪电） ----------
   // 只拦主画布这一个 ctx 实例的 strokeStyle / fillStyle：
   // 鬼谷皮开启时，把战斗特效的暖色画笔（火/金/伤红）映射为墨色系（朱砂/赭石/枯墨金），
@@ -3615,7 +3629,7 @@
   function drawSettleStage() {
     const s = G.settle; if (!s) return;
     ctx.save();
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.setTransform(PR, 0, 0, PR, 0, 0);
     // 台面：一圈淡光，暗示「这块可以走动」
     ctx.fillStyle = 'rgba(0,0,0,0.18)';
     ctx.beginPath(); ctx.ellipse((STAGE.x0 + STAGE.x1) / 2, (STAGE.y0 + STAGE.y1) / 2,
@@ -5548,7 +5562,7 @@
   function render() {
     let sx = 0, sy = 0;
     if (G.shake > 0) { sx = U.rand(-G.shake, G.shake); sy = U.rand(-G.shake, G.shake); }
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.setTransform(PR, 0, 0, PR, 0, 0);
     ctx.clearRect(0, 0, W, H);
     if (grassPat) { ctx.fillStyle = grassPat; ctx.fillRect(0, 0, W, H); }
     else { ctx.fillStyle = skinBg(G.map && G.map.bg).base; ctx.fillRect(0, 0, W, H); }
@@ -9370,13 +9384,22 @@
     // 上限 1180 兜住超长屏，再长就居中留边 —— 把视野拉成一条比留边更难受。
     const ratio = availH / availW;
     const wantH = Math.round(Math.min(1180, Math.max(768, BASE_W * ratio)));
-    if (wantH !== H) {
+    // 渲染分辨率倍率：默认 1（=历史行为，画布永远 480 宽）。
+    // 手机上这块画布会被拉伸到 DPR 倍，1px 的墨线和像素特效会糊；
+    // 用 ?pr=2 / ?pr=3 提高画布像素密度换清晰度，代价是填充率按平方涨 —— 由真机实测决定用哪档。
+    PR = renderPR();
+    const bw = Math.round(W * PR), bh = Math.round(wantH * PR);
+    if (wantH !== H || cv.width !== bw || cv.height !== bh) {
       H = wantH;
-      cv.width = W; cv.height = H;
-      // 视口变了，场景装饰与分块缓存需要重建
+      cv.width = bw; cv.height = bh;
+      // 视口或倍率变了，场景装饰与分块缓存需要重建
       G.decor = []; G.chunkMap = {};
       if (grassPat) buildGrass(buildGrass._bg);
     }
+    // 画布按「逻辑尺寸」上屏，多出来的像素只用于提高采样密度，不改变布局；舞台再整体 scale
+    cv.style.width = W + 'px';
+    cv.style.height = H + 'px';
+    ctx.imageSmoothingEnabled = false;   // 改 canvas.width 会重置上下文状态，这里补回来
     const scale = Math.min(availW / W, availH / H);
     viewScale = scale;
     // 舞台按逻辑尺寸布局，整体 scale：HUD / 弹窗 / 字号跟着画布一起缩，
@@ -9935,6 +9958,11 @@
       }
       return G.state;
     },
+    // 同步渲染一帧（不推进世界）。真机性能验收用：直接计 render() 的耗时，
+    // 不受 rAF 60Hz 封顶影响 —— 否则「60fps 就是 16.67ms」什么都测不出来。
+    render() { render(); },
+    // 当前同屏敌人数量（性能面板读取用）
+    enemyCount() { return G.enemies ? G.enemies.length : 0; },
     // ---- 功法特效验收钩子（qa/verify-skillfx.mjs / qa/shot-skillfx.mjs 用）----
     // 暴露命中配色表，便于断言每一门功法的命中色
     VFX_HIT_COLOR: VFX_HIT_COLOR,

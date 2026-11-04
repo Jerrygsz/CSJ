@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0d0f12">
+<title>真机性能验收 · 凡人·长生劫</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; background: #0d0f12; overflow: hidden; }
+  body { font: 14px/1.5 -apple-system, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif; color: #e8e4dc; }
+
+  /* 游戏本体：必须真实可见，display:none 会让浏览器直接跳过绘制，测出来的数是假的 */
+  #frm { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; z-index: 1; background: #f3ecdd; }
+
+  #ui {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 2;
+    padding: 14px 14px calc(14px + env(safe-area-inset-bottom));
+    background: linear-gradient(to bottom, rgba(13,15,18,0), rgba(13,15,18,.94) 42px);
+    max-height: 82vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
+  .card {
+    background: rgba(22,25,30,.96); border: 1px solid rgba(200,162,91,.28);
+    border-radius: 14px; padding: 14px 15px;
+    box-shadow: 0 10px 40px rgba(0,0,0,.55);
+    backdrop-filter: blur(8px);
+  }
+  h1 { font-size: 16px; margin: 0 0 2px; letter-spacing: .5px; color: #e8d4a8; font-weight: 600; }
+  .sub { font-size: 11px; color: #7e8794; margin-bottom: 10px; letter-spacing: .3px; }
+
+  .dev { font-size: 11px; color: #6f7885; line-height: 1.7; margin-bottom: 12px;
+         font-family: ui-monospace, Menlo, Consolas, monospace; word-break: break-all; }
+  .dev b { color: #9aa4b2; font-weight: 500; }
+
+  button {
+    width: 100%; padding: 14px; border: 0; border-radius: 11px;
+    font-size: 15px; font-weight: 600; letter-spacing: 1px;
+    background: linear-gradient(180deg, #d6b273, #b68d4a); color: #241a08;
+    font-family: inherit; cursor: pointer;
+  }
+  button:disabled { opacity: .45; }
+  button.ghost { background: transparent; border: 1px solid rgba(200,162,91,.4); color: #c8a25b; margin-top: 8px; font-weight: 500; font-size: 13px; padding: 11px; }
+
+  .log { font-size: 12px; color: #8b93a0; margin-top: 10px; min-height: 0; }
+  .log div { padding: 2px 0; }
+  .log .ok { color: #7dba8a; }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
+  td { padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+  td.k { color: #9aa4b2; }
+  td.v { text-align: right; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 14px; color: #e8e4dc; }
+  td.v.hi { color: #e8d4a8; font-weight: 600; }
+  tr.acc td.v { color: #e0b978; }
+
+  .verdict { margin-top: 12px; padding: 12px; border-radius: 10px; font-size: 13px; line-height: 1.65; }
+  .verdict .tag { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 1px;
+                  padding: 2px 9px; border-radius: 5px; margin-bottom: 7px; }
+  .v-good { background: rgba(90,170,110,.13); border: 1px solid rgba(90,170,110,.35); }
+  .v-good .tag { background: #4a8f5d; color: #06120a; }
+  .v-okay { background: rgba(200,162,91,.12); border: 1px solid rgba(200,162,91,.35); }
+  .v-okay .tag { background: #c8a25b; color: #1c1508; }
+  .v-warn { background: rgba(214,140,70,.13); border: 1px solid rgba(214,140,70,.4); }
+  .v-warn .tag { background: #d68c46; color: #1c1004; }
+  .v-bad  { background: rgba(200,80,80,.13); border: 1px solid rgba(200,80,80,.4); }
+  .v-bad .tag { background: #c85050; color: #1c0505; }
+  .verdict ul { margin: 6px 0 0; padding-left: 18px; color: #b9c0cb; }
+  .verdict li { margin: 3px 0; }
+
+  .hint { font-size: 11px; color: #6b7481; margin-top: 10px; line-height: 1.6; }
+  code { font-family: ui-monospace, Menlo, Consolas, monospace; color: #9aa4b2; }
+
+  .prrow { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; }
+  .prrow .lbl { font-size: 11px; color: #7e8794; letter-spacing: .5px; white-space: nowrap; }
+  .prrow button {
+    flex: 1; width: auto; padding: 9px 0; font-size: 13px; font-weight: 600; letter-spacing: 0;
+    background: rgba(255,255,255,.05); color: #9aa4b2;
+    border: 1px solid rgba(255,255,255,.1); border-radius: 9px; cursor: pointer;
+  }
+  .prrow button.on { background: rgba(200,162,91,.18); color: #e8d4a8; border-color: rgba(200,162,91,.55); }
+</style>
+</head>
+<body>
+
+<iframe id="frm" src="index.html?test=1" allow="autoplay"></iframe>
+
+<div id="ui">
+  <div class="card">
+    <h1>真机性能验收</h1>
+    <div class="sub">凡人·长生劫 · 像素特效层（FX3）开销实测</div>
+    <div class="dev" id="dev">读取设备信息…</div>
+    <div class="prrow">
+      <span class="lbl">渲染精度</span>
+      <button data-pr="1" class="on">1×</button>
+      <button data-pr="2">2×</button>
+      <button data-pr="3">3×</button>
+    </div>
+    <button id="go">开始测试</button>
+    <div class="log" id="log"></div>
+    <div id="out"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const frm = document.getElementById('frm');
+  const $ = id => document.getElementById(id);
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const frame = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+  const BUDGET = 16.67;   // 60fps 单帧预算（ms）
+
+  // ---------- 设备信息 ----------
+  function widestCanvas(win) {
+    let best = null, area = 0;
+    const cs = win.document.querySelectorAll('canvas');
+    for (const c of cs) {
+      const a = c.width * c.height;
+      if (a > area) { area = a; best = c; }
+    }
+    return best;
+  }
+
+  function deviceInfo() {
+    let cv = '—', up = 0;
+    try {
+      const c = widestCanvas(frm.contentWindow);
+      if (c) {
+        cv = c.width + ' × ' + c.height;
+        const deviceW = (window.innerWidth || 1) * (window.devicePixelRatio || 1);
+        up = deviceW / c.width;
+      }
+    } catch (e) {}
+    return {
+      dpr: window.devicePixelRatio || 1,
+      screen: (window.screen.width || 0) + ' × ' + (window.screen.height || 0),
+      view: window.innerWidth + ' × ' + window.innerHeight,
+      canvas: cv,
+      up: up,
+      cores: navigator.hardwareConcurrency || '?',
+      mem: navigator.deviceMemory || navigator.deviceMemory === 0 ? navigator.deviceMemory : '?',
+      ua: navigator.userAgent
+    };
+  }
+
+  function paintDev(d) {
+    const upTxt = d.up
+      ? ' → 被拉伸 <b style="color:' + (d.up > 1.6 ? '#d68c46' : '#7dba8a') + '">' + d.up.toFixed(2) + '×</b> 铺满屏幕'
+      : '';
+    $('dev').innerHTML =
+      '<b>屏幕</b> ' + d.screen + ' css · 视口 ' + d.view + ' · DPR ' + d.dpr + '<br>' +
+      '<b>画布</b> ' + d.canvas + ' 像素' + upTxt + '<br>' +
+      '<b>CPU</b> ' + d.cores + ' 核 · <b>内存</b> ' + d.mem + ' GB<br>' +
+      '<b>UA</b> ' + d.ua;
+  }
+
+  // ---------- 计时 ----------
+  // 多局取最快：单局会被 GC、后台调度、温控拉长，取最小值得的是「这一档本来能跑多快」。
+  function timedRender(win, rounds, frames, each) {
+    const FR = win.__FR;
+    let best = Infinity;
+    for (let r = 0; r < rounds; r++) {
+      for (let i = 0; i < 12; i++) FR.render();       // 每局重新预热
+      each && each(-1);                                 // 预置场景
+      const t0 = performance.now();
+      for (let i = 0; i < frames; i++) {
+        if (each) each(i);
+        FR.render();
+      }
+      // 结尾强制读一次像素，把 GPU 队列冲刷干净；
+      // 否则手机上 drawImage 只是排队、不计时，测出来会「快得离谱」
+      try { const c = widestCanvas(win); c.getContext('2d').getImageData(0, 0, 1, 1); } catch (e) {}
+      const v = (performance.now() - t0) / frames;
+      if (v < best) best = v;
+    }
+    return best;
+  }
+
+  // 真实 rAF 帧率：这是最终结论的裁判，前面几项只是拆账
+  function realFps(win, ms, onFrame) {
+    return new Promise(res => {
+      let n = 0, t0 = 0, last = 0, worst = 0, drops = 0;
+      function tick(t) {
+        if (!t0) { t0 = t; last = t; requestAnimationFrame(tick); return; }
+        const d = t - last; last = t; n++;
+        if (d > worst) worst = d;
+        if (d > 20) drops++;                // 超过 20ms 就是掉到 50fps 以下
+        try { onFrame && onFrame(); } catch (e) {}
+        if (t - t0 < ms) requestAnimationFrame(tick);
+        else res({ fps: n / ((t - t0) / 1000), drops, worst, frames: n });
+      }
+      requestAnimationFrame(tick);
+    });
+  }
+
+  function log(s, ok) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    if (ok) d.className = 'ok';
+    $('log').appendChild(d);
+  }
+
+  // ---------- 主流程 ----------
+  const KEYS = ['hit', 'crit', 'poof', 'pickup', 'nova'];
+  let report = null;
+
+  async function run() {
+    busy = true;
+    $('go').disabled = true;
+    $('out').innerHTML = '';
+    $('log').innerHTML = '';
+    report = null;
+
+    const W = frm.contentWindow;
+    const FR = W && W.__FR;
+    const FX = W && W.FX3;
+    if (!FR) throw new Error('游戏调试接口未就绪，请刷新重试');
+    if (!FX) throw new Error('特效层 FX3 未加载');
+
+    let sp = 0;
+    const spawnOne = (seed) => {
+      const G = FR.G, p = G.player || { x: 0, y: 0 };
+      FX.spawn(KEYS[seed % KEYS.length],
+               p.x + ((seed * 37) % 150) - 75,
+               p.y + ((seed * 53) % 120) - 60,
+               { pal: 'qi' });
+    };
+    const fill = (n) => { while (FX.count() < n) spawnOne(sp++); };
+
+    // ---- 准备：进图 + 让怪自然刷满 ----
+    log('→ 载入后山，跳过剧情…');
+    FR.enterMap('houshan', 'easy');
+    FR.skipStory(); FR.muteStory(true);
+    const G = FR.G;
+    if (G.state !== 'play') G.state = 'play';
+    await frame();
+    FR.tickFrames(180, 1 / 60);           // 3 秒，怪该刷的刷出来
+    await frame();
+    log('  怪物同屏 ' + G.enemies.length + ' 只', true);
+
+    // 冷启动预热：第一帧要建档、建图案、填缓存，算进去会把 A 抬得比 B 还高，
+    // 数据自相矛盾。先空跑 40 帧丢掉。
+    log('→ 预热…');
+    for (let i = 0; i < 40; i++) FR.render();
+    await frame();
+
+    // ---- A 空载：没有怪、没有特效 ----
+    log('→ A 空载渲染…');
+    FX.clear(); G.enemies.length = 0; G.parts.length = 0;
+    await frame();
+    FX.clear();
+    const A = timedRender(W, 3, 40);
+
+    // ---- B 战斗负载：有怪群、没有特效 ----
+    log('→ B 怪群渲染（无特效）…');
+    FX.clear();
+    FR.tickFrames(400, 1 / 60);           // 刷到本图同屏上限附近
+    const crowd = G.enemies.length;
+    await frame();
+    FX.clear();
+    const B = timedRender(W, 3, 40);
+
+    // ---- C 战斗负载 + 6 个特效 ----
+    log('→ C 怪群 + 6 特效…');
+    FX.clear(); sp = 0;
+    await frame();
+    const C = timedRender(W, 3, 40, (i) => {
+      if (i >= 0) { fill(6); FX.update(1 / 60); }
+    });
+
+    // ---- D 实战帧率：真实跑 2.6 秒 ----
+    log('→ D 实战帧率（2.6 秒）…');
+    FX.clear(); sp = 0;
+    const D = await realFps(W, 2600, () => fill(6));
+
+    // ---- 收尾 ----
+    FX.clear();
+
+    const dFx = Math.max(0, C - B);   // 噪声可能让 C 略小于 B，负增量没有物理意义
+    report = { A, B, C, D, dFx, crowd, dev: deviceInfo(), pr: PR };
+    render(report);
+    log('✓ 测试完成', true);
+    $('go').disabled = false;
+    $('go').textContent = '重新测试';
+    busy = false;
+  }
+
+  // ---------- 结论 ----------
+  function verdict(r) {
+    const d = r.dFx, fps = r.D.fps, drops = r.D.drops;
+    // 特效单帧增量（6 实例）是主判据；实战帧率是兜底
+    if (d <= 3 && fps >= 55) return {
+      cls: 'v-good', tag: '优',
+      text: '特效层几乎无感，' + BUDGET.toFixed(1) + 'ms 预算里只吃掉 ' + d.toFixed(1) + 'ms。',
+      todo: ['同屏上限可以从 6 提到 8~10，特效可以铺得更满。']
+    };
+    if (d <= 6 && fps >= 45) return {
+      cls: 'v-okay', tag: '良',
+      text: '特效开销 ' + d.toFixed(1) + 'ms，占单帧预算 ' + Math.round(d / BUDGET * 100) + '%，可以接受。',
+      todo: ['保持同屏上限 6 不动。',
+             '若后续还要加特效点位，先压「每实例均摊 ' + (d / 6).toFixed(2) + 'ms」——优先减尺寸，不要减帧数。']
+    };
+    if (d <= 9 && fps >= 35) return {
+      cls: 'v-warn', tag: '偏重',
+      text: '特效开销 ' + d.toFixed(1) + 'ms，占单帧预算 ' + Math.round(d / BUDGET * 100) + '%，已经在抢主渲染的时间。',
+      todo: ['同屏上限 6 → 4。',
+             '领域法阵（常驻那个）改成 20fps 节流，它是唯一长久占位的。',
+             '暴击星爆虽然定了保留原尺寸，但真机上要按这个结果决定是否只在大招时出现。']
+    };
+    return {
+      cls: 'v-bad', tag: '重',
+      text: '特效开销 ' + d.toFixed(1) + 'ms（' + Math.round(d / BUDGET * 100) + '% 单帧预算），' +
+            '实战 ' + fps.toFixed(0) + 'fps，掉帧 ' + drops + ' 次。这台机器带不动。',
+      todo: ['同屏上限 6 → 3。',
+             '关掉领域常驻法阵，改用一次性施法特效。',
+             'Boss 起手法阵只保留一张静态贴图（不做逐像素重绘）。',
+             '真机结果发我，我按机型做降级档。']
+    };
+  }
+
+  function render(r) {
+    const v = verdict(r);
+    const fmt = x => x.toFixed(2);
+    const perFx = r.dFx / 6;
+    const html =
+      '<table>' +
+      '<tr><td class="k">渲染精度</td><td class="v">' + r.pr + '× · 画布 ' + r.dev.canvas + '</td></tr>' +
+      '<tr><td class="k">A 空载渲染</td><td class="v">' + fmt(r.A) + ' ms</td></tr>' +
+      '<tr><td class="k">B 怪群渲染 · ' + r.crowd + ' 只</td><td class="v">' + fmt(r.B) + ' ms</td></tr>' +
+      '<tr><td class="k">C 怪群 + 6 特效</td><td class="v">' + fmt(r.C) + ' ms</td></tr>' +
+      '<tr class="acc"><td class="k">特效增量（C−B）</td><td class="v hi">' + fmt(r.dFx) + ' ms</td></tr>' +
+      '<tr><td class="k">每实例均摊</td><td class="v">' + perFx.toFixed(2) + ' ms</td></tr>' +
+      '<tr><td class="k">占 60fps 预算</td><td class="v">' + Math.round(r.dFx / BUDGET * 100) + ' %</td></tr>' +
+      '<tr class="acc"><td class="k">D 实战帧率</td><td class="v hi">' + r.D.fps.toFixed(0) + ' fps</td></tr>' +
+      '<tr><td class="k">掉帧次数 / 最差帧</td><td class="v">' + r.D.drops + ' / ' + r.D.worst.toFixed(1) + ' ms</td></tr>' +
+      '</table>' +
+      '<div class="verdict ' + v.cls + '">' +
+      '<span class="tag">' + v.tag + '</span><br>' + v.text +
+      '<ul>' + v.todo.map(t => '<li>' + t + '</li>').join('') + '</ul>' +
+      '</div>' +
+      '<button class="ghost" id="copy">复制结果发给 Jerry</button>' +
+      '<div class="hint">A/B/C 是同步渲染取三局最快值（含 GPU 冲刷），D 是真实 rAF 帧率。' +
+      '两项都要看：同步值低但帧率掉，说明瓶颈在合成或填充率；两个都高，就是纯 JS 开销。</div>';
+
+    $('out').innerHTML = html;
+    // 结果表在按钮下方，手机上要自己滑才行 —— 直接带过去
+    setTimeout(() => {
+      const ui = $('ui');
+      ui.scrollTo({ top: ui.scrollHeight, behavior: 'smooth' });
+    }, 60);
+    $('copy').onclick = () => {
+      const d = r.dev;
+      const txt =
+        '【凡人·长生劫 真机特效验收】\n' +
+        '设备：' + d.ua + '\n' +
+        '屏幕 ' + d.screen + ' DPR' + d.dpr + ' 画布 ' + d.canvas + ' CPU' + d.cores + '核\n' +
+        'A 空载 ' + fmt(r.A) + 'ms | B 怪群(' + r.crowd + '只) ' + fmt(r.B) + 'ms | C +6特效 ' + fmt(r.C) + 'ms\n' +
+        '特效增量 ' + fmt(r.dFx) + 'ms（占预算 ' + Math.round(r.dFx / BUDGET * 100) + '%）| 每实例 ' + perFx.toFixed(2) + 'ms\n' +
+        'D 实战 ' + r.D.fps.toFixed(0) + 'fps | 掉帧 ' + r.D.drops + ' 次 | 最差 ' + r.D.worst.toFixed(1) + 'ms\n' +
+        '判定：' + v.tag;
+      if (navigator.clipboard) navigator.clipboard.writeText(txt).then(() => {
+        $('copy').textContent = '已复制 ✓';
+        setTimeout(() => { $('copy').textContent = '复制结果发给 Jerry'; }, 1500);
+      }).catch(() => prompt('长按复制：', txt));
+      else prompt('长按复制：', txt);
+    };
+  }
+
+  // ---------- 启动 ----------
+  function boot() {
+    try {
+      const W = frm.contentWindow;
+      if (!W || !W.__FR) { setTimeout(boot, 200); return; }
+      paintDev(deviceInfo());
+    } catch (e) {
+      setTimeout(boot, 200);
+    }
+  }
+
+  // ---------- 渲染精度档位 ----------
+  let PR = 1;
+
+  function waitReady(ms) {
+    return new Promise((res, rej) => {
+      const t0 = performance.now();
+      (function poll() {
+        try {
+          const W = frm.contentWindow;
+          if (W && W.__FR && W.FX3) return res(W);
+        } catch (e) {}
+        if (performance.now() - t0 > (ms || 25000)) return rej(new Error('游戏载入超时，检查网络后刷新'));
+        setTimeout(poll, 150);
+      })();
+    });
+  }
+
+  function setPR(n) {
+    PR = n;
+    document.querySelectorAll('.prrow button').forEach(b => b.classList.toggle('on', +b.dataset.pr === n));
+    $('out').innerHTML = '';
+    $('log').innerHTML = '';
+    $('go').disabled = true;
+    $('go').textContent = '开始测试';
+    frm.src = 'index.html?test=1&pr=' + n;
+    waitReady().then(() => {
+      paintDev(deviceInfo());
+      $('go').disabled = false;
+      log('已切到 ' + n + '× 渲染精度（画布与画面 1:1，最清晰）');
+    }).catch(e => { log('✗ ' + e.message); $('go').disabled = false; });
+  }
+
+  document.querySelectorAll('.prrow button').forEach(b => {
+    b.onclick = () => { if (busy) return; setPR(+b.dataset.pr); };
+  });
+
+  let busy = false;
+
+  $('go').onclick = () => {
+    $('log').innerHTML = '';
+    run().catch(err => {
+      log('✗ ' + (err && err.message || err));
+      $('go').disabled = false;
+      busy = false;
+    });
+  };
+
+  frm.addEventListener('load', () => setTimeout(boot, 300));
+  setTimeout(boot, 1200);
+})();
+</script>
+</body>
+</html>
