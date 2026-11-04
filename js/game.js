@@ -535,7 +535,7 @@
     bonus: {}, realm: { dmg: 0, atk: 0, spd: 0 }, realmIdx: 0, realmHp: 0, gear: {},
     combo: 0, comboT: 0, hitStop: 0, lastCombo: -1, comboTier: 0,
     dashCd: 0,                 // 闪身冷却（秒）
-    vacuumT: 0, pendingEnding: false, runLoot: [], lastAutoSave: 0,
+    vacuumT: 0, pendingEnding: false, runLoot: [], lastAutoSave: 0, pickLeft: 0,
     shopTab: 'buy', shopCat: 'dan',
     caveId: null, caveTab: 'stat', diffPick: null,
     npcs: [], encT: 8,
@@ -693,6 +693,17 @@
   // 一屏要多大半径才算「全屏拾取」：视口半对角线再放一点余量。
   // W/H 是逻辑视口且随设备伸展（480×864 起，长屏可到 480×1120），故实时算，不写死。
   function viewPickR() { return Math.sqrt(W * W + H * H) / 2 + 24; }
+  // 视野判定：以镜头实际可视矩形为准（硬跟随下就是玩家身边这一屏）。
+  // Boss 战后的自动收取只认这一屏之内的掉落；视野外的留在原地，不再全图扫荡。
+  const VIEW_EDGE = 6;   // 四边余量：正好卡在屏幕边缘的那件，玩家看得见就该捡得到
+  function inView(o) {
+    if (!o) return false;
+    const p = G.player || { x: 0, y: 0 };
+    const cx = (G.cam && G.cam.x != null) ? G.cam.x : p.x - W / 2;
+    const cy = (G.cam && G.cam.y != null) ? G.cam.y : p.y - H / 2;
+    return o.x >= cx - VIEW_EDGE && o.x <= cx + W + VIEW_EDGE &&
+           o.y >= cy - VIEW_EDGE && o.y <= cy + H + VIEW_EDGE;
+  }
   // ---------- 驱物术的第二个功用：神念拾取 ----------
   // 顿悟池里「拾取范围 +30%」那张卡在上一轮被删了（它和「变强打怪」无关，属于噪音），
   // 但拾取本身不能没着落 —— 宝石飞不进来，玩家就得靠脚一个个去踩，走位压力反而变形。
@@ -2986,12 +2997,15 @@
     else gainXp(o.val);
     Sfx.gem();
   }
-  // Boss 战后：全图掉落自动飞向角色（配合结局对话）
+  // Boss 战后：一屏之内的掉落自动飞向角色（配合结局对话）
+  // 视野外的不施加吸力 —— 隔着半张图的材料不会自己长腿跑过来。
   function vacuumPickups(dt, speed) {
     const p = G.player, sp = speed || 900;
     const pull = (arr) => {
       for (let i = arr.length - 1; i >= 0; i--) {
-        const o = arr[i]; const d = U.dist(p.x, p.y, o.x, o.y);
+        const o = arr[i];
+        if (!inView(o)) continue;
+        const d = U.dist(p.x, p.y, o.x, o.y);
         const a = Math.atan2(p.y - o.y, p.x - o.x);
         o.x += Math.cos(a) * sp * dt; o.y += Math.sin(a) * sp * dt;
         if (d < 20) {
@@ -3004,19 +3018,37 @@
     };
     pull(G.gems); pull(G.herbs); pull(G.loot);
   }
-  function collectAllPickups() {
-    let n = 0;
+  // inViewOnly：只收当前一屏之内的掉落（Boss 战后的自动收取走这条）。
+  // 视野外的留在原地 —— 该走过去捡的东西，得玩家自己走过去。
+  function collectAllPickups(inViewOnly) {
+    let n = 0, left = 0;
     // P6：房主把 Boss 战利品全数收走时，给队友留一份——修为 / 灵石 / 回血各半，
     // 掉落道具也给同款一份（只此一件的东西 addToBag 自己会拦，不会一式两份）。
     const share = (G.coopRole === 'host' && window.Coop) ? { xp: 0, stones: 0, hp: 0, items: [] } : null;
-    for (const g of G.gems) {
+    const drain = (arr, onTake) => {
+      const rest = [];
+      for (const o of arr) {
+        if (inViewOnly && !inView(o)) { rest.push(o); left++; continue; }
+        onTake(o); n++;
+      }
+      arr.length = 0;
+      for (const o of rest) arr.push(o);
+    };
+    drain(G.gems, g => {
       if (share) { if (g.kind === 'stone') share.stones += (g.val || 1); else share.xp += (g.val || 0); }
-      takeGem(g); n++;
-    }
-    for (const h of G.herbs) { G.player.hp = Math.min(G.player.maxhp, G.player.hp + 14); if (share) share.hp += 14; n++; }
-    for (const l of G.loot) { if (share && l.item) share.items.push(l.item.id); applyItem(l.item, { silent: true }); n++; }
-    G.gems.length = 0; G.herbs.length = 0; G.loot.length = 0;
+      takeGem(g);
+    });
+    drain(G.herbs, () => {
+      G.player.hp = Math.min(G.player.maxhp, G.player.hp + 14);
+      if (share) share.hp += 14;
+    });
+    drain(G.loot, l => {
+      if (share && l.item) share.items.push(l.item.id);
+      applyItem(l.item, { silent: true });
+    });
+    G.pickLeft = left;   // 结算面板要报「视野外没捡到几件」
     if (n > 0) spawnText(G.player.x, G.player.y - 30, '收获 ' + n + ' 件', '#ffd24a', 16);
+    if (left > 0) spawnText(G.player.x, G.player.y - 52, '视野外 ' + left + ' 件未及拾取', '#8b96a6', 12);
     if (share) {
       share.xp *= 0.5; share.stones *= 0.5; share.hp *= 0.5;
       if (share.stones) share.stones = Math.max(1, Math.round(share.stones));
@@ -4782,7 +4814,7 @@
       G.vacuumT -= dt;
       vacuumPickups(dt, 900);
       if (G.vacuumT <= 0) {
-        collectAllPickups();
+        collectAllPickups(true);   // 只收一屏之内：视野外的留在原地
         autoSave();
         if (G.pendingEnding) {
           G.pendingEnding = false;
@@ -5810,7 +5842,7 @@
     G.boss = null; G.bossActive = false; G.bossSpawned = false; G.bossWarned = false; G.extraIdx = 0;
     G.fieldSlow = []; G.shake = 0; G.flash = 0; G.hitStop = 0;
     G.decor = []; G.chunkMap = {}; G.cam = { x: -W / 2, y: -H / 2 }; G.orbPos = []; G.camLag = null;
-    G.vacuumT = 0; G.pendingEnding = false; G.runLoot = []; G.matGain = 0; G.lastAutoSave = 0;
+    G.vacuumT = 0; G.pendingEnding = false; G.runLoot = []; G.matGain = 0; G.lastAutoSave = 0; G.pickLeft = 0;
     G.alch = null; G.alchWet = false;   // 破境药材配额，进图时按图重算
     G.breakHinted = false;   // 瓶颈弹幕每图只提一次
     G.minorHint = 0;         // 小境界关口弹幕也每图只提一次
@@ -6440,6 +6472,9 @@
       }
     }
     const dm = (G.map && (G.map.type === 'combat' || G.map.type === 'boss')) ? (G.diff || DIFFICULTIES[0]) : DIFFICULTIES[0];
+    if (G.pickLeft > 0) {
+      extra += '<div class="lootrow"><b style="color:#8b96a6">视野外未及拾取</b><span>' + G.pickLeft + ' 件 · 留在原地</span></div>';
+    }
     if (G.reclaimedLost && G.reclaimedLost.items > 0) {
       extra += '<div class="lootrow reward"><b style="color:#ffd24a">寻回前番失落</b><span>道具 ×'
         + G.reclaimedLost.items + '（' + G.reclaimedLost.kinds + ' 味）· 原物奉还</span></div>';
