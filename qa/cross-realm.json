@@ -1,0 +1,958 @@
+{
+  "rows": [
+    {
+      "realm": "炼气",
+      "from": 1,
+      "to": 35,
+      "nMap": 5,
+      "dps": 145,
+      "hp": 16,
+      "ttk": 0.131,
+      "mobs": 9,
+      "nearN": 9,
+      "nearSpd": 59.1,
+      "farN": 0,
+      "farSpd": null,
+      "nearMax": 86
+    },
+    {
+      "realm": "筑基",
+      "from": 36,
+      "to": 48,
+      "nMap": 2,
+      "dps": 666,
+      "hp": 65,
+      "ttk": 0.122,
+      "mobs": 4,
+      "nearN": 3,
+      "nearSpd": 58,
+      "farN": 1,
+      "farSpd": 74,
+      "nearMax": 62
+    },
+    {
+      "realm": "结丹",
+      "from": 56,
+      "to": 72,
+      "nMap": 1,
+      "dps": 1669,
+      "hp": 90,
+      "ttk": 0.054,
+      "mobs": 1,
+      "nearN": 1,
+      "nearSpd": 26,
+      "farN": 0,
+      "farSpd": null,
+      "nearMax": 26
+    },
+    {
+      "realm": "元婴",
+      "from": 82,
+      "to": 102,
+      "nMap": 9,
+      "dps": 2707,
+      "hp": 267,
+      "ttk": 0.095,
+      "mobs": 15,
+      "nearN": 13,
+      "nearSpd": 56.3,
+      "farN": 2,
+      "farSpd": 40,
+      "nearMax": 70
+    },
+    {
+      "realm": "化神",
+      "from": 112,
+      "to": 132,
+      "nMap": 2,
+      "dps": 6838,
+      "hp": 627,
+      "ttk": 0.092,
+      "mobs": 2,
+      "nearN": 2,
+      "nearSpd": 63,
+      "farN": 0,
+      "farSpd": null,
+      "nearMax": 66
+    },
+    {
+      "realm": "合体",
+      "from": 200,
+      "to": 240,
+      "nMap": 2,
+      "dps": 22594,
+      "hp": 665,
+      "ttk": 0.044,
+      "mobs": 2,
+      "nearN": 2,
+      "nearSpd": 48,
+      "farN": 0,
+      "farSpd": null,
+      "nearMax": 62
+    },
+    {
+      "realm": "大乘",
+      "from": 260,
+      "to": 300,
+      "nMap": 2,
+      "dps": 28124,
+      "hp": 204,
+      "ttk": 0.007,
+      "mobs": 2,
+      "nearN": 2,
+      "nearSpd": 68,
+      "farN": 0,
+      "farSpd": null,
+      "nearMax": 68
+    },
+    {
+      "realm": "金仙",
+      "from": 460,
+      "to": 460,
+      "nMap": 1,
+      "dps": 79284,
+      "hp": 4928,
+      "ttk": 0.062,
+      "mobs": 2,
+      "nearN": 1,
+      "nearSpd": 90,
+      "farN": 1,
+      "farSpd": 86,
+      "nearMax": 90
+    }
+  ],
+  "maps": [
+    {
+      "id": "houshan",
+      "name": "七玄门·后山",
+      "lv": 1,
+      "type": "combat",
+      "want": 5,
+      "got": 2,
+      "hpAvg": 2,
+      "spdAvg": 68,
+      "mobs": [
+        {
+          "type": "wolf",
+          "name": "恶狼",
+          "hp": 2,
+          "spd": 62,
+          "art": "妖狼裂爪",
+          "ranged": false,
+          "mobile": false
+        },
+        {
+          "type": "snake",
+          "name": "毒蛇",
+          "hp": 2,
+          "spd": 74,
+          "art": "毒牙噬",
+          "ranged": false,
+          "mobile": false
+        }
+      ],
+      "dps": 13,
+      "ttk": 0.154
+    },
+    {
+      "id": "mishi",
+      "name": "墨大夫·密室",
+      "lv": 7,
+      "type": "boss",
+      "want": 2,
+      "got": 1,
+      "hpAvg": 16,
+      "spdAvg": 26,
+      "mobs": [
+        {
+          "type": "ghoul",
+          "name": "尸傀",
+          "hp": 16,
+          "spd": 26,
+          "art": "尸爪裂魂",
+          "ranged": false,
+          "mobile": false
+        }
+      ],
+      "dps": 71,
+      "ttk": 0.225
+    },
+    {
+      "id": "yaoyuan",
+      "name": "黄枫谷·百药园（旧园）",
+      "lv": 22,
+      "type": "combat",
+      "want": 5,
+      "got": 2,
+      "hpAvg": 10,
+      "spdAvg": 71,
+      "mobs": [
+        {
+          "type": "bat",
+          "name": "蝙蝠",
+          "hp": 9,
+          "spd": 68,
+          "art": "扑翼吸血",
+          "ranged": false,
+          "mobile": false
+        },
+        {
+          "type": "snake",
+          "name": "毒蛇",
+          "hp": 10,
+          "spd": 74,
+          "art": "毒牙噬",
+          "ranged": false,
+          "mobile": false
+        }
+      ],
+      "dps": 155,
+      "ttk": 0.065
+    },
+    {
+      "id": "xuese",
+      "name": "血色禁地",
+      "lv": 28,
+      "type": "combat",
+      "want": 5,
+      "got": 2,
+      "hpAvg": 19,
+      "spdAvg": 56,
+      "mobs": [
+        {
+          "type": "assassin",
+          "name": "死士",
+          "hp": 13,
+          "spd": 86,
+          "art": "淬毒匕首",
+          "ranged": false,
+          "mobile": true
+        },
+        {
+          "type": "ghoul",
+          "name": "尸傀",
+          "hp": 24,
+          "spd": 26,
+          "art": "尸爪裂魂",
+          "ranged": false,
+          "mobile": false
+        }
+      ],
+      "dps": 145,
+      "ttk": 0.131
+    },
+    {
+      "id": "yanjia",
+      "name": "燕家堡",
+      "lv": 36,
+      "type": "combat",
+      "want": 3,
+      "got": 2,
+      "hpAvg": 65,
+      "spdAvg": 58,
+      "mobs": [
+        {
+          "type": "moxiu",
+          "name": "魔道修士",
+          "hp": 70,
+          "spd": 54,
+          "art": "魔道飞剑",
+          "ranged": false,
+          "mobile": false
+        },
+        {
+          "type": "guiling",
+          "name": "鬼灵门弟子",
+          "hp": 59,
+          "spd": 62,
+          "art": "阴煞掌",
+          "ranged": false,
+          "mobile": true
+        }
+      ],
+      "dps": 534,
+      "ttk": 0.122
+    },
+    {
+      "id": "liulian",
+      "name": "六连殿·出海捕妖",
+      "lv": 46,
+      "type": "combat",
+      "want": 3,
+      "got": 2,
+      "hpAvg": 65,
+      "spdAvg": 66,
+      "mobs": [
+        {
+          "type": "yuyao",
+          "name": "婴鲤兽",
+          "hp": 59,
+          "spd": 74,
+          "art": "婴鲤吐珠",
+          "ranged": true,
+          "mobile": false
+        },
+        {
+          "type": "haishou",
+          "name": "海妖兽",
+          "hp": 71,
+          "spd": 58,
+          "art": "潮涌扑击",
+          "ranged": false,
+          "mobile": false
+        }
+      ],
+      "dps": 666,
+      "ttk": 0.098
+    },
+    {
+      "id": "ningcui",
+      "name": "凝翠岛·杀妖取丹",
+      "lv": 52,
+      "type": "combat",
+      "want": 2,
+      "got": 2,
+      "hpAvg": 72,
+      "spdAvg": 66,
+      "mobs": [
+        {
+          "type": "yuyao",
+          "name": "婴鲤兽",
+          "hp": 66,
+          "spd": 74,
+          "art": "婴鲤吐珠",
+          "ranged": true,
+          "mobile": false
+        },
+        {
+          "type": "haishou",
+          "name": "海妖兽",
+          "hp": 78,
+          "spd": 58,
+          "art": "潮涌扑击",
+          "ranged": false,
+          "mobile": false
+        }
+      ],
+      "dps": 767,
+      "ttk": 0.094
+    },
+    {
+      "id": "xutian",
+      "name": "虚天殿",
+      "lv": 68,
+      "type": "boss",
+      "want": 3,
+      "got": 1,
+      "hpAvg": 90,
+      "spdAvg": 26,
+      "mobs": [
+        {
+          "type": "ghoul",
+          "name": "尸傀",
+          "hp": 90,
+          "spd": 26,
+          "art": "尸爪裂魂",
+          "ranged": false,
+          "mobile": false
+        }
+      ],
+      "dps": 1669,
+      "ttk": 0.054
+    },
+    {
+      "id": "yinming",
+      "name": "阴冥之地",
+      "lv": 80,
+      "type": "combat",
+      "want": 3,
+      "got": 2,
+      "hpAvg": 190,
+      "spdAvg": 68,
+      "mobs": [
+        {
+          "type": "guiwu",
+          "name": "阴兽",
+          "hp": 232,
+          "spd": 66,
+          "art": "阴风噬体",
+          "ranged": false,
+          "mobile": false
+        },
+        {
+          "type": "guixiu",
+          "name": "鬼物",
+          "hp": 147,
+          "spd": 70,
+          "art": "阴气侵体",
+          "ranged": false,
+          "mobile": false
+        }
+      ],
+      "dps": 1947,
+      "ttk": 0.098
+    },
+    {
+      "id": "shixiao",
+      "name": "禁地·尸魈",
+      "lv": 80,
+      "type": "combat",
+      "want": 3,
+      "got": 2,
+      "hpAvg": 129,
+      "spdAvg": 42,
+      "mobs": [
+        {
+          "type": "ghoul",
+          "name": "尸傀",
+          "hp": 55,
+          "spd": 26,
+          "art": "尸爪裂魂",
+          "ranged": false,
+          "mobile": false
+        },
+        {
+          "type": "shixiao",
+          "name": "尸魈",
+          "hp": 202,
+          "spd": 58,
+          "art": "尸爪噬血",
+          "ranged": false,
+          "mobile": true
+        }
+      ],
+      "dps": 1947,
+      "ttk": 0.066
+    },
+    {
+      "id": "sanjian",
+      "name": "三派试剑",
+      "lv": 81,
+      "type": "combat",
+      "want": 3,
+      "got": 2,
+      "hpAvg": 199,
+      "spdAvg": 64,
+      "mobs": [
+        {
+          "type": "moxiu2",
+          "name": "魔修",
+          "hp": 191,
+          "spd": 62,
+          "art": "魔焰焚身",
+          "ranged": false,
+          "mobile": false
+        },
+        {
+          "type": "zhengdao",
+          "name": "修士",
+          "hp": 206,
+          "spd": 66,
+          "art": "御剑斩",
+          "ranged": false,
+          "mobile": false
+        }
+      ],
+      "dps": 1947,
+      "ttk": 0.102
+    },
+    {
+      "id": "cangkun",
+      "name": "苍坤上人洞府",
+      "lv": 84,
+      "type": "combat",
+      "want": 3,
+      "got": 2,
+      "hpAvg": 267,
+      "spdAvg": 52,
+      "mobs": [
+        {
+          "type": "kui2",
+          "name": "傀儡",
+          "hp": 280,
+          "spd": 40,
+          "art": "灵光炮",
+          "ranged": true,
+          "mobile": false
+        },
+        {
+          "type": "dajinxiu",
+          "name": "散修",
+          "hp": 253,
+          "spd": 64,
+          "art": "散修飞剑",
+          "ranged": false,
+          "mobile": false
+        }
+      ],
+      "dps": 2707,
+      "ttk": 0.099
+    },
+    {
+      "id": "yanyue",
+      "name": "掩月宗",
+      "lv": 86,
+      "type": "combat",
+      "want": 3,
+      "got": 2,
+      "hpAvg": 269,
+      "spdAvg": 64,
+      "mobs": [
+        {
+          "type": "zhengdao",
+          "name": "修士",
+          "hp": 278,
+          "spd": 66,
+          "art": "御剑斩",
+          "ranged": false,
+          "mobile": false
+        },
+        {
+          "type": "moxiu2",
+          "name": "魔修",
+          "hp": 259,
+          "spd": 62,
+          "art": "魔焰焚身",
+          "ranged": false,
+          "mobile": false
+        }
+      ],
+      "dps": 2707,
+      "ttk": 0.099
+    },
+    {
+      "id": "huanglong",
+      "name": "黄龙山大战",
+      "lv": 88,
+      "type": "chase",
+      "want": 3,
+      "got": 2,
+      "hpAvg": 266,
+      "spdAvg": 58,
+      "mobs": [
+        {
+          "type": "moxiu2",
+          "name": "魔修",
+          "hp": 236,
+          "spd": 62,
+          "art": "魔焰焚身",
+          "ranged": false,
+          "mobile": false
+        },
+        {
+          "type": "gui2",
+          "name": "魔物",
+          "hp": 296,
+          "spd": 54,
+          "art": "魔气侵蚀",
+          "ranged": false,
+          "mobile": false
+        }
+      ],
+      "dps": 2707,
+      "ttk": 0.098
+    },
+    {
+      "id": "yinluo",
+      "name": "阴罗宗四长老",
+      "lv": 90,
+      "type": "boss",
+      "want": 3,
+      "got": 1,
+      "hpAvg": 63,
+      "spdAvg": 26,
+      "mobs": [
+        {
+          "type": "ghoul",
+          "name": "尸傀",
+          "hp": 63,
+          "spd": 26,
+          "art": "尸爪裂魂",
+          "ranged": false,
+          "mobile": false
+        }
+      ],
+      "dps": 2707,
+      "ttk": 0.023
+    },
+    {
+      "id": "zhuimo",
+      "name": "坠魔谷",
+      "lv": 90,
+      "type": "combat",
+      "want": 3,
+      "got": 2,
+      "hpAvg": 277,
+      "spdAvg": 57,
+      "mobs": [
+        {
+          "type": "gui2",
+          "name": "魔物",
+          "hp": 289,
+          "spd": 54,
+          "art": "魔气侵蚀",
+          "ranged": false,
+          "mobile": false
+        },
+        {
+          "type": "yaoshou2",
+          "name": "妖兽",
+          "hp": 264,
+          "spd": 60,
+          "art": "妖爪裂骨",
+          "ranged": false,
+          "mobile": false
+        }
+      ],
+      "dps": 2707,
+      "ttk": 0.102
+    },
+    {
+      "id": "mulan",
+      "name": "天澜草原·重伤",
+      "lv": 94,
+      "type": "chase",
+      "want": 3,
+      "got": 2,
+      "hpAvg": 265,
+      "spdAvg": 66,
+      "mobs": [
+        {
+          "type": "moxiu2",
+          "name": "魔修",
+          "hp": 260,
+          "spd": 62,
+          "art": "魔焰焚身",
+          "ranged": false,
+          "mobile": false
+        },
+        {
+          "type": "fashi",
+          "name": "慕兰法士",
+          "hp": 270,
+          "spd": 70,
+          "art": "慕兰咒印",
+          "ranged": false,
+          "mobile": false
+        }
+      ],
+      "dps": 3200,
+      "ttk": 0.083
+    },
+    {
+      "id": "kunwu",
+      "name": "昆吾山",
+      "lv": 96,
+      "type": "boss",
+      "want": 3,
+      "got": 1,
+      "hpAvg": 70,
+      "spdAvg": 26,
+      "mobs": [
+        {
+          "type": "ghoul",
+          "name": "尸傀",
+          "hp": 70,
+          "spd": 26,
+          "art": "尸爪裂魂",
+          "ranged": false,
+          "mobile": false
+        }
+      ],
+      "dps": 3200,
+      "ttk": 0.022
+    },
+    {
+      "id": "zhenmo",
+      "name": "镇魔塔",
+      "lv": 98,
+      "type": "boss",
+      "want": 3,
+      "got": 1,
+      "hpAvg": 304,
+      "spdAvg": 66,
+      "mobs": [
+        {
+          "type": "yaoxiu",
+          "name": "妖修",
+          "hp": 304,
+          "spd": 66,
+          "art": "化形妖术",
+          "ranged": false,
+          "mobile": false
+        }
+      ],
+      "dps": 3200,
+      "ttk": 0.095
+    },
+    {
+      "id": "xiaoji",
+      "name": "小极宫",
+      "lv": 100,
+      "type": "combat",
+      "want": 3,
+      "got": 2,
+      "hpAvg": 278,
+      "spdAvg": 50,
+      "mobs": [
+        {
+          "type": "kui2",
+          "name": "傀儡",
+          "hp": 307,
+          "spd": 40,
+          "art": "灵光炮",
+          "ranged": true,
+          "mobile": false
+        },
+        {
+          "type": "yaoshou2",
+          "name": "妖兽",
+          "hp": 248,
+          "spd": 60,
+          "art": "妖爪裂骨",
+          "ranged": false,
+          "mobile": false
+        }
+      ],
+      "dps": 3200,
+      "ttk": 0.087
+    },
+    {
+      "id": "muzu",
+      "name": "木族领地",
+      "lv": 132,
+      "type": "boss",
+      "want": 3,
+      "got": 1,
+      "hpAvg": 627,
+      "spdAvg": 60,
+      "mobs": [
+        {
+          "type": "yaoshou2",
+          "name": "妖兽",
+          "hp": 627,
+          "spd": 60,
+          "art": "妖爪裂骨",
+          "ranged": false,
+          "mobile": false
+        }
+      ],
+      "dps": 6838,
+      "ttk": 0.092
+    },
+    {
+      "id": "zhenchan",
+      "name": "碧眼真蟾",
+      "lv": 132,
+      "type": "boss",
+      "want": 3,
+      "got": 1,
+      "hpAvg": 598,
+      "spdAvg": 66,
+      "mobs": [
+        {
+          "type": "yaoxiu",
+          "name": "妖修",
+          "hp": 598,
+          "spd": 66,
+          "art": "化形妖术",
+          "ranged": false,
+          "mobile": false
+        }
+      ],
+      "dps": 6838,
+      "ttk": 0.087
+    },
+    {
+      "id": "longjia",
+      "name": "陇家·巨猿战老祖",
+      "lv": 205,
+      "type": "boss",
+      "want": 3,
+      "got": 1,
+      "hpAvg": 665,
+      "spdAvg": 34,
+      "mobs": [
+        {
+          "type": "kui",
+          "name": "机关傀儡",
+          "hp": 665,
+          "spd": 34,
+          "art": "机关铁臂",
+          "ranged": false,
+          "mobile": false
+        }
+      ],
+      "dps": 15032,
+      "ttk": 0.044
+    },
+    {
+      "id": "huanxiao",
+      "name": "幻啸沙漠",
+      "lv": 240,
+      "type": "boss",
+      "want": 3,
+      "got": 1,
+      "hpAvg": 176,
+      "spdAvg": 62,
+      "mobs": [
+        {
+          "type": "wolf",
+          "name": "恶狼",
+          "hp": 176,
+          "spd": 62,
+          "art": "妖狼裂爪",
+          "ranged": false,
+          "mobile": false
+        }
+      ],
+      "dps": 22594,
+      "ttk": 0.008
+    },
+    {
+      "id": "shiyin",
+      "name": "魔界·始印之地",
+      "lv": 268,
+      "type": "boss",
+      "want": 3,
+      "got": 1,
+      "hpAvg": 204,
+      "spdAvg": 68,
+      "mobs": [
+        {
+          "type": "bat",
+          "name": "蝙蝠",
+          "hp": 204,
+          "spd": 68,
+          "art": "扑翼吸血",
+          "ranged": false,
+          "mobile": false
+        }
+      ],
+      "dps": 28124,
+      "ttk": 0.007
+    },
+    {
+      "id": "xiaoxiuluo",
+      "name": "小修罗界·寒潭",
+      "lv": 282,
+      "type": "boss",
+      "want": 3,
+      "got": 1,
+      "hpAvg": 176,
+      "spdAvg": 68,
+      "mobs": [
+        {
+          "type": "bat",
+          "name": "蝙蝠",
+          "hp": 176,
+          "spd": 68,
+          "art": "扑翼吸血",
+          "ranged": false,
+          "mobile": false
+        }
+      ],
+      "dps": 28124,
+      "ttk": 0.006
+    },
+    {
+      "id": "xisha",
+      "name": "灰界·洗煞雷池",
+      "lv": 460,
+      "type": "combat",
+      "want": 2,
+      "got": 2,
+      "hpAvg": 4928,
+      "spdAvg": 88,
+      "mobs": [
+        {
+          "type": "jy_younu",
+          "name": "幽奴",
+          "hp": 3942,
+          "spd": 90,
+          "art": "幽奴噬魂",
+          "ranged": false,
+          "mobile": false
+        },
+        {
+          "type": "jy_xiushi",
+          "name": "九幽族修士",
+          "hp": 5913,
+          "spd": 86,
+          "art": "九幽阴火",
+          "ranged": true,
+          "mobile": false
+        }
+      ],
+      "dps": 79284,
+      "ttk": 0.062
+    }
+  ],
+  "groups": [
+    {
+      "name": "炼气",
+      "from": 1,
+      "to": 35
+    },
+    {
+      "name": "筑基",
+      "from": 36,
+      "to": 48
+    },
+    {
+      "name": "结丹",
+      "from": 56,
+      "to": 72
+    },
+    {
+      "name": "元婴",
+      "from": 82,
+      "to": 102
+    },
+    {
+      "name": "化神",
+      "from": 112,
+      "to": 132
+    },
+    {
+      "name": "炼虚",
+      "from": 150,
+      "to": 180
+    },
+    {
+      "name": "合体",
+      "from": 200,
+      "to": 240
+    },
+    {
+      "name": "大乘",
+      "from": 260,
+      "to": 300
+    },
+    {
+      "name": "渡劫",
+      "from": 330,
+      "to": 330
+    },
+    {
+      "name": "真仙",
+      "from": 420,
+      "to": 420
+    },
+    {
+      "name": "金仙",
+      "from": 460,
+      "to": 460
+    },
+    {
+      "name": "太乙",
+      "from": 520,
+      "to": 520
+    },
+    {
+      "name": "大罗",
+      "from": 580,
+      "to": 580
+    }
+  ]
+}

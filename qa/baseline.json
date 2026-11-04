@@ -1,0 +1,1192 @@
+{
+  "skills": [
+    {
+      "id": "sword",
+      "name": "驱物术",
+      "type": "ranged",
+      "minLv": 1,
+      "max": 6,
+      "kind": "beam",
+      "base": 8,
+      "perLv": 3,
+      "cd": 0.85,
+      "countBase": 1,
+      "countPerLv": 0.34,
+      "pierceBase": 3,
+      "range": 360,
+      "life": 1.4
+    },
+    {
+      "id": "fire",
+      "name": "火弹术",
+      "type": "ranged_aoe",
+      "minLv": 5,
+      "max": 5,
+      "kind": "beam",
+      "base": 14,
+      "perLv": 6,
+      "cd": 1.5,
+      "countBase": 1,
+      "countPerLv": 0.5,
+      "pierceBase": 1,
+      "range": 520,
+      "life": 1.5
+    },
+    {
+      "id": "orb",
+      "name": "金光罩",
+      "type": "aura",
+      "minLv": 8,
+      "max": 5,
+      "kind": "orbit",
+      "base": 6,
+      "perLv": 3,
+      "countBase": 0,
+      "countPerLv": 1,
+      "rad": 36
+    },
+    {
+      "id": "nova",
+      "name": "定神符",
+      "type": "ranged_aoe",
+      "minLv": 12,
+      "max": 5,
+      "kind": "burst",
+      "base": 10,
+      "perLv": 5,
+      "cdBase": 4.5,
+      "cdPerLv": 0.3,
+      "cdMin": 2.5,
+      "range": 9999,
+      "radBase": 80
+    },
+    {
+      "id": "frost",
+      "name": "冰冻术",
+      "type": "aura",
+      "minLv": 20,
+      "max": 5,
+      "kind": "field",
+      "base": 2,
+      "perLv": 1,
+      "radBase": 60
+    },
+    {
+      "id": "jianfen",
+      "name": "剑影分光术",
+      "type": "ranged",
+      "minLv": 56,
+      "max": 6,
+      "kind": "beam",
+      "base": 6,
+      "perLv": 2.5,
+      "cd": 1.5,
+      "countBase": 2,
+      "countPerLv": 0.5,
+      "pierceBase": 2,
+      "range": 460,
+      "life": 1.3
+    },
+    {
+      "id": "shayao",
+      "name": "煞妖诀",
+      "type": "aura",
+      "minLv": 56,
+      "max": 6,
+      "kind": "orbit",
+      "base": 8,
+      "perLv": 4,
+      "countBase": 1,
+      "countPerLv": 1,
+      "rad": 42
+    },
+    {
+      "id": "xueling",
+      "name": "血灵钻",
+      "type": "ranged",
+      "minLv": 60,
+      "max": 6,
+      "kind": "beam",
+      "base": 26,
+      "perLv": 10,
+      "cd": 2.4,
+      "countBase": 1,
+      "countPerLv": 0.34,
+      "pierceBase": 3,
+      "range": 520,
+      "life": 1.2
+    },
+    {
+      "id": "xuelian",
+      "name": "血炼神光",
+      "type": "ranged",
+      "minLv": 56,
+      "max": 6,
+      "kind": "beam",
+      "base": 18,
+      "perLv": 7,
+      "cd": 1.8,
+      "countBase": 1,
+      "countPerLv": 0.34,
+      "pierceBase": 2,
+      "range": 480,
+      "life": 1.3
+    },
+    {
+      "id": "sanyan",
+      "name": "三焰扇",
+      "type": "ranged_aoe",
+      "minLv": 56,
+      "max": 6,
+      "kind": "spread",
+      "base": 11,
+      "perLv": 4,
+      "cd": 2.6,
+      "countBase": 3,
+      "countPerLv": 0.5,
+      "pierceBase": 1,
+      "range": 480,
+      "life": 1.2
+    },
+    {
+      "id": "tongbao",
+      "name": "洞漩金光",
+      "type": "aura",
+      "minLv": 56,
+      "max": 6,
+      "kind": "field",
+      "base": 14,
+      "perLv": 6,
+      "radBase": 70
+    },
+    {
+      "id": "dageng",
+      "name": "大庚剑阵",
+      "type": "ranged",
+      "minLv": 82,
+      "max": 7,
+      "kind": "beam",
+      "base": 20,
+      "perLv": 8,
+      "cd": 2.2,
+      "countBase": 4,
+      "countPerLv": 0.34,
+      "pierceBase": 3,
+      "range": 560,
+      "life": 1.5
+    },
+    {
+      "id": "tiandu",
+      "name": "天都尸火",
+      "type": "ranged_aoe",
+      "minLv": 82,
+      "max": 7,
+      "kind": "burst",
+      "base": 22,
+      "perLv": 9,
+      "cdBase": 5,
+      "cdPerLv": 0.3,
+      "cdMin": 3,
+      "range": 9999,
+      "radBase": 110
+    },
+    {
+      "id": "leishen",
+      "name": "辟邪神雷",
+      "type": "ranged_aoe",
+      "minLv": 82,
+      "max": 7,
+      "kind": "thunder",
+      "base": 14,
+      "perLv": 6,
+      "cd": 2.4,
+      "countBase": 1,
+      "countPerLv": 0.34,
+      "range": 560
+    },
+    {
+      "id": "qinxian",
+      "name": "惊神刺",
+      "type": "ranged_aoe",
+      "minLv": 82,
+      "max": 7,
+      "kind": "burst",
+      "base": 26,
+      "perLv": 9,
+      "cdBase": 4.2,
+      "cdPerLv": 0.25,
+      "cdMin": 2.6,
+      "range": 9999,
+      "radBase": 120
+    },
+    {
+      "id": "shishen",
+      "name": "失神刺",
+      "type": "ranged",
+      "minLv": 102,
+      "max": 7,
+      "kind": "homing",
+      "base": 9,
+      "perLv": 4,
+      "cd": 2.6,
+      "countBase": 1,
+      "countPerLv": 0.34,
+      "range": 520,
+      "life": 2.2
+    },
+    {
+      "id": "jzhen",
+      "name": "青蟠剑阵",
+      "type": "aura",
+      "minLv": 112,
+      "max": 7,
+      "kind": "orbit",
+      "base": 12,
+      "perLv": 5,
+      "countBase": 4,
+      "countPerLv": 0.5,
+      "rad": 78
+    },
+    {
+      "id": "heisha",
+      "name": "黑煞修罗功",
+      "type": "ranged_aoe",
+      "minLv": 102,
+      "max": 7,
+      "kind": "burst",
+      "base": 20,
+      "perLv": 8,
+      "cdBase": 4.8,
+      "cdPerLv": 0.3,
+      "cdMin": 2.8,
+      "range": 9999,
+      "radBase": 100
+    },
+    {
+      "id": "jinshen",
+      "name": "禁神术",
+      "type": "ranged",
+      "minLv": 112,
+      "max": 7,
+      "kind": "homing",
+      "base": 10,
+      "perLv": 4,
+      "cd": 3.2,
+      "countBase": 1,
+      "countPerLv": 0.2,
+      "range": 520,
+      "life": 2.4
+    },
+    {
+      "id": "lihun",
+      "name": "离魂术",
+      "type": "ranged",
+      "minLv": 102,
+      "max": 6,
+      "kind": "homing",
+      "base": 11,
+      "perLv": 5,
+      "cd": 2.2,
+      "countBase": 2,
+      "countPerLv": 0.34,
+      "range": 480,
+      "life": 2
+    },
+    {
+      "id": "mengyin",
+      "name": "梦引术",
+      "type": "ranged",
+      "minLv": 110,
+      "max": 6,
+      "kind": "homing",
+      "base": 7,
+      "perLv": 3,
+      "cd": 2,
+      "countBase": 1,
+      "countPerLv": 0.34,
+      "range": 500,
+      "life": 2.2
+    },
+    {
+      "id": "yuanci",
+      "name": "元磁神光",
+      "type": "aura",
+      "minLv": 102,
+      "max": 7,
+      "kind": "field",
+      "base": 10,
+      "perLv": 8,
+      "radBase": 90
+    },
+    {
+      "id": "nianjian",
+      "name": "念剑诀",
+      "type": "ranged",
+      "minLv": 200,
+      "max": 6,
+      "kind": "beam",
+      "base": 60,
+      "perLv": 22,
+      "cd": 1.4,
+      "countBase": 3,
+      "countPerLv": 0.5,
+      "pierceBase": 3,
+      "range": 520,
+      "life": 1.3
+    },
+    {
+      "id": "jingang2",
+      "name": "金罡灭魔神雷",
+      "type": "ranged_aoe",
+      "minLv": 260,
+      "max": 6,
+      "kind": "thunder",
+      "base": 90,
+      "perLv": 32,
+      "cd": 2.6,
+      "countBase": 2,
+      "countPerLv": 0.34,
+      "range": 640
+    },
+    {
+      "id": "niling",
+      "name": "逆灵真阴大法",
+      "type": "aura",
+      "minLv": 420,
+      "max": 6,
+      "kind": "field",
+      "base": 24,
+      "perLv": 10,
+      "radBase": 120
+    }
+  ],
+  "realms": [
+    {
+      "name": "炼气期一层"
+    },
+    {
+      "name": "炼气期二层"
+    },
+    {
+      "name": "炼气期三层"
+    },
+    {
+      "name": "炼气期四层"
+    },
+    {
+      "name": "炼气期五层"
+    },
+    {
+      "name": "炼气期六层"
+    },
+    {
+      "name": "炼气期七层"
+    },
+    {
+      "name": "炼气期八层"
+    },
+    {
+      "name": "炼气期九层"
+    },
+    {
+      "name": "炼气期十层"
+    },
+    {
+      "name": "炼气期十一层"
+    },
+    {
+      "name": "炼气期十二层"
+    },
+    {
+      "name": "炼气期十三层"
+    },
+    {
+      "name": "筑基初期"
+    },
+    {
+      "name": "筑基中期"
+    },
+    {
+      "name": "筑基后期"
+    },
+    {
+      "name": "结丹初期"
+    },
+    {
+      "name": "结丹中期"
+    },
+    {
+      "name": "结丹后期"
+    },
+    {
+      "name": "元婴初期"
+    },
+    {
+      "name": "元婴中期"
+    },
+    {
+      "name": "元婴后期"
+    },
+    {
+      "name": "化神初期"
+    },
+    {
+      "name": "化神中期"
+    },
+    {
+      "name": "化神后期"
+    },
+    {
+      "name": "炼虚初期"
+    },
+    {
+      "name": "炼虚中期"
+    },
+    {
+      "name": "炼虚后期"
+    },
+    {
+      "name": "合体初期"
+    },
+    {
+      "name": "合体中期"
+    },
+    {
+      "name": "合体后期"
+    },
+    {
+      "name": "大乘期"
+    },
+    {
+      "name": "大乘期"
+    },
+    {
+      "name": "渡劫期"
+    },
+    {
+      "name": "真仙"
+    },
+    {
+      "name": "金仙"
+    },
+    {
+      "name": "太乙"
+    },
+    {
+      "name": "大罗"
+    },
+    {
+      "name": "道祖"
+    }
+  ],
+  "maps": [
+    {
+      "id": "houshan",
+      "name": "七玄门·后山",
+      "lv": 1,
+      "arc": "A",
+      "n": 2,
+      "hpAvg": 2,
+      "hpMin": 2,
+      "hpMax": 2,
+      "spdAvg": 68,
+      "spdMin": 62,
+      "spdMax": 74,
+      "mobs": [
+        {
+          "type": "snake",
+          "hp": 2,
+          "spd": 74,
+          "r": 7,
+          "dmg": 3
+        },
+        {
+          "type": "wolf",
+          "hp": 2,
+          "spd": 62,
+          "r": 9,
+          "dmg": 3
+        }
+      ]
+    },
+    {
+      "id": "mishi",
+      "name": "墨大夫·密室",
+      "lv": 7,
+      "arc": "A",
+      "n": 1,
+      "hpAvg": 16,
+      "hpMin": 16,
+      "hpMax": 16,
+      "spdAvg": 26,
+      "spdMin": 26,
+      "spdMax": 26,
+      "mobs": [
+        {
+          "type": "ghoul",
+          "hp": 16,
+          "spd": 26,
+          "r": 12,
+          "dmg": 12
+        }
+      ]
+    },
+    {
+      "id": "yaoyuan",
+      "name": "黄枫谷·百药园（旧园）",
+      "lv": 22,
+      "arc": "B",
+      "n": 2,
+      "hpAvg": 10,
+      "hpMin": 9,
+      "hpMax": 10,
+      "spdAvg": 71,
+      "spdMin": 68,
+      "spdMax": 74,
+      "mobs": [
+        {
+          "type": "bat",
+          "hp": 9,
+          "spd": 68,
+          "r": 7,
+          "dmg": 15
+        },
+        {
+          "type": "snake",
+          "hp": 10,
+          "spd": 74,
+          "r": 7,
+          "dmg": 17
+        }
+      ]
+    },
+    {
+      "id": "xuese",
+      "name": "血色禁地",
+      "lv": 28,
+      "arc": "B",
+      "n": 2,
+      "hpAvg": 19,
+      "hpMin": 13,
+      "hpMax": 24,
+      "spdAvg": 56,
+      "spdMin": 26,
+      "spdMax": 86,
+      "mobs": [
+        {
+          "type": "ghoul",
+          "hp": 24,
+          "spd": 26,
+          "r": 12,
+          "dmg": 29
+        },
+        {
+          "type": "assassin",
+          "hp": 13,
+          "spd": 86,
+          "r": 9,
+          "dmg": 22
+        }
+      ]
+    },
+    {
+      "id": "yanjia",
+      "name": "燕家堡",
+      "lv": 36,
+      "arc": "C",
+      "n": 2,
+      "hpAvg": 65,
+      "hpMin": 59,
+      "hpMax": 70,
+      "spdAvg": 58,
+      "spdMin": 54,
+      "spdMax": 62,
+      "mobs": [
+        {
+          "type": "moxiu",
+          "hp": 70,
+          "spd": 54,
+          "r": 11,
+          "dmg": 42
+        },
+        {
+          "type": "guiling",
+          "hp": 59,
+          "spd": 62,
+          "r": 10,
+          "dmg": 38
+        }
+      ]
+    },
+    {
+      "id": "liulian",
+      "name": "六连殿·出海捕妖",
+      "lv": 46,
+      "arc": "D",
+      "n": 2,
+      "hpAvg": 65,
+      "hpMin": 59,
+      "hpMax": 70,
+      "spdAvg": 66,
+      "spdMin": 58,
+      "spdMax": 74,
+      "mobs": [
+        {
+          "type": "haishou",
+          "hp": 70,
+          "spd": 58,
+          "r": 11,
+          "dmg": 45
+        },
+        {
+          "type": "yuyao",
+          "hp": 59,
+          "spd": 74,
+          "r": 9,
+          "dmg": 41
+        }
+      ]
+    },
+    {
+      "id": "ningcui",
+      "name": "凝翠岛·杀妖取丹",
+      "lv": 52,
+      "arc": "D",
+      "n": 2,
+      "hpAvg": 72,
+      "hpMin": 66,
+      "hpMax": 78,
+      "spdAvg": 66,
+      "spdMin": 58,
+      "spdMax": 74,
+      "mobs": [
+        {
+          "type": "haishou",
+          "hp": 78,
+          "spd": 58,
+          "r": 11,
+          "dmg": 54
+        },
+        {
+          "type": "yuyao",
+          "hp": 66,
+          "spd": 74,
+          "r": 9,
+          "dmg": 50
+        }
+      ]
+    },
+    {
+      "id": "xutian",
+      "name": "虚天殿",
+      "lv": 68,
+      "arc": "E",
+      "n": 1,
+      "hpAvg": 90,
+      "hpMin": 90,
+      "hpMax": 90,
+      "spdAvg": 26,
+      "spdMin": 26,
+      "spdMax": 26,
+      "mobs": [
+        {
+          "type": "ghoul",
+          "hp": 90,
+          "spd": 26,
+          "r": 12,
+          "dmg": 67
+        }
+      ]
+    },
+    {
+      "id": "yinming",
+      "name": "阴冥之地",
+      "lv": 80,
+      "arc": "F",
+      "n": 2,
+      "hpAvg": 190,
+      "hpMin": 148,
+      "hpMax": 232,
+      "spdAvg": 68,
+      "spdMin": 66,
+      "spdMax": 70,
+      "mobs": [
+        {
+          "type": "guiwu",
+          "hp": 232,
+          "spd": 66,
+          "r": 11,
+          "dmg": 133
+        },
+        {
+          "type": "guixiu",
+          "hp": 148,
+          "spd": 70,
+          "r": 10,
+          "dmg": 115
+        }
+      ]
+    },
+    {
+      "id": "shixiao",
+      "name": "禁地·尸魈",
+      "lv": 80,
+      "arc": "F",
+      "n": 2,
+      "hpAvg": 129,
+      "hpMin": 55,
+      "hpMax": 202,
+      "spdAvg": 42,
+      "spdMin": 26,
+      "spdMax": 58,
+      "mobs": [
+        {
+          "type": "ghoul",
+          "hp": 55,
+          "spd": 26,
+          "r": 12,
+          "dmg": 75
+        },
+        {
+          "type": "shixiao",
+          "hp": 202,
+          "spd": 58,
+          "r": 12,
+          "dmg": 129
+        }
+      ]
+    },
+    {
+      "id": "sanjian",
+      "name": "三派试剑",
+      "lv": 81,
+      "arc": "F",
+      "n": 2,
+      "hpAvg": 199,
+      "hpMin": 191,
+      "hpMax": 206,
+      "spdAvg": 64,
+      "spdMin": 62,
+      "spdMax": 66,
+      "mobs": [
+        {
+          "type": "moxiu2",
+          "hp": 191,
+          "spd": 62,
+          "r": 11,
+          "dmg": 129
+        },
+        {
+          "type": "zhengdao",
+          "hp": 206,
+          "spd": 66,
+          "r": 11,
+          "dmg": 132
+        }
+      ]
+    },
+    {
+      "id": "cangkun",
+      "name": "苍坤上人洞府",
+      "lv": 84,
+      "arc": "F",
+      "n": 2,
+      "hpAvg": 267,
+      "hpMin": 253,
+      "hpMax": 280,
+      "spdAvg": 52,
+      "spdMin": 40,
+      "spdMax": 64,
+      "mobs": [
+        {
+          "type": "kui2",
+          "hp": 280,
+          "spd": 40,
+          "r": 14,
+          "dmg": 169
+        },
+        {
+          "type": "dajinxiu",
+          "hp": 253,
+          "spd": 64,
+          "r": 11,
+          "dmg": 160
+        }
+      ]
+    },
+    {
+      "id": "yanyue",
+      "name": "掩月宗",
+      "lv": 86,
+      "arc": "F",
+      "n": 2,
+      "hpAvg": 269,
+      "hpMin": 259,
+      "hpMax": 278,
+      "spdAvg": 64,
+      "spdMin": 62,
+      "spdMax": 66,
+      "mobs": [
+        {
+          "type": "moxiu2",
+          "hp": 259,
+          "spd": 62,
+          "r": 11,
+          "dmg": 166
+        },
+        {
+          "type": "zhengdao",
+          "hp": 278,
+          "spd": 66,
+          "r": 11,
+          "dmg": 169
+        }
+      ]
+    },
+    {
+      "id": "huanglong",
+      "name": "黄龙山大战",
+      "lv": 88,
+      "arc": "F",
+      "n": 2,
+      "hpAvg": 267,
+      "hpMin": 237,
+      "hpMax": 296,
+      "spdAvg": 58,
+      "spdMin": 54,
+      "spdMax": 62,
+      "mobs": [
+        {
+          "type": "gui2",
+          "hp": 296,
+          "spd": 54,
+          "r": 14,
+          "dmg": 155
+        },
+        {
+          "type": "moxiu2",
+          "hp": 237,
+          "spd": 62,
+          "r": 11,
+          "dmg": 134
+        }
+      ]
+    },
+    {
+      "id": "yinluo",
+      "name": "阴罗宗四长老",
+      "lv": 90,
+      "arc": "G",
+      "n": 1,
+      "hpAvg": 63,
+      "hpMin": 63,
+      "hpMax": 63,
+      "spdAvg": 26,
+      "spdMin": 26,
+      "spdMax": 26,
+      "mobs": [
+        {
+          "type": "ghoul",
+          "hp": 63,
+          "spd": 26,
+          "r": 12,
+          "dmg": 77
+        }
+      ]
+    },
+    {
+      "id": "zhuimo",
+      "name": "坠魔谷",
+      "lv": 90,
+      "arc": "G",
+      "n": 2,
+      "hpAvg": 277,
+      "hpMin": 264,
+      "hpMax": 289,
+      "spdAvg": 57,
+      "spdMin": 54,
+      "spdMax": 60,
+      "mobs": [
+        {
+          "type": "yaoshou2",
+          "hp": 264,
+          "spd": 60,
+          "r": 13,
+          "dmg": 146
+        },
+        {
+          "type": "gui2",
+          "hp": 289,
+          "spd": 54,
+          "r": 14,
+          "dmg": 154
+        }
+      ]
+    },
+    {
+      "id": "mulan",
+      "name": "天澜草原·重伤",
+      "lv": 94,
+      "arc": "G",
+      "n": 2,
+      "hpAvg": 265,
+      "hpMin": 260,
+      "hpMax": 270,
+      "spdAvg": 66,
+      "spdMin": 62,
+      "spdMax": 70,
+      "mobs": [
+        {
+          "type": "moxiu2",
+          "hp": 260,
+          "spd": 62,
+          "r": 11,
+          "dmg": 160
+        },
+        {
+          "type": "fashi",
+          "hp": 270,
+          "spd": 70,
+          "r": 11,
+          "dmg": 167
+        }
+      ]
+    },
+    {
+      "id": "kunwu",
+      "name": "昆吾山",
+      "lv": 96,
+      "arc": "G",
+      "n": 1,
+      "hpAvg": 70,
+      "hpMin": 70,
+      "hpMax": 70,
+      "spdAvg": 26,
+      "spdMin": 26,
+      "spdMax": 26,
+      "mobs": [
+        {
+          "type": "ghoul",
+          "hp": 70,
+          "spd": 26,
+          "r": 12,
+          "dmg": 96
+        }
+      ]
+    },
+    {
+      "id": "zhenmo",
+      "name": "镇魔塔",
+      "lv": 98,
+      "arc": "G",
+      "n": 1,
+      "hpAvg": 304,
+      "hpMin": 304,
+      "hpMax": 304,
+      "spdAvg": 66,
+      "spdMin": 66,
+      "spdMax": 66,
+      "mobs": [
+        {
+          "type": "yaoxiu",
+          "hp": 304,
+          "spd": 66,
+          "r": 11,
+          "dmg": 182
+        }
+      ]
+    },
+    {
+      "id": "xiaoji",
+      "name": "小极宫",
+      "lv": 100,
+      "arc": "G",
+      "n": 2,
+      "hpAvg": 278,
+      "hpMin": 248,
+      "hpMax": 307,
+      "spdAvg": 50,
+      "spdMin": 40,
+      "spdMax": 60,
+      "mobs": [
+        {
+          "type": "yaoshou2",
+          "hp": 248,
+          "spd": 60,
+          "r": 13,
+          "dmg": 186
+        },
+        {
+          "type": "kui2",
+          "hp": 307,
+          "spd": 40,
+          "r": 14,
+          "dmg": 190
+        }
+      ]
+    },
+    {
+      "id": "muzu",
+      "name": "木族领地",
+      "lv": 132,
+      "arc": "I",
+      "n": 1,
+      "hpAvg": 626,
+      "hpMin": 626,
+      "hpMax": 626,
+      "spdAvg": 60,
+      "spdMin": 60,
+      "spdMax": 60,
+      "mobs": [
+        {
+          "type": "yaoshou2",
+          "hp": 626,
+          "spd": 60,
+          "r": 13,
+          "dmg": 563
+        }
+      ]
+    },
+    {
+      "id": "zhenchan",
+      "name": "碧眼真蟾",
+      "lv": 132,
+      "arc": "I",
+      "n": 1,
+      "hpAvg": 599,
+      "hpMin": 599,
+      "hpMax": 599,
+      "spdAvg": 66,
+      "spdMin": 66,
+      "spdMax": 66,
+      "mobs": [
+        {
+          "type": "yaoxiu",
+          "hp": 599,
+          "spd": 66,
+          "r": 11,
+          "dmg": 542
+        }
+      ]
+    },
+    {
+      "id": "longjia",
+      "name": "陇家·巨猿战老祖",
+      "lv": 205,
+      "arc": "K",
+      "n": 1,
+      "hpAvg": 665,
+      "hpMin": 665,
+      "hpMax": 665,
+      "spdAvg": 34,
+      "spdMin": 34,
+      "spdMax": 34,
+      "mobs": [
+        {
+          "type": "kui",
+          "hp": 665,
+          "spd": 34,
+          "r": 13,
+          "dmg": 1201
+        }
+      ]
+    },
+    {
+      "id": "huanxiao",
+      "name": "幻啸沙漠",
+      "lv": 240,
+      "arc": "K",
+      "n": 1,
+      "hpAvg": 177,
+      "hpMin": 177,
+      "hpMax": 177,
+      "spdAvg": 62,
+      "spdMin": 62,
+      "spdMax": 62,
+      "mobs": [
+        {
+          "type": "wolf",
+          "hp": 177,
+          "spd": 62,
+          "r": 9,
+          "dmg": 969
+        }
+      ]
+    },
+    {
+      "id": "shiyin",
+      "name": "魔界·始印之地",
+      "lv": 268,
+      "arc": "L",
+      "n": 1,
+      "hpAvg": 206,
+      "hpMin": 206,
+      "hpMax": 206,
+      "spdAvg": 68,
+      "spdMin": 68,
+      "spdMax": 68,
+      "mobs": [
+        {
+          "type": "bat",
+          "hp": 206,
+          "spd": 68,
+          "r": 7,
+          "dmg": 1096
+        }
+      ]
+    },
+    {
+      "id": "xiaoxiuluo",
+      "name": "小修罗界·寒潭",
+      "lv": 282,
+      "arc": "L",
+      "n": 1,
+      "hpAvg": 176,
+      "hpMin": 176,
+      "hpMax": 176,
+      "spdAvg": 68,
+      "spdMin": 68,
+      "spdMax": 68,
+      "mobs": [
+        {
+          "type": "bat",
+          "hp": 176,
+          "spd": 68,
+          "r": 7,
+          "dmg": 991
+        }
+      ]
+    },
+    {
+      "id": "xisha",
+      "name": "灰界·洗煞雷池",
+      "lv": 460,
+      "arc": "M",
+      "n": 2,
+      "hpAvg": 4928,
+      "hpMin": 3942,
+      "hpMax": 5913,
+      "spdAvg": 88,
+      "spdMin": 86,
+      "spdMax": 90,
+      "mobs": [
+        {
+          "type": "jy_younu",
+          "hp": 3942,
+          "spd": 90,
+          "r": 24,
+          "dmg": 15738
+        },
+        {
+          "type": "jy_xiushi",
+          "hp": 5913,
+          "spd": 86,
+          "r": 25,
+          "dmg": 16077
+        }
+      ]
+    }
+  ],
+  "W": 480,
+  "H": 864
+}

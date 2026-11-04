@@ -204,6 +204,43 @@ window.isPassiveSkill = function (id) {
   return !!(s && s.type === 'passive');
 };
 
+// ---------- 射程模型：100px → 内切屏幕的椭圆 ----------
+// 旧做法是每门功法写死 range 360~640，全部超过屏幕半宽 240 —— 等于一直在打屏幕外的目标。
+// 现在改成一条曲线：起步横半轴 100，满进度正好内切屏幕四边，任何方向都不出屏。
+//
+// 为什么是椭圆不是圆：视口 480×864，玩家居中，横向只剩 240、纵向有 432。
+// 用圆（上限 240）会让屏幕上下边缘 432px 处的怪「看得见打不着」，纵向白白浪费一半。
+// 椭圆形状恒定，只缩放一个参数，纵半轴 = 横半轴 × (H/W)，所以换设备比例也不会变形。
+window.rangeModel = {
+  A0: 100,                                    // 起步横半轴（用户定的 100px）
+  BANDS: [36, 56, 82, 112, 200, 260, 460],    // 进入下一大境界的最低等级
+  MAX_IDX: 7,
+  realmIdx(lv) {                              // 0 炼气 … 7 金仙
+    let i = 0;
+    for (const b of this.BANDS) { if (lv >= b) i++; else break; }
+    return i;
+  },
+  // 进度 t：境界占大头，功法层数在境界之上再补最多 45%。
+  // 为什么功法不能独占：功法 max 只有 5~7 层，一局却跨 8 个大境界。
+  // 让层数单独决定进度，炼气期把驱物术练满就顶到全屏，后面七个境界没有成长可给了。
+  t(lv, max, realmIdx) {
+    const r = Math.min(this.MAX_IDX, Math.max(0, realmIdx || 0));
+    const baseR = Math.pow(r / this.MAX_IDX, 0.6);   // 指数 0.6：前期涨得快，别让前期太苦
+    const sk = Math.min(1, Math.max(0, (lv || 0) / Math.max(1, max || 6)));
+    return Math.min(1, baseR + (1 - baseR) * sk * 0.45);
+  },
+  // 返回椭圆两轴。hw/hh 是屏幕半宽/半高，也是硬上限 —— 屏幕装不下的不硬塞。
+  // k 是射程类被动的乘数（祭炼/顿悟），作用在进度上而不是像素上；
+  // 进度已经到 1 时它自然归零，收益递减到 0 —— 这是「不超出屏幕」的必然代价。
+  axes(lv, max, realmIdx, hw, hh, k) {
+    const W2 = hw || 240, H2 = hh || 432;
+    let t = this.t(lv, max, realmIdx) * (k || 1);
+    t = Math.min(1, Math.max(0, t));
+    const ax = Math.min(W2, this.A0 + (W2 - this.A0) * Math.pow(t, 0.75));
+    return { ax, ay: Math.min(H2, ax * (H2 / W2)) };
+  }
+};
+
 // 进攻参数换算：数值由「层数」决定，练熟练层是真能变强的
 window.skillAtk = {
   dmg(a, lv) { return (a.base || 0) + (a.perLv || 0) * lv; },

@@ -1166,6 +1166,42 @@
     }
     return best;
   }
+  // 椭圆内最近之敌：射程是一条内切屏幕的椭圆（见 skills.js 的 rangeModel），不是圆。
+  // 判定归一化距离 ≤1，但挑目标仍按真实欧氏距离 —— 否则纵向的怪会因为「归一化上更近」被优先选中。
+  function nearestEnemyIn(ax, ay) {
+    const p = G.player;
+    if (!p || !ax || !ay) return null;
+    let best = null, bd = Infinity;
+    for (const e of allEnemies()) {
+      const dx = e.x - p.x, dy = e.y - p.y;
+      const nx = dx / ax, ny = dy / ay;
+      if (nx * nx + ny * ny > 1) continue;
+      const d = dx * dx + dy * dy;
+      if (d < bd) { bd = d; best = e; }
+    }
+    return best;
+  }
+  // 椭圆在某个方向上的半径：弹道活多久，就看它能飞到这个方向的边缘为止
+  function ellipseR(ang, ax, ay) {
+    if (!ax || !ay) return 0;
+    const c = Math.cos(ang), s = Math.sin(ang);
+    return 1 / Math.sqrt((c * c) / (ax * ax) + (s * s) / (ay * ay));
+  }
+  // 弹道寿命 = 飞到椭圆边界为止，超出的部分截掉。
+  // 这是「不超出屏幕」真正落地的地方：旧 life 写死 1.4 秒 × 360 速度 = 504px，
+  // 比屏幕半高 432 还远，子弹出了画面还在判定。
+  function bulletLife(ang, a, spd, fallback) {
+    const rEnd = ellipseR(ang, a._ax, a._ay);
+    if (!rEnd) return fallback;
+    return Math.min(fallback, rEnd / spd + 0.04);
+  }
+  // 追踪弹的初始方向是随机的，不能按一开始那个角度算半径（可能正好朝着短轴）。
+  // 按长轴给，再乘 1.5 抵掉转弯多走的路 —— 追踪弹的路径是弯的，不是直线。
+  function homingLife(a, spd, fallback) {
+    const ax = a._ax, ay = a._ay;
+    if (!ax || !ay) return fallback;
+    return Math.min(fallback, Math.max(ax, ay) / spd * 1.5);
+  }
   function offscreen(o, m) {
     return o.x < G.cam.x - m || o.x > G.cam.x + W + m || o.y < G.cam.y - m || o.y > G.cam.y + H + m;
   }
@@ -1256,16 +1292,23 @@
 
   function fireWeapons(dt) {
     const p = G.player;
+    const RM = window.rangeModel;
+    if (!RM) return;   // 数据层没加载就干脆不出手：宁可不打，也别用旧的死值打屏幕外
+    const ri = RM.realmIdx(p.level || 1);
+    const hw = W / 2, hh = H / 2;
     for (const e of equippedActives()) {
       const a = e.s.atk;
       if (a.kind === 'orbit' || a.kind === 'field') continue;  // 近身领域交给 updateAuras
       const key = 't_' + e.id;
       p[key] = (p[key] || 0) - dt;
       if (p[key] > 0) continue;
-      const tgt = nearestEnemy(a.range || 420);
-      if (!tgt && a.kind !== 'burst') { p[key] = 0.2; continue; }
       // 本局顿悟/祭炼对本门功法的加成，只改这一次出手用的配置
       const a2 = insightAtk(e.id, a);
+      // 射程按「玩家境界 + 本门功法层数」现算，满进度正好内切屏幕四边
+      const ax2 = RM.axes(e.lv, e.s.max, ri, hw, hh, a2.rangeK || 1);
+      a2._ax = ax2.ax; a2._ay = ax2.ay;
+      const tgt = nearestEnemyIn(ax2.ax, ax2.ay);
+      if (!tgt && a2.kind !== 'burst') { p[key] = 0.2; continue; }
       fireActive(e.s, a2, e.lv, tgt);
       p[key] = window.skillAtk.cd(a2, e.lv) * hasteMul() * atkMul();
       if (tgt) p.dir = tgt.x >= p.x ? 1 : -1;
@@ -1296,7 +1339,7 @@
       const base = Math.atan2(tgt.y - p.y, tgt.x - p.x);
       for (let i = 0; i < cnt; i++) {
         const ang = base + (i - (cnt - 1) / 2) * (a.spread || 0.18);
-        pushBullet({ x: p.x, y: p.y, vx: Math.cos(ang) * 360, vy: Math.sin(ang) * 360, r: 6, dmg, life: a.life || 1.4, pierce, hit: new Set(), home: false, fx: a.vfx || 'sword', vfx: a.vfx || 'sword', ang: ang, stun: a.stun || 0, leech: a.leech || 0 });
+        pushBullet({ x: p.x, y: p.y, vx: Math.cos(ang) * 360, vy: Math.sin(ang) * 360, r: 6, dmg, life: bulletLife(ang, a, 360, a.life || 1.4), pierce, hit: new Set(), home: false, fx: a.vfx || 'sword', vfx: a.vfx || 'sword', ang: ang, stun: a.stun || 0, leech: a.leech || 0 });
       }
       // 剑系出手：身前一道弯月。法术系不出刃，改成脚下起一圈符文（读作「在运气」）
       const vfx = a.vfx || 'sword';
@@ -1309,7 +1352,7 @@
       // 远程追踪：火蛇一类，放出去自己找目标
       for (let i = 0; i < cnt; i++) {
         const ang = Math.random() * Math.PI * 2;
-        pushBullet({ x: p.x, y: p.y, vx: Math.cos(ang) * 160, vy: Math.sin(ang) * 160, r: 7, dmg, life: a.life || 3, pierce: 1, hit: new Set(), home: true, fx: a.vfx || 'snake', vfx: a.vfx || 'snake', ang: ang, phase: Math.random() * 6.28, stun: a.stun || 0 });
+        pushBullet({ x: p.x, y: p.y, vx: Math.cos(ang) * 160, vy: Math.sin(ang) * 160, r: 7, dmg, life: homingLife(a, 160, a.life || 3), pierce: 1, hit: new Set(), home: true, fx: a.vfx || 'snake', vfx: a.vfx || 'snake', ang: ang, phase: Math.random() * 6.28, stun: a.stun || 0 });
       }
       if (struck) spawnRune(p.x, p.y, 22, VFX_HIT_COLOR[a.vfx || 'snake']);
       Sfx.fire();
@@ -1318,7 +1361,7 @@
       const ang0 = Math.atan2(tgt.y - p.y, tgt.x - p.x);
       for (let i = 0; i < cnt; i++) {
         const ang = ang0 + (i - (cnt - 1) / 2) * (a.spread || 0.5);
-        pushBullet({ x: p.x, y: p.y, vx: Math.cos(ang) * 300, vy: Math.sin(ang) * 300, r: 7, dmg, life: a.life || 1.2, pierce: 1, hit: new Set(), home: false, fx: a.vfx || 'fan', vfx: a.vfx || 'fan', ang: ang, hue: i % 3 });
+        pushBullet({ x: p.x, y: p.y, vx: Math.cos(ang) * 300, vy: Math.sin(ang) * 300, r: 7, dmg, life: bulletLife(ang, a, 300, a.life || 1.2), pierce: 1, hit: new Set(), home: false, fx: a.vfx || 'fan', vfx: a.vfx || 'fan', ang: ang, hue: i % 3 });
       }
       if (struck) spawnRune(p.x, p.y, 26, VFX_HIT_COLOR[a.vfx || 'fan']);
       Sfx.fire();
@@ -1328,7 +1371,11 @@
       novaBlast(p.x, p.y, window.skillAtk.rad(a, lv), dmg, a.vfx || 'gold');
     } else if (a.kind === 'thunder') {
       // 天落雷：辟邪神雷劈当面数敌，每一道都要看得见是从天上打下来的
-      const pool = allEnemies().filter(x => U.dist(p.x, p.y, x.x, x.y) < (a.range || 560));
+      // 天雷只在射程椭圆内落雷：看得见的地方才劈得到
+      const pool = allEnemies().filter(x => {
+        const nx = (x.x - p.x) / (a._ax || 560), ny = (x.y - p.y) / (a._ay || 560);
+        return nx * nx + ny * ny <= 1;
+      });
       for (let i = 0; i < Math.min(cnt, pool.length); i++) {
         thunderStrike(pool[i].x, pool[i].y, dmg, pool[i]);
       }
@@ -1806,6 +1853,46 @@
     G._refDmg = n ? sum / n : ENEMY_BASE_DMG;
     return G._refDmg;
   }
+  // ---------- 追击档：越往后，没有远程手段的怪越追得上人 ----------
+  // 改之前全场最快的小怪 90，玩家 96 —— 没有一只追得上你，「越往后越危险」只是纸面数字。
+  //
+  // 每张图指定一只「猎手」：本图里本来就会追人的怪（base≥55 或带冲刺）中最快的那个。
+  // 它的目标速度随境界从自身原值爬到 98（玩家 96 × 1.02）—— 跑不掉，只能靠打。
+  // 其余怪按档位小幅靠拢且封顶 92：绝不越过玩家，留出「主动走位能拉开」的空间。
+  // 远程怪完全不动：它们靠弹幕施压，再给速度就是双重惩罚。
+  //
+  // 为什么猎手不能用「本图最快」来选：虚天殿 / 昆吾山这类图最快只有 26，
+  // 一选就把 26 速的尸傀拉到 80（+208%），肉盾定位直接垮掉。猎手必须本来就快。
+  const HUNTER_MAX = 98, NON_HUNTER_CAP = 92, HUNTER_MIN_BASE = 55;
+  function isRangedTrash(type) {
+    const art = (window.TRASH_ARTS || {})[type];
+    return !!(art && art.t === 'cast');
+  }
+  function hunterOfMap() {
+    if (G._hunterType !== undefined) return G._hunterType;
+    const list = (G.map && G.map.enemies) || [];
+    let best = null, bs = 0;
+    for (const ty of list) {
+      if (isRangedTrash(ty)) continue;
+      const d = ENEMY_TYPES[ty]; if (!d) continue;
+      const sp = d.spd || 0;
+      if (d.dash) { best = ty; break; }              // 带冲刺的优先当猎手
+      if (sp >= HUNTER_MIN_BASE && sp > bs) { bs = sp; best = ty; }
+    }
+    G._hunterType = best;
+    return best;
+  }
+  function chaseSpd(type, def) {
+    const base = def.spd || 0;
+    if (isRangedTrash(type)) return base;
+    const ri = window.rangeModel ? window.rangeModel.realmIdx(mapLv()) : 0;
+    if (ri <= 0) return base;   // 炼气期原样，不改早期手感
+    const t = Math.pow(ri / 7, 0.5);   // 开方：前期先把差距拉掉大半，别等到金仙才摸得到人
+    if (hunterOfMap() === type) return Math.max(base, base + (HUNTER_MAX - base) * t);
+    const tgt = base >= 70 ? 83 : (base >= 45 ? 71 : 0);
+    if (!tgt) return base * (1 + 0.22 * t);          // 肉盾只微涨：拉它等于把肉盾定位抹掉
+    return Math.max(base, Math.min(NON_HUNTER_CAP, base + (tgt - base) * t));
+  }
   function makeEnemy(type, x, y, hpMul, dmgMul) {
     const def = ENEMY_TYPES[type];
     // 同图内相对硬度。默认沿用 def.hp 开方（旧口径）；若本图写了 hulMap，则按「角色硬度」重标，
@@ -1825,7 +1912,7 @@
     const e = {
       _id: ++enemySeq,
       type, x, y, hp: ENEMY_BASE_HP * hpMul * rel, maxhp: ENEMY_BASE_HP * hpMul * rel,
-      spd: def.spd * (curDiff().spd || 1), dmg: ENEMY_BASE_DMG * dmgMul * relDmg,
+      spd: chaseSpd(type, def) * (curDiff().spd || 1), dmg: ENEMY_BASE_DMG * dmgMul * relDmg,
       r: def.r, xpVal: def.xp, spr: def.spr, wob: def.wob, charge: def.charge, dash: def.dash,
       hitFlash: 0, t: 0, dashT: U.rand(1, 3), _orbCd: {},
       // 功法（js/arts.js）：每种小怪一门手法，贴身命中时按形体显形
@@ -5400,7 +5487,9 @@
     if (m && m.range) {
       if (a.rad != null) o.rad = a.rad * (1 + m.range);
       if (a.radBase != null) o.radBase = a.radBase * (1 + m.range);
-      if (a.range != null) o.range = a.range * (1 + m.range);
+      // 射程不再是像素值，改成往「进度」上乘（见 rangeModel.axes 的 k 参数）。
+      // 乘像素没有意义：射程已经硬顶在内切屏幕的椭圆上，乘多少都会被 clamp 回 240/432。
+      if (a.range != null) o.rangeK = (a.rangeK || 1) * (1 + m.range);
     }
     // 攻速：出手间隔 / 爆发间隔 / 领域命中间隔
     if (m && m.cd) {
@@ -6802,6 +6891,7 @@
     if (window.FX3) FX3.clear();   // 换图：上一张图的残留特效不许跟着带过来
     G._refDmg = null;  // 本图怪物的凶悍基准要重算（见 refDmgOfMap）
     G._hulAvg = null;  // 本图 hulMap 的平均值缓存在此（见 makeEnemy）
+    G._hunterType = undefined;  // 本图的猎手要重新指定（见 hunterOfMap）
     G.diff = diffById(diffId || save.lastDiff || 'easy');
     if (diffId) save.lastDiff = G.diff.id;
     save.mapId = id;
@@ -10523,6 +10613,15 @@
     gameOver() { gameOver(); return G.state; },
     startOutro() { startOutro(); return G.state; },
     endSent() { return !!G._endSent; },
+    // 逻辑视口：射程上限（内切屏幕的椭圆）要靠它算，验收脚本得拿得到
+    viewSize() { return { W, H }; },
+    // 该功法此刻的射程椭圆两轴：验收时和「实际命中距离」对账用
+    rangeAxes(skillId, lv) {
+      const RM = window.rangeModel; if (!RM || !G.player) return null;
+      const s = window.skillById ? window.skillById(skillId) : null;
+      const ri = RM.realmIdx(G.player.level || 1);
+      return RM.axes(lv == null ? 1 : lv, s ? s.max : 6, ri, W / 2, H / 2, 1);
+    },
     claimedCount() { return G._claimedDrops ? G._claimedDrops.size : 0; },
     hostDrops() {
       const a = G.gems.length + G.herbs.length + G.loot.length;
