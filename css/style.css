@@ -67,6 +67,14 @@ html, body {
   --text-3: #9a927f;   /* 次要 5.9:1 */
   --text-4: #8f8878;   /* 禁用 / 弱提示 5.21:1（原 #7c7768 仅 4.11，不达 AA） */
   --accent: #ffd24a;   /* 强调金 */
+  /* 稀有度字色：HTML 里不再写死 #hex，一律走这组变量（见 game.js 的 rarize）。
+     这里放的是深色皮用的亮色；水墨皮在文件末尾整组换成深墨色。 */
+  --rar-0: #cfd6e2;    /* 凡品 */
+  --rar-1: #6fe08a;    /* 良品 */
+  --rar-2: #6db6ff;    /* 上品 */
+  --rar-3: #c48cff;    /* 珍品 */
+  --rar-4: #ffd24a;    /* 至宝 */
+  --rar-5: #8ff0e0;    /* 仙品 */
   --accent-lite: #e0b24a;
   --accent-deep: #c9912f;
   --accent-soft: #c9b27a;
@@ -1025,7 +1033,7 @@ body[data-skin="guigu"] {
   --bg-card-a: #f4f1e8; --bg-card-b: #e7e2d1;
   --bg-scrim: rgba(28,28,28,0.55);
   --line-gold: #5a544a; --line-soft: rgba(60,56,48,0.30);
-  --text-1: #161512; --text-2: #332f28; --text-3: #524d43; --text-4: #6b665a;
+  --text-1: #161512; --text-2: #332f28; --text-3: #524d43; --text-4: #5a5142;   /* 4 级弱提示也压到 7:1，宣纸上 #6b665a 只有 4.6 */
   --accent: #b5714b;        /* 赭石为主强调（朱砂留给危险/点彩） */
   --accent-lite: #c98a5e; --accent-deep: #8f4f2e; --accent-soft: #6e7b7a; --accent-shadow: #4a4438;
   --ok: #5f7f61; --ok-soft: #cfd8c8;              /* 竹青 */
@@ -1386,7 +1394,7 @@ body[data-skin="guigu"] .mc-tag.market,
 body[data-skin="guigu"] .mc-tag.side { color: #3f5f74; border-color: rgba(63,95,116,0.48); }
 /* 状态：当前所在竹青、未至淡墨（不用系统绿，绿在纸上像屏幕漏光） */
 body[data-skin="guigu"] .mc-state.on, body[data-skin="guigu"] .mc-mini.on { color: #3f7350; }
-body[data-skin="guigu"] .mc-state.off, body[data-skin="guigu"] .mc-mini.off { color: #8d8676; }
+body[data-skin="guigu"] .mc-state.off { color: #4a453a; }
 body[data-skin="guigu"] .mc-go { color: #8f4f2e; }
 /* 未解锁的图：压得太灰会把整卷纸弄脏，只压到六成 */
 body[data-skin="guigu"] .mapcard.locked { opacity: .62; filter: grayscale(0.7); }
@@ -1422,3 +1430,144 @@ body[data-skin="guigu"] #dialogFace {
 /* 水墨皮下头像是 flex 项（不是浮层），不需要那 78px 的左内边距 */
 body[data-skin="guigu"] #dialogbox.has-face { padding-left: var(--sp-4); }
 body[data-skin="guigu"] #dialogFace canvas { height: 72px; }
+
+/* ============================================================================
+   水墨皮 · 对比度校正（第93轮）
+   ----------------------------------------------------------------------------
+   宣纸底（#efeadb / #f4f1e8）上，为深色皮设计的亮色全部失效：
+   至宝金 #ffd24a 只有 1.22:1、仙品青 #8ff0e0 只有 1.13:1、凡品灰 #cfd6e2 只有
+   1.20:1 —— 不是"偏淡"，是肉眼基本看不见。另外一批卡片的底色写的是
+   rgba(0,0,0,0.26) 这类黑蒙版，在纸上变成一块墨渍，而字又是墨色，同样叠死。
+
+   这里统一按「深墨 + 矿物色」重排：字色一律压到 4.5:1 以上，
+   底色一律从黑蒙版改成淡墨（rgba(74,68,56,·)）。
+   所有数值都用 qa/audit-contrast.mjs 实测过，不是估的。
+   ============================================================================ */
+
+body[data-skin="guigu"] {
+  /* 稀有度：亮色 → 深墨矿物色（on #efebdf 实测 7.5 / 5.4 / 6.9 / 6.4 / 5.0 / 5.3） */
+  --rar-0: #4a4a44;   /* 凡品 · 淡墨 */
+  --rar-1: #2f6b3d;   /* 良品 · 竹青 */
+  --rar-2: #1f4f8a;   /* 上品 · 花青 */
+  --rar-3: #6a3f96;   /* 珍品 · 紫 */
+  --rar-4: #8a5a12;   /* 至宝 · 赭金 */
+  --rar-5: #0f6b62;   /* 仙品 · 松石 */
+}
+
+/* 区块标题 / 小节标题：#b5714b 在纸上只有 3.24:1 */
+body[data-skin="guigu"] .cs-title { color: #8f4f2e; border-left-color: rgba(143,79,46,0.55); }
+body[data-skin="guigu"] .cs-sub { color: #5a5142; border-left-color: rgba(60,56,48,0.32); }
+
+/* 成算 / 稀缺提示：青灰 3.71:1 → 5.1:1 */
+body[data-skin="guigu"] .rr-rate,
+body[data-skin="guigu"] .recrow .rr-rate { color: #4e5a58; }
+body[data-skin="guigu"] .recrow.can .rr-rate { color: #37543b; }
+body[data-skin="guigu"] .brk-hint { color: #8f4f2e; }
+
+/* 材料 / 灵石小签 */
+body[data-skin="guigu"] .mat { color: #8f2f24; border-color: rgba(143,47,36,0.38); }
+body[data-skin="guigu"] .mat.ok { color: #3f5c42; border-color: rgba(63,92,66,0.42); }
+body[data-skin="guigu"] .mat.stone,
+body[data-skin="guigu"] .mat.stone.ok { color: #8f4f2e; border-color: rgba(143,79,46,0.42); }
+body[data-skin="guigu"] .mat.clk:hover { background: rgba(74,68,56,0.07); border-color: rgba(60,56,48,0.5); }
+
+/* 主行动按钮：墨字压在平均 #ac6d46 的赭石渐变上只有 4.06:1。
+   底提亮一档到 #cf9a70（6.9:1），仍是赭石，只是没那么闷。 */
+body[data-skin="guigu"] .sr-btn.buy {
+  background: linear-gradient(180deg, #d6a67e, #c88f63);
+  border-color: rgba(122,63,34,0.55); color: #1c1c1c;
+}
+body[data-skin="guigu"] .sr-btn.buy:active { filter: brightness(1.08); }
+
+/* 进阶 / 材料行：底是 rgba(0,0,0,0.26)，在纸上是一块墨渍，字也是墨 —— 2.0:1。
+   改成淡墨底 + 墨线，徽章改成小签（不再是深底墨字）。 */
+body[data-skin="guigu"] .brk-row { background: rgba(74,68,56,0.055); border-color: rgba(60,56,48,0.22); color: #332f28; }
+body[data-skin="guigu"] .brk-row i { background: rgba(60,56,48,0.14); color: #3a352c; border: 1px solid rgba(60,56,48,0.26); }
+body[data-skin="guigu"] .brk-row b { color: #8f2f24; }
+body[data-skin="guigu"] .brk-row.click:hover { background: rgba(143,79,46,0.08); border-color: rgba(143,79,46,0.45); }
+body[data-skin="guigu"] .brk-row.click span { text-decoration-color: rgba(143,79,46,0.5); }
+body[data-skin="guigu"] .brk-row.ok { border-color: rgba(95,127,97,0.42); }
+body[data-skin="guigu"] .brk-row.ok i { background: rgba(95,127,97,0.18); color: #2f4a33; border-color: rgba(95,127,97,0.4); }
+body[data-skin="guigu"] .brk-row.ok b { color: #37543b; }
+
+/* 世界地图 · 统计条：黑底亮字 → 淡墨底墨字（2.26:1 → 8:1） */
+body[data-skin="guigu"] .wm-stats span { background: rgba(74,68,56,0.06); border-color: rgba(60,56,48,0.24); color: #3a352c; }
+/* 「详」小钮 & 未至状态：3.1~3.8:1 → 5:1 以上 */
+body[data-skin="guigu"] .mc-info { color: #3a352c; border-color: rgba(60,56,48,0.32); }
+body[data-skin="guigu"] .mapcard.open .mc-info { color: #3a352c; border-color: rgba(60,56,48,0.32); }
+body[data-skin="guigu"] .mc-num { color: #8f2f24; }
+body[data-skin="guigu"] .mc-tag.fight { color: #8a4a1e; }
+body[data-skin="guigu"] .mc-tag.market,
+body[data-skin="guigu"] .mc-tag.side { color: #33505f; }
+
+/* 装备格里的「未佩」等弱提示 */
+body[data-skin="guigu"] .es-body i { color: #5a5142; }
+body[data-skin="guigu"] .gr-need { color: #8f2f24; }
+
+/* ============================================================================
+   洞府 · 分组折叠（手风琴）
+   ----------------------------------------------------------------------------
+   列表一长，翻找就变成"往下滚"。按类收起来，一次只开一组：
+   组头一行就是索引，点哪组开哪组，其余自动收起。
+   ============================================================================ */
+.fold { display: flex; flex-direction: column; }
+.fold-h {
+  width: 100%; display: flex; align-items: center; gap: 8px;
+  padding: 7px 8px; margin-top: 2px;
+  background: transparent; border: 0; border-bottom: 1px solid var(--line-soft);
+  color: var(--text-2); font-family: inherit; font-size: var(--fs-cap);
+  letter-spacing: 1px; text-align: left; cursor: pointer;
+  position: relative;
+}
+.fold-h::after { content: ''; position: absolute; inset: -4px 0; }   /* 放大点击区 */
+.fold-h .fh-n { color: var(--text-4); font-size: var(--fs-micro); letter-spacing: 0; }
+.fold-h .fh-ar { margin-left: auto; font-size: 10px; color: var(--text-4); transition: transform .16s; }
+.fold.open .fold-h .fh-ar { transform: rotate(180deg); }
+.fold.open .fold-h { color: var(--accent); border-bottom-color: rgba(201,162,74,0.5); }
+.fold-b { display: none; flex-direction: column; gap: 6px; padding: 6px 0 2px; }
+.fold.open .fold-b { display: flex; }
+/* 分组内的行去掉顶层的分隔感，靠组头分隔 */
+.fold .bagrow, .fold .gearrow, .fold .recrow, .fold .brk-row { margin: 0; }
+
+body[data-skin="guigu"] .fold-h { color: #3a352c; border-bottom-color: rgba(60,56,48,0.22); }
+body[data-skin="guigu"] .fold-h .fh-n, body[data-skin="guigu"] .fold-h .fh-ar { color: #6a6354; }
+body[data-skin="guigu"] .fold.open .fold-h { color: #8f4f2e; border-bottom-color: rgba(143,79,46,0.5); }
+
+/* ---- 禁用 / 未解锁项的压暗幅度 ----
+   opacity 是连字一起变淡的：.45 会把 5:1 的字压到 2:1，等于看不清。
+   这些东西玩家仍然需要读（这件是什么、缺哪一味、还差哪个境界），
+   所以只压到"看得出是次要"为止，不压到"读不出来"。 */
+body[data-skin="guigu"] .gearrow.locked { opacity: .78; border-style: dashed; }
+body[data-skin="guigu"] .mapcard.locked { opacity: .88; }
+body[data-skin="guigu"] .skipill { opacity: .82; }
+body[data-skin="guigu"] .btn.small.off,
+body[data-skin="guigu"] .sr-btn:disabled { opacity: .62; }
+
+/* 属性页功法小格：进度字原本跟着强调色走，3.26:1 */
+body[data-skin="guigu"] .skipill i { color: #8f4f2e; }
+body[data-skin="guigu"] .skipill b { color: #332f28; }
+body[data-skin="guigu"] .skipill span { color: #5a5142; }
+/* 世界地图 · 行迹段头：青灰 3.69:1 */
+body[data-skin="guigu"] .wm-sec b { color: #5a5142; }
+body[data-skin="guigu"] .wm-sec b::first-letter { color: #8f4f2e; }
+body[data-skin="guigu"] .wm-sec span { color: #5a5142; }
+
+/* 再收一档：压暗之后仍要过 4.5:1，所以底色字本身再加深一级 */
+body[data-skin="guigu"] .gearrow.locked { opacity: .94; }
+body[data-skin="guigu"] .btn:disabled,
+body[data-skin="guigu"] .sr-btn:disabled { opacity: .74; }
+body[data-skin="guigu"] .mc-pos,
+body[data-skin="guigu"] .mc-desc,
+body[data-skin="guigu"] .mc-meta,
+body[data-skin="guigu"] .mc-mini,
+body[data-skin="guigu"] .mc-tag.story { color: #4a453a; }
+body[data-skin="guigu"] .skipill i { color: #6d3b20; }
+body[data-skin="guigu"] .skipill span { color: #3a352c; }
+
+body[data-skin="guigu"] .mc-mini.off { color: #4a453a; }
+
+/* 选中页签：同一块赭石渐变，同样提亮一档（4.06:1 → 6.9:1） */
+body[data-skin="guigu"] .tab.active {
+  background: linear-gradient(180deg, #d6a67e, #c88f63);
+  border-color: rgba(122,63,34,0.55); color: #1c1c1c;
+}

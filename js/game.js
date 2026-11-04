@@ -95,6 +95,23 @@
     if (!p || p.length < 3) return hex;
     return '#' + [p[0], p[1], p[2]].map(v => (+v).toString(16).padStart(2, '0')).join('');
   };
+  // ---------- HTML 里的稀有度字色 ----------
+  // RARITY 的颜色是给深色皮设计的亮色：#ffd24a 在宣纸底上只有 1.22:1，
+  // 凡品 #cfd6e2 只有 1.20:1 —— 水墨皮里等于看不见。
+  // 所以 HTML 不再直接写色值，统一换成 var(--rar-N)，由皮肤决定具体颜色。
+  // 只认这 6 个已知色值，其它 color: 原样放行，不会误伤。
+  const RAR_BY_HEX = {};
+  for (let _i = 0; _i < (window.RARITY || []).length; _i++) {
+    RAR_BY_HEX[String(window.RARITY[_i].color).toLowerCase()] = _i;
+  }
+  function rarize(html) {
+    return String(html == null ? '' : html).replace(
+      /(^|[;"'\s])color:\s*(#[0-9a-f]{6})/gi,
+      (m, pre, hex) => {
+        const i = RAR_BY_HEX[hex.toLowerCase()];
+        return i == null ? m : pre + 'color:var(--rar-' + i + ')';
+      });
+  }
   (function () {
     if (typeof CanvasRenderingContext2D === 'undefined') return;   // smoke 的 DOM 垫片没有真实画布
     const proto = CanvasRenderingContext2D.prototype;
@@ -6878,7 +6895,7 @@
       if (!rest.length) continue;
       html += pfTierBlock(g.tier, rest, false, eq);
     }
-    elPfBody.innerHTML = html;
+    elPfBody.innerHTML = rarize(html);
   }
   function startMap(id, diffId) {
     const m = MAPS.find(x => x.id === id);
@@ -7506,7 +7523,7 @@
         '<b style="color:' + rar.color + '">' + r.item.name + (r.n > 1 ? '<i>×' + r.n + '</i>' : '') + '</b>' +
         '</div>';
     }
-    elItemToast.innerHTML = html;
+    elItemToast.innerHTML = rarize(html);
   }
   function toastTick() {
     const now = Date.now();
@@ -7738,7 +7755,7 @@
     } else if (!sides.length) {
       rows += '<div class="wm-sec empty">行迹之间，或遇旧人旧事。走近了，自会开口。</div>';
     }
-    elWmList.innerHTML = rows;
+    elWmList.innerHTML = rarize(rows);
   }
 
   // ---------- 难度选择 ----------
@@ -7922,7 +7939,50 @@
     else if (tab === 'garden') html = renderCaveGarden(c, lv);
     else if (tab === 'rest') html = renderCaveRest(c, lv);
     else html = renderCaveCraft(c, tab, lv);
-    elCaveBody.innerHTML = html;
+    elCaveBody.innerHTML = rarize(html);
+  }
+
+  // ==================== 洞府分组折叠（手风琴） ====================
+  // 列表一长，「找那一件」就变成「往下滚」。按类收起来，一次只开一组。
+  // 大境界：境界名有「炼气期一层」「筑基初期」「大乘期」三种写法，不能靠切后缀，
+  // 用关键词表取第一个命中项。
+  const BIG_REALM_KEYS = ['炼气', '筑基', '结丹', '元婴', '化神', '炼虚', '合体', '大乘', '渡劫', '真仙', '金仙', '太乙', '大罗', '道祖'];
+  function bigRealmOf(lv) {
+    const nm = realmName(Math.max(1, lv | 0));
+    for (const k of BIG_REALM_KEYS) if (nm.indexOf(k) >= 0) return k;
+    return '其他';
+  }
+  function bigRealmIdx(name) { const i = BIG_REALM_KEYS.indexOf(name); return i < 0 ? BIG_REALM_KEYS.length : i; }
+  // 组头怎么写：「炼气」要念成「炼气期」，「真仙」「大罗」本身已经是一个完整的说法
+  const REALM_NO_QI = ['真仙', '金仙', '太乙', '大罗', '道祖', '其他'];
+  function realmGroupName(k) { return REALM_NO_QI.indexOf(k) >= 0 ? k : k + '期'; }
+  // 当前页签开着哪一组：没选过就默认「玩家当前所在的大境界」，找不到就第一组。
+  // 这样点进功法/炼制，先看到的就是自己这一档，不用先翻。
+  function foldOpenOf(tab, keys, prefer) {
+    if (!G.caveFold) G.caveFold = {};
+    let k = G.caveFold[tab];
+    if (k === undefined) k = (prefer && keys.indexOf(prefer) >= 0) ? prefer : keys[0];
+    if (k && keys.indexOf(k) < 0) k = (prefer && keys.indexOf(prefer) >= 0) ? prefer : keys[0];
+    G.caveFold[tab] = k || '';
+    return G.caveFold[tab];
+  }
+  function foldGroup(tab, key, title, count, bodyHtml, openKey) {
+    const open = openKey === key;
+    return '<div class="fold' + (open ? ' open' : '') + '">' +
+      '<button class="fold-h" data-fold-tab="' + tab + '" data-fold-key="' + key + '">' +
+      '<span class="fh-name">' + title + '</span>' +
+      '<span class="fh-n">' + count + '</span>' +
+      '<span class="fh-ar">▾</span></button>' +
+      '<div class="fold-b">' + bodyHtml + '</div></div>';
+  }
+  // 依大境界把条目分桶（桶按境界先后排，桶内由调用方排）
+  function bucketByRealm(items, lvOf) {
+    const m = {};
+    for (const it of items) {
+      const k = bigRealmOf(lvOf(it));
+      (m[k] = m[k] || []).push(it);
+    }
+    return Object.keys(m).sort((a, b) => bigRealmIdx(a) - bigRealmIdx(b)).map(k => ({ realm: k, list: m[k] }));
   }
 
   // 把 0~100 的百分数念成修仙口吻的「成」：一成=10%，五成多=五成出头，不足一成=不到一成
@@ -8001,7 +8061,7 @@
       return '<div class="eqslot' + (it ? ' filled' : '') + '" data-slot="' + s.id + '">' +
         '<span class="es-ico">' + s.icon + '</span>' +
         '<div class="es-body"><b>' + s.name + '</b>' +
-        '<i style="color:' + (it ? r.color : '#7c7768') + '">' + (it ? it.name : '未佩') + '</i></div>' +
+        '<i style="color:' + (it ? r.color : 'var(--text-4)') + '">' + (it ? it.name : '未佩') + '</i></div>' +
         (it ? '<span class="es-off">卸</span>' : '') +
         '</div>';
     }).join('');
@@ -8010,19 +8070,31 @@
     let list = '';
     if (!ids.length) list = '<div class="shopempty">储物袋里没有可佩之物。山里的妖兽与魔修身上倒常见。</div>';
     else {
-      for (const id of ids.sort((a, b) => (Items.get(b).rarity - Items.get(a).rarity))) {
-        const it = Items.get(id), r = RARITY[it.rarity], s = SLOTS.find(x => x.id === it.slot);
-        const on = save.equip[it.slot] === id;
-        const ok = lv >= reqLv(it.req || 1);
-        list += '<div class="gearrow' + (ok ? '' : ' locked') + (on ? ' equipped' : '') + '" data-equip="' + id + '">' +
-          '<div class="gr-main"><b style="color:' + r.color + '">' + it.name + '</b>' +
-          '<i>' + r.name + ' · ' + (s ? s.name : '') + '　' + it.desc + '</i></div>' +
-          '<div class="gr-right">' +
-          (ok ? (on ? '<span class="gr-on">已佩</span>' : '<span class="sr-btn buy">佩上</span>')
-            : '<span class="gr-need">需' + realmName(it.req) + '</span>') +
-          '<span class="sr-own">×' + save.inventory[id] + '</span>' +
-          (sellableCount(id) > 0 && !it.unique ? '<button class="sr-btn ghost" data-decomp="' + id + '">拆</button>' : '') +
-          '</div></div>';
+      // 按槽位收进折叠组：兵器 / 护甲 / 佩饰 / 符宝。
+      // 组内仍按珍稀度降序 —— 同类的物件摆在一起，「这件比身上那把强多少」才比得出来。
+      const bySlot = {};
+      for (const id of ids) { const it = Items.get(id); (bySlot[it.slot] = bySlot[it.slot] || []).push(id); }
+      const slotKeys = SLOTS.map(s => s.id).filter(k => bySlot[k]);
+      const openSlot = foldOpenOf('equip', slotKeys);
+      for (const k of slotKeys) {
+        const sd = SLOTS.find(x => x.id === k) || { name: k, icon: '◆' };
+        const rows = bySlot[k]
+          .sort((a, b) => (Items.get(b).rarity - Items.get(a).rarity) || (Items.get(a).name < Items.get(b).name ? -1 : 1))
+          .map(id => {
+            const it = Items.get(id), r = RARITY[it.rarity], s = SLOTS.find(x => x.id === it.slot);
+            const on = save.equip[it.slot] === id;
+            const ok = lv >= reqLv(it.req || 1);
+            return '<div class="gearrow' + (ok ? '' : ' locked') + (on ? ' equipped' : '') + '" data-equip="' + id + '">' +
+              '<div class="gr-main"><b style="color:' + r.color + '">' + it.name + '</b>' +
+              '<i>' + r.name + ' · ' + (s ? s.name : '') + '　' + it.desc + '</i></div>' +
+              '<div class="gr-right">' +
+              (ok ? (on ? '<span class="gr-on">已佩</span>' : '<span class="sr-btn buy">佩上</span>')
+                : '<span class="gr-need">需' + realmName(it.req) + '</span>') +
+              '<span class="sr-own">×' + save.inventory[id] + '</span>' +
+              (sellableCount(id) > 0 && !it.unique ? '<button class="sr-btn ghost" data-decomp="' + id + '">拆</button>' : '') +
+              '</div></div>';
+          }).join('');
+        list += foldGroup('equip', k, sd.icon + ' ' + sd.name, bySlot[k].length + ' 件', rows, openSlot);
       }
     }
     // 储物袋其他：装备之外的所有物（丹药 / 符箓 / 灵物 / 丹方 / 材料）
@@ -8092,37 +8164,44 @@
     const list = Recipes.of(kind);
     let html = '<div class="cave-sec"><div class="cs-title">' + kd.icon + ' ' + kd.name + '</div>' +
       '<div class="cs-note">' + kd.tip + '　材料可在战斗中获得，也可在坊市买入。</div>' +
-      '<div class="cs-note brk-hint">缺哪一味，点料名就写它去哪儿取。</div>';
-    for (const r of list) {
-      const outItem = Items.get(r.out);
-      const rar = outItem ? RARITY[outItem.rarity] : RARITY[0];
-      const okReq = lv >= reqLv(r.req || 1);
-      const okBook = hasFormula(r);
-      const okStone = (save.stones || 0) >= r.cost;
-      let okMat = true;
-      const mats = r.mats.map(m => {
-        const have = save.inventory[m[0]] || 0;
-        if (have < m[1]) okMat = false;
-        const it = Items.get(m[0]);
-        // 料名可点：缺的、够的都点得，点一下就知道去哪儿取
-        return '<span class="mat clk' + (have >= m[1] ? ' ok' : '') + '" data-mat="' + m[0] + '">' +
-          (it ? it.name : m[0]) + ' ' + Math.min(have, 99) + '/' + m[1] + '</span>';
-      }).join('');
-      const can = okReq && okBook && okStone && okMat;
-      // 火候几成，先让人看见。炼坏了材料是不退的
-      const effRate = craftRateOf(r);
-      const ratePct = Math.round(effRate * 100);
-      const profTip = (r.kind === 'alchemy' && alchemyCount() > 0) ? '（含熟手 ' + Math.round(alchemyProf() * 100) + '%）' : '';
-      html += '<div class="recrow' + (can ? ' can' : '') + '">' +
-        '<div class="rr-main"><b style="color:' + rar.color + '">' + r.name + (r.outN > 1 ? ' ×' + r.outN : '') + '</b>' +
-        '<span class="rr-rate">成算 ' + ratePct + '%' + profTip + (ratePct < 100 ? ' · 败则料尽' : '') + '</span>' +
-        '<div class="rr-mats">' + mats + '<span class="mat stone' + (okStone ? ' ok' : '') + '">灵石 ' + r.cost + '</span></div>' +
-        '<em>' + r.desc + '</em></div>' +
-        '<div class="rr-right">' +
-        (!okBook ? '<span class="gr-need">缺丹方</span>'
-          : okReq ? '<button class="sr-btn buy" data-craft="' + r.id + '"' + (can ? '' : ' disabled') + '>炼制</button>'
-          : '<span class="gr-need">需' + realmName(r.req) + '</span>') +
-        '</div></div>';
+      '<div class="cs-note brk-hint">缺哪一味，点料名就写它去哪儿取。方子按境界收着，点开哪一档看哪一档。</div>';
+    // 按境界收起来：一路列下来有十几二十条，翻到后面就找不着自己在哪一档了
+    const buckets = bucketByRealm(list, r => r.req || 1);
+    const openRealm = foldOpenOf('craft:' + kind, buckets.map(b => b.realm), bigRealmOf(lv));
+    for (const bk of buckets) {
+      let rows = '';
+      for (const r of bk.list) {
+        const outItem = Items.get(r.out);
+        const rar = outItem ? RARITY[outItem.rarity] : RARITY[0];
+        const okReq = lv >= reqLv(r.req || 1);
+        const okBook = hasFormula(r);
+        const okStone = (save.stones || 0) >= r.cost;
+        let okMat = true;
+        const mats = r.mats.map(m => {
+          const have = save.inventory[m[0]] || 0;
+          if (have < m[1]) okMat = false;
+          const it = Items.get(m[0]);
+          // 料名可点：缺的、够的都点得，点一下就知道去哪儿取
+          return '<span class="mat clk' + (have >= m[1] ? ' ok' : '') + '" data-mat="' + m[0] + '">' +
+            (it ? it.name : m[0]) + ' ' + Math.min(have, 99) + '/' + m[1] + '</span>';
+        }).join('');
+        const can = okReq && okBook && okStone && okMat;
+        // 火候几成，先让人看见。炼坏了材料是不退的
+        const effRate = craftRateOf(r);
+        const ratePct = Math.round(effRate * 100);
+        const profTip = (r.kind === 'alchemy' && alchemyCount() > 0) ? '（含熟手 ' + Math.round(alchemyProf() * 100) + '%）' : '';
+        rows += '<div class="recrow' + (can ? ' can' : '') + '">' +
+          '<div class="rr-main"><b style="color:' + rar.color + '">' + r.name + (r.outN > 1 ? ' ×' + r.outN : '') + '</b>' +
+          '<span class="rr-rate">成算 ' + ratePct + '%' + profTip + (ratePct < 100 ? ' · 败则料尽' : '') + '</span>' +
+          '<div class="rr-mats">' + mats + '<span class="mat stone' + (okStone ? ' ok' : '') + '">灵石 ' + r.cost + '</span></div>' +
+          '<em>' + r.desc + '</em></div>' +
+          '<div class="rr-right">' +
+          (!okBook ? '<span class="gr-need">缺丹方</span>'
+            : okReq ? '<button class="sr-btn buy" data-craft="' + r.id + '"' + (can ? '' : ' disabled') + '>炼制</button>'
+            : '<span class="gr-need">需' + realmName(r.req) + '</span>') +
+          '</div></div>';
+      }
+      html += foldGroup('craft:' + kind, bk.realm, realmGroupName(bk.realm), bk.list.length + ' 方', rows, openRealm);
     }
     html += '</div>';
     return html;
@@ -8144,18 +8223,26 @@
       '<div class="cs-note">学过的不等于身上在用。身上同时运 <b>' + eq.length + ' / ' + cap + '</b> 门 —— 境界越高，运得越多。' +
       '境界一破，旧功法自动卸下只留一门主力；要不要戴回来，自己动手。</div>';
     let any = false;
-    for (const s of SKILLS) {
-      const lv2 = c.skills[s.id] || 0;
-      if (!lv2) continue;
-      any = true;
-      const on = eq.indexOf(s.id) >= 0;
-      const top = window.skillCapById ? window.skillCapById(s.id, lv) : s.max;
-      const okLv = lv >= (s.minLv || 1);
-      html += '<div class="recrow' + (on ? ' can' : '') + '">' +
-        '<div class="rr-main"><b>' + ico(s.icon) + s.name + '　' + lv2 + ' 重' + (s.main ? '　· 主力' : '') + '　[' + skillTypeLabel(s) + ']' + '</b>' +
-        '<em>' + s.desc + '　此境可至 ' + top + ' 重' + (okLv ? '' : '　· 境界不足') + '</em></div>' +
-        '<div class="rr-right"><button class="sr-btn' + (on ? ' ghost' : ' buy') + '" data-skill="' + s.id + '">' +
-        (on ? '卸下' : '运起') + '</button></div></div>';
+    // 按所授境界收起来：炼气期一口气授五门，往上一路还有十几门，
+    // 平铺下来找一门要滚半屏。组头就是目录，点哪档开哪档。
+    const learned = SKILLS.filter(s => (c.skills[s.id] || 0) > 0);
+    const buckets = bucketByRealm(learned, s => s.minLv || 1);
+    const openSk = foldOpenOf('skill', buckets.map(b => b.realm), bigRealmOf(lv));
+    for (const bk of buckets) {
+      let rows = '';
+      for (const s of bk.list) {
+        any = true;
+        const lv2 = c.skills[s.id] || 0;
+        const on = eq.indexOf(s.id) >= 0;
+        const top = window.skillCapById ? window.skillCapById(s.id, lv) : s.max;
+        const okLv = lv >= (s.minLv || 1);
+        rows += '<div class="recrow' + (on ? ' can' : '') + '">' +
+          '<div class="rr-main"><b>' + ico(s.icon) + s.name + '　' + lv2 + ' 重' + (s.main ? '　· 主力' : '') + '　[' + skillTypeLabel(s) + ']' + '</b>' +
+          '<em>' + s.desc + '　此境可至 ' + top + ' 重' + (okLv ? '' : '　· 境界不足') + '</em></div>' +
+          '<div class="rr-right"><button class="sr-btn' + (on ? ' ghost' : ' buy') + '" data-skill="' + s.id + '">' +
+          (on ? '卸下' : '运起') + '</button></div></div>';
+      }
+      html += foldGroup('skill', bk.realm, realmGroupName(bk.realm), bk.list.length + ' 门', rows, openSk);
     }
     // 未习法诀（藏经）：储物袋里的法诀，点「学习」才记入已习得；书留架上，日后被清可重学
     const manualItems = (window.ALL_ITEMS || []).filter(it => it.teach && (save.inventory[it.id] || 0) > 0);
@@ -8364,18 +8451,18 @@
       '<div class="cs-note">大境界不是刷满修为就能过。丹药、材料、灵石、剧情，四样齐备才谈得上冲关；' +
       '而冲关有成败 —— 破境丹押得越多把握越大（各境每枚的加成都不同），只带一枚，也只是赌一把。缺什么这里都写着。</div>';
     let pending = null;
-    for (const b of list) {
+    // 先算一遍状态：折叠组的开/关要靠「当前该破哪一关」定，不能边渲染边定
+    const steps = list.map(b => {
       const done = lv >= b.lv;
       const miss = breakMissing(b);
       if (!done && !pending) pending = b;
-      let status;
-      if (done) status = '　已过';
-      else if (miss.length && miss.every(m => m.kind === 'level')) status = '　还差修为';
-      else if (miss.length) status = '　还差 ' + miss.length + ' 样';
-      else status = '　齐了';
-      html += '<div class="cave-sec2"><div class="cs-title">' + (done ? '✔ ' : '') + b.from + ' → ' + b.realm +
-        status + '</div>' +
-        '<div class="cs-note">' + (b.tip || '') + '</div>';
+      return { b, done, miss };
+    });
+    // 一关一组，默认开「当前这一关」：进来先看到自己在哪，其余全收着
+    const stepKeys = steps.map(s => String(s.b.lv));
+    const openStep = foldOpenOf('break', stepKeys, pending ? String(pending.lv) : (stepKeys[stepKeys.length - 1] || ''));
+    for (const { b, done, miss } of steps) {
+      let body = '<div class="cs-note">' + (b.tip || '') + '</div>';
       // 物事齐了：「闭门冲关」按钮顶在最上面，不用往下翻就能点
       if (!done && !miss.length) {
         const bm = MAPS.find(x => x.endLevel === b.lv);
@@ -8396,10 +8483,15 @@
           odds = '持丹 <b>' + pills + '</b> 枚 · 冲关把握 <b>' + pctCheng(rate * 100) + '</b>'
             + (rate >= 1 ? '（十成把握）' : '（每枚 ' + pctChengDelta(breakStepOf(b) * 100) + '，' + Math.ceil(1 / breakStepOf(b)) + ' 枚必成；败则丹药尽毁）');
         }
-        html += '<div class="cs-note">' + odds + '</div>';
-        html += '<button class="btn small" data-breaknow="' + b.lv + '">入' + (bm ? '「' + bm.name + '」' : '洞府') + '冲关 · ' + b.realm + '</button>';
+        body += '<div class="cs-note">' + odds + '</div>';
+        body += '<button class="btn small" data-breaknow="' + b.lv + '">入' + (bm ? '「' + bm.name + '」' : '洞府') + '冲关 · ' + b.realm + '</button>';
       }
-      html += '<div class="brk-list">' + renderBreakList(b) + '</div></div>';
+      body += '<div class="brk-list">' + renderBreakList(b) + '</div>';
+      // 组头只写「从哪到哪」，状态放右侧小字 —— 两处都写会变成「已过 已过」
+      const cnt = done ? '已过'
+        : (miss.length && miss.every(m => m.kind === 'level')) ? '差修为'
+          : miss.length ? ('差 ' + miss.length + ' 样') : '齐了';
+      html += foldGroup('break', String(b.lv), (done ? '✔ ' : '') + b.from + ' → ' + b.realm, cnt, body, openStep);
     }
     html += '</div>';
     return html;
@@ -9095,7 +9187,7 @@
           : '<div class="shopempty">此柜今日无货。</div>');
       }
     }
-    elShopList.innerHTML = rows.join('');
+    elShopList.innerHTML = rarize(rows.join(''));
   }
   function isEquipped(id) { for (const k in save.equip) if (save.equip[k] === id) return true; return false; }
   function equippedCountOf(id) { let n = 0; for (const k in save.equip) if (save.equip[k] === id) n++; return n; }
@@ -10031,6 +10123,40 @@
   if (elCaveBody) elCaveBody.addEventListener('click', e => {
     // 点到可点物件外的任何地方，先收「去哪取」提示卡（点物件时下面会重新弹）
     if (!e.target.closest('.brk-row.click') && !e.target.closest('.mat.clk')) hideItemTip();
+    // 分组折叠：手风琴。点开一组，同页签其它组自动收起；
+    // 再点同一组则收起（全收起来，只看目录）。
+    // 这里直接切 class，不走 renderCave()：
+    // 重绘会让滚动位置回到顶部 —— 在长列表里点靠下的组，等于白点。
+    const fh = e.target.closest('button[data-fold-key]');
+    if (fh) {
+      const tab = fh.getAttribute('data-fold-tab') || G.caveTab;
+      const key = fh.getAttribute('data-fold-key');
+      if (!G.caveFold) G.caveFold = {};
+      const willClose = (G.caveFold[tab] === key);
+      G.caveFold[tab] = willClose ? '' : key;
+      const mine = fh.closest('.fold');
+      // 锚定组头：展开/收起会改变上方内容高度，不补偿的话点下去那行会跳走。
+      // 先记下它在屏幕上的位置，切完类再把它挪回原处。
+      const st0 = elCaveBody.scrollTop;
+      const y0 = fh.getBoundingClientRect().top;
+      for (const f of elCaveBody.querySelectorAll('.fold')) {
+        f.classList.toggle('open', !willClose && f === mine);
+      }
+      // 折叠把内容高度一下子改掉，浏览器会顺手把滚动条推到新底部（滚动锚定 /
+      // 按钮归位）。先拉回点击前的位置，y0 与 y1 才是同一基准；
+      // 否则补偿量里混进浏览器自己的那次滚动，组头照样从手指底下跑掉。
+      elCaveBody.scrollTop = st0;
+      // flex 容器展开/收起后往往要两遍布局才稳定：读一次位置补一次，最多三轮。
+      // 被 scrollTop 上下限钳住时（内容比视口还短）自动停手，不空转。
+      for (let i = 0; i < 3; i++) {
+        const d = fh.getBoundingClientRect().top - y0;
+        if (Math.abs(d) < 1) break;
+        const before = elCaveBody.scrollTop;
+        elCaveBody.scrollTop += d;
+        if (Math.abs(elCaveBody.scrollTop - before) < 0.5) break;
+      }
+      return;
+    }
     // 按钮必须排在整行之前判：
     // 装备行的「拆」是嵌在 data-equip 那一行里头的 <button>，
     // 若先 closest('[data-equip]')，点「拆」会被整行抢走 —— 表现为「点拆却佩上了」。
