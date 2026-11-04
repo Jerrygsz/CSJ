@@ -1571,3 +1571,51 @@ body[data-skin="guigu"] .tab.active {
   background: linear-gradient(180deg, #d6a67e, #c88f63);
   border-color: rgba(122,63,34,0.55); color: #1c1c1c;
 }
+
+/* ============================================================================
+   水墨皮 · 交互浮层补漏（第94轮）
+   ----------------------------------------------------------------------------
+   第93轮审计只扫了几个固定容器，且跳过 display:none —— 「点料名才出现」的
+   「去哪取」卡片挂在 body 上、初始 hidden，整张漏检。它沿用深色皮的近黑底
+   rgba(18,14,9,.97)，字色却已被换成墨色，于是黑底墨字只有 1.37:1。
+   这里把交互态浮层、以及固定容器之外的几处文本一并收口。
+   ============================================================================ */
+
+/* 去哪取提示卡：近黑底 → 淡墨纸底，墨线勾边 */
+body[data-skin="guigu"] .item-tip {
+  background: rgba(74,68,56,0.07);
+  border-color: rgba(60,56,48,0.30);
+}
+body[data-skin="guigu"] .item-tip.inline { border-left-color: #8f4f2e; }
+body[data-skin="guigu"] .item-tip.float { box-shadow: 0 8px 26px rgba(74,68,56,0.22); }
+body[data-skin="guigu"] .item-tip b { color: #8f4f2e; }
+body[data-skin="guigu"] .item-tip span { color: #332f28; }
+
+/* 固定容器之外：洞府卷首题字 / 角落版本水印 / 横屏提示 */
+body[data-skin="guigu"] .cave-quote { color: #4a453a; }
+body[data-skin="guigu"] #ver { color: #5a5142; text-shadow: none; }
+body[data-skin="guigu"] #rotateHint p { color: #8f4f2e; }
+
+/* 同类深蒙版一律换淡墨：深色皮里是黑底亮字，翻到宣纸上就成了一块墨渍 */
+body[data-skin="guigu"] .chat-wrap #chatInput,
+body[data-skin="guigu"] .chat-emoji button {
+  background: rgba(74,68,56,0.08); border-color: rgba(60,56,48,0.30); color: #161512;
+}
+body[data-skin="guigu"] .wl-row,
+body[data-skin="guigu"] .wl-row.got,
+body[data-skin="guigu"] #victoryLoot,
+body[data-skin="guigu"] .dchip {
+  background: rgba(74,68,56,0.06); border-color: rgba(60,56,48,0.24);
+}
+body[data-skin="guigu"] .dchip { color: #3a352c; }
+body[data-skin="guigu"] #fsHint {
+  background: rgba(244,241,232,0.97); border-color: rgba(60,56,48,0.35); color: #8f4f2e;
+}
+body[data-skin="guigu"] #dialogFace {
+  background: rgba(74,68,56,0.08); border-color: rgba(60,56,48,0.24);
+}
+/* 拍卖会标题条：淡金底上原先写的是亮金 #f0d79a，几乎隐形 */
+body[data-skin="guigu"] .shopauc {
+  background: linear-gradient(90deg, rgba(143,79,46,0.12), rgba(143,79,46,0.03));
+  border-color: rgba(143,79,46,0.40); color: #5a4118;
+}
