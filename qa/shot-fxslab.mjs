@@ -18,6 +18,10 @@ const SK = {
   vortex: { n: '漩涡', fx: 'pull', dist: 80, k: 0.5, tele: 0.3 },
   dash:   { n: '冲撞', fx: 'dash', dist: 4.6, k: 0.6, tele: 0.3, _f: 24 },
   blink:  { n: '瞬移', fx: 'blink', dist: 200, k: 0.4, tele: 0.3, _f: 21 },
+  // 持续型三招（真判定，走 G.hazards）
+  pillar: { n: '光柱', fx: 'pillar', rad: 48, dur: 2.2, k: 0.30, c: '#ff8a3a', tele: 0.3, _f: 30 },
+  sweep:  { n: '横扫光刃', fx: 'sweep', len: 420, r: 16, arc: 2.0, dur: 2.4, k: 0.32, c: '#ffb060', tele: 0.3, _f: 32 },
+  spike:  { n: '地刺', fx: 'spike', num: 6, r: 26, k: 0.55, c: '#e8c88a', tele: 0.3, _f: 24 },
 };
 
 const b = await chromium.launch({ channel: 'chrome' });
@@ -35,7 +39,7 @@ await p.evaluate(() => {
   FR.enterMap('houshan', 'easy');
   if (G.state !== 'play') G.state = 'play';
   FR.tickFrames(40, 1 / 60);
-  G.enemies.length = 0; G.ebullets.length = 0; G.tells.length = 0; G.zones.length = 0; G.parts.length = 0;
+  G.enemies.length = 0; G.ebullets.length = 0; G.tells.length = 0; G.zones.length = 0; G.parts.length = 0; G.hazards.length = 0;
   if (window.FX3) FX3.clear();
   if (!G.boss) FR.boss();
   G.player.x = 240; G.player.y = 620;
@@ -46,7 +50,7 @@ for (const key of Object.keys(SK)) {
   const stat = await p.evaluate((o) => {
     const FR = window.__FR, G = FR.G;
     const b = G.boss; if (!b) return { err: 'no boss' };
-    G.ebullets.length = 0; G.tells.length = 0; G.zones.length = 0; G.parts.length = 0;
+    G.ebullets.length = 0; G.tells.length = 0; G.zones.length = 0; G.parts.length = 0; G.hazards.length = 0;
     if (window.FX3) FX3.clear();
     b.pending = null; b.dashing = 0;
     b.kit = { skills: [o.sk] };     // 只留这一招，保证这一帧画面里只有它
@@ -66,10 +70,11 @@ for (const key of Object.keys(SK)) {
       eb: G.ebullets.length,
       kinds: [...new Set(G.ebullets.map(x => x.k || '?'))],
       zones: G.zones.map(z => z.kind),
+      haz: G.hazards.map(h => h.kind),
       tells: G.tells.length,
     };
   }, { sk: SK[key] });
   await p.screenshot({ path: `qa/shots/${TAG}-${key}.png` });
-  console.log(`${key.padEnd(7)} 子弹${String(stat.eb).padStart(3)} 形体[${stat.kinds}] 地面区[${stat.zones}] 预警${stat.tells}`);
+  console.log(`${key.padEnd(7)} 子弹${String(stat.eb).padStart(3)} 形体[${stat.kinds}] 地面区[${stat.zones}] 持续[${stat.haz}] 预警${stat.tells}`);
 }
 await b.close();

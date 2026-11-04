@@ -310,7 +310,7 @@
     '墨蛟': { tag: '墨蛟 · 墨雾与水箭', skills: [
       { n: '墨雾弥漫', fx: 'mist', cd: 6.2, tele: 0.5, num: 12, spd: 42, r: 18, k: 0.32, dur: 3.0 },
       { n: '蛟息水箭', fx: 'fan', cd: 3.0, tele: 0.4, num: 6, spread: 0.18, spd: 235, k: 0.6 },
-      { n: '蛟尾横扫', fx: 'ring', cd: 5.4, tele: 0.42, num: 13, spd: 185, k: 0.42 }
+      { n: '蛟尾横扫', fx: 'ring', cd: 5.4, tele: 0.42, num: 13, spd: 185, k: 0.52 }
     ] },
     // 石甲兽：一身石甲，硬冲硬砸
     '石甲兽': { tag: '石甲兽 · 石甲冲撞', skills: [
@@ -422,6 +422,273 @@
       { n: '混沌攒射', fx: 'fan', cd: 2.6, tele: 0.3, num: 8, spread: 0.18, spd: 275, k: 0.6 },
       { n: '法域镇压', fx: 'trap', cd: 12, tele: 0.9, dur: 0.9, k: 1.1 },
       { n: '混沌吞噬', fx: 'pull', cd: 10, tele: 0.75, dist: 95, k: 0.92 }
+    ] },
+
+    // ==================================================================
+    // 四、剩余 48 只「只被点名、原著没细写战况」的 Boss 专属表
+    //     上一轮它们走同族通用档（妖兽/魔修），所以打谁都一样。这一轮按原著给身份：
+    //     · 有明确功法出处的（冰凤的寒气、磁光兽的磁光、佛骨王的骨、土皇钉的土）按出处写；
+    //     · 只有名号的，按「门派 / 种族 / 修为层次」给一以贯之的三招，不硬编独门绝学。
+    //
+    //     三种新招式（持续型，需要真判定）：
+    //       pillar 光柱：定桩在「预警时你站的地方」，持续扣血，k 是**每 tick** 系数
+    //       sweep  横扫光刃：从 Boss 身上扫过一段弧，判定按线段算，k 是**每 tick** 系数
+    //       spike  地刺：朝你方向依次破土，每个点位只结算一次，k 是**单次**系数
+    //     派发原则：柱=光/火/佛/雷属性；刃=剑修/刀修/大能；刺=土/骨/金/木/冰属性。
+    // ==================================================================
+
+    // ---- 凡俗与低阶（教学区间，不给持续招，别在 1 级就把人劝退）----
+    '山贼头目': { tag: '山贼头目 · 凡俗刀法', skills: [
+      { n: '朴刀横斩', fx: 'fan', cd: 4.2, tele: 0.42, num: 4, spread: 0.24, spd: 200, k: 0.40 },
+      { n: '蛮力冲撞', fx: 'dash', cd: 7.5, tele: 0.66, dist: 4.2, k: 0.55 }
+    ] },
+    '野狼帮帮主·贾天龙': { tag: '贾天龙 · 铁线拳', skills: [
+      { n: '铁线拳', fx: 'fan', cd: 3.2, tele: 0.36, num: 5, spread: 0.20, spd: 215, k: 0.46 },
+      { n: '横练冲撞', fx: 'dash', cd: 7.0, tele: 0.62, dist: 4.4, k: 0.62 }
+    ] },
+    '七级妖兽': { tag: '七级妖兽 · 妖躯', skills: [
+      { n: '妖爪连抓', fx: 'fan', cd: 3.0, tele: 0.38, num: 5, spread: 0.22, spd: 218, k: 0.52 },
+      { n: '扑噬', fx: 'dash', cd: 6.4, tele: 0.60, dist: 4.8, k: 0.66 },
+      { n: '兽吼震地', fx: 'nova', cd: 12, tele: 0.70, num: 16, spd: 185, rad: 120, k: 0.52 }
+    ] },
+    '虞阳城·妖修': { tag: '虞阳城妖修 · 妖风', skills: [
+      { n: '妖风刃', fx: 'fan', cd: 2.9, tele: 0.34, num: 6, spread: 0.19, spd: 235, k: 0.54 },
+      { n: '妖气缠身', fx: 'mist', cd: 8.4, tele: 0.56, num: 12, spd: 48, r: 18, k: 0.32, dur: 2.8 }
+    ] },
+
+    // ---- 人界 · 道魔两道 ----
+    '妙鹤真人': { tag: '妙鹤真人 · 御剑拂尘', skills: [
+      { n: '鹤羽飞剑', fx: 'fan', cd: 2.7, tele: 0.32, num: 6, spread: 0.18, spd: 245, k: 0.54 },
+      // 拂尘横扫：原著里道门真人近身就是这一下，扫一个扇面
+      { n: '拂尘横扫', fx: 'sweep', cd: 10, tele: 0.80, len: 400, r: 14, arc: 1.9, dur: 2.0, k: 0.5, c: '#e8ddc0' }
+    ] },
+    '黑煞教长老': { tag: '黑煞教长老 · 黑煞气', skills: [
+      { n: '黑煞掌', fx: 'fan', cd: 3.0, tele: 0.34, num: 5, spread: 0.2, spd: 230, k: 0.54 },
+      { n: '阴煞缠身', fx: 'trap', cd: 11, tele: 0.80, dur: 0.8, rad: 60, k: 0.72 }
+    ] },
+    '魔道执事': { tag: '魔道执事 · 驱尸', skills: [
+      { n: '阴风爪', fx: 'fan', cd: 3.4, tele: 0.36, num: 4, spread: 0.22, spd: 210, k: 0.48 },
+      { n: '驱尸助战', fx: 'summon', cd: 12, tele: 0.75, type: 'ghoul', num: 2, cap: 3 }
+    ] },
+    '古魔主魂': { tag: '古魔主魂 · 古魔之气', skills: [
+      { n: '魔气贯体', fx: 'beam', cd: 6.8, tele: 0.62, spd: 800, r: 10, k: 0.90 },
+      { n: '血光照野', fx: 'ring', cd: 5.6, tele: 0.50, num: 18, spd: 185, k: 0.40 },
+      { n: '魔威镇压', fx: 'nova', cd: 11, tele: 0.80, num: 18, spd: 190, rad: 150, k: 0.85 }
+    ] },
+    '银翅夜叉': { tag: '银翅夜叉 · 银翅', skills: [
+      { n: '银翅斩', fx: 'fan', cd: 2.8, tele: 0.32, num: 6, spread: 0.18, spd: 250, k: 0.56 },
+      { n: '夜叉扑击', fx: 'dash', cd: 6.2, tele: 0.58, dist: 5.0, k: 0.70 },
+      { n: '银羽风暴', fx: 'ring', cd: 6.6, tele: 0.52, num: 18, spd: 200, k: 0.42 }
+    ] },
+    '敖啸老祖': { tag: '敖啸老祖 · 蛟龙之属', skills: [
+      { n: '龙息喷吐', fx: 'mist', cd: 7.6, tele: 0.68, num: 13, spd: 50, r: 19, k: 0.34, dur: 3.0 },
+      // 蛟尾横扫：龙属近身的大范围一扫，原著里蛟类惯用躯干
+      { n: '蛟尾横扫', fx: 'sweep', cd: 9.5, tele: 0.82, len: 430, r: 17, arc: 2.0, dur: 2.1, k: 0.31, c: '#8fd0e0' },
+      { n: '水龙卷', fx: 'pull', cd: 10, tele: 0.72, dist: 95, k: 0.86 }
+    ] },
+    '冰凤': { tag: '冰凤 · 寒冰之属', skills: [
+      // 冰刺破土：寒气从地面往下结，戳上来 —— 冰属该用刺，不该用柱
+      { n: '冰刺破土', fx: 'spike', cd: 9.5, tele: 0.72, num: 6, r: 26, k: 0.55, c: '#bfe9ff' },
+      { n: '冰锥天降', fx: 'rain', cd: 5.8, tele: 0.62, num: 7, rad: 155, r: 10, k: 0.64 },
+      { n: '寒冰封域', fx: 'chill', cd: 11, tele: 0.70, dur: 1.4, rad: 95, slow: 0.42, k: 0.60 },
+      { n: '凤鸣冰爆', fx: 'nova', cd: 12, tele: 0.85, num: 20, spd: 195, rad: 155, k: 0.88 }
+    ] },
+    '鸾鸣门·双修夫妇': { tag: '鸾鸣门双修夫妇 · 双剑合璧', skills: [
+      { n: '双剑合璧', fx: 'fan', cd: 2.6, tele: 0.30, num: 6, spread: 0.15, spd: 260, k: 0.50 },
+      { n: '鸾鸣音波', fx: 'ring', cd: 6.4, tele: 0.52, num: 18, spd: 190, k: 0.40 },
+      { n: '合击贯刺', fx: 'beam', cd: 8.0, tele: 0.58, spd: 820, r: 11, k: 0.92 }
+    ] },
+    '至阳上人': { tag: '至阳上人 · 至阳真火', skills: [
+      // 火柱：至阳一脉的招牌就是"真火自地脉冲起"，这个 boss 就该有柱
+      { n: '至阳火柱', fx: 'pillar', cd: 10, tele: 0.78, rad: 48, dur: 1.7, k: 0.31, c: '#ff8a3a' },
+      { n: '大日金轮', fx: 'ring', cd: 5.8, tele: 0.48, num: 20, spd: 190, k: 0.40 },
+      { n: '阳炎掌', fx: 'fan', cd: 2.9, tele: 0.32, num: 6, spread: 0.18, spd: 250, k: 0.57 }
+    ] },
+
+    // ---- 灵界 · 大乘与一族之主 ----
+    '灵将': { tag: '灵将 · 灵族战将', skills: [
+      { n: '灵光枪', fx: 'beam', cd: 6.6, tele: 0.60, spd: 780, r: 10, k: 0.88 },
+      { n: '灵气环身', fx: 'ring', cd: 6.2, tele: 0.50, num: 16, spd: 190, k: 0.40 },
+      { n: '灵盾护体', fx: 'heal', cd: 15, tele: 0.60, pct: 0.03 }
+    ] },
+    '银光仙子': { tag: '银光仙子 · 银光', skills: [
+      { n: '银光落柱', fx: 'pillar', cd: 9.5, tele: 0.74, rad: 44, dur: 1.6, k: 0.29, c: '#e6f0ff' },
+      { n: '银针如雨', fx: 'rain', cd: 5.6, tele: 0.60, num: 8, rad: 150, r: 9, k: 0.62 },
+      { n: '银铃音波', fx: 'ring', cd: 6.4, tele: 0.50, num: 18, spd: 195, k: 0.40 }
+    ] },
+    '大乘修士': { tag: '大乘修士 · 御器', skills: [
+      { n: '御剑攒刺', fx: 'fan', cd: 2.7, tele: 0.30, num: 6, spread: 0.18, spd: 250, k: 0.56 },
+      { n: '法宝轰击', fx: 'nova', cd: 10, tele: 0.82, num: 18, spd: 190, rad: 150, k: 0.86 },
+      { n: '护体灵光', fx: 'heal', cd: 16, tele: 0.60, pct: 0.025 }
+    ] },
+    '白光界·土皇钉': { tag: '土皇钉 · 戊土', skills: [
+      // 土皇钉：土属法宝，扎地成刺 —— 这个 boss 是"刺"最正宗的出处
+      { n: '土皇钉破土', fx: 'spike', cd: 8.6, tele: 0.70, num: 6, r: 28, k: 0.58, c: '#e0c88a' },
+      { n: '戊土镇压', fx: 'nova', cd: 11, tele: 0.82, num: 18, spd: 185, rad: 145, k: 0.84 },
+      { n: '白光贯地', fx: 'pillar', cd: 12, tele: 0.80, rad: 46, dur: 1.6, k: 0.30, c: '#f2f6ff' }
+    ] },
+    '白石真人': { tag: '白石真人 · 石化', skills: [
+      { n: '白石巨掌', fx: 'rain', cd: 5.8, tele: 0.64, num: 6, rad: 150, r: 12, k: 0.68 },
+      { n: '石化定身', fx: 'trap', cd: 12, tele: 0.85, dur: 0.9, rad: 62, k: 0.78 },
+      { n: '石刺林', fx: 'spike', cd: 10, tele: 0.74, num: 7, r: 26, k: 0.56, c: '#cfcabb' }
+    ] },
+    '冷焰老祖': { tag: '冷焰老祖 · 冷焰', skills: [
+      // 冷焰是"冷的火"，所以它既有柱（火性）又有冰面（寒性），这是它最该有的辨识度
+      { n: '冷焰火柱', fx: 'pillar', cd: 9.0, tele: 0.76, rad: 46, dur: 1.7, k: 0.30, c: '#8fd8ff' },
+      { n: '寒焰横扫', fx: 'sweep', cd: 10, tele: 0.80, len: 420, r: 15, arc: 2.0, dur: 2.1, k: 0.5, c: '#a8e0ff' },
+      { n: '冰封千里', fx: 'chill', cd: 12, tele: 0.72, dur: 1.3, rad: 100, slow: 0.40, k: 0.58 }
+    ] },
+    '血云·血祭大阵': { tag: '血云血祭大阵 · 阵灵', skills: [
+      // 这是"阵"，不是"人"：柱子是阵眼被激活，吸力是阵纹在收 —— 持续型招式最贴它
+      { n: '血柱冲天', fx: 'pillar', cd: 8.2, tele: 0.80, rad: 50, dur: 1.8, k: 0.30, c: '#ff5a5a' },
+      { n: '血雾弥漫', fx: 'mist', cd: 7.4, tele: 0.60, num: 14, spd: 44, r: 19, k: 0.32, dur: 3.0 },
+      { n: '血祭吸元', fx: 'pull', cd: 9.5, tele: 0.74, dist: 100, k: 0.86 }
+    ] },
+    '地渊·刑兽': { tag: '地渊刑兽 · 地脉', skills: [
+      { n: '地刺追魂', fx: 'spike', cd: 8.0, tele: 0.66, num: 7, r: 28, k: 0.58, c: '#d8b078' },
+      { n: '刑兽冲撞', fx: 'dash', cd: 6.2, tele: 0.58, dist: 5.2, k: 0.72 },
+      { n: '岩崩落石', fx: 'rain', cd: 6.4, tele: 0.64, num: 7, rad: 155, r: 11, k: 0.66 }
+    ] },
+    '米尊者': { tag: '米尊者 · 佛门金刚', skills: [
+      { n: '佛光普照', fx: 'pillar', cd: 10, tele: 0.82, rad: 48, dur: 1.7, k: 0.30, c: '#ffd98a' },
+      { n: '金刚掌', fx: 'fan', cd: 3.0, tele: 0.34, num: 6, spread: 0.18, spd: 245, k: 0.56 },
+      { n: '定身咒', fx: 'trap', cd: 12, tele: 0.82, dur: 0.8, rad: 60, k: 0.72 }
+    ] },
+    '第一魔尊': { tag: '第一魔尊 · 魔道之巅', skills: [
+      { n: '魔焰冲天', fx: 'pillar', cd: 8.8, tele: 0.80, rad: 50, dur: 1.8, k: 0.32, c: '#ff6a4a' },
+      { n: '魔气横扫', fx: 'sweep', cd: 9.0, tele: 0.78, len: 440, r: 16, arc: 2.1, dur: 2.1, k: 0.54, c: '#c98aff' },
+      { n: '万魔朝宗', fx: 'ring', cd: 5.6, tele: 0.50, num: 20, spd: 195, k: 0.42 },
+      { n: '魔影遁形', fx: 'blink', cd: 8.0, tele: 0.40, dist: 200, k: 0.50 }
+    ] },
+    '兽尊殿·魔尊': { tag: '兽尊殿魔尊 · 御兽', skills: [
+      { n: '兽潮冲撞', fx: 'dash', cd: 6.0, tele: 0.56, dist: 5.2, k: 0.72 },
+      { n: '血口噬咬', fx: 'fan', cd: 2.9, tele: 0.32, num: 6, spread: 0.20, spd: 240, k: 0.54 },
+      { n: '驱兽成军', fx: 'summon', cd: 12, tele: 0.78, type: 'wolf', num: 3, cap: 5 }
+    ] },
+    '元魇始祖·化身': { tag: '元魇始祖化身 · 梦魇', skills: [
+      { n: '梦魇缠身', fx: 'trap', cd: 10, tele: 0.84, dur: 0.9, rad: 62, k: 0.80 },
+      { n: '魇影分身', fx: 'blink', cd: 8.0, tele: 0.42, dist: 210, k: 0.50 },
+      { n: '幽光贯脑', fx: 'beam', cd: 7.0, tele: 0.62, spd: 810, r: 11, k: 0.92 }
+    ] },
+    '宝花圣祖': { tag: '宝花圣祖 · 万花', skills: [
+      { n: '宝花绽放', fx: 'nova', cd: 9.5, tele: 0.82, num: 20, spd: 195, rad: 155, k: 0.86 },
+      { n: '花雨漫落', fx: 'rain', cd: 5.8, tele: 0.62, num: 8, rad: 160, r: 10, k: 0.64 },
+      { n: '藤蔓缠身', fx: 'trap', cd: 11, tele: 0.80, dur: 0.85, rad: 60, k: 0.74 }
+    ] },
+    '矿脉·磁光兽': { tag: '矿脉磁光兽 · 磁光', skills: [
+      { n: '磁光柱', fx: 'pillar', cd: 9.0, tele: 0.76, rad: 46, dur: 1.7, k: 0.30, c: '#8fd8ff' },
+      { n: '磁力牵引', fx: 'pull', cd: 9.6, tele: 0.74, dist: 95, k: 0.86 },
+      { n: '磁光散射', fx: 'fan', cd: 2.8, tele: 0.32, num: 7, spread: 0.18, spd: 255, k: 0.58 }
+    ] },
+    '吞天圣祖·化身': { tag: '吞天圣祖化身 · 吞噬', skills: [
+      { n: '吞天漩涡', fx: 'pull', cd: 8.4, tele: 0.76, dist: 110, rad: 120, k: 0.88 },
+      { n: '虚空吞噬', fx: 'nova', cd: 10, tele: 0.84, num: 20, spd: 190, rad: 160, k: 0.88 },
+      { n: '吞噬冲击', fx: 'beam', cd: 7.2, tele: 0.64, spd: 800, r: 12, k: 0.94 }
+    ] },
+    '夜叉族·黑枭王': { tag: '黑枭王 · 夜叉', skills: [
+      { n: '黑枭裂爪', fx: 'fan', cd: 2.8, tele: 0.32, num: 6, spread: 0.18, spd: 250, k: 0.56 },
+      { n: '夜枭扑击', fx: 'dash', cd: 6.0, tele: 0.56, dist: 5.4, k: 0.74 },
+      { n: '血翼风暴', fx: 'ring', cd: 6.4, tele: 0.50, num: 18, spd: 200, k: 0.42 }
+    ] },
+    '元魇圣祖·化身': { tag: '元魇圣祖化身 · 魇域', skills: [
+      { n: '魇域封锁', fx: 'trap', cd: 9.5, tele: 0.84, dur: 1.0, rad: 66, k: 0.80 },
+      { n: '梦魇穿刺', fx: 'beam', cd: 6.8, tele: 0.60, spd: 820, r: 12, k: 0.94 },
+      { n: '魇影重重', fx: 'blink', cd: 7.5, tele: 0.40, dist: 215, k: 0.50 }
+    ] },
+    '五光族·奕姓大乘': { tag: '五光族大乘 · 五色神光', skills: [
+      // 五色神光是一道扫过去的光，原著里就是这么用的
+      { n: '五色神光', fx: 'sweep', cd: 8.4, tele: 0.78, len: 450, r: 16, arc: 2.2, dur: 2.2, k: 0.54, c: '#c9a8ff' },
+      { n: '五光轮转', fx: 'ring', cd: 5.8, tele: 0.50, num: 20, spd: 195, k: 0.42 },
+      { n: '五光攒射', fx: 'fan', cd: 2.8, tele: 0.32, num: 7, spread: 0.16, spd: 260, k: 0.56 }
+    ] },
+    '不灭天尊': { tag: '不灭天尊 · 不灭金身', skills: [
+      { n: '灭世光柱', fx: 'pillar', cd: 9.5, tele: 0.86, rad: 52, dur: 1.9, k: 0.33, c: '#ffd98a' },
+      { n: '天尊法相', fx: 'nova', cd: 11, tele: 0.86, num: 22, spd: 195, rad: 165, k: 0.92 },
+      { n: '不灭金身', fx: 'heal', cd: 16, tele: 0.62, pct: 0.035 }
+    ] },
+    '天鼎宫·守鼎傀儡': { tag: '守鼎傀儡 · 机关', skills: [
+      // 傀儡没有"功力"，只有机关：地刺是机关钉，横扫是机关臂
+      { n: '机关地钉', fx: 'spike', cd: 8.2, tele: 0.70, num: 6, r: 26, k: 0.56, c: '#cfc3ad' },
+      { n: '巨鼎压顶', fx: 'rain', cd: 6.2, tele: 0.66, num: 6, rad: 150, r: 13, k: 0.70 },
+      { n: '机关臂横扫', fx: 'sweep', cd: 9.8, tele: 0.82, len: 400, r: 15, arc: 1.9, dur: 2.0, k: 0.48, c: '#b8ad98' }
+    ] },
+    '佛骨王': { tag: '佛骨王 · 佛骨', skills: [
+      { n: '骨刺林', fx: 'spike', cd: 8.0, tele: 0.70, num: 7, r: 27, k: 0.58, c: '#efe6cc' },
+      { n: '佛骨金身', fx: 'heal', cd: 15, tele: 0.62, pct: 0.03 },
+      { n: '骨爪裂空', fx: 'fan', cd: 2.9, tele: 0.32, num: 6, spread: 0.18, spd: 250, k: 0.56 }
+    ] },
+    '灵界第一大乘': { tag: '灵界第一大乘 · 灵气', skills: [
+      { n: '天地灵气柱', fx: 'pillar', cd: 9.0, tele: 0.82, rad: 50, dur: 1.8, k: 0.32, c: '#bfe9ff' },
+      { n: '灵光贯日', fx: 'beam', cd: 6.6, tele: 0.60, spd: 830, r: 12, k: 0.96 },
+      { n: '大乘威压', fx: 'nova', cd: 10, tele: 0.84, num: 20, spd: 195, rad: 160, k: 0.88 }
+    ] },
+    '天象尊者': { tag: '天象尊者 · 星辰', skills: [
+      { n: '星辰光柱', fx: 'pillar', cd: 8.6, tele: 0.80, rad: 48, dur: 1.8, k: 0.31, c: '#cfe0ff' },
+      { n: '天象轮转', fx: 'ring', cd: 5.6, tele: 0.50, num: 20, spd: 195, k: 0.42 },
+      { n: '陨星坠落', fx: 'rain', cd: 5.8, tele: 0.66, num: 8, rad: 165, r: 11, k: 0.68 }
+    ] },
+
+    // ---- 仙界 ----
+    '萧晋寒·天庭使者': { tag: '萧晋寒 · 天庭敕令', skills: [
+      { n: '天罚雷柱', fx: 'pillar', cd: 8.4, tele: 0.78, rad: 48, dur: 1.8, k: 0.32, c: '#bfe9ff' },
+      { n: '天庭敕令', fx: 'trap', cd: 11, tele: 0.84, dur: 0.95, rad: 64, k: 0.80 },
+      { n: '雷光横扫', fx: 'sweep', cd: 9.4, tele: 0.80, len: 440, r: 16, arc: 2.1, dur: 2.1, k: 0.54, c: '#cfe8ff' }
+    ] },
+    '太乙境噬金仙': { tag: '噬金仙 · 噬金', skills: [
+      // 噬金仙：以金铁为食，金气化刺
+      { n: '金刺裂地', fx: 'spike', cd: 8.2, tele: 0.70, num: 7, r: 27, k: 0.58, c: '#ffd08a' },
+      { n: '噬金扑咬', fx: 'dash', cd: 6.0, tele: 0.56, dist: 5.4, k: 0.76 },
+      { n: '金气切割', fx: 'fan', cd: 2.7, tele: 0.30, num: 7, spread: 0.16, spd: 265, k: 0.58 }
+    ] },
+    '鬼木': { tag: '鬼木 · 阴木', skills: [
+      { n: '鬼藤缠身', fx: 'trap', cd: 10, tele: 0.84, dur: 0.9, rad: 64, k: 0.78 },
+      { n: '阴木破土', fx: 'spike', cd: 8.6, tele: 0.72, num: 6, r: 26, k: 0.56, c: '#a8c88a' },
+      { n: '阴气弥漫', fx: 'mist', cd: 7.6, tele: 0.60, num: 13, spd: 46, r: 19, k: 0.32, dur: 3.0 }
+    ] },
+    '血池·鳞犼像': { tag: '血池鳞犼像 · 血池', skills: [
+      { n: '血柱喷涌', fx: 'pillar', cd: 8.6, tele: 0.80, rad: 50, dur: 1.8, k: 0.31, c: '#ff5a5a' },
+      { n: '血浪滔天', fx: 'ring', cd: 5.8, tele: 0.50, num: 20, spd: 195, k: 0.42 },
+      { n: '血池牵引', fx: 'pull', cd: 9.8, tele: 0.74, dist: 100, k: 0.88 }
+    ] },
+    '东方白·金源宫主': { tag: '东方白 · 金源', skills: [
+      { n: '金光斩', fx: 'beam', cd: 6.4, tele: 0.58, spd: 830, r: 12, k: 0.96 },
+      { n: '金源光柱', fx: 'pillar', cd: 9.2, tele: 0.80, rad: 48, dur: 1.8, k: 0.31, c: '#ffd98a' },
+      { n: '金锋齐射', fx: 'fan', cd: 2.7, tele: 0.30, num: 7, spread: 0.16, spd: 265, k: 0.58 }
+    ] },
+    '奇摩子': { tag: '奇摩子 · 魔道大能', skills: [
+      { n: '魔焰横扫', fx: 'sweep', cd: 9.0, tele: 0.78, len: 440, r: 16, arc: 2.1, dur: 2.1, k: 0.52, c: '#ff8a3a' },
+      { n: '魔影遁形', fx: 'blink', cd: 8.0, tele: 0.40, dist: 210, k: 0.50 },
+      { n: '魔气弹幕', fx: 'ring', cd: 5.6, tele: 0.50, num: 20, spd: 195, k: 0.42 }
+    ] },
+    '黑天魔祖': { tag: '黑天魔祖 · 黑天魔焰', skills: [
+      { n: '魔焰柱', fx: 'pillar', cd: 8.4, tele: 0.80, rad: 50, dur: 1.8, k: 0.32, c: '#ff6a4a' },
+      { n: '黑天吞噬', fx: 'pull', cd: 9.4, tele: 0.76, dist: 105, rad: 115, k: 0.90 },
+      { n: '魔威镇压', fx: 'nova', cd: 10, tele: 0.84, num: 20, spd: 195, rad: 160, k: 0.90 }
+    ] },
+    '柳自在': { tag: '柳自在 · 柳叶飞剑', skills: [
+      { n: '柳叶飞剑', fx: 'fan', cd: 2.6, tele: 0.30, num: 7, spread: 0.16, spd: 265, k: 0.58 },
+      { n: '柳枝缠身', fx: 'trap', cd: 11, tele: 0.84, dur: 0.9, rad: 62, k: 0.76 },
+      { n: '剑光纵横', fx: 'sweep', cd: 9.2, tele: 0.78, len: 430, r: 15, arc: 2.0, dur: 2.1, k: 0.52, c: '#cfe8ff' }
+    ] },
+    '鬼灵子': { tag: '鬼灵子 · 御鬼', skills: [
+      { n: '幽冥鬼爪', fx: 'fan', cd: 2.9, tele: 0.32, num: 6, spread: 0.18, spd: 250, k: 0.56 },
+      { n: '召魂助战', fx: 'summon', cd: 12, tele: 0.76, type: 'guiling', num: 3, cap: 5 },
+      { n: '鬼域封禁', fx: 'trap', cd: 10, tele: 0.84, dur: 0.9, rad: 64, k: 0.78 }
+    ] },
+    '东离虎·道祖': { tag: '东离虎 · 虎啸', skills: [
+      { n: '道祖法域', fx: 'pillar', cd: 8.6, tele: 0.82, rad: 52, dur: 1.9, k: 0.33, c: '#ffd98a' },
+      { n: '虎啸山河', fx: 'nova', cd: 9.5, tele: 0.84, num: 22, spd: 195, rad: 165, k: 0.92 },
+      { n: '虎爪裂天', fx: 'fan', cd: 2.7, tele: 0.30, num: 7, spread: 0.16, spd: 265, k: 0.58 }
+    ] },
+    '紫杉': { tag: '紫杉 · 紫气', skills: [
+      { n: '紫气东来', fx: 'pillar', cd: 8.8, tele: 0.80, rad: 48, dur: 1.8, k: 0.31, c: '#c9a8ff' },
+      { n: '紫电贯空', fx: 'beam', cd: 6.6, tele: 0.60, spd: 830, r: 12, k: 0.96 },
+      { n: '紫霞漫卷', fx: 'ring', cd: 5.8, tele: 0.50, num: 20, spd: 195, k: 0.42 }
+    ] },
+    '朱颜': { tag: '朱颜 · 朱砂符', skills: [
+      { n: '朱红光柱', fx: 'pillar', cd: 9.0, tele: 0.80, rad: 48, dur: 1.8, k: 0.31, c: '#ff7a52' },
+      { n: '朱砂符阵', fx: 'trap', cd: 11, tele: 0.84, dur: 0.95, rad: 64, k: 0.80 },
+      { n: '符箓爆裂', fx: 'nova', cd: 10, tele: 0.84, num: 20, spd: 195, rad: 155, k: 0.86 }
     ] }
   };
 })();

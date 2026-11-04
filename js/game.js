@@ -554,6 +554,7 @@
     enemies: [], bullets: [], ebullets: [], fxBullets: [], gems: [], herbs: [], parts: [], texts: [], loot: [],
     tells: [],                // Boss 出招预警圈（画在地上，随前摇淡出）
     zones: [],                // 地面持续区：困阵 / 冰面 / 漩涡（招式落下后留在地上的那片「地方」）
+    hazards: [],              // 持续型招式：光柱 / 横扫光刃 / 地刺。与 zones 不同，它们**真吃伤害**（按 tick 结算）
     spawnT: 0, nextEliteT: 100, eliteIdx: 0,
     boss: null, bossActive: false, bossSpawned: false, bossWarned: false,
     frostR: 0, shake: 0, flash: 0, god: false, ts: 1,
@@ -1741,6 +1742,7 @@
         }
       }
     }
+    updateHazards(dt);
   }
 
   // ---------- 敌人 ----------
@@ -2827,6 +2829,74 @@
   }
   function bossDmgOf(b, sk) { return Math.max(1, Math.round((b.dmg || 1) * (sk.k || 0.5) * threatK(b.threatKind || 'boss'))); }
 
+  // ---------- 持续型招式（光柱 / 横扫光刃 / 地刺）----------
+  // 与 G.zones 的分工：zones 只做「看得见的范围 + 减速」，一伤害也不结算；
+  // hazards 是**真判定**——站里面每隔 tick 秒扣一次。这是本轮唯一会动难度的东西，
+  // 所以三条纪律必须守住：
+  //   ① 起手先有预警圈（updateBossKit 提前 tele 秒画好），有兆头才谈得上「躲」；
+  //   ② tick ≥ 0.4s，且玩家自带 0.55s 无敌帧，所以「站在里面」最多 1.8 下/秒，不会瞬秒；
+  //   ③ 单跳 k 只给 0.28~0.34，整段吃完约等于一次普攻的 1 倍上下。
+  function addHazard(o) {
+    const h = Object.assign({ t: 1, dur: 1, age: 0, tick: 0.4, tickT: 0, hit: false }, o);
+    G.hazards.push(h);
+    if (G.hazards.length > 8) G.hazards.shift();   // 同屏上限：再多就是糊，也打不动人
+    return h;
+  }
+  // 点到线段距离：横扫光刃的判定不是圆，是「这条光带本身」，用圆去比会漏判贴边的玩家
+  function distToSeg(px, py, x1, y1, x2, y2) {
+    const dx = x2 - x1, dy = y2 - y1;
+    const L = dx * dx + dy * dy;
+    let t = L > 0 ? ((px - x1) * dx + (py - y1) * dy) / L : 0;
+    t = t < 0 ? 0 : (t > 1 ? 1 : t);
+    const qx = x1 + dx * t, qy = y1 + dy * t;
+    return Math.hypot(px - qx, py - qy);
+  }
+  function updateHazards(dt) {
+    const p = G.player;
+    // 联机：队友站进光柱也得掉血，否则两人里总有一个可以站着不动白嫖
+    const pt = (G.coopRole === 'host' && G.partner && G.partner.shown && !G.partner.down) ? G.partner : null;
+    for (let i = G.hazards.length - 1; i >= 0; i--) {
+      const h = G.hazards[i];
+      h.age += dt; h.t -= dt;
+      if (h.kind === 'sweep') h.ang += (h.rate || 0) * dt;
+      if (h.t <= 0) { G.hazards.splice(i, 1); continue; }
+      if (!p || G.state !== 'play') continue;
+
+      if (h.kind === 'spike') {
+        // 地刺是一串点位，各自错开 delay 依次破土 —— 形成一道「追着你冒」的土浪。
+        // 每个点位只结算一次（hit 标记），不像光柱那样反复扣。
+        for (let j = 0; j < h.pts.length; j++) {
+          const q = h.pts[j];
+          if (q.hit) continue;
+          q.age += dt;
+          if (q.age < q.d) continue;
+          const near = U.dist(p.x, p.y, q.x, q.y) < q.r + p.r * 0.4;
+          const nearPt = pt && U.dist(pt.x, pt.y, q.x, q.y) < q.r + (pt.r || 9) * 0.4;
+          if (near) { q.hit = true; hitPlayer(h.dmg); }
+          if (nearPt && window.Coop) window.Coop.addPartnerHurt(h.dmg);
+          if (q.hit || (q.age > q.d + 0.28 && !nearPt)) q.hit = true;   // 破土瞬间没踩上就作废
+        }
+        continue;
+      }
+
+      let inside;
+      if (h.kind === 'sweep') {
+        inside = distToSeg(p.x, p.y, h.x, h.y, h.x + Math.cos(h.ang) * h.len, h.y + Math.sin(h.ang) * h.len) < h.r + p.r * 0.4;
+      } else {
+        inside = U.dist(p.x, p.y, h.x, h.y) < h.r + p.r * 0.4;
+      }
+      const insidePt = pt && (h.kind === 'sweep'
+        ? distToSeg(pt.x, pt.y, h.x, h.y, h.x + Math.cos(h.ang) * h.len, h.y + Math.sin(h.ang) * h.len) < h.r + (pt.r || 9) * 0.4
+        : U.dist(pt.x, pt.y, h.x, h.y) < h.r + (pt.r || 9) * 0.4);
+      if (!inside) { h.tickT = 0; continue; }   // 走出去就重置：再进来立刻挨一下，符合直觉
+      h.tickT -= dt;
+      if (h.tickT <= 0) {
+        h.tickT = h.tick; hitPlayer(h.dmg);
+        if (insidePt && window.Coop) window.Coop.addPartnerHurt(h.dmg);
+      }
+    }
+  }
+
   // ---------- 敌方弹体与地面区的「形」 ----------
   // 评审结论：185 条 Boss 招式里 109 条共用同一张 5×5 紫红圆点，只改缩放。
   // 于是扇形齐射、环射、贯刺、天降、毒雾在画面上是一个东西 —— 玩家读不出"这一招是什么"。
@@ -3017,7 +3087,228 @@
     ctx.restore(); ctx.globalAlpha = 1;
   }
 
-  function castBossSkill(b, sk) {
+  // ---------- 持续型招式的绘制 ----------
+  // 分两层画：
+  //   drawHazardGround  贴地那层（光环 / 焦痕 / 破土圈）—— 和 zones 一起先铺，压在角色脚下
+  //   drawHazardBody    立起来那层（柱身 / 光刃 / 刺尖）—— 在角色之后画，才有"我从光里穿过去"的层次
+  // 一个必须守住的原则：**柱身半透明**。不透明的话玩家被自己的躲避特效糊住，看不见脚下站位。
+  // 颜色加 alpha：渐变色里要逐 stop 控制透明度（光柱顶部必须真的淡到 0），
+  // 只靠 globalAlpha 压整块是不行的。返回 rgba 字符串，仍然会走 inkify 的砍色规则。
+  function withAlpha(c, a) {
+    if (typeof c !== 'string') return c;
+    let m = c.match(/^#([0-9a-f]{6})$/i);
+    if (m) {
+      const n = parseInt(m[1], 16);
+      return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
+    }
+    m = c.match(/^rgba?\(([^)]+)\)$/i);
+    if (m) {
+      const q = m[1].split(',').map(v => parseFloat(v));
+      return 'rgba(' + q[0] + ',' + q[1] + ',' + q[2] + ',' + a + ')';
+    }
+    return c;
+  }
+  function drawHazardGround(h) {
+    const fade = Math.min(1, h.age / 0.12) * Math.min(1, h.t / 0.35);
+    if (fade <= 0.01) return;
+    const col = h.color || '#ffe6a0';
+    ctx.save();
+    if (h.kind === 'pillar') {
+      ctx.translate(h.x, h.y); ctx.scale(1, 0.42);
+      const R = h.r, rot = (G.time || 0) * 0.9;
+      ctx.globalAlpha = fade * 0.20; ctx.fillStyle = col;
+      ctx.beginPath(); ctx.arc(0, 0, R * 1.35, 0, 6.28); ctx.fill();
+      ctx.globalAlpha = fade * 0.85; ctx.strokeStyle = col; ctx.lineWidth = 2.4;
+      ctx.beginPath(); ctx.arc(0, 0, R, 0, 6.28); ctx.stroke();
+      ctx.globalAlpha = fade * 0.50; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.arc(0, 0, R * 0.62, 0, 6.28); ctx.stroke();
+      // 八根短刻痕绕着转：一眼看出「这是布在地上的一座阵」，不是随手一圈
+      ctx.globalAlpha = fade * 0.75; ctx.lineWidth = 2; ctx.lineCap = 'round';
+      for (let i = 0; i < 8; i++) {
+        const a = rot + i * 0.7854;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(a) * R * 0.72, Math.sin(a) * R * 0.72);
+        ctx.lineTo(Math.cos(a) * R * 0.95, Math.sin(a) * R * 0.95);
+        ctx.stroke();
+      }
+    } else if (h.kind === 'sweep') {
+      // 地面焦痕：跟着光刃走的一道压扁的亮带，让人看出"光是从地面削过去的"
+      ctx.translate(h.x, h.y); ctx.scale(1, 0.42);
+      const x2 = Math.cos(h.ang) * h.len, y2 = Math.sin(h.ang) * h.len;
+      ctx.globalAlpha = fade * 0.16; ctx.strokeStyle = col; ctx.lineWidth = h.r * 2.6; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(x2, y2); ctx.stroke();
+      ctx.globalAlpha = fade * 0.52; ctx.lineWidth = h.r * 0.7;
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(x2, y2); ctx.stroke();
+    }
+    ctx.restore(); ctx.globalAlpha = 1;
+  }
+
+  function drawHazardBody(h) {
+    const fade = Math.min(1, h.age / 0.10) * Math.min(1, h.t / 0.30);
+    if (fade <= 0.01) return;
+    const col = h.color || '#ffe6a0';
+    const now = G.time || 0;
+
+    if (h.kind === 'pillar') {
+      // 柱身：上宽下窄的锥形光带（光从高处压下来，越往上越散）。
+      // 关键做法：**用带 alpha 的渐变色一次铺满**，而不是"整块实色 + globalAlpha"。
+      // 后者无论怎么调，顶部都是一条硬横边 —— 那是梯形路径的边缘，不是光该有的收束。
+      const H = h.h || 200, R = h.r;
+      const wB = R * 0.95, wT = R * 1.52;
+      const flick = 0.88 + 0.12 * Math.sin(now * 19 + h.x * 0.1);
+      // 注意：砍色规则拦的是 ctx.fillStyle 这个 setter，而 createLinearGradient 里的颜色
+      // 在 addColorStop 那一刻就定死了，绕过了拦截。所以渐变的每个 stop 必须显式过一遍
+      // inkify —— 否则水墨皮里光柱还是橙的（第一版就踩了这个坑）。
+      const A = (a) => inkify(withAlpha(col, a * fade * flick));
+      const trap = (wb, wt) => {
+        ctx.beginPath();
+        ctx.moveTo(h.x - wt, h.y - H); ctx.lineTo(h.x + wt, h.y - H);
+        ctx.lineTo(h.x + wb, h.y); ctx.lineTo(h.x - wb, h.y);
+        ctx.closePath();
+      };
+      ctx.save();
+      // 外晕：一路淡到 0
+      const g = ctx.createLinearGradient(0, h.y, 0, h.y - H);
+      g.addColorStop(0, A(0.35)); g.addColorStop(0.28, A(0.28));
+      g.addColorStop(0.62, A(0.13)); g.addColorStop(1, A(0));
+      ctx.fillStyle = g; trap(wB, wT); ctx.fill();
+      // 内核：窄一半、亮一档，柱子才有"能量的中心"
+      const g2 = ctx.createLinearGradient(0, h.y, 0, h.y - H);
+      g2.addColorStop(0, A(0.52)); g2.addColorStop(0.34, A(0.36));
+      g2.addColorStop(0.70, A(0.12)); g2.addColorStop(1, A(0));
+      ctx.fillStyle = g2; trap(wB * 0.42, wT * 0.40); ctx.fill();
+      // 两侧界线：同样走渐变描边，顶部跟着淡 —— 否则就是两根竖到底的"轨道"
+      const gs = ctx.createLinearGradient(0, h.y, 0, h.y - H);
+      gs.addColorStop(0, A(0.55)); gs.addColorStop(0.45, A(0.34));
+      gs.addColorStop(0.85, A(0.06)); gs.addColorStop(1, A(0));
+      ctx.strokeStyle = gs; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(h.x - wT * 0.995, h.y - H); ctx.lineTo(h.x - wB * 0.995, h.y);
+      ctx.moveTo(h.x + wT * 0.995, h.y - H); ctx.lineTo(h.x + wB * 0.995, h.y);
+      ctx.stroke();
+      // 落点亮斑：光压到地上，脚下那一块必须最亮
+      const gb = ctx.createRadialGradient(h.x, h.y, 0, h.x, h.y, wB * 1.5);
+      gb.addColorStop(0, A(0.55)); gb.addColorStop(0.55, A(0.18)); gb.addColorStop(1, A(0));
+      ctx.fillStyle = gb;
+      ctx.save(); ctx.translate(h.x, h.y); ctx.scale(1, 0.42);
+      ctx.beginPath(); ctx.arc(0, 0, wB * 1.5, 0, 6.28); ctx.fill();
+      ctx.restore();
+      // 上升的碎光：静止的柱子会像贴图
+      for (let i = 0; i < 7; i++) {
+        const t = ((now * (0.55 + i * 0.07) + i * 0.19) % 1);
+        const yy = h.y - t * H * 0.95;
+        const spread = (wB * 0.55) * (1 - t * 0.35) + wT * 0.22 * t;
+        const xx = h.x + Math.sin(i * 2.4 + now * 1.6) * spread;
+        ctx.globalAlpha = 0.70 * fade * Math.sin(t * 3.14);
+        ctx.fillStyle = col;
+        ctx.fillRect(xx - 1.2, yy - 1.2, 2.4, 2.4);
+      }
+      ctx.restore(); ctx.globalAlpha = 1;
+      return;
+    }
+
+    if (h.kind === 'sweep') {
+      // 光刃：从 Boss 身上扫出去的一道扁刃。
+      // 动感不能靠"再画一条错开的刀"——两条细杆并排落在画面上就是两根杆，不是残影。
+      // 正确做法是同一把刃按极小角度差连画六层、一层比一层淡，叠成一条被拉长的拖影。
+      const x2 = h.x + Math.cos(h.ang) * h.len, y2 = h.y + Math.sin(h.ang) * h.len;
+      const drawBand = (ang, alpha, wmul) => {
+        const ex = h.x + Math.cos(ang) * h.len, ey = h.y + Math.sin(ang) * h.len;
+        const nx = -Math.sin(ang), ny = Math.cos(ang);
+        const gc = inkify(col);            // 同上：渐变 stop 不过 setter，必须显式砍色
+        const g = ctx.createLinearGradient(h.x, h.y, ex, ey);
+        g.addColorStop(0, gc); g.addColorStop(0.22, gc);
+        g.addColorStop(0.78, gc); g.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.globalAlpha = alpha; ctx.fillStyle = g;
+        // 宽 → 更宽 → 收尖：像刀削出去的一道刃，中段最厚
+        const w0 = h.r * 0.60 * wmul, w1 = h.r * 1.65 * wmul;
+        const mx = h.x + Math.cos(ang) * h.len * 0.38, my = h.y + Math.sin(ang) * h.len * 0.38;
+        ctx.beginPath();
+        ctx.moveTo(h.x + nx * w0 * 0.18, h.y + ny * w0 * 0.18);
+        ctx.quadraticCurveTo(mx + nx * w1, my + ny * w1, ex, ey);
+        ctx.quadraticCurveTo(mx - nx * w1, my - ny * w1, h.x - nx * w0 * 0.18, h.y - ny * w0 * 0.18);
+        ctx.closePath(); ctx.fill();
+      };
+      ctx.save(); ctx.lineCap = 'round';
+      const N = 6;
+      for (let i = 0; i < N; i++) {
+        const q = i / (N - 1);                       // 0 = 最早的一层
+        const off = -0.058 * (1 - q);
+        // alpha 用「保底 + 上浮」而不是纯幂次：幂次会让中间几层几乎为 0，
+        // 层与层之间就露出缝，看着仍像两根分开的杆。
+        const al = 0.40 * (0.12 + 0.88 * Math.pow(q, 1.6)) * fade;
+        drawBand(h.ang + off, i === N - 1 ? 0.42 * fade : al, i === N - 1 ? 1 : 0.86);
+      }
+      // 刃线：中心一条细亮线，方向感全靠它
+      ctx.globalAlpha = 0.85 * fade; ctx.strokeStyle = col; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(h.x, h.y); ctx.lineTo(x2, y2); ctx.stroke();
+      // 刃头：圆形亮斑，让"扫到哪儿了"一清二楚
+      ctx.globalAlpha = 0.75 * fade;
+      ctx.beginPath(); ctx.arc(x2, y2, h.r * 0.85, 0, 6.28); ctx.fill();
+      ctx.globalAlpha = 1; ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(x2, y2, h.r * 0.38, 0, 6.28); ctx.fill();
+      ctx.restore(); ctx.globalAlpha = 1;
+      return;
+    }
+
+    if (h.kind === 'spike') {
+      for (let j = 0; j < h.pts.length; j++) {
+        const q = h.pts[j];
+        if (q.age <= 0) continue;                     // 还没破土
+        const local = q.age - q.d;
+        if (local < -0.16) continue;
+        // 破土 0.10s 起 → 停 0.26s → 收回去
+        const rise = Math.min(1, Math.max(0, (local + 0.16) / 0.10));
+        const out = Math.min(1, Math.max(0, (h.t - 0.20) / 0.16));   // 整体快结束时缩回
+        const k = rise * (0.35 + 0.65 * out);
+        if (k <= 0.02) continue;
+        const R = q.r, H = R * (1.55 + 0.35 * ((j % 3) - 1) * 0.4) * k;
+        ctx.save();
+        // 破土时的地裂圈
+        if (rise < 1 || local < 0.05) {
+          ctx.globalAlpha = 0.5 * (1 - Math.min(1, rise)) * fade;
+          ctx.strokeStyle = col; ctx.lineWidth = 2;
+          ctx.save(); ctx.translate(q.x, q.y); ctx.scale(1, 0.42);
+          ctx.beginPath(); ctx.arc(0, 0, R * (1.5 + rise * 0.9), 0, 6.28); ctx.stroke();
+          ctx.restore();
+        }
+        // 落地阴影：没有它，刺是"浮在地上"的
+        ctx.globalAlpha = 0.30 * fade; ctx.fillStyle = '#000000';
+        ctx.save(); ctx.translate(q.x, q.y + 2); ctx.scale(1, 0.34);
+        ctx.beginPath(); ctx.arc(0, 0, R * 1.15, 0, 6.28); ctx.fill();
+        ctx.restore();
+        // 三根错开高度的尖刺，中间那根最高 —— 一根会像钉子，三根才像"地从底下裂开"。
+        // 用**实心**填充（不再往顶部渐隐）：渐隐会把刺尖化成一缕白烟，
+        // 看着是光点不是石头。立体感靠"受光面 + 暗面"两块拼，不靠透明度。
+        for (let s = 0; s < 3; s++) {
+          const off = (s - 1) * R * 0.54;
+          const hh = H * (s === 1 ? 1 : 0.62);
+          const wd = R * (s === 1 ? 0.50 : 0.38);
+          const tx = q.x + off, ty = q.y - hh;
+          ctx.globalAlpha = 0.95 * fade; ctx.fillStyle = col;
+          ctx.beginPath();
+          ctx.moveTo(tx - wd, q.y + 2);
+          ctx.lineTo(tx + wd * 0.16, ty);
+          ctx.lineTo(tx + wd, q.y + 2);
+          ctx.closePath(); ctx.fill();
+          // 受光面（左半边）：亮一档，刺才有厚度
+          ctx.globalAlpha = 0.34 * fade; ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.moveTo(tx - wd, q.y + 2);
+          ctx.lineTo(tx + wd * 0.16, ty);
+          ctx.lineTo(tx - wd * 0.22, q.y + 2);
+          ctx.closePath(); ctx.fill();
+          // 棱线：一条从尖到底的亮线，尖刺的"尖"全靠它
+          ctx.globalAlpha = 0.80 * fade; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.moveTo(tx + wd * 0.16, ty); ctx.lineTo(tx - wd * 0.05, q.y + 2); ctx.stroke();
+        }
+        ctx.restore(); ctx.globalAlpha = 1;
+      }
+      return;
+    }
+  }
+
+  function castBossSkill(b, sk, tgt) {
     const p = G.player; if (!p || !b) return;
     const ang = Math.atan2(p.y - b.y, p.x - b.x);
     const dmg = bossDmgOf(b, sk);
@@ -3062,6 +3353,50 @@
           });
         }
         Sfx.shoot(); break;
+      }
+      case 'pillar': {
+        // 光柱：定桩持续招。柱子落在「前摇开始时玩家站的地方」，所以看见预警圈就得走开。
+        // 这是本轮唯一真正持续扣血的招式——不是打一发就走，是"这一片地被占了"。
+        const tx = (tgt && tgt.x !== undefined) ? tgt.x : p.x;
+        const ty = (tgt && tgt.y !== undefined) ? tgt.y : p.y;
+        const rad = sk.rad || 46, dur = sk.dur || 1.7;
+        addHazard({
+          kind: 'pillar', x: tx, y: ty, r: rad, t: dur, dur: dur, dmg: dmg,
+          tick: sk.tick || 0.40, color: sk.c || '#ffe6a0', h: sk.h || 200
+        });
+        G.parts.push({ ring: true, x: tx, y: ty, r: rad * 0.35, maxr: rad * 2.3, life: 0.40, maxlife: 0.40, color: '#ffe6a0' });
+        G.parts.push({ ring: true, x: tx, y: ty, r: rad * 1.5, maxr: rad * 0.7, life: 0.30, maxlife: 0.30, color: '#fff4d0' });
+        G.shake = Math.max(G.shake, 6); Sfx.burst(); break;
+      }
+      case 'sweep': {
+        // 横扫光刃：一道长光带从 Boss 身上扫过去，判定是「线段」不是圆。
+        // 玩家能做的只有两件事——绕到背后，或者趁它扫过来之前跑到射程外。
+        const len = sk.len || 440, dur = sk.dur || 2.2;
+        const half = (sk.arc || 2.0) / 2;
+        const a0 = ang - half, a1 = ang + half;
+        addHazard({
+          kind: 'sweep', x: b.x, y: b.y, r: sk.r || 15, len: len,
+          ang: a0, rate: (a1 - a0) / dur, t: dur, dur: dur, dmg: dmg,
+          tick: sk.tick || 0.45, color: sk.c || '#ffb060'
+        });
+        Sfx.warn(); G.shake = Math.max(G.shake, 5); break;
+      }
+      case 'spike': {
+        // 地刺：从 Boss 脚下朝玩家方向连成一排，按 delay 依次破土 —— 是「追着你冒」的土浪。
+        // 每个点位只结算一次，不是持续区：踩中就一下，躲开就没事。
+        const dd = U.dist(b.x, b.y, p.x, p.y);
+        const total = Math.min(sk.len || 430, dd + 70);
+        const n = sk.num || 5, gap = total / n;
+        const pts = [];
+        for (let k = 0; k < n; k++) {
+          const d = gap * (k + 1);
+          pts.push({
+            x: b.x + Math.cos(ang) * d, y: b.y + Math.sin(ang) * d,
+            r: sk.r || 26, d: k * (sk.step || 0.10), age: 0, hit: false
+          });
+        }
+        addHazard({ kind: 'spike', x: b.x, y: b.y, r: 0, t: (sk.dur || 1.3), dur: (sk.dur || 1.3), dmg: dmg, pts: pts, color: sk.c || '#e8c88a' });
+        Sfx.warn(); break;
       }
       case 'dash':
         // 起势先炸一圈尘：冲撞是「Boss 动了」最强的信号，之前只有一点点零星粒子，压根看不出要冲
@@ -3128,9 +3463,10 @@
   // 前摇期间头顶报招式名 + 地上亮预警圈 —— 原著里高手出招也有兆头，玩家该有那半秒反应。
   function updateBossKit(b, kit, dt) {
     const list = kit.skills;
+    const pl = G.player;          // updateBossKit 是独立函数，本作用域里没有 p
     if (b.pending) {
       b.pending.t -= dt;
-      if (b.pending.t <= 0) { const s = b.pending.sk; b.pending = null; castBossSkill(b, s); }
+      if (b.pending.t <= 0) { const s = b.pending.sk, tg = b.pending.tgt; b.pending = null; castBossSkill(b, s, tg); }
     }
     if (b.dashing > 0) {
       b.dashing -= dt;
@@ -3151,8 +3487,17 @@
       b.cds[i] = (sk.cd || 6) * (b.phase2 ? 0.72 : 1);   // 二阶段整体加快，跟旧版节奏一致
       const tele = sk.tele === undefined ? 0.5 : sk.tele;
       if (tele > 0.02) {
-        b.pending = { sk: sk, t: tele };
-        tellAt(b.x, b.y, sk.fx === 'rain' ? 0 : (sk.rad || 130), tele, '#ff7a52');
+        // 定桩类（光柱/地刺）的落点是"前摇开始那一刻玩家站的地方"，预警圈就必须画在落点上，
+        // 而不是画在 Boss 脚下 —— 画错了玩家根本不知道该躲哪儿。
+        const needTgt = (sk.fx === 'pillar' || sk.fx === 'spike');
+        if (needTgt && pl) {
+          const tg = { x: pl.x, y: pl.y };
+          b.pending = { sk: sk, t: tele, tgt: tg };
+          tellAt(tg.x, tg.y, sk.fx === 'spike' ? (sk.r || 26) * 1.6 : (sk.rad || 46) + 12, tele, '#ff7a52');
+        } else {
+          b.pending = { sk: sk, t: tele };
+          tellAt(b.x, b.y, sk.fx === 'rain' ? 0 : (sk.rad || 130), tele, '#ff7a52');
+        }
         spawnText(b.x, b.y - b.r * 1.6 - 16, sk.n, '#ffc46a', 12);
       } else {
         castBossSkill(b, sk);
@@ -5959,6 +6304,7 @@
     for (const l of G.loot) drawLoot(l);
     // 地面持续区先铺（贴地），预警圈与弹体压在上面
     for (const z of G.zones) drawZone(z);
+    for (const h of G.hazards) drawHazardGround(h);
     // Boss 出招预警：地上圈随前摇收拢、颜色由暗转亮 —— 给玩家那半秒反应
     for (const t of G.tells) {
       const k = Math.max(0, Math.min(1, t.t / t.dur));      // 1 → 0
@@ -6111,6 +6457,10 @@
         ctx.beginPath(); ctx.arc(p.x, p.y, p.r + 8, 0, 6.28); ctx.stroke();
       }
     }
+
+    // 持续型招式立起来那层：压在角色之上、粒子之下。
+    // 放这个位置是为了「人从光柱里穿过去」有前后层次；再往下压会被角色挡成半截。
+    for (const h of G.hazards) drawHazardBody(h);
 
     // 双人联机 P2：把远程队友画出来（青色光环 + 名牌区分本地金环）
     if (window.Coop) window.Coop.draw(ctx);
@@ -6271,7 +6621,7 @@
   function resetRun() {
     if (window.Coop) window.Coop.reset();
     G.player = newPlayer();
-    G.enemies = []; G.bullets = []; G.ebullets = []; G.gems = []; G.herbs = []; G.parts = []; G.texts = []; G.loot = []; G.tells = []; G.zones = [];
+    G.enemies = []; G.bullets = []; G.ebullets = []; G.gems = []; G.herbs = []; G.parts = []; G.texts = []; G.loot = []; G.tells = []; G.zones = []; G.hazards = [];
     G.reclaimedLost = null;   // 上一张图"寻回失落"的结算提示不带到这张图
     G.time = 0; G.kills = 0; G.spawnT = 1; G.nextEliteT = 100; G.eliteIdx = 0; G.artSeen = {};
     G.pickPulseAt = 0;   // 进图头 1.2 秒展示一次神念拾取圈
@@ -10768,7 +11118,7 @@
     god(on) { G.god = !!on; },
     timeScale(v) { G.ts = v; },
     setTime(t) { G.time = t; },
-    clear() { G.enemies.length = 0; G.ebullets.length = 0; G.gems.length = 0; G.herbs.length = 0; G.tells.length = 0; G.zones.length = 0; },
+    clear() { G.enemies.length = 0; G.ebullets.length = 0; G.gems.length = 0; G.herbs.length = 0; G.tells.length = 0; G.zones.length = 0; G.hazards.length = 0; },
     spawn(type, n) {
       if (!G.player || !ENEMY_TYPES[type]) return;
       for (let i = 0; i < (n || 1); i++) {
