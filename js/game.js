@@ -71,6 +71,16 @@
     if (l > 0.72) ink = ink.map(v => Math.round(v * 0.9 + 46 * 0.1));
     return 'rgba(' + ink[0] + ',' + ink[1] + ',' + ink[2] + ',' + a + ')';
   }
+  // pixelfx 那层走的是逐像素写缓冲，绕过了 ctx 的 strokeStyle/fillStyle 拦截，
+  // 所以把同一套砍色规则开一个 hex 出口给它，保证水墨皮里特效也是墨色系。
+  window.INK_HEX = function (hex) {
+    if (typeof hex !== 'string' || hex[0] !== '#' || hex.length !== 7) return hex;
+    const out = inkify(hex);
+    if (out === hex) return hex;
+    const p = out.match(/\d+/g);
+    if (!p || p.length < 3) return hex;
+    return '#' + [p[0], p[1], p[2]].map(v => (+v).toString(16).padStart(2, '0')).join('');
+  };
   (function () {
     if (typeof CanvasRenderingContext2D === 'undefined') return;   // smoke 的 DOM 垫片没有真实画布
     const proto = CanvasRenderingContext2D.prototype;
@@ -1218,6 +1228,11 @@
     }
     // 终点落地环：比起点更亮更大，收束在落脚点
     G.parts.push({ ring: true, x: p.x, y: p.y, r: 8, maxr: 56, life: 0.32, maxlife: 0.32, color: '#bfe9ff' });
+    // 身法：pixelfx 的 poof 在起点「散形」、终点「现形」。位移感靠这一对，不靠光带
+    if (window.FX3) {
+      FX3.spawn('poof', sx, sy, { pal: 'qi' });
+      FX3.spawn('poof', p.x, p.y, { pal: 'qi', seed: (Math.random() * 997) | 0 });
+    }
     spawnText(p.x, p.y - 30, '闪', '#cfefff', 16);
     Sfx.dodge();
     return true;
@@ -1354,6 +1369,7 @@
   function updateAuras(dt) {
     const p = G.player;
     G.orbPos = []; G.fieldSlow = [];
+    let fieldRune = null;   // 本帧是否有领域类功法在开（决定脚下要不要常驻法阵）
     for (const e of equippedActives()) {
       const a = insightAtk(e.id, e.s.atk);
       if (a.kind === 'orbit') {
@@ -1377,6 +1393,9 @@
         const rad = window.skillAtk.rad(a, e.lv);
         const dmg = window.skillAtk.dmg(a, e.lv);
         G.fieldSlow.push({ rad: rad, slow: a.slow || 0.4, vfx: a.vfx || 'ice' });
+        // 领域是靠脚下那圈东西「说」出来的：没有阵纹，玩家只看到一个无形的减速区。
+        // 法阵要跟着人走，所以用 hold（常驻 + 每帧跟位），而不是 spawn。
+        fieldRune = { pal: (a.vfx === 'gravity') ? 'mo' : 'qi' };
         for (const en of allEnemies()) {
           if (U.dist(p.x, p.y, en.x, en.y) < rad + en.r) {
             if (!en._fieldCd) en._fieldCd = {};
@@ -1389,6 +1408,11 @@
     for (const en of allEnemies()) {
       if (en._orbCd) for (const k in en._orbCd) if (en._orbCd[k] > 0) en._orbCd[k] = Math.max(0, en._orbCd[k] - dt);
       if (en._fieldCd) for (const k in en._fieldCd) if (en._fieldCd[k] > 0) en._fieldCd[k] = Math.max(0, en._fieldCd[k] - dt);
+    }
+    // 领域法阵：开着就一直亮、跟着人走；功法卸下立刻收
+    if (window.FX3) {
+      if (fieldRune) FX3.hold('field', 'rune', () => (G.player ? { x: G.player.x, y: G.player.y + 6 } : null), fieldRune);
+      else FX3.release('field');
     }
   }
 
@@ -1417,6 +1441,8 @@
       crit ? (ink ? 21 : 18) : 13);
     if (G.coopRole === 'host' && window.Coop) window.Coop.queueDmg(e.x, e.y - e.r - 4, Math.round(d), crit);
     if (crit) {
+      // 暴击：pixelfx 的 crit-hit 顶替原来的两圈印泥环 —— 一次性把「这一下很重」说清楚
+      if (window.FX3) FX3.spawn('crit', e.x, e.y - e.r * 0.3, { pal: save.skin === 'guigu' ? 'xue' : 'jin' });
       G.hitStop = Math.max(G.hitStop, 0.018);
       flashCritInk();
       // 水墨皮：朱砂爆点落在怪身上（不是只有全屏泛红 —— 那看着像自己挨打）。
@@ -2629,6 +2655,8 @@
     const p = G.player; if (!p || !b) return;
     const ang = Math.atan2(p.y - b.y, p.x - b.x);
     const dmg = bossDmgOf(b, sk);
+    // 起手法阵：Boss 一出手，脚下先亮一圈阵纹 —— 比只有一圈预警环更像"在结印"
+    if (window.FX3) FX3.spawn('rune', b.x, b.y + b.r * 0.55, { pal: 'mo', scale: 1 });
     switch (sk.fx) {
       case 'fan':
         aimFan(b.x, b.y, ang, sk.num || 5, sk.spread || 0.2, sk.spd || 220, dmg);
@@ -3493,6 +3521,7 @@
     } catch (e) {}
   }
   function updateParts(dt) {
+    if (window.FX3) FX3.update(dt);   // pixelfx 特效推进（顿帧里也跟着冻，手感才一致）
     for (let i = G.parts.length - 1; i >= 0; i--) {
       const p = G.parts[i]; p.life -= dt;
       if (p.life <= 0) { G.parts.splice(i, 1); continue; }
@@ -5688,6 +5717,8 @@
     for (const b of G.fxBullets) drawBulletVfx(b, 0.78);
     // 环绕：玄罡的金环 / 大庚剑阵的青碧飞剑
     for (const o of G.orbPos) drawOrb(o);
+    // pixelfx 像素特效层：角色之后、飘字之前。关掉加法光（见 fxpix.js 文件头），否则在宣纸白底上等于没画
+    if (window.FX3) FX3.draw(ctx);
     for (const pt of G.parts) if (!pt.rune) drawPart(pt);
     for (const t of G.texts) { ctx.globalAlpha = Math.max(0, t.life / t.maxlife); ctx.fillStyle = t.color; ctx.font = 'bold ' + t.size + 'px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(t.text, t.x, t.y); ctx.globalAlpha = 1; }
 
@@ -5985,6 +6016,7 @@
 
     G.mapId = id; G.map = m;
     G._refHp = null;   // 本图怪物的硬度基准要重算（见 refHpOfMap）
+    if (window.FX3) FX3.clear();   // 换图：上一张图的残留特效不许跟着带过来
     G._refDmg = null;  // 本图怪物的凶悍基准要重算（见 refDmgOfMap）
     G._hulAvg = null;  // 本图 hulMap 的平均值缓存在此（见 makeEnemy）
     G.diff = diffById(diffId || save.lastDiff || 'easy');
