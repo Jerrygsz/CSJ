@@ -310,7 +310,7 @@
       desc: '南宫婉被逼嫁给化意门长老。他化形入山，只带了一柄剑。',
       startLevel: 86, startSkills: { sword: 6, fire: 5, orb: 5, nova: 5, frost: 5 },
       unlock: 'cangkun', next: 'huanglong',
-      diff: 2.7, bossAt: 0, intro: 'yanyue', outro: 'yanyue_out',
+      diff: 2.7, bossAt: 120, intro: 'yanyue', outro: 'yanyue_out',
       enemies: ['zhengdao', 'moxiu2', 'assassin'],
       elites: ['掩月宗执事', '化意门护卫'],
       mats: ['m_yusui', 'm_xuantie', 'm_hanhuo'],

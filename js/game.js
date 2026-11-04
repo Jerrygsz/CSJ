@@ -5677,7 +5677,12 @@
 
     // Boss 登场调度（共斗时客机不自己刷：进度已对齐房主，Boss 走房主快照的镜像，避免两个 Boss）
     if (G.map && G.map.boss && !G.bossSpawned && !(G.coopRole === 'client' && G.coopShared)) {
-      const at = G.map.bossAt || 0;
+      // 战斗图写了 Boss 却漏写 bossAt，在这里会静默变成「永远不刷」——at 恒为 0，条件是 at > 0。
+      // 掩月宗就是这么卡了一个版本：小怪滚滚来，Boss 到不了，玩家一直打空场。
+      // 所以给一个兜底时点：战斗图漏填一律 120s 登场，「有 Boss 就一定会来」。
+      // type:'boss' 不吃这条 —— 它是开场回调里直接 spawnBoss()，不靠时钟。
+      const at = (G.map.bossAt > 0) ? G.map.bossAt
+        : (G.map.type !== 'boss' ? 120 : 0);
       if (at > 0 && G.time >= at - 3 && !G.bossWarned) { G.bossWarned = true; banner('⚠ 妖气逼近'); Sfx.warn(); }
       if (at > 0 && G.time >= at) spawnBoss();
     }
