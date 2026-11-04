@@ -128,6 +128,9 @@
       totalKills: 0, playTime: 0,
       inventory: {}, bonuses: {}, totalItems: 0,
       stones: 0, cleared: [], unlocked: ['qixuan'], mapId: 'qixuan',
+      // 道陨代价：stoneBurned = 历次被天地收走的灵石总数（只增不减，永不退还）；
+      // deathLost = {地图id: {items:{道具id:件数}}} —— 掉的道具挂在这里，把那张图再打穿一次就原物取回
+      stoneBurned: 0, deathLost: {},
       // 跨地图永久修为：等级与功法只增不减，回刷低级图也不会退回去
       cultivate: { level: 1, xp: 0, skills: { sword: 1 } },
       // 在洞府「研习」/ 化开法诀而习得的功法（手写册子、掉落所得都走 learnSkill）：
@@ -525,6 +528,7 @@
     downT: 0, rescueT: 0,     // P6 倒地观战：倒了多久 / 队友救援进度（秒）
     mapId: null, map: null, diff: null,
     enemies: [], bullets: [], ebullets: [], fxBullets: [], gems: [], herbs: [], parts: [], texts: [], loot: [],
+    tells: [],                // Boss 出招预警圈（画在地上，随前摇淡出）
     spawnT: 0, nextEliteT: 100, eliteIdx: 0,
     boss: null, bossActive: false, bossSpawned: false, bossWarned: false,
     frostR: 0, shake: 0, flash: 0, god: false, ts: 1,
@@ -1651,6 +1655,11 @@
       if (b.life <= 0 || offscreen(b, 60)) G.ebullets.splice(i, 1);
     }
     if (G.ebullets.length > 420) G.ebullets.splice(0, G.ebullets.length - 420);
+    // 预警圈只做视觉，不吃伤害；前摇走完自己消失
+    for (let i = G.tells.length - 1; i >= 0; i--) {
+      G.tells[i].t -= dt;
+      if (G.tells[i].t <= 0) G.tells.splice(i, 1);
+    }
   }
 
   // ---------- 敌人 ----------
@@ -2505,6 +2514,19 @@
       noSummon: !!cfg.noSummon,   // 显式关掉召群（仅教学关用；不影响其它 Boss 的既有召群）
       phase2: false, phaseT: 0
     };
+    // 招式表：先按 Boss 名找原著专属招式（js/bosskit.js），找不到就按同族通用招式。
+    // 都没有（理论上不会）则退回下面 updateBoss 里的旧四系打法，保证任何配置不空转。
+    const kits = window.BOSS_KITS || null;
+    const kindKits = window.BOSS_KIT_KIND || null;
+    const kit = (kits && kits[cfg.name]) || (kindKits && kindKits[cfg.kind]) || null;
+    if (kit && kit.skills && kit.skills.length) {
+      G.boss.kit = kit;
+      G.boss.kitNamed = !!(kits && kits[cfg.name]);   // 专属招式表 vs 同族通用表（召群时口径不同）
+      G.boss.cds = {};
+      G.boss.pending = null;
+      // 起手错开：不然一现身七八招同时亮，第一秒就把玩家埋了
+      kit.skills.forEach((sk, i) => { G.boss.cds[i] = (sk.cd || 6) * (0.5 + i * 0.16); });
+    }
     G.bossActive = true; G.bossSpawned = true;
     G.enemies = G.enemies.filter(e => !e.elite);
     G.flash = Math.max(G.flash, 0.5); G.shake = 12;
@@ -2554,6 +2576,127 @@
     }
     return true;
   }
+
+  // ---------- 招式表驱动（js/bosskit.js） ----------
+  // 预警圈：画在地上的一圈，随前摇收缩/淡出。Boss 出手前必须先看得见 —— 这是"能躲"的前提。
+  function tellAt(x, y, r, dur, color) {
+    G.tells.push({ x, y, r: r || 120, t: dur || 0.5, dur: dur || 0.5, color: color || '#ff7a52' });
+  }
+  function bossDmgOf(b, sk) { return Math.max(1, Math.round((b.dmg || 1) * (sk.k || 0.5))); }
+  function castBossSkill(b, sk) {
+    const p = G.player; if (!p || !b) return;
+    const ang = Math.atan2(p.y - b.y, p.x - b.x);
+    const dmg = bossDmgOf(b, sk);
+    switch (sk.fx) {
+      case 'fan':
+        aimFan(b.x, b.y, ang, sk.num || 5, sk.spread || 0.2, sk.spd || 220, dmg);
+        Sfx.shoot(); break;
+      case 'ring':
+        ringBurst(b.x, b.y, sk.num || 14, sk.spd || 175, dmg);
+        G.shake = Math.max(G.shake, 5); Sfx.burst(); break;
+      case 'beam': {
+        const sd = sk.spd || 760, r = sk.r || 11;
+        // 贯刺不做成一发子弹：沿射线铺三节，射速够快时看上去就是一道剑光
+        for (let k = 0; k < 3; k++) {
+          G.ebullets.push({ x: b.x + Math.cos(ang) * k * 26, y: b.y + Math.sin(ang) * k * 26, vx: Math.cos(ang) * sd, vy: Math.sin(ang) * sd, r: r - k * 2, dmg: dmg, life: 1.5 });
+        }
+        G.shake = Math.max(G.shake, 5); Sfx.shoot(); break;
+      }
+      case 'rain': {
+        const n = sk.num || 6, rad = sk.rad || 160;
+        for (let k = 0; k < n; k++) {
+          const a = Math.random() * 6.28, rr = Math.sqrt(Math.random()) * rad;
+          const tx = p.x + Math.cos(a) * rr, ty = p.y + Math.sin(a) * rr;
+          G.ebullets.push({ x: tx, y: ty - 300, vx: 0, vy: 430 + Math.random() * 130, r: sk.r || 10, dmg: dmg, life: 2.2 });
+          tellAt(tx, ty, (sk.r || 10) + 18, 0.55, '#ffb060');
+        }
+        Sfx.burst(); break;
+      }
+      case 'mist': {
+        const n = sk.num || 10;
+        for (let k = 0; k < n; k++) {
+          const a = k / n * 6.28 + Math.random() * 0.4;
+          G.ebullets.push({
+            x: b.x + Math.cos(a) * 30, y: b.y + Math.sin(a) * 30,
+            vx: Math.cos(a) * (sk.spd || 46), vy: Math.sin(a) * (sk.spd || 46),
+            r: sk.r || 17, dmg: dmg, life: sk.dur || 2.6
+          });
+        }
+        Sfx.shoot(); break;
+      }
+      case 'dash':
+        b.dashing = 0.44; b.dashAng = ang; b.dashDist = sk.dist || 4.6; Sfx.warn(); break;
+      case 'blink': {
+        const a = Math.random() * 6.28, dd = sk.dist || 190;
+        b.x = p.x + Math.cos(a) * dd; b.y = p.y + Math.sin(a) * dd;
+        G.shake = Math.max(G.shake, 6); Sfx.burst(); break;
+      }
+      case 'summon': {
+        // 地图上写了 summon:'' 或 noSummon 的 Boss 一律不召群（教学关靠这个关掉添兵）。
+        // 招式表不能绕过这条：否则「山贼头目不召群」会被通用魔修招式重新打开。
+        if (b.noSummon || b.summon === '') break;
+        // 专属招式表：召什么由招式定（虫母召虫、蛛母召子）；
+        // 通用同族表：沿用地图上配的召唤物，别把"海兽"改成"狼"。
+        const st = b.kitNamed ? (sk.type || 'ghoul') : ((b.summon && b.summon !== '') ? b.summon : (sk.type || 'ghoul'));
+        if (summonAt(b, st, sk.num || 2, sk.cap || 4)) banner(b.name + ' · ' + sk.n);
+        break;
+      }
+      case 'trap':
+        if (sk.dur) p.rootT = Math.max(p.rootT || 0, sk.dur);
+        hitPlayer(dmg);
+        spawnText(p.x, p.y - 34, sk.n, '#ff7ab0', 13); Sfx.warn(); break;
+      case 'chill':
+        if (sk.dur) { p.slowT = Math.max(p.slowT || 0, sk.dur); p.slowK = sk.slow || 0.45; }
+        hitPlayer(dmg);
+        spawnText(p.x, p.y - 34, sk.n, '#8fd8ff', 13); Sfx.warn(); break;
+      case 'pull': {
+        const dd = U.dist(p.x, p.y, b.x, b.y) || 1;
+        const mv = Math.min(sk.dist || 80, Math.max(0, dd - 70));
+        p.x += (b.x - p.x) / dd * mv; p.y += (b.y - p.y) / dd * mv;
+        hitPlayer(dmg); G.shake = Math.max(G.shake, 5); Sfx.warn(); break;
+      }
+      case 'nova':
+        ringBurst(b.x, b.y, sk.num || 18, sk.spd || 190, dmg);
+        if (U.dist(p.x, p.y, b.x, b.y) < (sk.rad || 150)) hitPlayer(Math.round(dmg * 1.4));
+        G.shake = Math.max(G.shake, 10); Sfx.burst(); break;
+      case 'heal': {
+        const add = Math.round(b.maxhp * (sk.pct || 0.04));
+        b.hp = Math.min(b.maxhp, b.hp + add);
+        spawnText(b.x, b.y - b.r - 26, sk.n + ' · 回气 ' + add, '#ffdd66', 12);
+        Sfx.buff(); break;
+      }
+    }
+  }
+  // 招式轮转：每招各算各的冷却，同一时刻只出一招（pending 是前摇）。
+  // 前摇期间头顶报招式名 + 地上亮预警圈 —— 原著里高手出招也有兆头，玩家该有那半秒反应。
+  function updateBossKit(b, kit, dt) {
+    const list = kit.skills;
+    if (b.pending) {
+      b.pending.t -= dt;
+      if (b.pending.t <= 0) { const s = b.pending.sk; b.pending = null; castBossSkill(b, s); }
+    }
+    if (b.dashing > 0) {
+      b.dashing -= dt;
+      b.x += Math.cos(b.dashAng) * b.spd * (b.dashDist || 4.6) * dt;
+      b.y += Math.sin(b.dashAng) * b.spd * (b.dashDist || 4.6) * dt;
+      if (Math.random() < 0.6) G.parts.push({ x: b.x + U.rand(-10, 10), y: b.y + U.rand(-10, 10), vx: 0, vy: 0, life: 0.3, maxlife: 0.3, size: 5, color: '#9a8360' });
+    }
+    for (let i = 0; i < list.length; i++) {
+      const sk = list[i];
+      b.cds[i] = (b.cds[i] || 0) - dt;
+      if (b.cds[i] > 0 || b.pending) continue;
+      b.cds[i] = (sk.cd || 6) * (b.phase2 ? 0.72 : 1);   // 二阶段整体加快，跟旧版节奏一致
+      const tele = sk.tele === undefined ? 0.5 : sk.tele;
+      if (tele > 0.02) {
+        b.pending = { sk: sk, t: tele };
+        tellAt(b.x, b.y, sk.fx === 'rain' ? 0 : (sk.rad || 130), tele, '#ff7a52');
+        spawnText(b.x, b.y - b.r * 1.6 - 16, sk.n, '#ffc46a', 12);
+      } else {
+        castBossSkill(b, sk);
+      }
+      break;   // 一帧只起一招，别让两招前摇叠在一起
+    }
+  }
   function updateBoss(dt) {
     const b = G.boss, p = G.player;
     // 兜底：active 为真却没有 Boss 实体时（联机进度同步的边界情况）直接收摊，别崩
@@ -2572,7 +2715,10 @@
     let mv = 0; if (d > 180) mv = 1; else if (d < 120) mv = -0.6;
     b.x += Math.cos(ang) * spd * mv * dt; b.y += Math.sin(ang) * spd * mv * dt;
 
-    if (b.kind === 'beast') {
+    if (b.kit) {
+      // 有招式表就走招式表（原著招式 + 前摇 + 伤害系数），下面四系只作没有表的兜底
+      updateBossKit(b, b.kit, dt);
+    } else if (b.kind === 'beast') {
       // 冲撞突进
       b.dashT -= dt;
       if (b.dashT <= 0) { b.dashing = 0.42; b.dashT = phase2 ? 2.3 : 3.6; b.dashAng = ang; Sfx.warn(); }
@@ -4510,7 +4656,9 @@
       else G.autoDodgePrev = null;
     }
     const len = Math.hypot(dx, dy) || 1;
-    const sp = p.spd * spdMul() * (1 + (G.bonus.spd || 0));
+    // 定身（夺舍 / 禁制 / 蛛丝）与冻缓（极寒之气）：Boss 招式里"控"的那一半
+    const ctrlK = (p.rootT > 0) ? 0 : (p.slowT > 0 ? (p.slowK || 0.5) : 1);
+    const sp = p.spd * spdMul() * (1 + (G.bonus.spd || 0)) * ctrlK;
     p.x += (dx / len) * sp * dt; p.y += (dy / len) * sp * dt;
     if (dx !== 0) p.dir = dx > 0 ? 1 : -1;
     // 迈步相位只在真的走的时候推进：站着的时候腿不该还在摆
@@ -4519,6 +4667,8 @@
     const rg = rb('regen') + passiveSum('regen') + buffSum('regen') + (G.bonus.regen || 0) + gb('regen');
     if (rg > 0 && p.hp < p.maxhp) p.hp = Math.min(p.maxhp, p.hp + rg * dt);
     if (p.iv > 0) p.iv -= dt;
+    if (p.rootT > 0) p.rootT -= dt;
+    if (p.slowT > 0) p.slowT -= dt;
     if (p.dashFx > 0) p.dashFx -= dt;
     if (G.dashCd > 0) G.dashCd -= dt;
     if (p.hurtFlash > 0) p.hurtFlash -= dt;
@@ -5321,7 +5471,19 @@
     for (const g of G.gems) { if (g.kind === 'stone') drawStone(g); else drawSpr('gem', g.x, g.y, 1.6, false); }
     for (const h of G.herbs) drawSpr('herb', h.x, h.y, 1.6, false);
     for (const l of G.loot) drawLoot(l);
-    for (const b of G.ebullets) drawSpr('ebullet', b.x, b.y, 1.4, false);
+    // Boss 出招预警：地上圈随前摇收拢、颜色由暗转亮 —— 给玩家那半秒反应
+    for (const t of G.tells) {
+      const k = Math.max(0, Math.min(1, t.t / t.dur));      // 1 → 0
+      ctx.save();
+      ctx.globalAlpha = 0.20 + 0.45 * (1 - k);
+      ctx.strokeStyle = t.color; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(t.x, t.y, Math.max(6, t.r * (0.35 + 0.65 * (1 - k))), 0, 6.28); ctx.stroke();
+      ctx.globalAlpha = 0.10 + 0.16 * (1 - k);
+      ctx.fillStyle = t.color;
+      ctx.beginPath(); ctx.arc(t.x, t.y, Math.max(6, t.r * (0.35 + 0.65 * (1 - k))), 0, 6.28); ctx.fill();
+      ctx.restore();
+    }
+    for (const b of G.ebullets) drawSpr('ebullet', b.x, b.y, 1.4 * (b.r || 7) / 7, false);
 
     const es = G.enemies.slice().sort((a, b) => a.y - b.y);
     for (const e of es) drawEnemy(e);
@@ -5608,7 +5770,8 @@
   function resetRun() {
     if (window.Coop) window.Coop.reset();
     G.player = newPlayer();
-    G.enemies = []; G.bullets = []; G.ebullets = []; G.gems = []; G.herbs = []; G.parts = []; G.texts = []; G.loot = [];
+    G.enemies = []; G.bullets = []; G.ebullets = []; G.gems = []; G.herbs = []; G.parts = []; G.texts = []; G.loot = []; G.tells = [];
+    G.reclaimedLost = null;   // 上一张图"寻回失落"的结算提示不带到这张图
     G.time = 0; G.kills = 0; G.spawnT = 1; G.nextEliteT = 100; G.eliteIdx = 0;
     G.pickPulseAt = 0;   // 进图头 1.2 秒展示一次神念拾取圈
     G.fxBullets.length = 0; G.coopFrozen = false; G.dialogSynced = false;
@@ -6021,6 +6184,9 @@
     }
     const first = isFirstClear(m);
     if (first) save.cleared.push(m.id);
+    // 再战把这张图打穿了：上一次道陨掉的道具原物奉还。灵石不在此列。
+    const reclaimed = reclaimLost(m.id);
+    G.reclaimedLost = reclaimed;
     // 黄枫谷·山门：升仙令配发的筑基丹，当场被叶师叔换走（原著因果）。
     // 对话白纸黑字写「配发筑基丹一枚」又「丹归叶师叔」，储物袋必须真的收到、又真的失去；
     // 一次结清，且记入 save.met，重进此图绝不重复给/拿（不会凭空多/少一枚）。
@@ -6241,6 +6407,10 @@
       }
     }
     const dm = (G.map && (G.map.type === 'combat' || G.map.type === 'boss')) ? (G.diff || DIFFICULTIES[0]) : DIFFICULTIES[0];
+    if (G.reclaimedLost && G.reclaimedLost.items > 0) {
+      extra += '<div class="lootrow reward"><b style="color:#ffd24a">寻回前番失落</b><span>道具 ×'
+        + G.reclaimedLost.items + '（' + G.reclaimedLost.kinds + ' 味）· 原物奉还</span></div>';
+    }
     if (dm.id !== 'easy') {
       extra += '<div class="lootrow reward"><b style="color:' + dm.color + '">' + dm.name + '</b><span>难度加成已并入</span></div>';
     }
@@ -8452,6 +8622,7 @@
   const elGoTime = document.getElementById('goTime');
   const elGoKills = document.getElementById('goKills');
   const elGoLevel = document.getElementById('goLevel');
+  const elGoToll = document.getElementById('goToll');
   const elVictory = document.getElementById('victory');
   const elVictoryTitle = document.getElementById('victoryTitle');
   const elVictoryDesc = document.getElementById('victoryDesc');
@@ -8519,6 +8690,67 @@
   const elCaveBody = document.getElementById('caveBody');
 
   // ---------- 流程 ----------
+  // 道陨的代价（Jerry 定）：灵石折半 —— 烧了就烧了，永不见还；
+  // 道具也折半 —— 但随机掉的这一半记在账上，把这张图再打穿一次就能原物取回。
+  // 逻辑分开写在两个函数里，是因为"灵石不退"和"道具可赎"本来就是两条不同的规则。
+  const DEATH_STONE_K = 0.5, DEATH_ITEM_K = 0.5;
+  function deathToll() {
+    const mapId = G.mapId || save.mapId || 'qixuan';
+    const out = { stones: 0, items: 0, kinds: 0 };
+    // ① 灵石：折半上缴，记进 stoneBurned 只用于展示，绝不回补
+    const st = Math.round(save.stones || 0);
+    out.stones = Math.floor(st * DEATH_STONE_K);
+    if (out.stones > 0) {
+      save.stones = st - out.stones;
+      save.stoneBurned = (save.stoneBurned || 0) + out.stones;
+    }
+    // ② 道具：随机抽走储物袋总量的一半（穿在装备槽上的四件不动 —— 身上的东西夺不走）
+    const inv = save.inventory || {};
+    const equipped = {};
+    for (const k in (save.equip || {})) { const v = save.equip[k]; if (v) equipped[v] = 1; }
+    const ids = Object.keys(inv).filter(id => (inv[id] || 0) > 0 && !equipped[id]);
+    let total = 0;
+    for (const id of ids) total += inv[id];
+    let target = Math.floor(total * DEATH_ITEM_K);
+    if (target > 0) {
+      for (let i = ids.length - 1; i > 0; i--) {   // 洗牌：掉哪几味是随机的，不是固定扣
+        const j = (Math.random() * (i + 1)) | 0;
+        const t = ids[i]; ids[i] = ids[j]; ids[j] = t;
+      }
+      const lost = {};
+      for (const id of ids) {
+        if (target <= 0) break;
+        const take = Math.min(inv[id], target);
+        if (take <= 0) continue;
+        inv[id] -= take; target -= take;
+        lost[id] = (lost[id] || 0) + take;
+        out.items += take; out.kinds++;
+      }
+      // 同一张图死过多次：失落之物累加，别互相覆盖（覆盖等于白丢前一次的）
+      save.deathLost = save.deathLost || {};
+      const prev = save.deathLost[mapId] || { items: {} };
+      for (const id in lost) prev.items[id] = (prev.items[id] || 0) + lost[id];
+      prev.t = Date.now();
+      save.deathLost[mapId] = prev;
+    }
+    writeSave();
+    return out;
+  }
+  // 再战通关：把这张图上一次道陨掉的道具原数还回来。灵石不在此列。
+  function reclaimLost(mapId) {
+    const dl = save.deathLost;
+    if (!dl || !dl[mapId]) return null;
+    const rec = dl[mapId];
+    let n = 0, kinds = 0;
+    for (const id in (rec.items || {})) {
+      const c = rec.items[id] | 0;
+      if (c <= 0) continue;
+      save.inventory[id] = (save.inventory[id] || 0) + c;
+      n += c; kinds++;
+    }
+    delete dl[mapId];
+    return n > 0 ? { items: n, kinds: kinds } : null;
+  }
   function gameOver() {
     if (G.state === 'gameover') return;
     G.state = 'gameover';
@@ -8531,6 +8763,15 @@
     writeSave();
     Sfx.lose();
     elGoTime.textContent = fmtTime(G.time); elGoKills.textContent = G.kills; elGoLevel.textContent = realmName(G.player.level);
+    // 道陨的代价：灵石折半（永退不回）＋ 道具折半（再战通关可取回）
+    const toll = deathToll();
+    if (elGoToll) {
+      const stoneTxt = toll.stones > 0 ? ('灵石 <b>' + toll.stones + '</b> 已散于天地，追不回来') : '袋中无灵石可失';
+      const itemTxt = toll.items > 0
+        ? ('失落道具 <b>' + toll.items + '</b> 件（' + toll.kinds + ' 味）· 再战此图打穿，原物奉还')
+        : '袋中无道具可失';
+      elGoToll.innerHTML = '<span class="toll-h">道陨代价</span>' + stoneTxt + '<br>' + itemTxt;
+    }
     elGameover.style.display = 'flex'; refreshTitle();
   }
   function doPause() {

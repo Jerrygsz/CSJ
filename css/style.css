@@ -239,6 +239,17 @@ body.fs #wrap { background: #000; }
 .stats2 { display: flex; gap: var(--sp-4); justify-content: center; margin: 12px 0; color: var(--text-2); font-size: var(--fs-body); }
 .stats2 b { color: var(--accent); font-size: var(--fs-h2); display: block; }
 
+/* 道陨代价：灵石折半（不退）＋ 道具折半（可打回来）。用暗红细框，读起来像账，不像报错。 */
+.toll {
+  margin: 10px 0 14px; padding: 9px 12px; text-align: left;
+  border: 1px solid rgba(168, 58, 42, 0.5); border-radius: 6px;
+  background: rgba(168, 58, 42, 0.08);
+  color: var(--text-2); font-size: var(--fs-cap); line-height: 1.7;
+}
+.toll b { color: #e8735c; font-size: var(--fs-body); }
+.toll .toll-h { display: block; color: #c25a48; font-size: var(--fs-cap); letter-spacing: .14em; margin-bottom: 2px; }
+.toll:empty { display: none; }
+
 /* ---------- 对话 ---------- */
 #dialog { background: rgba(8,10,14,0.35); justify-content: flex-end; padding-bottom: 8%; }
 #dialogbox { position: relative; width: 92%; max-width: 460px; background: var(--paper); color: var(--ink); border: 2px solid var(--line-gold); border-radius: var(--r-lg); padding: var(--sp-4); text-align: left; box-shadow: 0 8px 30px rgba(0,0,0,0.6); cursor: pointer; }
