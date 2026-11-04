@@ -63,12 +63,14 @@ window.MAPS = [
     desc: '替药庐采药。山兽与流窜山贼都在这一带出没，是炼气初期最好的练手处。',
     startLevel: 1, startSkills: { sword: 1 },
     unlock: 'qixuan', next: 'mishi',
-    diff: 1.0, bossAt: 110,
+    diff: 1.0, bossAt: 110, packMax: 12, trashDmgMul: 0.6,
     enemies: ['wolf', 'snake', 'bat', 'boar', 'bandit'],
     elites: ['头狼', '马贼头目'],
     mats: ['m_chijing', 'm_huangjing', 'm_jingtie', 'm_wolfdan', 'm_shedan'],
-    boss: { kind: 'beast', name: '狼妖', hp: 1100, spd: 66, dmg: 15, r: 20, spr: 'wolf', scale: 3.4 },
-    extraBoss: [{ kind: 'mo', name: '山贼头目', hp: 1200, spd: 60, dmg: 16, r: 20, spr: 'bandit', scale: 4.4, summon: 'bandit' }],
+    // 教学关：Boss 与副 Boss 都不召群 —— 首关同时应付两只 Boss + 源源不断的小怪，对新手是劝退，
+    // 不是教学。不召怪后「站桩也能赢」，符合 balance.js 首关目标带。
+    boss: { kind: 'beast', name: '狼妖', hp: 1100, spd: 66, dmg: 15, r: 20, spr: 'wolf', scale: 3.4, summon: '' },
+    extraBoss: [{ kind: 'mo', name: '山贼头目', hp: 1200, spd: 60, dmg: 16, r: 20, spr: 'bandit', scale: 4.4, noSummon: true }],
     // 原著：采药那几年在药庐外头捡到一只小绿瓶，夜里会自己聚一滴绿液 —— 掌天瓶
     reward: { stones: 80, items: ['zhangtian'] },
     clearTitle: '采药已毕',

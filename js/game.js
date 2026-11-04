@@ -1677,7 +1677,8 @@
     const d = curDiff();
     const B = window.BALANCE;
     const k = B ? B.trashDmgK(mapLv()) : (1 + (mapDiff() - 1) * 0.55);
-    return (1 + G.time / 120 * 0.15) * k * (d.dmg || 1);
+    const mapK = (G.map && G.map.trashDmgMul) || 1;   // 教学关可单独压低小怪伤害（map.trashDmgMul）
+    return (1 + G.time / 120 * 0.15) * k * (d.dmg || 1) * mapK;
   }
   function spawnPos() {
     const a = Math.random() * Math.PI * 2;
@@ -1700,7 +1701,17 @@
   }
   function makeEnemy(type, x, y, hpMul, dmgMul) {
     const def = ENEMY_TYPES[type];
-    const rel = Math.pow(def.hp / refHpOfMap(), 0.5);   // 同图内的相对硬度，开方压缩差距
+    // 同图内相对硬度。默认沿用 def.hp 开方（旧口径）；若本图写了 hulMap，则按「角色硬度」重标，
+    // 并按本图平均归一 —— 既恢复肉盾/快攻的硬度性格，又不改变整图平均强度。
+    // （后期图 def.hp 都挤在 25~42 万的窄带里，开方后几乎全 1.0，性格被压平；hulMap 专治这个。）
+    let rel;
+    const hm = G.map && G.map.hulMap;
+    if (hm && hm[type] != null) {
+      if (G._hulAvg == null) { const v = Object.keys(hm).map(k => hm[k]); G._hulAvg = v.reduce((a, c) => a + c, 0) / v.length || 1; }
+      rel = hm[type] / G._hulAvg;
+    } else {
+      rel = Math.pow(def.hp / refHpOfMap(), 0.5);
+    }
     const e = {
       _id: ++enemySeq,
       type, x, y, hp: ENEMY_BASE_HP * hpMul * rel, maxhp: ENEMY_BASE_HP * hpMul * rel,
@@ -2491,6 +2502,7 @@
       dashT: 2.2, dashAng: 0, dashing: 0, _orbCd: {},
       // 妖兽系 boss 召哪种小怪：图里没写就还是狼；写空串表示这一只不召群
       summon: cfg.summon === undefined ? 'wolf' : cfg.summon,
+      noSummon: !!cfg.noSummon,   // 显式关掉召群（仅教学关用；不影响其它 Boss 的既有召群）
       phase2: false, phaseT: 0
     };
     G.bossActive = true; G.bossSpawned = true;
@@ -2600,9 +2612,12 @@
         ringBurst(b.x, b.y, phase2 ? 14 : 10, 150, bShot(b, 0.28));
         G.shake = 6; Sfx.burst();
       }
-      // 召唤尸傀
+      // 召唤尸傀（boss.summon 为空串表示「这一只不召群」，与 beast 分支口径一致；教学关靠这个关掉召群）
       b.sumT -= dt;
-      if (b.sumT <= 0) { b.sumT = phase2 ? 7 : 9; summonAt(b, 'ghoul', phase2 ? 3 : 2, phase2 ? 5 : 4); }
+      if (b.sumT <= 0) {
+        b.sumT = phase2 ? 7 : 9;
+        if (!b.noSummon) summonAt(b, 'ghoul', phase2 ? 3 : 2, phase2 ? 5 : 4);
+      }
       if (phase2) {
         b.burstT -= dt;
         if (b.burstT <= 0) { b.burstT = 3.2; ringBurst(b.x, b.y, 16, 170, bShot(b, 0.28)); G.shake = 5; Sfx.burst(); }
@@ -2698,7 +2713,9 @@
     const t = G.time;
     const interval = Math.max(0.30, 0.9 - t * 0.0032);
     const cnt = curDiff().cnt || 1;
-    const want = Math.min(PACK_HARD, Math.min(PACK_MAX, PACK_MIN + t * PACK_GROW) * cnt);
+    // 教学关可单独压低同屏上限（map.packMax）：首关不靠数量堆压力，先让新手站得住
+    const cap = (G.map && G.map.packMax) || PACK_MAX;
+    const want = Math.min(PACK_HARD, Math.min(cap, PACK_MIN + t * PACK_GROW) * cnt);
     const gap = want - G.enemies.length;
     // 只补缺口的一半、单拍最多 6 只：一次灌满会把画面瞬间糊住
     const batch = Math.max(0, Math.min(6, Math.round(gap * 0.5)));
@@ -5741,6 +5758,7 @@
 
     G.mapId = id; G.map = m;
     G._refHp = null;   // 本图怪物的硬度基准要重算（见 refHpOfMap）
+    G._hulAvg = null;  // 本图 hulMap 的平均值缓存在此（见 makeEnemy）
     G.diff = diffById(diffId || save.lastDiff || 'easy');
     if (diffId) save.lastDiff = G.diff.id;
     save.mapId = id;

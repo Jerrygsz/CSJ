@@ -326,6 +326,9 @@
       unlock: 'shuiyan', next: 'taiyi',
       diff: 5.4, bossAt: 60, intro: 'xisha', outro: 'xisha_out',
       enemies: ['jy_younu', 'jy_xiushi'],
+      // 硬度性格：幽奴是快攻刺客（薄、快、狠），九幽族修士是正面修士（厚）。
+      // 两者 def.hp 只差 7%，开方后几乎一样；这里按角色重标，整图平均归一，不改整图难度。
+      hulMap: { jy_younu: 0.80, jy_xiushi: 1.20 },
       elites: ['九幽族长老', '九幽族修士'],
       mats: ['m_xianyuanshi', 'm_shijian'],
       // 鬼木：九幽族大罗。八张黑色符箓化八根漆黑巨兵，「每一根散发的气息，都不逊于一件入品仙器」。

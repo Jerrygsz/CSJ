@@ -608,6 +608,8 @@
       unlock: 'zhenmo', next: 'xutian2',
       diff: 3.2, bossAt: 120, intro: 'xiaoji', outro: 'xiaoji_out',
       enemies: ['yaoshou2', 'kui2', 'dajinxiu'],
+      // 硬度性格：傀儡最厚（慢、硬），妖兽居中，散修最薄。整图平均归一，不改整图难度。
+      hulMap: { yaoshou2: 1.05, kui2: 1.30, dajinxiu: 0.85 },
       elites: ['妖族先锋', '小极宫弟子'],
       mats: ['m_xuanbing', 'm_hanhuo', 'm_gangyin', 'm_yusui'],
       boss: { kind: 'mo', name: '寒骊上人', hp: 32000, spd: 58, dmg: 72, r: 21, spr: 'hanlishang', scale: 5.6 },

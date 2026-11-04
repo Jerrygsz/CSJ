@@ -35,7 +35,7 @@
 
   // [地图 id]: [Boss 血量, Boss 单击伤害]
   var BOSS = {
-    houshan:           [     200,      5],  // lv1   combat 裸装   20 击   (原 1100 / 15)
+    houshan:           [     100,      3],  // lv1   combat 裸装   33 击   (原 1100 / 15；教学关再放宽，站桩也能赢)
     mkuang:            [     300,      8],  // lv3   combat 裸装   14 击   (原 980 / 14)
     mishi:             [    1700,     13],  // lv7   boss   裸装 10.9 击   (原 1500 / 18)
     yanwu:             [    2000,     12],  // lv9   combat 裸装 13.3 击   (原 1900 / 13)
