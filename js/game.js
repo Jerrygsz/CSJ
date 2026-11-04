@@ -9333,9 +9333,11 @@
   function resize() {
     const availW = elFit.clientWidth, availH = elFit.clientHeight;
     if (!availW || !availH) return;
-    // 长屏手机：纵向视口按比例伸展，画面铺满不留黑边；
-    // 桌面/横屏：不低于 BASE_H，保持原来的视野
-    const wantH = Math.round(Math.min(1120, Math.max(BASE_H, BASE_W * (availH / availW))));
+    // 逻辑视口：宽固定 480（设计基准），高按设备比例伸展，画面铺满不留黑边。
+    // 下限 768（原 864）：矮屏机型与平板/桌面窗口也能铺满宽度，不再上下留黑；
+    // 上限 1180 兜住超长屏，再长就居中留边 —— 把视野拉成一条比留边更难受。
+    const ratio = availH / availW;
+    const wantH = Math.round(Math.min(1180, Math.max(768, BASE_W * ratio)));
     if (wantH !== H) {
       H = wantH;
       cv.width = W; cv.height = H;
@@ -9345,8 +9347,22 @@
     }
     const scale = Math.min(availW / W, availH / H);
     viewScale = scale;
-    elStage.style.width = Math.max(1, Math.round(W * scale)) + 'px';
-    elStage.style.height = Math.max(1, Math.round(H * scale)) + 'px';
+    // 舞台按逻辑尺寸布局，整体 scale：HUD / 弹窗 / 字号跟着画布一起缩，
+    // 各机型看到的是同一张设计稿，只是大小不同。
+    elStage.style.width = W + 'px';
+    elStage.style.height = H + 'px';
+    elStage.style.transform = 'translate(-50%, -50%) scale(' + (Math.round(scale * 1e5) / 1e5) + ')';
+    // 触摸设备横屏：竖版画面会被压成极窄一条，与其硬塞不如请人转回来
+    try {
+      const coarse = (window.matchMedia && matchMedia('(pointer: coarse)').matches) || ('ontouchstart' in window);
+      const rot = !!coarse && availW > availH * 1.18;
+      if (document.body && document.body.classList) {
+        document.body.classList.toggle('rot', rot);
+        // 矮屏档：16:9 老机型（360×640 / 375×667）逻辑视口只有 854，
+        // 首页那份内容会顶出去 —— 交给 CSS 收紧一档排版，别让玩家在首屏学滚动。
+        document.body.classList.toggle('short', !rot && H < 1000);
+      }
+    } catch (e) {}
   }
   G.view = { scale: 1, safe: { top: 0, right: 0, bottom: 0, left: 0 } };
   function refreshView() {

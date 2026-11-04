@@ -89,9 +89,19 @@ html, body {
   padding: var(--fr-safe-top) var(--fr-safe-right) var(--fr-safe-bottom) var(--fr-safe-left);
   background: radial-gradient(circle at 50% 42%, #171b23 0%, #0a0c10 78%);
 }
-#fit { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-/* 舞台：与画布同尺寸，所有 HUD / 弹窗都以它为定位基准，避免跑到黑边上 */
-#stage { position: relative; flex: 0 0 auto; width: 480px; height: 864px; }
+/* 舞台外层：定位容器。不再用 flex 居中 —— 舞台尺寸可能大于容器，
+   flex 的负剩余空间会让内容在某些浏览器里偏向一侧；绝对定位 + translate 永远正中对齐。 */
+#fit { position: relative; width: 100%; height: 100%; }
+/* 舞台：始终按「逻辑坐标」布局（宽 480，高由 JS 按机型比例给出），
+   再由 JS 在外层整体 scale。这样画布、HUD、弹窗、字号共用同一套坐标，
+   换机型只是整体放大缩小 —— 不会出现「画布缩了、按钮没缩」的错位与挤压。 */
+#stage {
+  position: absolute; left: 50%; top: 50%;
+  width: 480px; height: 864px;
+  transform-origin: center center;
+  transform: translate(-50%, -50%) scale(1);
+  will-change: transform;
+}
 #game {
   display: block; width: 100%; height: 100%;
   background: #36532f; image-rendering: pixelated; image-rendering: crisp-edges;
@@ -211,7 +221,173 @@ body.fs #wrap { background: #000; }
 .panel h2 { color: var(--accent); font-size: var(--fs-h1); margin-bottom: 8px; }
 #victory .panel, #gameover .panel { max-height: 92%; overflow-y: auto; }
 .panel p { color: var(--text-2); line-height: 1.6; margin: 4px 0; font-size: var(--fs-body); }
-#title h1 { font-size: var(--fs-display); color: var(--accent); letter-spacing: 4px; text-shadow: 0 2px 8px #000; margin-bottom: 4px; }
+/* ============ 标题页（首页） ============
+   首页是玩家见到的第一屏，原先只有一个灰框加几行字，跟游戏里的国风质感脱节。
+   这里给它一套「印章 + 细线 + 题字 + 落款」的骨架，两套皮肤各配一套颜色：
+     默认皮「鎏金古卷」：夜色为底、金线为骨，标题走金色渐变。
+     鬼谷皮「水墨卷轴」：宣纸为底、墨线为骨，朱砂印章压角落。
+   装饰全部用 CSS 与伪元素，不引图片 —— 首页不该为几道装饰多拉一次请求。 */
+.title-overlay {
+  background:
+    radial-gradient(120% 62% at 50% 0%, rgba(201,162,74,0.16) 0%, rgba(201,162,74,0) 62%),
+    radial-gradient(90% 55% at 50% 100%, rgba(120,90,30,0.14) 0%, rgba(0,0,0,0) 72%),
+    var(--bg-scrim);
+}
+.title-panel {
+  position: relative;
+  padding: 24px 22px 16px;
+  border-radius: var(--r-sm);
+  /* 内缩一圈细线：像裱好的画心，比加粗描边更轻 */
+  outline: 1px solid rgba(201,162,74,0.20); outline-offset: -7px;
+  box-shadow: 0 18px 60px rgba(0,0,0,0.66), inset 0 0 90px rgba(201,162,74,0.05);
+  max-height: 96%; overflow-y: auto; overscroll-behavior: contain;
+}
+/* 顶部一道金光：视线从上方落下 */
+.title-panel::before {
+  content: ''; position: absolute; left: 0; right: 0; top: 0; height: 2px;
+  background: linear-gradient(90deg, rgba(201,162,74,0) 0%, rgba(255,210,74,0.92) 50%, rgba(201,162,74,0) 100%);
+}
+.t-head { display: block; text-align: center; }
+/* 印章：方形、微斜、单字。位置在标题之上，像书页的起首章 */
+.t-seal {
+  width: 44px; height: 44px; margin: 0 auto 12px;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid rgba(201,162,74,0.85); border-radius: 3px;
+  background: rgba(255,210,74,0.06);
+  box-shadow: 0 0 18px rgba(255,210,74,0.20), inset 0 0 12px rgba(255,210,74,0.10);
+  transform: rotate(-3deg);
+}
+.t-seal b { font-size: 23px; font-weight: normal; line-height: 1; color: var(--accent); }
+.title-panel h1 {
+  font-size: 33px; letter-spacing: 6px; margin-bottom: 6px;
+  color: var(--accent); text-shadow: 0 2px 10px rgba(0,0,0,0.75);
+}
+/* 金色渐变字：老浏览器没有 background-clip:text 时会退化成上面的纯金色，不会变透明 */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .title-panel h1 {
+    background: linear-gradient(180deg, #ffeeb4 0%, #ffd24a 48%, #c9912f 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none; filter: drop-shadow(0 2px 10px rgba(255,180,60,0.32));
+  }
+}
+/* 题字下的分隔：两侧细线，中间两个字，模仿卷首的界栏 */
+.t-rule { display: flex; align-items: center; gap: 10px; margin: 12px 0 14px; }
+.t-rule i { flex: 1; height: 1px; background: linear-gradient(90deg, rgba(201,162,74,0), rgba(201,162,74,0.52), rgba(201,162,74,0)); }
+.t-rule b { flex: none; font-weight: normal; font-size: 11px; letter-spacing: 6px; color: rgba(201,162,74,0.72); }
+.title-panel .cite {
+  text-align: left; padding-left: 11px;
+  border-left: 2px solid rgba(201,162,74,0.34);
+  line-height: 1.75; margin: 2px 0 16px;
+}
+.title-panel .t-start {
+  min-width: 216px; letter-spacing: 3px;
+  box-shadow: 0 4px 0 var(--accent-shadow), 0 0 26px rgba(255,190,70,0.26);
+}
+/* 常态呼吸光晕；按下时交给 :active，免得两套 box-shadow 打架 */
+.title-panel .t-start:not(:active) { animation: tStartGlow 3.6s ease-in-out infinite; }
+@keyframes tStartGlow {
+  0%, 100% { box-shadow: 0 4px 0 var(--accent-shadow), 0 0 18px rgba(255,190,70,0.18); }
+  50% { box-shadow: 0 4px 0 var(--accent-shadow), 0 0 34px rgba(255,190,70,0.44); }
+}
+.t-foot {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-top: 14px; padding-top: 8px;
+  border-top: 1px dotted rgba(201,162,74,0.16);
+  font-size: 10px; letter-spacing: 2px; color: var(--text-4);
+}
+/* ---- 鬼谷水墨：同一套骨架，换纸墨朱砂 ---- */
+body[data-skin="guigu"] .title-overlay {
+  background:
+    radial-gradient(120% 62% at 50% 0%, rgba(255,255,255,0.80) 0%, rgba(255,255,255,0) 60%),
+    radial-gradient(90% 55% at 50% 100%, rgba(150,140,110,0.20) 0%, rgba(255,255,255,0) 72%),
+    rgba(226,220,204,0.94);
+}
+body[data-skin="guigu"] .title-panel {
+  background: linear-gradient(180deg, #f7f3e8 0%, #ece6d4 100%);
+  border-color: rgba(74,68,56,0.62);
+  /* 鬼谷皮已经有「上下轴头」这套卷轴语言，首页沿用，不再叠一圈内缩线 */
+  outline: none;
+  box-shadow:
+    inset 0 5px 0 -2.5px rgba(60,56,48,0.50),
+    inset 0 -5px 0 -2.5px rgba(60,56,48,0.50),
+    inset 0 0 0 1px rgba(60,56,48,0.12),
+    0 18px 50px rgba(60,54,44,0.30);
+}
+/* 轴头已经压住上沿，朱砂细线再叠一道就脏了 —— 让它退场 */
+body[data-skin="guigu"] .title-panel::before { display: none; }
+body[data-skin="guigu"] .t-seal {
+  border-color: rgba(150,42,32,0.85); background: rgba(168,58,42,0.05);
+  box-shadow: 0 0 16px rgba(168,58,42,0.14), inset 0 0 10px rgba(168,58,42,0.07);
+}
+body[data-skin="guigu"] .t-seal b { color: #a83a2a; }
+body[data-skin="guigu"] .title-panel h1 { color: #2f2a20; text-shadow: 0 1px 0 rgba(255,255,255,0.6); }
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  body[data-skin="guigu"] .title-panel h1 {
+    background: linear-gradient(180deg, #4a4438 0%, #2b261d 58%, #7a5f2e 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; text-shadow: none;
+    filter: drop-shadow(0 1px 0 rgba(255,255,255,0.5));
+  }
+}
+body[data-skin="guigu"] .t-rule i { background: linear-gradient(90deg, rgba(74,68,56,0), rgba(74,68,56,0.42), rgba(74,68,56,0)); }
+body[data-skin="guigu"] .t-rule b { color: rgba(90,80,60,0.70); }
+body[data-skin="guigu"] .title-panel .cite { border-left-color: rgba(168,58,42,0.42); }
+body[data-skin="guigu"] .title-panel .t-start { box-shadow: 0 4px 0 #4a4438, 0 0 22px rgba(150,80,40,0.18); }
+body[data-skin="guigu"] .title-panel .t-start:not(:active) { animation-name: tStartGlowInk; }
+@keyframes tStartGlowInk {
+  0%, 100% { box-shadow: 0 4px 0 #4a4438, 0 0 14px rgba(150,80,40,0.12); }
+  50% { box-shadow: 0 4px 0 #4a4438, 0 0 26px rgba(150,80,40,0.30); }
+}
+body[data-skin="guigu"] .t-foot { border-top-color: rgba(74,68,56,0.18); color: rgba(90,84,70,0.68); }
+
+/* ---- 矮屏档（16:9 老机型 / 小窗口）：首页内容顶出去时整体收紧一档 ----
+   只压间距与小装饰，不删信息、不缩正文字号 —— 该读的字一个不少，
+   只是别让「转世重修」掉到屏幕外面去。 */
+body.short .title-panel { padding: 16px 18px 12px; }
+body.short .t-seal { width: 34px; height: 34px; margin-bottom: 8px; }
+body.short .t-seal b { font-size: 18px; }
+body.short .title-panel h1 { font-size: 28px; letter-spacing: 5px; margin-bottom: 4px; }
+body.short .title-panel .sub { margin-bottom: 8px; }
+body.short .t-rule { margin: 8px 0 10px; }
+body.short .title-panel .desc { font-size: 14px; line-height: 1.62; margin-bottom: 10px; }
+body.short .title-panel .cite { margin: 0 0 10px; line-height: 1.6; }
+body.short #best { margin-top: 10px; }
+body.short .ts-row { line-height: 1.62; }
+body.short .title-panel .hint { margin-top: 8px; font-size: 11px; line-height: 1.62; }
+body.short .title-panel .btnrow { margin-top: 2px; }
+body.short .title-panel .btn.small { min-height: 38px; padding: 9px 12px; }
+body.short .t-foot { margin-top: 8px; }
+
+/* ============ 横屏提示 ============ */
+/* 触摸设备横屏时竖版画面只剩一条，与其硬塞不如请人转回来。
+   桌面浏览器窗口拉宽不受影响（判定在 JS 里看 pointer:coarse）。 */
+#rotateHint { display: none; }
+body.rot #rotateHint {
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  background: radial-gradient(circle at 50% 42%, var(--bg-panel-a) 0%, var(--bg-base) 78%);
+  color: var(--text-2); text-align: center; padding: 24px;
+}
+body.rot #wrap { visibility: hidden; }
+body.rot #ver { visibility: hidden; }
+#rotateHint p { font-size: var(--fs-h2); color: var(--accent); letter-spacing: 3px; }
+#rotateHint span { font-size: var(--fs-cap); color: var(--text-3); letter-spacing: 1px; }
+/* 手机轮廓从横到竖地转，动作本身就是说明 */
+.rh-phone {
+  width: 40px; height: 66px; border: 2px solid var(--line-gold); border-radius: 8px;
+  position: relative; animation: rhTilt 2.6s ease-in-out infinite;
+  box-shadow: 0 0 20px rgba(201,162,74,0.20);
+}
+.rh-phone::after {
+  content: ''; position: absolute; left: 50%; bottom: 5px; width: 11px; height: 2px;
+  margin-left: -5.5px; background: var(--line-gold); border-radius: 1px;
+}
+@keyframes rhTilt {
+  0%, 38% { transform: rotate(90deg); }
+  58%, 100% { transform: rotate(0deg); }
+}
+
 .sub { color: var(--accent-soft); font-size: var(--fs-body); margin-bottom: var(--sp-3); letter-spacing: 1px; }
 .desc { color: var(--text-2); font-size: var(--fs-body); line-height: 1.7; margin-bottom: 16px; }
 /* 百药园园门题字：两行，落款压一行，别抢标题 */

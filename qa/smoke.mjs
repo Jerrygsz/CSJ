@@ -231,10 +231,14 @@ ok(!!F, '__FR 调试接口可用');
 eq(typeof F.view, 'function', '__FR.view 存在');
 
 console.log('\n== 适配 / 舞台 ==');
+// 舞台自本轮起按「逻辑坐标」布局（宽恒 480，高由机型比例给出），整套 UI 再整体 scale。
+// 所以布局尺寸不再是屏幕尺寸；视觉尺寸 = 逻辑尺寸 × scale，断言统一按视觉口径。
+const vis = (f) => Math.round(f * F.view().scale);
 frames(2);
 let v = F.view();
-eq(elStage.clientWidth, 390, '竖屏 390×844：舞台宽铺满 390');
-eq(elStage.clientHeight, 844, '竖屏 390×844：舞台高铺满 844（纵向视口伸展，无黑边）');
+eq(elStage.clientWidth, 480, '舞台按逻辑坐标布局：宽恒 480');
+eq(vis(elStage.clientWidth), 390, '竖屏 390×844：视觉宽铺满 390');
+eq(vis(elStage.clientHeight), 844, '竖屏 390×844：视觉高铺满 844（纵向视口伸展，无黑边）');
 ok(v.scale > 0.81 && v.scale < 0.82, '缩放比约 0.81', v.scale);
 
 resizeTo(390, 844, { top: 47, right: 0, bottom: 34, left: 0 });
@@ -242,21 +246,21 @@ frames(1);
 v = F.view();
 eq(elFit.clientWidth, 390, '安全区生效后可用宽 390');
 eq(elFit.clientHeight, 763, '安全区生效后可用高 763');
-eq(elStage.clientHeight, 763, '刘海屏下舞台高 763（扣掉安全区后铺满）');
+eq(vis(elStage.clientHeight), 763, '刘海屏下视觉高 763（扣掉安全区后铺满）');
 ok(v.safe.top === 47 && v.safe.bottom === 34, '安全区数值可读', v.safe);
 
 resizeTo(500, 600);
 frames(1);
 v = F.view();
-eq(elStage.clientHeight, 600, '矮屏 500×600：舞台高等于可用高');
-eq(elStage.clientWidth, 333, '矮屏 500×600：舞台宽 333（高度受限）');
+eq(vis(elStage.clientHeight), 600, '矮屏 500×600：视觉高等于可用高');
+eq(vis(elStage.clientWidth), 375, '矮屏 500×600：视觉宽 375（高度受限，逻辑视口压到 768）');
 
 resizeTo(1280, 720);
 frames(1);
 v = F.view();
-eq(elStage.clientHeight, 720, '桌面 1280×720：高铺满 720');
-eq(elStage.clientWidth, 400, '桌面 1280×720：宽 400，两侧留黑边');
-ok(elStage.clientWidth <= 1280 && elStage.clientHeight <= 720, '舞台不超出视口');
+eq(vis(elStage.clientHeight), 720, '桌面 1280×720：视觉高铺满 720');
+eq(vis(elStage.clientWidth), 450, '桌面 1280×720：视觉宽 450，两侧留黑边');
+ok(vis(elStage.clientWidth) <= 1280 && vis(elStage.clientHeight) <= 720, '视觉尺寸不超出视口');
 
 resizeTo(390, 844, { top: 47, right: 0, bottom: 34, left: 0 });
 frames(1);

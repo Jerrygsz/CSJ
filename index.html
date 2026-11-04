@@ -9,7 +9,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <title>凡人·长生劫 — 炼气期 · 筑基 · 结丹 · 元婴 · 化神</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%23131821%22/%3E%3Ctext x=%2216%22 y=%2223%22 font-size=%2220%22 text-anchor=%22middle%22 fill=%22%23ffd24a%22%3E凡%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="css/style.css?v=20261104H">
+  <link rel="stylesheet" href="css/style.css?v=20261104I">
 </head>
 <body>
   <div id="wrap">
@@ -78,13 +78,17 @@
         </div>
 
         <!-- 标题 -->
-        <div id="title" class="overlay">
-          <div class="panel">
-            <h1>凡人·长生劫</h1>
-            <p class="sub">炼气期 · 筑基 · 结丹 · 元婴 · 化神</p>
+        <div id="title" class="overlay title-overlay">
+          <div class="panel title-panel">
+            <div class="t-head">
+              <div class="t-seal" aria-hidden="true"><b>凡</b></div>
+              <h1>凡人·长生劫</h1>
+              <p class="sub">炼气期 · 筑基 · 结丹 · 元婴 · 化神</p>
+            </div>
+            <div class="t-rule" aria-hidden="true"><i></i><b>长 生</b><i></i></div>
             <p class="desc">七玄门药童韩立，自青牛山起步。闯血色禁地、渡乱星海、归天南结婴、赴大晋化神——斩妖、夺宝、辟洞府，长生之路由此铺开。</p>
             <p class="cite">凡草怕年月，掌天瓶里一夜春。<i>马老种药，韩立种时间。</i></p>
-            <button id="startBtn" class="btn">踏入修行图</button>
+            <button id="startBtn" class="btn t-start">踏入修行图</button>
             <div id="best"></div>
             <div id="titleBag"></div>
             <p class="hint">拖动屏幕 / WASD 移动　·　战斗分 凡境·险境·死境，越险所得越厚<br>触碰图中旧人旧事可开支线　·　双击画面顶部 进 / 出全屏</p>
@@ -94,6 +98,7 @@
               <button id="coopBtn" class="btn small">👥 双人联机</button>
               <button id="rebirthBtn" class="btn small danger">转世重修</button>
             </div>
+            <div class="t-foot" aria-hidden="true"><span>凡人流 · 卷一</span><span>掌天瓶</span></div>
           </div>
         </div>
 
@@ -340,39 +345,47 @@
     </div>
   </div>
 
-  <div id="ver">v20261104H</div>
+  <div id="ver">v20261104I</div>
 
-  <script src="js/utils.js?v=20261104H"></script>
-  <script src="js/audio.js?v=20261104H"></script>
-  <script src="js/sprites.js?v=20261104H"></script>
-  <script src="js/skills.js?v=20261104H"></script>
-  <script src="js/enemies.js?v=20261104H"></script>
-  <script src="js/story.js?v=20261104H"></script>
-  <script src="js/items.js?v=20261104H"></script>
-  <script src="js/maps.js?v=20261104H"></script>
-  <script src="js/recipes.js?v=20261104H"></script>
-  <script src="js/encounters.js?v=20261104H"></script>
-  <script src="js/late.js?v=20261104H"></script>
-  <script src="js/late2.js?v=20261104H"></script>
-  <script src="js/late3.js?v=20261104H"></script>
-  <script src="js/lingjie.js?v=20261104H"></script>
-  <script src="js/xianjie.js?v=20261104H"></script>
-  <script src="js/balance.js?v=20261104H"></script>
+  <!-- 横屏提示：触摸设备（手机/平板）横过来时，竖版画面会被压成极窄一条。
+       与其硬塞进去，不如直接请人转回来 —— 只在 body.rot 时出现，桌面不受影响。 -->
+  <div id="rotateHint">
+    <div class="rh-phone" aria-hidden="true"></div>
+    <p>请将手机竖过来</p>
+    <span>《凡人·长生劫》是一款竖屏游戏</span>
+  </div>
+
+  <script src="js/utils.js?v=20261104I"></script>
+  <script src="js/audio.js?v=20261104I"></script>
+  <script src="js/sprites.js?v=20261104I"></script>
+  <script src="js/skills.js?v=20261104I"></script>
+  <script src="js/enemies.js?v=20261104I"></script>
+  <script src="js/story.js?v=20261104I"></script>
+  <script src="js/items.js?v=20261104I"></script>
+  <script src="js/maps.js?v=20261104I"></script>
+  <script src="js/recipes.js?v=20261104I"></script>
+  <script src="js/encounters.js?v=20261104I"></script>
+  <script src="js/late.js?v=20261104I"></script>
+  <script src="js/late2.js?v=20261104I"></script>
+  <script src="js/late3.js?v=20261104I"></script>
+  <script src="js/lingjie.js?v=20261104I"></script>
+  <script src="js/xianjie.js?v=20261104I"></script>
+  <script src="js/balance.js?v=20261104I"></script>
   <!-- Boss 招式表：按原著战斗描写写死的招式（名 / 前摇 / 伤害系数），game.js 只负责执行 -->
-  <script src="js/bosskit.js?v=20261104H"></script>
-  <script src="js/sources.js?v=20261104H"></script>
-  <script src="js/value.js?v=20261104H"></script>
-  <script src="js/game.js?v=20261104H"></script>
-  <script src="js/debugapi.js?v=20261104H"></script>
-  <script src="js/net.js?v=20261104H"></script>
-  <script src="js/coop.js?v=20261104H"></script>
-  <script src="js/chat.js?v=20261104H"></script>
+  <script src="js/bosskit.js?v=20261104I"></script>
+  <script src="js/sources.js?v=20261104I"></script>
+  <script src="js/value.js?v=20261104I"></script>
+  <script src="js/game.js?v=20261104I"></script>
+  <script src="js/debugapi.js?v=20261104I"></script>
+  <script src="js/net.js?v=20261104I"></script>
+  <script src="js/coop.js?v=20261104I"></script>
+  <script src="js/chat.js?v=20261104I"></script>
 
   <script>
     // 注册 Service Worker：每次发版自动拉最新 index.html，绕开中间代理缓存
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function () {
-        navigator.serviceWorker.register('sw.js?v=20261104H').catch(function () {
+        navigator.serviceWorker.register('sw.js?v=20261104I').catch(function () {
           /* 注册失败不影响游戏本体 */
         });
       });
