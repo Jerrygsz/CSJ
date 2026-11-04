@@ -553,6 +553,7 @@
     mapId: null, map: null, diff: null,
     enemies: [], bullets: [], ebullets: [], fxBullets: [], gems: [], herbs: [], parts: [], texts: [], loot: [],
     tells: [],                // Boss 出招预警圈（画在地上，随前摇淡出）
+    zones: [],                // 地面持续区：困阵 / 冰面 / 漩涡（招式落下后留在地上的那片「地方」）
     spawnT: 0, nextEliteT: 100, eliteIdx: 0,
     boss: null, bossActive: false, bossSpawned: false, bossWarned: false,
     frostR: 0, shake: 0, flash: 0, god: false, ts: 1,
@@ -1703,6 +1704,16 @@
       b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt;
       if (U.dist(p.x, p.y, b.x, b.y) < b.r + p.r) { hitPlayer(b.dmg); G.ebullets.splice(i, 1); continue; }
       if (pt && U.dist(pt.x, pt.y, b.x, b.y) < b.r + (pt.r || 9)) { if (window.Coop) window.Coop.addPartnerHurt(b.dmg); G.ebullets.splice(i, 1); continue; }
+      // 天降物砸到地面：炸开再消失。没有这一下，它会径直穿过地面继续往下飞，
+      // 玩家看到的是"东西掉进了地底"，而不是"砸在地上"。
+      if (b.landY !== undefined && b.y >= b.landY) {
+        G.parts.push({ ring: true, x: b.x, y: b.landY, r: 3, maxr: b.r * 2.4, life: 0.26, maxlife: 0.26, color: '#ffb060' });
+        for (let k = 0; k < 3; k++) {
+          const a = Math.random() * 6.28;
+          G.parts.push({ x: b.x, y: b.landY, vx: Math.cos(a) * 70, vy: Math.sin(a) * 40 - 30, life: 0.22, maxlife: 0.22, size: 3, color: '#ffb060' });
+        }
+        G.ebullets.splice(i, 1); continue;
+      }
       if (b.life <= 0 || offscreen(b, 60)) G.ebullets.splice(i, 1);
     }
     if (G.ebullets.length > 420) G.ebullets.splice(0, G.ebullets.length - 420);
@@ -1710,6 +1721,25 @@
     for (let i = G.tells.length - 1; i >= 0; i--) {
       G.tells[i].t -= dt;
       if (G.tells[i].t <= 0) G.tells.splice(i, 1);
+    }
+    // 地面持续区：只承载「看得见的范围 + 减速」，伤害仍在落招那一瞬一次性结算，
+    // 所以加视觉不会改变任何一张图的难度（这一点是刻意守住的）。
+    for (let i = G.zones.length - 1; i >= 0; i--) {
+      const z = G.zones[i];
+      z.t -= dt; z.age = (z.age || 0) + dt;
+      if (z.t <= 0) { G.zones.splice(i, 1); continue; }
+      if (!G.player) continue;
+      if (U.dist(G.player.x, G.player.y, z.x, z.y) < z.r + G.player.r * 0.5) {
+        if (z.slow) {
+          G.player.slowT = Math.max(G.player.slowT || 0, 0.18);
+          G.player.slowK = Math.min(G.player.slowK || 1, z.slow);
+        }
+        if (z.pull) {
+          // 漩涡：每帧往中心拽一点，力度很小，只是让「被缠住」有手感
+          const dx = z.x - G.player.x, dy = z.y - G.player.y, dd = Math.hypot(dx, dy) || 1;
+          G.player.x += dx / dd * z.pull * dt; G.player.y += dy / dd * z.pull * dt;
+        }
+      }
     }
   }
 
@@ -2758,13 +2788,18 @@
     return T[kind] || 1;
   }
   function bShot(b, k) { return Math.max(1, Math.round((b && b.dmg || 0) * k * threatK('boss'))); }
-  function ringBurst(x, y, n, spd, dmg) {
-    for (let k = 0; k < n; k++) { const a = k / n * 6.28; G.ebullets.push({ x, y, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd, r: 7, dmg: dmg || 12, life: 4 }); }
+  // k = 弹体形体（见 drawEBullet）。招式不同、形体必须不同：
+  // 之前所有招式共用一张 5×5 紫红圆点，185 条 Boss 招式里 109 条在画面上长得一模一样。
+  function ringBurst(x, y, n, spd, dmg, kind) {
+    for (let k = 0; k < n; k++) {
+      const a = k / n * 6.28;
+      G.ebullets.push({ x, y, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd, r: 7, dmg: dmg || 12, life: 4, k: kind || 'orb', a: a });
+    }
   }
-  function aimFan(x, y, base, n, spread, spd, dmg) {
+  function aimFan(x, y, base, n, spread, spd, dmg, kind) {
     for (let k = 0; k < n; k++) {
       const a = base + (k - (n - 1) / 2) * spread;
-      G.ebullets.push({ x, y, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd, r: 7, dmg, life: 5 });
+      G.ebullets.push({ x, y, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd, r: 7, dmg, life: 5, k: kind || 'shard', a: a });
     }
   }
   function summonAt(b, type, cnt, cap) {
@@ -2782,7 +2817,206 @@
   function tellAt(x, y, r, dur, color) {
     G.tells.push({ x, y, r: r || 120, t: dur || 0.5, dur: dur || 0.5, color: color || '#ff7a52' });
   }
+  // 地面持续区：招式「落在地上」的那一片。三型各有专属画法（见 drawZone），
+  // 只做视觉 + 减速，不追加伤害 —— 加视觉不该顺手改难度。
+  function addZone(x, y, r, dur, kind, opt) {
+    const z = Object.assign({ x, y, r, t: dur, dur: dur, kind: kind, age: 0 }, opt || {});
+    G.zones.push(z);
+    if (G.zones.length > 12) G.zones.shift();   // 同屏最多 12 片，多了就是糊
+    return z;
+  }
   function bossDmgOf(b, sk) { return Math.max(1, Math.round((b.dmg || 1) * (sk.k || 0.5) * threatK(b.threatKind || 'boss'))); }
+
+  // ---------- 敌方弹体与地面区的「形」 ----------
+  // 评审结论：185 条 Boss 招式里 109 条共用同一张 5×5 紫红圆点，只改缩放。
+  // 于是扇形齐射、环射、贯刺、天降、毒雾在画面上是一个东西 —— 玩家读不出"这一招是什么"。
+  // 纪律：**形由招式语义决定（这是剑还是毒），色才由来源决定（谁放的）**。
+  // 所有笔触沿用现有粒子语言：多层 alpha 叠加、lineCap round、1px 起线，不引新图。
+  const BULLET_COLOR = {
+    orb: '#ff6a4a',    // 环射 · 饱满珠
+    shard: '#ffd08a',  // 扇形齐射 · 碎刃
+    blade: '#cfe8ff',  // 贯刺 · 剑光
+    drop: '#ffb060',   // 天降 · 坠物
+    mist: '#d9f58a',   // 毒雾 · 必须比草地亮一档，绿色雾压在绿草上是隐形的
+    heavy: '#ff8a3a'   // 爆发 · 重珠
+  };
+  function drawEBullet(bb) {
+    const k = bb.k || 'orb';
+    const r = bb.r || 7;
+    const col = BULLET_COLOR[k] || BULLET_COLOR.orb;
+
+    if (k === 'blade') {
+      // 贯刺：沿速度方向拉成细长光带，前端尖、尾部收细，三节首尾相衔就是一道剑气
+      const len = r * 7.5, wid = r * 0.6;
+      const ang = Math.atan2(bb.vy, bb.vx);
+      ctx.save(); ctx.translate(bb.x, bb.y); ctx.rotate(ang);
+      ctx.globalAlpha = 0.30; ctx.fillStyle = col;
+      ctx.beginPath(); ctx.ellipse(0, 0, len * 0.58, wid * 1.9, 0, 0, 6.28); ctx.fill();
+      ctx.globalAlpha = 0.95;
+      ctx.beginPath();
+      ctx.moveTo(len * 0.52, 0); ctx.lineTo(-len * 0.34, wid);
+      ctx.lineTo(-len * 0.52, 0); ctx.lineTo(-len * 0.34, -wid);
+      ctx.closePath(); ctx.fill();
+      ctx.globalAlpha = 1; ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.ellipse(len * 0.32, 0, len * 0.10, wid * 0.40, 0, 0, 6.28); ctx.fill();
+      ctx.restore(); ctx.globalAlpha = 1;
+      return;
+    }
+
+    if (k === 'shard') {
+      // 碎刃：菱形锐片 + 身后一道短尾 —— 和珠子的区别是「有方向」
+      const len = r * 2.5, wid = r * 0.95;
+      const ang = Math.atan2(bb.vy, bb.vx);
+      ctx.save(); ctx.translate(bb.x, bb.y); ctx.rotate(ang);
+      ctx.globalAlpha = 0.26; ctx.strokeStyle = col; ctx.lineWidth = wid * 1.0; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(-len * 0.4, 0); ctx.lineTo(-len * 2.0, 0); ctx.stroke();
+      ctx.globalAlpha = 0.95; ctx.fillStyle = col;
+      ctx.beginPath();
+      ctx.moveTo(len * 0.78, 0); ctx.lineTo(0, wid);
+      ctx.lineTo(-len * 0.42, 0); ctx.lineTo(0, -wid);
+      ctx.closePath(); ctx.fill();
+      ctx.globalAlpha = 1; ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.ellipse(len * 0.18, 0, len * 0.20, wid * 0.32, 0, 0, 6.28); ctx.fill();
+      ctx.restore(); ctx.globalAlpha = 1;
+      return;
+    }
+
+    if (k === 'drop') {
+      // 天降：尖端朝下、拖尾在上 —— 尖朝上就成了「往上飞的箭」，方向感全反
+      const len = r * 2.2;
+      ctx.save(); ctx.translate(bb.x, bb.y);
+      ctx.globalAlpha = 0.24; ctx.strokeStyle = col; ctx.lineWidth = r * 0.7; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(0, -len * 0.4); ctx.lineTo(0, -len * 2.8); ctx.stroke();
+      ctx.globalAlpha = 0.95; ctx.fillStyle = col;
+      ctx.beginPath();
+      ctx.moveTo(0, len);                                        // 尖端在下
+      ctx.quadraticCurveTo(r * 0.92, -len * 0.10, 0, -len * 0.55); // 右侧收上顶
+      ctx.quadraticCurveTo(-r * 0.92, -len * 0.10, 0, len);        // 左侧回尖
+      ctx.fill();
+      ctx.globalAlpha = 1; ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.ellipse(0, -len * 0.10, r * 0.22, r * 0.34, 0, 0, 6.28); ctx.fill();
+      ctx.restore(); ctx.globalAlpha = 1;
+      return;
+    }
+
+    if (k === 'mist') {
+      // 毒雾：判定半径 16~18 是「碰到就中毒」的范围，不能直接拿来画 ——
+      // 10 团实心叠上去就是一堵绿墙，Boss 和玩家全被埋。视觉压到 0.72，
+      // 且整体做稀，让下面的东西透得出来：雾要「薄」，才读得出范围。
+      const s = bb.seed || 0;
+      // 视觉半径刻意大于判定半径（0.78→1.12）：10 团分布在半径 30 的环上、间距只有 19px，
+      // 半径 19 的团才叠得成「一片云」；小一档就是一串珠子，雾就没了。
+      const vr = r * 1.12;
+      // 四层、由外到内递浓：外圈 0.05 几乎透明，边界才软得下来。
+      // 三层等浓时会看得出一个个圆瓣（"花椰菜"），那是 alpha 断层的痕迹。
+      for (let i = 0; i < 4; i++) {
+        const a = s + i * 1.65;
+        const ox = Math.cos(a) * vr * 0.34, oy = Math.sin(a) * vr * 0.34;
+        ctx.globalAlpha = 0.050 + i * 0.024;
+        ctx.fillStyle = col;
+        ctx.beginPath(); ctx.arc(bb.x + ox, bb.y + oy, vr * (1.00 - i * 0.16), 0, 6.28); ctx.fill();
+      }
+      // 极淡的边缘线：交代「雾到哪儿为止」，不指望它形成硬边
+      ctx.globalAlpha = 0.13; ctx.strokeStyle = col; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.arc(bb.x, bb.y, vr * 0.99, 0, 6.28); ctx.stroke();
+      ctx.globalAlpha = 1;
+      return;
+    }
+
+    if (k === 'heavy') {
+      // 重珠：珠体外多一圈呼吸环，撞上来之前就有「这一下很沉」的预感
+      const pul = 1 + Math.sin((G.time || 0) * 13) * 0.07;
+      ctx.globalAlpha = 0.16; ctx.fillStyle = col;
+      ctx.beginPath(); ctx.arc(bb.x, bb.y, r * 1.85 * pul, 0, 6.28); ctx.fill();
+      ctx.globalAlpha = 0.72; ctx.strokeStyle = col; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(bb.x, bb.y, r * 1.28 * pul, 0, 6.28); ctx.stroke();
+      ctx.globalAlpha = 1; ctx.fillStyle = col;
+      ctx.beginPath(); ctx.arc(bb.x, bb.y, r * 0.88, 0, 6.28); ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(bb.x, bb.y, r * 0.36, 0, 6.28); ctx.fill();
+      return;
+    }
+
+    // orb：三层同心 —— 外光晕 / 珠体 / 白芯
+    ctx.globalAlpha = 0.16; ctx.fillStyle = col;
+    ctx.beginPath(); ctx.arc(bb.x, bb.y, r * 1.70, 0, 6.28); ctx.fill();
+    ctx.globalAlpha = 0.92;
+    ctx.beginPath(); ctx.arc(bb.x, bb.y, r * 0.85, 0, 6.28); ctx.fill();
+    ctx.globalAlpha = 1; ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(bb.x, bb.y, r * 0.34, 0, 6.28); ctx.fill();
+  }
+
+  // 地面持续区：贴在纸面上的一层，按 0.42 压扁才是「画在地上」（与 rune 同一口径）
+  function drawZone(z) {
+    const fade = Math.min(1, (z.age || 0) / 0.14) * Math.min(1, z.t / 0.45);
+    if (fade <= 0.01) return;
+    const R = z.r * (z.kind === 'bind' ? 0.35 + 0.65 * Math.min(1, (z.age || 0) / 0.4) : 1);
+    ctx.save();
+    ctx.translate(z.x, z.y); ctx.scale(1, 0.42);
+
+    if (z.kind === 'ice') {
+      // 冰面：压扁的冷色面 + 六角冰晶
+      ctx.globalAlpha = fade * 0.16; ctx.fillStyle = '#8fd8ff';
+      ctx.beginPath(); ctx.arc(0, 0, R, 0, 6.28); ctx.fill();
+      ctx.globalAlpha = fade * 0.85; ctx.strokeStyle = '#8fd8ff'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(0, 0, R, 0, 6.28); ctx.stroke();
+      ctx.globalAlpha = fade * 0.55; ctx.lineWidth = 1.4;
+      for (let i = 0; i < 6; i++) {
+        const a = i * 1.0472;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(a) * R * 0.24, Math.sin(a) * R * 0.24);
+        ctx.lineTo(Math.cos(a) * R * 0.92, Math.sin(a) * R * 0.92);
+        ctx.stroke();
+        // 每根主枝上挑两根支晶，像结出来的冰刺
+        const mx = Math.cos(a) * R * 0.58, my = Math.sin(a) * R * 0.58;
+        for (const s of [-0.7, 0.7]) {
+          ctx.beginPath(); ctx.moveTo(mx, my);
+          ctx.lineTo(mx + Math.cos(a + s) * R * 0.20, my + Math.sin(a + s) * R * 0.20);
+          ctx.stroke();
+        }
+      }
+    } else if (z.kind === 'vortex') {
+      // 漩涡：三道螺旋，随时间转 —— 有旋转才像「在吸」
+      const rot = (z.age || 0) * 4.2;
+      ctx.globalAlpha = fade * 0.14; ctx.fillStyle = '#c98aff';
+      ctx.beginPath(); ctx.arc(0, 0, R, 0, 6.28); ctx.fill();
+      ctx.globalAlpha = fade * 0.8; ctx.strokeStyle = '#c98aff'; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
+      for (let s2 = 0; s2 < 3; s2++) {
+        ctx.beginPath();
+        const a0 = rot + s2 * 2.094;
+        for (let i = 0; i <= 16; i++) {
+          const a = a0 + i * 0.22;
+          const rr = R * (0.18 + i / 16 * 0.78);
+          const x = Math.cos(a) * rr, y = Math.sin(a) * rr;
+          i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+        }
+        ctx.stroke();
+      }
+      ctx.globalAlpha = fade * 0.9; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.arc(0, 0, R * 0.16, 0, 6.28); ctx.stroke();
+    } else {
+      // 困阵：阵纹环 + 四向锁链，链条由外朝内收紧
+      ctx.globalAlpha = fade * 0.15; ctx.fillStyle = '#ff7ab0';
+      ctx.beginPath(); ctx.arc(0, 0, R, 0, 6.28); ctx.fill();
+      ctx.globalAlpha = fade * 0.9; ctx.strokeStyle = '#ff7ab0'; ctx.lineWidth = 2.4;
+      ctx.beginPath(); ctx.arc(0, 0, R, 0, 6.28); ctx.stroke();
+      ctx.globalAlpha = fade * 0.6; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.arc(0, 0, R * 0.74, 0, 6.28); ctx.stroke();
+      ctx.globalAlpha = fade * 0.85; ctx.lineWidth = 2;
+      for (let i = 0; i < 4; i++) {
+        const a = i * 1.5708 + 0.785;
+        const tip = R * (0.62 + 0.30 * Math.min(1, (z.age || 0) / 0.35));
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(a) * R * 1.02, Math.sin(a) * R * 1.02);
+        ctx.lineTo(Math.cos(a) * tip, Math.sin(a) * tip);
+        ctx.stroke();
+        // 链条末端的钩
+        ctx.beginPath(); ctx.arc(Math.cos(a) * tip, Math.sin(a) * tip, R * 0.07, 0, 6.28); ctx.stroke();
+      }
+    }
+    ctx.restore(); ctx.globalAlpha = 1;
+  }
+
   function castBossSkill(b, sk) {
     const p = G.player; if (!p || !b) return;
     const ang = Math.atan2(p.y - b.y, p.x - b.x);
@@ -2791,16 +3025,19 @@
     if (window.FX3) FX3.spawn('rune', b.x, b.y + b.r * 0.55, { pal: 'mo', scale: 1 });
     switch (sk.fx) {
       case 'fan':
-        aimFan(b.x, b.y, ang, sk.num || 5, sk.spread || 0.2, sk.spd || 220, dmg);
+        // 扇形齐射 = 碎刃：小而快的菱形，沿速度方向拉出短尾，和环射一眼分得开
+        aimFan(b.x, b.y, ang, sk.num || 5, sk.spread || 0.2, sk.spd || 220, dmg, 'shard');
         Sfx.shoot(); break;
       case 'ring':
-        ringBurst(b.x, b.y, sk.num || 14, sk.spd || 175, dmg);
+        // 环射 = 完整珠：四面八方都有一颗，形状要「饱满」才对得上「一圈打出来」
+        ringBurst(b.x, b.y, sk.num || 14, sk.spd || 175, dmg, 'orb');
         G.shake = Math.max(G.shake, 5); Sfx.burst(); break;
       case 'beam': {
         const sd = sk.spd || 760, r = sk.r || 11;
-        // 贯刺不做成一发子弹：沿射线铺三节，射速够快时看上去就是一道剑光
+        // 贯刺不做成一发子弹：沿射线铺三节，射速够快时看上去就是一道剑光。
+        // k:'blade' 让每一节都画成沿速度方向拉长的光带，三节首尾相衔成一道贯刺。
         for (let k = 0; k < 3; k++) {
-          G.ebullets.push({ x: b.x + Math.cos(ang) * k * 26, y: b.y + Math.sin(ang) * k * 26, vx: Math.cos(ang) * sd, vy: Math.sin(ang) * sd, r: r - k * 2, dmg: dmg, life: 1.5 });
+          G.ebullets.push({ x: b.x + Math.cos(ang) * k * 26, y: b.y + Math.sin(ang) * k * 26, vx: Math.cos(ang) * sd, vy: Math.sin(ang) * sd, r: r - k * 2, dmg: dmg, life: 1.5, k: 'blade', a: ang });
         }
         G.shake = Math.max(G.shake, 5); Sfx.shoot(); break;
       }
@@ -2809,7 +3046,7 @@
         for (let k = 0; k < n; k++) {
           const a = Math.random() * 6.28, rr = Math.sqrt(Math.random()) * rad;
           const tx = p.x + Math.cos(a) * rr, ty = p.y + Math.sin(a) * rr;
-          G.ebullets.push({ x: tx, y: ty - 300, vx: 0, vy: 430 + Math.random() * 130, r: sk.r || 10, dmg: dmg, life: 2.2 });
+          G.ebullets.push({ x: tx, y: ty - 300, vx: 0, vy: 430 + Math.random() * 130, r: sk.r || 10, dmg: dmg, life: 2.2, k: 'drop', a: 1.5708, landY: ty });
           tellAt(tx, ty, (sk.r || 10) + 18, 0.55, '#ffb060');
         }
         Sfx.burst(); break;
@@ -2821,16 +3058,27 @@
           G.ebullets.push({
             x: b.x + Math.cos(a) * 30, y: b.y + Math.sin(a) * 30,
             vx: Math.cos(a) * (sk.spd || 46), vy: Math.sin(a) * (sk.spd || 46),
-            r: sk.r || 17, dmg: dmg, life: sk.dur || 2.6
+            r: sk.r || 17, dmg: dmg, life: sk.dur || 2.6, k: 'mist', a: a, seed: Math.random() * 6.28
           });
         }
         Sfx.shoot(); break;
       }
       case 'dash':
-        b.dashing = 0.44; b.dashAng = ang; b.dashDist = sk.dist || 4.6; Sfx.warn(); break;
+        // 起势先炸一圈尘：冲撞是「Boss 动了」最强的信号，之前只有一点点零星粒子，压根看不出要冲
+        G.parts.push({ ring: true, x: b.x, y: b.y + b.r * 0.45, r: 5, maxr: b.r * 2.2, life: 0.30, maxlife: 0.30, color: '#d8b078' });
+        G.parts.push({ ring: true, x: b.x, y: b.y + b.r * 0.45, r: b.r * 1.6, maxr: b.r * 0.8, life: 0.24, maxlife: 0.24, color: '#ffb060' });
+        b.dashing = 0.44; b.dashAng = ang; b.dashDist = sk.dist || 4.6; b._dashGap = 0; Sfx.warn(); break;
       case 'blink': {
         const a = Math.random() * 6.28, dd = sk.dist || 190;
+        const ox = b.x, oy = b.y;
         b.x = p.x + Math.cos(a) * dd; b.y = p.y + Math.sin(a) * dd;
+        // 原地炸开 + 落点收拢：让「消失—出现」被看见。只抖屏的话，Boss 只是忽然换了位置。
+        // 这里不用 pixelfx 的 poof：它是像素风放射爆炸，放大到 Boss 尺寸就是一颗发光球，
+        // 和 Boss 自己的笔触不是一套。改用同心环，同源、也看得懂。
+        G.parts.push({ ring: true, x: ox, y: oy, r: b.r * 1.9, maxr: 5, life: 0.36, maxlife: 0.36, color: '#b98aff' });
+        G.parts.push({ ring: true, x: ox, y: oy, r: b.r * 1.2, maxr: 3, life: 0.30, maxlife: 0.30, color: '#f2dcff' });
+        G.parts.push({ ring: true, x: b.x, y: b.y, r: 4, maxr: b.r * 2.1, life: 0.36, maxlife: 0.36, color: '#b98aff' });
+        G.parts.push({ ring: true, x: b.x, y: b.y, r: 3, maxr: b.r * 1.1, life: 0.30, maxlife: 0.30, color: '#f2dcff' });
         G.shake = Math.max(G.shake, 6); Sfx.burst(); break;
       }
       case 'summon': {
@@ -2844,21 +3092,28 @@
         break;
       }
       case 'trap':
+        // 困阵：地上升起一圈阵纹，人站里面挪不动 —— 之前只扣血弹一行字，玩家完全看不出被打
         if (sk.dur) p.rootT = Math.max(p.rootT || 0, sk.dur);
         hitPlayer(dmg);
+        addZone(p.x, p.y, sk.rad || 58, Math.max(1.2, (sk.dur || 1.2) + 0.5), 'bind', { slow: 0.34 });
         spawnText(p.x, p.y - 34, sk.n, '#ff7ab0', 13); Sfx.warn(); break;
       case 'chill':
         if (sk.dur) { p.slowT = Math.max(p.slowT || 0, sk.dur); p.slowK = sk.slow || 0.45; }
         hitPlayer(dmg);
+        addZone(p.x, p.y, sk.rad || 88, 2.4, 'ice', { slow: sk.slow || 0.45 });
         spawnText(p.x, p.y - 34, sk.n, '#8fd8ff', 13); Sfx.warn(); break;
       case 'pull': {
         const dd = U.dist(p.x, p.y, b.x, b.y) || 1;
         const mv = Math.min(sk.dist || 80, Math.max(0, dd - 70));
         p.x += (b.x - p.x) / dd * mv; p.y += (b.y - p.y) / dd * mv;
+        // 漩涡：画在「被拽向的地方」，看得见"有东西在吸我"
+        addZone(b.x, b.y, sk.rad || 108, 1.15, 'vortex', { pull: 62 });
         hitPlayer(dmg); G.shake = Math.max(G.shake, 5); Sfx.warn(); break;
       }
       case 'nova':
-        ringBurst(b.x, b.y, sk.num || 18, sk.spd || 190, dmg);
+        // 爆发 = 重珠：珠子更大、带一圈脉动外环，撞上来有「这一下很重」的预感
+        ringBurst(b.x, b.y, sk.num || 18, sk.spd || 190, dmg, 'heavy');
+        G.parts.push({ ring: true, x: b.x, y: b.y, r: 10, maxr: (sk.rad || 150) * 0.9, life: 0.42, maxlife: 0.42, color: '#ff9a4a' });
         if (U.dist(p.x, p.y, b.x, b.y) < (sk.rad || 150)) hitPlayer(Math.round(dmg * 1.4));
         G.shake = Math.max(G.shake, 10); Sfx.burst(); break;
       case 'heal': {
@@ -2882,6 +3137,12 @@
       b.x += Math.cos(b.dashAng) * b.spd * (b.dashDist || 4.6) * dt;
       b.y += Math.sin(b.dashAng) * b.spd * (b.dashDist || 4.6) * dt;
       if (Math.random() < 0.6) G.parts.push({ x: b.x + U.rand(-10, 10), y: b.y + U.rand(-10, 10), vx: 0, vy: 0, life: 0.3, maxlife: 0.3, size: 5, color: '#9a8360' });
+      // 沿途留残影环：单靠零星灰尘，一帧就看不出「它刚扫过去一条线」
+      b._dashGap = (b._dashGap || 0) - dt;
+      if (b._dashGap <= 0) {
+        b._dashGap = 0.055;
+        G.parts.push({ ring: true, x: b.x, y: b.y + b.r * 0.35, r: b.r * 0.95, maxr: b.r * 1.3, life: 0.26, maxlife: 0.26, color: '#a89060' });
+      }
     }
     for (let i = 0; i < list.length; i++) {
       const sk = list[i];
@@ -5696,6 +5957,8 @@
     for (const g of G.gems) { if (g.kind === 'stone') drawStone(g); else drawSpr('gem', g.x, g.y, 1.6, false); }
     for (const h of G.herbs) drawSpr('herb', h.x, h.y, 1.6, false);
     for (const l of G.loot) drawLoot(l);
+    // 地面持续区先铺（贴地），预警圈与弹体压在上面
+    for (const z of G.zones) drawZone(z);
     // Boss 出招预警：地上圈随前摇收拢、颜色由暗转亮 —— 给玩家那半秒反应
     for (const t of G.tells) {
       const k = Math.max(0, Math.min(1, t.t / t.dur));      // 1 → 0
@@ -5708,7 +5971,7 @@
       ctx.beginPath(); ctx.arc(t.x, t.y, Math.max(6, t.r * (0.35 + 0.65 * (1 - k))), 0, 6.28); ctx.fill();
       ctx.restore();
     }
-    for (const b of G.ebullets) drawSpr('ebullet', b.x, b.y, 1.4 * (b.r || 7) / 7, false);
+    for (const b of G.ebullets) drawEBullet(b);
 
     const es = G.enemies.slice().sort((a, b) => a.y - b.y);
     for (const e of es) drawEnemy(e);
@@ -5742,11 +6005,22 @@
           ctx.beginPath(); ctx.arc(b.x, b.y, r, 0, 6.28); ctx.stroke();
         }
       }
-      // 冲撞前摇：脚下的红色指向线
-      if (b.kind === 'beast' && b.dashing > 0) {
-        ctx.strokeStyle = 'rgba(255,90,60,0.5)'; ctx.lineWidth = 5;
-        ctx.beginPath(); ctx.moveTo(b.x, b.y);
-        ctx.lineTo(b.x + Math.cos(b.dashAng) * 200, b.y + Math.sin(b.dashAng) * 200); ctx.stroke();
+      // 冲撞方向预告：由粗到细、由亮到暗的一段轨道。
+      // 原来是一条等宽 5px、200px 的硬直线 —— 看着像 UI 占位符，不像"要冲过来"。
+      // 而且只对 kind==='beast' 画，人形 Boss 冲撞时完全没有提示。
+      if (b.dashing > 0) {
+        const L = 200, ca = Math.cos(b.dashAng), sa = Math.sin(b.dashAng), seg = 9;
+        ctx.save(); ctx.lineCap = 'round'; ctx.strokeStyle = '#ff5a3c';
+        for (let i = 0; i < seg; i++) {
+          const t0 = i / seg, t1 = (i + 1) / seg;
+          ctx.globalAlpha = 0.60 * (1 - t0) * (1 - t0);
+          ctx.lineWidth = 6.5 * (1 - t0 * 0.80);
+          ctx.beginPath();
+          ctx.moveTo(b.x + ca * L * t0, b.y + sa * L * t0);
+          ctx.lineTo(b.x + ca * L * t1, b.y + sa * L * t1);
+          ctx.stroke();
+        }
+        ctx.restore(); ctx.globalAlpha = 1;
       }
     }
 
@@ -5997,7 +6271,7 @@
   function resetRun() {
     if (window.Coop) window.Coop.reset();
     G.player = newPlayer();
-    G.enemies = []; G.bullets = []; G.ebullets = []; G.gems = []; G.herbs = []; G.parts = []; G.texts = []; G.loot = []; G.tells = [];
+    G.enemies = []; G.bullets = []; G.ebullets = []; G.gems = []; G.herbs = []; G.parts = []; G.texts = []; G.loot = []; G.tells = []; G.zones = [];
     G.reclaimedLost = null;   // 上一张图"寻回失落"的结算提示不带到这张图
     G.time = 0; G.kills = 0; G.spawnT = 1; G.nextEliteT = 100; G.eliteIdx = 0; G.artSeen = {};
     G.pickPulseAt = 0;   // 进图头 1.2 秒展示一次神念拾取圈
@@ -10494,7 +10768,7 @@
     god(on) { G.god = !!on; },
     timeScale(v) { G.ts = v; },
     setTime(t) { G.time = t; },
-    clear() { G.enemies.length = 0; G.ebullets.length = 0; G.gems.length = 0; G.herbs.length = 0; },
+    clear() { G.enemies.length = 0; G.ebullets.length = 0; G.gems.length = 0; G.herbs.length = 0; G.tells.length = 0; G.zones.length = 0; },
     spawn(type, n) {
       if (!G.player || !ENEMY_TYPES[type]) return;
       for (let i = 0; i < (n || 1); i++) {
