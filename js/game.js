@@ -1795,7 +1795,9 @@
       type, x, y, hp: ENEMY_BASE_HP * hpMul * rel, maxhp: ENEMY_BASE_HP * hpMul * rel,
       spd: def.spd * (curDiff().spd || 1), dmg: ENEMY_BASE_DMG * dmgMul * relDmg,
       r: def.r, xpVal: def.xp, spr: def.spr, wob: def.wob, charge: def.charge, dash: def.dash,
-      hitFlash: 0, t: 0, dashT: U.rand(1, 3), _orbCd: {}
+      hitFlash: 0, t: 0, dashT: U.rand(1, 3), _orbCd: {},
+      // 功法（js/arts.js）：每种小怪一门手法，贴身命中时按形体显形
+      art: (window.TRASH_ARTS || {})[type] || null, _artCd: 0
     };
     return e;
   }
@@ -1825,7 +1827,7 @@
         spd: 66 * (dm.spd || 1), dmg: baseDmg * k * dDmg, r: 15, xpVal: 30, spr: 'wolf', scale: 2,
         wob: false, charge: true, dash: false, hitFlash: 0, t: 0, howlT: 7, _orbCd: {}, elite: true, name: names[idx] || names[0] || '头狼'
       };
-      G.enemies.push(e); banner('⚠ 精英 · ' + e.name); Sfx.warn();
+      applyEliteKit(e, e.name); G.enemies.push(e); banner('⚠ 精英 · ' + e.name); Sfx.warn();
     } else {
       const hp = baseHp * k * 1.12 * dHp;
       const e = {
@@ -1833,7 +1835,7 @@
         xpVal: 45, spr: 'blacklord', scale: 1.4, wob: false, charge: false, dash: false, hitFlash: 0,
         t: 0, shootT: 1.5, _orbCd: {}, elite: true, name: names[idx] || names[1] || '厉无极', ranged: true
       };
-      G.enemies.push(e); banner('⚠ 精英 · ' + e.name); Sfx.warn();
+      applyEliteKit(e, e.name); G.enemies.push(e); banner('⚠ 精英 · ' + e.name); Sfx.warn();
     }
   }
   // ---------- 灵宠 ----------
@@ -2505,6 +2507,90 @@
     writeSave();
   }
 
+  // ---------- 敌人功法（数据在 js/arts.js） ----------
+  // Boss 招式表：先查 js/bosskit.js 的专属表，再查 arts.js 的补表，
+  // 最后按前缀兜一层 —— 「墨大夫」那张表要对得上「墨大夫·墨居仁」，否则白写。
+  function namedKitOf(name) {
+    if (!name) return null;
+    const a = window.BOSS_KITS || {}, b = window.BOSS_KIT_MORE || {};
+    if (a[name]) return a[name];
+    if (b[name]) return b[name];
+    for (const k in b) { if (name.indexOf(k) === 0 || k.indexOf(name) === 0) return b[k]; }
+    for (const k in a) { if (name.indexOf(k) === 0 || k.indexOf(name) === 0) return a[k]; }
+    return null;
+  }
+  // 精英按名找专属表，找不到按「族」兜底（尸道 / 剑修 / 傀儡 / 鬼道…），
+  // 再找不到才落到护卫族 —— 保证任何一只精英都有招式，不会有哑巴。
+  function eliteKitOf(name) {
+    const named = (window.ELITE_NAMED || {})[name];
+    if (named && named.skills) return { kit: named, named: true };
+    const fams = window.ELITE_KITS || {};
+    const rules = window.ELITE_FAMILY_RULES || [];
+    for (let i = 0; i < rules.length; i++) {
+      if (rules[i][0].test(name) && fams[rules[i][1]]) return { kit: fams[rules[i][1]], named: false };
+    }
+    return { kit: fams.guard || null, named: false };
+  }
+  function applyEliteKit(e, name) {
+    const r = eliteKitOf(name);
+    if (!r.kit || !r.kit.skills || !r.kit.skills.length) return;
+    e.kit = r.kit; e.kitNamed = r.named; e.cds = {};
+    e.threatKind = 'elite';   // 招式伤害吃精英档，不是 Boss 档
+    // 起手错开：不然一现身就把两三招同时亮出来
+    r.kit.skills.forEach((sk, i) => { e.cds[i] = (sk.cd || 8) * (0.7 + i * 0.34); });
+  }
+  // 功法显形：不同形体的笔触不一样，一眼能分出「这是爪子 / 剑 / 毒 / 尸气」。
+  // 不用图片资源，全部用现有粒子件（爪痕用弯月、剑光用射线、毒用散点…）。
+  function artBurst(x, y, art, ang) {
+    if (!art) return;
+    const c = art.c || '#e8e0d0';
+    const a = (ang == null ? Math.random() * 6.28 : ang);
+    const P = G.parts;
+    switch (art.f) {
+      case 'claw':   // 三道平行弯爪
+        for (let k = -1; k <= 1; k++) P.push({ slash: true, x, y, ang: a + k * 0.42, arc: 1.05, rad: 20, color: c, life: 0.22, maxlife: 0.22 });
+        break;
+      case 'blade':  // 一道剑光 + 收势弯月
+        P.push({ ray: true, x, y, ang: a, len: 46, color: c, life: 0.15, maxlife: 0.15 });
+        P.push({ slash: true, x, y, ang: a, arc: 0.9, rad: 25, color: c, life: 0.2, maxlife: 0.2 });
+        break;
+      case 'fang':   // 两颗毒牙 + 溅毒
+        for (let k = -1; k <= 1; k += 2) P.push({ ray: true, x, y, ang: a + k * 0.3, len: 26, color: c, life: 0.14, maxlife: 0.14 });
+        for (let k = 0; k < 4; k++) P.push({ x, y, vx: Math.cos(a + U.rand(-0.5, 0.5)) * U.rand(40, 110), vy: Math.sin(a + U.rand(-0.5, 0.5)) * U.rand(40, 110), life: 0.4, maxlife: 0.4, size: 2, color: c });
+        break;
+      case 'mist':   // 慢慢铺开的雾
+        for (let k = 0; k < 7; k++) { const aa = Math.random() * 6.28; P.push({ x, y, vx: Math.cos(aa) * U.rand(8, 34), vy: Math.sin(aa) * U.rand(8, 34), life: 0.7, maxlife: 0.7, size: 4, color: c }); }
+        break;
+      case 'ghost':  // 一圈阴气环 + 往上飘
+        P.push({ ring: true, x, y, r: 6, maxr: 30, life: 0.3, maxlife: 0.3, color: c });
+        for (let k = 0; k < 5; k++) P.push({ x, y, vx: U.rand(-50, 50), vy: U.rand(-70, -20), life: 0.5, maxlife: 0.5, size: 2, color: c });
+        break;
+      case 'stone':  // 碎石四溅 + 地上一圈
+        for (let k = 0; k < 5; k++) P.push({ x, y, vx: Math.cos(a + U.rand(-0.9, 0.9)) * U.rand(50, 120), vy: Math.sin(a + U.rand(-0.9, 0.9)) * U.rand(50, 120), life: 0.34, maxlife: 0.34, size: 3, color: c });
+        P.push({ ring: true, x, y, r: 5, maxr: 26, life: 0.24, maxlife: 0.24, color: c });
+        break;
+      case 'puppet': // 机关：环 + 两道硬直射线
+        P.push({ ring: true, x, y, r: 4, maxr: 24, life: 0.26, maxlife: 0.26, color: c });
+        for (let k = -1; k <= 1; k += 2) P.push({ ray: true, x, y, ang: a + k * 0.5, len: 30, color: c, life: 0.18, maxlife: 0.18 });
+        break;
+      case 'blood':  // 血点喷溅
+        for (let k = 0; k < 6; k++) P.push({ x, y, vx: Math.cos(a + U.rand(-0.7, 0.7)) * U.rand(60, 150), vy: Math.sin(a + U.rand(-0.7, 0.7)) * U.rand(60, 150), life: 0.3, maxlife: 0.3, size: 3, color: c });
+        break;
+      case 'frost':  // 寒环 + 冰屑
+        P.push({ ring: true, x, y, r: 6, maxr: 28, life: 0.3, maxlife: 0.3, color: c });
+        for (let k = 0; k < 4; k++) P.push({ x, y, vx: U.rand(-40, 40), vy: U.rand(-40, 40), life: 0.45, maxlife: 0.45, size: 2, color: c });
+        break;
+      case 'wind':   // 妖风：两道反向弧
+        for (let k = 0; k < 2; k++) P.push({ slash: true, x, y, ang: a + k * 1.6, arc: 1.5, rad: 26, color: c, life: 0.26, maxlife: 0.26 });
+        break;
+      case 'bone':   // 三根骨刺
+        for (let k = -1; k <= 1; k++) P.push({ ray: true, x, y, ang: a + k * 0.26, len: 34, color: c, life: 0.16, maxlife: 0.16 });
+        break;
+      default:
+        P.push({ ray: true, x, y, ang: a, len: 40, color: c, life: 0.16, maxlife: 0.16 });
+    }
+  }
+
   function updateEnemies(dt) {
     const p = G.player;
     // P6：队友躺着就别再追他、别再撞他（倒地的人不再吃伤）
@@ -2535,11 +2621,13 @@
       if (sm < 0.2) sm = 0.2;
       e.x += px * spd * sm * dt; e.y += py * spd * sm * dt;
 
-      if (e.type === 'wolfking') {
+      // 有招式表的精英：走 Boss 同一套引擎（前摇 + 预警圈 + 头顶报招名）
+      if (e.kit) updateBossKit(e, e.kit, dt);
+      if (e.type === 'wolfking' && !e.kit) {
         e.howlT -= dt;
         if (e.howlT <= 0) { e.howlT = 7; for (let k = 0; k < 3; k++) { const a = Math.random() * 6.28; spawnEliteWolf(e.x + Math.cos(a) * 30, e.y + Math.sin(a) * 30); } }
       }
-      if (e.ranged) {
+      if (e.ranged && !e.kit) {
         const d = U.dist(p.x, p.y, e.x, e.y);
         if (d < 140) { e.x -= px * spd * sm * dt; e.y -= py * spd * sm * dt; }
         else if (d > 200) { e.x += px * spd * 0.6 * sm * dt; e.y += py * spd * 0.6 * sm * dt; }
@@ -2550,7 +2638,37 @@
           for (let k = -1; k <= 1; k++) { const a = base + k * 0.25; G.ebullets.push({ x: e.x, y: e.y, vx: Math.cos(a) * 180, vy: Math.sin(a) * 180, r: 6, dmg: e.dmg, life: 4 }); }
         }
       }
-      if (U.dist(p.x, p.y, e.x, e.y) < e.r + p.r) hitPlayer(e.dmg);
+      // ---- 功法 ----
+      // 贴身命中时按形体显形（爪痕 / 剑光 / 毒雾 / 阴气…）；本来就该远程的另带一招。
+      // 招式不改原来那套接触伤害，只换一副"出手的样子"，所以整体难度不被重新洗一遍。
+      if (e._artCd > 0) e._artCd -= dt;
+      const art = e.art;
+      if (art && art.t === 'cast') {
+        if (e.castT == null) e.castT = U.rand(1.6, 4.2);
+        e.castT -= dt;
+        if (e.castT <= 0) {
+          e.castT = (art.cd || 6) * U.rand(0.85, 1.25);
+          const base = Math.atan2(p.y - e.y, p.x - e.x);
+          G.ebullets.push({
+            x: e.x, y: e.y, vx: Math.cos(base) * 210, vy: Math.sin(base) * 210, r: 6,
+            dmg: Math.max(1, Math.round(e.dmg * (art.k || 0.34))), life: 4, color: art.c
+          });
+          artBurst(e.x, e.y, art, base); Sfx.shoot();
+        }
+      }
+      if (U.dist(p.x, p.y, e.x, e.y) < e.r + p.r) {
+        hitPlayer(e.dmg);
+        if (art && e._artCd <= 0) {
+          artBurst(e.x, e.y, art, Math.atan2(p.y - e.y, p.x - e.x));
+          e._artCd = 0.55;
+          // 一类怪第一次打到你时，报一次它的功法名 —— 全程只报一次，不刷屏
+          if (G.artSeen && !G.artSeen[e.type]) {
+            G.artSeen[e.type] = 1;
+            const nm = (window.ENEMY_TYPES[e.type] || {}).name || '';
+            spawnText(e.x, e.y - e.r - 14, (nm ? nm + ' · ' : '') + art.n, art.c || '#ffe9a8', 11);
+          }
+        }
+      }
       if (pt && U.dist(pt.x, pt.y, e.x, e.y) < e.r + (pt.r || 9)) { if (window.Coop) window.Coop.addPartnerHurt(e.dmg); }
       e._flip = tx < e.x;
     }
@@ -2585,12 +2703,12 @@
     };
     // 招式表：先按 Boss 名找原著专属招式（js/bosskit.js），找不到就按同族通用招式。
     // 都没有（理论上不会）则退回下面 updateBoss 里的旧四系打法，保证任何配置不空转。
-    const kits = window.BOSS_KITS || null;
     const kindKits = window.BOSS_KIT_KIND || null;
-    const kit = (kits && kits[cfg.name]) || (kindKits && kindKits[cfg.kind]) || null;
+    const namedKit = namedKitOf(cfg.name);
+    const kit = namedKit || (kindKits && kindKits[cfg.kind]) || null;
     if (kit && kit.skills && kit.skills.length) {
       G.boss.kit = kit;
-      G.boss.kitNamed = !!(kits && kits[cfg.name]);   // 专属招式表 vs 同族通用表（召群时口径不同）
+      G.boss.kitNamed = !!namedKit;   // 专属招式表 vs 同族通用表（召群时口径不同）
       G.boss.cds = {};
       G.boss.pending = null;
       // 起手错开：不然一现身七八招同时亮，第一秒就把玩家埋了
@@ -2664,7 +2782,7 @@
   function tellAt(x, y, r, dur, color) {
     G.tells.push({ x, y, r: r || 120, t: dur || 0.5, dur: dur || 0.5, color: color || '#ff7a52' });
   }
-  function bossDmgOf(b, sk) { return Math.max(1, Math.round((b.dmg || 1) * (sk.k || 0.5) * threatK('boss'))); }
+  function bossDmgOf(b, sk) { return Math.max(1, Math.round((b.dmg || 1) * (sk.k || 0.5) * threatK(b.threatKind || 'boss'))); }
   function castBossSkill(b, sk) {
     const p = G.player; if (!p || !b) return;
     const ang = Math.atan2(p.y - b.y, p.x - b.x);
@@ -5881,7 +5999,7 @@
     G.player = newPlayer();
     G.enemies = []; G.bullets = []; G.ebullets = []; G.gems = []; G.herbs = []; G.parts = []; G.texts = []; G.loot = []; G.tells = [];
     G.reclaimedLost = null;   // 上一张图"寻回失落"的结算提示不带到这张图
-    G.time = 0; G.kills = 0; G.spawnT = 1; G.nextEliteT = 100; G.eliteIdx = 0;
+    G.time = 0; G.kills = 0; G.spawnT = 1; G.nextEliteT = 100; G.eliteIdx = 0; G.artSeen = {};
     G.pickPulseAt = 0;   // 进图头 1.2 秒展示一次神念拾取圈
     G.fxBullets.length = 0; G.coopFrozen = false; G.dialogSynced = false;
     G.boss = null; G.bossActive = false; G.bossSpawned = false; G.bossWarned = false; G.extraIdx = 0;
