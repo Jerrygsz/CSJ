@@ -63,7 +63,7 @@ window.MAPS = [
     desc: '替药庐采药。山兽与流窜山贼都在这一带出没，是炼气初期最好的练手处。',
     startLevel: 1, startSkills: { sword: 1 },
     unlock: 'qixuan', next: 'mishi',
-    diff: 1.0, bossAt: 110, packMax: 12, trashDmgMul: 0.6,
+    diff: 1.0, bossAt: 110, packMax: 12, trashDmgMul: 0.42,
     enemies: ['wolf', 'snake', 'bat', 'boar', 'bandit'],
     elites: ['头狼', '马贼头目'],
     mats: ['m_chijing', 'm_huangjing', 'm_jingtie', 'm_wolfdan', 'm_shedan'],

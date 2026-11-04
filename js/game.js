@@ -1700,6 +1700,12 @@
   // lv460 更是 1000 倍以上 —— 中后期全线「打不动」。这里把 def.hp 压成「相对本图平均的硬度」：
   // 同一张图里该厚的仍然厚，但不再跨图复利。
   const ENEMY_BASE_HP = 12;   // lv1 基准怪（狼）的设计血量
+  // 同理，敌人表里的 def.dmg 也是一条跨图曲线（狼 6 → 幽奴 322），而 trashDmgK 又按等级
+  // 标了一条。两条相乘的下场是：lv1 小怪单击 3.1% 气血，lv36 变 17%，lv80 直接 36% —— 
+  // 后期不是「有危机感」，是一碰就死，中间没有任何过渡。
+  // 这里把 def.dmg 压成「同图内的相对凶悍度」（开方压缩），绝对量统一由 ENEMY_BASE_DMG 定，
+  // 于是全游戏小怪单击都落在同一档：约占该级气血 trashDmgK 所标的比例。
+  const ENEMY_BASE_DMG = 6;   // lv1 基准怪（恶狼 dmg 6）的单击
   function refHpOfMap() {
     if (G._refHp != null) return G._refHp;
     const list = (G.map && G.map.enemies) || [];
@@ -1707,6 +1713,15 @@
     for (const t of list) { const d = ENEMY_TYPES[t]; if (d && d.hp > 0) { sum += d.hp; n++; } }
     G._refHp = n ? sum / n : ENEMY_BASE_HP;
     return G._refHp;
+  }
+  // 本图怪物的「凶悍基准」：与 refHpOfMap 同一套思路，只用于把伤害归一化到同图平均
+  function refDmgOfMap() {
+    if (G._refDmg != null) return G._refDmg;
+    const list = (G.map && G.map.enemies) || [];
+    let sum = 0, n = 0;
+    for (const t of list) { const d = ENEMY_TYPES[t]; if (d && d.dmg > 0) { sum += d.dmg; n++; } }
+    G._refDmg = n ? sum / n : ENEMY_BASE_DMG;
+    return G._refDmg;
   }
   function makeEnemy(type, x, y, hpMul, dmgMul) {
     const def = ENEMY_TYPES[type];
@@ -1721,10 +1736,13 @@
     } else {
       rel = Math.pow(def.hp / refHpOfMap(), 0.5);
     }
+    // 同图内的相对凶悍度：幽灵比妖兽脆、幽奴比修士狠，这个性格保留；
+    // 但不再跨图复利（绝对量由 ENEMY_BASE_DMG × dmgMul 统一）。
+    const relDmg = Math.pow((def.dmg || ENEMY_BASE_DMG) / refDmgOfMap(), 0.5);
     const e = {
       _id: ++enemySeq,
       type, x, y, hp: ENEMY_BASE_HP * hpMul * rel, maxhp: ENEMY_BASE_HP * hpMul * rel,
-      spd: def.spd * (curDiff().spd || 1), dmg: def.dmg * dmgMul,
+      spd: def.spd * (curDiff().spd || 1), dmg: ENEMY_BASE_DMG * dmgMul * relDmg,
       r: def.r, xpVal: def.xp, spr: def.spr, wob: def.wob, charge: def.charge, dash: def.dash,
       hitFlash: 0, t: 0, dashT: U.rand(1, 3), _orbCd: {}
     };
@@ -2557,7 +2575,20 @@
   // 别再写死 12/14：这两个数从第一版留到现在，lv520 的 Boss 单击已经 4.6 万，
   // 弹幕还在打 14 点 —— 后期法师系 Boss 等于不会伤人，危机感直接归零。
   // 散射单发低一些（一轮打出去十几发），环形再低一档（贴身会被套好几圈）。
-  function bShot(b, k) { return Math.max(1, Math.round((b && b.dmg || 0) * k)); }
+  // Boss 一切伤害的共同出口：招式弹幕、旧四系弹幕、贴身碰撞都从这里取倍率。
+  // THREAT.boss 在 js/balance.js（第 80 轮统一抬高，一处调全场生效）。
+  // Boss 这一档按地图等级渐进：前 6 级的 Boss 完全不吃倍率（教学关万一因为全局抬伤变难，
+  // 劝退成本最高），之后线性爬到满额 —— lv46 起才是完整的 1.35。
+  function threatK(kind) {
+    const T = window.BALANCE && window.BALANCE.THREAT;
+    if (!T) return 1;
+    if (kind === 'boss') {
+      const t = Math.min(1, Math.max(0, (mapLv() - 6) / 40));
+      return 1 + (T.boss - 1) * t;
+    }
+    return T[kind] || 1;
+  }
+  function bShot(b, k) { return Math.max(1, Math.round((b && b.dmg || 0) * k * threatK('boss'))); }
   function ringBurst(x, y, n, spd, dmg) {
     for (let k = 0; k < n; k++) { const a = k / n * 6.28; G.ebullets.push({ x, y, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd, r: 7, dmg: dmg || 12, life: 4 }); }
   }
@@ -2582,7 +2613,7 @@
   function tellAt(x, y, r, dur, color) {
     G.tells.push({ x, y, r: r || 120, t: dur || 0.5, dur: dur || 0.5, color: color || '#ff7a52' });
   }
-  function bossDmgOf(b, sk) { return Math.max(1, Math.round((b.dmg || 1) * (sk.k || 0.5))); }
+  function bossDmgOf(b, sk) { return Math.max(1, Math.round((b.dmg || 1) * (sk.k || 0.5) * threatK('boss'))); }
   function castBossSkill(b, sk) {
     const p = G.player; if (!p || !b) return;
     const ang = Math.atan2(p.y - b.y, p.x - b.x);
@@ -2777,7 +2808,7 @@
         const arms = phase2 ? 4 : 3;
         for (let k = 0; k < arms; k++) {
           const a = b.ang + k * Math.PI * 2 / arms;
-          G.ebullets.push({ x: b.x, y: b.y, vx: Math.cos(a) * 155, vy: Math.sin(a) * 155, r: 6, dmg: b.dmg * 0.8, life: 4.5 });
+          G.ebullets.push({ x: b.x, y: b.y, vx: Math.cos(a) * 155, vy: Math.sin(a) * 155, r: 6, dmg: bShot(b, 0.8), life: 4.5 });
         }
       }
       // 躲远、召虫
@@ -2813,7 +2844,8 @@
       }
     }
 
-    if (U.dist(p.x, p.y, b.x, b.y) < b.r + p.r) hitPlayer(b.dmg);
+    // 贴身碰撞与招式同档：突进扑到人身上也必须真疼，否则「躲突进」没有意义
+    if (U.dist(p.x, p.y, b.x, b.y) < b.r + p.r) hitPlayer(bShot(b, 1));
     b._flip = p.x < b.x;
   }
   function onBossDead() {
@@ -5921,6 +5953,7 @@
 
     G.mapId = id; G.map = m;
     G._refHp = null;   // 本图怪物的硬度基准要重算（见 refHpOfMap）
+    G._refDmg = null;  // 本图怪物的凶悍基准要重算（见 refDmgOfMap）
     G._hulAvg = null;  // 本图 hulMap 的平均值缓存在此（见 makeEnemy）
     G.diff = diffById(diffId || save.lastDiff || 'easy');
     if (diffId) save.lastDiff = G.diff.id;
