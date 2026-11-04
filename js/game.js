@@ -3168,27 +3168,33 @@
       };
       ctx.save();
       // 外晕：一路淡到 0
+      // 【提亮一档】柱身是玩家读「这根柱有多高」的主要依据，但深色地图上外晕
+      // 只有 0.35→0.13，混色后和底色明度差太小，柱身整段读不出来。三档各抬约 32%。
+      // 内核只抬 6~17%：内核与外晕是叠乘的（0.46 与 0.55 叠后 ≈ 0.76），
+      // 两个都提一档会直接糊成实心亮块，把脚下的站位盖掉。
       const g = ctx.createLinearGradient(0, h.y, 0, h.y - H);
-      g.addColorStop(0, A(0.35)); g.addColorStop(0.28, A(0.28));
-      g.addColorStop(0.62, A(0.13)); g.addColorStop(1, A(0));
+      g.addColorStop(0, A(0.46)); g.addColorStop(0.28, A(0.37));
+      g.addColorStop(0.62, A(0.18)); g.addColorStop(1, A(0));
       ctx.fillStyle = g; trap(wB, wT); ctx.fill();
       // 内核：窄一半、亮一档，柱子才有"能量的中心"
       const g2 = ctx.createLinearGradient(0, h.y, 0, h.y - H);
-      g2.addColorStop(0, A(0.52)); g2.addColorStop(0.34, A(0.36));
-      g2.addColorStop(0.70, A(0.12)); g2.addColorStop(1, A(0));
+      g2.addColorStop(0, A(0.55)); g2.addColorStop(0.34, A(0.40));
+      g2.addColorStop(0.70, A(0.14)); g2.addColorStop(1, A(0));
       ctx.fillStyle = g2; trap(wB * 0.42, wT * 0.40); ctx.fill();
       // 两侧界线：同样走渐变描边，顶部跟着淡 —— 否则就是两根竖到底的"轨道"
+      // 界线是「柱子的边」，抬得最痕（×1.31~1.5）：高度差异最先从这两条斜边读出来。
       const gs = ctx.createLinearGradient(0, h.y, 0, h.y - H);
-      gs.addColorStop(0, A(0.55)); gs.addColorStop(0.45, A(0.34));
-      gs.addColorStop(0.85, A(0.06)); gs.addColorStop(1, A(0));
+      gs.addColorStop(0, A(0.72)); gs.addColorStop(0.45, A(0.45));
+      gs.addColorStop(0.85, A(0.09)); gs.addColorStop(1, A(0));
       ctx.strokeStyle = gs; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
       ctx.beginPath();
       ctx.moveTo(h.x - wT * 0.995, h.y - H); ctx.lineTo(h.x - wB * 0.995, h.y);
       ctx.moveTo(h.x + wT * 0.995, h.y - H); ctx.lineTo(h.x + wB * 0.995, h.y);
       ctx.stroke();
       // 落点亮斑：光压到地上，脚下那一块必须最亮
+      // 这一块几乎不提（×1.06）：它已经是最亮的一层，再抬会把玩家小人烫掉。
       const gb = ctx.createRadialGradient(h.x, h.y, 0, h.x, h.y, wB * 1.5);
-      gb.addColorStop(0, A(0.55)); gb.addColorStop(0.55, A(0.18)); gb.addColorStop(1, A(0));
+      gb.addColorStop(0, A(0.58)); gb.addColorStop(0.55, A(0.20)); gb.addColorStop(1, A(0));
       ctx.fillStyle = gb;
       ctx.save(); ctx.translate(h.x, h.y); ctx.scale(1, 0.42);
       ctx.beginPath(); ctx.arc(0, 0, wB * 1.5, 0, 6.28); ctx.fill();
@@ -3374,9 +3380,16 @@
         const tx = (tgt && tgt.x !== undefined) ? tgt.x : p.x;
         const ty = (tgt && tgt.y !== undefined) ? tgt.y : p.y;
         const rad = sk.rad || 46, dur = sk.dur || 1.7;
+        // 阶段加高：**同一个 Boss，打到最后柱子更高** —— 不用盯血条也知道它变强了。
+        // 二阶段（血量 60%，startPhase2 那条线）+10%；狂暴（血量 30%，和 updateBossKit 的
+        // enrage 同一条线）在二阶段基础上再抬，累计 ×1.18。
+        // 上限压到 320：道祖原本 280，×1.18=330 会顶进血条。柱高再高也不能压 UI。
+        const hBase = sk.h || pillarHOf(b);
+        const hMul = (b.hp < b.maxhp * 0.3) ? 1.18 : (b.phase2 ? 1.10 : 1);
+        const hFinal = Math.round(Math.min(320, hBase * hMul) / 5) * 5;
         addHazard({
           kind: 'pillar', x: tx, y: ty, r: rad, t: dur, dur: dur, dmg: dmg,
-          tick: sk.tick || 0.40, color: sk.c || '#ffe6a0', h: sk.h || pillarHOf(b)
+          tick: sk.tick || 0.40, color: sk.c || '#ffe6a0', h: hFinal
         });
         G.parts.push({ ring: true, x: tx, y: ty, r: rad * 0.35, maxr: rad * 2.3, life: 0.40, maxlife: 0.40, color: '#ffe6a0' });
         G.parts.push({ ring: true, x: tx, y: ty, r: rad * 1.5, maxr: rad * 0.7, life: 0.30, maxlife: 0.30, color: '#fff4d0' });

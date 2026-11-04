@@ -1,0 +1,38 @@
+[
+  {
+    "tag": "normal",
+    "pct": 1,
+    "label": "常态",
+    "boss": "东离虎·道祖",
+    "h": 280,
+    "r": 52,
+    "phase2": false,
+    "rage": false,
+    "hpPct": 100,
+    "file": "qa/shots/pillar-normal.png"
+  },
+  {
+    "tag": "phase2",
+    "pct": 0.55,
+    "label": "二阶段",
+    "boss": "东离虎·道祖",
+    "h": 310,
+    "r": 52,
+    "phase2": true,
+    "rage": false,
+    "hpPct": 55,
+    "file": "qa/shots/pillar-phase2.png"
+  },
+  {
+    "tag": "rage",
+    "pct": 0.25,
+    "label": "狂暴",
+    "boss": "东离虎·道祖",
+    "h": 320,
+    "r": 52,
+    "phase2": true,
+    "rage": true,
+    "hpPct": 25,
+    "file": "qa/shots/pillar-rage.png"
+  }
+]
