@@ -5965,6 +5965,10 @@
   //   · 台账未加载时白名单为空（全部短路），并在 __FR.scenery3().codexLoaded 暴露，绝不静默出图。
   // ==========================================================================
   const SC3_CODEX = (typeof window !== 'undefined' && window.MAP_CODEX && typeof window.MAP_CODEX === 'object') ? window.MAP_CODEX : null;
+  // 第101轮 风格基线（Jerry 定调，标杆 shot-codex-qixuan.png）：纸色三元组与量化口径来自台账，
+  // 缺 style 时 SC3_PAPER = null，sc3BakePaper 直接降级不铺纸 —— 缺字段不猜，绝不静默出图。
+  const SC3_STYLE = (typeof window !== 'undefined' && window.MAP_CODEX_STYLE && typeof window.MAP_CODEX_STYLE === 'object') ? window.MAP_CODEX_STYLE : null;
+  const SC3_PAPER = (SC3_STYLE && SC3_STYLE.paper && SC3_STYLE.paper.base) ? SC3_STYLE.paper : null;
   const SC3_SAMPLE = new Set(SC3_CODEX ? Object.keys(SC3_CODEX) : []);
   let SC3_ENABLED = true;   // 验收 A/B 探针：同一张图开/关三层，量每帧绘制增量（不影响正式运行）
   const SC3_ON = (m) => !!(SC3_ENABLED && m && SC3_SAMPLE.has(m.id));
@@ -5977,10 +5981,11 @@
   //   不改 alpha 结构、不改纸底 buildGrass / inkBg、不引入彩色、不碰判定。
   //   tone 小（矿洞 / 血池 / 黑煞）→ 墨更浓更幽；tone 大（太南雾山 / 药园）→ 墨更淡更亮。
   //   tone = 1 时输出与批次3 完全一致，保证已有观感零回归。
-  // 深底适配：9 张游戏增补图没有 inkBg，buildGrass 退回 m.bg.base 的深墨底。
-  //   淡墨层在深底上会被吞掉（实拍 shiku 发现），故按同一口径判底明度，
-  //   dark 时把整组墨色整体抬到浅灰区（保持各通道相对明暗），相当于「淡白墨」。
-  //   色相不变、仍是低饱和灰阶，地图数据一个字段都不改。
+  // 第99轮「深底把淡墨层抬到浅灰」的临时方案已废止：那种白墨只适合黑底，
+  //   在浅宣纸上会几乎看不见，且让 18 张图分成两套笔法。
+  // 第101轮：纸底统一到浅宣纸后，dark 只表示「原深底图 → 需补铺宣纸 + 积墨」，
+  //   墨色回归淡墨，仅略压深一档（×0.88）表达幽暗；色相不变、仍是低饱和灰阶。
+  //   中国水墨画夜景 / 幽谷靠积墨，不靠把纸涂黑。
   function sc3Colors(jin, tone, dark) {
     const t = (typeof tone === 'number' && isFinite(tone)) ? Math.max(0.7, Math.min(1.2, tone)) : 1;
     const k = 1 + (t - 1) * 1.5;   // 适度放大逐图差异，仍锁在淡墨灰阶内
@@ -5991,14 +5996,15 @@
     for (const key in pal) {
       const rgb = pal[key].map(v => {
         const q = Math.max(24, Math.min(220, Math.round(v * k)));
-        return dark ? Math.round(255 - (255 - q) * 0.35) : q;
+        return dark ? Math.max(20, Math.round(q * 0.88)) : q;
       });
       C[key] = 'rgba(' + rgb.join(',') + ',';
     }
     return C;
   }
   // 与 buildGrass 完全同款取底：m.inkBg || m.bg，再看 base 亮度。
-  // 亮度 < 110 视为深墨底（实测 9 张无 inkBg 的增补图 base 全在 #26~#4a 区间）。
+  // 亮度 < 110 判为「原生深墨底」（实测 9 张无 inkBg 的增补图 base 全在 #26~#4a 区间）。
+  // 第101轮起该返回值驱动「是否补铺宣纸」，不再驱动墨色反相；判据不变，便于 QA 逐图核对。
   function sc3DarkBase(m) {
     const src = (m && (m.inkBg || m.bg)) || null;
     const hex = src && src.base;
@@ -6044,6 +6050,29 @@
     };
     try {
       switch (kind) {
+        // 第101轮 风格基线：收录图的原 3 种 tree / rock / tuft 也改用灰阶新层，
+        // 不再走带绿色的 window.Sprites —— 标杆 qixuan 的纯灰阶必须覆盖全部 12 种装饰。
+        case 'tree': // 杂树：斜干 + 疏枝 + 三两没骨叶团（与 pine 的横层点叶区分）
+          brush(cx+2,Hh-3, cx-4,14, C.ink,0.58,2.4);
+          brush(cx-1,32, cx-12,20, C.ink,0.42,1.5);
+          brush(cx,26, cx+10,16, C.ink,0.40,1.5);
+          brush(cx-2,20, cx-8,10, C.line,0.30,1.1);
+          blob(cx-11,18,6,4,C.ink,0.26); blob(cx+9,15,6,4,C.ink,0.24); blob(cx-4,11,5,3,C.deep,0.20);
+          break;
+        case 'rock': // 孤石：三笔石棱 + 淡墨块面，无苔点（与 moss 区分）
+          blob(cx,Hh-14,11,8,C.ink,0.22);
+          brush(cx-11,Hh-10, cx-6,Hh-26, C.ink,0.46,1.8);
+          brush(cx-6,Hh-26, cx+4,Hh-28, C.ink,0.40,1.5);
+          brush(cx+4,Hh-28, cx+11,Hh-16, C.ink,0.34,1.4);
+          brush(cx-9,Hh-7, cx+9,Hh-7, C.deep,0.24,1.2);
+          break;
+        case 'tuft': // 草簇：五笔斜出短草 + 根部一点淡墨
+          ell(cx,Hh-4,9,2.5,C.deep,0.16);
+          for(let i=0;i<5;i++){
+            const bx=cx+(i-2)*3.4, h=14+((i*7)%6), lean=(i-2)*2.2;
+            brush(bx,Hh-5, bx+lean,Hh-5-h, C.ink,0.34,1.3);
+          }
+          break;
         case 'bamboo': // 竹：两三根略带弧度的竿 + 点叶簇（不画横节/对称斜叶，避免笔直交叉成井字栅栏）
           for (let k=0;k<3;k++){
             const bx=cx-9+k*9, top=8+k*4, lean=(k-1)*3;
@@ -6159,14 +6188,22 @@
           brush(cx-23,82, cx+23,82, C.deep,0.40,2.0);   // 门槛，把两根柱子收成一座门
           for(let i=0;i<4;i++) brush(cx-24-i*3, 60+i*6, cx-8+i*5, 62+i*6, C.line,0.30-i*0.04,1.6);
           break;
-        case 'pool': // 乌龙潭 / 赤水峰石潭：软边水坑 + 四周扭曲枯枝
-          ell(cx,58,30,13,C.water,0.30); ell(cx,58,24,9,C.deep,0.20); ell(cx-4,56,16,5,C.lite,0.12);
-          for(let i=0;i<3;i++) brush(cx-24+i*3,55+i*2, cx+18-i*4,55+i*2, C.line,0.18,1.0);
-          brush(cx-34,76, cx-24,40, C.ink,0.48,2.2);
-          brush(cx-27,52, cx-38,44, C.ink,0.40,1.5);
-          brush(cx-25,45, cx-16,38, C.ink,0.36,1.3);
-          brush(cx+30,78, cx+25,46, C.ink,0.42,2.0);
-          brush(cx+27,58, cx+36,50, C.ink,0.34,1.3);
+        case 'pool': // 乌龙潭 / 赤水峰石潭：不闭合岸线围出一汪水 + 水纹 + 水边短苇
+          // 不再用三层实心椭圆（会读成「一个石盘」），也不再画两根长斜杆（会读成支架）。
+          ell(cx,60,28,10,C.water,0.12);
+          try {
+            g.strokeStyle=P(C.ink,0.48); g.lineWidth=2.2; g.lineCap='round';
+            g.beginPath(); g.ellipse(cx,60,28,11,0,0.30,2.85); g.stroke();   // 前岸（留缺口）
+            g.beginPath(); g.ellipse(cx,60,28,11,0,3.40,6.00); g.stroke();   // 后岸（留缺口）
+          } catch (e) { /* 垫片降级 */ }
+          for(let i=0;i<3;i++) brush(cx-18+i*3,57+i*3, cx+10-i*4,57+i*3, C.line,0.16,1.0);
+          brush(cx-30,70, cx-19,76, C.deep,0.28,1.6);
+          brush(cx+18,75, cx+30,69, C.deep,0.28,1.6);
+          for(let i=0;i<5;i++){                       // 岸边短苇：几笔斜出，不抢主笔
+            const px=cx-26+i*13, py=44+(i%2)*5, d=(i%2?1:-1);
+            brush(px,py+10, px+d*4,py, C.ink,0.32,1.3);
+            brush(px+d*4,py, px+d*7,py-5, C.line,0.22,0.9);
+          }
           break;
         case 'stonehut': // 墨大夫无窗石屋：草草粉刷的石墙略带欹斜，石缝皴擦，只一道石门（无窗）
           ell(cx-7,48,17,11,C.ink,0.12);                // 偏一侧的墙面阴影，不居中，避免读成「镜子」
@@ -6210,14 +6247,18 @@
             brush(px-5,py-5, px+5,py-5, C.deep,0.48,1.6);
           }
           break;
-        case 'grove': // 皇城小竹林剪影 / 岔道密林 + 一道横向淡墨压顶
+        case 'grove': // 皇城小竹林：竹竿带节 + 披针点叶；取消压顶横墨（那会把竹林读成栅栏）
           for(let k=0;k<5;k++){
-            const bx=cx-30+k*15, top=20+(k%3)*9, lean=(k%2?4:-4);
-            g.strokeStyle=P(C.ink,0.50-k*0.05); g.lineWidth=2.2; g.lineCap='round';
-            g.beginPath(); g.moveTo(bx,86); g.quadraticCurveTo(bx+lean*0.4,54,bx+lean,top); g.stroke();
-            for(let l=0;l<3;l++) ell(bx+lean+(l%2?4:-4),top+4+l*7,3.6,1.6,C.ink,0.32);
+            const bx=cx-30+k*15, top=18+(k%3)*8, lean=(k%2?5:-5);
+            brush(bx,86, bx+lean,top, C.ink,0.52-k*0.05,2.4);
+            for(let j=0;j<2;j++){ const yy=44+j*22; brush(bx-3,yy, bx+3,yy, C.deep,0.30,1.2); }  // 竹节
+            for(let l=0;l<3;l++){                       // 披针叶：斜出短笔，不是小圆点
+              const yy=top+6+l*9, d=(l%2?1:-1);
+              brush(bx+lean,yy, bx+lean+d*9,yy-4, C.ink,0.36,1.6);
+              brush(bx+lean,yy+2, bx+lean+d*7,yy+3, C.line,0.24,1.2);
+            }
           }
-          for(let i=0;i<2;i++) brush(cx-40,14+i*5, cx+40,14+i*5, C.fog,0.20-i*0.06,4.0);
+          for(let i=0;i<2;i++) brush(cx-40,84+i*4, cx+38,84+i*4, C.fog,0.12-i*0.04,2.4);  // 地面淡雾
           break;
         case 'minehead': // 塌方斜坡 + 笔线围出的半掩洞口（不画大圆墨团）+ 阵旗 + 钟乳
           brush(cx-40,72, cx-16,32, C.ink,0.54,2.8);
@@ -6232,14 +6273,15 @@
           blob(cx+33,46,7,11,C.ink,0.36);
           for(let i=0;i<3;i++) brush(cx-6+i*8,32, cx-6+i*8,42+(i%2)*5, C.lite,0.28,1.6);
           break;
-        case 'shed': // 歪斜棚架 + 冷铁砧 + 倒着的铁牌
-          brush(cx-26,84, cx-22,42, C.ink,0.52,2.6);
-          brush(cx+24,84, cx+28,40, C.ink,0.48,2.6);
-          brush(cx-26,42, cx+30,36, C.deep,0.52,2.4);
-          brush(cx-22,42, cx-34,32, C.ink,0.36,1.6);
-          blob(cx-2,72,12,5,C.deep,0.48);
-          brush(cx-14,80, cx+10,80, C.ink,0.40,2.0);
-          brush(cx+16,78, cx+28,70, C.lite,0.36,1.6);
+        case 'shed': // 歪斜棚檐：斜顶 + 檐口垂草 + 一角木案（去掉居中椭圆，避免与 pool 雷同）
+          brush(cx-28,82, cx-24,44, C.ink,0.54,2.6);
+          brush(cx+26,82, cx+30,42, C.ink,0.50,2.6);
+          brush(cx-30,44, cx+34,36, C.deep,0.56,2.6);   // 棚顶斜势（与山门平横梁区分）
+          brush(cx-34,38, cx+38,30, C.ink,0.40,2.0);    // 二重檐
+          for(let i=0;i<6;i++) brush(cx-26+i*11,43+i*0.6, cx-26+i*11,49+i*0.6, C.line,0.26,1.0); // 垂草
+          brush(cx-16,82, cx+14,82, C.deep,0.44,2.2);   // 木案台面
+          brush(cx-12,82, cx-12,70, C.ink,0.36,1.4);
+          brush(cx+10,82, cx+10,70, C.ink,0.36,1.4);
           break;
         default: return null;
       }
@@ -6310,6 +6352,46 @@
     } catch (e) { return null; }
     return c;
   }
+  // 第101轮 纸性统一：把 9 张无 inkBg 的深底图补铺成标杆 qixuan 的同款浅宣纸。
+  //   · 与 buildGrass 水墨皮完全同款：96×96 无缝纸纹，每点 3×3 偏移画一遍，平铺不见接缝；
+  //   · 确定性伪随机（sc3Hash 派生），同版本逐字节可复现，不引 Math.random；
+  //   · dark 图额外叠几团 radialGradient 软边墨晕 = 淡墨积染，幽暗靠积墨而非黑底；
+  //   · 返回 canvas 交 createPattern，每帧仅 1 次 fillRect；风格基线缺失则 null 安全降级。
+  function sc3BakePaper(dark) {
+    if (!SC3_PAPER) return null;
+    let c;
+    try { c = document.createElement('canvas'); } catch (e) { return null; }
+    if (!c || !c.getContext) return null;
+    c.width = c.height = 96;
+    const x = c.getContext('2d');
+    if (!x || !x.fillRect || !x.beginPath || !x.arc) return null;   // smoke 垫片降级
+    const S = 96;
+    let sd = sc3Hash('paper');
+    const rnd = () => { sd = (sd * 1664525 + 1013904223) >>> 0; return sd / 4294967296; };
+    x.fillStyle = SC3_PAPER.base; x.fillRect(0, 0, S, S);
+    const blot = (cx, cy, r, col, a) => {
+      x.globalAlpha = a; x.fillStyle = col;
+      for (let ox = -S; ox <= S; ox += S) for (let oy = -S; oy <= S; oy += S) {
+        x.beginPath(); x.arc(cx + ox, cy + oy, r, 0, 6.2832); x.fill();
+      }
+    };
+    for (let i=0;i<26;i++) blot(rnd()*S, rnd()*S, 5+rnd()*11, SC3_PAPER.b, 0.030);
+    for (let i=0;i<20;i++) blot(rnd()*S, rnd()*S, 1.5+rnd()*3, SC3_PAPER.a, 0.055);
+    x.globalAlpha = 1;
+    if (dark && x.createRadialGradient) {
+      for (let i=0;i<5;i++) {
+        const px=(i*37+13)%S, py=(i*53+29)%S, r=22+(i%3)*8;
+        let rg = null;
+        try { rg = x.createRadialGradient(px, py, 0, px, py, r); } catch (e) { break; }
+        if (!rg || !rg.addColorStop) break;
+        rg.addColorStop(0, 'rgba(96,90,78,0.055)');
+        rg.addColorStop(1, 'rgba(96,90,78,0)');
+        x.fillStyle = rg;
+        for (let ox=-S; ox<=S; ox+=S) for (let oy=-S; oy<=S; oy+=S) x.fillRect(px+ox-r, py+oy-r, r*2, r*2);
+      }
+    }
+    return c;
+  }
   // 主景构图位（世界坐标系数，相对 W/H）。G.cam 起点 (-W/2,-H/2)，故屏幕 y = 世界 y + H/2，
   // 下列位置一律落在屏幕上半：避开中央法阵/角色玩法区，也不压底部远山视差层。
   const SC3_FOCUS_POS = {
@@ -6335,20 +6417,26 @@
     const key = skin + '|' + W + '|' + H + '|' + m.id + '|' + tone + '|' + (dark ? 'd' : 'p');
     if (sc3Cache && sc3Cache.key === key) return sc3Cache;   // 热路径命中时只是一次字符串比较
     const C = sc3Colors(skin !== 'guigu', tone, dark);
-    // 主景专用浓墨：浅纸底更黑、深墨底更亮，让「唯一主角」从同色系的配景里跳出来。
-    // 仍是同一组低饱和灰阶通道，只挪明度，不引彩色、不动纸底。
+    // 纸性统一：仅对 9 张原生深底图补铺宣纸；浅纸图沿用 buildGrass 的原生纸底，零改动。
+    // 铺在 grassPat 之后、parallax 之前，于是被深底吞掉的远山 / 暗角层次重新可见。
+    let paperPat = null, paperTile = null;
+    if (dark) {
+      paperTile = sc3BakePaper(true);
+      if (paperTile) { try { paperPat = ctx.createPattern(paperTile, 'repeat'); } catch (e) { paperPat = null; } }
+    }
+    // 主景专用浓墨：纸底已统一，不再分浅底/深底两套，一律比配景更黑。
+    // 仍是同一组低饱和灰阶通道，只挪明度，不引彩色、不动纸底数据。
     const CF = {};
     for (const k in C) {
       const mm = /rgba\((\d+),(\d+),(\d+),/.exec(C[k]);
       if (!mm) { CF[k] = C[k]; continue; }
-      const v = [+mm[1], +mm[2], +mm[3]].map(n => dark
-        ? Math.min(244, Math.round(n + (244 - n) * 0.32))
-        : Math.max(22, Math.round(n * 0.60)));
+      const v = [+mm[1], +mm[2], +mm[3]].map(n => Math.max(22, Math.round(n * 0.60)));
       CF[k] = 'rgba(' + v.join(',') + ',';
     }
-    // 精灵：9 种装饰（小）+ 本图地标所需的大画布 case，注入局部表，不碰 window.Sprites
+    // 精灵：12 种装饰全部用灰阶新层烘焙（含原 3 种 tree/rock/tuft），注入局部表；
+    // 收录图从此完全不碰 window.Sprites 的带彩色老精灵，未收录图仍走原路径、逐字节不变。
     const spr = {};
-    for (const k of ['bamboo','pine','moss','puddle','mist','ruin','lantern','banner','bone']) spr[k] = sc3Bake(k, C, false);
+    for (const k of SC3_TYPES) spr[k] = sc3Bake(k, C, false);
     // 地标名 → 大画布 case 的规范映射：避免把小装饰 case 画到大画布上（坐标系按 40×48 写死会缩成一团）
     const SC3_MARK2CASE = { gate:'gate', stele:'stele', well:'well', bones:'bones', stair:'stair', banner:'lanternmark', lantern:'lanternbig' };
     const marks = {};
@@ -6381,10 +6469,11 @@
     const tile = sc3BakeTerrain(C, terrain, co && co.layout);
     if (tile) { try { terrainPat = ctx.createPattern(tile, 'repeat'); } catch (e) { terrainPat = null; } }
     sc3Cache = { on:true, key, skin, mapId:m.id, tone, dark, phase, composition:co, focus,
-                 spr, marks, landmarks, terrain, terrainPat, terrainTile: tile, decor:codex.decor, C };
+                 paperPat, paperTile, spr, marks, landmarks, terrain,
+                 terrainPat, terrainTile: tile, decor:codex.decor, C, CF };
     return sc3Cache;
   }
-  // 装饰绘制出口：新类型用 blitSprOn 画局部表里的离屏 canvas（沿用同一变换与 alpha 纪律）
+  // 装饰绘制出口：收录图 12 种全部用 blitSprOn 画局部表里的灰阶离屏 canvas（沿用同一变换与 alpha 纪律）
   function sc3DrawDecor(d, sc3, alpha) {
     const c = sc3.spr[d.type];
     if (c) blitSprOn(ctx, c, d.x, d.y, d.s, false, null, alpha);
@@ -6665,8 +6754,9 @@
       const alpha = (0.55 + 0.45 * dr) * (d.a || 1);   // 聚落内浓淡错落；未收录图无 a 字段，逐字节不变
       const prevA = ctx.globalAlpha;
       ctx.globalAlpha = alpha;
-      // 批次4 收录图：12 种装饰里的新类型走局部离屏精灵表；原 3 种仍走 window.Sprites 老路径
-      if (sc3.on && d.type !== 'tree' && d.type !== 'rock' && d.type !== 'tuft') sc3DrawDecor(d, sc3, alpha);
+      // 第101轮 风格基线：收录图 12 种装饰一律走灰阶新层，杜绝老精灵里的绿色小树。
+      // 未收录 153 张 sc3.on=false，仍原样走 window.Sprites，逐字节不变。
+      if (sc3.on) sc3DrawDecor(d, sc3, alpha);
       else if (d.type === 'tree') drawSpr('tree', d.x, d.y, d.s, false);
       else if (d.type === 'rock') drawSpr('rock', d.x, d.y, d.s, false);
       else drawSpr('tuft', d.x, d.y, 1.4, false);
@@ -6890,12 +6980,17 @@
     if (G.shake > 0) { sx = U.rand(-G.shake, G.shake); sy = U.rand(-G.shake, G.shake); }
     ctx.setTransform(PR, 0, 0, PR, 0, 0);
     ctx.clearRect(0, 0, W, H);
+    const sc3 = ensureScenery3();   // 带缓存；下方贴地层与地标绘制复用同一份，不重复烘焙
     if (grassPat) { ctx.fillStyle = grassPat; ctx.fillRect(0, 0, W, H); }
     else {
       const m = G.map;
       const fill = (save && save.skin === 'guigu' && m && m.inkBg) ? m.inkBg.base : (skinBg(m && m.bg).base || '#36532f');
       ctx.fillStyle = fill; ctx.fillRect(0, 0, W, H);
     }
+    // 第101轮 纸性统一：仅原生深底的收录图补铺一层浅宣纸（每帧 +1 fillRect）。
+    // 铺在 parallax 之前，远山 / 暗角照常叠在纸上，与标杆 qixuan 完全同序。
+    // 未收录 153 张 sc3.on=false，这一行完全不执行，逐字节不变。
+    if (sc3.on && sc3.paperPat) { ctx.fillStyle = sc3.paperPat; ctx.fillRect(0, 0, W, H); }
     // 一角构图：四角淡墨/暗角 + 中央留白（框景锁屏幕边），远/中/近三层随相机横移，地面加 1:1 世界肌理
     const px = parallaxLayers();
     if (px) {
@@ -6910,7 +7005,7 @@
     if (px && px.grain) { ctx.fillStyle = px.grain; ctx.fillRect(G.cam.x, G.cam.y, W, H); }
     // 批次3 P1-4：贴地明度块，离屏烘焙一次 → 每帧仅 1 次 fillRect（世界坐标锚定，随相机 1:1 走）。
     // 与 px.grain 同款 createPattern，纯视觉，不进 G.zones / G.hazards。
-    const sc3 = ensureScenery3();
+    // sc3 已在纸底阶段取得并复用（ensureScenery3 带缓存，热路径只是一次字符串比较）
     if (sc3.on && sc3.terrainPat) { ctx.fillStyle = sc3.terrainPat; ctx.fillRect(G.cam.x, G.cam.y, W, H); }
 
     drawDecor();
@@ -11740,6 +11835,9 @@
         codexLoaded: !!SC3_CODEX, codexSize: SC3_CODEX ? Object.keys(SC3_CODEX).length : 0,
         mapId: s.on ? s.mapId : null, tone: s.on ? s.tone : null, skin: s.on ? s.skin : null,
         darkBase: s.on ? !!s.dark : null,
+        styleLoaded: !!SC3_STYLE,
+        paper: SC3_PAPER ? { base:SC3_PAPER.base, a:SC3_PAPER.a, b:SC3_PAPER.b } : null,
+        paperPat: s.on ? !!s.paperPat : false,
         composition: (s.on && s.composition) ? { layout:s.composition.layout, breath:s.composition.breath, clusters:s.composition.clusters, palette:s.composition.palette.slice(), focusCase:s.composition.focusCase, focusScale:s.composition.focusScale } : null,
         focus: (s.on && s.focus) ? { kind:s.focus.kind, name:s.focus.name, layout:s.focus.layout, x:+s.focus.x.toFixed(1), y:+s.focus.y.toFixed(1), s:s.focus.s, hasSpr:!!s.focus.spr } : null,
         decorCount: G.decor.length,
@@ -11762,7 +11860,8 @@
           r.sort((a, b) => a - b);
           return r.length ? +r[Math.floor(r.length / 2)].toFixed(1) : null;
         })(),
-        paletteInk: s.on ? s.C.ink : null,   // 验收探针：深底图应抬到浅灰区（普通字符串，跨边界不丢）
+        paletteInk: s.on ? s.C.ink : null,   // 验收探针：配景淡墨（普通字符串，跨边界不丢）
+        focusInk: (s.on && s.CF) ? s.CF.ink : null,   // 主景浓墨，应恒比配景更黑；不分浅底/深底两套
         decorScheme: s.on ? s.decor.map(x => x.slice()) : null,
         landmarks: s.on ? s.landmarks.map(l => ({ kind: l.kind, name: l.name, x: +l.x.toFixed(1), y: +l.y.toFixed(1), hasSpr: !!l.spr })) : [],
         terrain: s.on ? s.terrain.slice() : null,

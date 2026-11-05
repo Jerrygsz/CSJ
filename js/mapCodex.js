@@ -1,6 +1,39 @@
 // 自动生成，请勿手改。唯一真源：../../mapCodex.json
 // 生成器：_scratch/build-mapcodex.mjs ｜ 批次4 首批 18 张（arc A/B/X）
 // 只含渲染所需字段（含逐图 composition 构图章法）；考据正文 / 原文摘引 / 差异标注见《地图原著考据台账.md》。
+// 风格基线：Jerry 定调，标杆 fanren/qa/shot-codex-qixuan.png；后续每批沿用，不按 arc 分组。
+window.MAP_CODEX_STYLE = {
+  "name": "中国山水水墨／水彩 · 高级简约",
+  "benchmark": "fanren/qa/shot-codex-qixuan.png",
+  "benchmarkMap": "qixuan",
+  "paper": {
+    "base": "#ddd6c3",
+    "a": "#e6e0cf",
+    "b": "#d0c8b2",
+    "source": "qixuan.inkBg（批次1 已算好的墨阶三元组）",
+    "scope": "9 张有 inkBg 的主线图由 buildGrass 直接出纸；9 张无 inkBg 的增补图由视觉层 sc3BakePaper() 补铺同款 tile，不改 m.bg / m.inkBg",
+    "deepInk": "原深底图改用淡墨积染表达幽暗：纸底不变，贴地墨块与配景墨色略加重，主景仍为浓墨",
+    "rollback": "__FR.scenery3Enable(false) 关掉三层即恢复原深底；或移除 MAP_CODEX_STYLE.paper 触发安全降级"
+  },
+  "quant": {
+    "decorMax": 70,
+    "nearestNeighborPx": "< 90（组半径 48，实测 21.1）",
+    "landmarkAlpha": 0.2,
+    "focusAlpha": "0.70（void）/ 0.92（其余）",
+    "terrainMaxAlpha": 33,
+    "terrainSolidPixels": 0,
+    "focusKinds": 8,
+    "layouts": 7,
+    "paletteMax": 3
+  },
+  "conformance": {
+    "native": "qixuan / houshan / mishi / yelang / jiayuan / tainan / huangfeng / yaoyuan / xuese（9 张，数据层已有 inkBg）",
+    "patched": "luxiong / mkuang / zhangtie / yanwu / yaopu / heixiang / xuechi / heisha / shiku（9 张，视觉层补铺宣纸）",
+    "outOfScope": "右侧 3 个方形按钮、顶部血条、底部技能栏、圆形法阵属既有 UI／玩法层，不属地图视觉层，本轮未改"
+  },
+  "principles": 9
+};
+
 window.MAP_CODEX = {
   "qixuan": {
     "decor": [

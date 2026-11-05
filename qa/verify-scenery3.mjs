@@ -1,13 +1,14 @@
 // 批次4 阶段二：逐图原著考据台账（window.MAP_CODEX）驱动的地图视觉层，常驻验收。
 // 自带静态服务，独立于其它 QA 脚本的端口。
 //
-// 断言分六组：
+// 断言分七组：
 //   A 路线约束：白名单 = 台账 18 张 key；171 张图只启用 18 张，未收录 153 张完全短路
 //   B 三项指标：装饰类型 ≥12、地标 1~3 个且都有精灵、贴地层 pattern 存在、双皮各自烘焙
 //   C 纯视觉：新层不写 G.zones / G.hazards（判定层零变化）
 //   D 流畅度：同一张后山图开/关三层，A/B 量每帧绘制调用增量与帧耗
 //   E 逐图一致性：18 张图的 decor / landmarks / terrain / tone 逐字段等于台账，且同 arc 内不再共用一套外观
 //   F 构图化：逐图 composition 等于台账、主景唯一定位且避开玩法区、装饰按 palette 收窄、聚落成丛、留白生效
+//   G 纸性统一：风格基线加载、纸色等于标杆 qixuan.inkBg、9 张原深底图补铺宣纸 / 9 张原生浅纸零改动、主景浓墨不分叉
 //
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -194,18 +195,19 @@ const arcClash = Object.keys(byArc).filter(a => {
   return v.length > 1 && new Set(v.map(x => JSON.stringify(x.s.decorScheme))).size < v.length;
 });
 ok(arcClash.length === 0, '同一 arc 内的图不再共用一套外观（推翻批次3 的 arc→biome 分组）', arcClash);
-// 深底适配：9 张无 inkBg 的增补图必须识别为深底，并把新层墨色抬到浅灰区（否则装饰被深底吞掉）
-const darkFlags = rows.map(r => ({ id: r.id, dark: r.s.darkBase, ink: r.s.paletteInk }));
-const darkIds = darkFlags.filter(x => x.dark).map(x => x.id);
+// 第101轮：深底判定不再驱动「白墨反相」，而是驱动「是否补铺宣纸」。
 const inkR = (s) => { const m = /rgba\((\d+)/.exec(s || ''); return m ? +m[1] : -1; };
 const noInkBg = await page.evaluate(() => window.MAPS.filter(m => !m.inkBg).map(m => m.id));
-const expectDark = codexIds.filter(id => noInkBg.includes(id));
-ok(darkIds.length === 9 && eq(darkIds.slice().sort(), expectDark.slice().sort()),
+const expectDark = codexIds.filter(id => noInkBg.includes(id)).slice().sort();
+const darkIds = rows.filter(r => r.s.darkBase).map(r => r.id).slice().sort();
+ok(darkIds.length === 9 && eq(darkIds, expectDark),
    '深底判定与数据层一致（9 张无 inkBg 的增补图）', { darkIds, expectDark });
-ok(darkFlags.filter(x => x.dark).every(x => inkR(x.ink) > 170),
-   '深底图新层墨色已抬到浅灰区（装饰可见，不被深底吞掉）', darkFlags.filter(x => x.dark));
-ok(darkFlags.filter(x => !x.dark).every(x => inkR(x.ink) < 120),
-   '浅纸底图仍保持原淡墨（零回归）', darkFlags.filter(x => !x.dark).slice(0, 2));
+ok(rows.every(r => inkR(r.s.paletteInk) > 20 && inkR(r.s.paletteInk) < 130),
+   '18 张配景统一回归淡墨区（废止第99轮深底白墨 >170 的临时方案）',
+   rows.map(r => ({ id:r.id, ink:inkR(r.s.paletteInk) })).slice(0, 6));
+ok(rows.every(r => inkR(r.s.focusInk) > 0 && inkR(r.s.focusInk) < inkR(r.s.paletteInk)),
+   '18 张主景统一比配景更黑（浅底/深底不再分两套色板）',
+   rows.map(r => ({ id:r.id, focus:inkR(r.s.focusInk), decor:inkR(r.s.paletteInk) })).slice(0, 6));
 console.log('   E 组覆盖:', JSON.stringify({ maps: rows.length, arcs: Object.keys(byArc), uniqDecor, uniqLm, uniqTerrain, tones: tones.length, dark: darkIds.length }));
 
 console.log('\n== F 构图化：主景 / 聚落 / 留白 / 笔法 ==');
@@ -246,6 +248,38 @@ ok(nn.length >= 15 && nn.reduce((s, x) => s + x, 0) / nn.length < 90,
 const layouts = [...new Set(rows.map(r => r.s.composition.layout))];
 ok(layouts.length >= 6, '章法覆盖 ≥6 种（中轴/斜势/压角/环抱/空灵/夹景/横带）', layouts);
 console.log('   F 组覆盖:', JSON.stringify({ uniqComp, focusKinds: focusKinds.length, layouts, maxN, avgNN: +(nn.reduce((s, x) => s + x, 0) / nn.length).toFixed(1) }));
+
+console.log('\n== G 纸性统一：标杆 qixuan 的浅宣纸铺到 18 张 ==');
+const qInk = await page.evaluate(() => (window.MAPS.find(m => m.id === 'qixuan') || {}).inkBg || null);
+ok(rows.every(r => r.s.styleLoaded === true), '风格基线 window.MAP_CODEX_STYLE 已加载',
+   rows.filter(r => !r.s.styleLoaded).map(r => r.id));
+ok(!!qInk && rows.every(r => r.s.paper && r.s.paper.base === qInk.base &&
+     r.s.paper.a === qInk.a && r.s.paper.b === qInk.b),
+   '纸色三元组逐字等于标杆 qixuan.inkBg（不是另配一套米色）', { qInk, sample: rows[0].s.paper });
+const patched = rows.filter(r => r.s.paperPat).map(r => r.id).slice().sort();
+const native = rows.filter(r => !r.s.paperPat);
+ok(patched.length === 9 && eq(patched, expectDark),
+   '9 张原深底图补铺宣纸，与缺 inkBg 的数据层清单完全一致', { patched, expectDark });
+ok(native.length === 9 && native.every(r => !r.s.darkBase),
+   '9 张原生浅纸图零改动（不重复铺纸、不改 buildGrass）', native.map(r => r.id));
+ok(sOff.paperPat === false && sOff.styleLoaded === true,
+   '未收录 153 张不铺纸、不触发新填充（风格基线是全局只读配置）', { paperPat: sOff.paperPat });
+// 深底图每帧多 1 次 fillRect（宣纸 + 贴地），仍是整屏填充而非逐格瓦片
+await enter('shiku', 'guigu');
+const dFillDark = await page.evaluate(() => {
+  const c = document.getElementById('game').getContext('2d');
+  const orig = c.fillRect; let n = 0;
+  c.fillRect = function (...a) { n++; return orig.apply(this, a); };
+  window.__FR.scenery3Enable(true); window.__FR.renderOnce();
+  n = 0; window.__FR.renderOnce(); const on = n;
+  window.__FR.scenery3Enable(false); window.__FR.renderOnce();
+  n = 0; window.__FR.renderOnce(); const off = n;
+  c.fillRect = orig; window.__FR.scenery3Enable(true);
+  return on - off;
+});
+ok(dFillDark === 2, '原深底图每帧恰好 +2 fillRect（宣纸 + 贴地），仍非逐格瓦片', { dFillDark });
+console.log('   G 组覆盖:', JSON.stringify({ styleLoaded: rows[0].s.styleLoaded, paper: rows[0].s.paper,
+  patched: patched.length, native: native.length, dFillDark }));
 
 console.log('\n== 运行期无 JS 报错 ==');
 ok(errs.length === 0, '全程无 pageerror', errs);

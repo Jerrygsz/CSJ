@@ -3,6 +3,8 @@
 //   node qa/shot-scenery3.mjs             拍 10 张（覆盖 8 类主景形状）+ 后山 on/off/jin 对照
 //   node qa/shot-scenery3.mjs xuese       只重拍指定 mapId
 // 目的：肉眼确认「一个主景立得住 / 大片留白 / 装饰成丛不铺满 / 无方形图标 / 软边不马赛克 / 两皮统一」。
+// 第101轮追加：5 张深底图（`xuechi/shiku/heisha/heixiang/yanwu`）需与标杆 `qixuan` 同为浅宣纸水彩感，
+//   对照图见 `shot-before-paper-*.png`；风格基线由 `window.MAP_CODEX_STYLE` 提供。
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -54,7 +56,8 @@ const dump = async (label) => {
     decor: (i.decorScheme || []).map(x => x[0] + ':' + x[1]),
     landmarks: i.landmarks.map(l => l.name), terrain: i.terrain, terrainPat: i.terrainPat,
     composition: i.composition, focus: i.focus && i.focus.kind + '@' + i.focus.layout,
-    decorCount: i.decorCount, decorKinds: i.decorKinds, decorNN: i.decorNN
+    decorCount: i.decorCount, decorKinds: i.decorKinds, decorNN: i.decorNN,
+    styleLoaded: i.styleLoaded, paper: i.paper && i.paper.base, paperPat: i.paperPat, darkBase: i.darkBase
   }));
   return i;
 };
