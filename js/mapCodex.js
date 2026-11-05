@@ -1,5 +1,5 @@
 // 自动生成，请勿手改。唯一真源：../../mapCodex.json
-// 生成器：_scratch/build-mapcodex.mjs ｜ 批次4 共 29 张（首批 18 + 第二批 11，人界篇第一卷～第四卷）
+// 生成器：_scratch/build-mapcodex.mjs ｜ 批次4 共 50 张（首批 18 + 第二批 11 + 第三批 21，人界篇第一卷～第五卷）
 // 只含渲染所需字段（含逐图 composition 构图章法）；考据正文 / 原文摘引 / 差异标注见《地图原著考据台账.md》。
 // 风格基线：Jerry 定调，标杆 fanren/qa/shot-codex-qixuan.png；后续每批沿用，不按 arc 分组。
 window.MAP_CODEX_STYLE = {
@@ -11,7 +11,7 @@ window.MAP_CODEX_STYLE = {
     "a": "#e6e0cf",
     "b": "#d0c8b2",
     "source": "qixuan.inkBg（批次1 已算好的墨阶三元组）",
-    "scope": "19 张有 inkBg 的图由 buildGrass 直接出纸；10 张无 inkBg 的增补图由视觉层 sc3BakePaper() 补铺同款 tile，不改 m.bg / m.inkBg；分组由真源 hasInkBg 驱动",
+    "scope": "37 张有 inkBg 的图由 buildGrass 直接出纸；13 张无 inkBg 的增补图由视觉层 sc3BakePaper() 补铺同款 tile，不改 m.bg / m.inkBg；分组由真源 hasInkBg 驱动",
     "deepInk": "原深底图改用淡墨积染表达幽暗：纸底不变，贴地墨块与配景墨色略加重，主景仍为浓墨",
     "rollback": "__FR.scenery3Enable(false) 关掉三层即恢复原深底；或移除 MAP_CODEX_STYLE.paper 触发安全降级"
   },
@@ -22,14 +22,14 @@ window.MAP_CODEX_STYLE = {
     "focusAlpha": "0.70（void）/ 0.92（其余）",
     "terrainMaxAlpha": 33,
     "terrainSolidPixels": 0,
-    "focusKinds": 11,
+    "focusKinds": 17,
     "layouts": 7,
     "paletteMax": 3
   },
   "conformance": {
-    "native": "qixuan / houshan / mishi / yelang / jiayuan / tainan / huangfeng / yaoyuan / xuese / zhuji / yanjia / jingu / guchuan / kuixing / liulian / haian / tianxing / ningcui / jiedan（19 张，数据层已有 inkBg）",
-    "patched": "luxiong / mkuang / zhangtie / yanwu / yaopu / heixiang / xuechi / heisha / shiku / linxiong（10 张，视觉层补铺宣纸）",
-    "outOfScope": "第102轮 Jerry 拍板做 UI 柔化：右侧 3 个方形按钮 / 圆形提示圈 / 血条 / 技能栏已在 body.sc3-paper 作用域下退成淡墨软边，仅「收录图 + 水墨皮」生效；未收录 142 张与鎏金皮零改动（原「本轮未改」边界已取消）"
+    "native": "qixuan / houshan / mishi / yelang / jiayuan / tainan / huangfeng / yaoyuan / xuese / zhuji / yanjia / jingu / guchuan / kuixing / liulian / haian / tianxing / ningcui / jiedan / miaoyin / qingzhu / guxiu / xutian / wuzhong / waihai / yuanyao / yinming / bianhai / luoyun / shixiao / sanjian / yinyue / jieying / jiaoyihui / cangkun / yanyue / huanglong（37 张，数据层已有 inkBg）",
+    "patched": "luxiong / mkuang / zhangtie / yanwu / yaopu / heixiang / xuechi / heisha / shiku / linxiong / luoyunyaoyuan / fujia / huixiang（13 张，视觉层补铺宣纸）",
+    "outOfScope": "第102轮 Jerry 拍板做 UI 柔化：右侧 3 个方形按钮 / 圆形提示圈 / 血条 / 技能栏已在 body.sc3-paper 作用域下退成淡墨软边，仅「收录图 + 水墨皮」生效；未收录 121 张与鎏金皮零改动（原「本轮未改」边界已取消）"
   },
   "principles": 9
 };
@@ -1765,5 +1765,1113 @@ window.MAP_CODEX = {
     },
     "batch": 2,
     "hasInkBg": true
+  },
+  "miaoyin": {
+    "decor": [
+      [
+        "bamboo",
+        0.34
+      ],
+      [
+        "ruin",
+        0.22
+      ],
+      [
+        "mist",
+        0.24
+      ],
+      [
+        "lantern",
+        0.2
+      ]
+    ],
+    "marks": [
+      "banner",
+      "stele"
+    ],
+    "landmarks": [
+      {
+        "kind": "banner",
+        "name": "天星城茶馆巨大茶旗幡"
+      },
+      {
+        "kind": "stele",
+        "name": "妙音门客卿长老腰牌"
+      }
+    ],
+    "terrain": [
+      "stair",
+      "cliff"
+    ],
+    "tone": 0.92,
+    "composition": {
+      "focus": "挂着巨大茶旗幡的茶馆阁楼与案上两寸枯天雷竹",
+      "focusCase": "bamboostand",
+      "layout": "corner",
+      "breath": 3,
+      "clusters": 1,
+      "palette": [
+        "bamboo",
+        "lantern"
+      ],
+      "focusScale": 1.7
+    },
+    "batch": 3,
+    "hasInkBg": true
+  },
+  "qingzhu": {
+    "decor": [
+      [
+        "bamboo",
+        0.4
+      ],
+      [
+        "tuft",
+        0.24
+      ],
+      [
+        "moss",
+        0.2
+      ],
+      [
+        "lantern",
+        0.16
+      ]
+    ],
+    "marks": [
+      "banner",
+      "stele"
+    ],
+    "landmarks": [
+      {
+        "kind": "banner",
+        "name": "青竹小轩铺面招幌"
+      },
+      {
+        "kind": "stele",
+        "name": "后院丹房药圃石额"
+      }
+    ],
+    "terrain": [
+      "stair"
+    ],
+    "tone": 0.9,
+    "composition": {
+      "focus": "青竹小轩铺面檐角外斜出的金雷竹与一竿幼竹",
+      "focusCase": "bamboostand",
+      "layout": "diagonal",
+      "breath": 3,
+      "clusters": 2,
+      "palette": [
+        "bamboo",
+        "tuft"
+      ],
+      "focusScale": 1.8
+    },
+    "batch": 3,
+    "hasInkBg": true
+  },
+  "guxiu": {
+    "decor": [
+      [
+        "rock",
+        0.38
+      ],
+      [
+        "ruin",
+        0.28
+      ],
+      [
+        "mist",
+        0.2
+      ],
+      [
+        "bone",
+        0.14
+      ]
+    ],
+    "marks": [
+      "stele",
+      "bones"
+    ],
+    "landmarks": [
+      {
+        "kind": "stele",
+        "name": "石壁旧锦帕残图"
+      },
+      {
+        "kind": "bones",
+        "name": "封灵柱下古修遗骸"
+      }
+    ],
+    "terrain": [
+      "cliff",
+      "cloud"
+    ],
+    "tone": 0.96,
+    "composition": {
+      "focus": "荒岛上不闭合的古阵石环与中央石壁残图",
+      "focusCase": "stonering",
+      "layout": "ring",
+      "breath": 3,
+      "clusters": 1,
+      "palette": [
+        "rock",
+        "ruin"
+      ],
+      "focusScale": 1.9
+    },
+    "batch": 3,
+    "hasInkBg": true
+  },
+  "xutian": {
+    "decor": [
+      [
+        "mist",
+        0.36
+      ],
+      [
+        "ruin",
+        0.22
+      ],
+      [
+        "rock",
+        0.24
+      ],
+      [
+        "lantern",
+        0.18
+      ]
+    ],
+    "marks": [
+      "gate",
+      "stele",
+      "well"
+    ],
+    "landmarks": [
+      {
+        "kind": "gate",
+        "name": "虚天殿白玉宫门"
+      },
+      {
+        "kind": "stele",
+        "name": "宝光阁玉柱"
+      },
+      {
+        "kind": "well",
+        "name": "虚天鼎鼎口"
+      }
+    ],
+    "terrain": [
+      "cloud",
+      "stair"
+    ],
+    "tone": 0.82,
+    "composition": {
+      "focus": "悬在千丈云海之上的百丈白玉琼楼与重檐",
+      "focusCase": "floatingpalace",
+      "layout": "axis",
+      "breath": 3,
+      "clusters": 1,
+      "palette": [
+        "mist",
+        "rock"
+      ],
+      "focusScale": 2.1
+    },
+    "batch": 3,
+    "hasInkBg": true
+  },
+  "wuzhong": {
+    "decor": [
+      [
+        "rock",
+        0.36
+      ],
+      [
+        "mist",
+        0.34
+      ],
+      [
+        "puddle",
+        0.18
+      ],
+      [
+        "tuft",
+        0.12
+      ]
+    ],
+    "marks": [
+      "gate",
+      "stele"
+    ],
+    "landmarks": [
+      {
+        "kind": "gate",
+        "name": "雾中岛三间石室石门"
+      },
+      {
+        "kind": "stele",
+        "name": "岛礁自布阵纹石额"
+      }
+    ],
+    "terrain": [
+      "water",
+      "cliff"
+    ],
+    "tone": 0.98,
+    "composition": {
+      "focus": "海雾横带里露出的三间石室与一角礁岸",
+      "focusCase": "stonehut",
+      "layout": "band",
+      "breath": 3,
+      "clusters": 1,
+      "palette": [
+        "mist",
+        "rock"
+      ],
+      "focusScale": 1.7
+    },
+    "batch": 3,
+    "hasInkBg": true
+  },
+  "waihai": {
+    "decor": [
+      [
+        "rock",
+        0.34
+      ],
+      [
+        "mist",
+        0.26
+      ],
+      [
+        "puddle",
+        0.24
+      ],
+      [
+        "bone",
+        0.16
+      ]
+    ],
+    "marks": [
+      "bones",
+      "gate"
+    ],
+    "landmarks": [
+      {
+        "kind": "bones",
+        "name": "洞府里一副雷鹏骨翅"
+      },
+      {
+        "kind": "gate",
+        "name": "化形妖修洞府石门"
+      }
+    ],
+    "terrain": [
+      "water",
+      "cliff"
+    ],
+    "tone": 1.02,
+    "composition": {
+      "focus": "环礁围出的静水与洞口斜悬的一对雷鹏骨翅",
+      "focusCase": "reef",
+      "layout": "corner",
+      "breath": 2,
+      "clusters": 2,
+      "palette": [
+        "rock",
+        "bone"
+      ],
+      "focusScale": 1.8
+    },
+    "batch": 3,
+    "hasInkBg": true
+  },
+  "yuanyao": {
+    "decor": [
+      [
+        "mist",
+        0.32
+      ],
+      [
+        "rock",
+        0.3
+      ],
+      [
+        "ruin",
+        0.22
+      ],
+      [
+        "bone",
+        0.16
+      ]
+    ],
+    "marks": [
+      "stele",
+      "banner"
+    ],
+    "landmarks": [
+      {
+        "kind": "stele",
+        "name": "还魂术法阵阵眼石"
+      },
+      {
+        "kind": "banner",
+        "name": "玄阴之地护法幡"
+      }
+    ],
+    "terrain": [
+      "water",
+      "cloud"
+    ],
+    "tone": 1.04,
+    "composition": {
+      "focus": "玄阴之地不闭合的还魂术法阵与阵外压来的黑雾带",
+      "focusCase": "stonering",
+      "layout": "band",
+      "breath": 3,
+      "clusters": 1,
+      "palette": [
+        "mist",
+        "rock"
+      ],
+      "focusScale": 1.9
+    },
+    "batch": 3,
+    "hasInkBg": true
+  },
+  "yinming": {
+    "decor": [
+      [
+        "rock",
+        0.4
+      ],
+      [
+        "mist",
+        0.3
+      ],
+      [
+        "ruin",
+        0.18
+      ],
+      [
+        "bone",
+        0.12
+      ]
+    ],
+    "marks": [
+      "stele",
+      "bones"
+    ],
+    "landmarks": [
+      {
+        "kind": "stele",
+        "name": "高墙村落石门额"
+      },
+      {
+        "kind": "bones",
+        "name": "阴兽残骨"
+      }
+    ],
+    "terrain": [
+      "cliff",
+      "cloud"
+    ],
+    "tone": 1.12,
+    "composition": {
+      "focus": "插进阴云的通天黑石巨山与山脚一道断续高墙",
+      "focusCase": "stormpeak",
+      "layout": "diagonal",
+      "breath": 3,
+      "clusters": 1,
+      "palette": [
+        "rock",
+        "mist"
+      ],
+      "focusScale": 2.1
+    },
+    "batch": 3,
+    "hasInkBg": true
+  },
+  "bianhai": {
+    "decor": [
+      [
+        "puddle",
+        0.4
+      ],
+      [
+        "mist",
+        0.32
+      ],
+      [
+        "rock",
+        0.16
+      ],
+      [
+        "tuft",
+        0.12
+      ]
+    ],
+    "marks": [
+      "bones"
+    ],
+    "landmarks": [
+      {
+        "kind": "bones",
+        "name": "海面海兽残骸"
+      }
+    ],
+    "terrain": [
+      "water",
+      "cloud"
+    ],
+    "tone": 0.94,
+    "composition": {
+      "focus": "无风无浪的死海横带与水下浮起的一道软边墨雾",
+      "focusCase": "deadsea",
+      "layout": "band",
+      "breath": 3,
+      "clusters": 1,
+      "palette": [
+        "puddle",
+        "mist"
+      ],
+      "focusScale": 1.9
+    },
+    "batch": 3,
+    "hasInkBg": true
+  },
+  "luoyun": {
+    "decor": [
+      [
+        "tree",
+        0.32
+      ],
+      [
+        "rock",
+        0.26
+      ],
+      [
+        "mist",
+        0.24
+      ],
+      [
+        "moss",
+        0.18
+      ]
+    ],
+    "marks": [
+      "gate",
+      "stair"
+    ],
+    "landmarks": [
+      {
+        "kind": "gate",
+        "name": "云梦山三派山门"
+      },
+      {
+        "kind": "stair",
+        "name": "上山青石台阶"
+      }
+    ],
+    "terrain": [
+      "stair",
+      "cloud"
+    ],
+    "tone": 0.86,
+    "composition": {
+      "focus": "青石台阶尽头收窄的云梦山三派山门与门后远山",
+      "focusCase": "narrowgate",
+      "layout": "axis",
+      "breath": 2,
+      "clusters": 2,
+      "palette": [
+        "tree",
+        "mist"
+      ],
+      "focusScale": 1.8
+    },
+    "batch": 3,
+    "hasInkBg": true
+  },
+  "luoyunyaoyuan": {
+    "decor": [
+      [
+        "tuft",
+        0.36
+      ],
+      [
+        "rock",
+        0.26
+      ],
+      [
+        "mist",
+        0.24
+      ],
+      [
+        "moss",
+        0.14
+      ]
+    ],
+    "marks": [
+      "gate",
+      "stele"
+    ],
+    "landmarks": [
+      {
+        "kind": "gate",
+        "name": "小石山洞府洞口"
+      },
+      {
+        "kind": "stele",
+        "name": "药园阵纹石额"
+      }
+    ],
+    "terrain": [
+      "cliff",
+      "cloud"
+    ],
+    "tone": 0.88,
+    "composition": {
+      "focus": "药园一角三间茅屋与屋后留着空白洞口的无名小石山",
+      "focusCase": "shed",
+      "layout": "corner",
+      "breath": 3,
+      "clusters": 2,
+      "palette": [
+        "tuft",
+        "mist"
+      ],
+      "focusScale": 1.8
+    },
+    "batch": 3,
+    "hasInkBg": false
+  },
+  "shixiao": {
+    "decor": [
+      [
+        "rock",
+        0.42
+      ],
+      [
+        "ruin",
+        0.22
+      ],
+      [
+        "bone",
+        0.2
+      ],
+      [
+        "mist",
+        0.16
+      ]
+    ],
+    "marks": [
+      "bones",
+      "stele"
+    ],
+    "landmarks": [
+      {
+        "kind": "bones",
+        "name": "石台上被金符银链镇住的尸魈"
+      },
+      {
+        "kind": "stele",
+        "name": "青金石石壁符痕"
+      }
+    ],
+    "terrain": [
+      "cliff"
+    ],
+    "tone": 1.06,
+    "composition": {
+      "focus": "青金石空石室里一座低石台与台上一道悬垂符线",
+      "focusCase": "stoneroom",
+      "layout": "frame",
+      "breath": 3,
+      "clusters": 1,
+      "palette": [
+        "rock",
+        "ruin"
+      ],
+      "focusScale": 1.9
+    },
+    "batch": 3,
+    "hasInkBg": true
+  },
+  "sanjian": {
+    "decor": [
+      [
+        "rock",
+        0.34
+      ],
+      [
+        "ruin",
+        0.24
+      ],
+      [
+        "tuft",
+        0.22
+      ],
+      [
+        "banner",
+        0.2
+      ]
+    ],
+    "marks": [
+      "banner",
+      "stair"
+    ],
+    "landmarks": [
+      {
+        "kind": "banner",
+        "name": "三派试剑大会幡"
+      },
+      {
+        "kind": "stair",
+        "name": "石林小路石阶"
+      }
+    ],
+    "terrain": [
+      "stair",
+      "cliff"
+    ],
+    "tone": 0.9,
+    "composition": {
+      "focus": "石林环出的空坪中心一株淡墨灵眼之树",
+      "focusCase": "stonering",
+      "layout": "ring",
+      "breath": 2,
+      "clusters": 2,
+      "palette": [
+        "rock",
+        "banner"
+      ],
+      "focusScale": 1.8
+    },
+    "batch": 3,
+    "hasInkBg": true
+  },
+  "yinyue": {
+    "decor": [
+      [
+        "rock",
+        0.34
+      ],
+      [
+        "mist",
+        0.26
+      ],
+      [
+        "ruin",
+        0.22
+      ],
+      [
+        "lantern",
+        0.18
+      ]
+    ],
+    "marks": [
+      "stele",
+      "lantern"
+    ],
+    "landmarks": [
+      {
+        "kind": "stele",
+        "name": "玉如意古宝器纹"
+      },
+      {
+        "kind": "lantern",
+        "name": "静室一盏石灯"
+      }
+    ],
+    "terrain": [
+      "cliff"
+    ],
+    "tone": 0.98,
+    "composition": {
+      "focus": "空石室石台上一柄斜置玉如意与一道极淡狐影",
+      "focusCase": "stoneroom",
+      "layout": "void",
+      "breath": 3,
+      "clusters": 1,
+      "palette": [
+        "rock",
+        "mist"
+      ],
+      "focusScale": 1.6
+    },
+    "batch": 3,
+    "hasInkBg": true
+  },
+  "jieying": {
+    "decor": [
+      [
+        "mist",
+        0.34
+      ],
+      [
+        "rock",
+        0.28
+      ],
+      [
+        "ruin",
+        0.2
+      ],
+      [
+        "lantern",
+        0.18
+      ]
+    ],
+    "marks": [
+      "gate",
+      "stele"
+    ],
+    "landmarks": [
+      {
+        "kind": "gate",
+        "name": "落下符文的洞府石门"
+      },
+      {
+        "kind": "stele",
+        "name": "静室外阵纹石额"
+      }
+    ],
+    "terrain": [
+      "cloud",
+      "cliff"
+    ],
+    "tone": 0.84,
+    "composition": {
+      "focus": "落下的洞府石门与门上一圈断续符文",
+      "focusCase": "stoneroom",
+      "layout": "axis",
+      "breath": 3,
+      "clusters": 1,
+      "palette": [
+        "mist",
+        "rock"
+      ],
+      "focusScale": 1.9
+    },
+    "batch": 3,
+    "hasInkBg": true
+  },
+  "jiaoyihui": {
+    "decor": [
+      [
+        "ruin",
+        0.3
+      ],
+      [
+        "banner",
+        0.28
+      ],
+      [
+        "lantern",
+        0.24
+      ],
+      [
+        "rock",
+        0.18
+      ]
+    ],
+    "marks": [
+      "gate",
+      "banner"
+    ],
+    "landmarks": [
+      {
+        "kind": "gate",
+        "name": "阗天城修士之城城门"
+      },
+      {
+        "kind": "banner",
+        "name": "坊市摊位招幌"
+      }
+    ],
+    "terrain": [
+      "stair",
+      "cliff"
+    ],
+    "tone": 0.9,
+    "composition": {
+      "focus": "阗天城收窄城门与门内两三面斜垂招幌",
+      "focusCase": "clanhall",
+      "layout": "frame",
+      "breath": 2,
+      "clusters": 2,
+      "palette": [
+        "banner",
+        "lantern"
+      ],
+      "focusScale": 1.7
+    },
+    "batch": 3,
+    "hasInkBg": true
+  },
+  "cangkun": {
+    "decor": [
+      [
+        "rock",
+        0.38
+      ],
+      [
+        "ruin",
+        0.26
+      ],
+      [
+        "mist",
+        0.2
+      ],
+      [
+        "bone",
+        0.16
+      ]
+    ],
+    "marks": [
+      "gate",
+      "stair"
+    ],
+    "landmarks": [
+      {
+        "kind": "gate",
+        "name": "晶壁里七八丈青石门"
+      },
+      {
+        "kind": "stair",
+        "name": "石屋下黝黑石阶"
+      }
+    ],
+    "terrain": [
+      "stair",
+      "cliff"
+    ],
+    "tone": 1,
+    "composition": {
+      "focus": "地下青石壁里一扇七八丈高的石门与门前向下石阶",
+      "focusCase": "stoneroom",
+      "layout": "frame",
+      "breath": 3,
+      "clusters": 1,
+      "palette": [
+        "rock",
+        "ruin"
+      ],
+      "focusScale": 2
+    },
+    "batch": 3,
+    "hasInkBg": true
+  },
+  "yanyue": {
+    "decor": [
+      [
+        "tree",
+        0.28
+      ],
+      [
+        "rock",
+        0.28
+      ],
+      [
+        "mist",
+        0.24
+      ],
+      [
+        "banner",
+        0.2
+      ]
+    ],
+    "marks": [
+      "gate",
+      "stele"
+    ],
+    "landmarks": [
+      {
+        "kind": "gate",
+        "name": "掩月宗山门"
+      },
+      {
+        "kind": "stele",
+        "name": "洞府禁制符痕"
+      }
+    ],
+    "terrain": [
+      "stair",
+      "cliff"
+    ],
+    "tone": 0.94,
+    "composition": {
+      "focus": "石阶尽头收窄的掩月宗山门与门内一片留白",
+      "focusCase": "narrowgate",
+      "layout": "corner",
+      "breath": 2,
+      "clusters": 2,
+      "palette": [
+        "tree",
+        "mist"
+      ],
+      "focusScale": 1.8
+    },
+    "batch": 3,
+    "hasInkBg": true
+  },
+  "huanglong": {
+    "decor": [
+      [
+        "mist",
+        0.36
+      ],
+      [
+        "rock",
+        0.3
+      ],
+      [
+        "ruin",
+        0.2
+      ],
+      [
+        "banner",
+        0.14
+      ]
+    ],
+    "marks": [
+      "gate",
+      "banner"
+    ],
+    "landmarks": [
+      {
+        "kind": "gate",
+        "name": "黄龙山禁制大阵雾门"
+      },
+      {
+        "kind": "banner",
+        "name": "琼台楼阁钟幡"
+      }
+    ],
+    "terrain": [
+      "cloud",
+      "cliff"
+    ],
+    "tone": 1.02,
+    "composition": {
+      "focus": "碧绿雾海横带之上压着的一片琼台楼阁檐角",
+      "focusCase": "temple",
+      "layout": "band",
+      "breath": 2,
+      "clusters": 3,
+      "palette": [
+        "mist",
+        "rock"
+      ],
+      "focusScale": 1.9
+    },
+    "batch": 3,
+    "hasInkBg": true
+  },
+  "fujia": {
+    "decor": [
+      [
+        "ruin",
+        0.32
+      ],
+      [
+        "tree",
+        0.26
+      ],
+      [
+        "rock",
+        0.24
+      ],
+      [
+        "bone",
+        0.18
+      ]
+    ],
+    "marks": [
+      "gate",
+      "stele"
+    ],
+    "landmarks": [
+      {
+        "kind": "gate",
+        "name": "付家堡堡门"
+      },
+      {
+        "kind": "stele",
+        "name": "辛如音竹屋齐云霄灵位"
+      }
+    ],
+    "terrain": [
+      "cliff"
+    ],
+    "tone": 1.06,
+    "composition": {
+      "focus": "断续堡墙与墙内一角偏僻阁楼、墙外一株斜树",
+      "focusCase": "clanhall",
+      "layout": "corner",
+      "breath": 3,
+      "clusters": 1,
+      "palette": [
+        "ruin",
+        "tree"
+      ],
+      "focusScale": 1.8
+    },
+    "batch": 3,
+    "hasInkBg": false
+  },
+  "huixiang": {
+    "decor": [
+      [
+        "tree",
+        0.32
+      ],
+      [
+        "ruin",
+        0.26
+      ],
+      [
+        "tuft",
+        0.24
+      ],
+      [
+        "rock",
+        0.18
+      ]
+    ],
+    "marks": [
+      "stele",
+      "gate"
+    ],
+    "landmarks": [
+      {
+        "kind": "stele",
+        "name": "韩家祠漆黑银粉牌匾"
+      },
+      {
+        "kind": "gate",
+        "name": "五里沟旧居院门"
+      }
+    ],
+    "terrain": [
+      "stair"
+    ],
+    "tone": 0.88,
+    "composition": {
+      "focus": "五里沟闭门阁楼与门上漆黑牌匾、阁前几道卵石短笔",
+      "focusCase": "clanhall",
+      "layout": "corner",
+      "breath": 3,
+      "clusters": 1,
+      "palette": [
+        "tree",
+        "ruin"
+      ],
+      "focusScale": 1.7
+    },
+    "batch": 3,
+    "hasInkBg": false
   }
 };
