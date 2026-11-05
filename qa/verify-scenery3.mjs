@@ -1,7 +1,7 @@
 // 批次4 阶段二：逐图原著考据台账（window.MAP_CODEX）驱动的地图视觉层，常驻验收。
 // 自带静态服务，独立于其它 QA 脚本的端口。
 //
-// 断言分七组：
+// 断言分九组：
 //   A 路线约束：白名单 = 台账 18 张 key；171 张图只启用 18 张，未收录 153 张完全短路
 //   B 三项指标：装饰类型 ≥12、地标 1~3 个且都有精灵、贴地层 pattern 存在、双皮各自烘焙
 //   C 纯视觉：新层不写 G.zones / G.hazards（判定层零变化）
@@ -9,6 +9,8 @@
 //   E 逐图一致性：18 张图的 decor / landmarks / terrain / tone 逐字段等于台账，且同 arc 内不再共用一套外观
 //   F 构图化：逐图 composition 等于台账、主景唯一定位且避开玩法区、装饰按 palette 收窄、聚落成丛、留白生效
 //   G 纸性统一：风格基线加载、纸色等于标杆 qixuan.inkBg、9 张原深底图补铺宣纸 / 9 张原生浅纸零改动、主景浓墨不分叉
+//   H UI 柔化：body.sc3-paper 只在收录图 + 水墨皮挂上；硬边/投影/饱和全部退掉，热区与元素数不变，可一键回退
+//   I 逐图幽暗：mood 只落 xuechi / heisha、四项参数等于台账、积墨罩连续软边、主景更浓、标杆零回归、每帧 +1 drawImage
 //
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -280,6 +282,87 @@ const dFillDark = await page.evaluate(() => {
 ok(dFillDark === 2, '原深底图每帧恰好 +2 fillRect（宣纸 + 贴地），仍非逐格瓦片', { dFillDark });
 console.log('   G 组覆盖:', JSON.stringify({ styleLoaded: rows[0].s.styleLoaded, paper: rows[0].s.paper,
   patched: patched.length, native: native.length, dFillDark }));
+
+console.log('\n== H UI 柔化：只在浅宣纸上退到纸后 ==');
+const softOn = rows.filter(r => r.s.uiSoft === true).map(r => r.id).sort();
+ok(softOn.length === 18 && softOn.every(x => codexIds.includes(x)),
+   '18 张收录图 + 水墨皮挂上 body.sc3-paper，HUD 进入柔化态', { n: softOn.length });
+ok(rows.every(r => r.s.uiSoft === r.s.softRing),
+   'CSS 作用域与 canvas 法阵柔化同一开关（不会只柔一半）',
+   rows.filter(r => r.s.uiSoft !== r.s.softRing).map(r => r.id));
+ok(sOff.uiSoft === false && sOff.softRing === false,
+   '未收录 153 张深底图不挂 class、提示圈保持原强度', { uiSoft: sOff.uiSoft, softRing: sOff.softRing });
+await enter('houshan', 'jin');
+const jinSoft = await page.evaluate(() => ({ cls: document.body.classList.contains('sc3-paper'), s: window.__FR.scenery3() }));
+ok(jinSoft.cls === false && jinSoft.s.uiSoft === false && jinSoft.s.softRing === false,
+   '鎏金皮不柔化（作用域限定 data-skin=guigu）', { cls: jinSoft.cls, uiSoft: jinSoft.s.uiSoft });
+await enter('xuechi', 'guigu');
+const hud = await page.evaluate(() => {
+  const q = document.querySelector('#quickbar .qb');
+  const pip = document.querySelector('#skillrow .pip');
+  const hp = document.getElementById('hpwrap');
+  const cs = (e) => e ? getComputedStyle(e) : null;
+  return {
+    qbs: document.querySelectorAll('#quickbar .qb').length, pips: document.querySelectorAll('#skillrow .pip').length,
+    qbW: q && Math.round(q.getBoundingClientRect().width), qbH: q && Math.round(q.getBoundingClientRect().height),
+    qbShadow: cs(q) && cs(q).boxShadow, hpShadow: cs(hp) && cs(hp).boxShadow,
+    pipShadow: cs(pip) && cs(pip).boxShadow,
+    hpFill: cs(document.getElementById('hpfill')) && cs(document.getElementById('hpfill')).backgroundImage
+  };
+});
+ok(hud.qbs === 3 && hud.qbW === 46 && hud.qbH === 46 && hud.pips > 0,
+   '三格快捷钮与技能栏全在、点击热区 46×46 不变（只改外观不删元素）', hud);
+ok(hud.qbShadow === 'none' && hud.hpShadow === 'none' && hud.pipShadow === 'none',
+   '双重墨框 / 投影 / 纸签阴影全部去掉', { qb: hud.qbShadow, hp: hud.hpShadow, pip: hud.pipShadow });
+ok(!/178,\s*58,\s*44/.test(hud.hpFill || ''),
+   '血条不再是鲜红硬色块（改淡墨飞白）', hud.hpFill);
+const hudOff = await page.evaluate(() => {
+  document.body.classList.remove('sc3-paper');
+  const v = getComputedStyle(document.querySelector('#quickbar .qb')).boxShadow;
+  document.body.classList.add('sc3-paper');
+  return v;
+});
+ok(hudOff !== 'none' && hudOff.length > 4,
+   '摘掉 class 立即回到原硬边双框 UI（可一键回退）', hudOff);
+
+console.log('\n== I 逐图幽暗：血池 / 黑煞教单独调 ==');
+const moodIds = ['xuechi', 'heisha'];
+const withMood = rows.filter(r => r.s.mood).map(r => r.id).sort();
+ok(withMood.length === 2 && eq(withMood, moodIds.slice().sort()),
+   'mood 只落在 xuechi / heisha，其余 16 张完全短路', withMood);
+ok(rows.filter(r => !r.s.mood).every(r => r.s.moodTile === false && r.s.moodA === null),
+   '无 mood 的 16 张不烘积墨罩、渲染层零开销',
+   rows.filter(r => !r.s.mood && (r.s.moodTile || r.s.moodA)).map(r => r.id));
+for (const id of moodIds) {
+  const s = rows.find(r => r.id === id).s, c = codex[id].mood;
+  ok(s.mood && s.mood.gloom === c.gloom && s.mood.vignette === c.vignette &&
+     s.mood.haze === c.haze && s.mood.focusInk === c.focusInk,
+     id + ' 四项 mood 参数逐字段等于台账', { s: s.mood, c });
+  ok(s.moodTile === true && s.moodA && s.moodA.solidPixels === 0 &&
+     s.moodA.distinctAlpha >= 20 && s.moodA.maxAlpha > 60 && s.moodA.maxAlpha < 170,
+     id + ' 积墨罩是连续软边（无实心像素、多档 alpha、不涂黑）', s.moodA);
+}
+const inkOf = (s) => { const m = /rgba\((\d+),/.exec(s.focusInk || ''); return m ? +m[1] : 999; };
+const qRow = rows.find(r => r.id === 'qixuan');
+ok(inkOf(rows.find(r => r.id === 'xuechi').s) < inkOf(qRow.s) &&
+   inkOf(rows.find(r => r.id === 'heisha').s) < inkOf(qRow.s),
+   '幽暗图主景浓墨比标杆更黑（focusInk 生效）',
+   { qixuan: inkOf(qRow.s), xuechi: inkOf(rows.find(r => r.id === 'xuechi').s), heisha: inkOf(rows.find(r => r.id === 'heisha').s) });
+ok(qRow.s.mood === null && qRow.s.moodTile === false && qRow.s.uiSoft === true,
+   '标杆 qixuan 零回归：无积墨罩，只有 HUD 柔化', { mood: qRow.s.mood, moodTile: qRow.s.moodTile });
+await enter('xuechi', 'guigu');
+const dMood = await page.evaluate(() => {
+  const a = window.__FR.scenery3().moodDraws;
+  window.__FR.renderOnce(); window.__FR.renderOnce();
+  const b = window.__FR.scenery3().moodDraws;
+  window.__FR.scenery3Enable(false); window.__FR.renderOnce(); window.__FR.renderOnce();
+  const c = window.__FR.scenery3().moodDraws;
+  window.__FR.scenery3Enable(true);
+  return { on: b - a, off: c - b };
+});
+ok(dMood.on === 2 && dMood.off === 0,
+   '积墨罩每帧恰好 1 次 drawImage；关掉三层后 0 次（不残留）', dMood);
+console.log('   I 组覆盖:', JSON.stringify({ withMood, moodA: rows.find(r => r.id === 'xuechi').s.moodA, dMood }));
 
 console.log('\n== 运行期无 JS 报错 ==');
 ok(errs.length === 0, '全程无 pageerror', errs);

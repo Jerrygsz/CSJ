@@ -29,7 +29,7 @@ window.MAP_CODEX_STYLE = {
   "conformance": {
     "native": "qixuan / houshan / mishi / yelang / jiayuan / tainan / huangfeng / yaoyuan / xuese（9 张，数据层已有 inkBg）",
     "patched": "luxiong / mkuang / zhangtie / yanwu / yaopu / heixiang / xuechi / heisha / shiku（9 张，视觉层补铺宣纸）",
-    "outOfScope": "右侧 3 个方形按钮、顶部血条、底部技能栏、圆形法阵属既有 UI／玩法层，不属地图视觉层，本轮未改"
+    "outOfScope": "第102轮 Jerry 拍板做 UI 柔化：右侧 3 个方形按钮 / 圆形提示圈 / 血条 / 技能栏已在 body.sc3-paper 作用域下退成淡墨软边，仅「收录图 + 水墨皮」生效；深底 153 张与鎏金皮零改动（原「本轮未改」边界已取消）"
   },
   "principles": 9
 };
@@ -985,6 +985,15 @@ window.MAP_CODEX = {
         "mist"
       ],
       "focusScale": 1.9
+    },
+    "mood": {
+      "name": "幽·腐地",
+      "gloom": 0.32,
+      "vignette": 0.86,
+      "haze": 0.52,
+      "focusInk": 0.72,
+      "basis": "第三卷第一百八十章《乌龙潭》：「灰黑色的腐烂地面，不停冒着气泡的浑浊水坑，奇形怪状的扭曲树木」；scene.atmosphere「听不见虫叫」。",
+      "note": "幽暗靠积墨：整纸压一层暖灰、四角软边浓墨晕、横向腐雾带，主景浓墨再压一档；不把纸涂黑、不落成血红色，仍守浅宣纸与灰阶。"
     }
   },
   "heisha": {
@@ -1044,6 +1053,15 @@ window.MAP_CODEX = {
         "mist"
       ],
       "focusScale": 1.8
+    },
+    "mood": {
+      "name": "幽·压顶",
+      "gloom": 0.3,
+      "vignette": 0.82,
+      "haze": 0.6,
+      "focusInk": 0.74,
+      "basis": "第三卷第三百二十七章《入阵》：「血光一闪……将这竹林的上空全部笼罩」「下面竹林中突然冒出一层青白两色的光幕」；scene.atmosphere「血光压顶（转灰阶）」。",
+      "note": "血光只取明度：上方一道横向软边浓墨压顶 + 四角积墨，竹林剪影更浓；不加红、不改纸底数据。"
     }
   },
   "shiku": {

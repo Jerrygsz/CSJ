@@ -4184,29 +4184,41 @@
       ctx.globalAlpha = 1; ctx.restore();
     } else {
       // 冰霜：冷色地盘 + 内圈冷雾，边缘一圈慢慢转的冰晶（不要白边，不然像个气泡）
+      // 第102轮 UI 柔化：浅宣纸上这枚 r≈92 的青蓝盘是「圆形法阵」里最实的一块，
+      //   退成淡墨软边晕（去彩、alpha 减半、断续细环），常驻范围仍读得出；深底 / 鎏金皮保持冷色。
       // 渐变按半径缓存、并且画在「以玩家为原点」的坐标系里 —— 否则每帧都要新建一个渐变对象
-      const key = Math.round(fd.rad);
+      const soft = SC3_SOFT_RING;
+      const key = Math.round(fd.rad) + (soft ? '|soft' : '');
       let grad = vfxGradCache.get(key);
       ctx.save(); ctx.translate(p.x, p.y);
       if (!grad) {
         grad = ctx.createRadialGradient(0, 0, fd.rad * 0.15, 0, 0, fd.rad);
-        grad.addColorStop(0, 'rgba(140,215,255,0.20)');
-        grad.addColorStop(0.72, 'rgba(120,200,255,0.10)');
-        grad.addColorStop(1, 'rgba(120,200,255,0)');
+        if (soft) {
+          grad.addColorStop(0, 'rgba(74,70,60,0.10)');
+          grad.addColorStop(0.72, 'rgba(74,70,60,0.05)');
+          grad.addColorStop(1, 'rgba(74,70,60,0)');
+        } else {
+          grad.addColorStop(0, 'rgba(140,215,255,0.20)');
+          grad.addColorStop(0.72, 'rgba(120,200,255,0.10)');
+          grad.addColorStop(1, 'rgba(120,200,255,0)');
+        }
         vfxGradCache.set(key, grad);
       }
       ctx.globalAlpha = 1; ctx.fillStyle = grad;
       ctx.beginPath(); ctx.arc(0, 0, fd.rad, 0, 6.28); ctx.fill();
-      ctx.globalAlpha = 0.28; ctx.strokeStyle = '#a8e2ff'; ctx.lineWidth = 1;
+      if (soft) ctx.setLineDash([6, 8]);
+      ctx.globalAlpha = soft ? 0.12 : 0.28;
+      ctx.strokeStyle = soft ? 'rgba(74,70,60,0.7)' : '#a8e2ff'; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.arc(0, 0, fd.rad * 0.97, 0, 6.28); ctx.stroke();
+      if (soft) ctx.setLineDash([]);
       for (let i = 0; i < 10; i++) {
         const ang = t * 0.3 + i * (6.28 / 10);
         const rr = fd.rad * (0.55 + ((i * 37) % 40) / 100);
         const rx = Math.cos(ang) * rr;
         const ry = Math.sin(ang) * rr;
         const s = 2.6 + Math.sin(t * 2.2 + i) * 1.2;
-        ctx.globalAlpha = 0.55 + Math.sin(t * 2 + i) * 0.25;
-        ctx.fillStyle = '#e2f8ff';
+        ctx.globalAlpha = (0.55 + Math.sin(t * 2 + i) * 0.25) * (soft ? 0.45 : 1);
+        ctx.fillStyle = soft ? 'rgba(74,70,60,0.85)' : '#e2f8ff';
         ctx.beginPath(); ctx.moveTo(rx, ry - s * 1.5); ctx.lineTo(rx + s * 0.62, ry + s * 0.5); ctx.lineTo(rx - s * 0.62, ry + s * 0.5); ctx.closePath(); ctx.fill();
       }
       ctx.globalAlpha = 1;
@@ -5971,6 +5983,9 @@
   const SC3_PAPER = (SC3_STYLE && SC3_STYLE.paper && SC3_STYLE.paper.base) ? SC3_STYLE.paper : null;
   const SC3_SAMPLE = new Set(SC3_CODEX ? Object.keys(SC3_CODEX) : []);
   let SC3_ENABLED = true;   // 验收 A/B 探针：同一张图开/关三层，量每帧绘制增量（不影响正式运行）
+  let SC3_UI_FLAG = null;   // 第102轮 UI 柔化：body.sc3-paper 挂/摘标记，只在状态翻转时动一次 DOM
+  let SC3_SOFT_RING = false; // 第102轮：浅纸图上「圆形法阵」柔化总开关，每帧由 render 统一刷新
+  let SC3_MOOD_DRAWS = 0;   // 第102轮验收探针：积墨罩累计绘制次数，证明每帧只贴 1 次
   const SC3_ON = (m) => !!(SC3_ENABLED && m && SC3_SAMPLE.has(m.id));
   const sc3CodexOf = (m) => (SC3_CODEX && m && SC3_CODEX[m.id]) || null;
   // 全量装饰类型：原 3 种 + 新增 9 种 = 12（P1-3 目标 ≥12）
@@ -6392,6 +6407,59 @@
     }
     return c;
   }
+  // 第102轮 逐图幽暗：血池 / 黑煞教「不够阴森」，单独调。
+  //   · 中国水墨画夜景靠积墨，不靠把纸涂黑：整纸一层暖灰 + 四角软边浓墨晕 + 横向雾带，
+  //     全是 radialGradient 软边，中央留白不封死，主景 / 装饰 / 角色照常压在其上；
+  //   · W×H 全屏离屏烘焙一次，按 mapId 缓存，每帧只多 1 次 drawImage；
+  //   · 只有台账带 mood 的图才烘焙，其余 16 张 mood=null 完全短路；
+  //   · 严守灰阶：仍是纸 + 暖墨，不引红色、不改 m.bg / inkBg、不碰判定。
+  function sc3BakeMood(mo) {
+    let c;
+    try { c = document.createElement('canvas'); } catch (e) { return null; }
+    if (!c || !c.getContext) return null;
+    c.width = W; c.height = H;
+    const g = c.getContext('2d');
+    if (!g || !g.fillRect || !g.createRadialGradient || !g.arc) return null;   // smoke 垫片降级
+    const num = (v, lo, hi) => (typeof v === 'number' && isFinite(v)) ? Math.max(lo, Math.min(hi, v)) : 0;
+    const gloom = num(mo.gloom, 0, 0.4), vig = num(mo.vignette, 0, 1), haze = num(mo.haze, 0, 1);
+    const INK = '46,42,36';   // 暖墨灰阶，与纸性同源，不带色相
+    try {
+      // ① 整纸压一层极淡暖灰：从「晴天宣纸」变成「阴天宣纸」，仍是纸不是黑底
+      if (gloom > 0) { g.fillStyle = 'rgba(' + INK + ',' + (gloom * 0.58).toFixed(3) + ')'; g.fillRect(0, 0, W, H); }
+      // ①b 压顶墨云交给下面的横向软边雾带（中心 y≈0.16H），刻意避开顶部 HUD 区：
+      //     最上一行文字必须读得出，幽暗不能靠把整屏连 HUD 一起压黑。
+      // ② 四角积墨：中心透明、边缘浓的软边径向罩 + 四枚错位墨团，避免完美圆形的「镜头暗角」感
+      if (vig > 0) {
+        const R = Math.max(W, H) * 0.78;
+        let rg = g.createRadialGradient(W*0.5, H*0.46, H*0.16, W*0.5, H*0.46, R);
+        rg.addColorStop(0, 'rgba(' + INK + ',0)');
+        rg.addColorStop(0.55, 'rgba(' + INK + ',' + (vig * 0.14).toFixed(3) + ')');
+        rg.addColorStop(1, 'rgba(' + INK + ',' + (vig * 0.55).toFixed(3) + ')');
+        g.fillStyle = rg; g.fillRect(0, 0, W, H);
+        const corners = [[-0.06,-0.04],[1.06,-0.02],[-0.04,1.04],[1.04,1.06]];
+        for (let i=0;i<4;i++) {
+          const cx = corners[i][0]*W, cy = corners[i][1]*H, r = W*(0.44 + (i%2)*0.10);
+          let cg = g.createRadialGradient(cx, cy, 0, cx, cy, r);
+          cg.addColorStop(0, 'rgba(' + INK + ',' + (vig * 0.20).toFixed(3) + ')');
+          cg.addColorStop(1, 'rgba(' + INK + ',0)');
+          g.fillStyle = cg; g.fillRect(cx-r, cy-r, r*2, r*2);
+        }
+      }
+      // ③ 横向雾带：血池的腐雾 / 黑煞的压顶血光，只取明度不落成红色
+      if (haze > 0) {
+        const bands = [[0.16, 0.11], [0.80, 0.045]];
+        for (let i=0;i<bands.length;i++) {
+          const by = H*bands[i][0], bh = H*bands[i][1], rad = W*0.62;
+          g.save(); g.translate(W*0.5, by); g.scale(1, bh/rad);
+          let hg = g.createRadialGradient(0,0,0,0,0,rad);
+          hg.addColorStop(0, 'rgba(' + INK + ',' + (haze * (i ? 0.16 : 0.42)).toFixed(3) + ')');
+          hg.addColorStop(1, 'rgba(' + INK + ',0)');
+          g.fillStyle = hg; g.beginPath(); g.arc(0,0,rad,0,6.2832); g.fill(); g.restore();
+        }
+      }
+    } catch (e) { return null; }
+    return c;
+  }
   // 主景构图位（世界坐标系数，相对 W/H）。G.cam 起点 (-W/2,-H/2)，故屏幕 y = 世界 y + H/2，
   // 下列位置一律落在屏幕上半：避开中央法阵/角色玩法区，也不压底部远山视差层。
   const SC3_FOCUS_POS = {
@@ -6412,6 +6480,8 @@
     const skin = (save && save.skin === 'guigu') ? 'guigu' : 'jin';
     const tone = (typeof codex.tone === 'number') ? codex.tone : 1;
     const co = codex.composition || null;
+    // 第102轮：mood 是可选字段，只给「需要单独调幽暗」的图用；无字段则完全短路
+    const mood = (codex.mood && typeof codex.mood === 'object') ? codex.mood : null;
     const phase = (sc3Hash(m.id) % 997) / 997;
     const dark = sc3DarkBase(m);
     const key = skin + '|' + W + '|' + H + '|' + m.id + '|' + tone + '|' + (dark ? 'd' : 'p');
@@ -6424,13 +6494,17 @@
       paperTile = sc3BakePaper(true);
       if (paperTile) { try { paperPat = ctx.createPattern(paperTile, 'repeat'); } catch (e) { paperPat = null; } }
     }
+    // 逐图幽暗：全屏软边积墨罩，只烘一次；无 mood 的 16 张为 null，render 里整行不执行
+    const moodTile = mood ? sc3BakeMood(mood) : null;
     // 主景专用浓墨：纸底已统一，不再分浅底/深底两套，一律比配景更黑。
     // 仍是同一组低饱和灰阶通道，只挪明度，不引彩色、不动纸底数据。
     const CF = {};
+    // mood.focusInk：幽暗图的主景再压一档浓墨（0.6~1），其余图 fi=1 逐字节不变
+    const fi = mood ? Math.max(0.6, Math.min(1, (typeof mood.focusInk === 'number' ? mood.focusInk : 1))) : 1;
     for (const k in C) {
       const mm = /rgba\((\d+),(\d+),(\d+),/.exec(C[k]);
       if (!mm) { CF[k] = C[k]; continue; }
-      const v = [+mm[1], +mm[2], +mm[3]].map(n => Math.max(22, Math.round(n * 0.60)));
+      const v = [+mm[1], +mm[2], +mm[3]].map(n => Math.max(22, Math.round(n * 0.60 * fi)));
       CF[k] = 'rgba(' + v.join(',') + ',';
     }
     // 精灵：12 种装饰全部用灰阶新层烘焙（含原 3 种 tree/rock/tuft），注入局部表；
@@ -6469,7 +6543,7 @@
     const tile = sc3BakeTerrain(C, terrain, co && co.layout);
     if (tile) { try { terrainPat = ctx.createPattern(tile, 'repeat'); } catch (e) { terrainPat = null; } }
     sc3Cache = { on:true, key, skin, mapId:m.id, tone, dark, phase, composition:co, focus,
-                 paperPat, paperTile, spr, marks, landmarks, terrain,
+                 paperPat, paperTile, mood, moodTile, spr, marks, landmarks, terrain,
                  terrainPat, terrainTile: tile, decor:codex.decor, C, CF };
     return sc3Cache;
   }
@@ -6862,6 +6936,11 @@
   // 每加一种特效要同时改两处条件，漏一处就会被当成方块画出来；合成一条 else-if 链不再漏。
   function drawPart(pt) {
     const life = Math.max(0, pt.life / pt.maxlife);
+    // 第102轮：浅宣纸上把「环形 / 放射」这类跟着人走的持续特效退到纸后（去彩、降 alpha），
+    // 命中 / 暴击 / 拾取等一次性反馈不受影响；深底图 / 鎏金皮完全不变。
+    const softRingFx = SC3_SOFT_RING && (pt.ring || pt.ray);
+    const kFx = softRingFx ? 0.26 : 1;
+    const inkFx = 'rgba(74,70,60,0.8)';
     // 粒子半径一律不许为负：收缩/外扩类特效算过头就会喂给 arc 一个负数，直接抛错
     if (pt.r < 0) pt.r = 0;
     if (pt.maxr < 0) pt.maxr = 0;
@@ -6871,13 +6950,13 @@
     if (pt.ring) {
       // 半径可能是负的（收缩类特效算出来 -16 这种），arc 会直接抛错，钳一下
       const t = 1 - life; const r = Math.max(0, U.lerp(pt.r, pt.maxr, t));
-      ctx.strokeStyle = pt.color; ctx.lineWidth = 4 * life + 1; ctx.globalAlpha = life;
+      ctx.strokeStyle = softRingFx ? inkFx : pt.color; ctx.lineWidth = 4 * life + 1; ctx.globalAlpha = life * kFx;
       ctx.beginPath(); ctx.arc(pt.x, pt.y, r, 0, 6.28); ctx.stroke(); ctx.globalAlpha = 1;
       return;
     }
     if (pt.bolt) { drawBolt(pt); return; }
     if (pt.ray) {
-      ctx.globalAlpha = life * 0.9; ctx.strokeStyle = pt.color; ctx.lineWidth = 3 * life + 1;
+      ctx.globalAlpha = life * 0.9 * kFx; ctx.strokeStyle = softRingFx ? inkFx : pt.color; ctx.lineWidth = 3 * life + 1;
       ctx.beginPath(); ctx.moveTo(pt.x, pt.y);
       ctx.lineTo(pt.x + Math.cos(pt.ang) * pt.len, pt.y + Math.sin(pt.ang) * pt.len);
       ctx.stroke(); ctx.globalAlpha = 1; return;
@@ -6981,6 +7060,13 @@
     ctx.setTransform(PR, 0, 0, PR, 0, 0);
     ctx.clearRect(0, 0, W, H);
     const sc3 = ensureScenery3();   // 带缓存；下方贴地层与地标绘制复用同一份，不重复烘焙
+    // 第102轮：浅纸作用域一处定，CSS HUD / 神念圈 / 冰域 / 常驻法阵全部复用，避免各处口径打架
+    SC3_SOFT_RING = !!(sc3.on && save && save.skin === 'guigu');
+    // 只在「收录图 + 水墨皮」的浅宣纸上挂 body.sc3-paper；深底 153 张 / 鎏金皮不挂。
+    // 状态翻转时才动一次 DOM，热路径不产生布局抖动。
+    if (typeof document !== 'undefined' && document.body && document.body.classList) {
+      if (SC3_SOFT_RING !== SC3_UI_FLAG) { SC3_UI_FLAG = SC3_SOFT_RING; document.body.classList.toggle('sc3-paper', SC3_SOFT_RING); }
+    }
     if (grassPat) { ctx.fillStyle = grassPat; ctx.fillRect(0, 0, W, H); }
     else {
       const m = G.map;
@@ -7000,6 +7086,9 @@
       drawLayer(px.near, 0.8);
       ctx.drawImage(px.frame, 0, 0);
     }
+    // 第102轮 逐图幽暗：仅 xuechi / heisha 带 mood。铺在视差之后、贴地/装饰/角色之前，
+    // 于是远山与暗角一起被压成夜色，而主景与角色仍在罩之上保持清晰（每帧 +1 drawImage）。
+    if (sc3.on && sc3.moodTile) { ctx.drawImage(sc3.moodTile, 0, 0); SC3_MOOD_DRAWS++; }
     ctx.save();
     ctx.translate(-G.cam.x + sx, -G.cam.y + sy);
     if (px && px.grain) { ctx.fillStyle = px.grain; ctx.fillRect(G.cam.x, G.cam.y, W, H); }
@@ -7154,19 +7243,26 @@
       }
       // 神念拾取圈：进图头 1.2 秒露一下，让玩家看见驱物术的拾取范围到哪
       // 拾取本身每帧都在生效，圈只是提示，不常驻 —— 常驻会跟受击红边、境界光环打架
+      // 第102轮 UI 柔化：浅宣纸上这枚 r≈267 的青蓝亮圈是整屏最出戏的「几何圆」，
+      //   退成断续淡墨笔线（无彩、低 alpha、去实心蓝盘）；深底图 / 鎏金皮保持原提示强度，
+      //   免得深色场上反而读不出范围。ctx.save/restore 保证 setLineDash 不外泄。
+      const softRing = SC3_SOFT_RING;
       if (G.pickPulseAt != null && G.time - G.pickPulseAt < 1.3) {
         const k = 1 - (G.time - G.pickPulseAt) / 1.3;
         const rr = pickupR();
-        ctx.strokeStyle = 'rgba(140,220,255,' + (0.28 * k) + ')';
-        ctx.lineWidth = 1.5;
+        ctx.save();
+        if (softRing) ctx.setLineDash([9, 11]);
+        ctx.strokeStyle = softRing ? 'rgba(74,70,60,' + (0.10 * k).toFixed(3) + ')' : 'rgba(140,220,255,' + (0.28 * k) + ')';
+        ctx.lineWidth = softRing ? 1 : 1.5;
         ctx.beginPath(); ctx.arc(p.x, p.y, rr, 0, 6.28); ctx.stroke();
-        ctx.fillStyle = 'rgba(140,220,255,' + (0.06 * k) + ')';
+        ctx.fillStyle = softRing ? 'rgba(74,70,60,' + (0.016 * k).toFixed(3) + ')' : 'rgba(140,220,255,' + (0.06 * k) + ')';
         ctx.beginPath(); ctx.arc(p.x, p.y, rr, 0, 6.28); ctx.fill();
+        ctx.restore();
       }
-      // 境界光环：层数越高越亮
+      // 境界光环：层数越高越亮（浅纸上同款退成淡墨细环）
       if (G.realmIdx > 1) {
-        const pw = Math.min(0.5, 0.05 * G.realmIdx);
-        ctx.strokeStyle = 'rgba(255,220,120,' + pw + ')';
+        const pw = softRing ? Math.min(0.16, 0.015 * G.realmIdx) : Math.min(0.5, 0.05 * G.realmIdx);
+        ctx.strokeStyle = softRing ? 'rgba(74,70,60,' + pw + ')' : 'rgba(255,220,120,' + pw + ')';
         ctx.lineWidth = 1.5;
         ctx.beginPath(); ctx.arc(p.x, p.y, p.r + 8, 0, 6.28); ctx.stroke();
       }
@@ -7188,7 +7284,8 @@
     // 环绕：玄罡的金环 / 大庚剑阵的青碧飞剑
     for (const o of G.orbPos) drawOrb(o);
     // pixelfx 像素特效层：角色之后、飘字之前。关掉加法光（见 fxpix.js 文件头），否则在宣纸白底上等于没画
-    if (window.FX3) FX3.draw(ctx);
+    // 第102轮：浅纸上只把常驻领域法阵（hold）压到 0.42，一次性命中 / 暴击特效不受影响
+    if (window.FX3) FX3.draw(ctx, SC3_SOFT_RING ? 0.42 : 1);
     for (const pt of G.parts) if (!pt.rune) drawPart(pt);
     for (const t of G.texts) { ctx.globalAlpha = Math.max(0, t.life / t.maxlife); ctx.fillStyle = t.color; ctx.font = 'bold ' + t.size + 'px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(t.text, t.x, t.y); ctx.globalAlpha = 1; }
 
@@ -11868,6 +11965,13 @@
         terrainPat: s.on ? !!s.terrainPat : false,
         terrainA: s.on ? sc3TerrainAlpha(s.terrainTile) : null,
         spriteKinds: s.on ? Object.keys(s.spr) : [],
+        // 第102轮验收探针：mood 参数 / 积墨罩是否烘出 / alpha 分布（证明软边非硬块）/ UI 柔化作用域
+        mood: (s.on && s.mood) ? { name:s.mood.name, gloom:s.mood.gloom, vignette:s.mood.vignette, haze:s.mood.haze, focusInk:s.mood.focusInk } : null,
+        moodTile: s.on ? !!s.moodTile : false,
+        moodA: s.on ? sc3TerrainAlpha(s.moodTile) : null,
+        moodDraws: SC3_MOOD_DRAWS,
+        uiSoft: (typeof document !== 'undefined' && document.body && document.body.classList) ? document.body.classList.contains('sc3-paper') : false,
+        softRing: !!(s.on && save && save.skin === 'guigu'),
         zones: G.zones.length, hazards: G.hazards.length
       };
     },

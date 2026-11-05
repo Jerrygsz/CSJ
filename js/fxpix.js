@@ -110,15 +110,22 @@
     }
   }
 
-  function draw(ctx) {
+  // holdAlpha：常驻特效（hold 出来的领域法阵）在浅宣纸上单独压一档 —— 那圈像素符文
+  // 在白纸上比墨景还跳；一次性特效（命中 / 暴击 / 拾取）仍是原强度，玩法反馈不能一起抹掉。
+  // 由 game.js 的 render() 传入，缺省 1 = 逐字节保持旧行为。
+  function draw(ctx, holdAlpha) {
     if (!live.length) return;
+    const ha = (typeof holdAlpha === 'number') ? Math.max(0, Math.min(1, holdAlpha)) : 1;
     // 像素放大一律最近邻：插值会把像素网格糊掉，整套就白做了
     const smooth = ctx.imageSmoothingEnabled;
+    const prevA = ctx.globalAlpha;
     ctx.imageSmoothingEnabled = false;
     for (const it of live) {
       const s = it.scale;
+      ctx.globalAlpha = it.tag ? prevA * ha : prevA;
       ctx.drawImage(it.slot.cv, it.x - it.ox * s, it.y - it.oy * s, it.w * s, it.h * s);
     }
+    ctx.globalAlpha = prevA;
     ctx.imageSmoothingEnabled = smooth;
   }
 

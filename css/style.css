@@ -1646,3 +1646,84 @@ body[data-skin="guigu"] .shopauc {
   background: linear-gradient(90deg, rgba(143,79,46,0.12), rgba(143,79,46,0.03));
   border-color: rgba(143,79,46,0.40); color: #5a4118;
 }
+
+/* ================= 第102轮 · 浅宣纸上的 HUD 柔化 =================
+   Jerry 拍板：右侧三格快捷钮、顶部血条、底部技能栏、圆形提示圈在浅纸上比深底
+   更显眼，与「高级简约」冲突，本轮做 UI 柔化。
+   作用域只挂在 body.sc3-paper（由 game.js 在「收录图 + 水墨皮」时挂上）：
+     · 未收录的 153 张深底图：不挂 class，原 UI 逐字节不变、可读性不降；
+     · 鎏金皮：选择器已限定 data-skin="guigu"，不受影响。
+   手法只有两个字：退。去硬边 / 去双重墨框 / 去投影 / 去饱和 / 压 alpha，
+   不删任何元素、不改尺寸与定位、不动点击热区 —— 玩法信息仍在，只是不再抢画。 */
+body[data-skin="guigu"].sc3-paper #topbar {
+  background: linear-gradient(180deg, rgba(244,241,232,0.48) 0%, rgba(244,241,232,0.20) 52%, rgba(244,241,232,0) 82%);
+}
+
+/* 气血 / 煞气：纸签墨框 → 一道两端飞白的淡墨细条 */
+body[data-skin="guigu"].sc3-paper #hpwrap,
+body[data-skin="guigu"].sc3-paper #xpwrap {
+  background: rgba(244,239,224,0.28);
+  border: 1px solid rgba(58,53,44,0.14); border-radius: 1px;
+  box-shadow: none;
+}
+body[data-skin="guigu"].sc3-paper #hpfill {
+  background: linear-gradient(90deg, rgba(122,98,82,0.42), rgba(122,98,82,0.72) 62%, rgba(122,98,82,0.34));
+  -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,0.35) 0%, #000 12%, #000 74%, rgba(0,0,0,0.04) 100%);
+  mask-image: linear-gradient(90deg, rgba(0,0,0,0.35) 0%, #000 12%, #000 74%, rgba(0,0,0,0.04) 100%);
+}
+body[data-skin="guigu"].sc3-paper #xpfill {
+  background: linear-gradient(90deg, rgba(104,112,106,0.36), rgba(104,112,106,0.60) 62%, rgba(104,112,106,0.28));
+  -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,0.35) 0%, #000 12%, #000 74%, rgba(0,0,0,0.04) 100%);
+  mask-image: linear-gradient(90deg, rgba(0,0,0,0.35) 0%, #000 12%, #000 74%, rgba(0,0,0,0.04) 100%);
+}
+body[data-skin="guigu"].sc3-paper .barlabel,
+body[data-skin="guigu"].sc3-paper .barval {
+  color: rgba(46,42,34,0.52); text-shadow: none;
+}
+body[data-skin="guigu"].sc3-paper #stats { color: rgba(51,47,40,0.56); }
+body[data-skin="guigu"].sc3-paper #mapName {
+  color: rgba(82,77,67,0.60); border-left-color: rgba(74,68,56,0.26);
+}
+
+/* 右侧三格「硬边方印」：去掉内外双描边与投影，柔角、半透纸底，退成三枚淡印 */
+body[data-skin="guigu"].sc3-paper .qb {
+  border-radius: 10px;
+  background: rgba(244,239,224,0.30);
+  border: 1px solid rgba(58,53,44,0.18);
+  box-shadow: none;
+}
+body[data-skin="guigu"].sc3-paper .qb.empty { opacity: .34; }
+body[data-skin="guigu"].sc3-paper .qb:not(.empty) { opacity: .76; }
+body[data-skin="guigu"].sc3-paper .qb:active {
+  background: rgba(230,223,204,0.52); box-shadow: none; transform: scale(0.96);
+}
+body[data-skin="guigu"].sc3-paper .qb::after { color: rgba(120,70,54,0.52); opacity: .42; }
+body[data-skin="guigu"].sc3-paper .qb.pet {
+  border-color: rgba(63,89,65,0.28); box-shadow: none;
+}
+body[data-skin="guigu"].sc3-paper .qb .qb-cd {
+  border-radius: 10px; background: rgba(52,48,40,0.30); color: rgba(246,241,226,0.88);
+}
+
+/* 底部技能栏纸签：同款退法，图标压到近乎纸上的印痕 */
+body[data-skin="guigu"].sc3-paper #skillrow .pip {
+  background: rgba(244,239,224,0.32); border-color: rgba(58,53,44,0.16);
+  border-radius: 6px; box-shadow: none;
+}
+body[data-skin="guigu"].sc3-paper #skillrow .pip b { color: rgba(120,70,54,0.50); }
+body[data-skin="guigu"].sc3-paper .qb-icon,
+body[data-skin="guigu"].sc3-paper #skillrow .pip span { opacity: .48; }
+
+/* 右上「大衍 / 禁制」两枚胶囊顺带同调：实纸胶囊 → 淡墨细圈 */
+body[data-skin="guigu"].sc3-paper #autoBtn {
+  background: rgba(244,241,232,0.34); border-color: rgba(74,68,56,0.20);
+  box-shadow: none; color: rgba(80,76,66,0.72);
+}
+body[data-skin="guigu"].sc3-paper #autoBtn.on {
+  color: rgba(143,79,46,0.82); border-color: rgba(143,79,46,0.34); background: rgba(244,241,232,0.46);
+}
+body[data-skin="guigu"].sc3-paper #pauseBtn::before {
+  background: rgba(244,241,232,0.34); border-color: rgba(74,68,56,0.20); box-shadow: none;
+}
+body[data-skin="guigu"].sc3-paper #pauseBtn span { color: rgba(51,47,40,0.64); }
+body[data-skin="guigu"].sc3-paper #pauseBtn:active::before { background: rgba(234,229,213,0.62); }
