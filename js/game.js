@@ -4407,7 +4407,9 @@
   function genChunk(cx, cy) {
     let seed = ((cx * 73856093) ^ (cy * 19349663)) >>> 0;
     const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967295; };
-    const scheme = (G.map && G.map.decorScheme) || DEFAULT_DECOR;
+    // 批次3 样板图：用 biome 装饰权重表（12 种）覆盖；非白名单图仍走原 decorScheme，逐字节不变
+    const sc3 = ensureScenery3();
+    const scheme = (sc3.on && sc3.decor) ? sc3.decor : ((G.map && G.map.decorScheme) || DEFAULT_DECOR);
     for (let i = 0; i < 6; i++) {
       const x = cx * CH + rnd() * CH, y = cy * CH + rnd() * CH, t = rnd();
       let acc = 0, type = null;
@@ -5918,6 +5920,252 @@
     pxCache = { w: W, h: H, skin, frame, far, mid, near, grain };
     return pxCache;
   }
+
+  // ==========================================================================
+  // 批次3（P1-2 地标 / P1-3 biome 装饰包 / P1-4 贴地明度块）
+  //
+  // 路线判断（先于动手）：本游戏是 480×H 无限滚动割草场地，没有瓦片、没有世界边界、
+  // 没有地形数据。所以「贴图式地形」不做 PNG 贴图、不做逐格瓦片、不做 16 掩码 Wang 集 ——
+  // 那些要么硬边方块（一地马赛克），要么每屏几千次 drawImage（掉帧）。正解是：
+  //   ① 全部程序化离屏烘焙一次，按 skin/W/H/biome 缓存（换皮 / resize / 进图自动重建）；
+  //   ② 贴地层 = 一张可无缝平铺的软边明度块 tile，createPattern 后每帧 1 次 fillRect；
+  //   ③ 装饰 / 地标 = 小尺寸离屏 canvas，靠 blitSprOn 复用同一出口，视锥裁剪沿用 drawDecor；
+  //   ④ 软边用 radialGradient 模拟宣纸洇染，绝不用硬边矩形；笔法与 parallaxLayers 同源；
+  //   ⑤ 不引入彩色：墨皮用墨/纸灰阶，金皮用暗金暗部，全部低饱和；不碰 any 判定。
+  //
+  // 样板期（Jerry 拍板「先后山样板图」）：SC3_SAMPLE 白名单只含 houshan。
+  // 非白名单图 ensureScenery3() 直接返回 {on:false}，scheme / 绘制走原逻辑，逐字节不变。
+  // 下一轮全量只需把白名单换成「按 biome 恒启用」。
+  // ==========================================================================
+  const SC3_SAMPLE = new Set(['houshan']);
+  let SC3_ENABLED = true;   // 验收 A/B 探针：同一张图开/关三层，量每帧绘制增量（不影响正式运行）
+  const SC3_ON = (m) => !!(SC3_ENABLED && m && SC3_SAMPLE.has(m.id));
+  // 全量装饰类型：原 3 种 + 新增 9 种 = 12（P1-3 目标 ≥12）
+  const SC3_TYPES = ['tree', 'rock', 'tuft', 'bamboo', 'pine', 'moss', 'puddle', 'mist', 'ruin', 'lantern', 'banner', 'bone'];
+  // arc A~M → 6 组 biome，每组给「装饰权重表 / 地标候选 / 贴地块类型」
+  const SC3_BIOME = {
+    shanlin:  { decor: [['tree',0.16],['bamboo',0.16],['pine',0.12],['moss',0.14],['rock',0.14],['tuft',0.22]], marks: ['gate','stele','stair'], terrain: ['water','stair'] },
+    haiyu:    { decor: [['puddle',0.20],['mist',0.16],['ruin',0.12],['rock',0.16],['tuft',0.20],['tree',0.10]], marks: ['stele','banner','well'], terrain: ['water','cloud'] },
+    lingjie:  { decor: [['lantern',0.14],['banner',0.14],['mist',0.16],['tree',0.14],['rock',0.14],['tuft',0.22]], marks: ['gate','lantern','stele'], terrain: ['cloud','stair'] },
+    moyu:     { decor: [['bone',0.22],['ruin',0.18],['moss',0.12],['rock',0.20],['tuft',0.14],['tree',0.08]], marks: ['well','bones','stele'], terrain: ['cliff'] },
+    xianjie:  { decor: [['lantern',0.14],['banner',0.16],['pine',0.14],['mist',0.10],['rock',0.14],['tuft',0.22]], marks: ['gate','banner','lantern'], terrain: ['cloud'] },
+    huangye:  { decor: [['ruin',0.18],['bone',0.16],['moss',0.16],['rock',0.18],['tuft',0.20],['tree',0.06]], marks: ['well','stele','bones'], terrain: ['cliff','stair'] }
+  };
+  const SC3_ARC2BIOME = { A:'shanlin', B:'shanlin', C:'shanlin', D:'haiyu', E:'haiyu', F:'lingjie', G:'lingjie', H:'lingjie', I:'moyu', J:'moyu', K:'moyu', L:'xianjie', M:'xianjie', X:'huangye' };
+  function sc3BiomeOf(m) { return SC3_ARC2BIOME[(m && m.arc) || 'B'] || 'shanlin'; }
+  function sc3Hash(str) { let h = 2166136261; str = String(str || ''); for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = (h * 16777619) >>> 0; } return h >>> 0; }
+  // 双皮调色：全部低饱和，墨皮墨/纸灰阶，金皮暗金暗部（金皮不纸化）
+  function sc3Colors(jin) {
+    // 注：批次1 墨阶改造后 buildGrass 优先取 m.inkBg，两皮实际渲染出的都是浅纸底。
+    // 故新层统一走「淡墨灰阶」（金皮略暖、墨皮中性），不引入彩色、也不用近黑暗金（会在纸底显脏）。
+    return jin
+      ? { ink:'rgba(78,68,52,', deep:'rgba(64,56,42,', lite:'rgba(140,128,106,', line:'rgba(96,84,64,', water:'rgba(108,100,84,', fog:'rgba(88,80,64,' }
+      : { ink:'rgba(84,80,70,', deep:'rgba(66,62,54,', lite:'rgba(140,134,120,', line:'rgba(96,92,80,', water:'rgba(112,110,100,', fog:'rgba(92,88,76,' };
+  }
+  // 离屏画一笔的程序化精灵：所有新装饰 / 地标共用这一处，风格统一、无外部资源
+  function sc3Bake(kind, C, big) {
+    let c;
+    try { c = document.createElement('canvas'); } catch (e) { return null; }
+    if (!c || !c.getContext) return null;
+    const S = big ? 88 : 40, Hh = big ? 92 : 48;
+    c.width = S; c.height = Hh;
+    const g = c.getContext('2d');
+    if (!g || !g.beginPath) return null;              // smoke 垫片无真实绘图 API：降级
+    // 整体 alpha 再压一档：装饰/地标是「退到纸后面的远景」，不能跟主角同亮度（第83轮 L1/L2 口径）
+    const P = (col, a) => col + (a * 0.72).toFixed(3) + ')';
+    const rect = (x,y,w,h,col,a) => { g.fillStyle = P(col,a); g.fillRect(x,y,w,h); };
+    const line = (x0,y0,x1,y1,col,a,w) => { g.strokeStyle = P(col,a); g.lineWidth = w||1.4; g.lineCap='round'; g.beginPath(); g.moveTo(x0,y0); g.lineTo(x1,y1); g.stroke(); };
+    const ell = (x,y,rx,ry,col,a) => { g.fillStyle = P(col,a); g.beginPath(); g.ellipse(x,y,rx,ry,0,0,6.2832); g.fill(); };
+    const cx = S/2;
+    try {
+      switch (kind) {
+        case 'bamboo': // 竹：两三根略带弧度的竿 + 点叶簇（不画横节/对称斜叶，避免笔直交叉成井字栅栏）
+          for (let k=0;k<3;k++){
+            const bx=cx-9+k*9, top=8+k*4, lean=(k-1)*3;
+            g.strokeStyle=P(C.ink,0.6); g.lineWidth=2.0; g.lineCap='round';
+            g.beginPath(); g.moveTo(bx,Hh-3); g.quadraticCurveTo(bx+lean*0.4,Hh*0.5,bx+lean,top); g.stroke();
+            for(let l=0;l<4;l++){ const yy=top+3+l*6, d=(l%2?1:-1); ell(bx+lean+d*(3+l*1.2),yy-2,3.4,1.5,C.ink,0.42); }
+          }
+          break;
+        case 'pine': // 松：斜干 + 三层点叶墨团（不画横展针线，避免横竖交叉成网格）
+          line(cx+6,Hh-3,cx-5,12,C.ink,0.66,2.8);
+          for(let l=0;l<3;l++){ const yy=16+l*11, w=15-l*2; for(let n=0;n<6;n++){ const px=cx-3-w/2+n*(w/5); ell(px,yy+Math.sin(n*1.7)*2,3.2,1.9,C.ink,0.38); } }
+          break;
+        case 'moss': // 苔石：石形 + 顶部苔点
+          ell(cx,Hh-14,15,11,C.ink,0.5); ell(cx-6,Hh-19,7,5,C.lite,0.28);
+          for(let i=0;i<7;i++) ell(cx-10+i*3.2,Hh-23+((i*7)%5),1.6,1.2,C.deep,0.5);
+          break;
+        case 'puddle': // 水洼：浅椭圆 + 波纹
+          ell(cx,Hh-12,17,6,C.water,0.30); ell(cx,Hh-12,17,6,C.lite,0.08);
+          line(cx-9,Hh-13,cx+6,Hh-13,C.line,0.4,1); line(cx-6,Hh-10,cx+9,Hh-10,C.line,0.3,0.9);
+          break;
+        case 'mist': // 云气：三道横向柔带
+          for(let l=0;l<3;l++){ g.strokeStyle=P(C.fog,0.22-l*0.04); g.lineWidth=3.4-l*0.6; g.beginPath(); const yy=Hh-14-l*8; g.moveTo(3,yy); g.quadraticCurveTo(cx,yy-5,S-3,yy); g.stroke(); }
+          break;
+        case 'ruin': // 残垣：断墙 + 缺口 + 砖缝
+          rect(cx-13,Hh-30,10,27,C.ink,0.5); rect(cx+4,Hh-24,10,21,C.ink,0.45); rect(cx-13,Hh-34,26,5,C.deep,0.42);
+          line(cx-12,Hh-22,cx-4,Hh-22,C.line,0.4,0.9); line(cx+5,Hh-17,cx+13,Hh-17,C.line,0.35,0.9);
+          break;
+        case 'lantern': // 石灯：座 + 柱 + 灯室 + 顶盖
+          rect(cx-8,Hh-4,16,4,C.deep,0.6); rect(cx-3,Hh-20,6,16,C.ink,0.6);
+          rect(cx-7,Hh-29,14,9,C.ink,0.55); rect(cx-4,Hh-27,8,5,C.lite,0.35);
+          rect(cx-10,Hh-32,20,3,C.deep,0.65); line(cx,Hh-32,cx,Hh-35,C.deep,0.5,1.4);
+          break;
+        case 'banner': // 经幡：竖杆 + 下垂旗
+          line(cx-6,Hh-3,cx-6,6,C.ink,0.65,2); rect(cx-5,8,13,20,C.ink,0.4); rect(cx-5,8,13,3,C.deep,0.5);
+          line(cx-6,6,cx+9,6,C.deep,0.55,1.4); line(cx+1,12,cx+1,26,C.line,0.3,0.9);
+          break;
+        case 'bone': // 骨殖：两根长骨 + 一个颅骨
+          line(cx-11,Hh-6,cx+7,Hh-22,C.lite,0.5,3); line(cx+8,Hh-8,cx-9,Hh-24,C.lite,0.45,2.6);
+          ell(cx-8,Hh-24,3,3,C.lite,0.5); ell(cx+8,Hh-22,3,3,C.lite,0.45); ell(cx+2,Hh-12,5,4,C.lite,0.45);
+          ell(cx+0.5,Hh-13,1,1.1,C.deep,0.5); ell(cx+3.5,Hh-13,1,1.1,C.deep,0.5);
+          break;
+        // ---- 地标（big）----
+        case 'gate': // 山门：双柱 + 横梁 + 双檐
+          rect(cx-26,26,9,60,C.ink,0.5); rect(cx+17,26,9,60,C.ink,0.5);
+          rect(cx-30,20,60,7,C.deep,0.6); rect(cx-34,13,68,4,C.ink,0.5);
+          rect(cx-30,40,60,3,C.line,0.45); line(cx-34,13,cx-22,6,C.deep,0.4,2); line(cx+34,13,cx+22,6,C.deep,0.4,2);
+          break;
+        case 'stele': // 断碑：碑身 + 断裂斜顶 + 刻痕
+          rect(cx-15,22,30,62,C.ink,0.5); g.fillStyle=P(C.ink,0.5); g.beginPath(); g.moveTo(cx-15,22); g.lineTo(cx-8,14); g.lineTo(cx+3,20); g.lineTo(cx+15,12); g.lineTo(cx+15,26); g.closePath(); g.fill();
+          for(let i=0;i<4;i++) line(cx-9,36+i*10,cx+9,36+i*10,C.deep,0.4,1.1);
+          rect(cx-20,84,40,5,C.deep,0.55);
+          break;
+        case 'well': // 枯井：井圈 + 井壁 + 辘轳架
+          ell(cx,60,24,10,C.ink,0.5); ell(cx,60,17,6.5,C.deep,0.6);
+          rect(cx-24,60,5,24,C.ink,0.45); rect(cx+19,60,5,24,C.ink,0.45);
+          line(cx-22,58,cx-22,28,C.deep,0.55,2); line(cx+22,58,cx+22,28,C.deep,0.55,2); line(cx-22,28,cx+22,28,C.ink,0.5,2.2);
+          break;
+        case 'bones': // 骨堆：多根骨 + 颅骨
+          for(let i=0;i<5;i++) line(cx-24+i*3,80-i*4,cx+18-i*2,68+i*2,C.lite,0.42,2.6);
+          ell(cx-4,62,9,8,C.lite,0.5); ell(cx-7,61,1.8,2.2,C.deep,0.55); ell(cx-1,61,1.8,2.2,C.deep,0.55);
+          break;
+        case 'stair': // 石阶：三级横阶
+          for(let i=0;i<4;i++){ const y=52+i*9, w=20+i*7; rect(cx-w,y,w*2,7,C.ink,0.42-i*0.05); line(cx-w,y,cx+w,y,C.deep,0.4,1); }
+          break;
+        case 'lanternmark': // 幡杆地标（高杆 + 长幡）
+          line(cx,Hh-3,cx,8,C.ink,0.6,2.6); rect(cx-1,12,15,34,C.ink,0.38); rect(cx-1,12,15,3,C.deep,0.5);
+          line(cx,8,cx+18,8,C.deep,0.5,1.6); line(cx+7,18,cx+7,42,C.line,0.3,1);
+          break;
+        case 'lanternbig': // 大石灯地标：双层基座 + 灯柱 + 灯室 + 飞檐
+          rect(cx-20,Hh-7,40,6,C.deep,0.55); rect(cx-14,Hh-12,28,6,C.ink,0.5);
+          rect(cx-6,Hh-40,12,28,C.ink,0.5); rect(cx-14,Hh-58,28,18,C.ink,0.48);
+          rect(cx-9,Hh-55,18,11,C.lite,0.32); rect(cx-19,Hh-62,38,5,C.deep,0.6);
+          line(cx,Hh-62,cx,Hh-68,C.deep,0.5,2); ell(cx,Hh-70,3,3,C.lite,0.4);
+          break;
+        default: return null;
+      }
+      // 软边淡出罩：destination-in 径向渐变，把精灵四周 alpha 渐隐到 0，像墨洇进宣纸。
+      // 这一步是「不像硬边贴片 / 不马赛克」的关键——尤其断碑、石阶、山门这类带直边的地标。
+      if (g.globalCompositeOperation !== undefined && g.createRadialGradient) {
+        const rg = g.createRadialGradient(cx, Hh*0.5, Math.min(S,Hh)*0.18, cx, Hh*0.5, Math.max(S,Hh)*0.60);
+        rg.addColorStop(0, 'rgba(0,0,0,1)'); rg.addColorStop(0.62, 'rgba(0,0,0,0.82)'); rg.addColorStop(1, 'rgba(0,0,0,0)');
+        g.globalCompositeOperation = 'destination-in'; g.fillStyle = rg; g.fillRect(0,0,S,Hh);
+        g.globalCompositeOperation = 'source-over';
+      }
+    } catch (e) { return null; }
+    return c;
+  }
+  // 贴地层 tile：软边明度块（radialGradient 洇染），3×3 偏移保证无缝平铺；四角摆块、中央留白
+  function sc3BakeTerrain(C, kinds) {
+    let c;
+    try { c = document.createElement('canvas'); } catch (e) { return null; }
+    if (!c || !c.getContext) return null;
+    const tw = Math.max(240, W), th = Math.max(400, H);
+    c.width = tw; c.height = th;
+    const g = c.getContext('2d');
+    if (!g || !g.createRadialGradient) return null;   // smoke 垫片：降级
+    try {
+      // 软边椭圆明度块：中心浓、边缘透，跨边界按 3×3 偏移补画 → pattern 平铺无硬接缝
+      const blot = (bx, by, rx, ry, col, a) => {
+        for (let ox=-1; ox<=1; ox++) for (let oy=-1; oy<=1; oy++) {
+          const x=bx+ox*tw, y=by+oy*th;
+          if (x < -rx || x > tw+rx || y < -ry || y > th+ry) continue;
+          g.save(); g.translate(x,y); g.scale(1, ry/rx);
+          const rg = g.createRadialGradient(0,0,0,0,0,rx);
+          rg.addColorStop(0, col + a + ')'); rg.addColorStop(0.55, col + (a*0.45).toFixed(3) + ')'); rg.addColorStop(1, col + '0)');
+          g.fillStyle = rg; g.beginPath(); g.arc(0,0,rx,0,6.2832); g.fill(); g.restore();
+        }
+      };
+      const has = (k) => kinds.indexOf(k) >= 0;
+      // 四角 + 边缘构图，正中央（角色/法阵区）保持极低明度，守「中央留白」
+      if (has('water')) { blot(tw*0.16, th*0.80, tw*0.30, th*0.10, C.water, 0.13); blot(tw*0.86, th*0.30, tw*0.22, th*0.08, C.water, 0.10); }
+      if (has('cloud')) { blot(tw*0.10, th*0.20, tw*0.34, th*0.09, C.fog, 0.10); blot(tw*0.90, th*0.74, tw*0.30, th*0.08, C.fog, 0.09); }
+      if (has('cliff')) { blot(tw*0.02, th*0.52, tw*0.18, th*0.20, C.deep, 0.12); blot(tw*0.98, th*0.12, tw*0.16, th*0.16, C.deep, 0.10); }
+      if (has('stair')) {  // 石阶是几条淡横向带，不是硬矩形：用扁椭圆软边叠出来
+        for (let i=0;i<3;i++) blot(tw*0.72, th*(0.62+i*0.075), tw*0.20, th*0.016, C.ink, 0.055);
+      }
+      // 一道极淡的坡皴，跟视差层 bank 呼应，避免纯色块发闷
+      g.strokeStyle = C.line + '0.06)'; g.lineWidth = 1.2; g.beginPath();
+      for (let x=0; x<=tw; x+=8) { const y = th*0.90 - 10*Math.sin(x/tw*Math.PI*2)*Math.sin(x/tw*Math.PI); if(x===0) g.moveTo(x,y); else g.lineTo(x,y); }
+      g.stroke();
+    } catch (e) { return null; }
+    return c;
+  }
+  let sc3Cache = null;
+  function ensureScenery3() {
+    const m = G.map;
+    if (!SC3_ON(m)) { sc3Cache = null; return { on:false }; }
+    const skin = (save && save.skin === 'guigu') ? 'guigu' : 'jin';
+    const biome = sc3BiomeOf(m);
+    const key = skin + '|' + W + '|' + H + '|' + biome + '|' + m.id;
+    if (sc3Cache && sc3Cache.key === key) return sc3Cache;
+    const C = sc3Colors(skin !== 'guigu');
+    const def = SC3_BIOME[biome];
+    // 精灵：9 种装饰（小）+ 3 个地标候选类型（大），注入局部表，不碰 window.Sprites
+    const spr = {};
+    for (const k of ['bamboo','pine','moss','puddle','mist','ruin','lantern','banner','bone']) spr[k] = sc3Bake(k, C, false);
+    // 地标名 → 大画布 case 的规范映射：避免把小装饰 case 画到大画布上（坐标系按 40×48 写死会缩成一团）
+    const SC3_MARK2CASE = { gate:'gate', stele:'stele', well:'well', bones:'bones', stair:'stair', banner:'lanternmark', lantern:'lanternbig' };
+    const marks = {};
+    for (const k of def.marks) marks[k] = sc3Bake(SC3_MARK2CASE[k] || k, C, true);
+    // 地标：按 map.id 确定性生成 1~3 个世界坐标固定点（初始相机视野附近，攒空间记忆）
+    const sd = sc3Hash(m.id), rnd = (n) => ((sd >>> (n*3)) % 1000) / 1000;
+    const nMarks = 1 + (sd % 3);
+    const landmarks = [];
+    for (let i=0;i<nMarks;i++) {
+      const k = def.marks[(sd+i) % def.marks.length];
+      landmarks.push({ kind: k, spr: marks[k], x: -W*0.30 + rnd(i+1)*W*0.60, y: -H*0.26 + rnd(i+4)*H*0.52, s: 0.9 + rnd(i+7)*0.3 });
+    }
+    // 贴地层：烘焙 tile → createPattern（每帧 1 次 fillRect）
+    let terrainPat = null;
+    const tile = sc3BakeTerrain(C, def.terrain);
+    if (tile) { try { terrainPat = ctx.createPattern(tile, 'repeat'); } catch (e) { terrainPat = null; } }
+    sc3Cache = { on:true, key, skin, biome, spr, marks, landmarks, terrainPat, terrainTile: tile, decor:def.decor, C };
+    return sc3Cache;
+  }
+  // 装饰绘制出口：新类型用 blitSprOn 画局部表里的离屏 canvas（沿用同一变换与 alpha 纪律）
+  function sc3DrawDecor(d, sc3, alpha) {
+    const c = sc3.spr[d.type];
+    if (c) blitSprOn(ctx, c, d.x, d.y, d.s, false, null, alpha);
+  }
+  function sc3DrawLandmarks(sc3) {
+    for (const lm of sc3.landmarks) {
+      if (!lm.spr) continue;
+      if (lm.x < G.cam.x - 120 || lm.x > G.cam.x + W + 120 || lm.y < G.cam.y - 120 || lm.y > G.cam.y + H + 120) continue;
+      blitSprOn(ctx, lm.spr, lm.x, lm.y, lm.s, false, null, 0.45);   // 明度压到 0.45（报告 L2 口径 0.55 再收一档），不与主角抢视线
+    }
+  }
+  // 验收探针：量贴地 tile 的 alpha 分布，证明是「连续渐变的软边淡墨块」而非硬边 0/255 二值贴片。
+  // 只在 QA 调试口调用（scenery3()），不在渲染热路径里。垫片无真实像素时安全返回 null。
+  function sc3TerrainAlpha(tile) {
+    if (!tile || !tile.getContext) return null;
+    try {
+      const g = tile.getContext('2d');
+      if (!g || !g.getImageData) return null;
+      const d = g.getImageData(0, 0, tile.width, tile.height).data;
+      if (!d || d.length < 4) return null;
+      let nz = 0, maxA = 0, solid = 0; const seen = new Set();
+      for (let i = 3; i < d.length; i += 4) {
+        const a = d[i];
+        if (a > 2) nz++;
+        if (a > maxA) maxA = a;
+        if (a >= 250) solid++;
+        seen.add(a);
+      }
+      return { w: tile.width, h: tile.height, nonZero: nz, maxAlpha: maxA, solidPixels: solid, distinctAlpha: seen.size };
+    } catch (e) { return null; }
+  }
   function buildGrass(m) {
     // 水墨皮走按推进序预算的同色系墨阶（m.inkBg，已由数据层算好）；其余皮肤走原底色。
     const isGuigu = save && save.skin === 'guigu';
@@ -6153,6 +6401,7 @@
   }
   function drawDecor() {
     const list = G.decor;
+    const sc3 = ensureScenery3();   // 命中缓存时只是一次 key 比较，非白名单图直接 {on:false}
     for (const d of list) {
       if (d.x < G.cam.x - 60 || d.x > G.cam.x + W + 60 || d.y < G.cam.y - 60 || d.y > G.cam.y + H + 60) continue;
       // 近浓远淡：屏幕纵向做大气透视——远景减透明度退后（墨皮融纸成淡、金皮融暗底成退），近景满墨。
@@ -6161,7 +6410,9 @@
       const alpha = 0.55 + 0.45 * dr;
       const prevA = ctx.globalAlpha;
       ctx.globalAlpha = alpha;
-      if (d.type === 'tree') drawSpr('tree', d.x, d.y, d.s, false);
+      // 批次3 样板图：12 种装饰里的新类型走局部离屏精灵表；原 3 种仍走 window.Sprites 老路径
+      if (sc3.on && d.type !== 'tree' && d.type !== 'rock' && d.type !== 'tuft') sc3DrawDecor(d, sc3, alpha);
+      else if (d.type === 'tree') drawSpr('tree', d.x, d.y, d.s, false);
       else if (d.type === 'rock') drawSpr('rock', d.x, d.y, d.s, false);
       else drawSpr('tuft', d.x, d.y, 1.4, false);
       ctx.globalAlpha = prevA;
@@ -6402,8 +6653,14 @@
     ctx.save();
     ctx.translate(-G.cam.x + sx, -G.cam.y + sy);
     if (px && px.grain) { ctx.fillStyle = px.grain; ctx.fillRect(G.cam.x, G.cam.y, W, H); }
+    // 批次3 P1-4：贴地明度块，离屏烘焙一次 → 每帧仅 1 次 fillRect（世界坐标锚定，随相机 1:1 走）。
+    // 与 px.grain 同款 createPattern，纯视觉，不进 G.zones / G.hazards。
+    const sc3 = ensureScenery3();
+    if (sc3.on && sc3.terrainPat) { ctx.fillStyle = sc3.terrainPat; ctx.fillRect(G.cam.x, G.cam.y, W, H); }
 
     drawDecor();
+    // P1-2 地标：画在装饰之上、地面特效之下（满屏特效也不会盖住），明度 0.55，不参与碰撞
+    if (sc3.on) sc3DrawLandmarks(sc3);
     // 地面特效先铺：符文环是画在地上的，等角色都画完再画就成呼啦圈了
     for (const pt of G.parts) if (pt.rune) drawPart(pt);
     for (const g of G.gems) { if (g.kind === 'stone') drawStone(g); else drawSpr('gem', g.x, g.y, 1.6, false); }
@@ -11218,6 +11475,22 @@
     skin(name) { if (name === undefined) return save.skin; applySkin(name === 'guigu' ? 'guigu' : 'jin'); return save.skin; },
     grassTile() { return buildGrass._tile || null; },
     wash() { return parallaxLayers().frame; },
+    // 批次3 验收口：查样板图 biome / 装饰类型 / 地标 / 贴地层状态。不暴露 canvas（跨边界会丢属性）
+    renderOnce() { if (G.state === 'play') { render(); return true; } return false; },
+    scenery3Enable(v) { SC3_ENABLED = !!v; sc3Cache = null; return SC3_ENABLED; },
+    scenery3() {
+      const s = ensureScenery3();
+      return {
+        on: s.on, sample: Array.from(SC3_SAMPLE), types: SC3_TYPES.slice(),
+        biome: s.on ? s.biome : null, skin: s.on ? s.skin : null,
+        decorScheme: s.on ? s.decor.map(x => x.slice()) : null,
+        landmarks: s.on ? s.landmarks.map(l => ({ kind: l.kind, x: +l.x.toFixed(1), y: +l.y.toFixed(1), hasSpr: !!l.spr })) : [],
+        terrainPat: s.on ? !!s.terrainPat : false,
+        terrainA: s.on ? sc3TerrainAlpha(s.terrainTile) : null,
+        spriteKinds: s.on ? Object.keys(s.spr) : [],
+        zones: G.zones.length, hazards: G.hazards.length
+      };
+    },
     cave(id) { if (CAVES[id] && save.caves.indexOf(id) < 0) { save.caves.push(id); writeSave(); } openCave(id); return G.caveId; },    openAllCaves() { for (const k in CAVES) if (save.caves.indexOf(k) < 0) save.caves.push(k); writeSave(); renderWorldMap(); return save.caves.length; },
     caveTab(t) { G.caveTab = t; if (G.state === 'cave') renderCave(); return G.caveTab; },
     equip(id) { equipGear(id); return save.equip; },
