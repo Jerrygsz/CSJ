@@ -1,5 +1,5 @@
 // 自动生成，请勿手改。唯一真源：../../mapCodex.json
-// 生成器：_scratch/build-mapcodex.mjs ｜ 批次5 共 88 张（首批 18 + 第二批 11 + 第三批 21 + 第四批 19 + 第五批 19，人界篇第一卷～第七卷 + 灵界篇前两段）
+// 生成器：_scratch/build-mapcodex.mjs ｜ 批次6 共 107 张（首批 18 + 第二批 11 + 第三批 21 + 第四批 19 + 第五批 19 + 第六批 19，人界篇第一卷～第七卷 + 灵界篇第十卷魔界之战）
 // 只含渲染所需字段（含逐图 composition 构图章法）；考据正文 / 原文摘引 / 差异标注见《地图原著考据台账.md》。
 // 风格基线：Jerry 定调，标杆 fanren/qa/shot-codex-qixuan.png；后续每批沿用，不按 arc 分组。
 window.MAP_CODEX_STYLE = {
@@ -11,7 +11,7 @@ window.MAP_CODEX_STYLE = {
     "a": "#e6e0cf",
     "b": "#d0c8b2",
     "source": "qixuan.inkBg（批次1 已算好的墨阶三元组）",
-    "scope": "72 张有 inkBg 的图由 buildGrass 直接出纸；16 张无 inkBg 的增补图由视觉层 sc3BakePaper() 补铺同款 tile，不改 m.bg / m.inkBg；分组由真源 hasInkBg 驱动",
+    "scope": "90 张有 inkBg 的图由 buildGrass 直接出纸；17 张无 inkBg 的增补图由视觉层 sc3BakePaper() 补铺同款 tile，不改 m.bg / m.inkBg；分组由真源 hasInkBg 驱动",
     "deepInk": "原深底图改用淡墨积染表达幽暗：纸底不变，贴地墨块与配景墨色略加重，主景仍为浓墨",
     "rollback": "__FR.scenery3Enable(false) 关掉三层即恢复原深底；或移除 MAP_CODEX_STYLE.paper 触发安全降级"
   },
@@ -27,9 +27,9 @@ window.MAP_CODEX_STYLE = {
     "paletteMax": 3
   },
   "conformance": {
-    "native": "qixuan / houshan / mishi / yelang / jiayuan / tainan / huangfeng / yaoyuan / xuese / zhuji / yanjia / jingu / guchuan / kuixing / liulian / haian / tianxing / ningcui / jiedan / miaoyin / qingzhu / guxiu / xutian / wuzhong / waihai / yuanyao / yinming / bianhai / luoyun / shixiao / sanjian / yinyue / jieying / jiaoyihui / cangkun / yanyue / huanglong / bianjie / yinluo / jixi / zhuimo / lingmiao / mulan / dajin / kunwu / zhenmo / xiaoji / xutian2 / xinggong / kunpeng / luoyun2 / tianlan / liudao / jiezi / feisheng / qinluo / anyuan / luori / shanku / tianyuan / lingdi / muzu / zhenchan / tianpeng / minghe / lianxu / fengyuan / huohu / shisan / mojin / guanghan / heti_guan（72 张，数据层已有 inkBg）",
-    "patched": "luxiong / mkuang / zhangtie / yanwu / yaopu / heixiang / xuechi / heisha / shiku / linxiong / luoyunyaoyuan / fujia / huixiang / zijian / yuyang / yuyang_dou（16 张，视觉层补铺宣纸）",
-    "outOfScope": "第102轮 Jerry 拍板做 UI 柔化：右侧 3 个方形按钮 / 圆形提示圈 / 血条 / 技能栏已在 body.sc3-paper 作用域下退成淡墨软边，仅「收录图 + 水墨皮」生效；未收录 83 张与鎏金皮零改动（原「本轮未改」边界已取消）"
+    "native": "qixuan / houshan / mishi / yelang / jiayuan / tainan / huangfeng / yaoyuan / xuese / zhuji / yanjia / jingu / guchuan / kuixing / liulian / haian / tianxing / ningcui / jiedan / miaoyin / qingzhu / guxiu / xutian / wuzhong / waihai / yuanyao / yinming / bianhai / luoyun / shixiao / sanjian / yinyue / jieying / jiaoyihui / cangkun / yanyue / huanglong / bianjie / yinluo / jixi / zhuimo / lingmiao / mulan / dajin / kunwu / zhenmo / xiaoji / xutian2 / xinggong / kunpeng / luoyun2 / tianlan / liudao / jiezi / feisheng / qinluo / anyuan / luori / shanku / tianyuan / lingdi / muzu / zhenchan / tianpeng / minghe / lianxu / fengyuan / huohu / shisan / mojin / guanghan / heti_guan / liangzu / jiuxian / heiyu / longjia / shengdao / zhenling / mojie / diyuan2 / moban / yitian / huangquan / tianzhan / xueya / huanxiao / moyuan / modajie / lanpu / muzu2（90 张，数据层已有 inkBg）",
+    "patched": "luxiong / mkuang / zhangtie / yanwu / yaopu / heixiang / xuechi / heisha / shiku / linxiong / luoyunyaoyuan / fujia / huixiang / zijian / yuyang / yuyang_dou / linghuang（17 张，视觉层补铺宣纸）",
+    "outOfScope": "第102轮 Jerry 拍板做 UI 柔化：右侧 3 个方形按钮 / 圆形提示圈 / 血条 / 技能栏已在 body.sc3-paper 作用域下退成淡墨软边，仅「收录图 + 水墨皮」生效；未收录 64 张与鎏金皮零改动（原「本轮未改」边界已取消）"
   },
   "principles": 9
 };
@@ -4799,6 +4799,918 @@ window.MAP_CODEX = {
       "focusScale": 2.1
     },
     "batch": 5,
+    "hasInkBg": true
+  },
+  "linghuang": {
+    "decor": [
+      [
+        "rock",
+        0.3
+      ],
+      [
+        "banner",
+        0.28
+      ],
+      [
+        "mist",
+        0.26
+      ],
+      [
+        "tuft",
+        0.16
+      ]
+    ],
+    "marks": [
+      "banner"
+    ],
+    "landmarks": [
+      {
+        "kind": "banner",
+        "name": "灵皇大比旗"
+      }
+    ],
+    "terrain": [
+      "cliff"
+    ],
+    "tone": 0.95,
+    "composition": {
+      "focus": "灵皇圣城台与一侧大比旗幡",
+      "focusCase": "clanhall",
+      "layout": "band",
+      "breath": 2,
+      "clusters": 2,
+      "palette": [
+        "rock",
+        "banner",
+        "mist"
+      ],
+      "focusScale": 1.8
+    },
+    "batch": 6,
+    "hasInkBg": false
+  },
+  "liangzu": {
+    "decor": [
+      [
+        "rock",
+        0.34
+      ],
+      [
+        "banner",
+        0.24
+      ],
+      [
+        "mist",
+        0.24
+      ],
+      [
+        "bone",
+        0.18
+      ]
+    ],
+    "marks": [
+      "gate"
+    ],
+    "landmarks": [
+      {
+        "kind": "gate",
+        "name": "天渊城擎天石塔门"
+      }
+    ],
+    "terrain": [
+      "cliff"
+    ],
+    "tone": 0.95,
+    "composition": {
+      "focus": "天渊城两座擎天石塔间的楼阁",
+      "focusCase": "clanhall",
+      "layout": "diagonal",
+      "breath": 2,
+      "clusters": 2,
+      "palette": [
+        "rock",
+        "banner",
+        "mist"
+      ],
+      "focusScale": 1.9
+    },
+    "batch": 6,
+    "hasInkBg": true
+  },
+  "jiuxian": {
+    "decor": [
+      [
+        "rock",
+        0.3
+      ],
+      [
+        "mist",
+        0.3
+      ],
+      [
+        "pine",
+        0.22
+      ],
+      [
+        "banner",
+        0.18
+      ]
+    ],
+    "marks": [
+      "gate"
+    ],
+    "landmarks": [
+      {
+        "kind": "gate",
+        "name": "九仙山迎仙宫门"
+      }
+    ],
+    "terrain": [
+      "cliff"
+    ],
+    "tone": 0.97,
+    "composition": {
+      "focus": "九仙山峰顶云海中的迎仙宫殿宇",
+      "focusCase": "stormpeak",
+      "layout": "frame",
+      "breath": 3,
+      "clusters": 2,
+      "palette": [
+        "rock",
+        "mist",
+        "pine"
+      ],
+      "focusScale": 1.9
+    },
+    "batch": 6,
+    "hasInkBg": true
+  },
+  "heiyu": {
+    "decor": [
+      [
+        "rock",
+        0.34
+      ],
+      [
+        "mist",
+        0.3
+      ],
+      [
+        "ruin",
+        0.2
+      ],
+      [
+        "bone",
+        0.16
+      ]
+    ],
+    "marks": [
+      "gate"
+    ],
+    "landmarks": [
+      {
+        "kind": "gate",
+        "name": "黑域入口巨门"
+      }
+    ],
+    "terrain": [
+      "cloud"
+    ],
+    "tone": 0.78,
+    "composition": {
+      "focus": "黑域微敞的入口巨门与门外浓墨",
+      "focusCase": "narrowgate",
+      "layout": "corner",
+      "breath": 2,
+      "clusters": 1,
+      "palette": [
+        "rock",
+        "mist",
+        "ruin"
+      ],
+      "focusScale": 1.7
+    },
+    "batch": 6,
+    "hasInkBg": true
+  },
+  "longjia": {
+    "decor": [
+      [
+        "rock",
+        0.32
+      ],
+      [
+        "banner",
+        0.26
+      ],
+      [
+        "mist",
+        0.24
+      ],
+      [
+        "tuft",
+        0.18
+      ]
+    ],
+    "marks": [
+      "banner"
+    ],
+    "landmarks": [
+      {
+        "kind": "banner",
+        "name": "万灵台阵旗"
+      }
+    ],
+    "terrain": [
+      "cliff"
+    ],
+    "tone": 0.95,
+    "composition": {
+      "focus": "万灵台青石法阵与四周阵旗",
+      "focusCase": "stonering",
+      "layout": "ring",
+      "breath": 2,
+      "clusters": 2,
+      "palette": [
+        "rock",
+        "banner",
+        "mist"
+      ],
+      "focusScale": 1.8
+    },
+    "batch": 6,
+    "hasInkBg": true
+  },
+  "shengdao": {
+    "decor": [
+      [
+        "rock",
+        0.3
+      ],
+      [
+        "mist",
+        0.28
+      ],
+      [
+        "banner",
+        0.24
+      ],
+      [
+        "pine",
+        0.18
+      ]
+    ],
+    "marks": [
+      "gate"
+    ],
+    "landmarks": [
+      {
+        "kind": "gate",
+        "name": "圣岛迷天楼门"
+      }
+    ],
+    "terrain": [
+      "cliff"
+    ],
+    "tone": 0.96,
+    "composition": {
+      "focus": "圣岛一座瘦高的迷天楼",
+      "focusCase": "pagoda",
+      "layout": "axis",
+      "breath": 3,
+      "clusters": 1,
+      "palette": [
+        "rock",
+        "mist",
+        "banner"
+      ],
+      "focusScale": 1.9
+    },
+    "batch": 6,
+    "hasInkBg": true
+  },
+  "zhenling": {
+    "decor": [
+      [
+        "rock",
+        0.3
+      ],
+      [
+        "banner",
+        0.28
+      ],
+      [
+        "mist",
+        0.26
+      ],
+      [
+        "bone",
+        0.16
+      ]
+    ],
+    "marks": [
+      "stele"
+    ],
+    "landmarks": [
+      {
+        "kind": "stele",
+        "name": "真灵世家排位碑"
+      }
+    ],
+    "terrain": [
+      "cliff"
+    ],
+    "tone": 0.95,
+    "composition": {
+      "focus": "万灵台青石盆与世家献宝列",
+      "focusCase": "clanhall",
+      "layout": "ring",
+      "breath": 2,
+      "clusters": 2,
+      "palette": [
+        "rock",
+        "banner",
+        "mist"
+      ],
+      "focusScale": 1.7
+    },
+    "batch": 6,
+    "hasInkBg": true
+  },
+  "mojie": {
+    "decor": [
+      [
+        "rock",
+        0.32
+      ],
+      [
+        "mist",
+        0.3
+      ],
+      [
+        "ruin",
+        0.2
+      ],
+      [
+        "bone",
+        0.18
+      ]
+    ],
+    "marks": [
+      "gate"
+    ],
+    "landmarks": [
+      {
+        "kind": "gate",
+        "name": "魔界入口"
+      }
+    ],
+    "terrain": [
+      "cloud"
+    ],
+    "tone": 0.85,
+    "composition": {
+      "focus": "魔界入口裂隙与内里淡墨天色",
+      "focusCase": "narrowgate",
+      "layout": "void",
+      "breath": 3,
+      "clusters": 1,
+      "palette": [
+        "rock",
+        "mist",
+        "ruin"
+      ],
+      "focusScale": 1.8
+    },
+    "batch": 6,
+    "hasInkBg": true
+  },
+  "diyuan2": {
+    "decor": [
+      [
+        "rock",
+        0.34
+      ],
+      [
+        "mist",
+        0.28
+      ],
+      [
+        "moss",
+        0.22
+      ],
+      [
+        "bone",
+        0.16
+      ]
+    ],
+    "marks": [
+      "gate"
+    ],
+    "landmarks": [
+      {
+        "kind": "gate",
+        "name": "地渊青色城门"
+      }
+    ],
+    "terrain": [
+      "cliff"
+    ],
+    "tone": 0.9,
+    "composition": {
+      "focus": "地渊青色城门与门后洞府",
+      "focusCase": "stoneroom",
+      "layout": "corner",
+      "breath": 2,
+      "clusters": 2,
+      "palette": [
+        "rock",
+        "mist",
+        "moss"
+      ],
+      "focusScale": 1.8
+    },
+    "batch": 6,
+    "hasInkBg": true
+  },
+  "moban": {
+    "decor": [
+      [
+        "rock",
+        0.3
+      ],
+      [
+        "mist",
+        0.28
+      ],
+      [
+        "pine",
+        0.24
+      ],
+      [
+        "bone",
+        0.18
+      ]
+    ],
+    "marks": [
+      "stele"
+    ],
+    "landmarks": [
+      {
+        "kind": "stele",
+        "name": "魔斑巨树碑"
+      }
+    ],
+    "terrain": [
+      "cloud"
+    ],
+    "tone": 0.8,
+    "composition": {
+      "focus": "直耸巨树腰部的阁楼与翻滚魔斑墨团",
+      "focusCase": "battleline",
+      "layout": "diagonal",
+      "breath": 3,
+      "clusters": 2,
+      "palette": [
+        "rock",
+        "mist",
+        "pine"
+      ],
+      "focusScale": 1.9
+    },
+    "batch": 6,
+    "hasInkBg": true
+  },
+  "yitian": {
+    "decor": [
+      [
+        "rock",
+        0.38
+      ],
+      [
+        "banner",
+        0.24
+      ],
+      [
+        "mist",
+        0.22
+      ],
+      [
+        "bone",
+        0.16
+      ]
+    ],
+    "marks": [
+      "gate"
+    ],
+    "landmarks": [
+      {
+        "kind": "gate",
+        "name": "倚天城巨墙门"
+      }
+    ],
+    "terrain": [
+      "cliff"
+    ],
+    "tone": 0.85,
+    "composition": {
+      "focus": "倚天城一段厚重巨墙与墙头阵线",
+      "focusCase": "battleline",
+      "layout": "band",
+      "breath": 2,
+      "clusters": 2,
+      "palette": [
+        "rock",
+        "banner",
+        "mist"
+      ],
+      "focusScale": 1.9
+    },
+    "batch": 6,
+    "hasInkBg": true
+  },
+  "huangquan": {
+    "decor": [
+      [
+        "rock",
+        0.32
+      ],
+      [
+        "mist",
+        0.3
+      ],
+      [
+        "moss",
+        0.22
+      ],
+      [
+        "puddle",
+        0.16
+      ]
+    ],
+    "marks": [
+      "well"
+    ],
+    "landmarks": [
+      {
+        "kind": "well",
+        "name": "黄泉地火池"
+      }
+    ],
+    "terrain": [
+      "water"
+    ],
+    "tone": 0.86,
+    "composition": {
+      "focus": "黄泉地火池与池边枯石",
+      "focusCase": "pool",
+      "layout": "frame",
+      "breath": 2,
+      "clusters": 1,
+      "palette": [
+        "rock",
+        "mist",
+        "moss"
+      ],
+      "focusScale": 1.7
+    },
+    "batch": 6,
+    "hasInkBg": true
+  },
+  "tianzhan": {
+    "decor": [
+      [
+        "rock",
+        0.36
+      ],
+      [
+        "banner",
+        0.22
+      ],
+      [
+        "mist",
+        0.24
+      ],
+      [
+        "bone",
+        0.18
+      ]
+    ],
+    "marks": [
+      "banner"
+    ],
+    "landmarks": [
+      {
+        "kind": "banner",
+        "name": "天渊城石塔旗"
+      }
+    ],
+    "terrain": [
+      "cliff"
+    ],
+    "tone": 0.85,
+    "composition": {
+      "focus": "天渊城悬浮巨殿与拔地石塔群",
+      "focusCase": "floatingpalace",
+      "layout": "axis",
+      "breath": 2,
+      "clusters": 2,
+      "palette": [
+        "rock",
+        "banner",
+        "mist"
+      ],
+      "focusScale": 2
+    },
+    "batch": 6,
+    "hasInkBg": true
+  },
+  "xueya": {
+    "decor": [
+      [
+        "rock",
+        0.34
+      ],
+      [
+        "banner",
+        0.22
+      ],
+      [
+        "mist",
+        0.26
+      ],
+      [
+        "bone",
+        0.18
+      ]
+    ],
+    "marks": [
+      "gate"
+    ],
+    "landmarks": [
+      {
+        "kind": "gate",
+        "name": "血鸦城城门"
+      }
+    ],
+    "terrain": [
+      "cliff"
+    ],
+    "tone": 0.88,
+    "composition": {
+      "focus": "血鸦城城楼门与门内坊肆",
+      "focusCase": "clanhall",
+      "layout": "frame",
+      "breath": 2,
+      "clusters": 2,
+      "palette": [
+        "rock",
+        "banner",
+        "mist"
+      ],
+      "focusScale": 1.8
+    },
+    "batch": 6,
+    "hasInkBg": true
+  },
+  "huanxiao": {
+    "decor": [
+      [
+        "tuft",
+        0.34
+      ],
+      [
+        "rock",
+        0.3
+      ],
+      [
+        "mist",
+        0.22
+      ],
+      [
+        "bone",
+        0.14
+      ]
+    ],
+    "marks": [
+      "gate"
+    ],
+    "landmarks": [
+      {
+        "kind": "gate",
+        "name": "幻夜城城门"
+      }
+    ],
+    "terrain": [
+      "cloud"
+    ],
+    "tone": 0.96,
+    "composition": {
+      "focus": "幻啸沙漠沙丘线与半掩的幻夜城楼",
+      "focusCase": "desertruin",
+      "layout": "diagonal",
+      "breath": 3,
+      "clusters": 2,
+      "palette": [
+        "rock",
+        "mist",
+        "tuft"
+      ],
+      "focusScale": 1.8
+    },
+    "batch": 6,
+    "hasInkBg": true
+  },
+  "moyuan": {
+    "decor": [
+      [
+        "rock",
+        0.32
+      ],
+      [
+        "mist",
+        0.3
+      ],
+      [
+        "puddle",
+        0.22
+      ],
+      [
+        "bone",
+        0.16
+      ]
+    ],
+    "marks": [
+      "stele"
+    ],
+    "landmarks": [
+      {
+        "kind": "stele",
+        "name": "雷海岛屿巨峰碑"
+      }
+    ],
+    "terrain": [
+      "water"
+    ],
+    "tone": 0.85,
+    "composition": {
+      "focus": "魔源海黑海上的雷海岛屿巨峰与击海电光",
+      "focusCase": "thunderhead",
+      "layout": "frame",
+      "breath": 3,
+      "clusters": 1,
+      "palette": [
+        "rock",
+        "mist",
+        "puddle"
+      ],
+      "focusScale": 2
+    },
+    "batch": 6,
+    "hasInkBg": true
+  },
+  "modajie": {
+    "decor": [
+      [
+        "rock",
+        0.3
+      ],
+      [
+        "moss",
+        0.26
+      ],
+      [
+        "tree",
+        0.24
+      ],
+      [
+        "puddle",
+        0.2
+      ]
+    ],
+    "marks": [
+      "well"
+    ],
+    "landmarks": [
+      {
+        "kind": "well",
+        "name": "洗灵池"
+      }
+    ],
+    "terrain": [
+      "water"
+    ],
+    "tone": 1,
+    "composition": {
+      "focus": "苦灵岛洗灵池银水与池旁巨树",
+      "focusCase": "pool",
+      "layout": "corner",
+      "breath": 2,
+      "clusters": 1,
+      "palette": [
+        "rock",
+        "moss",
+        "tree"
+      ],
+      "focusScale": 1.7
+    },
+    "batch": 6,
+    "hasInkBg": true
+  },
+  "lanpu": {
+    "decor": [
+      [
+        "rock",
+        0.32
+      ],
+      [
+        "mist",
+        0.28
+      ],
+      [
+        "puddle",
+        0.22
+      ],
+      [
+        "banner",
+        0.18
+      ]
+    ],
+    "marks": [
+      "gate"
+    ],
+    "landmarks": [
+      {
+        "kind": "gate",
+        "name": "蓝瀑城广源斋门"
+      }
+    ],
+    "terrain": [
+      "water"
+    ],
+    "tone": 0.95,
+    "composition": {
+      "focus": "蓝瀑湖岸的临湖商铺广源斋",
+      "focusCase": "shed",
+      "layout": "band",
+      "breath": 3,
+      "clusters": 1,
+      "palette": [
+        "rock",
+        "mist",
+        "puddle"
+      ],
+      "focusScale": 1.8
+    },
+    "batch": 6,
+    "hasInkBg": true
+  },
+  "muzu2": {
+    "decor": [
+      [
+        "tree",
+        0.34
+      ],
+      [
+        "rock",
+        0.3
+      ],
+      [
+        "moss",
+        0.22
+      ],
+      [
+        "mist",
+        0.14
+      ]
+    ],
+    "marks": [
+      "stele"
+    ],
+    "landmarks": [
+      {
+        "kind": "stele",
+        "name": "木族圣树碑"
+      }
+    ],
+    "terrain": [
+      "cliff"
+    ],
+    "tone": 0.95,
+    "composition": {
+      "focus": "木棉城木族圣树与树下城郭",
+      "focusCase": "grove",
+      "layout": "void",
+      "breath": 3,
+      "clusters": 2,
+      "palette": [
+        "tree",
+        "rock",
+        "moss"
+      ],
+      "focusScale": 2
+    },
+    "batch": 6,
     "hasInkBg": true
   }
 };

@@ -1,7 +1,7 @@
 // 批次4 阶段二：逐图原著考据台账（window.MAP_CODEX）驱动的地图视觉层，常驻验收。
 // 自带静态服务，独立于其它 QA 脚本的端口。
 //
-// 断言分十三组。第103轮起所有数量口径都从 window.MAP_CODEX 动态取，
+// 断言分十四组。第103轮起所有数量口径都从 window.MAP_CODEX 动态取，
 // 不再写死 18 / 29 / 50 / 69 / 153 / 142 / 121 / 102 / 9 / 13 / 14 / 16，
 // 也不再拿某张固定 id 当「未收录图」——收录一张就少一张未收录。
 //   A 路线约束：白名单 = MAP_CODEX 的 key；171 张图只启用收录图，其余完全短路
@@ -20,6 +20,8 @@
 //             剩余 83 张全属 arc K~M、真源 stage8 与交付版本对齐、标杆零回归
 //   N 第五批：19 张自动启用、灵界篇前两段收口、16 类主景复用既有 24 类（sc3Bake 无需新增 case）、
 //             纸性分组含 yuyang / yuyang_dou（16 张补铺宣纸 / 72 张原生浅纸）、标杆零回归
+//   O 第六批：19 张自动启用、arc K 魔界之战收口、9 类主景全复用既有 24 类、24 类每类仍有用图、
+//             台账零颜色字段（全灰阶纪律）、真源 stage9 与交付版本 20261106N 对齐、标杆零回归
 //
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -98,8 +100,9 @@ const b2Ids = codexIds.filter(id => codex[id].batch === 2);
 const b3Ids = codexIds.filter(id => codex[id].batch === 3);
 const b4Ids = codexIds.filter(id => codex[id].batch === 4);
 const b5Ids = codexIds.filter(id => codex[id].batch === 5);
+const b6Ids = codexIds.filter(id => codex[id].batch === 6);
 const expectPatched = codexIds.filter(id => codex[id].hasInkBg === false).slice().sort();
-console.log('\n动态口径:', JSON.stringify({ total: allIds.length, on: N, off: offIds.length, b1: b1Ids.length, b2: b2Ids.length, b3: b3Ids.length, b4: b4Ids.length, b5: b5Ids.length, patched: expectPatched.length, native: N - expectPatched.length, untracked: untrackedId }));
+console.log('\n动态口径:', JSON.stringify({ total: allIds.length, on: N, off: offIds.length, b1: b1Ids.length, b2: b2Ids.length, b3: b3Ids.length, b4: b4Ids.length, b5: b5Ids.length, b6: b6Ids.length, patched: expectPatched.length, native: N - expectPatched.length, untracked: untrackedId }));
 
 console.log('\n== A 路线约束：逐图台账白名单（不全量铺开）==');
 await enter('houshan', 'guigu');
@@ -393,14 +396,16 @@ const metaQ = await page.evaluate(() => ({
   b3: Object.values(window.MAP_CODEX).filter(x => x.batch === 3).length,
   b4: Object.values(window.MAP_CODEX).filter(x => x.batch === 4).length,
   b5: Object.values(window.MAP_CODEX).filter(x => x.batch === 5).length,
+  b6: Object.values(window.MAP_CODEX).filter(x => x.batch === 6).length,
   focusKinds: window.MAP_CODEX_STYLE.quant.focusKinds,
   layouts: window.MAP_CODEX_STYLE.quant.layouts
 }));
 ok(metaQ.total === N && metaQ.b1 === b1Ids.length && metaQ.b2 === b2Ids.length &&
    metaQ.b3 === b3Ids.length && metaQ.b4 === b4Ids.length && metaQ.b5 === b5Ids.length &&
-   N === metaQ.b1 + metaQ.b2 + metaQ.b3 + metaQ.b4 + metaQ.b5,
+   metaQ.b6 === b6Ids.length &&
+   N === metaQ.b1 + metaQ.b2 + metaQ.b3 + metaQ.b4 + metaQ.b5 + metaQ.b6,
    '真源已扩到 ' + N + ' 张（' + metaQ.b1 + ' + ' + metaQ.b2 + ' + ' + metaQ.b3 + ' + ' + metaQ.b4 + ' + ' + metaQ.b5 +
-   '），batch 字段逐批进机读产物，五批加起来正好等于收录数', metaQ);
+   ' + ' + metaQ.b6 + '），batch 字段逐批进机读产物，六批加起来正好等于收录数', metaQ);
 const gameSrc = fs.readFileSync(join(root, 'js/game.js'), 'utf8');
 ok(/SC3_SAMPLE\s*=\s*new Set\(SC3_CODEX \? Object\.keys\(SC3_CODEX\)/.test(gameSrc) &&
    !/SC3_SAMPLE\s*=\s*new Set\(\[/.test(gameSrc),
@@ -478,10 +483,10 @@ ok(ui2off.b !== 'none' && ui2off.d !== 'none',
 console.log('   J/K 组覆盖:', JSON.stringify({ metaQ, b2: b2Ids.length, b2Comp, sig: Object.values(sigExpect), ui2 }));
 
 console.log('\n== L 第三批：21 张自动启用 + 6 个新主景的像素级证据 ==');
-ok(N === b1Ids.length + b2Ids.length + b3Ids.length + b4Ids.length + b5Ids.length && offIds.length === allIds.length - N,
+ok(N === b1Ids.length + b2Ids.length + b3Ids.length + b4Ids.length + b5Ids.length + b6Ids.length && offIds.length === allIds.length - N,
    '收录 ' + N + ' 张（首批 ' + b1Ids.length + ' / 第二批 ' + b2Ids.length + ' / 第三批 ' + b3Ids.length +
-   ' / 第四批 ' + b4Ids.length + ' / 第五批 ' + b5Ids.length + '），未收录 ' + offIds.length + ' 张仍完全短路（Jerry 禁止全量铺开）',
-   { N, b1: b1Ids.length, b2: b2Ids.length, b3: b3Ids.length, b4: b4Ids.length, b5: b5Ids.length, off: offIds.length });
+   ' / 第四批 ' + b4Ids.length + ' / 第五批 ' + b5Ids.length + ' / 第六批 ' + b6Ids.length + '），未收录 ' + offIds.length + ' 张仍完全短路（Jerry 禁止全量铺开）',
+   { N, b1: b1Ids.length, b2: b2Ids.length, b3: b3Ids.length, b4: b4Ids.length, b5: b5Ids.length, b6: b6Ids.length, off: offIds.length });
 const b3Rows = b3Ids.map(id => rows.find(r => r.id === id));
 ok(b3Rows.every(r => r && r.s.on && r.s.mapId === r.id && r.s.decorScheme &&
                      r.s.landmarks.every(l => l.hasSpr) && r.s.terrainPat && r.s.styleLoaded),
@@ -550,10 +555,10 @@ ok(b1Ids.length + b2Ids.length + b3Ids.length + b4Ids.length === 69 &&
    b1Ids.length === 18 && b2Ids.length === 11 && b3Ids.length === 21 && b4Ids.length === 19,
    '人界篇 69 张（18 + 11 + 21 + 19）＝第一卷～第七卷全篇收口；第五批另收灵界篇 I/J 19 张',
    { b1: b1Ids.length, b2: b2Ids.length, b3: b3Ids.length, b4: b4Ids.length, b5: b5Ids.length });
-ok(offIds.length === 83 && offIds.every(id => ['K', 'L', 'M'].includes(arcs[id])),
-   '剩余 83 张全部落在 arc K~M（灵界篇第八卷之后），人界篇 A~H + 第五批 I/J 已收录',
+ok(offIds.length === allIds.length - N && offIds.every(id => ['L', 'M'].includes(arcs[id])),
+   '剩余 ' + offIds.length + ' 张全部落在 arc L~M（灵界篇第十卷后段之后），人界篇 A~H + 灵界篇 I/J/K 已收录',
    { off: offIds.length,
-     bad: offIds.filter(id => !['K','L','M'].includes(arcs[id])).slice(0, 8),
+     bad: offIds.filter(id => !['L','M'].includes(arcs[id])).slice(0, 8),
      dist: offIds.reduce((a, id) => (a[arcs[id]] = (a[arcs[id]] || 0) + 1, a), {}) });
 const b4Rows = b4Ids.map(id => rows.find(r => r.id === id));
 ok(b4Rows.every(r => r && r.s.on && r.s.mapId === r.id && r.s.decorScheme &&
@@ -583,8 +588,8 @@ for (const [id, kind] of [['bianjie','battleline'], ['jixi','desertruin'], ['mul
 const new4Rows = rows.filter(r => r.s.focus && NEW4.includes(r.s.focus.kind));
 ok(new4Rows.length >= 7 && new4Rows.every(r => r.s.focusA && r.s.focusA.nonZero > 300 && r.s.focusA.solidPixels === 0),
    '7 个新主景涉及的 ' + new4Rows.length + ' 张图逐张都有可见笔触（没有空白烘焙 / 没有 fallback 到旧形状）');
-ok(expectPatched.length === 16 && N - expectPatched.length === 72 && eq(expectPatched, expectDark),
-   '纸性分组动态口径继续成立：16 张补铺宣纸 / 72 张原生浅纸，与数据层 inkBg 清单逐字一致',
+ok(expectPatched.length >= 16 && eq(expectPatched, expectDark),
+   '纸性分组动态口径继续成立：' + expectPatched.length + ' 张补铺宣纸 / ' + (N - expectPatched.length) + ' 张原生浅纸，与数据层 inkBg 清单逐字一致',
    { patched: expectPatched.length, native: N - expectPatched.length, data: expectDark.length });
 ok(/SC3_SAMPLE\s*=\s*new Set\(SC3_CODEX \? Object\.keys\(SC3_CODEX\)/.test(gameSrc) &&
    !/SC3_SAMPLE\s*=\s*new Set\(\[/.test(gameSrc),
@@ -597,10 +602,10 @@ if (fs.existsSync(truthPath)) {
         typeof m.hasInkBg === 'boolean'),
      '真源层：第四批 19 张逐图带 source / refs / canon / quotes / diff / composition / landmarks / hasInkBg',
      t4.filter(m => !(m.quotes && m.quotes.length && m.composition)).map(m => m.id));
-  ok(truth.meta.counts.maps === 88 && truth.meta.style.quant.focusKinds === 24 &&
+  ok(truth.meta.counts.maps === N && truth.meta.style.quant.focusKinds === 24 &&
      !!truth.meta.stage8 && /20261105L/.test(truth.meta.stage8.status),
-     '真源 meta.counts / style.quant / stage8 与交付版本 20261105L 对齐',
-     { counts: truth.meta.counts, focusKinds: truth.meta.style.quant.focusKinds, stage8: truth.meta.stage8 && truth.meta.stage8.status });
+     '真源 meta.counts 与运行时收录数一致、style.quant 24 类不变、stage8 仍记录第四批交付版本 20261105L',
+     { counts: truth.meta.counts, runtime: N, focusKinds: truth.meta.style.quant.focusKinds, stage8: truth.meta.stage8 && truth.meta.stage8.status });
 } else {
   console.log('   （仓库外唯一真源不可读，跳过 2 条真源层断言；前 12 组不受影响）');
 }
@@ -639,8 +644,8 @@ for (const [id, kind] of REP5) {
      id + ' 主景 ' + kind + ' 像素级非空白：多档软 alpha、无实心直角块', s.focusA);
 }
 ok(expectPatched.includes('yuyang') && expectPatched.includes('yuyang_dou') &&
-   expectPatched.length === 16 && N - expectPatched.length === 72 && eq(expectPatched, expectDark),
-   '纸性分组含第五批 yuyang / yuyang_dou：16 张补铺宣纸 / 72 张原生浅纸，与数据层 inkBg 清单逐字一致',
+   expectPatched.length >= 16 && expectPatched.length + (N - expectPatched.length) === N && eq(expectPatched, expectDark),
+   '纸性分组含第五批 yuyang / yuyang_dou：' + expectPatched.length + ' 张补铺宣纸 / ' + (N - expectPatched.length) + ' 张原生浅纸，与数据层 inkBg 清单逐字一致',
    { patched: expectPatched.length, native: N - expectPatched.length, data: expectDark.length });
 ok(/SC3_SAMPLE\s*=\s*new Set\(SC3_CODEX \? Object\.keys\(SC3_CODEX\)/.test(gameSrc) &&
    !/SC3_SAMPLE\s*=\s*new Set\(\[/.test(gameSrc),
@@ -651,6 +656,64 @@ ok(qRow.s.composition.focusCase === 'narrowgate' && qRow.s.mood === null &&
    { comp: qRow.s.composition, mood: qRow.s.mood, paperPat: qRow.s.paperPat });
 console.log('   N 组覆盖:', JSON.stringify({ b5: b5Ids.length, b5Comp, b5Kinds: b5Kinds.length,
   patched: expectPatched.length, native: N - expectPatched.length }));
+
+console.log('\n== O 第六批：19 张自动启用 + arc K 魔界之战收口 + 主景全复用既有 24 类 ==');
+ok(b6Ids.length === 19 && b6Ids.every(id => codex[id].batch === 6 && typeof codex[id].hasInkBg === 'boolean'),
+   '第六批 19 张机读产物全部带 batch=6 / hasInkBg 布尔（纸性仍由真源驱动，未手写名单）', { b6: b6Ids.length });
+const b6Rows = b6Ids.map(id => rows.find(r => r.id === id));
+ok(b6Rows.every(r => r && r.s.on && r.s.mapId === r.id && r.s.decorScheme &&
+                     r.s.landmarks.every(l => l.hasSpr) && r.s.terrainPat && r.s.styleLoaded),
+   '第六批 19 张全部自动启用并烘出装饰 / 地标精灵 / 贴地层（白名单逻辑第 5 次零改动）',
+   b6Rows.filter(r => !r || !r.s.on).map(r => r && r.id));
+const b6Comp = new Set(b6Rows.map(r => JSON.stringify(r.s.composition))).size;
+ok(b6Comp === b6Ids.length && b6Rows.every(r => r.s.focus && r.s.focus.hasSpr && r.s.focus.y < 0),
+   '第六批 19 张构图各不相同、主景全部避开中央玩法区', { b6Comp });
+const b6Kinds = [...new Set(b6Rows.map(r => r.s.focus && r.s.focus.kind))];
+ok(b6Kinds.length === 13 && b6Kinds.every(k => focusKinds.includes(k)) &&
+   new Set(rows.map(r => r.s.focus && r.s.focus.kind)).size === focusKinds.length && focusKinds.length === 24,
+   '第六批 13 类主景全部复用既有 24 类（sc3Bake 无需新增 case）、24 类每类都有图在用',
+   { b6Kinds, runtime: focusKinds.length, meta: metaQ.focusKinds });
+const REP6 = [['linghuang','clanhall'],['liangzu','clanhall'],['jiuxian','stormpeak'],['heiyu','narrowgate'],
+              ['longjia','stonering'],['shengdao','pagoda'],['zhenling','clanhall'],['mojie','narrowgate'],
+              ['diyuan2','stoneroom'],['moban','battleline'],['yitian','battleline'],['huangquan','pool'],
+              ['tianzhan','floatingpalace'],['xueya','clanhall'],['huanxiao','desertruin'],['moyuan','thunderhead'],
+              ['modajie','pool'],['lanpu','shed'],['muzu2','grove']];
+for (const [id, kind] of REP6) {
+  const s = rows.find(r => r.id === id).s;
+  ok(s.focus && s.focus.kind === kind && s.focus.hasSpr && s.focusA &&
+     s.focusA.nonZero > 300 && s.focusA.distinctAlpha >= 6 && s.focusA.solidPixels === 0,
+     id + ' 主景 ' + kind + ' 像素级非空白：多档软 alpha、无实心直角块', s.focusA);
+}
+// 全灰阶纪律：台账里没有任何颜色字段，色相只能由 inkTone 灰度推导（不落彩色）
+const COLORISH = /^(r|g|b|rgb|rgba|hex|color|colors|hue|saturat|tint|fill|stroke)$/i;
+const colorKeys = [];
+for (const id of b6Ids) for (const k of Object.keys(codex[id])) if (COLORISH.test(k)) colorKeys.push(id + '.' + k);
+for (const id of b6Ids) for (const k of Object.keys(codex[id].composition || {})) if (COLORISH.test(k)) colorKeys.push(id + '.composition.' + k);
+ok(colorKeys.length === 0, '全灰阶纪律：第六批 19 张台账不含任何颜色字段，观感只由 inkTone / tone 灰度决定', colorKeys);
+ok(/SC3_SAMPLE\s*=\s*new Set\(SC3_CODEX \? Object\.keys\(SC3_CODEX\)/.test(gameSrc) &&
+   !/SC3_SAMPLE\s*=\s*new Set\(\[/.test(gameSrc),
+   '第六批之后白名单仍由 Object.keys(MAP_CODEX) 生成，源码里没有补写任何图名或图数');
+if (fs.existsSync(truthPath)) {
+  const truth6 = JSON.parse(fs.readFileSync(truthPath, 'utf8'));
+  const t6 = truth6.maps.filter(m => m.batch === 6);
+  ok(t6.length === 19 && t6.every(m => m.arc === 'K' && m.source && m.refs && m.refs.length && m.canon &&
+        m.canon.length >= 40 && m.quotes && m.quotes.length && m.diff && m.composition && m.landmarks.length &&
+        typeof m.hasInkBg === 'boolean'),
+     '真源层：第六批 19 张全 arc=K，逐图带 source / refs / canon(≥40字) / quotes / diff / composition / landmarks / hasInkBg',
+     t6.filter(m => !(m.quotes && m.quotes.length && m.composition && m.canon && m.canon.length >= 40)).map(m => m.id));
+  ok(truth6.meta.counts.maps === N && truth6.meta.counts.batch6 === 19 && truth6.meta.style.quant.focusKinds === 24 &&
+     !!truth6.meta.stage9 && /20261106N/.test(truth6.meta.stage9.status),
+     '真源 meta：counts.maps / batch6 与运行时一致，style.quant 仍 24 类，stage9 记录第六批交付版本 20261106N',
+     { counts: truth6.meta.counts, runtime: N, stage9: truth6.meta.stage9 && truth6.meta.stage9.status });
+} else {
+  console.log('   （仓库外唯一真源不可读，跳过 2 条第六批真源层断言）');
+}
+ok(qRow.s.composition.focusCase === 'narrowgate' && qRow.s.mood === null &&
+   qRow.s.focus.kind === 'narrowgate' && qRow.s.uiSoft === true && qRow.s.paperPat === false,
+   '标杆 qixuan 零回归：第六批 19 张构图没动它的章法、积墨与原生浅纸',
+   { comp: qRow.s.composition, mood: qRow.s.mood, paperPat: qRow.s.paperPat });
+console.log('   O 组覆盖:', JSON.stringify({ b6: b6Ids.length, b6Comp, b6Kinds: b6Kinds.length,
+  focusKinds: focusKinds.length, patched: expectPatched.length, native: N - expectPatched.length }));
 
 console.log('\n== 运行期无 JS 报错 ==');
 ok(errs.length === 0, '全程无 pageerror', errs);
