@@ -4407,8 +4407,32 @@
   function genChunk(cx, cy) {
     let seed = ((cx * 73856093) ^ (cy * 19349663)) >>> 0;
     const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967295; };
-    // 批次4 收录图：用逐图台账的装饰权重表（12 种内选 6 种）覆盖；未收录图仍走原 decorScheme，逐字节不变
     const sc3 = ensureScenery3();
+    const co = (sc3.on && sc3.composition) ? sc3.composition : null;
+    if (co) {
+      // ---- 构图化：连通聚落 + 大片留白（不是逐格独立随机撒点）----
+      // 低频连续相位判「聚落成片」：同族装饰按连通区域一致化，跟 Wang 集里
+      // 「不逐格随机选变体」是同一条纪律。clusters 调频率，breath 调阈值与组内数量。
+      const f = 0.55 + co.clusters * 0.18;
+      const ph = sc3.phase;
+      const v = Math.sin(cx * f + ph * 6.2832) * Math.cos(cy * f * 0.74 + ph * 3.1416)
+              + 0.35 * Math.sin((cx + cy) * f * 0.45 + ph * 9.4248);
+      const thr = [-0.10, 0.20, 0.45][co.breath - 1];
+      if (v <= thr) return;                       // 留白 chunk：一个装饰都不放
+      const n = [5, 4, 3][co.breath - 1];
+      const pal = co.palette;
+      const kind = pal[(seed >>> 5) % pal.length];  // 组内同种成丛，不混搭 6 种笔法
+      const ox = cx * CH + CH * (0.28 + rnd() * 0.44);
+      const oy = cy * CH + CH * (0.28 + rnd() * 0.44);
+      for (let i = 0; i < n; i++) {
+        const ang = rnd() * 6.2832, r = rnd() * CH * 0.20;
+        // 同组内大小、浓淡错落（水墨的「浓淡干湿」）；a 为 alpha 系数，未收录图无此字段故逐字节不变
+        G.decor.push({ type: kind, x: ox + Math.cos(ang) * r, y: oy + Math.sin(ang) * r,
+                       s: 0.6 + rnd() * 0.8, a: 0.5 + rnd() * 0.5 });
+      }
+      return;
+    }
+    // ---- 原逻辑：未收录 153 张 / 构图缺失降级，逐字节保持批次3 口径 ----
     const scheme = (sc3.on && sc3.decor) ? sc3.decor : ((G.map && G.map.decorScheme) || DEFAULT_DECOR);
     for (let i = 0; i < 6; i++) {
       const x = cx * CH + rnd() * CH, y = cy * CH + rnd() * CH, t = rnd();
@@ -5988,7 +6012,7 @@
     return (0.299*r + 0.587*g + 0.114*b) < 110;
   }
   // 离屏画一笔的程序化精灵：所有新装饰 / 地标共用这一处，风格统一、无外部资源
-  function sc3Bake(kind, C, big) {
+  function sc3Bake(kind, C, big, strong) {
     let c;
     try { c = document.createElement('canvas'); } catch (e) { return null; }
     if (!c || !c.getContext) return null;
@@ -5997,11 +6021,27 @@
     const g = c.getContext('2d');
     if (!g || !g.beginPath) return null;              // smoke 垫片无真实绘图 API：降级
     // 整体 alpha 再压一档：装饰/地标是「退到纸后面的远景」，不能跟主角同亮度（第83轮 L1/L2 口径）
-    const P = (col, a) => col + (a * 0.72).toFixed(3) + ')';
+    // strong = 逐图主景：它现在是画面主角，不再「退到纸后」，用实笔与全 alpha；
+    // 配景仍压 0.72，保持不与角色/法阵抢视线的旧纪律。
+    const P = (col, a) => col + (a * (strong ? 1.0 : 0.72)).toFixed(3) + ')';
     const rect = (x,y,w,h,col,a) => { g.fillStyle = P(col,a); g.fillRect(x,y,w,h); };
     const line = (x0,y0,x1,y1,col,a,w) => { g.strokeStyle = P(col,a); g.lineWidth = w||1.4; g.lineCap='round'; g.beginPath(); g.moveTo(x0,y0); g.lineTo(x1,y1); g.stroke(); };
     const ell = (x,y,rx,ry,col,a) => { g.fillStyle = P(col,a); g.beginPath(); g.ellipse(x,y,rx,ry,0,0,6.2832); g.fill(); };
     const cx = S/2;
+    // 水墨笔法原语：断续笔线（带提按、段间留白）与没骨墨团（错位椭圆叠出不规则块）。
+    // 用来替掉实心 rect() 直角块——那东西在画面上读起来像散落的方形图标，不是笔触。
+    const brush = (x0,y0,x1,y1,col,a,w) => {
+      for (let i=0;i<3;i++) {
+        const t0=i/3, t1=strong ? (i+1)/3 : (i+0.72)/3;   // 主景连续实笔，配景断续虚笔
+        line(x0+(x1-x0)*t0, y0+(y1-y0)*t0, x0+(x1-x0)*t1, y0+(y1-y0)*t1,
+             col, a*(strong ? 1 : 1-i*0.18), w);
+      }
+    };
+    const blob = (x,y,rx,ry,col,a) => {
+      ell(x,y,rx,ry,col,a);
+      ell(x-rx*0.35,y-ry*0.25,rx*0.62,ry*0.70,col,a*0.60);
+      ell(x+rx*0.38,y+ry*0.22,rx*0.55,ry*0.62,col,a*0.50);
+    };
     try {
       switch (kind) {
         case 'bamboo': // 竹：两三根略带弧度的竿 + 点叶簇（不画横节/对称斜叶，避免笔直交叉成井字栅栏）
@@ -6016,9 +6056,13 @@
           line(cx+6,Hh-3,cx-5,12,C.ink,0.66,2.8);
           for(let l=0;l<3;l++){ const yy=16+l*11, w=15-l*2; for(let n=0;n<6;n++){ const px=cx-3-w/2+n*(w/5); ell(px,yy+Math.sin(n*1.7)*2,3.2,1.9,C.ink,0.38); } }
           break;
-        case 'moss': // 苔石：石形 + 顶部苔点
-          ell(cx,Hh-14,15,11,C.ink,0.5); ell(cx-6,Hh-19,7,5,C.lite,0.28);
-          for(let i=0;i<7;i++) ell(cx-10+i*3.2,Hh-23+((i*7)%5),1.6,1.2,C.deep,0.5);
+        case 'moss': // 苔石：皴笔勾石棱 + 淡墨块面 + 顶部苔点（成丛时不再是「一坨圆灰球」）
+          blob(cx,Hh-15,13,9,C.ink,0.30);
+          line(cx-13,Hh-12, cx-7,Hh-27, C.ink,0.48,1.6);
+          line(cx-7,Hh-27, cx+5,Hh-30, C.ink,0.42,1.4);
+          line(cx+5,Hh-30, cx+13,Hh-18, C.ink,0.38,1.4);
+          line(cx-11,Hh-8, cx+11,Hh-8, C.deep,0.28,1.2);
+          for(let i=0;i<5;i++) ell(cx-8+i*4,Hh-27+((i*5)%4),1.5,1.1,C.deep,0.40);
           break;
         case 'puddle': // 水洼：浅椭圆 + 波纹
           ell(cx,Hh-12,17,6,C.water,0.30); ell(cx,Hh-12,17,6,C.lite,0.08);
@@ -6027,18 +6071,26 @@
         case 'mist': // 云气：三道横向柔带
           for(let l=0;l<3;l++){ g.strokeStyle=P(C.fog,0.22-l*0.04); g.lineWidth=3.4-l*0.6; g.beginPath(); const yy=Hh-14-l*8; g.moveTo(3,yy); g.quadraticCurveTo(cx,yy-5,S-3,yy); g.stroke(); }
           break;
-        case 'ruin': // 残垣：断墙 + 缺口 + 砖缝
-          rect(cx-13,Hh-30,10,27,C.ink,0.5); rect(cx+4,Hh-24,10,21,C.ink,0.45); rect(cx-13,Hh-34,26,5,C.deep,0.42);
-          line(cx-12,Hh-22,cx-4,Hh-22,C.line,0.4,0.9); line(cx+5,Hh-17,cx+13,Hh-17,C.line,0.35,0.9);
+        case 'ruin': // 残垣：两段断墙笔 + 一道横断缝（不画实心方块）
+          brush(cx-11,Hh-3, cx-11,Hh-28, C.ink,0.52,2.8);
+          brush(cx+9,Hh-3, cx+9,Hh-21, C.ink,0.44,2.4);
+          brush(cx-13,Hh-30, cx+2,Hh-27, C.deep,0.40,1.8);
+          brush(cx+2,Hh-23, cx+12,Hh-21, C.line,0.30,1.2);
+          blob(cx-11,Hh-29,5,3,C.deep,0.28);
           break;
-        case 'lantern': // 石灯：座 + 柱 + 灯室 + 顶盖
-          rect(cx-8,Hh-4,16,4,C.deep,0.6); rect(cx-3,Hh-20,6,16,C.ink,0.6);
-          rect(cx-7,Hh-29,14,9,C.ink,0.55); rect(cx-4,Hh-27,8,5,C.lite,0.35);
-          rect(cx-10,Hh-32,20,3,C.deep,0.65); line(cx,Hh-32,cx,Hh-35,C.deep,0.5,1.4);
+        case 'lantern': // 石灯：笔柱 + 没骨灯室 + 一笔顶盖
+          brush(cx,Hh-4, cx,Hh-21, C.ink,0.60,2.6);
+          brush(cx-8,Hh-4, cx+8,Hh-4, C.deep,0.55,2.4);
+          blob(cx,Hh-26,7,5,C.ink,0.50);
+          ell(cx,Hh-26,3.4,2.4,C.lite,0.30);
+          brush(cx-10,Hh-32, cx+10,Hh-32, C.deep,0.60,2.2);
+          brush(cx,Hh-32, cx,Hh-36, C.deep,0.45,1.4);
           break;
-        case 'banner': // 经幡：竖杆 + 下垂旗
-          line(cx-6,Hh-3,cx-6,6,C.ink,0.65,2); rect(cx-5,8,13,20,C.ink,0.4); rect(cx-5,8,13,3,C.deep,0.5);
-          line(cx-6,6,cx+9,6,C.deep,0.55,1.4); line(cx+1,12,cx+1,26,C.line,0.3,0.9);
+        case 'banner': // 经幡：竖杆 + 没骨下垂旗
+          brush(cx-6,Hh-3, cx-6,6, C.ink,0.65,2.0);
+          blob(cx+2,18,6,10,C.ink,0.38);
+          brush(cx-6,7, cx+9,7, C.deep,0.52,1.6);
+          brush(cx+1,12, cx+1,26, C.line,0.26,1.0);
           break;
         case 'bone': // 骨殖：两根长骨 + 一个颅骨
           line(cx-11,Hh-6,cx+7,Hh-22,C.lite,0.5,3); line(cx+8,Hh-8,cx-9,Hh-24,C.lite,0.45,2.6);
@@ -6046,37 +6098,148 @@
           ell(cx+0.5,Hh-13,1,1.1,C.deep,0.5); ell(cx+3.5,Hh-13,1,1.1,C.deep,0.5);
           break;
         // ---- 地标（big）----
-        case 'gate': // 山门：双柱 + 横梁 + 双檐
-          rect(cx-26,26,9,60,C.ink,0.5); rect(cx+17,26,9,60,C.ink,0.5);
-          rect(cx-30,20,60,7,C.deep,0.6); rect(cx-34,13,68,4,C.ink,0.5);
-          rect(cx-30,40,60,3,C.line,0.45); line(cx-34,13,cx-22,6,C.deep,0.4,2); line(cx+34,13,cx+22,6,C.deep,0.4,2);
+        case 'gate': // 山门：双柱笔 + 断续横梁 + 压低檐角
+          brush(cx-22,86, cx-22,26, C.ink,0.52,3.0);
+          brush(cx+22,86, cx+22,26, C.ink,0.52,3.0);
+          brush(cx-30,22, cx+30,22, C.deep,0.60,2.8);
+          brush(cx-34,14, cx+34,14, C.ink,0.48,2.2);
+          brush(cx-30,40, cx+30,40, C.line,0.30,1.4);
+          brush(cx-34,14, cx-24,7, C.deep,0.38,1.8);
+          brush(cx+34,14, cx+24,7, C.deep,0.38,1.8);
           break;
-        case 'stele': // 断碑：碑身 + 断裂斜顶 + 刻痕
-          rect(cx-15,22,30,62,C.ink,0.5); g.fillStyle=P(C.ink,0.5); g.beginPath(); g.moveTo(cx-15,22); g.lineTo(cx-8,14); g.lineTo(cx+3,20); g.lineTo(cx+15,12); g.lineTo(cx+15,26); g.closePath(); g.fill();
-          for(let i=0;i<4;i++) line(cx-9,36+i*10,cx+9,36+i*10,C.deep,0.4,1.1);
-          rect(cx-20,84,40,5,C.deep,0.55);
+        case 'stele': // 断碑：没骨碑身 + 断续刻痕（不画实心矩形）
+          blob(cx,52,13,30,C.ink,0.46);
+          brush(cx-13,24, cx-5,16, C.deep,0.44,2.0);
+          brush(cx-3,20, cx+5,15, C.deep,0.44,2.0);
+          brush(cx+7,18, cx+13,13, C.deep,0.44,2.0);
+          for(let i=0;i<4;i++) brush(cx-7,38+i*11, cx+6,38+i*11, C.deep,0.34,1.1);
+          brush(cx-20,84, cx+20,84, C.deep,0.50,2.4);
           break;
-        case 'well': // 枯井：井圈 + 井壁 + 辘轳架
-          ell(cx,60,24,10,C.ink,0.5); ell(cx,60,17,6.5,C.deep,0.6);
-          rect(cx-24,60,5,24,C.ink,0.45); rect(cx+19,60,5,24,C.ink,0.45);
-          line(cx-22,58,cx-22,28,C.deep,0.55,2); line(cx+22,58,cx+22,28,C.deep,0.55,2); line(cx-22,28,cx+22,28,C.ink,0.5,2.2);
+        case 'well': // 枯井：双环 + 笔线辘轳架
+          ell(cx,60,24,10,C.ink,0.46); ell(cx,60,17,6.5,C.deep,0.56);
+          brush(cx-22,60, cx-22,28, C.deep,0.52,2.0);
+          brush(cx+22,60, cx+22,28, C.deep,0.52,2.0);
+          brush(cx-23,28, cx+23,28, C.ink,0.48,2.2);
+          brush(cx+8,28, cx+8,44, C.line,0.30,1.2);
           break;
         case 'bones': // 骨堆：多根骨 + 颅骨
           for(let i=0;i<5;i++) line(cx-24+i*3,80-i*4,cx+18-i*2,68+i*2,C.lite,0.42,2.6);
           ell(cx-4,62,9,8,C.lite,0.5); ell(cx-7,61,1.8,2.2,C.deep,0.55); ell(cx-1,61,1.8,2.2,C.deep,0.55);
           break;
-        case 'stair': // 石阶：三级横阶
-          for(let i=0;i<4;i++){ const y=52+i*9, w=20+i*7; rect(cx-w,y,w*2,7,C.ink,0.42-i*0.05); line(cx-w,y,cx+w,y,C.deep,0.4,1); }
+        case 'stair': // 石阶：几道断续横笔，斜向错开（不画笔直井字）
+          for(let i=0;i<4;i++){ const y=52+i*9, w=18+i*6, ox=i*3;
+            brush(cx-w+ox,y, cx+w+ox,y, C.ink,0.40-i*0.05,2.2);
+          }
           break;
-        case 'lanternmark': // 幡杆地标（高杆 + 长幡）
-          line(cx,Hh-3,cx,8,C.ink,0.6,2.6); rect(cx-1,12,15,34,C.ink,0.38); rect(cx-1,12,15,3,C.deep,0.5);
-          line(cx,8,cx+18,8,C.deep,0.5,1.6); line(cx+7,18,cx+7,42,C.line,0.3,1);
+        case 'lanternmark': // 幡杆地标：高杆 + 没骨长幡
+          brush(cx,Hh-3, cx,8, C.ink,0.60,2.6);
+          blob(cx+7,29,7,17,C.ink,0.34);
+          brush(cx,8, cx+18,8, C.deep,0.50,1.6);
+          brush(cx+7,18, cx+7,42, C.line,0.26,1.0);
           break;
-        case 'lanternbig': // 大石灯地标：双层基座 + 灯柱 + 灯室 + 飞檐
-          rect(cx-20,Hh-7,40,6,C.deep,0.55); rect(cx-14,Hh-12,28,6,C.ink,0.5);
-          rect(cx-6,Hh-40,12,28,C.ink,0.5); rect(cx-14,Hh-58,28,18,C.ink,0.48);
-          rect(cx-9,Hh-55,18,11,C.lite,0.32); rect(cx-19,Hh-62,38,5,C.deep,0.6);
-          line(cx,Hh-62,cx,Hh-68,C.deep,0.5,2); ell(cx,Hh-70,3,3,C.lite,0.4);
+        case 'lanternbig': // 大石灯：笔柱 + 没骨灯室 + 一笔飞檐
+          brush(cx-20,Hh-8, cx+20,Hh-8, C.deep,0.52,2.8);
+          brush(cx-14,Hh-14, cx+14,Hh-14, C.ink,0.46,2.4);
+          brush(cx,Hh-16, cx,Hh-42, C.ink,0.50,3.0);
+          blob(cx,Hh-50,13,9,C.ink,0.46);
+          ell(cx,Hh-50,6,4,C.lite,0.28);
+          brush(cx-20,Hh-62, cx+20,Hh-62, C.deep,0.56,2.6);
+          brush(cx,Hh-62, cx,Hh-69, C.deep,0.46,2.0);
+          ell(cx,Hh-71,3,3,C.lite,0.36);
+          break;
+        // ---- 批次4 构图化：逐图原著专属主景（big 画布，只画 1 个）----
+        // 全部由 mapCodex.json 的 composition.focusCase 指定，focus 文字即原著景物。
+        case 'narrowgate': // 彩霞山 / 黄枫谷山门：双柱收窄、檐角压低，石阶斜向
+          brush(cx-20,82, cx-20,30, C.ink,0.66,3.8);
+          brush(cx+20,82, cx+20,30, C.ink,0.66,3.8);
+          brush(cx-28,30, cx+28,30, C.deep,0.70,3.4);
+          brush(cx-32,23, cx+32,23, C.ink,0.56,2.6);
+          brush(cx-30,23, cx-22,17, C.deep,0.46,2.0);
+          brush(cx+30,23, cx+22,17, C.deep,0.46,2.0);
+          brush(cx-23,82, cx+23,82, C.deep,0.40,2.0);   // 门槛，把两根柱子收成一座门
+          for(let i=0;i<4;i++) brush(cx-24-i*3, 60+i*6, cx-8+i*5, 62+i*6, C.line,0.30-i*0.04,1.6);
+          break;
+        case 'pool': // 乌龙潭 / 赤水峰石潭：软边水坑 + 四周扭曲枯枝
+          ell(cx,58,30,13,C.water,0.30); ell(cx,58,24,9,C.deep,0.20); ell(cx-4,56,16,5,C.lite,0.12);
+          for(let i=0;i<3;i++) brush(cx-24+i*3,55+i*2, cx+18-i*4,55+i*2, C.line,0.18,1.0);
+          brush(cx-34,76, cx-24,40, C.ink,0.48,2.2);
+          brush(cx-27,52, cx-38,44, C.ink,0.40,1.5);
+          brush(cx-25,45, cx-16,38, C.ink,0.36,1.3);
+          brush(cx+30,78, cx+25,46, C.ink,0.42,2.0);
+          brush(cx+27,58, cx+36,50, C.ink,0.34,1.3);
+          break;
+        case 'stonehut': // 墨大夫无窗石屋：草草粉刷的石墙略带欹斜，石缝皴擦，只一道石门（无窗）
+          ell(cx-7,48,17,11,C.ink,0.12);                // 偏一侧的墙面阴影，不居中，避免读成「镜子」
+          for(let i=0;i<3;i++) brush(cx-21,43+i*8, cx+17,42+i*8, C.line,0.16,1.0);  // 石料垒缝
+          brush(cx-27,66, cx-25,33, C.deep,0.62,2.8);   // 左墙略斜
+          brush(cx+26,66, cx+28,31, C.deep,0.62,2.8);   // 右墙略斜
+          brush(cx-30,32, cx+30,30, C.deep,0.66,3.2);   // 平顶略斜（非三角，与太南寺区分）
+          brush(cx-28,67, cx+28,66, C.ink,0.50,2.4);
+          brush(cx-5,67, cx-5,50, C.deep,0.58,2.2);     // 门洞留白
+          brush(cx+5,67, cx+5,50, C.deep,0.58,2.2);
+          brush(cx-5,50, cx+5,50, C.deep,0.52,1.8);
+          try {
+            g.strokeStyle=P(C.line,0.28); g.lineWidth=1.2;
+            g.beginPath(); g.ellipse(cx,76,26,8,0,0,6.2832); g.stroke();
+            g.beginPath(); g.ellipse(cx,76,17,5,0,0,6.2832); g.stroke();
+          } catch (e) { /* 垫片降级 */ }
+          for(let i=0;i<8;i++){ const a=i/8*6.2832; ell(cx+Math.cos(a)*30,76+Math.sin(a)*9,2.2,2.2,C.lite,0.46); }
+          break;
+        case 'temple': // 太南山顶小寺：三角屋顶 + 塔身 + 台基（与石屋的平顶明确区分），下衬山脊云带
+          brush(cx-26,40, cx,22, C.deep,0.62,3.2);
+          brush(cx,22, cx+26,40, C.deep,0.62,3.2);
+          brush(cx-30,41, cx+30,41, C.ink,0.56,2.8);
+          brush(cx-14,43, cx-13,72, C.ink,0.52,2.8);
+          brush(cx+14,43, cx+13,72, C.ink,0.52,2.8);
+          brush(cx-18,73, cx+18,73, C.deep,0.50,2.6);
+          brush(cx-8,56, cx+8,56, C.line,0.30,1.4);
+          for(let i=0;i<3;i++) brush(cx-40+i*4,82+i*4, cx+38-i*6,82+i*4, C.fog,0.17-i*0.04,3.2);
+          break;
+        case 'stonering': // 中心区石墙大圆圈 + 四道铜门 + 环形迷雾山脉
+          try {
+            g.strokeStyle=P(C.ink,0.48); g.lineWidth=2.6; g.lineCap='round';
+            for(let i=0;i<8;i++){ const a0=i/8*6.2832+0.06, a1=(i+0.82)/8*6.2832;
+              g.beginPath(); g.ellipse(cx,52,34,20,0,a0,a1); g.stroke(); }
+            for(let i=0;i<2;i++){ g.strokeStyle=P(C.fog,0.16-i*0.05); g.lineWidth=3.2-i;
+              g.beginPath(); g.ellipse(cx,52,42+i*4,26+i*3,0,3.4,6.0); g.stroke(); }
+          } catch (e) { /* 垫片降级 */ }
+          for(let i=0;i<4;i++){
+            const a=i/4*6.2832+0.785, px=cx+Math.cos(a)*34, py=52+Math.sin(a)*20;
+            brush(px-3,py+4, px-3,py-5, C.deep,0.58,2.0);
+            brush(px+3,py+4, px+3,py-5, C.deep,0.58,2.0);
+            brush(px-5,py-5, px+5,py-5, C.deep,0.48,1.6);
+          }
+          break;
+        case 'grove': // 皇城小竹林剪影 / 岔道密林 + 一道横向淡墨压顶
+          for(let k=0;k<5;k++){
+            const bx=cx-30+k*15, top=20+(k%3)*9, lean=(k%2?4:-4);
+            g.strokeStyle=P(C.ink,0.50-k*0.05); g.lineWidth=2.2; g.lineCap='round';
+            g.beginPath(); g.moveTo(bx,86); g.quadraticCurveTo(bx+lean*0.4,54,bx+lean,top); g.stroke();
+            for(let l=0;l<3;l++) ell(bx+lean+(l%2?4:-4),top+4+l*7,3.6,1.6,C.ink,0.32);
+          }
+          for(let i=0;i<2;i++) brush(cx-40,14+i*5, cx+40,14+i*5, C.fog,0.20-i*0.06,4.0);
+          break;
+        case 'minehead': // 塌方斜坡 + 笔线围出的半掩洞口（不画大圆墨团）+ 阵旗 + 钟乳
+          brush(cx-40,72, cx-16,32, C.ink,0.54,2.8);
+          brush(cx-32,76, cx-10,40, C.deep,0.40,2.2);
+          brush(cx-8,52, cx+2,44, C.deep,0.56,2.6);
+          brush(cx+2,44, cx+16,48, C.deep,0.56,2.6);
+          brush(cx+16,48, cx+20,74, C.ink,0.50,2.4);
+          brush(cx-8,52, cx-10,74, C.ink,0.50,2.4);
+          ell(cx+5,62,9,7,C.fog,0.08);                // 洞里一点微光，仍留白
+          brush(cx+26,84, cx+24,34, C.ink,0.58,2.4);
+          brush(cx+24,36, cx+38,36, C.deep,0.48,1.6);
+          blob(cx+33,46,7,11,C.ink,0.36);
+          for(let i=0;i<3;i++) brush(cx-6+i*8,32, cx-6+i*8,42+(i%2)*5, C.lite,0.28,1.6);
+          break;
+        case 'shed': // 歪斜棚架 + 冷铁砧 + 倒着的铁牌
+          brush(cx-26,84, cx-22,42, C.ink,0.52,2.6);
+          brush(cx+24,84, cx+28,40, C.ink,0.48,2.6);
+          brush(cx-26,42, cx+30,36, C.deep,0.52,2.4);
+          brush(cx-22,42, cx-34,32, C.ink,0.36,1.6);
+          blob(cx-2,72,12,5,C.deep,0.48);
+          brush(cx-14,80, cx+10,80, C.ink,0.40,2.0);
+          brush(cx+16,78, cx+28,70, C.lite,0.36,1.6);
           break;
         default: return null;
       }
@@ -6084,7 +6247,9 @@
       // 这一步是「不像硬边贴片 / 不马赛克」的关键——尤其断碑、石阶、山门这类带直边的地标。
       if (g.globalCompositeOperation !== undefined && g.createRadialGradient) {
         const rg = g.createRadialGradient(cx, Hh*0.5, Math.min(S,Hh)*0.18, cx, Hh*0.5, Math.max(S,Hh)*0.60);
-        rg.addColorStop(0, 'rgba(0,0,0,1)'); rg.addColorStop(0.62, 'rgba(0,0,0,0.82)'); rg.addColorStop(1, 'rgba(0,0,0,0)');
+        rg.addColorStop(0, 'rgba(0,0,0,1)');
+        rg.addColorStop(strong ? 0.76 : 0.62, strong ? 'rgba(0,0,0,0.96)' : 'rgba(0,0,0,0.82)');
+        rg.addColorStop(1, 'rgba(0,0,0,0)');
         g.globalCompositeOperation = 'destination-in'; g.fillStyle = rg; g.fillRect(0,0,S,Hh);
         g.globalCompositeOperation = 'source-over';
       }
@@ -6092,7 +6257,7 @@
     return c;
   }
   // 贴地层 tile：软边明度块（radialGradient 洇染），3×3 偏移保证无缝平铺；四角摆块、中央留白
-  function sc3BakeTerrain(C, kinds) {
+  function sc3BakeTerrain(C, kinds, layout) {
     let c;
     try { c = document.createElement('canvas'); } catch (e) { return null; }
     if (!c || !c.getContext) return null;
@@ -6120,6 +6285,24 @@
       if (has('stair')) {  // 石阶是几条淡横向带，不是硬矩形：用扁椭圆软边叠出来
         for (let i=0;i<3;i++) blot(tw*0.72, th*(0.62+i*0.075), tw*0.20, th*0.016, C.ink, 0.055);
       }
+      // 构图章法摆块：贴地层也参与逐图构图，仍是软边淡墨块、中央保持低明度
+      if (layout === 'ring') {
+        for (let i=0;i<8;i++){ const a=i/8*6.2832;
+          blot(tw*0.50+Math.cos(a)*tw*0.34, th*0.50+Math.sin(a)*th*0.30, tw*0.16, th*0.055, C.deep, 0.06); }
+      } else if (layout === 'band') {
+        blot(tw*0.50, th*0.10, tw*0.46, th*0.045, C.fog, 0.09);
+        blot(tw*0.50, th*0.90, tw*0.40, th*0.030, C.deep, 0.05);
+      } else if (layout === 'frame') {
+        blot(tw*0.03, th*0.50, tw*0.13, th*0.28, C.deep, 0.09);
+        blot(tw*0.97, th*0.50, tw*0.13, th*0.28, C.deep, 0.09);
+      } else if (layout === 'diagonal') {
+        for(let i=0;i<3;i++) blot(tw*(0.22+i*0.24), th*(0.24+i*0.22), tw*0.16, th*0.045, C.ink, 0.05);
+      } else if (layout === 'void') {
+        blot(tw*0.12, th*0.16, tw*0.20, th*0.055, C.fog, 0.05);
+      } else if (layout === 'corner') {
+        blot(tw*0.88, th*0.16, tw*0.18, th*0.09, C.deep, 0.08);
+        blot(tw*0.08, th*0.84, tw*0.16, th*0.07, C.deep, 0.06);
+      }
       // 一道极淡的坡皴，跟视差层 bank 呼应，避免纯色块发闷
       g.strokeStyle = C.line + '0.06)'; g.lineWidth = 1.2; g.beginPath();
       for (let x=0; x<=tw; x+=8) { const y = th*0.90 - 10*Math.sin(x/tw*Math.PI*2)*Math.sin(x/tw*Math.PI); if(x===0) g.moveTo(x,y); else g.lineTo(x,y); }
@@ -6127,6 +6310,17 @@
     } catch (e) { return null; }
     return c;
   }
+  // 主景构图位（世界坐标系数，相对 W/H）。G.cam 起点 (-W/2,-H/2)，故屏幕 y = 世界 y + H/2，
+  // 下列位置一律落在屏幕上半：避开中央法阵/角色玩法区，也不压底部远山视差层。
+  const SC3_FOCUS_POS = {
+    axis:     [ 0.00, -0.20],
+    diagonal: [-0.20, -0.16],
+    corner:   [ 0.22, -0.14],
+    ring:     [ 0.00, -0.18],
+    void:     [-0.22, -0.18],
+    frame:    [-0.24, -0.12],
+    band:     [ 0.00, -0.22]
+  };
   let sc3Cache = null;
   function ensureScenery3() {
     const m = G.map;
@@ -6135,10 +6329,23 @@
     if (!codex) { sc3Cache = null; return { on:false }; }   // 台账缺条目：宁可短路，不套用别的图外观
     const skin = (save && save.skin === 'guigu') ? 'guigu' : 'jin';
     const tone = (typeof codex.tone === 'number') ? codex.tone : 1;
+    const co = codex.composition || null;
+    const phase = (sc3Hash(m.id) % 997) / 997;
     const dark = sc3DarkBase(m);
     const key = skin + '|' + W + '|' + H + '|' + m.id + '|' + tone + '|' + (dark ? 'd' : 'p');
     if (sc3Cache && sc3Cache.key === key) return sc3Cache;   // 热路径命中时只是一次字符串比较
     const C = sc3Colors(skin !== 'guigu', tone, dark);
+    // 主景专用浓墨：浅纸底更黑、深墨底更亮，让「唯一主角」从同色系的配景里跳出来。
+    // 仍是同一组低饱和灰阶通道，只挪明度，不引彩色、不动纸底。
+    const CF = {};
+    for (const k in C) {
+      const mm = /rgba\((\d+),(\d+),(\d+),/.exec(C[k]);
+      if (!mm) { CF[k] = C[k]; continue; }
+      const v = [+mm[1], +mm[2], +mm[3]].map(n => dark
+        ? Math.min(244, Math.round(n + (244 - n) * 0.32))
+        : Math.max(22, Math.round(n * 0.60)));
+      CF[k] = 'rgba(' + v.join(',') + ',';
+    }
     // 精灵：9 种装饰（小）+ 本图地标所需的大画布 case，注入局部表，不碰 window.Sprites
     const spr = {};
     for (const k of ['bamboo','pine','moss','puddle','mist','ruin','lantern','banner','bone']) spr[k] = sc3Bake(k, C, false);
@@ -6160,13 +6367,21 @@
         s: 0.9 + rnd(i+7) * 0.3
       });
     }
-    // 贴地层：按台账的 terrain 组合烘焙 tile → createPattern（每帧 1 次 fillRect）
+    // 主景：全图只立 1 个原著景物，big 画布专属形状，放大提亮、按章法定构图位
+    let focus = null;
+    if (co) {
+      const pos = SC3_FOCUS_POS[co.layout] || SC3_FOCUS_POS.axis;
+      focus = { kind: co.focusCase, name: co.focus, layout: co.layout,
+                spr: sc3Bake(co.focusCase, CF, true, true),  // 浓墨 + 实笔全 alpha：主景不再退到纸后
+                x: pos[0]*W, y: pos[1]*H, s: co.focusScale };
+    }
+    // 贴地层：按台账 terrain + 章法烘焙 tile → createPattern（每帧 1 次 fillRect）
     const terrain = Array.isArray(codex.terrain) ? codex.terrain : [];
     let terrainPat = null;
-    const tile = sc3BakeTerrain(C, terrain);
+    const tile = sc3BakeTerrain(C, terrain, co && co.layout);
     if (tile) { try { terrainPat = ctx.createPattern(tile, 'repeat'); } catch (e) { terrainPat = null; } }
-    sc3Cache = { on:true, key, skin, mapId:m.id, tone, dark, spr, marks, landmarks, terrain,
-                 terrainPat, terrainTile: tile, decor:codex.decor, C };
+    sc3Cache = { on:true, key, skin, mapId:m.id, tone, dark, phase, composition:co, focus,
+                 spr, marks, landmarks, terrain, terrainPat, terrainTile: tile, decor:codex.decor, C };
     return sc3Cache;
   }
   // 装饰绘制出口：新类型用 blitSprOn 画局部表里的离屏 canvas（沿用同一变换与 alpha 纪律）
@@ -6175,11 +6390,16 @@
     if (c) blitSprOn(ctx, c, d.x, d.y, d.s, false, null, alpha);
   }
   function sc3DrawLandmarks(sc3) {
+    const inView = (x, y, pad) => !(x < G.cam.x - pad || x > G.cam.x + W + pad || y < G.cam.y - pad || y > G.cam.y + H + pad);
+    // 次景：原 landmarks 退到纸后，极淡、缩小，不与主景争视线
     for (const lm of sc3.landmarks) {
-      if (!lm.spr) continue;
-      if (lm.x < G.cam.x - 120 || lm.x > G.cam.x + W + 120 || lm.y < G.cam.y - 120 || lm.y > G.cam.y + H + 120) continue;
-      blitSprOn(ctx, lm.spr, lm.x, lm.y, lm.s, false, null, 0.45);   // 明度压到 0.45（报告 L2 口径 0.55 再收一档），不与主角抢视线
+      if (!lm.spr || !inView(lm.x, lm.y, 120)) continue;
+      blitSprOn(ctx, lm.spr, lm.x, lm.y, lm.s * 0.8, false, null, 0.20);
     }
+    // 主景：唯一主角，放大提亮；void 章法（高山雾 / 密林）刻意更淡更远
+    const f = sc3.focus;
+    if (f && f.spr && inView(f.x, f.y, 200))
+      blitSprOn(ctx, f.spr, f.x, f.y, f.s, false, null, f.layout === 'void' ? 0.70 : 0.92);
   }
   // 验收探针：量贴地 tile 的 alpha 分布，证明是「连续渐变的软边淡墨块」而非硬边 0/255 二值贴片。
   // 只在 QA 调试口调用（scenery3()），不在渲染热路径里。垫片无真实像素时安全返回 null。
@@ -6442,7 +6662,7 @@
       // 近浓远淡：屏幕纵向做大气透视——远景减透明度退后（墨皮融纸成淡、金皮融暗底成退），近景满墨。
       // 廉价、不改判定，两皮都正确。
       const dr = Math.max(0, Math.min(1, (d.y - G.cam.y) / H)); // 0 顶(远) → 1 底(近)
-      const alpha = 0.55 + 0.45 * dr;
+      const alpha = (0.55 + 0.45 * dr) * (d.a || 1);   // 聚落内浓淡错落；未收录图无 a 字段，逐字节不变
       const prevA = ctx.globalAlpha;
       ctx.globalAlpha = alpha;
       // 批次4 收录图：12 种装饰里的新类型走局部离屏精灵表；原 3 种仍走 window.Sprites 老路径
@@ -11520,6 +11740,28 @@
         codexLoaded: !!SC3_CODEX, codexSize: SC3_CODEX ? Object.keys(SC3_CODEX).length : 0,
         mapId: s.on ? s.mapId : null, tone: s.on ? s.tone : null, skin: s.on ? s.skin : null,
         darkBase: s.on ? !!s.dark : null,
+        composition: (s.on && s.composition) ? { layout:s.composition.layout, breath:s.composition.breath, clusters:s.composition.clusters, palette:s.composition.palette.slice(), focusCase:s.composition.focusCase, focusScale:s.composition.focusScale } : null,
+        focus: (s.on && s.focus) ? { kind:s.focus.kind, name:s.focus.name, layout:s.focus.layout, x:+s.focus.x.toFixed(1), y:+s.focus.y.toFixed(1), s:s.focus.s, hasSpr:!!s.focus.spr } : null,
+        decorCount: G.decor.length,
+        // 构图验收探针（只在 QA 调试口算，不进渲染热路径）：
+        // decorKinds 证明装饰种类已按 palette 收窄；decorNN 是同种装饰最近邻距离中位数，
+        // 聚落成丛时应远小于「逐格均匀撒点」的期望值。
+        decorKinds: (() => { const o = {}; for (const d of G.decor) o[d.type] = (o[d.type] || 0) + 1; return o; })(),
+        decorNN: (() => {
+          const ds = G.decor; if (ds.length < 4 || ds.length > 200) return null;
+          const by = {}; for (const d of ds) (by[d.type] || (by[d.type] = [])).push(d);
+          const r = [];
+          for (const k in by) { const a = by[k];
+            for (let i = 0; i < a.length; i++) { let best = Infinity;
+              for (let j = 0; j < a.length; j++) if (i !== j) {
+                const q = Math.hypot(a[i].x - a[j].x, a[i].y - a[j].y); if (q < best) best = q;
+              }
+              if (best < Infinity) r.push(best);
+            }
+          }
+          r.sort((a, b) => a - b);
+          return r.length ? +r[Math.floor(r.length / 2)].toFixed(1) : null;
+        })(),
         paletteInk: s.on ? s.C.ink : null,   // 验收探针：深底图应抬到浅灰区（普通字符串，跨边界不丢）
         decorScheme: s.on ? s.decor.map(x => x.slice()) : null,
         landmarks: s.on ? s.landmarks.map(l => ({ kind: l.kind, name: l.name, x: +l.x.toFixed(1), y: +l.y.toFixed(1), hasSpr: !!l.spr })) : [],

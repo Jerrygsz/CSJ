@@ -1,12 +1,13 @@
 // 批次4 阶段二：逐图原著考据台账（window.MAP_CODEX）驱动的地图视觉层，常驻验收。
 // 自带静态服务，独立于其它 QA 脚本的端口。
 //
-// 断言分五组：
+// 断言分六组：
 //   A 路线约束：白名单 = 台账 18 张 key；171 张图只启用 18 张，未收录 153 张完全短路
 //   B 三项指标：装饰类型 ≥12、地标 1~3 个且都有精灵、贴地层 pattern 存在、双皮各自烘焙
 //   C 纯视觉：新层不写 G.zones / G.hazards（判定层零变化）
 //   D 流畅度：同一张后山图开/关三层，A/B 量每帧绘制调用增量与帧耗
 //   E 逐图一致性：18 张图的 decor / landmarks / terrain / tone 逐字段等于台账，且同 arc 内不再共用一套外观
+//   F 构图化：逐图 composition 等于台账、主景唯一定位且避开玩法区、装饰按 palette 收窄、聚落成丛、留白生效
 //
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -68,6 +69,7 @@ const probe = async (id) => {
     const d = document.getElementById('dialog'); if (d) d.style.display = 'none';
   }, id);
   await page.waitForTimeout(90);
+  await page.evaluate(() => window.__FR.renderOnce());   // 确保 ensureDecor() 已铺好 chunk，构图探针才有数据
   return page.evaluate(() => window.__FR.scenery3());
 };
 
@@ -99,7 +101,7 @@ const newTypes = g.decorScheme ? g.decorScheme.map(x => x[0]) : [];
 ok(newTypes.filter(t => !['tree','rock','tuft'].includes(t)).length >= 3,
    '台账装饰权重表含 ≥3 种新装饰（不是只挂在常量里）', newTypes);
 ok(g.landmarks.length >= 1 && g.landmarks.length <= 3, 'P1-2 地标每图 1~3 个', { n: g.landmarks.length });
-ok(g.landmarks.every(l => l.hasSpr), 'P1-2 每个地标都烘焙出精灵（明度 0.45 + 软边罩走 blitSprOn）', g.landmarks);
+ok(g.landmarks.every(l => l.hasSpr), 'P1-2 每个次景都烘焙出精灵（alpha 0.20 退到纸后 + 软边罩走 blitSprOn）', g.landmarks);
 ok(g.landmarks.every(l => !!l.name), '地标带原著景物名（不是随机 kind）', g.landmarks.map(l => l.name));
 ok(g.terrainPat === true, 'P1-4 贴地层 createPattern 已生成', { terrainPat: g.terrainPat });
 ok(g.mapId === 'houshan' && g.skin === 'guigu' && g.tone === 0.98,
@@ -156,7 +158,7 @@ const perf = await page.evaluate(() => {
 });
 console.log('   A/B:', JSON.stringify(perf));
 ok(perf.dFill === 1, 'P1-4 贴地层每帧恰好 +1 次 fillRect（不是逐格瓦片）', { dFill: perf.dFill });
-ok(perf.dDraw >= 0 && perf.dDraw <= 3, 'P1-2 地标每帧 ≤3 次 drawImage（视锥裁剪生效）', { dDraw: perf.dDraw });
+ok(perf.dDraw >= 0 && perf.dDraw <= 5, '地标 + 主景每帧 ≤5 次 drawImage（视锥裁剪生效）', { dDraw: perf.dDraw });
 ok(perf.dMs < 1.0, '帧耗增量 < 1ms/帧（对照第83轮 6 特效 1.95ms 基线）', { dMs: perf.dMs });
 ok(perf.on.ms < 3.0, '开启三层后整帧耗 < 3ms/帧', { ms: +perf.on.ms.toFixed(3) });
 
@@ -205,6 +207,45 @@ ok(darkFlags.filter(x => x.dark).every(x => inkR(x.ink) > 170),
 ok(darkFlags.filter(x => !x.dark).every(x => inkR(x.ink) < 120),
    '浅纸底图仍保持原淡墨（零回归）', darkFlags.filter(x => !x.dark).slice(0, 2));
 console.log('   E 组覆盖:', JSON.stringify({ maps: rows.length, arcs: Object.keys(byArc), uniqDecor, uniqLm, uniqTerrain, tones: tones.length, dark: darkIds.length }));
+
+console.log('\n== F 构图化：主景 / 聚落 / 留白 / 笔法 ==');
+const fMism = [];
+for (const r of rows) {
+  const c = codex[r.id].composition, s = r.s;
+  if (!c) { fMism.push(r.id + ': 台账缺 composition'); continue; }
+  if (!s.composition) { fMism.push(r.id + ': 运行时缺 composition'); continue; }
+  if (s.composition.layout !== c.layout || s.composition.breath !== c.breath ||
+      s.composition.clusters !== c.clusters || s.composition.focusCase !== c.focusCase ||
+      s.composition.focusScale !== c.focusScale || !eq(s.composition.palette, c.palette))
+    fMism.push(r.id + ': composition 字段不符');
+  if (!s.focus || !s.focus.hasSpr) fMism.push(r.id + ': 主景精灵缺失');
+  else {
+    if (s.focus.kind !== c.focusCase) fMism.push(r.id + ': 主景形状不符');
+    if (s.focus.s !== c.focusScale) fMism.push(r.id + ': 主景倍率不符');
+    if (s.focus.y >= 0) fMism.push(r.id + ': 主景压到中央玩法区');
+  }
+  const kinds = Object.keys(s.decorKinds || {});
+  if (kinds.length > 3) fMism.push(r.id + ': 装饰种类未收窄 (' + kinds.length + ')');
+  if (kinds.some(k => !c.palette.includes(k))) fMism.push(r.id + ': 出现 palette 之外的装饰');
+}
+ok(fMism.length === 0, '18 张构图参数逐字段等于台账；主景唯一定位、装饰按 palette 收窄', fMism);
+const uniqComp = new Set(rows.map(r => JSON.stringify(r.s.composition))).size;
+ok(uniqComp === 18, '18 张构图各不相同（不再是同一套均匀撒点）', { uniqComp });
+const focusKinds = [...new Set(rows.map(r => r.s.focus && r.s.focus.kind))];
+ok(focusKinds.length >= 7, '主景形状 ≥7 类（原著景物不是同一张牌坊）', focusKinds);
+const counts = rows.map(r => ({ id: r.id, breath: r.s.composition.breath, n: r.s.decorCount, nn: r.s.decorNN }));
+const maxN = Math.max(...counts.map(x => x.n));
+ok(maxN < 70, '留白生效：装饰数远低于旧版约 90 个均匀撒点', { maxN, counts });
+const avg = a => a.length ? a.reduce((s, x) => s + x.n, 0) / a.length : 0;
+const b3 = counts.filter(x => x.breath === 3), b2 = counts.filter(x => x.breath === 2);
+ok(avg(b3) < avg(b2), 'breath=3（高山雾 / 密闭石屋）比 breath=2 更疏', { b3: +avg(b3).toFixed(1), b2: +avg(b2).toFixed(1) });
+const nn = counts.map(x => x.nn).filter(x => typeof x === 'number' && isFinite(x));
+ok(nn.length >= 15 && nn.reduce((s, x) => s + x, 0) / nn.length < 90,
+   '聚落成丛：同种装饰最近邻距离中位数 < 90px（组半径 48px，非均匀撒点）',
+   { maps: nn.length, avgNN: +(nn.reduce((s, x) => s + x, 0) / nn.length).toFixed(1), samples: counts.slice(0, 5) });
+const layouts = [...new Set(rows.map(r => r.s.composition.layout))];
+ok(layouts.length >= 6, '章法覆盖 ≥6 种（中轴/斜势/压角/环抱/空灵/夹景/横带）', layouts);
+console.log('   F 组覆盖:', JSON.stringify({ uniqComp, focusKinds: focusKinds.length, layouts, maxN, avgNN: +(nn.reduce((s, x) => s + x, 0) / nn.length).toFixed(1) }));
 
 console.log('\n== 运行期无 JS 报错 ==');
 ok(errs.length === 0, '全程无 pageerror', errs);

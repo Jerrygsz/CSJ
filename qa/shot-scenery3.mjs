@@ -1,8 +1,8 @@
-// 批次4 实拍：逐图原著考据台账驱动的多图水墨实拍 + 后山三层开/关对照。
+// 批次4 构图化实拍：逐图原著主景 + 聚落留白 + 后山三层开/关对照。
 // 自带静态服务（9098），无需先起外部 server；用法：
-//   node qa/shot-scenery3.mjs             拍 6 张代表性收录图 + 后山 on/off/jin 对照
+//   node qa/shot-scenery3.mjs             拍 10 张（覆盖 8 类主景形状）+ 后山 on/off/jin 对照
 //   node qa/shot-scenery3.mjs xuese       只重拍指定 mapId
-// 目的：肉眼确认「软边明度块不是马赛克 / 逐图外观确实不同 / 中央留白 / 两皮风格统一 / 无硬切」。
+// 目的：肉眼确认「一个主景立得住 / 大片留白 / 装饰成丛不铺满 / 无方形图标 / 软边不马赛克 / 两皮统一」。
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -52,13 +52,16 @@ const dump = async (label) => {
   console.log(label, JSON.stringify({
     on: i.on, mapId: i.mapId, skin: i.skin, tone: i.tone,
     decor: (i.decorScheme || []).map(x => x[0] + ':' + x[1]),
-    landmarks: i.landmarks.map(l => l.name), terrain: i.terrain, terrainPat: i.terrainPat
+    landmarks: i.landmarks.map(l => l.name), terrain: i.terrain, terrainPat: i.terrainPat,
+    composition: i.composition, focus: i.focus && i.focus.kind + '@' + i.focus.layout,
+    decorCount: i.decorCount, decorKinds: i.decorKinds, decorNN: i.decorNN
   }));
   return i;
 };
 
 const only = process.argv[2] || null;
-const ids = only ? [only] : ['qixuan', 'mishi', 'tainan', 'xuese', 'jiayuan', 'shiku', 'xuechi', 'heisha'];
+// 10 张覆盖 8 类原著主景形状：narrowgate / stonehut / temple / stonering / pool / minehead / grove / shed
+const ids = only ? [only] : ['qixuan', 'mishi', 'tainan', 'xuese', 'xuechi', 'shiku', 'heisha', 'heixiang', 'jiayuan', 'yanwu'];
 const written = [];
 
 for (const id of ids) {
