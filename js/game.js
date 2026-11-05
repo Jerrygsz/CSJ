@@ -4444,7 +4444,7 @@
       }
       return;
     }
-    // ---- 原逻辑：未收录图（当前 121 张，随台账逐批追加递减）/ 构图缺失降级，逐字节保持批次3 口径 ----
+    // ---- 原逻辑：未收录图（当前 102 张，全属灵界篇；随台账逐批追加递减）/ 构图缺失降级，逐字节保持批次3 口径 ----
     const scheme = (sc3.on && sc3.decor) ? sc3.decor : ((G.map && G.map.decorScheme) || DEFAULT_DECOR);
     for (let i = 0; i < 6; i++) {
       const x = cx * CH + rnd() * CH, y = cy * CH + rnd() * CH, t = rnd();
@@ -6474,6 +6474,127 @@
           brush(cx+34,64, cx+42,58, C.line,0.24,1.3);
           blob(cx+30,48,6,4,C.fog,0.16);
           break;
+        // 第105轮 第四批（人界篇收官）7 个新主景。
+        // 实拍复修（第105轮第二轮）：初版全是细线线稿，jixi 读成脚手架、zhenmo 读成货架、
+        // xiaoji 读成墙角、bianjie 读成路牌。标杆 qixuan 的牌坊虽也有直边，但靠石棱皴擦、
+        // 云带托底与浓淡层次撑住体积。故本轮一律改为「没骨墨团块面打底 + 短断续笔线提骨」，
+        // 删掉通长横杠、Γ 形直角、层间等宽的对称横线；体积靠 blob 叠，不靠线框。
+        case 'battleline': // 慕兰边界：两侧淡墨阵旗成丛，中间大片无人地带留白
+          blob(cx-27,52,15,13,C.fog,0.20);                    // 左阵旗影成丛（没骨块面）
+          blob(cx-34,46,9,9,C.ink,0.14);
+          blob(cx+28,58,12,9,C.fog,0.13);                     // 右阵更远更淡，不镜像对称
+          blob(cx+35,53,7,6,C.line,0.10);
+          brush(cx-32,58, cx-30,40, C.deep,0.46,2.0);         // 幡杆只露几截短斜笔，不立通长竖杆
+          brush(cx-30,40, cx-26,37, C.line,0.30,1.3);
+          blob(cx-23,43,6,8,C.ink,0.30);                      // 旗面用墨团而非方形
+          brush(cx-27,34, cx-17,34, C.deep,0.34,1.5);
+          brush(cx-18,64, cx-8,63, C.line,0.24,1.2);          // 阵前断续短笔，不成通长横杠
+          brush(cx+8,67, cx+16,66, C.line,0.20,1.1);
+          brush(cx+22,61, cx+30,62, C.fog,0.18,1.0);
+          for(let i=0;i<3;i++) ell(cx+22+i*6,50+i*4,3.5,1.8,C.line,0.12); // 极淡人马影
+          ell(cx,26,26,6,C.fog,0.06);                         // 上方极淡天光
+          break;
+        case 'desertruin': // 极西之地：沙丘没骨横带里半埋的几截斜断柱，不成门框
+          blob(cx-26,66,20,9,C.fog,0.20);                       // 三团沙丘错落，不排成直线
+          blob(cx+8,70,22,8,C.fog,0.16);
+          blob(cx+32,62,12,6,C.fog,0.11);
+          brush(cx-34,62, cx-28,44, C.ink,0.48,2.4);            // 左断柱：斜、只有一截
+          brush(cx-28,44, cx-25,40, C.line,0.26,1.4);
+          brush(cx+14,68, cx+11,55, C.deep,0.40,2.2);           // 右断柱：更短、反向倾
+          blob(cx-30,65,9,4,C.fog,0.16);                        // 柱脚沙埋
+          blob(cx+13,67,8,3,C.fog,0.13);
+          brush(cx-6,70, cx+4,66, C.line,0.32,2.0);             // 一截横躺的断柱，不接任何竖柱
+          brush(cx-2,72, cx+2,70, C.fog,0.20,1.2);
+          for(let i=0;i<4;i++) brush(cx-38+i*17,78+i%2*3, cx-28+i*17,77+i%2*3, C.fog,0.14,1.0); // 沙纹短笔
+          ell(cx+8,24,22,5,C.fog,0.07);                         // 上方天光留白
+          break;
+        case 'grasscamp': // 天澜草原：草浪墨团横带 + 两顶只画一边的帐顶
+          blob(cx-24,64,18,8,C.fog,0.18);                       // 草浪靠块面，不靠四条平行横线
+          blob(cx+12,68,20,7,C.fog,0.15);
+          blob(cx+32,60,10,5,C.fog,0.11);
+          brush(cx-30,64, cx-22,48, C.ink,0.44,2.2);            // 主帐只画一侧斜边 + 弧顶一小段
+          brush(cx-22,48, cx-14,51, C.deep,0.34,1.6);
+          blob(cx-22,58,9,6,C.fog,0.14);
+          brush(cx+3,66, cx+9,56, C.deep,0.30,1.7);             // 次帐更偏更小
+          brush(cx+9,56, cx+13,58, C.line,0.22,1.2);
+          blob(cx+9,62,6,4,C.fog,0.10);
+          brush(cx-36,78, cx-24,76, C.line,0.18,1.2);           // 两道车辙短斜笔
+          brush(cx-33,82, cx-21,80, C.line,0.14,1.0);
+          for(let i=0;i<6;i++){ const x=cx+16+i*4, y=56+(i%3)*4;
+            brush(x,y, x+1,y-7-(i%2)*3, C.fog,0.16,1.0); }    // 草簇短笔，不成栅栏
+          break;
+        case 'pagoda': { // 镇魔塔：淡墨塔身块面 + 三层错位的短檐（不等宽、不居中对称）
+          blob(cx-2,54,15,26,C.fog,0.16);                       // 塔身没骨块面，上窄下宽
+          blob(cx+1,38,10,13,C.fog,0.13);
+          brush(cx-24,32, cx+8,31, C.deep,0.52,2.4);            // 三层檐 x / y 都错开，不读成货架
+          brush(cx-24,32, cx-21,27, C.ink,0.34,1.6);
+          brush(cx-16,50, cx+14,49, C.deep,0.46,2.2);
+          brush(cx+14,49, cx+17,45, C.ink,0.30,1.5);
+          brush(cx-10,68, cx+12,67, C.ink,0.42,2.0);
+          brush(cx-10,68, cx-13,64, C.line,0.28,1.3);
+          brush(cx-8,36, cx-7,46, C.line,0.26,1.2);             // 柱线只两截短笔，不连成栅栏
+          brush(cx+6,53, cx+5,63, C.line,0.22,1.1);
+          brush(cx-22,77, cx-8,76, C.ink,0.34,1.8);             // 塔基断续两段，非通长横杠
+          brush(cx+2,78, cx+20,77, C.ink,0.30,1.8);
+          ell(cx+4,42,10,14,C.lite,0.05);
+          break;
+        }
+        case 'icewall': // 小极宫：一整片横向冰壁 + 断续冰棱，不成三个圆轮、不勾 Γ 直角
+          blob(cx-18,48,26,13,C.fog,0.15);                      // 横向拉长的整片冰壁
+          blob(cx+14,52,20,11,C.fog,0.12);                      // 右侧略低略淡，叠出层次
+          blob(cx-30,58,14,8,C.fog,0.10);
+          brush(cx-38,34, cx-20,33, C.line,0.32,1.8);           // 上沿只三段短笔，不通长
+          brush(cx-12,33, cx+6,34, C.line,0.26,1.6);
+          brush(cx+16,35, cx+34,34, C.line,0.20,1.4);
+          brush(cx-28,40, cx-24,60, C.line,0.22,1.2);           // 冰棱：长短不一的斜短笔
+          brush(cx-6,38, cx-2,54, C.line,0.18,1.0);
+          brush(cx+18,42, cx+14,58, C.line,0.16,1.0);
+          brush(cx-32,46, cx-20,42, C.lite,0.20,1.2);           // 反光用短斜笔，不用圆点
+          brush(cx+4,40, cx+14,38, C.lite,0.16,1.0);
+          brush(cx-6,72, cx+14,82, C.ink,0.36,1.9);             // 斜下冰梯
+          brush(cx+2,70, cx+20,80, C.line,0.24,1.2);
+          blob(cx-16,78,16,6,C.fog,0.12);                       // 厚雪软边
+          break;
+        case 'thunderhead': // 天澜圣兽雷劫：横压乌云靠墨团叠出，不用三条通长横杠
+          blob(cx-26,24,18,8,C.deep,0.20);
+          blob(cx-6,20,20,9,C.deep,0.17);
+          blob(cx+18,26,17,7,C.ink,0.14);
+          blob(cx+32,20,10,6,C.fog,0.11);
+          brush(cx-36,32, cx-18,31, C.fog,0.20,1.6);            // 云脚断续短笔
+          brush(cx-4,33, cx+10,32, C.fog,0.17,1.4);
+          brush(cx+20,34, cx+36,33, C.fog,0.14,1.2);
+          brush(cx-14,36, cx-9,48, C.ink,0.44,2.0);             // 雷线折而不断
+          brush(cx-9,50, cx-4,58, C.line,0.28,1.4);
+          brush(cx+12,34, cx+7,44, C.deep,0.34,1.6);
+          brush(cx+7,46, cx+10,54, C.line,0.22,1.2);
+          try {                                                 // 法阵残环：两段断续弧，不连成一整道「笑脸」
+            g.strokeStyle=P(C.ink,0.30); g.lineWidth=1.8; g.lineCap='round';
+            g.beginPath(); g.ellipse(cx,66,24,9,0,0.55,1.25); g.stroke();
+            g.beginPath(); g.ellipse(cx,66,24,9,0,1.90,2.55); g.stroke();
+            g.strokeStyle=P(C.line,0.18); g.lineWidth=1.1;
+            g.beginPath(); g.ellipse(cx,66,16,6,0,0.75,1.15); g.stroke();
+            g.beginPath(); g.ellipse(cx,66,16,6,0,2.00,2.40); g.stroke();
+          } catch(e) { /* 垫片降级 */ }
+          break;
+        case 'featherfall': // 鲲鹏之战：断续浪线之间一片斜落的羽影，不画规则锯齿梯子
+          for(let i=0;i<3;i++){
+            const yy=50+i*10;
+            brush(cx-38,yy, cx-16,yy-3, C.fog,0.13,1.6);        // 三段错开，不成通长横条
+            brush(cx-8,yy+1, cx+12,yy-1, C.fog,0.11,1.4);
+            brush(cx+20,yy+2, cx+38,yy, C.fog,0.10,1.3);
+          }
+          blob(cx-8,30,5,10,C.fog,0.14);                        // 先有羽面块面，再落羽轴
+          blob(cx-1,40,6,12,C.fog,0.13);
+          blob(cx+6,50,5,10,C.fog,0.11);
+          brush(cx-12,20, cx-1,42, C.deep,0.48,2.2);           // 羽轴两段不同斜率，略带弧
+          brush(cx-1,42, cx+13,66, C.ink,0.40,2.0);
+          brush(cx+13,66, cx+16,72, C.line,0.24,1.3);
+          for(let i=0;i<5;i++){                                 // 羽枝长短错落，不成对称锯齿
+            const px=cx-10+20*(i/5), py=26+36*(i/5);
+            brush(px,py, px+7-i*0.8, py+3, C.ink,0.26-i*0.03,1.1);
+            if(i%2===0) brush(px,py, px-5, py+5, C.line,0.20,1.0);
+          }
+          break;
         default: return null;
       }
       // 软边淡出罩：destination-in 径向渐变，把精灵四周 alpha 渐隐到 0，像墨洇进宣纸。
@@ -6725,14 +6846,14 @@
     const key = skin + '|' + W + '|' + H + '|' + m.id + '|' + tone + '|' + (dark ? 'd' : 'p');
     if (sc3Cache && sc3Cache.key === key) return sc3Cache;   // 热路径命中时只是一次字符串比较
     const C = sc3Colors(skin !== 'guigu', tone, dark);
-    // 纸性统一：仅对无 inkBg 的增补图（当前 13 张，由真源 hasInkBg 驱动）补铺宣纸；浅纸图沿用 buildGrass 的原生纸底，零改动。
+    // 纸性统一：仅对无 inkBg 的增补图（当前 14 张，由真源 hasInkBg 驱动）补铺宣纸；浅纸图沿用 buildGrass 的原生纸底，零改动。
     // 铺在 grassPat 之后、parallax 之前，于是被深底吞掉的远山 / 暗角层次重新可见。
     let paperPat = null, paperTile = null;
     if (dark) {
       paperTile = sc3BakePaper(true);
       if (paperTile) { try { paperPat = ctx.createPattern(paperTile, 'repeat'); } catch (e) { paperPat = null; } }
     }
-    // 逐图幽暗：全屏软边积墨罩，只烘一次；无 mood 的图（当前 48 张）为 null，render 里整行不执行
+    // 逐图幽暗：全屏软边积墨罩，只烘一次；无 mood 的图（当前 67 张）为 null，render 里整行不执行
     const moodTile = mood ? sc3BakeMood(mood) : null;
     // 主景专用浓墨：纸底已统一，不再分浅底/深底两套，一律比配景更黑。
     // 仍是同一组低饱和灰阶通道，只挪明度，不引彩色、不动纸底数据。

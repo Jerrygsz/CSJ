@@ -1,8 +1,9 @@
 // 批次4 阶段二：逐图原著考据台账（window.MAP_CODEX）驱动的地图视觉层，常驻验收。
 // 自带静态服务，独立于其它 QA 脚本的端口。
 //
-// 断言分十二组。第103轮起所有数量口径都从 window.MAP_CODEX 动态取，
-// 不再写死 18 / 29 / 50 / 153 / 142 / 121 / 9 / 16，也不再拿某张固定 id 当「未收录图」——收录一张就少一张未收录。
+// 断言分十三组。第103轮起所有数量口径都从 window.MAP_CODEX 动态取，
+// 不再写死 18 / 29 / 50 / 69 / 153 / 142 / 121 / 102 / 9 / 13 / 14 / 16，
+// 也不再拿某张固定 id 当「未收录图」——收录一张就少一张未收录。
 //   A 路线约束：白名单 = MAP_CODEX 的 key；171 张图只启用收录图，其余完全短路
 //   B 三项指标：装饰类型 ≥12、地标 1~3 个且都有精灵、贴地层 pattern 存在、双皮各自烘焙
 //   C 纯视觉：新层不写 G.zones / G.hazards（判定层零变化）
@@ -14,7 +15,9 @@
 //   I 逐图幽暗：mood 只落 xuechi / heisha、四项参数等于台账、积墨罩连续软边、主景更浓、标杆零回归、每帧 +1 drawImage
 //   J 第二批：加台账即自动启用、白名单源码未写死图数、3 个新主景落地、纸性分组由 hasInkBg 驱动
 //   K 视觉边界：mood.signature 专属笔法确实画进积墨罩、玩法层 #banner / .chat-dove / #chatInput 柔化且可回退
-//   L 第三批：21 张自动启用、6 个新主景像素级非空白、17 类形状全覆盖、纸性分组动态口径继续成立、标杆零回归
+//   L 第三批：21 张自动启用、6 个新主景像素级非空白、形状类数动态对齐、纸性分组动态口径继续成立、标杆零回归
+//   M 第四批：19 张自动启用、人界篇 69 张全篇收口、7 个新主景像素级非空白、24 类形状全覆盖、
+//             剩余 102 张全属灵界篇、真源 stage8 与交付版本对齐、标杆零回归
 //
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -91,8 +94,9 @@ const untrackedId = offIds.find(id => (arcs[id] === 'C' || arcs[id] === 'D')) ||
 const b1Ids = codexIds.filter(id => codex[id].batch === 1);
 const b2Ids = codexIds.filter(id => codex[id].batch === 2);
 const b3Ids = codexIds.filter(id => codex[id].batch === 3);
+const b4Ids = codexIds.filter(id => codex[id].batch === 4);
 const expectPatched = codexIds.filter(id => codex[id].hasInkBg === false).slice().sort();
-console.log('\n动态口径:', JSON.stringify({ total: allIds.length, on: N, off: offIds.length, b1: b1Ids.length, b2: b2Ids.length, b3: b3Ids.length, patched: expectPatched.length, untracked: untrackedId }));
+console.log('\n动态口径:', JSON.stringify({ total: allIds.length, on: N, off: offIds.length, b1: b1Ids.length, b2: b2Ids.length, b3: b3Ids.length, b4: b4Ids.length, patched: expectPatched.length, native: N - expectPatched.length, untracked: untrackedId }));
 
 console.log('\n== A 路线约束：逐图台账白名单（不全量铺开）==');
 await enter('houshan', 'guigu');
@@ -384,12 +388,15 @@ const metaQ = await page.evaluate(() => ({
   b1: Object.values(window.MAP_CODEX).filter(x => x.batch === 1).length,
   b2: Object.values(window.MAP_CODEX).filter(x => x.batch === 2).length,
   b3: Object.values(window.MAP_CODEX).filter(x => x.batch === 3).length,
+  b4: Object.values(window.MAP_CODEX).filter(x => x.batch === 4).length,
   focusKinds: window.MAP_CODEX_STYLE.quant.focusKinds,
   layouts: window.MAP_CODEX_STYLE.quant.layouts
 }));
-ok(metaQ.total === N && metaQ.b1 === b1Ids.length && metaQ.b2 === b2Ids.length && metaQ.b3 === b3Ids.length &&
-   b1Ids.length === 18 && b2Ids.length === 11 && b3Ids.length === 21,
-   '真源已扩到 ' + N + ' 张（首批 18 + 第二批 11 + 第三批 21），batch 字段逐批进机读产物', metaQ);
+ok(metaQ.total === N && metaQ.b1 === b1Ids.length && metaQ.b2 === b2Ids.length &&
+   metaQ.b3 === b3Ids.length && metaQ.b4 === b4Ids.length &&
+   N === metaQ.b1 + metaQ.b2 + metaQ.b3 + metaQ.b4,
+   '真源已扩到 ' + N + ' 张（' + metaQ.b1 + ' + ' + metaQ.b2 + ' + ' + metaQ.b3 + ' + ' + metaQ.b4 +
+   '），batch 字段逐批进机读产物，四批加起来正好等于收录数', metaQ);
 const gameSrc = fs.readFileSync(join(root, 'js/game.js'), 'utf8');
 ok(/SC3_SAMPLE\s*=\s*new Set\(SC3_CODEX \? Object\.keys\(SC3_CODEX\)/.test(gameSrc) &&
    !/SC3_SAMPLE\s*=\s*new Set\(\[/.test(gameSrc),
@@ -410,8 +417,8 @@ for (const [id, kind] of [['zhuji', 'furnace'], ['kuixing', 'ship'], ['ningcui',
   ok(s.focus && s.focus.kind === kind && s.focus.hasSpr && s.focus.s === codex[id].composition.focusScale,
      id + ' 新主景 ' + kind + ' 已烘焙且倍率等于台账', s.focus);
 }
-ok(metaQ.focusKinds === 17 && focusKinds.length === metaQ.focusKinds && metaQ.layouts === 7 && layouts.length === metaQ.layouts,
-   '主景形状 8→11→17 类、章法 7 种，风格基线量化值与运行时逐字一致',
+ok(metaQ.focusKinds === focusKinds.length && metaQ.layouts === layouts.length,
+   '主景形状 ' + focusKinds.length + ' 类、章法 ' + layouts.length + ' 种，风格基线量化值与运行时逐字一致',
    { metaQ, runtimeFocus: focusKinds.length, runtimeLayouts: layouts.length });
 ok(qRow.s.composition.focusCase === 'narrowgate' && qRow.s.uiSoft === true && qRow.s.mood === null,
    '标杆 qixuan 零回归：构图 / 柔化 / 无积墨罩三项不变', qRow.s.composition);
@@ -467,9 +474,10 @@ ok(ui2off.b !== 'none' && ui2off.d !== 'none',
 console.log('   J/K 组覆盖:', JSON.stringify({ metaQ, b2: b2Ids.length, b2Comp, sig: Object.values(sigExpect), ui2 }));
 
 console.log('\n== L 第三批：21 张自动启用 + 6 个新主景的像素级证据 ==');
-ok(N === 50 && b1Ids.length === 18 && b2Ids.length === 11 && b3Ids.length === 21 && offIds.length === 121,
-   '收录 50 张（首批 18 / 第二批 11 / 第三批 21），未收录 121 张仍完全短路（Jerry 禁止全量铺开）',
-   { N, b1: b1Ids.length, b2: b2Ids.length, b3: b3Ids.length, off: offIds.length });
+ok(N === b1Ids.length + b2Ids.length + b3Ids.length + b4Ids.length && offIds.length === allIds.length - N,
+   '收录 ' + N + ' 张（首批 ' + b1Ids.length + ' / 第二批 ' + b2Ids.length + ' / 第三批 ' + b3Ids.length +
+   ' / 第四批 ' + b4Ids.length + '），未收录 ' + offIds.length + ' 张仍完全短路（Jerry 禁止全量铺开）',
+   { N, b1: b1Ids.length, b2: b2Ids.length, b3: b3Ids.length, b4: b4Ids.length, off: offIds.length });
 const b3Rows = b3Ids.map(id => rows.find(r => r.id === id));
 ok(b3Rows.every(r => r && r.s.on && r.s.mapId === r.id && r.s.decorScheme &&
                      r.s.landmarks.every(l => l.hasSpr) && r.s.terrainPat && r.s.styleLoaded),
@@ -482,9 +490,9 @@ const b3Comp = new Set(b3Rows.map(r => JSON.stringify(r.s.composition))).size;
 ok(b3Comp === b3Ids.length && b3Rows.every(r => r.s.focus && r.s.focus.hasSpr && r.s.focus.y < 0),
    '第三批 21 张构图各不相同、主景全部避开中央玩法区（不是按 arc E/F 套同一套外观）', { b3Comp });
 const NEW3 = ['floatingpalace','bamboostand','deadsea','stoneroom','stormpeak','clanhall'];
-ok(focusKinds.length === 17 && NEW3.every(k => focusKinds.includes(k)) &&
-   metaQ.focusKinds === 17 && new Set(rows.map(r => r.s.focus && r.s.focus.kind)).size === 17,
-   '主景形状 11→17 类，6 个新 case 全部在运行时出现且 17 类都有图在用',
+ok(NEW3.every(k => focusKinds.includes(k)) &&
+   metaQ.focusKinds === focusKinds.length && new Set(rows.map(r => r.s.focus && r.s.focus.kind)).size === focusKinds.length,
+   '6 个第三批新 case 全部在运行时出现，且当前 ' + focusKinds.length + ' 类形状每类都有图在用',
    { runtime: focusKinds.length, meta: metaQ.focusKinds });
 // 像素级：不是「hasSpr=true 就万事大吉」，必须有可见笔触、连续 alpha、且没有实心直角墨块
 for (const [id, kind] of [['xutian','floatingpalace'], ['miaoyin','bamboostand'], ['bianhai','deadsea'],
@@ -498,10 +506,11 @@ ok(rows.filter(r => r.s.focus && NEW3.includes(r.s.focus.kind))
        .every(r => r.s.focusA && r.s.focusA.nonZero > 300 && r.s.focusA.solidPixels === 0),
    '6 个新主景涉及的 ' + rows.filter(r => r.s.focus && NEW3.includes(r.s.focus.kind)).length +
    ' 张图逐张都有可见笔触（没有空白烘焙）');
-ok(expectPatched.length === 13 && eq(expectPatched, expectDark) &&
+ok(eq(expectPatched, expectDark) && expectPatched.length + (N - expectPatched.length) === N &&
    ['luoyunyaoyuan','fujia','huixiang'].every(id => expectPatched.includes(id)),
-   '纸性分组动态口径继续成立：13 张补铺宣纸（含第三批 3 张），与数据层 inkBg 清单逐字一致',
-   { patched: expectPatched.length, data: expectDark.length });
+   '纸性分组动态口径继续成立：' + expectPatched.length + ' 张补铺宣纸 / ' + (N - expectPatched.length) +
+   ' 张原生浅纸，与数据层 inkBg 清单逐字一致',
+   { patched: expectPatched.length, native: N - expectPatched.length, data: expectDark.length });
 ok(/SC3_SAMPLE\s*=\s*new Set\(SC3_CODEX \? Object\.keys\(SC3_CODEX\)/.test(gameSrc) &&
    !/SC3_SAMPLE\s*=\s*new Set\(\[/.test(gameSrc),
    '第三批之后白名单仍由 Object.keys(MAP_CODEX) 生成，源码里没有补写任何图名或图数');
@@ -517,21 +526,87 @@ if (fs.existsSync(truthPath)) {
         m.quotes && m.quotes.length && m.diff && m.composition && m.landmarks.length),
      '真源层：第三批 21 张逐图带 source / refs / canon / quotes / diff / composition / landmarks',
      t3.filter(m => !(m.quotes && m.quotes.length)).map(m => m.id));
-  ok(truth.maps.length === 50 && truth.maps.reduce((n, m) => n + m.quotes.length, 0) === 183 &&
-     !!truth.meta.stage7 && /20261105K/.test(truth.meta.stage7.status),
-     '真源 50 张 / 183 条摘引，meta.stage7 状态与交付版本 20261105K 对齐',
-     { maps: truth.maps.length, quotes: truth.maps.reduce((n, m) => n + m.quotes.length, 0), stage7: truth.meta.stage7 && truth.meta.stage7.status });
+  ok(truth.maps.length === N && truth.maps.reduce((n, m) => n + m.quotes.length, 0) === 259 &&
+     !!truth.meta.stage8 && /20261105L/.test(truth.meta.stage8.status),
+     '真源 ' + N + ' 张 / 259 条摘引，meta.stage8 状态与交付版本 20261105L 对齐',
+     { maps: truth.maps.length, quotes: truth.maps.reduce((n, m) => n + m.quotes.length, 0), stage8: truth.meta.stage8 && truth.meta.stage8.status });
   const html = fs.readFileSync(join(root, 'index.html'), 'utf8');
   const swSrc = fs.readFileSync(join(root, 'sw.js'), 'utf8');
-  ok((html.match(/20261105K/g) || []).length === 31 && /sw\.js\?v=20261105K/.test(html) &&
-     /const BUILD = '20261105K'/.test(swSrc),
-     'index.html 31 处版本号 + sw.js BUILD 均已 bump 到 20261105K',
-     { html: (html.match(/20261105K/g) || []).length, sw: (swSrc.match(/const BUILD = '([^']+)'/) || [])[1] });
+  ok((html.match(/20261105L/g) || []).length === 31 && /sw\.js\?v=20261105L/.test(html) &&
+     /const BUILD = '20261105L'/.test(swSrc),
+     'index.html 31 处版本号 + sw.js BUILD 均已 bump 到 20261105L',
+     { html: (html.match(/20261105L/g) || []).length, sw: (swSrc.match(/const BUILD = '([^']+)'/) || [])[1] });
 } else {
-  console.log('   （仓库外唯一真源不可读，跳过 3 条交付口径断言；前 11 组不受影响）');
+  console.log('   （仓库外唯一真源不可读，跳过 3 条交付口径断言；前 12 组不受影响）');
 }
 console.log('   L 组覆盖:', JSON.stringify({ b3: b3Ids.length, b3Comp, newCases: NEW3,
   focusKinds: focusKinds.length, patched: expectPatched.length }));
+
+console.log('\n== M 第四批：19 张自动启用 + 人界篇收官 + 7 个新主景的像素级证据 ==');
+ok(N === 69 && b1Ids.length === 18 && b2Ids.length === 11 && b3Ids.length === 21 &&
+   b4Ids.length === 19 && offIds.length === 102,
+   '收录 69 张（18 + 11 + 21 + 19）＝人界篇第一卷～第七卷全篇收口；未收录 102 张仍完全短路',
+   { N, b1: b1Ids.length, b2: b2Ids.length, b3: b3Ids.length, b4: b4Ids.length, off: offIds.length });
+ok(offIds.every(id => ['I', 'J', 'K', 'L', 'M'].includes(arcs[id])),
+   '剩余 102 张全部落在 arc I~M（灵界篇第八卷之后），人界篇 A~H 一张不漏、一张不越界',
+   { bad: offIds.filter(id => !['I','J','K','L','M'].includes(arcs[id])).slice(0, 8),
+     dist: offIds.reduce((a, id) => (a[arcs[id]] = (a[arcs[id]] || 0) + 1, a), {}) });
+const b4Rows = b4Ids.map(id => rows.find(r => r.id === id));
+ok(b4Rows.every(r => r && r.s.on && r.s.mapId === r.id && r.s.decorScheme &&
+                     r.s.landmarks.every(l => l.hasSpr) && r.s.terrainPat && r.s.styleLoaded),
+   '第四批 19 张全部自动启用并烘出装饰 / 地标精灵 / 贴地层（白名单逻辑第 3 次零改动）',
+   b4Rows.filter(r => !r || !r.s.on).map(r => r && r.id));
+ok(b4Rows.every(r => typeof codex[r.id].batch === 'number' && codex[r.id].batch === 4 &&
+                     typeof codex[r.id].hasInkBg === 'boolean'),
+   '第四批 19 张机读产物全部带 batch=4 / hasInkBg 布尔（纸性仍由真源驱动，不手写名单）');
+const b4Comp = new Set(b4Rows.map(r => JSON.stringify(r.s.composition))).size;
+ok(b4Comp === b4Ids.length && b4Rows.every(r => r.s.focus && r.s.focus.hasSpr && r.s.focus.y < 0),
+   '第四批 19 张构图各不相同、主景全部避开中央玩法区（不是按 arc G/H 套同一套外观）', { b4Comp });
+const NEW4 = ['battleline', 'desertruin', 'grasscamp', 'pagoda', 'icewall', 'thunderhead', 'featherfall'];
+ok(focusKinds.length === 24 && NEW4.every(k => focusKinds.includes(k)) &&
+   metaQ.focusKinds === 24 && new Set(rows.map(r => r.s.focus && r.s.focus.kind)).size === 24,
+   '主景形状 17→24 类，7 个新 case 全部在运行时出现且 24 类每类都有图在用',
+   { runtime: focusKinds.length, meta: metaQ.focusKinds, missing: NEW4.filter(k => !focusKinds.includes(k)) });
+// 像素级：新 case 光有 hasSpr 不算数，必须有可见笔触、连续 alpha、且没有实心直角墨块
+for (const [id, kind] of [['bianjie','battleline'], ['jixi','desertruin'], ['mulan','grasscamp'],
+                          ['zhenmo','pagoda'], ['xiaoji','icewall'], ['tianlan','thunderhead'],
+                          ['kunpeng','featherfall']]) {
+  const s = rows.find(r => r.id === id).s;
+  ok(s.focus && s.focus.kind === kind && s.focus.hasSpr && s.focusA &&
+     s.focusA.nonZero > 300 && s.focusA.distinctAlpha >= 6 && s.focusA.solidPixels === 0,
+     id + ' 新主景 ' + kind + ' 像素级非空白：多档软 alpha、无实心直角块', s.focusA);
+}
+const new4Rows = rows.filter(r => r.s.focus && NEW4.includes(r.s.focus.kind));
+ok(new4Rows.length === 7 && new4Rows.every(r => r.s.focusA && r.s.focusA.nonZero > 300 && r.s.focusA.solidPixels === 0),
+   '7 个新主景涉及的 ' + new4Rows.length + ' 张图逐张都有可见笔触（没有空白烘焙 / 没有 fallback 到旧形状）');
+ok(expectPatched.length === 14 && N - expectPatched.length === 55 && eq(expectPatched, expectDark),
+   '纸性分组动态口径继续成立：14 张补铺宣纸 / 55 张原生浅纸，与数据层 inkBg 清单逐字一致',
+   { patched: expectPatched.length, native: N - expectPatched.length, data: expectDark.length });
+ok(/SC3_SAMPLE\s*=\s*new Set\(SC3_CODEX \? Object\.keys\(SC3_CODEX\)/.test(gameSrc) &&
+   !/SC3_SAMPLE\s*=\s*new Set\(\[/.test(gameSrc),
+   '第四批之后白名单仍由 Object.keys(MAP_CODEX) 生成，源码里没有补写任何图名或图数');
+if (fs.existsSync(truthPath)) {
+  const truth = JSON.parse(fs.readFileSync(truthPath, 'utf8'));
+  const t4 = truth.maps.filter(m => m.batch === 4);
+  ok(t4.length === 19 && t4.every(m => m.source && m.refs && m.refs.length && m.canon &&
+        m.quotes && m.quotes.length && m.diff && m.composition && m.landmarks.length &&
+        typeof m.hasInkBg === 'boolean'),
+     '真源层：第四批 19 张逐图带 source / refs / canon / quotes / diff / composition / landmarks / hasInkBg',
+     t4.filter(m => !(m.quotes && m.quotes.length && m.composition)).map(m => m.id));
+  ok(truth.meta.counts.maps === 69 && truth.meta.style.quant.focusKinds === 24 &&
+     !!truth.meta.stage8 && /20261105L/.test(truth.meta.stage8.status),
+     '真源 meta.counts / style.quant / stage8 与交付版本 20261105L 对齐',
+     { counts: truth.meta.counts, focusKinds: truth.meta.style.quant.focusKinds, stage8: truth.meta.stage8 && truth.meta.stage8.status });
+} else {
+  console.log('   （仓库外唯一真源不可读，跳过 2 条真源层断言；前 12 组不受影响）');
+}
+ok(qRow.s.composition.focusCase === 'narrowgate' && qRow.s.mood === null &&
+   qRow.s.focus.kind === 'narrowgate' && qRow.s.uiSoft === true && qRow.s.paperPat === false,
+   '标杆 qixuan 零回归：新增 7 类主景 / 19 张构图都没动它的章法、积墨与原生浅纸',
+   { comp: qRow.s.composition, mood: qRow.s.mood, paperPat: qRow.s.paperPat });
+console.log('   M 组覆盖:', JSON.stringify({ b4: b4Ids.length, b4Comp, newCases: NEW4,
+  focusKinds: focusKinds.length, patched: expectPatched.length, native: N - expectPatched.length,
+  offArcs: offIds.reduce((a, id) => (a[arcs[id]] = (a[arcs[id]] || 0) + 1, a), {}) }));
 
 console.log('\n== 运行期无 JS 报错 ==');
 ok(errs.length === 0, '全程无 pageerror', errs);
