@@ -162,6 +162,17 @@ const p1 = await page.evaluate(() => {
 });
 ok(p1.critOn && p1.critAnim === 'critInk', '重击有朱砂闪光（critInk）', p1);
 ok(p1.scrollOn && p1.scrollAnim === 'scrollUnroll', '进图有展卷动效（scrollUnroll）', p1);
+// 鎏金皮也应有进图过渡（暗角暗金封印），不再硬切（P1-5 双皮对等）
+await page.evaluate(() => window.__FR.skin('jin'));
+await page.waitForTimeout(200);
+const p1j = await page.evaluate(() => {
+  const scroll = document.getElementById('scrollOpen');
+  const anim = (el, cls) => { el.classList.add(cls); const a = getComputedStyle(el).animationName; el.classList.remove(cls); return a; };
+  return { scrollOn: !!scroll, scrollAnim: scroll ? anim(scroll, 'play') : null };
+});
+ok(p1j.scrollOn && p1j.scrollAnim === 'jinSeal', '鎏金进图有暗金暗角过渡（jinSeal，不再硬切）', p1j);
+await page.evaluate(() => window.__FR.skin('guigu'));
+await page.waitForTimeout(120);
 ok(/凡人/.test(p1.dialogSeal || ''), '对白框右下角有「凡人」落款印', p1.dialogSeal);
 
 // boss 卷首：出场 2.6s 后自己退成背景淡痕（一直亮着会和像素怪抢主体）
@@ -213,11 +224,12 @@ ok(wash && wash.rightTree > 0.03, '右侧中景有枯树墨迹', wash && wash.ri
 ok(wash && wash.bottom > wash.center, '底部远山比画面中央重（一角构图：中空边重）', wash && [wash.bottom.toFixed(3), wash.center.toFixed(3)]);
 ok(wash && wash.center < 0.05, '画面中央保持留白（不压战斗区）', wash && wash.center.toFixed(3));
 
-// 切回金皮：晕墨层不再生成，底部不该残留水墨树
+// 切回金皮：金皮现在也构建自己的暗色框景层（P1-5 双皮对等），且与墨皮是不同缓存（切皮隔离仍成立）
 await page.evaluate(() => window.__FR.skin('jin'));
 await page.waitForTimeout(400);
-const washJin = await page.evaluate(() => window.__FR.wash());
-ok(!washJin, '金皮下不生成晕墨层（切皮隔离）', washJin);
+const washJin = await page.evaluate(() => { const c = window.__FR.wash(); return { ok: !!c, w: c ? c.width : null, h: c ? c.height : null }; });
+ok(washJin.ok && washJin.w === wash.w && washJin.h === wash.h, '鎏金皮也生成自己的框景层（双皮对等）', washJin.ok ? (washJin.w + 'x' + washJin.h) : 'null');
+ok(washJin !== wash, '鎏金框景层与墨皮是不同缓存（切皮隔离仍成立）', washJin && washJin !== wash);
 await page.evaluate(() => window.__FR.skin('guigu'));
 
 console.log('\n────────────────────────');

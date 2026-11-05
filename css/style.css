@@ -1386,6 +1386,20 @@ body[data-skin="guigu"] #scrollOpen.play { display: block; animation: scrollUnro
   100% { transform: scaleY(1);    opacity: 0; }
 }
 
+/* ================= 鎏金皮 · 进图仪式：暗金暗角封印（与墨皮展卷对等，不纸化） =================
+   暗部皮不照搬水墨：用暗角 + 暗金细框把四边压暗、中央留白，0.6s 内浮起又化开，替代硬切。 */
+body:not([data-skin="guigu"]) #scrollOpen {
+  background:
+    radial-gradient(ellipse at center, rgba(0,0,0,0) 36%, rgba(14,9,3,0.6) 100%);
+  box-shadow: inset 0 0 0 2px rgba(201,162,74,0.55), inset 0 0 70px rgba(14,9,3,0.55);
+}
+body:not([data-skin="guigu"]) #scrollOpen.play { display: block; animation: jinSeal .6s cubic-bezier(.2,.85,.3,1) forwards; }
+@keyframes jinSeal {
+  0%   { opacity: 0; transform: scale(1.05); }
+  42%  { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1); }
+}
+
 /* ================= 水墨皮 · 地图卡：把信息层级拉开 =================
    原来卡名、地点、状态、标签四层几乎同一种灰度，一眼扫过去分不出主次。
    重排：名浓（墨）、地淡（淡墨）、标签改墨线小签（不用彩色浅底）、

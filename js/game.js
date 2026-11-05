@@ -4379,7 +4379,7 @@
   const elScrollOpen = document.getElementById('scrollOpen');
   let _scrollAt = 0;
   function openScroll() {
-    if (!elScrollOpen || !save || save.skin !== 'guigu') return;
+    if (!elScrollOpen || !save) return;
     const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
     if (now - _scrollAt < 400) return;   // 连点两个图时不要叠成两层纸
     _scrollAt = now;
@@ -5785,195 +5785,138 @@
   }
   // 一角构图晕墨层（鬼谷水墨皮专用）：四角淡墨 + 底部平远远山，中央留白。
   // 离屏画布一次性烘焙，随皮肤/视口尺寸重建；每帧只多一次 drawImage。
-  let washLayer = null;
-  function washLayerOf() {
-    if (!save || save.skin !== 'guigu') return null;
-    if (washLayer && washLayer.width === W && washLayer.height === H) return washLayer;
-    const c = document.createElement('canvas'); c.width = W; c.height = H;
-    const g = c.getContext('2d');
-    const corner = (cx, cy, r, a) => {
-      const rg = g.createRadialGradient(cx, cy, 0, cx, cy, r);
-      rg.addColorStop(0, 'rgba(60,56,48,' + a + ')');
-      rg.addColorStop(1, 'rgba(60,56,48,0)');
-      g.fillStyle = rg; g.fillRect(cx - r, cy - r, r * 2, r * 2);
-    };
-    const R = Math.max(W, H) * 0.46;
-    // 整屏竖向明暗只在这里做一次（远处高、近处沉），地面平铺就永远平，不会出现循环横带
-    const vg = g.createLinearGradient(0, 0, 0, H);
-    vg.addColorStop(0, 'rgba(62,58,48,0.055)');
-    vg.addColorStop(0.55, 'rgba(62,58,48,0.015)');
-    vg.addColorStop(1, 'rgba(62,58,48,0.085)');
-    g.fillStyle = vg; g.fillRect(0, 0, W, H);
-    corner(0, 0, R, 0.14); corner(W, 0, R * 0.85, 0.11);
-    corner(0, H, R, 0.15); corner(W, H, R, 0.12);
-    // 平远远山：底部两叠淡墨剪影（山势只在中央隆起，两端伏进留白）
-    const mountain = (baseY, amp, alpha, seedOff) => {
-      const pts = [];
-      g.beginPath(); g.moveTo(-4, H + 4);
-      for (let px = 0; px <= W + 8; px += 8) {
-        const t = px / W;
-        const y = baseY - amp * (0.55 + 0.45 * Math.sin(t * 5.2 + seedOff)) * Math.sin(t * Math.PI);
-        pts.push([px, y]);
-        g.lineTo(px, y);
+  // ---------- 视差背景：远山/寒林/近景 分层随相机横移；屏幕固定框景保留 ----------
+  // 原 wash 是一张整屏合成、钉死在屏幕上（D3：相机一动，纸纹和远山浮在原地）。
+  // 现拆成：框景(屏幕固定) + 远(0.18)/中(0.45)/近(0.8) 三层随相机横移 + 世界肌理(1:1)。
+  // 约束：仍「四角淡墨/暗角 + 中央留白」，横移幅度小（系数<1），不产生眩晕。两皮各一套。
+  let pxCache = null;
+  function parallaxLayers() {
+    const skin = (save && save.skin === 'guigu') ? 'guigu' : 'jin';
+    if (pxCache && pxCache.w === W && pxCache.h === H && pxCache.skin === skin) return pxCache;
+    const jin = (skin !== 'guigu');
+    // 调色：水墨用墨/纸；鎏金用暗金+暗角（暗部皮不纸化，保留深色噪点底 + 高对比特效）
+    const C = jin
+      ? { corner: 'rgba(16,10,4,', fog: 'rgba(22,16,8,', mtn: 'rgba(44,32,16,', ridge: 'rgba(82,60,28,',
+          tree: 'rgba(26,20,12,', stone: 'rgba(34,26,14,', bank: 'rgba(64,48,24,', cun: 'rgba(92,68,32,' }
+      : { corner: 'rgba(60,56,48,', fog: 'rgba(62,58,48,', mtn: 'rgba(60,56,48,', ridge: 'rgba(52,48,40,',
+          tree: 'rgba(46,42,34,', stone: 'rgba(58,54,46,', bank: 'rgba(52,48,40,', cun: 'rgba(46,42,34,' };
+    const mk = (fn) => { const c = document.createElement('canvas'); c.width = W; c.height = H; fn(c.getContext('2d')); return c; };
+
+    // 笔形/石/坡岸/树/皴：与原有 wash 同一套笔法，仅多收一个 g（每层独立离屏画布）
+    const brush = (g, x0, y0, cx, cy, x1, y1, w0, w1, a) => {
+      const N = 14, at = (t) => { const u = 1 - t; return [u * u * x0 + 2 * u * t * cx + t * t * x1, u * u * y0 + 2 * u * t * cy + t * t * y1]; };
+      const L = [], Rr = [];
+      for (let i = 0; i <= N; i++) {
+        const t = i / N, p0 = at(t), pa = at(Math.max(0, t - 0.02)), pb = at(Math.min(1, t + 0.02));
+        const dx = pb[0] - pa[0], dy = pb[1] - pa[1], len = Math.hypot(dx, dy) || 1, w = (w0 + (w1 - w0) * t) / 2;
+        L.push([p0[0] - dy / len * w, p0[1] + dx / len * w]); Rr.push([p0[0] + dy / len * w, p0[1] - dx / len * w]);
       }
-      g.lineTo(W + 4, H + 4); g.closePath();
-      g.fillStyle = 'rgba(60,56,48,' + alpha + ')'; g.fill();
-      // 山脊线：一团平涂的灰是「沙丘」，压一道脊线才是山。两端用渐变淡出，不落成一条硬边。
-      const lg = g.createLinearGradient(0, 0, W, 0);
-      const c0 = 'rgba(52,48,40,';
-      lg.addColorStop(0, c0 + '0)');
-      lg.addColorStop(0.16, c0 + (alpha * 1.5).toFixed(3) + ')');
-      lg.addColorStop(0.84, c0 + (alpha * 1.25).toFixed(3) + ')');
-      lg.addColorStop(1, c0 + '0)');
-      g.beginPath();
-      pts.forEach(([px, y], i) => { if (i === 0) g.moveTo(px, y); else g.lineTo(px, y); });
-      g.strokeStyle = lg; g.lineWidth = 1.25; g.lineJoin = 'round'; g.stroke();
+      g.beginPath(); g.moveTo(L[0][0], L[0][1]);
+      for (let i = 1; i < L.length; i++) g.lineTo(L[i][0], L[i][1]);
+      for (let i = Rr.length - 1; i >= 0; i--) g.lineTo(Rr[i][0], Rr[i][1]);
+      g.closePath(); g.fillStyle = C.tree + a.toFixed(3) + ')'; g.fill();
     };
-    mountain(H * 0.94, H * 0.10, 0.12, 0.8);
-    mountain(H * 0.97, H * 0.06, 0.07, 2.3);
-    // 近景坡石：底部两角各压一撮淡墨石，画面才有「远山—场地—近石」三层。
-    // 只占左右两角，中间那条留给战斗（否则会挡住玩家和掉落物）。
-    const stone = (cx, cy, sw, sh, alpha) => {
+    const cun = (g, cx, cy, w, n, seed) => {
+      let sd = seed; const rnd = () => (sd = (sd * 9301 + 49297) % 233280) / 233280;
+      for (let i = 0; i < n; i++) {
+        const x = cx + (rnd() - 0.5) * w, y = cy + (rnd() - 0.5) * w * 0.26, len = w * (0.06 + rnd() * 0.05);
+        brush(g, x, y, x + len * 0.42, y - len * 0.32, x + len * 0.95, y - len * 0.72, 2.0, 0.5, 0.16);
+      }
+    };
+    const bank = (g, x0, x1, yb, amp, a) => {
+      g.beginPath();
+      for (let px = x0; px <= x1; px += 8) {
+        const t = (px - x0) / (x1 - x0), y = yb - amp * Math.sin(t * Math.PI) * (0.7 + 0.3 * Math.sin(t * 7.5));
+        if (px === x0) g.moveTo(px, y); else g.lineTo(px, y);
+      }
+      g.strokeStyle = C.bank + a + ')'; g.lineWidth = 1.15; g.lineCap = 'round'; g.stroke();
+    };
+    const tree = (g, bx, by, h, lean, a, seed) => {
+      let sd = seed; const rnd = () => (sd = (sd * 9301 + 49297) % 233280) / 233280;
+      const topX = bx + lean, topY = by - h;
+      brush(g, bx, by, bx + lean * 0.30 - lean * 0.16, by - h * 0.55, topX, topY, Math.max(2.8, h * 0.029), Math.max(0.5, h * 0.0038), a);
+      brush(g, bx, by - h * 0.022, bx - h * 0.048, by - h * 0.004, bx - h * 0.086, by - h * 0.014, Math.max(1.2, h * 0.0075), 0.35, a * 0.72);
+      brush(g, bx, by - h * 0.022, bx + h * 0.052, by - h * 0.002, bx + h * 0.092, by - h * 0.012, Math.max(1.2, h * 0.0075), 0.35, a * 0.72);
+      for (let k = 0; k < 3; k++) {
+        const t = 0.09 + k * 0.17 + rnd() * 0.05, tx = bx + (topX - bx) * t, ty = by - h * t, w = Math.max(1.8, h * 0.020 * (1 - t));
+        g.beginPath(); g.ellipse(tx + (rnd() - 0.5) * w * 0.6, ty, w * 0.60, w * 0.22, (rnd() - 0.5) * 0.6, 0, 6.29);
+        g.fillStyle = C.tree + Math.min(1, a * 1.2).toFixed(3) + ')'; g.fill();
+      }
+      const tips = [];
+      for (let k = 0; k < 5; k++) {
+        const t = 0.34 + k * 0.132 + rnd() * 0.028, sx = bx + (topX - bx) * t - lean * 0.10 * Math.sin(t * 3), sy = by - h * t;
+        const dir = (k % 2) ? 1 : -1, len = h * (0.34 - k * 0.046) * (0.85 + rnd() * 0.3), ex = sx + dir * len, ey = sy - len * (0.34 + rnd() * 0.26);
+        brush(g, sx, sy, sx + dir * len * 0.62, sy - len * 0.06, ex, ey, Math.max(1.6, h * 0.013), Math.max(0.45, h * 0.0028), a * 0.96);
+        tips.push([ex, ey]);
+        if (k < 4) {
+          const mx = sx + (ex - sx) * 0.58, my = sy + (ey - sy) * 0.58, l2 = len * (0.44 + rnd() * 0.2), t2x = mx + dir * l2 * 0.42, t2y = my - l2 * 0.92;
+          brush(g, mx, my, mx + dir * l2 * 0.34, my - l2 * 0.30, t2x, t2y, Math.max(0.9, h * 0.0075), Math.max(0.35, h * 0.0016), a * 0.82);
+          tips.push([t2x, t2y]);
+          if (k % 2 === 0) { brush(g, t2x, t2y, t2x + dir * l2 * 0.20, t2y - l2 * 0.22, t2x + dir * l2 * 0.30, t2y - l2 * 0.50, Math.max(0.6, h * 0.004), 0.3, a * 0.7); tips.push([t2x + dir * l2 * 0.30, t2y - l2 * 0.50]); }
+        }
+      }
+      for (let k = 0; k < tips.length; k++) {
+        if (rnd() > 0.55) continue;
+        const tx = tips[k][0], ty = tips[k][1];
+        for (let m = 0, n = 2 + ((rnd() * 3) | 0); m < n; m++) {
+          const px = tx + (rnd() - 0.5) * h * 0.085, py = ty + (rnd() - 0.5) * h * 0.06;
+          g.beginPath(); g.ellipse(px, py, h * (0.009 + rnd() * 0.006), h * (0.005 + rnd() * 0.004), (rnd() - 0.5) * 1.4, 0, 6.29);
+          g.fillStyle = C.tree + (a * 0.62).toFixed(3) + ')'; g.fill();
+        }
+      }
+    };
+    const stone = (g, cx, cy, sw, sh, alpha) => {
       g.beginPath();
       g.moveTo(cx - sw / 2, cy + sh);
       g.quadraticCurveTo(cx - sw * 0.44, cy - sh * 0.2, cx - sw * 0.16, cy - sh * 0.52);
       g.quadraticCurveTo(cx + sw * 0.04, cy - sh * 0.78, cx + sw * 0.24, cy - sh * 0.36);
       g.quadraticCurveTo(cx + sw * 0.44, cy - sh * 0.08, cx + sw / 2, cy + sh);
-      g.closePath();
-      g.fillStyle = 'rgba(58,54,46,' + alpha + ')'; g.fill();
+      g.closePath(); g.fillStyle = C.stone + alpha + ')'; g.fill();
     };
-    stone(W * 0.06, H * 0.975, W * 0.46, H * 0.070, 0.10);
-    stone(W * 0.94, H * 0.988, W * 0.40, H * 0.055, 0.075);
 
-    // ─────────── 中景：坡岸笔触 + 寒林枯树 ───────────
-    // 干笔一道：沿二次贝塞尔分段，起笔按下、收笔提起——线宽与浓度逐段衰减，末段自然成飞白。
-    // 国画的线从来不是等粗的，「一根均匀的线」是矢量图的语言。
-    const brush = (x0, y0, cx, cy, x1, y1, w0, w1, a) => {
-      const N = 14, at = (t) => {
-        const u = 1 - t;
-        return [u * u * x0 + 2 * u * t * cx + t * t * x1, u * u * y0 + 2 * u * t * cy + t * t * y1];
+    // 屏幕固定框景：四角 + 整屏竖向明暗（锁住「四角淡墨/暗角 + 中央留白」）
+    const frame = mk((g) => {
+      const corner = (cx, cy, r, a) => { const rg = g.createRadialGradient(cx, cy, 0, cx, cy, r); rg.addColorStop(0, C.corner + a + ')'); rg.addColorStop(1, C.corner + '0)'); g.fillStyle = rg; g.fillRect(cx - r, cy - r, r * 2, r * 2); };
+      const R = Math.max(W, H) * 0.46;
+      const vg = g.createLinearGradient(0, 0, 0, H);
+      vg.addColorStop(0, C.fog + '0.055)'); vg.addColorStop(0.55, C.fog + '0.015)'); vg.addColorStop(1, C.fog + '0.085)');
+      g.fillStyle = vg; g.fillRect(0, 0, W, H);
+      corner(0, 0, R, jin ? 0.22 : 0.14); corner(W, 0, R * 0.85, jin ? 0.18 : 0.11);
+      corner(0, H, R, jin ? 0.24 : 0.15); corner(W, H, R, jin ? 0.20 : 0.12);
+    });
+    // 远山：底部两叠剪影，周期整除 W → 横向无缝平铺；横移系数最小（0.18）
+    const far = mk((g) => {
+      const mountain = (baseY, amp, alpha, k, phase) => {
+        const fillPath = () => { g.beginPath(); g.moveTo(-4, H + 4); for (let px = 0; px <= W + 8; px += 8) { const t = px / W, y = baseY - amp * (0.55 + 0.45 * Math.sin(t * Math.PI * 2 * k + phase)) * Math.sin(t * Math.PI); g.lineTo(px, y); } g.lineTo(W + 4, H + 4); g.closePath(); };
+        fillPath(); g.fillStyle = C.mtn + alpha + ')'; g.fill();
+        g.beginPath(); for (let px = 0; px <= W + 8; px += 8) { const t = px / W, y = baseY - amp * (0.55 + 0.45 * Math.sin(t * Math.PI * 2 * k + phase)) * Math.sin(t * Math.PI); if (px === 0) g.moveTo(px, y); else g.lineTo(px, y); }
+        g.strokeStyle = C.ridge + (alpha * 1.4).toFixed(3) + ')'; g.lineWidth = 1.25; g.lineJoin = 'round'; g.stroke();
       };
-      // 一次填充笔形轮廓，而不是分段 stroke：
-      // 分段 stroke 时相邻两段的 alpha 会叠加，一棵树就会长出一圈一圈的「竹节纹」。
-      // 笔的提按交给宽度本身（国画里粗细就是浓淡），墨色保持一个值——这样线条才是连贯的一笔。
-      const L = [], Rr = [];
-      for (let i = 0; i <= N; i++) {
-        const t = i / N, p0 = at(t);
-        const pa = at(Math.max(0, t - 0.02)), pb = at(Math.min(1, t + 0.02));
-        const dx = pb[0] - pa[0], dy = pb[1] - pa[1];
-        const len = Math.hypot(dx, dy) || 1;
-        const w = (w0 + (w1 - w0) * t) / 2;
-        L.push([p0[0] - dy / len * w, p0[1] + dx / len * w]);
-        Rr.push([p0[0] + dy / len * w, p0[1] - dx / len * w]);
-      }
-      g.beginPath();
-      g.moveTo(L[0][0], L[0][1]);
-      for (let i = 1; i < L.length; i++) g.lineTo(L[i][0], L[i][1]);
-      for (let i = Rr.length - 1; i >= 0; i--) g.lineTo(Rr[i][0], Rr[i][1]);
-      g.closePath();
-      g.fillStyle = 'rgba(46,42,34,' + a.toFixed(3) + ')';
-      g.fill();
-    };
-    // 皴笔：同一组短斜笔重一点、轻一点地叠在石面上，石头才有「劈」出来的体积
-    const cun = (cx, cy, w, n, seed) => {
-      let sd = seed;
-      const rnd = () => (sd = (sd * 9301 + 49297) % 233280) / 233280;
-      for (let i = 0; i < n; i++) {
-        const x = cx + (rnd() - 0.5) * w, y = cy + (rnd() - 0.5) * w * 0.26;
-        const len = w * (0.06 + rnd() * 0.05);
-        brush(x, y, x + len * 0.42, y - len * 0.32, x + len * 0.95, y - len * 0.72, 2.0, 0.5, 0.16);
-      }
-    };
-    // 坡岸：只在左右两段露岸沿，中间断开留给战斗区（一条横贯全屏的线会把画切两半）
-    const bank = (x0, x1, yb, amp, a) => {
-      g.beginPath();
-      for (let px = x0; px <= x1; px += 8) {
-        const t = (px - x0) / (x1 - x0);
-        const y = yb - amp * Math.sin(t * Math.PI) * (0.7 + 0.3 * Math.sin(t * 7.5));
-        if (px === x0) g.moveTo(px, y); else g.lineTo(px, y);
-      }
-      g.strokeStyle = 'rgba(52,48,40,' + a + ')';
-      g.lineWidth = 1.15; g.lineCap = 'round'; g.stroke();
-    };
-    // 寒林枯树：一挺主干、四五分枝、枝梢疏点枯叶。只立在左右两侧，中央留白给战斗。
-    // 树是淡墨立在背景层（wash 画在精灵之前），所以角色从树前过不会被挡。
-    const tree = (bx, by, h, lean, a, seed) => {
-      let sd = seed;
-      const rnd = () => (sd = (sd * 9301 + 49297) % 233280) / 233280;
-      const topX = bx + lean, topY = by - h;
-      // 主干：根部按下、梢部提起。走一条 C 形（不画直线——直杆子叫电线杆，不叫树）
-      brush(bx, by, bx + lean * 0.30 - lean * 0.16, by - h * 0.55, topX, topY,
-        Math.max(2.8, h * 0.029), Math.max(0.5, h * 0.0038), a);
-      // 根：左右各挑一笔，把主干压在地上——不然树像一根插进去的杆子
-      brush(bx, by - h * 0.022, bx - h * 0.048, by - h * 0.004, bx - h * 0.086, by - h * 0.014,
-        Math.max(1.2, h * 0.0075), 0.35, a * 0.72);
-      brush(bx, by - h * 0.022, bx + h * 0.052, by - h * 0.002, bx + h * 0.092, by - h * 0.012,
-        Math.max(1.2, h * 0.0075), 0.35, a * 0.72);
-      // 苔点：主干下部点两三处短横点。国画树干全靠这点「糙」立住，光杆子太滑。
-      for (let k = 0; k < 3; k++) {
-        const t = 0.09 + k * 0.17 + rnd() * 0.05;
-        const tx = bx + (topX - bx) * t, ty = by - h * t;
-        const w = Math.max(1.8, h * 0.020 * (1 - t));
-        g.beginPath();
-        g.ellipse(tx + (rnd() - 0.5) * w * 0.6, ty, w * 0.60, w * 0.22, (rnd() - 0.5) * 0.6, 0, 6.29);
-        g.fillStyle = 'rgba(46,42,34,' + Math.min(1, a * 1.2).toFixed(3) + ')';
-        g.fill();
-      }
-      const tips = [];
-      // 一级枝：左右交替斜出，越往上越短；先下压再上挑，才成「鹿角」
-      for (let k = 0; k < 5; k++) {
-        const t = 0.34 + k * 0.132 + rnd() * 0.028;
-        const sx = bx + (topX - bx) * t - lean * 0.10 * Math.sin(t * 3), sy = by - h * t;
-        const dir = (k % 2) ? 1 : -1;
-        const len = h * (0.34 - k * 0.046) * (0.85 + rnd() * 0.3);
-        const ex = sx + dir * len, ey = sy - len * (0.34 + rnd() * 0.26);
-        // 中段控制点往横向拉、往低压，枝就有外张的弧，不是一根斜棍
-        brush(sx, sy, sx + dir * len * 0.62, sy - len * 0.06, ex, ey,
-          Math.max(1.6, h * 0.013), Math.max(0.45, h * 0.0028), a * 0.96);
-        tips.push([ex, ey]);
-        // 二级枝：一级枝中段向上反挑，枯树的「骨」全在这一笔
-        if (k < 4) {
-          const mx = sx + (ex - sx) * 0.58, my = sy + (ey - sy) * 0.58;
-          const l2 = len * (0.44 + rnd() * 0.2);
-          const t2x = mx + dir * l2 * 0.42, t2y = my - l2 * 0.92;
-          brush(mx, my, mx + dir * l2 * 0.34, my - l2 * 0.30, t2x, t2y,
-            Math.max(0.9, h * 0.0075), Math.max(0.35, h * 0.0016), a * 0.82);
-          tips.push([t2x, t2y]);
-          // 三级：细到几乎断，只交代「末梢」
-          if (k % 2 === 0) {
-            brush(t2x, t2y, t2x + dir * l2 * 0.20, t2y - l2 * 0.22, t2x + dir * l2 * 0.30, t2y - l2 * 0.50,
-              Math.max(0.6, h * 0.004), 0.3, a * 0.7);
-            tips.push([t2x + dir * l2 * 0.30, t2y - l2 * 0.50]);
-          }
-        }
-      }
-      // 枯叶：枝梢只点几笔疏叶，画成团就成了「树丛」，倪瓒的树贵在疏
-      for (let k = 0; k < tips.length; k++) {
-        if (rnd() > 0.55) continue;
-        const [tx, ty] = tips[k];
-        for (let m = 0, n = 2 + ((rnd() * 3) | 0); m < n; m++) {
-          const px = tx + (rnd() - 0.5) * h * 0.085, py = ty + (rnd() - 0.5) * h * 0.06;
-          g.beginPath();
-          g.ellipse(px, py, h * (0.009 + rnd() * 0.006), h * (0.005 + rnd() * 0.004), (rnd() - 0.5) * 1.4, 0, 6.29);
-          g.fillStyle = 'rgba(46,42,34,' + (a * 0.62).toFixed(3) + ')';
-          g.fill();
-        }
-      }
-    };
+      mountain(H * 0.94, H * 0.10, jin ? 0.16 : 0.12, 3, 0.8);
+      mountain(H * 0.97, H * 0.06, jin ? 0.10 : 0.07, 5, 2.3);
+    });
+    // 中景：坡岸 + 皴 + 两株远树（横移 0.45）
+    const mid = mk((g) => {
+      bank(g, 0, W * 0.32, H * 0.900, H * 0.022, jin ? 0.22 : 0.165);
+      bank(g, W * 0.70, W, H * 0.912, H * 0.017, jin ? 0.18 : 0.135);
+      cun(g, W * 0.10, H * 0.955, W * 0.30, 10, 11);
+      cun(g, W * 0.90, H * 0.970, W * 0.22, 8, 23);
+      tree(g, W * 0.285, H * 0.920, H * 0.140, W * 0.030, jin ? 0.30 : 0.21, 31);
+      tree(g, W * 0.752, H * 0.934, H * 0.120, -W * 0.024, jin ? 0.24 : 0.17, 43);
+    });
+    // 近景：左右两株近树 + 两角坡石（横移 0.8，近世界速）
+    const near = mk((g) => {
+      stone(g, W * 0.06, H * 0.975, W * 0.46, H * 0.070, jin ? 0.16 : 0.10);
+      stone(g, W * 0.94, H * 0.988, W * 0.40, H * 0.055, jin ? 0.12 : 0.075);
+      tree(g, W * 0.150, H * 0.958, H * 0.240, W * 0.056, jin ? 0.62 : 0.46, 7);
+      tree(g, W * 0.868, H * 0.985, H * 0.180, -W * 0.046, jin ? 0.50 : 0.36, 19);
+    });
+    // 世界坐标极淡肌理（随相机 1:1 移动，治「地面浮在原地」）
+    const grainTile = (() => { const s = 256, c = document.createElement('canvas'); c.width = s; c.height = s; const g = c.getContext('2d'); for (let i = 0; i < 150; i++) { const x = Math.random() * s, y = Math.random() * s, r = 1 + Math.random() * 2.4; g.fillStyle = (Math.random() < 0.5 ? C.fog : C.mtn) + (jin ? 0.06 : 0.045) + ')'; g.beginPath(); g.arc(x, y, r, 0, 6.2832); g.fill(); } return c; })();
+    const grain = ctx.createPattern(grainTile, 'repeat');
 
-    bank(0, W * 0.32, H * 0.900, H * 0.022, 0.165);
-    bank(W * 0.70, W, H * 0.912, H * 0.017, 0.135);
-    cun(W * 0.10, H * 0.955, W * 0.30, 10, 11);
-    cun(W * 0.90, H * 0.970, W * 0.22, 8, 23);
-    // 左株高、右株矮，两侧不对称才像自然长出来的（都竖直平行就成篱笆了）
-    tree(W * 0.150, H * 0.958, H * 0.240, W * 0.056, 0.46, 7);
-    tree(W * 0.868, H * 0.985, H * 0.180, -W * 0.046, 0.36, 19);
-    // 更远的两株：极淡，只交代中景纵深，不与近株争浓淡
-    tree(W * 0.285, H * 0.920, H * 0.140, W * 0.030, 0.21, 31);
-    tree(W * 0.752, H * 0.934, H * 0.120, -W * 0.024, 0.17, 43);
-
-    washLayer = c;
-    return c;
+    pxCache = { w: W, h: H, skin, frame, far, mid, near, grain };
+    return pxCache;
   }
   function buildGrass(m) {
     // 水墨皮走按推进序预算的同色系墨阶（m.inkBg，已由数据层算好）；其余皮肤走原底色。
@@ -6447,11 +6390,18 @@
       const fill = (save && save.skin === 'guigu' && m && m.inkBg) ? m.inkBg.base : (skinBg(m && m.bg).base || '#36532f');
       ctx.fillStyle = fill; ctx.fillRect(0, 0, W, H);
     }
-    // 一角构图：素纸上四角淡墨、远山伏底，中央留白让战斗自己说话
-    const wash = washLayerOf();
-    if (wash) ctx.drawImage(wash, 0, 0);
+    // 一角构图：四角淡墨/暗角 + 中央留白（框景锁屏幕边），远/中/近三层随相机横移，地面加 1:1 世界肌理
+    const px = parallaxLayers();
+    if (px) {
+      const drawLayer = (layer, f) => { const offX = ((G.cam.x * f) % W + W) % W; for (let xx = -offX; xx < W; xx += W) ctx.drawImage(layer, xx, 0); };
+      drawLayer(px.far, 0.18);
+      drawLayer(px.mid, 0.45);
+      drawLayer(px.near, 0.8);
+      ctx.drawImage(px.frame, 0, 0);
+    }
     ctx.save();
     ctx.translate(-G.cam.x + sx, -G.cam.y + sy);
+    if (px && px.grain) { ctx.fillStyle = px.grain; ctx.fillRect(G.cam.x, G.cam.y, W, H); }
 
     drawDecor();
     // 地面特效先铺：符文环是画在地上的，等角色都画完再画就成呼啦圈了
@@ -9995,7 +9945,7 @@
     save.skin = (skin === 'guigu') ? 'guigu' : 'jin';
     FX_INK.on = (save.skin === 'guigu');   // 特效画笔墨化，与皮同步切换
     window.SKIN_INK = (save.skin === 'guigu');   // 精灵换墨版（sprites.js 的 Proxy 认这个开关）
-    washLayer = null;                       // 晕墨层随皮重建（金皮直接不画）
+    pxCache = null;                          // 视差层随皮重建（两皮各自一套）
     try { if (document.body) document.body.dataset.skin = save.skin; } catch (e) {}   // smoke 的 DOM 垫片没有 dataset
     const jin = document.getElementById('skinJin'), gg = document.getElementById('skinGuigu');
     if (jin) jin.classList.toggle('on', save.skin !== 'guigu');
@@ -11267,7 +11217,7 @@
     bannerDown() { return !!(elBanner && elBanner.style.display === 'block'); },
     skin(name) { if (name === undefined) return save.skin; applySkin(name === 'guigu' ? 'guigu' : 'jin'); return save.skin; },
     grassTile() { return buildGrass._tile || null; },
-    wash() { return washLayerOf(); },
+    wash() { return parallaxLayers().frame; },
     cave(id) { if (CAVES[id] && save.caves.indexOf(id) < 0) { save.caves.push(id); writeSave(); } openCave(id); return G.caveId; },    openAllCaves() { for (const k in CAVES) if (save.caves.indexOf(k) < 0) save.caves.push(k); writeSave(); renderWorldMap(); return save.caves.length; },
     caveTab(t) { G.caveTab = t; if (G.state === 'cave') renderCave(); return G.caveTab; },
     equip(id) { equipGear(id); return save.equip; },
