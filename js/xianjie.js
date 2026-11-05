@@ -1460,14 +1460,82 @@
   window.MAP_SCENERY.shifang  = { bg: { base: '#3c3430', a: '#483f3a', b: '#2a2421' }, decor: [['rock', 0.12], ['tuft', 0.04]] };
   window.MAP_SCENERY.daoyi    = { bg: { base: '#2d2a34', a: '#373340', b: '#1f1d24' }, decor: [['rock', 0.18], ['tuft', 0.02]] };
   window.MAP_SCENERY.feiyu    = { bg: { base: '#27333b', a: '#313f49', b: '#1a232a' }, decor: [['rock', 0.10], ['tuft', 0.12]] };
+  // 下面四张原批次漏写 MAP_SCENERY（D5：M 弧后期图），金皮会回退默认绿底。补上同篇章冷暗色。
+  window.MAP_SCENERY.shijin   = { bg: { base: '#22262e', a: '#2b323c', b: '#161b21' }, decor: [['rock', 0.24], ['tuft', 0.06]] };
+  window.MAP_SCENERY.xianyun  = { bg: { base: '#2a2a30', a: '#33333a', b: '#1d1d21' }, decor: [['rock', 0.14], ['tuft', 0.10]] };
+  window.MAP_SCENERY.shuiyan  = { bg: { base: '#1c2430', a: '#242e3c', b: '#131a23' }, decor: [['rock', 0.20], ['tuft', 0.04]] };
+  window.MAP_SCENERY.xisha    = { bg: { base: '#24282e', a: '#2d333c', b: '#181c21' }, decor: [['rock', 0.22], ['tuft', 0.05]] };
 
-  // 底色套到图上
-  for (const id of ['linghuan', 'suxing', 'lingyan', 'xiaoping', 'tiangui', 'poxu', 'wumengdao', 'chulong', 'huijie', 'taiyi', 'dijiang', 'xingqi', 'dadi', 'daotian',
-    'xiedao', 'jingong', 'taisui', 'chongchao', 'suidian', 'daluo', 'wubao', 'jiuyuan', 'zaimiao', 'zhanshi', 'youming', 'leihai', 'fuyao', 'shifang', 'daoyi', 'feiyu']) {
-    const m = window.MAPS.find(x => x.id === id);
-    const sc = window.MAP_SCENERY[id];
-    if (m && sc) { m.bg = sc.bg; m.decorScheme = sc.decor; }
+  // 早期批次用白名单逐 id 回填，新增图漏列就静默跳过。改为全量循环（见 lingjie.js 同款修复）。
+  for (const m of window.MAPS) {
+    const sc = window.MAP_SCENERY[m.id];
+    if (sc) { m.bg = sc.bg; m.decorScheme = sc.decor; }
   }
+
+  // ============================================================================
+  // 批次1（P0-2 / P0-3）：地图场景「分得开」
+  // 1) 水墨皮推进序墨阶：按主线 next 链算推进序，亮纸→重墨斜坡 + 轻微交替，
+  //    保证相邻必差一档、越往后越沉。只给 guigu 用，与金皮原底色解耦。
+  // 2) 金皮相邻明度差：相邻主线图 bg.base 明度差 <18 时，把后一张沿 hue 等比推到 ≥18，
+  //    钳在暗部带（保留金皮深色基调，不越 0.42 阈值以免墨皮误判）。零差必清。
+  // 两者都在全量回填之后运行，m.bg 已就绪。
+  (function () {
+    const byId = new Map(window.MAPS.map(m => [m.id, m]));
+    const root = window.MAPS.find(m => !m.side && !m.unlock);
+    const spine = []; const seen = new Set(); let cur = root;
+    while (cur && !seen.has(cur.id)) { seen.add(cur.id); spine.push(cur); cur = cur.next ? byId.get(cur.next) : null; }
+    const N = Math.max(1, spine.length - 1);
+
+    // 水墨皮 7 档同色系纸/墨（暖中性，不偏色相）
+    const PALETTE = [
+      { base: '#e9e3d4', a: '#f1ecdf', b: '#ddd6c4' },
+      { base: '#ddd6c3', a: '#e6e0cf', b: '#d0c8b2' },
+      { base: '#d1c9b6', a: '#dad2c0', b: '#c4bba5' },
+      { base: '#c5bca8', a: '#cfc6b3', b: '#b8ae97' },
+      { base: '#b6ac96', a: '#c1b7a1', b: '#a89e86' },
+      { base: '#a79c84', a: '#b3a890', b: '#998d73' },
+      { base: '#979075', a: '#a49a80', b: '#8a7e63' }
+    ];
+    // 斜坡（越往后越沉）+ 轻微交替（保证相邻必差一档；单图视角下交替不可见，只提供局部层次）
+    const toneOf = (frac, idx) => {
+      const ripple = (idx % 2 === 0) ? 0.5 : -0.5;
+      return PALETTE[Math.floor(Math.max(0, Math.min(6, 0.5 + frac * 5.5 + ripple)))];
+    };
+    spine.forEach((m, i) => { m.inkBg = toneOf(i / N, i); });
+
+    // 支线图：取所属篇章在主线中出现位置的色调
+    const arcOrder = []; const arcSeen = new Set();
+    for (const m of spine) if (m.arc && !arcSeen.has(m.arc)) { arcSeen.add(m.arc); arcOrder.push(m.arc); }
+    const numArc = Math.max(1, arcOrder.length - 1);
+    for (const m of window.MAPS) {
+      if (m.side || m.inkBg) continue;
+      const ai = arcOrder.indexOf(m.arc);
+      m.inkBg = toneOf(ai < 0 ? 0.5 : ai / numArc, 0);
+    }
+
+    // 金皮相邻明度差微调（hue 等比缩放，钳暗部带）
+    const lumY = (h) => { const n = parseInt(h.slice(1), 16); return 0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255); };
+    const clampY = (y) => Math.max(22, Math.min(100, y));
+    const hexOf = (r, g, b) => '#' + [r, g, b].map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+    const shiftY = (hex, targetY) => {
+      const n = parseInt(hex.slice(1), 16);
+      const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+      const y = lumY(hex) || 1; const f = targetY / y;
+      return hexOf(r * f, g * f, b * f);
+    };
+    for (let i = 1; i < spine.length; i++) {
+      const p = spine[i - 1], q = spine[i];
+      if (!p.bg || !q.bg) continue;
+      const y0 = lumY(p.bg.base), y1 = lumY(q.bg.base);
+      if (Math.abs(y1 - y0) < 18) {
+        // 朝远离前一张的方向推 18，落点钳在暗部带；方向与全局「越往后越沉」一致（偏暗）
+        const target = clampY(y0 + (y1 >= y0 ? 18 : -18));
+        const newBase = shiftY(q.bg.base, target);
+        q.bg = { base: newBase, a: shiftY(q.bg.a || newBase, target), b: shiftY(q.bg.b || newBase, target) };
+      }
+    }
+    window.__SCENERY_DONE = true;
+  })();
 
   // 前传终点接上仙界篇：飞升仙界之后不是结束，是跌落
   const xj = window.MAPS.find(x => x.id === 'xianjie');

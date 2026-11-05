@@ -555,6 +555,7 @@ body.rot #ver { visibility: hidden; }
   border: 1px solid rgba(201,162,74,0.35); border-radius: var(--r-lg); padding: 8px 8px;
   background: linear-gradient(180deg, var(--bg-card-a), var(--bg-card-b));
   cursor: pointer; transition: border-color .12s, transform .1s;
+  position: relative;
 }
 /* ---- 行脚折：行程线 + 折叠节点（大地图感：一屏看七八处地名） ---- */
 .wm-route { position: relative; padding-left: 15px; display: flex; flex-direction: column; gap: var(--sp-2); }
@@ -588,6 +589,14 @@ body.rot #ver { visibility: hidden; }
 .mc-top { display: flex; align-items: center; gap: var(--sp-2); }
 .mc-num { color: var(--line-gold); font-size: var(--fs-cap); background: rgba(201,162,74,0.14); border-radius: var(--r-sm); padding: 0 4px; }
 .mc-name { color: var(--text-1); font-size: var(--fs-body); font-weight: bold; flex: 1; }
+/* 篇章印记（P0-5）：单字闲章，紧贴地图编号之后，不占额外行高 */
+.mc-seal {
+  flex: none; display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; font-size: 11px; line-height: 1; font-weight: normal;
+  color: var(--accent); border: 1px solid currentColor; border-radius: 2px;
+  background: rgba(255,210,74,0.06); transform: rotate(-4deg); opacity: .62;
+  font-family: var(--font-title, serif); pointer-events: none;
+}
 .mc-tag { font-size: var(--fs-micro); padding: 0 var(--sp-2); line-height: 1.6; border-radius: var(--r-sm); border: 1px solid; }
 .mc-tag.story { color: var(--accent-soft); border-color: rgba(201,178,122,0.55); }
 .mc-tag.fight { color: var(--tag-orange); border-color: rgba(255,154,106,0.5); }
@@ -1116,6 +1125,10 @@ body[data-skin="guigu"] .mapcard.current {
 body[data-skin="guigu"] .mc-num {
   color: #8f2f24; background: rgba(192,57,43,0.10);
   border: 1px solid rgba(143,47,36,0.55); border-radius: 2px; padding: 0 3px;
+}
+/* 篇章印记：墨皮走朱砂，不引入彩色 */
+body[data-skin="guigu"] .mc-seal {
+  color: #a8322a; border-color: #a8322a; background: rgba(168,50,42,0.07); opacity: .7;
 }
 /* 地名：淡墨笔意下划（毛笔扫过的横痕） */
 body[data-skin="guigu"] .mc-name {

@@ -5975,12 +5975,20 @@
     washLayer = c;
     return c;
   }
-  function buildGrass(bg) {
-    buildGrass._bg = bg || null;
-    bg = skinBg(bg);
-    const base = (bg && bg.base) || '#36532f';
-    const ca = (bg && bg.a) || '#3c5c34';
-    const cb = (bg && bg.b) || '#30492a';
+  function buildGrass(m) {
+    // 水墨皮走按推进序预算的同色系墨阶（m.inkBg，已由数据层算好）；其余皮肤走原底色。
+    const isGuigu = save && save.skin === 'guigu';
+    // 接受三种入参：带 inkBg 的地图 / 带 bg 的地图 / 直接 {base,a,b} 原始底色对象
+    // （换皮 applySkin、resize 重铺时走 buildGrass(buildGrass._bg)，可能是地图也可能是底色，都要认）。
+    let src;
+    if (m && m.inkBg) src = m.inkBg;
+    else if (m && m.bg) src = m.bg;
+    else if (m && m.base) src = m;
+    else src = { base: '#36532f' };
+    buildGrass._bg = m;   // 存原始入参（地图或底色），重铺时原样复用，水墨皮墨阶不丢
+    const base = src.base || '#36532f';
+    const ca = src.a || base;
+    const cb = src.b || base;
     const c = document.createElement('canvas'); c.width = 96; c.height = 96;
     const x = c.getContext('2d');
     if (save && save.skin === 'guigu') {
@@ -6204,9 +6212,16 @@
     const list = G.decor;
     for (const d of list) {
       if (d.x < G.cam.x - 60 || d.x > G.cam.x + W + 60 || d.y < G.cam.y - 60 || d.y > G.cam.y + H + 60) continue;
+      // 近浓远淡：屏幕纵向做大气透视——远景减透明度退后（墨皮融纸成淡、金皮融暗底成退），近景满墨。
+      // 廉价、不改判定，两皮都正确。
+      const dr = Math.max(0, Math.min(1, (d.y - G.cam.y) / H)); // 0 顶(远) → 1 底(近)
+      const alpha = 0.55 + 0.45 * dr;
+      const prevA = ctx.globalAlpha;
+      ctx.globalAlpha = alpha;
       if (d.type === 'tree') drawSpr('tree', d.x, d.y, d.s, false);
       else if (d.type === 'rock') drawSpr('rock', d.x, d.y, d.s, false);
       else drawSpr('tuft', d.x, d.y, 1.4, false);
+      ctx.globalAlpha = prevA;
     }
   }
   function drawNpc(npc) {
@@ -6427,7 +6442,11 @@
     ctx.setTransform(PR, 0, 0, PR, 0, 0);
     ctx.clearRect(0, 0, W, H);
     if (grassPat) { ctx.fillStyle = grassPat; ctx.fillRect(0, 0, W, H); }
-    else { ctx.fillStyle = skinBg(G.map && G.map.bg).base; ctx.fillRect(0, 0, W, H); }
+    else {
+      const m = G.map;
+      const fill = (save && save.skin === 'guigu' && m && m.inkBg) ? m.inkBg.base : (skinBg(m && m.bg).base || '#36532f');
+      ctx.fillStyle = fill; ctx.fillRect(0, 0, W, H);
+    }
     // 一角构图：素纸上四角淡墨、远山伏底，中央留白让战斗自己说话
     const wash = washLayerOf();
     if (wash) ctx.drawImage(wash, 0, 0);
@@ -6955,7 +6974,7 @@
     p.hp = p.maxhp;
 
     hideAllOverlays();
-    buildGrass(m.bg);
+    buildGrass(m);
     G.state = 'play'; last = performance.now();
     G.coopRole = (window.Net && window.Net.self() && window.Net.isHost()) ? 'host' : (window.Net && window.Net.self() ? 'client' : null);
     G._claimedDrops = new Set(); G._hostVacuum = false; G._endSent = false;
@@ -7603,6 +7622,19 @@
     if (elWanling) elWanling.style.display = 'flex';
     if (Sfx && Sfx.buff) Sfx.buff();
   }
+  // 篇章印记（P0-5）：每张地图卡按所属 arc 盖一枚单字闲章，一眼分辨属于哪一卷。
+  // 单色（金皮走 accent、墨皮走朱砂），不引入彩色；14 个 arc 各一字，互不重复。
+  const ARC_SEAL = {
+    A: '玄', B: '越', C: '魔', D: '星', E: '丹', F: '云', G: '昆', H: '神',
+    I: '灵', J: '族', K: '劫', L: '乘', M: '仙', X: '缘'
+  };
+  function arcSealHtml(m) {
+    const a = m.arc || 'X';
+    const g = ARC_SEAL[a];
+    if (!g) return '';
+    const meta = (window.MAP_ARCS || []).find(x => x.id === a);
+    return '<span class="mc-seal" title="篇章 · ' + (meta ? meta.name : a) + '">' + g + '</span>';
+  }
   function mapCardHtml(m, numTxt) {
     const unlocked = save.unlocked.indexOf(m.id) >= 0;
     const done = save.cleared.indexOf(m.id) >= 0;
@@ -7644,6 +7676,7 @@
     if (isCave) go = '<span class="mc-go home">入洞 →</span>';
     return '<div class="' + cls.join(' ') + '" data-map="' + m.id + '">' +
       '<div class="mc-top"><b class="mc-num">' + numTxt + '</b>' +
+      arcSealHtml(m) +
       '<span class="mc-name">' + m.name + '</span>' +
       '<span class="mc-tag ' + tagCls + '">' + tagTxt + '</span>' +
       '<span class="mc-info" data-info="' + m.id + '">' + (open ? '收' : '详') + '</span></div>' +

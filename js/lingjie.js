@@ -2582,19 +2582,16 @@
     diyi:     { bg: { base: '#2d3038', a: '#373b45', b: '#21242b' }, decor: [['rock', 0.28], ['tuft', 0.04]] },
     huirenjie:{ bg: { base: '#2f3a2b', a: '#384634', b: '#243023' }, decor: [['tree', 0.20], ['tuft', 0.20]] },
     yuyang:    { bg: { base: '#3a2f24', a: '#473a2d', b: '#2b231b' }, decor: [['rock', 0.20], ['tuft', 0.10]] },
-    yuyang_dou:{ bg: { base: '#3d2a22', a: '#4a3329', b: '#2c1e18' }, decor: [['rock', 0.26], ['tuft', 0.04]] }
+    yuyang_dou:{ bg: { base: '#3d2a22', a: '#4a3329', b: '#2c1e18' }, decor: [['rock', 0.26], ['tuft', 0.04]] },
+    // 下面两张原批次漏写 MAP_SCENERY（D5：J 弧后期图），金皮会回退默认绿底。补上同篇章暖暗色。
+    huohu:    { bg: { base: '#3a241c', a: '#463029', b: '#2b1a14' }, decor: [['rock', 0.30], ['tuft', 0.08]] },
+    mojin:    { bg: { base: '#3a3024', a: '#463a2b', b: '#2b241a' }, decor: [['rock', 0.34], ['tuft', 0.06]] }
   });
-  // late.js 合底色时还没有这些图，这里手动补上
-  for (const id of ['qinluo', 'anyuan', 'luori', 'shanku', 'tianyuan', 'lingdi', 'muzu', 'zhenchan', 'tianpeng', 'minghe',
-                    'lianxu', 'fengyuan', 'huohu', 'shisan', 'mojin', 'guanghan', 'heti_guan',
-                    'liangzu', 'shengdao', 'mojie', 'moban', 'yitian', 'huangquan', 'moyuan', 'xiaoling', 'modajie',
-                    'sanjie', 'dashengdian', 'shiyin', 'lingzu', 'xiaoxiuluo', 'qingyuangong', 'minghe2', 'helian',
-                    'tiandinggong', 'xuetian', 'qiangzhe',
-                    'jiujie', 'qunqiang', 'xianshi', 'zhenxian', 'zhangtianping', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie',
-                    'linghuang', 'zhandacheng', 'shengshi', 'heihu', 'baiguang', 'tianmo', 'diyi', 'huirenjie', 'yuyang', 'yuyang_dou']) {
-    const m = window.MAPS.find(x => x.id === id);
-    const sc = window.MAP_SCENERY[id];
-    if (m && sc) { m.bg = sc.bg; m.decorScheme = sc.decor; }
+  // 早期批次用白名单逐 id 回填，新增图只要漏列就静默跳过（D5：J/K/M 后期 16 张因此缺场景）。
+  // 改成全量循环：任何写了 MAP_SCENERY 的图都挂上，杜绝后续再加图时重蹈覆辙。
+  for (const m of window.MAPS) {
+    const sc = window.MAP_SCENERY[m.id];
+    if (sc) { m.bg = sc.bg; m.decorScheme = sc.decor; }
   }
 
   // 灵界功法与法诀是后加的，索引要重建一次（Items.get 查的是这份快照）
