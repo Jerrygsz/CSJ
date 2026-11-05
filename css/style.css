@@ -1727,3 +1727,30 @@ body[data-skin="guigu"].sc3-paper #pauseBtn::before {
 }
 body[data-skin="guigu"].sc3-paper #pauseBtn span { color: rgba(51,47,40,0.64); }
 body[data-skin="guigu"].sc3-paper #pauseBtn:active::before { background: rgba(234,229,213,0.62); }
+
+/* ================= 第103轮 · 玩法层临时 UI 也退到纸后 =================
+   第102轮如实标注里未动的两处：底部白色剧情横幅（#banner）、右下深色圆钮（.chat-dove，
+   飞鸽传书入口）。同样只在「收录图 + 水墨皮」的 body.sc3-paper 作用域生效；
+   只改外观，不删元素、不改尺寸定位、不改点击热区（44×44 与 pointer-events 原样）。 */
+body[data-skin="guigu"].sc3-paper #banner {
+  background: rgba(244,239,224,0.72);
+  border: 1px solid rgba(58,53,44,0.14);
+  border-radius: 10px;
+  box-shadow: none;
+  color: rgba(58,53,44,0.78);
+  text-shadow: none;
+}
+/* 卷轴两端轴头不删，只淡成纸上印痕 */
+body[data-skin="guigu"].sc3-paper #banner::before,
+body[data-skin="guigu"].sc3-paper #banner::after { opacity: .28; }
+body[data-skin="guigu"].sc3-paper .chat-dove {
+  background: rgba(244,239,224,0.34);
+  border: 1px solid rgba(58,53,44,0.16);
+  box-shadow: none;
+}
+body[data-skin="guigu"].sc3-paper .chat-dove canvas { opacity: .52; }
+body[data-skin="guigu"].sc3-paper .chat-wrap #chatInput {
+  background: rgba(244,239,224,0.70);
+  border-color: rgba(58,53,44,0.14);
+  color: rgba(51,47,40,0.82);
+}

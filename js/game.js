@@ -5986,6 +5986,7 @@
   let SC3_UI_FLAG = null;   // 第102轮 UI 柔化：body.sc3-paper 挂/摘标记，只在状态翻转时动一次 DOM
   let SC3_SOFT_RING = false; // 第102轮：浅纸图上「圆形法阵」柔化总开关，每帧由 render 统一刷新
   let SC3_MOOD_DRAWS = 0;   // 第102轮验收探针：积墨罩累计绘制次数，证明每帧只贴 1 次
+  let SC3_SIG = null;       // 第103轮验收探针：最后一次积墨罩实际画出的 mood.signature（只在烘焙路径赋值）
   const SC3_ON = (m) => !!(SC3_ENABLED && m && SC3_SAMPLE.has(m.id));
   const sc3CodexOf = (m) => (SC3_CODEX && m && SC3_CODEX[m.id]) || null;
   // 全量装饰类型：原 3 种 + 新增 9 种 = 12（P1-3 目标 ≥12）
@@ -6298,6 +6299,81 @@
           brush(cx-12,82, cx-12,70, C.ink,0.36,1.4);
           brush(cx+10,82, cx+10,70, C.ink,0.36,1.4);
           break;
+        // ---- 第103轮 · 第二批 3 个原著专属主景（big 画布）----
+        case 'furnace': // 地火之屋：扁平坞石圆敦 + 八枚龙首 + 八道细火托起银丝鼎
+          ell(cx,64,30,9,C.ink,0.10);
+          try {
+            g.strokeStyle=P(C.deep,0.58); g.lineWidth=2.4; g.lineCap='round';
+            g.beginPath(); g.ellipse(cx,64,30,10,0,0.15,3.00); g.stroke();   // 前缘留缺口，不画成石盘
+            g.beginPath(); g.ellipse(cx,64,30,10,0,3.30,6.05); g.stroke();
+          } catch (e) { /* 垫片降级 */ }
+          for(let i=0;i<8;i++){                       // 八枚龙首沿椭圆外缘斜出，口部对准圆心
+            const a=i/8*6.2832, px=cx+Math.cos(a)*30, py=64+Math.sin(a)*9;
+            brush(px,py, px+(cx-px)*0.22, py+(44-py)*0.22, C.deep,0.50,2.0);
+            ell(px,py,3.4,2.8,C.ink,0.44);
+          }
+          for(let i=0;i<8;i++){                       // 八道细火：双笔成簇，只取斜势，不落紫火颜色
+            const a=i/8*6.2832, px=cx+Math.cos(a)*24, py=64+Math.sin(a)*7;
+            const tx=cx+(i%2?3:-3), ty=44+(i%3)*2;
+            brush(px,py-1, tx,ty, C.ink,0.42,1.3);
+            brush(px+2,py-2, tx-1,ty+6, C.line,0.26,0.9);
+          }
+          brush(cx-12,40, cx+12,40, C.deep,0.62,2.6); // 银丝鼎：鼎口 + 两耳 + 斜腹 + 三足
+          brush(cx-12,40, cx-9,50, C.deep,0.50,2.0);
+          brush(cx+12,40, cx+9,50, C.deep,0.50,2.0);
+          brush(cx-9,50, cx+9,50, C.ink,0.44,1.8);
+          brush(cx-15,38, cx-17,34, C.ink,0.40,1.5);
+          brush(cx+15,38, cx+17,34, C.ink,0.40,1.5);
+          brush(cx-6,50, cx-7,55, C.line,0.30,1.2);
+          brush(cx+6,50, cx+7,55, C.line,0.30,1.2);
+          ell(cx-38,34,4,6,C.fog,0.16); ell(cx+38,34,4,6,C.fog,0.16);  // 四壁火星砂葫芦，退到纸后
+          break;
+        case 'ship': // 魁星岛巨舟：翘首船身 + 桅杆淡墨帆 + 远帆退入海雾横带
+          for(let i=0;i<3;i++) brush(cx-42,70+i*7, cx+40-i*5,70+i*7, C.fog,0.16-i*0.04,2.0);
+          brush(cx-34,64, cx+32,64, C.deep,0.62,3.0);
+          brush(cx-34,64, cx-29,55, C.deep,0.52,2.4);
+          brush(cx+32,64, cx+28,55, C.deep,0.52,2.4);
+          brush(cx-36,64, cx-30,68, C.ink,0.44,1.8);
+          brush(cx+34,64, cx+28,68, C.ink,0.44,1.8);
+          brush(cx-4,62, cx-4,14, C.deep,0.66,2.6);
+          // 淡墨帆：三边笔线 + 一道鼓风弧，不用实心墨团（实拍里会读成一颗球）
+          brush(cx-3,18, cx+18,24, C.deep,0.50,1.8);   // 上桁
+          brush(cx-3,18, cx-3,50, C.line,0.30,1.4);    // 前缘贴桅
+          brush(cx+18,24, cx+4,50, C.deep,0.46,1.8);   // 斜后缘
+          brush(cx-3,50, cx+4,50, C.ink,0.38,1.6);     // 下缘
+          try {
+            g.strokeStyle=P(C.fog,0.26); g.lineWidth=1.2;
+            g.beginPath(); g.moveTo(cx+1,26); g.quadraticCurveTo(cx+14,34,cx+3,46); g.stroke();
+          } catch (e) { /* 垫片降级 */ }
+          for(let i=0;i<3;i++){                       // 远帆：三点淡墨，横带层次
+            const px=cx-32+i*27, py=44+(i%2)*6;
+            brush(px,py, px,py-9, C.fog,0.22,1.2);
+            brush(px,py-9, px+5,py-6, C.fog,0.18,1.0);
+          }
+          break;
+        case 'reef': // 红瑚岛：不闭合环形珊瑚礁围静水 + 环心孤礁一株卷叶霓裳草
+          try {
+            g.strokeStyle=P(C.deep,0.52); g.lineWidth=2.4; g.lineCap='round';
+            g.beginPath(); g.ellipse(cx,60,36,17,0,0.35,2.80); g.stroke();
+            g.beginPath(); g.ellipse(cx,60,36,17,0,3.45,5.95); g.stroke();
+            g.strokeStyle=P(C.fog,0.18); g.lineWidth=2.0;
+            g.beginPath(); g.ellipse(cx,60,42,21,0,3.6,5.8); g.stroke();
+          } catch (e) { /* 垫片降级 */ }
+          ell(cx,60,26,11,C.water,0.10);
+          for(let i=0;i<3;i++) brush(cx-20+i*5,58+i*4, cx+14-i*6,58+i*4, C.line,0.14,1.0);
+          ell(cx,62,9,4,C.ink,0.16);
+          brush(cx,60, cx,38, C.deep,0.58,1.8);        // 单茎
+          for(let i=0;i<5;i++){                        // 卷曲圆筒叶：浓墨斜笔 + 卷口小椭圆，不画圆点
+            const d=(i%2?1:-1), yy=42+i*4;
+            brush(cx,yy, cx+d*13,yy-7, C.deep,0.48,1.6);
+            ell(cx+d*14,yy-8,3.4,2.4,C.ink,0.34);
+          }
+          for(let i=0;i<5;i++){                        // 环外零星礁石：石棱皴笔，不是灰球
+            const a=i/5*6.2832, px=cx+Math.cos(a)*36, py=60+Math.sin(a)*17;
+            brush(px-3,py+2, px+2,py-4, C.deep,0.34,1.6);
+            brush(px+2,py-4, px+5,py-2, C.line,0.20,1.0);
+          }
+          break;
         default: return null;
       }
       // 软边淡出罩：destination-in 径向渐变，把精灵四周 alpha 渐隐到 0，像墨洇进宣纸。
@@ -6411,9 +6487,10 @@
   //   · 中国水墨画夜景靠积墨，不靠把纸涂黑：整纸一层暖灰 + 四角软边浓墨晕 + 横向雾带，
   //     全是 radialGradient 软边，中央留白不封死，主景 / 装饰 / 角色照常压在其上；
   //   · W×H 全屏离屏烘焙一次，按 mapId 缓存，每帧只多 1 次 drawImage；
-  //   · 只有台账带 mood 的图才烘焙，其余 16 张 mood=null 完全短路；
+  //   · 只有台账带 mood 的图才烘焙，其余 27 张 mood=null 完全短路；
   //   · 严守灰阶：仍是纸 + 暖墨，不引红色、不改 m.bg / inkBg、不碰判定。
   function sc3BakeMood(mo) {
+    SC3_SIG = null;         // 每次重烘重置，切图不会把上一张的专属笔法带过来
     let c;
     try { c = document.createElement('canvas'); } catch (e) { return null; }
     if (!c || !c.getContext) return null;
@@ -6458,6 +6535,67 @@
         }
       }
     } catch (e) { return null; }
+    // ④ 第103轮：mood.signature 原著专属笔法。只取形状与明度，全灰阶软边、不引红色、不写判定。
+    //    实拍复盘后收过一轮：初版把气泡撒成「一地椭圆」、把竹林画成「通长竖线栅栏」，
+    //    都往用户最在意的「杂乱」方向走。现在一图只留一处主景，配景成丛、大片留白。
+    //    单独 try：垫片缺 ellipse 时只跳过这一层，不让整张积墨罩降级为 null。
+    if (mo.signature && g.ellipse) {
+      try {
+        if (mo.signature === 'bubblingPool') {
+          // 「灰黑色的腐烂地面，不停冒着气泡的浑浊水坑」：
+          // 收成画面一侧的一处主坑（避开中央玩法区），坑内聚泡、坑外只留两枚远泡。
+          const px = W*0.30, py = H*0.70, rx = W*0.20, ry = H*0.055;
+          g.strokeStyle = 'rgba(' + INK + ',0.17)'; g.lineWidth = 1.6; g.lineCap = 'round';
+          g.beginPath(); g.ellipse(px,py,rx,ry,0,0.20,2.55); g.stroke();
+          g.beginPath(); g.ellipse(px,py,rx,ry,0,3.45,5.90); g.stroke();
+          // 坑面浑浊：软边径向墨晕，中心略重，四周洇进纸里，不落实心块
+          g.save(); g.translate(px,py); g.scale(1, ry/rx);
+          const pg = g.createRadialGradient(0,0,0,0,0,rx);
+          pg.addColorStop(0, 'rgba(' + INK + ',0.11)');
+          pg.addColorStop(1, 'rgba(' + INK + ',0)');
+          g.fillStyle = pg; g.beginPath(); g.arc(0,0,rx,0,6.2832); g.fill(); g.restore();
+          // 坑内气泡：大小不一、聚在坑心，一律空泡圈 + 一道高光缺口
+          for (let i=0;i<7;i++) {
+            const bx = px + ((i*13)%17-8)*rx*0.085, by = py + ((i*7)%11-5)*ry*0.30;
+            const r = 3 + (i%3)*2.2;
+            g.strokeStyle = 'rgba(' + INK + ',' + (0.14+(i%2)*0.05).toFixed(3) + ')';
+            g.lineWidth = 1.0;
+            g.beginPath(); g.arc(bx,by,r,0.35,5.75); g.stroke();
+            g.beginPath(); g.arc(bx-r*0.30,by-r*0.30,r*0.28,3.40,6.00); g.stroke();
+          }
+          for (let i=0;i<2;i++) {   // 坑外远泡：只留两点，大片留白
+            const bx = W*(0.72+i*0.12), by = H*(0.42+i*0.22), r = W*0.022;
+            g.strokeStyle = 'rgba(' + INK + ',0.08)'; g.lineWidth = 0.9;
+            g.beginPath(); g.ellipse(bx,by,r,r*0.42,0,0.30,2.70); g.stroke();
+          }
+        } else if (mo.signature === 'bloodOverhead') {
+          // 「血光一闪……将这竹林的上空全部笼罩」：上方软边浓墨压顶（避开顶部 HUD），
+          // 下半两侧短斜笔竹影成丛；不画贯穿全屏的长竖线。
+          for (let i=0;i<3;i++) {
+            const by = H*(0.13+i*0.055), rad = W*0.72;
+            g.save(); g.translate(W*0.5,by); g.scale(1,0.13);
+            const og = g.createRadialGradient(0,0,0,0,0,rad);
+            og.addColorStop(0, 'rgba(' + INK + ',' + (0.26-i*0.055).toFixed(3) + ')');
+            og.addColorStop(1, 'rgba(' + INK + ',0)');
+            g.fillStyle = og; g.beginPath(); g.arc(0,0,rad,0,6.2832); g.fill(); g.restore();
+          }
+          const xs = [0.10,0.17,0.25,0.75,0.83,0.90];
+          for (let i=0;i<xs.length;i++) {
+            const bx = W*xs[i], lean = (i%2?1:-1)*W*0.035, top = H*(0.62+(i%3)*0.05);
+            g.strokeStyle = 'rgba(' + INK + ',' + (0.11+(i%3)*0.02).toFixed(3) + ')';
+            g.lineWidth = 2.0+(i%2); g.lineCap = 'round';
+            g.beginPath(); g.moveTo(bx,H*0.94); g.lineTo(bx+lean,top); g.stroke();
+            for (let j=0;j<2;j++) {
+              const yy = top + H*(0.06+j*0.07);
+              g.lineWidth = 1.0;
+              g.beginPath(); g.moveTo(bx+lean*0.6,yy);
+              g.lineTo(bx+lean*0.6+((j%2)?1:-1)*W*0.045, yy-H*0.025); g.stroke();
+            }
+          }
+        }
+        SC3_SIG = mo.signature;   // 专属笔法确实画进这张积墨罩了，供 __FR.scenery3() 断言
+      } catch (e) { /* 专属笔法降级，不影响积墨罩本体 */ }
+    }
     return c;
   }
   // 主景构图位（世界坐标系数，相对 W/H）。G.cam 起点 (-W/2,-H/2)，故屏幕 y = 世界 y + H/2，
@@ -11966,7 +12104,8 @@
         terrainA: s.on ? sc3TerrainAlpha(s.terrainTile) : null,
         spriteKinds: s.on ? Object.keys(s.spr) : [],
         // 第102轮验收探针：mood 参数 / 积墨罩是否烘出 / alpha 分布（证明软边非硬块）/ UI 柔化作用域
-        mood: (s.on && s.mood) ? { name:s.mood.name, gloom:s.mood.gloom, vignette:s.mood.vignette, haze:s.mood.haze, focusInk:s.mood.focusInk } : null,
+        mood: (s.on && s.mood) ? { name:s.mood.name, gloom:s.mood.gloom, vignette:s.mood.vignette, haze:s.mood.haze, focusInk:s.mood.focusInk, signature:s.mood.signature || null } : null,
+        moodSignature: (s.on && s.mood && s.moodTile) ? SC3_SIG : null,
         moodTile: s.on ? !!s.moodTile : false,
         moodA: s.on ? sc3TerrainAlpha(s.moodTile) : null,
         moodDraws: SC3_MOOD_DRAWS,
