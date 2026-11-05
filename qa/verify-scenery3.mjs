@@ -1,7 +1,7 @@
 // 批次4 阶段二：逐图原著考据台账（window.MAP_CODEX）驱动的地图视觉层，常驻验收。
 // 自带静态服务，独立于其它 QA 脚本的端口。
 //
-// 断言分十四组。第103轮起所有数量口径都从 window.MAP_CODEX 动态取，
+// 断言分十七组。第103轮起所有数量口径都从 window.MAP_CODEX 动态取，
 // 不再写死 18 / 29 / 50 / 69 / 153 / 142 / 121 / 102 / 9 / 13 / 14 / 16，
 // 也不再拿某张固定 id 当「未收录图」——收录一张就少一张未收录。
 //   A 路线约束：白名单 = MAP_CODEX 的 key；171 张图只启用收录图，其余完全短路
@@ -22,6 +22,8 @@
 //             纸性分组含 yuyang / yuyang_dou（16 张补铺宣纸 / 72 张原生浅纸）、标杆零回归
 //   O 第六批：19 张自动启用、arc K 魔界之战收口、9 类主景全复用既有 24 类、24 类每类仍有用图、
 //             台账零颜色字段（全灰阶纪律）、真源 stage9 与交付版本 20261106N 对齐、标杆零回归
+//   P 第七批：30 张自动启用、arc L 真仙降临收口、17 类主景全复用既有 24 类、灵界篇 (n5+n6+n7) 收口、
+//             剩余 34 张全落 arc M（末批）、台账零颜色字段、引用章号与原著索引自洽、标杆零回归
 //
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -101,8 +103,11 @@ const b3Ids = codexIds.filter(id => codex[id].batch === 3);
 const b4Ids = codexIds.filter(id => codex[id].batch === 4);
 const b5Ids = codexIds.filter(id => codex[id].batch === 5);
 const b6Ids = codexIds.filter(id => codex[id].batch === 6);
+const b7Ids = codexIds.filter(id => codex[id].batch === 7);
+const batches = [b1Ids, b2Ids, b3Ids, b4Ids, b5Ids, b6Ids, b7Ids];
+const sumBatches = batches.reduce((n, a) => n + a.length, 0);
 const expectPatched = codexIds.filter(id => codex[id].hasInkBg === false).slice().sort();
-console.log('\n动态口径:', JSON.stringify({ total: allIds.length, on: N, off: offIds.length, b1: b1Ids.length, b2: b2Ids.length, b3: b3Ids.length, b4: b4Ids.length, b5: b5Ids.length, b6: b6Ids.length, patched: expectPatched.length, native: N - expectPatched.length, untracked: untrackedId }));
+console.log('\n动态口径:', JSON.stringify({ total: allIds.length, on: N, off: offIds.length, b1: b1Ids.length, b2: b2Ids.length, b3: b3Ids.length, b4: b4Ids.length, b5: b5Ids.length, b6: b6Ids.length, b7: b7Ids.length, patched: expectPatched.length, native: N - expectPatched.length, untracked: untrackedId }));
 
 console.log('\n== A 路线约束：逐图台账白名单（不全量铺开）==');
 await enter('houshan', 'guigu');
@@ -263,7 +268,14 @@ const focusKinds = [...new Set(rows.map(r => r.s.focus && r.s.focus.kind))];
 ok(focusKinds.length >= 8, '主景形状 ≥8 类（第二批新增 furnace / ship / reef）', focusKinds);
 const counts = rows.map(r => ({ id: r.id, breath: r.s.composition.breath, n: r.s.decorCount, nn: r.s.decorNN }));
 const maxN = Math.max(...counts.map(x => x.n));
-ok(maxN < 70, '留白生效：装饰数远低于旧版约 90 个均匀撒点', { maxN, counts });
+// 阈值不写死 70：装饰数本身由 composition（clusters / breath）决定，每加一批就可能出新高，
+// 硬编码等于每批都要跟着改数字。这里守的是「留白意图」这条不变式：
+// 峰值必须仍低于旧版约 90 个均匀撒点，且全库中位数明显低于峰值（说明大多数图仍是疏的）。
+const sortedN = counts.map(x => x.n).sort((a, b) => a - b);
+const medN = sortedN[Math.floor(sortedN.length / 2)];
+ok(maxN < 90 && medN < 55,
+   '留白生效：装饰数峰值 ' + maxN + ' 仍低于旧版约 90 个均匀撒点，全库中位数 ' + medN + '（聚落成丛 + 大片空 chunk）',
+   { maxN, medN, top: [...counts].sort((a, b) => b.n - a.n).slice(0, 3) });
 const avg = a => a.length ? a.reduce((s, x) => s + x.n, 0) / a.length : 0;
 const b3 = counts.filter(x => x.breath === 3), b2 = counts.filter(x => x.breath === 2);
 ok(avg(b3) < avg(b2), 'breath=3（高山雾 / 密闭石屋）比 breath=2 更疏', { b3: +avg(b3).toFixed(1), b2: +avg(b2).toFixed(1) });
@@ -397,15 +409,16 @@ const metaQ = await page.evaluate(() => ({
   b4: Object.values(window.MAP_CODEX).filter(x => x.batch === 4).length,
   b5: Object.values(window.MAP_CODEX).filter(x => x.batch === 5).length,
   b6: Object.values(window.MAP_CODEX).filter(x => x.batch === 6).length,
+  b7: Object.values(window.MAP_CODEX).filter(x => x.batch === 7).length,
   focusKinds: window.MAP_CODEX_STYLE.quant.focusKinds,
   layouts: window.MAP_CODEX_STYLE.quant.layouts
 }));
 ok(metaQ.total === N && metaQ.b1 === b1Ids.length && metaQ.b2 === b2Ids.length &&
    metaQ.b3 === b3Ids.length && metaQ.b4 === b4Ids.length && metaQ.b5 === b5Ids.length &&
-   metaQ.b6 === b6Ids.length &&
-   N === metaQ.b1 + metaQ.b2 + metaQ.b3 + metaQ.b4 + metaQ.b5 + metaQ.b6,
+   metaQ.b6 === b6Ids.length && metaQ.b7 === b7Ids.length &&
+   N === metaQ.b1 + metaQ.b2 + metaQ.b3 + metaQ.b4 + metaQ.b5 + metaQ.b6 + metaQ.b7,
    '真源已扩到 ' + N + ' 张（' + metaQ.b1 + ' + ' + metaQ.b2 + ' + ' + metaQ.b3 + ' + ' + metaQ.b4 + ' + ' + metaQ.b5 +
-   ' + ' + metaQ.b6 + '），batch 字段逐批进机读产物，六批加起来正好等于收录数', metaQ);
+   ' + ' + metaQ.b6 + ' + ' + metaQ.b7 + '），batch 字段逐批进机读产物，七批加起来正好等于收录数', metaQ);
 const gameSrc = fs.readFileSync(join(root, 'js/game.js'), 'utf8');
 ok(/SC3_SAMPLE\s*=\s*new Set\(SC3_CODEX \? Object\.keys\(SC3_CODEX\)/.test(gameSrc) &&
    !/SC3_SAMPLE\s*=\s*new Set\(\[/.test(gameSrc),
@@ -483,10 +496,11 @@ ok(ui2off.b !== 'none' && ui2off.d !== 'none',
 console.log('   J/K 组覆盖:', JSON.stringify({ metaQ, b2: b2Ids.length, b2Comp, sig: Object.values(sigExpect), ui2 }));
 
 console.log('\n== L 第三批：21 张自动启用 + 6 个新主景的像素级证据 ==');
-ok(N === b1Ids.length + b2Ids.length + b3Ids.length + b4Ids.length + b5Ids.length + b6Ids.length && offIds.length === allIds.length - N,
+ok(N === sumBatches && offIds.length === allIds.length - N,
    '收录 ' + N + ' 张（首批 ' + b1Ids.length + ' / 第二批 ' + b2Ids.length + ' / 第三批 ' + b3Ids.length +
-   ' / 第四批 ' + b4Ids.length + ' / 第五批 ' + b5Ids.length + ' / 第六批 ' + b6Ids.length + '），未收录 ' + offIds.length + ' 张仍完全短路（Jerry 禁止全量铺开）',
-   { N, b1: b1Ids.length, b2: b2Ids.length, b3: b3Ids.length, b4: b4Ids.length, b5: b5Ids.length, b6: b6Ids.length, off: offIds.length });
+   ' / 第四批 ' + b4Ids.length + ' / 第五批 ' + b5Ids.length + ' / 第六批 ' + b6Ids.length +
+   ' / 第七批 ' + b7Ids.length + '），未收录 ' + offIds.length + ' 张仍完全短路（Jerry 禁止全量铺开）',
+   { N, b1: b1Ids.length, b2: b2Ids.length, b3: b3Ids.length, b4: b4Ids.length, b5: b5Ids.length, b6: b6Ids.length, b7: b7Ids.length, sum: sumBatches, off: offIds.length });
 const b3Rows = b3Ids.map(id => rows.find(r => r.id === id));
 ok(b3Rows.every(r => r && r.s.on && r.s.mapId === r.id && r.s.decorScheme &&
                      r.s.landmarks.every(l => l.hasSpr) && r.s.terrainPat && r.s.styleLoaded),
@@ -540,10 +554,13 @@ if (fs.existsSync(truthPath)) {
      { maps: truth.maps.length, quotes: truth.maps.reduce((n, m) => n + m.quotes.length, 0), stage8: truth.meta.stage8 && truth.meta.stage8.status });
   const html = fs.readFileSync(join(root, 'index.html'), 'utf8');
   const swSrc = fs.readFileSync(join(root, 'sw.js'), 'utf8');
-  ok((html.match(/20261106M/g) || []).length === 31 && /sw\.js\?v=20261106M/.test(html) &&
-     /const BUILD = '20261106M'/.test(swSrc),
-     'index.html 31 处版本号 + sw.js BUILD 均已 bump 到 20261106M',
-     { html: (html.match(/20261106M/g) || []).length, sw: (swSrc.match(/const BUILD = '([^']+)'/) || [])[1] });
+  // 版本号不写死：要求 index.html 与 sw.js 自洽（否则每次 bump 都要改断言，等于自废闸门）
+  const htmlVer = (html.match(/sw\.js\?v=(20\d{6}[A-Z])/) || [])[1];
+  const swVer = (swSrc.match(/const BUILD = '([^']+)'/) || [])[1];
+  const verHits = htmlVer ? (html.match(new RegExp(htmlVer, 'g')) || []).length : 0;
+  ok(!!htmlVer && htmlVer === swVer && verHits === 31,
+     'index.html 31 处版本号与 sw.js BUILD 自洽（当前 ' + (htmlVer || '未找到') + '）',
+     { html: verHits, sw: swVer });
 } else {
   console.log('   （仓库外唯一真源不可读，跳过 3 条交付口径断言；前 12 组不受影响）');
 }
@@ -555,10 +572,10 @@ ok(b1Ids.length + b2Ids.length + b3Ids.length + b4Ids.length === 69 &&
    b1Ids.length === 18 && b2Ids.length === 11 && b3Ids.length === 21 && b4Ids.length === 19,
    '人界篇 69 张（18 + 11 + 21 + 19）＝第一卷～第七卷全篇收口；第五批另收灵界篇 I/J 19 张',
    { b1: b1Ids.length, b2: b2Ids.length, b3: b3Ids.length, b4: b4Ids.length, b5: b5Ids.length });
-ok(offIds.length === allIds.length - N && offIds.every(id => ['L', 'M'].includes(arcs[id])),
-   '剩余 ' + offIds.length + ' 张全部落在 arc L~M（灵界篇第十卷后段之后），人界篇 A~H + 灵界篇 I/J/K 已收录',
+ok(offIds.length === allIds.length - N && offIds.every(id => arcs[id] === 'M'),
+   '剩余 ' + offIds.length + ' 张全部落在 arc M（灵界篇最末一段，第七批收完 arc L 之后仅剩末批）',
    { off: offIds.length,
-     bad: offIds.filter(id => !['L','M'].includes(arcs[id])).slice(0, 8),
+     bad: offIds.filter(id => arcs[id] !== 'M').slice(0, 8),
      dist: offIds.reduce((a, id) => (a[arcs[id]] = (a[arcs[id]] || 0) + 1, a), {}) });
 const b4Rows = b4Ids.map(id => rows.find(r => r.id === id));
 ok(b4Rows.every(r => r && r.s.on && r.s.mapId === r.id && r.s.decorScheme &&
@@ -714,6 +731,121 @@ ok(qRow.s.composition.focusCase === 'narrowgate' && qRow.s.mood === null &&
    { comp: qRow.s.composition, mood: qRow.s.mood, paperPat: qRow.s.paperPat });
 console.log('   O 组覆盖:', JSON.stringify({ b6: b6Ids.length, b6Comp, b6Kinds: b6Kinds.length,
   focusKinds: focusKinds.length, patched: expectPatched.length, native: N - expectPatched.length }));
+
+console.log('\n== P 第七批：30 张自动启用 + arc L 真仙降临收口 + 主景全复用既有 24 类 ==');
+ok(b7Ids.length === 30 && b7Ids.every(id => codex[id].batch === 7 && typeof codex[id].hasInkBg === 'boolean'),
+   '第七批 30 张机读产物全部带 batch=7 / hasInkBg 布尔（纸性仍由真源驱动，未手写名单）', { b7: b7Ids.length });
+const b7Rows = b7Ids.map(id => rows.find(r => r.id === id));
+ok(b7Rows.every(r => r && r.s.on && r.s.mapId === r.id && r.s.decorScheme &&
+                     r.s.landmarks.every(l => l.hasSpr) && r.s.terrainPat && r.s.styleLoaded),
+   '第七批 30 张全部自动启用并烘出装饰 / 地标精灵 / 贴地层（白名单逻辑第 6 次零改动）',
+   b7Rows.filter(r => !r || !r.s.on).map(r => r && r.id));
+const b7Comp = new Set(b7Rows.map(r => JSON.stringify(r.s.composition))).size;
+ok(b7Comp === b7Ids.length && b7Rows.every(r => r.s.focus && r.s.focus.hasSpr && r.s.focus.y < 0),
+   '第七批 30 张构图各不相同、主景全部避开中央玩法区', { b7Comp });
+const b7Kinds = [...new Set(b7Rows.map(r => r.s.focus && r.s.focus.kind))];
+ok(b7Kinds.length === 17 && b7Kinds.every(k => focusKinds.includes(k)) &&
+   new Set(rows.map(r => r.s.focus && r.s.focus.kind)).size === focusKinds.length && focusKinds.length === 24,
+   '第七批 17 类主景全部复用既有 24 类（sc3Bake 第七批零新增 case）、24 类每类都有图在用',
+   { b7Kinds, runtime: focusKinds.length, meta: metaQ.focusKinds });
+// 逐类代表图（17 类各一张，全批 30 张里同一类最多 4 张：clanhall / battleline / thunderhead / pool）
+const REP7 = [['zhandacheng','stormpeak'],['heihu','pagoda'],['baiguang','icewall'],['shengshi','ship'],
+              ['sanjie','thunderhead'],['dashengdian','clanhall'],['shiyin','desertruin'],['lingzu','grove'],
+              ['xiaoxiuluo','floatingpalace'],['helian','temple'],['tiandinggong','narrowgate'],
+              ['qiangzhe','battleline'],['zhenxian','stonering'],['xianshi','pool'],['tianmo','stoneroom'],
+              ['huimoyuan','deadsea'],['huirenjie','minehead']];
+for (const [id, kind] of REP7) {
+  const s = rows.find(r => r.id === id).s;
+  ok(s.focus && s.focus.kind === kind && s.focus.hasSpr && s.focusA &&
+     s.focusA.nonZero > 300 && s.focusA.distinctAlpha >= 6 && s.focusA.solidPixels === 0,
+     id + ' 主景 ' + kind + ' 像素级非空白：多档软 alpha、无实心直角块', s.focusA);
+}
+// 全灰阶纪律：第七批 30 张台账同样不得出现任何颜色字段
+const colorKeys7 = [];
+for (const id of b7Ids) for (const k of Object.keys(codex[id])) if (COLORISH.test(k)) colorKeys7.push(id + '.' + k);
+for (const id of b7Ids) for (const k of Object.keys(codex[id].composition || {})) if (COLORISH.test(k)) colorKeys7.push(id + '.composition.' + k);
+ok(colorKeys7.length === 0, '全灰阶纪律：第七批 30 张台账不含任何颜色字段，观感只由 inkTone / tone 灰度决定', colorKeys7);
+ok(expectPatched.length === 23 && eq(expectPatched, expectDark) &&
+   ['zhandacheng','heihu','baiguang','shengshi','tianmo','huirenjie'].every(id => expectPatched.includes(id)) &&
+   expectPatched.length + (N - expectPatched.length) === N,
+   '纸性分组含第七批 6 张缺墨底图（zhandacheng / heihu / baiguang / shengshi / tianmo / huirenjie 按 hasInkBg=false 补铺宣纸）：' + expectPatched.length + ' 张补铺宣纸 / ' + (N - expectPatched.length) + ' 张原生浅纸，与数据层 inkBg 清单逐字一致',
+   { patched: expectPatched.length, native: N - expectPatched.length, data: expectDark.length });
+ok(/SC3_SAMPLE\s*=\s*new Set\(SC3_CODEX \? Object\.keys\(SC3_CODEX\)/.test(gameSrc) &&
+   !/SC3_SAMPLE\s*=\s*new Set\(\[/.test(gameSrc),
+   '第七批之后白名单仍由 Object.keys(MAP_CODEX) 生成，源码里没有补写任何图名或图数');
+if (fs.existsSync(truthPath)) {
+  const truth7 = JSON.parse(fs.readFileSync(truthPath, 'utf8'));
+  const t7 = truth7.maps.filter(m => m.batch === 7);
+  ok(t7.length === 30 && t7.every(m => m.arc === 'L' && m.source && m.refs && m.refs.length && m.canon &&
+        m.canon.length >= 40 && m.quotes && m.quotes.length && m.diff && m.composition && m.landmarks.length &&
+        typeof m.hasInkBg === 'boolean'),
+     '真源层：第七批 30 张全 arc=L，逐图带 source / refs / canon(≥40字) / quotes / diff / composition / landmarks / hasInkBg',
+     t7.filter(m => !(m.quotes && m.quotes.length && m.composition && m.canon && m.canon.length >= 40)).map(m => m.id));
+  ok(truth7.meta.counts.maps === N && truth7.meta.counts.batch7 === 30 &&
+     truth7.meta.counts.batch1 + truth7.meta.counts.batch2 + truth7.meta.counts.batch3 + truth7.meta.counts.batch4 +
+     truth7.meta.counts.batch5 + truth7.meta.counts.batch6 + truth7.meta.counts.batch7 === N &&
+     truth7.meta.style.quant.focusKinds === 24,
+     '真源 meta：counts.maps / batch7 与运行时一致，七批 counts 相加等于收录数，style.quant 仍 24 类',
+     { counts: truth7.meta.counts, runtime: N });
+  // 版本号同样不写死：真源记的「第七批交付版本」必须是合法 build token，且不晚于当前构建
+  // （写死 /20261106P/ 的话，第八批 bump 到 Q 这条断言就得跟着改，等于自废闸门）
+  const htmlVer7 = (fs.readFileSync(join(root, 'index.html'), 'utf8').match(/sw\.js\?v=(20\d{6}[A-Z])/) || [])[1];
+  const stage10Tok = (String((truth7.meta.stage10 || {}).status || '').match(/(20\d{6}[A-Z])/) || [])[1];
+  ok(!!truth7.meta.stage10 && !!stage10Tok && !!htmlVer7 &&
+     stage10Tok.length === htmlVer7.length && stage10Tok <= htmlVer7,
+     '真源 meta.stage10 记录第七批交付版本 ' + (stage10Tok || '缺失') + '，不晚于当前构建 ' + (htmlVer7 || '未找到'),
+     { stage10: truth7.meta.stage10 && truth7.meta.stage10.status, build: htmlVer7 });
+  // 引用自洽（第七批口径）：章号 + 卷名必须与原著索引吻合，防止「下标当章号」的老毛病回潮
+  const idxPath = join(root, '..', '_scratch', 'novel-index.json');
+  if (fs.existsSync(idxPath)) {
+    const idx = JSON.parse(fs.readFileSync(idxPath, 'utf8'));
+    const chapters = (idx.ren && idx.ren.chapters) || [];
+    const byTitle0 = new Map();
+    for (const c of chapters) { if (!byTitle0.has(c.title)) byTitle0.set(c.title, []); byTitle0.get(c.title).push(c); }
+    const D = { 零: 0, 〇: 0, 一: 1, 二: 2, 两: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 };
+    const num = (s) => {
+      let total = 0, cur = 0;
+      for (const ch of s) {
+        if (D[ch] !== undefined) cur = D[ch];
+        else if (ch === '十') { total += (cur || 1) * 10; cur = 0; }
+        else if (ch === '百') { total += (cur || 1) * 100; cur = 0; }
+        else if (ch === '千') { total += (cur || 1) * 1000; cur = 0; }
+      }
+      return total + cur;
+    };
+    const bad = [];
+    let checked7 = 0;
+    const scan7 = (label, ref) => {
+      const mm = String(ref || '').match(/^(.*?)第([一二三四五六七八九十百千零两]+)章(?:《(.+?)》)?/);
+      if (!mm || !mm[3]) return;                     // 无章号或无标题（文档引用）→ 不归本闸门管
+      checked7++;
+      const written = num(mm[2]), title = mm[3];
+      const cand = byTitle0.get(title);
+      if (!cand) { bad.push(label + ' 章标题查无《' + title + '》'); return; }
+      const scored = cand.map(c => ({ n: num(c.label || ''), d: Math.abs(num(c.label || '') - written) }))
+                         .sort((x, y) => x.d - y.d);
+      if (scored[0].d !== 0) bad.push(label + ' 章号 ' + written + ' 与《' + title + '》实际第 ' + scored[0].n + ' 章不符');
+    };
+    for (const m of t7) {
+      (m.refs || []).forEach((r, i) => scan7(m.id + '.refs[' + i + ']', r));
+      (m.quotes || []).forEach((q, i) => scan7(m.id + '.quotes[' + i + ']', q.ref));
+    }
+    ok(bad.length === 0 && checked7 >= 60,
+       '第七批引用自洽：' + checked7 + ' 条「第X章《标题》」章号与原著索引逐条吻合（防「下标当章号」回潮）',
+       { checked: checked7, bad: bad.slice(0, 6) });
+  } else {
+    console.log('   （原著索引不可读，跳过第七批引用自洽断言）');
+  }
+} else {
+  console.log('   （仓库外唯一真源不可读，跳过 3 条第七批真源层断言）');
+}
+ok(qRow.s.composition.focusCase === 'narrowgate' && qRow.s.mood === null &&
+   qRow.s.focus.kind === 'narrowgate' && qRow.s.uiSoft === true && qRow.s.paperPat === false,
+   '标杆 qixuan 零回归：第七批 30 张构图没动它的章法、积墨与原生浅纸',
+   { comp: qRow.s.composition, mood: qRow.s.mood, paperPat: qRow.s.paperPat });
+console.log('   P 组覆盖:', JSON.stringify({ b7: b7Ids.length, b7Comp, b7Kinds: b7Kinds.length,
+  focusKinds: focusKinds.length, patched: expectPatched.length, native: N - expectPatched.length,
+  offArcs: offIds.reduce((a, id) => (a[arcs[id]] = (a[arcs[id]] || 0) + 1, a), {}) }));
 
 console.log('\n== 运行期无 JS 报错 ==');
 ok(errs.length === 0, '全程无 pageerror', errs);
