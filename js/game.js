@@ -1804,7 +1804,7 @@
       maxhp: maxhp, hp: dead ? 0 : maxhp, dead: dead, deadT: 0,
       iv: 0, hurtFlash: 0, guardT: 0, starveNoted: 0,
       dir: 1, moving: false, gait: 0, roam: Math.random() * 6.28,
-      dodgeT: 0, dodgeFx: 0, dodgePrev: null, dodgeFrom: null, dodgeThreats: 0, dodging: false,
+      dodgeT: 0, dodgeFx: 0, dodgePrev: null, dodgeFrom: null, dodgeThreats: 0, dodging: false, kiting: false,
       skCd: null, skCast: 0, artCd: { guard: 0.5, melee: 0.9, ranged: 1.3 }
     };
   }
@@ -2294,6 +2294,9 @@
   // 并且不设 autoAnchor —— 挂机躲完要回桩，它躲完接着自己找怪，所以不站桩。
   const ALLY_DODGE_R = 300;       // 与 autoThreats 的 R 同口径
   const ALLY_DODGE_HOLD = 0.28;   // 让开后顺着同一方向再走一小段，免得两帧一换原地抖
+  // 第120轮：对 Boss / 精英怪的风筝间距。远到「还能用基础弹道打到」就好（灵宠弹道约 360px、
+  // 同伴约 429px），所以取 250：留足余量不贴脸，又不至于够不着。普通怪不走这条。
+  const ALLY_KITE_WANT = 250;
   // 第117轮：水墨像素特效（FX3）只认 fxpix.js PAL 里的四条六档色阶。
   // 不是新配色 —— 水墨皮下 fxpix 会再用 INK_HEX 把每一档砍回本作墨阶。
   const ALLY_PALS = ['xue', 'jin', 'qi', 'mo'];
@@ -2680,14 +2683,28 @@
       if (t) {
         const d = U.dist(e.x, e.y, t.x, t.y) || 1;
         const ang = Math.atan2(t.y - e.y, t.x - e.x);
-        const want = mode === 'melee' ? 30 : 132;
-        const k = mode === 'melee'
-          ? (d > want ? 1 : (d < want * 0.7 ? -0.6 : 0))
-          : (d > want * 1.25 ? 1 : (d < want * 0.75 ? -0.8 : 0));
+        // 第120轮：目标是 Boss 或精英怪时，绝不贴脸 —— 拉到「能打到的最远间距」慢慢磨，
+        // 普通怪才走原来的近身 / 拉开口径。这样遇 Boss/精英就风筝、遇杂兵照旧，
+        // 遇险侧身那一套（allyDodgeDir）完全不动，被攻击时优先躲、躲完继续风筝。
+        const big = (t === G.boss) || (!!t.elite);
+        e.kiting = big;
+        let want, k;
+        if (big) {
+          want = ALLY_KITE_WANT;
+          // 落点带卡在 want 附近：比 ap 远才靠近，比 bf 近就后撤，落到 ap 处停住。
+          const ap = ALLY_KITE_WANT * 1.12, bf = ALLY_KITE_WANT * 0.8;
+          k = d > ap ? 1 : (d < bf ? -0.85 : 0);
+        } else {
+          want = mode === 'melee' ? 30 : 132;
+          k = mode === 'melee'
+            ? (d > want ? 1 : (d < want * 0.7 ? -0.6 : 0))
+            : (d > want * 1.25 ? 1 : (d < want * 0.75 ? -0.8 : 0));
+        }
         tx = e.x + Math.cos(ang) * 120 * k;
         ty = e.y + Math.sin(ang) * 120 * k;
         e.dir = Math.cos(ang) >= 0 ? 1 : -1;
       } else {
+        e.kiting = false;
         e.roam = (e.roam || 0) + dt * 0.6;
         tx = G.player.x + Math.cos(e.roam) * 130;
         ty = G.player.y + Math.sin(e.roam * 0.8) * 100;
@@ -10205,7 +10222,8 @@
       's　远击 ' + allyArtCd('ranged').toFixed(2) + 's';
     html += '<div class="cave-sec"><div class="cs-title">灵宠</div>' +
       '<div class="cs-note">带一只出门。它会在你眼前这一屏里自己找怪打，近的贴身、远的拉开，不再绕着你转；<br>' +
-      '遇上弹幕或要撞上了，会像你开大衍挂机那样侧身让半步，让完接着自己打，不站桩。<br>' +
+      '遇上弹幕或要撞上了，会像你开大衍挂机那样侧身让半步，让完接着自己打，不站桩；<br>' +
+      '见了 Boss 或精英怪则远远拉开距离慢慢磨，不往跟前凑。<br>' +
       '各有三门本事（护体 / 近身 / 远击）轮着使，出手快慢跟着你当前境界的功法走 —— 眼下 ' + cdTxt + '；<br>' +
       '本命绝学 <b>' + ti.label + '</b>（威势 ×' + ti.mul.toFixed(2) + '）隔一阵来一下。' + ti.note + '<br>' +
       '也会真挨打：血量是你满血的一半（不显血条）；殒了十息，灵石够就自动扣 10000 灵石复生；当时不够就欠着不复生，出去攒够钱，回洞府交钱才能起身。</div>';
@@ -10252,7 +10270,8 @@
       's　远击 ' + allyArtCd('ranged').toFixed(2) + 's';
     let html = '<div class="cave-sec"><div class="cs-title">同伴</div>' +
       '<div class="cs-note">按剧情出现的人。带一个出门，他也在你眼前这一屏里自己找怪打，出手比灵宠重，也比灵宠慢；<br>' +
-      '遇上弹幕或要撞上了，会像你开大衍挂机那样侧身让半步，让完接着自己打，不站桩。<br>' +
+      '遇上弹幕或要撞上了，会像你开大衍挂机那样侧身让半步，让完接着自己打，不站桩；<br>' +
+      '见了 Boss 或精英怪则远远拉开距离慢慢磨，不往跟前凑。<br>' +
       '护体 / 近身 / 远击三门轮着使，快慢跟着你当前境界 —— 眼下 ' + cdTxt + '；<br>' +
       '本命绝学仍隔一阵来一下，眼下 <b>' + ti.label + '</b>（威势 ×' + ti.mul.toFixed(2) + '）。<br>' +
       '同伴也会挨打、会殒落：血量是你满血的一半（不显血条），十息后灵石够才扣 10000 灵石复生；当时不够就欠着，出去攒够钱回洞府交钱，不会自己起身。</div>';
@@ -12648,7 +12667,7 @@
         dead: !!a.dead, deadT: +(a.deadT || 0).toFixed(3),
         guardT: +(a.guardT || 0).toFixed(3), iv: +(a.iv || 0).toFixed(3),
         dodging: !!a.dodging, dodgeThreats: a.dodgeThreats || 0,
-        dodgeHold: +(a.dodgeT || 0).toFixed(3),
+        dodgeHold: +(a.dodgeT || 0).toFixed(3), kiting: !!a.kiting,
         x: +a.x.toFixed(1), y: +a.y.toFixed(1), dir: a.dir, moving: !!a.moving,
         artCd: a.artCd ? Object.assign({}, a.artCd) : null,
         skCd: a.skCd == null ? null : +a.skCd.toFixed(3)
@@ -12703,7 +12722,7 @@
       const one = a => a ? {
         id: a.id, x: +a.x.toFixed(1), y: +a.y.toFixed(1), hp: +a.hp.toFixed(1),
         threats: a.dodgeThreats || 0, dodging: !!a.dodging,
-        hold: +(a.dodgeT || 0).toFixed(3),
+        hold: +(a.dodgeT || 0).toFixed(3), kiting: !!a.kiting,
         dir: a.dodgePrev ? { x: +a.dodgePrev.x.toFixed(3), y: +a.dodgePrev.y.toFixed(3) } : null
       } : null;
       return {
@@ -12711,7 +12730,7 @@
         autoOn: !!G.autoOn, anchorUsed: false,
         dirs: DODGE_DIRS, step: DODGE_STEP, times: DODGE_T.slice(),
         near: DODGE_NEAR, nearest: DODGE_NEAREST, radius: ALLY_DODGE_R,
-        hold: ALLY_DODGE_HOLD,
+        hold: ALLY_DODGE_HOLD, kite: ALLY_KITE_WANT,
         view: { x: +G.cam.x.toFixed(1), y: +G.cam.y.toFixed(1), w: W, h: H, edge: ALLY_VIEW_EDGE }
       };
     },
@@ -12741,6 +12760,28 @@
       return G.ebullets.length;
     },
     allyClearThreats() { G.ebullets.length = 0; return 0; },
+    // 第120轮测试钩子：在 (x,y) 放一只精英怪（带 elite 标记 + 必备字段），返回其引用。
+    // 不接真实招式表，只供「遇 Boss/精英是否拉开距离」的行为断言用。
+    allySpawnElite(x, y, opts) {
+      const o = opts || {};
+      const e = {
+        _id: o.id || 990120, type: 'elite', name: o.name || '测试精英', elite: true,
+        x: x, y: y, r: o.r == null ? 16 : o.r, spd: o.spd == null ? 60 : o.spd,
+        hp: o.hp == null ? 1e9 : o.hp, maxhp: o.hp == null ? 1e9 : o.hp, dmg: 0, xpVal: 0,
+        spr: 'elite', hitFlash: 0, t: 0, dashT: 0, stunT: 0, _orbCd: {}, art: null,
+        _artCd: 0, wob: 0, _dead: false
+      };
+      G.enemies.push(e);
+      return { id: e._id, x: +e.x.toFixed(1), y: +e.y.toFixed(1), elite: !!e.elite };
+    },
+    // 第120轮测试钩子：置一个假 Boss（仅位置和半径），并打开 bossActive，供风筝断言用。
+    allySetBoss(x, y, opts) {
+      const o = opts || {};
+      G.boss = { x: x, y: y, r: o.r == null ? 26 : o.r, spd: o.spd == null ? 70 : o.spd,
+        hp: 1e9, maxhp: 1e9, dashing: 0, dashAng: 0, _dead: false, name: '测试Boss' };
+      G.bossActive = true;
+      return { x: +G.boss.x.toFixed(1), y: +G.boss.y.toFixed(1), active: G.bossActive };
+    },
     allyCastArt(id, kind) {
       const a = allyEntById(id), art = window.allyArtOf(id, kind);
       if (!a || !art) return null;

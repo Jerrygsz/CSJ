@@ -801,6 +801,109 @@ for (const c of badR119) {
   ok(e.length > 0, '注入「' + c.label + '」会被拦下', e.slice(0, 2));
 }
 
+console.log('\n【Q · 第120轮：遇 Boss / 精英怪拉开距离（风筝），普通怪照旧】');
+const kite = await page.evaluate(() => {
+  const F = window.__FR, G = F.G;
+  F.allySetDeadMap({}); F.allySetOweMap({});
+  if (!G.pet || !G.player) return null;
+  for (const a of [G.pet, G.mate]) {
+    if (!a) continue;
+    a.dead = false; a.hp = a.maxhp; a.deadT = 0; a.iv = 0;
+    a.dodgeT = 0; a.dodgePrev = null; a.dodging = false; a.dodgeThreats = 0; a.dodgeFx = 0; a.kiting = false;
+  }
+  const id = G.pet.id, v = F.allyState().view;
+  const cx = v.y + v.h / 2;
+  const left = v.x + 70, right = v.x + v.w - 50;   // 横向拉开约 360px，远大于风筝阈值
+
+  // ① 精英怪：从远处接近，应拉到「能打到的最远间距」停住，绝不贴脸
+  G.enemies.length = 0; G.ebullets.length = 0; G.bullets.length = 0;
+  G.parts.length = 0; G.texts.length = 0; G.boss = null; G.bossActive = false;
+  if (window.FX3) FX3.clear();
+  F.allySetPos(id, left, cx);
+  const el = F.allySpawnElite(right, cx, { hp: 1e9, r: 16, spd: 0 });
+  let firedBasic = false;
+  for (let i = 0; i < 60; i++) {
+    F.allyMoveTick(0.05);
+    if (G.bullets.some(b => b.pet || b.mate)) firedBasic = true;
+  }
+  const elD = Math.hypot(G.pet.x - el.x, G.pet.y - el.y);
+  const kiteState = F.allyDodgeInfo().pet;
+  F.allyClearThreats();
+
+  // ② 普通怪放同一位置：应走旧行为（靠近），不风筝
+  G.enemies.length = 0; G.bullets.length = 0;
+  F.allySetPos(id, left, cx);
+  G.enemies.push({ _id: 990121, type: 'wolf', x: right, y: cx, hp: 1e9, maxhp: 1e9,
+    r: 10, spd: 0, dmg: 0, xpVal: 0, spr: 'wolf', hitFlash: 0, t: 0, dashT: 0,
+    stunT: 0, _orbCd: {}, art: null, _artCd: 0, wob: 0, _dead: false });
+  for (let i = 0; i < 60; i++) F.allyMoveTick(0.05);
+  const normD = Math.hypot(G.pet.x - right, G.pet.y - cx);
+  F.allyClearThreats();
+
+  // ③ 真 Boss：同样应风筝
+  G.enemies.length = 0; G.bullets.length = 0;
+  F.allySetPos(id, left, cx);
+  F.allySetBoss(right, cx, { r: 26, spd: 0 });
+  for (let i = 0; i < 60; i++) F.allyMoveTick(0.05);
+  const bossD = Math.hypot(G.pet.x - G.boss.x, G.pet.y - G.boss.y);
+  const bossKiting = F.allyDodgeInfo().pet.kiting;
+  G.boss = null; G.bossActive = false; G.enemies.length = 0;
+
+  return {
+    cfg: F.allyDodgeInfo(),
+    elite: { dist: +elD.toFixed(1), kiting: !!kiteState.kiting, fired: firedBasic },
+    normal: { dist: +normD.toFixed(1) },
+    boss: { dist: +bossD.toFixed(1), kiting: !!bossKiting }
+  };
+});
+// 源码检查（gsrc 在 node 作用域，不在浏览器里）
+const qMoveSrc = gsrc.slice(gsrc.indexOf('function allyMove('), gsrc.indexOf('function castAllyArt('));
+const qSrc = {
+  hasKiteConst: /ALLY_KITE_WANT = 250/.test(gsrc),
+  bigCheck: /t === G\.boss/.test(qMoveSrc) && /\.elite/.test(qMoveSrc),
+  modeUntouched: /mode === 'melee'\s*\?\s*30\s*:\s*132/.test(qMoveSrc)
+};
+const KITE_LO = 195, KITE_HI = 295;   // 风筝间距落点带（want 250，ap=280/bf=200）
+ok(kite && kite.elite.dist >= KITE_LO && kite.elite.dist <= KITE_HI,
+  '精英怪：拉开到能打到的远距停下（不贴脸、不跑没影）', kite && kite.elite);
+ok(kite && kite.elite.kiting === true, '精英怪场景中 kiting 标记为真', kite && kite.elite.kiting);
+ok(kite && kite.elite.fired, '精英怪在远距仍打得出弹道（能攻击到）', kite && kite.elite.fired);
+ok(kite && kite.normal.dist < KITE_LO - 30, '普通怪走旧行为靠近、没被一起风筝', kite && kite.normal);
+ok(kite && kite.boss.dist >= KITE_LO && kite.boss.dist <= KITE_HI && kite.boss.kiting,
+  '真 Boss 同样被风筝', kite && kite.boss);
+ok(kite && qSrc.hasKiteConst && qSrc.bigCheck && qSrc.modeUntouched,
+  '源码：新增风筝常量 + 只对 Boss/精英判定 + 普通怪口径（30/132）未动', qSrc);
+
+function validateR120(d) {
+  const e = [];
+  if (!d.kiteRange) e.push('Boss/精英没被拉开距离（贴脸或跑没影）');
+  if (!d.firedBasic) e.push('距离够却没打出弹道');
+  if (!d.normalCloser) e.push('普通怪也被一起风筝了');
+  if (!d.bossKite) e.push('Boss 没被风筝');
+  if (d.kiteMislabeled) e.push('普通怪被误判成风筝');
+  return e;
+}
+const realR120 = {
+  kiteRange: kite && kite.elite.dist >= KITE_LO && kite.elite.dist <= KITE_HI &&
+    kite.boss.dist >= KITE_LO && kite.boss.dist <= KITE_HI,
+  firedBasic: kite && kite.elite.fired,
+  normalCloser: kite && kite.normal.dist < kite.elite.dist - 30,
+  bossKite: kite && kite.boss.kiting,
+  kiteMislabeled: false
+};
+ok(validateR120(realR120).length === 0, '真实产物通过第120轮校验器', validateR120(realR120).slice(0, 5));
+const badR120 = [
+  { label: 'Boss/精英被贴脸', d: { ...realR120, kiteRange: false } },
+  { label: '距离够却打不出弹道', d: { ...realR120, firedBasic: false } },
+  { label: '普通怪一起被风筝', d: { ...realR120, normalCloser: false } },
+  { label: 'Boss 没被风筝', d: { ...realR120, bossKite: false } },
+  { label: '普通怪误判成风筝', d: { ...realR120, kiteMislabeled: true } }
+];
+for (const c of badR120) {
+  const e = validateR120(c.d);
+  ok(e.length > 0, '注入「' + c.label + '」会被拦下', e.slice(0, 2));
+}
+
 console.log('\n===================================');
 console.log('  ' + pass + ' 通过 / ' + fail + ' 失败');
 console.log('===================================');
