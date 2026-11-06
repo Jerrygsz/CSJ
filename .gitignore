@@ -24,3 +24,20 @@ codex/batch*-evidence.md
 codex/batch*-scenes.md
 codex/batch*-facts.md
 codex/batch*-pin.md
+
+# ---- 第114轮：网页发布资产与开发资产分离 ----
+# 原著全文属版权素材，仅本地留档 D:\Games\CSJ\raw\，绝不入库（旧提交里的副本待单独清理）。
+# raw/ 下的 *_index.json 与 目录*.md 是考据索引，仍入库。
+/凡人修仙传.txt
+/凡人修仙传-仙界篇.txt
+raw/*.txt
+
+# 闸门实拍：仓库只留第111轮定的 9 张交付快照，其余一律本地留档 D:\Games\CSJ\qa\。
+# 例外规则必须写在宽规则之后才生效。
+qa/*.png
+qa/shots/*.png
+!qa/shot-skin-*.png
+!qa/shots/haz-*.png
+
+# 发布白名单产物：由 scripts/build-site.mjs 生成，每次 Actions 重建，不入库。
+_site/
