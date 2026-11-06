@@ -1,4 +1,4 @@
-// 一键回归：把常驻验收脚本一次跑完（当前九个），谁红谁绿一眼看全。
+// 一键回归：把常驻验收脚本一次跑完（当前十个），谁红谁绿一眼看全。
 //
 // 动机（第110轮）：八批下来只有 verify-scenery3 / smoke / verify-ver 是每轮必跑的，
 // 其余五个全凭记忆挑着跑，结果 verify-ink-sprite 的两条断言在第102轮 UI 柔化时就已作废、
@@ -33,6 +33,7 @@ const ITEMS = [
   { key: 'story-once', file: 'verify-story-once.mjs', kind: 'gate',   desc: '剧情只演一次（定时 / 过场 / 剧情图 / 收场 / 坊市）+ 跌境界一次性' },
   { key: 'hazards',    file: 'verify-hazards.mjs',    kind: 'gate',   desc: '48 只 Boss 补表覆盖 + 持续型招式判定' },
   { key: 'mapscenery', file: 'verify-mapscenery.mjs', kind: 'gate',   desc: '地图分得开八项（读实现真实数据，不复刻算法）' },
+  { key: 'ally-skills', file: 'verify-ally-skills.mjs', kind: 'gate',  desc: '同伴 / 灵宠技能：原著考据 + 覆盖 + 境界四档 + 六种形态实机 + 反向注入' },
 ];
 
 const argv = process.argv.slice(2);

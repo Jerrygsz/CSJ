@@ -2119,6 +2119,144 @@
     }
     return best;
   }
+  // ==========================================================================
+  // 第116轮 · 同伴 / 灵宠技能：按原著本事自动出手，只作辅助攻击
+  // --------------------------------------------------------------------------
+  // 伤害一律从 damageEnemy() 走：暴击 / 飘字 / 吸血 / Boss 二阶段 / 死亡结算
+  // 全复用主角那条统一出口。境界的成长由它内部的 dmgMul() 承担 —— 主角境界、
+  // 装备、功法、增益涨多少，随行之人的这一招就跟着涨多少，这里绝不再乘一次
+  // G.realm.dmg，否则就是双重放大。额外只叠 ALLY_SKILL_TIERS：按长期修为
+  // （save.cultivate.level）分四档，让「修为越高，同行之人出手越有分量」在洞府里看得见。
+  // ==========================================================================
+  const ALLY_KINDS = ['bolt', 'fan', 'nova', 'chain', 'chill', 'drain'];
+  // 沿用第280轮的弹体画法，只把数据表里的色值映射到已有的 vfx 键；
+  // 环 / 粒子 / 飘字直接用色值，不改 drawBulletVfx。
+  const ALLY_BOLT_VFX = {
+    '#c0352a': 'blood', '#c9a6ff': 'soul', '#e8eef5': 'sword', '#4a3252': 'shasha',
+    '#ffe98a': 'gold', '#bfe9ff': 'ice', '#9df0d0': 'qingmang', '#e8d9c0': 'seal'
+  };
+  function allySkillOf(id) { return (window.ALLY_SKILLS || {})[id] || null; }
+  function allyTierAt(lv) {
+    const tiers = window.ALLY_SKILL_TIERS || [];
+    let t = tiers[0] || { at: 0, label: '初悟', mul: 1 };
+    for (const x of tiers) { if (lv >= x.at) t = x; else break; }
+    return t;
+  }
+  function allyTier() { return allyTierAt((save.cultivate && save.cultivate.level) || 1); }
+  function allyPower(sk, lv) {
+    const L = (lv == null) ? ((save.cultivate && save.cultivate.level) || 1) : lv;
+    return (sk.pow || 10) * (allyTierAt(L).mul || 1);
+  }
+  function allyRing(x, y, rad, color, life) {
+    G.parts.push({ ring: true, x, y, r: 8, maxr: rad, life: life || 0.36, maxlife: life || 0.36, color });
+  }
+  function allySpark(x, y, color, n) {
+    const k = n || 6;
+    for (let i = 0; i < k; i++) {
+      const a = i / k * 6.283 + Math.random() * 0.4;
+      G.parts.push({
+        x, y, vx: Math.cos(a) * U.rand(70, 150), vy: Math.sin(a) * U.rand(70, 150) - 30,
+        life: 0.3, maxlife: 0.3, size: 3, color
+      });
+    }
+  }
+  function allyVictims(x, y, rad) {
+    return allEnemies().filter(e => !e._dead && U.dist(x, y, e.x, e.y) <= rad + (e.r || 0));
+  }
+  function allyNearest(x, y, maxd, maxn) {
+    return allEnemies().filter(e => !e._dead)
+      .map(e => ({ e, d: U.dist2(x, y, e.x, e.y) }))
+      .filter(o => o.d <= maxd * maxd).sort((a, b) => a.d - b.d)
+      .slice(0, maxn || 3).map(o => o.e);
+  }
+  // 联机客机：直接伤害类要跟弹幕一样上报房主，不能本地扣权威怪的血
+  function allyDamage(e, dmg) {
+    if (e._remote && G.coopRole === 'client') {
+      if (window.Coop) window.Coop.reportHit(e._id, dmg);
+      return;
+    }
+    damageEnemy(e, dmg);
+  }
+  function castAllySkill(ent, ownerId, sk, lv) {
+    if (!ent || !sk || !G.player) return null;
+    const x = ent.x, y = ent.y;
+    const dmg = allyPower(sk, lv);
+    const col = sk.vfx || '#ffe98a';
+    const kind = ALLY_KINDS.indexOf(sk.kind) >= 0 ? sk.kind : 'bolt';
+    let hit = 0, shots = 0;
+
+    if (kind === 'bolt') {
+      const t = nearestEnemyFrom(x, y, 520);
+      const a = t ? Math.atan2(t.y - y, t.x - x) : ((G.player.dir || 1) >= 0 ? 0 : Math.PI);
+      G.bullets.push({
+        x, y, vx: Math.cos(a) * 380, vy: Math.sin(a) * 380, r: 8,
+        dmg, life: 1.5, pierce: sk.pierce || 3, hit: new Set(), home: true,
+        ally: true, owner: ownerId, vfx: ALLY_BOLT_VFX[col] || 'sword'
+      });
+      shots = 1; allySpark(x, y, col, 5); Sfx.shoot();
+    } else if (kind === 'fan') {
+      const t = nearestEnemyFrom(x, y, 520);
+      const base = t ? Math.atan2(t.y - y, t.x - x) : 0;
+      const n = sk.count || 3, spread = 0.72;
+      for (let i = 0; i < n; i++) {
+        const a = base + (n === 1 ? 0 : (i / (n - 1) - 0.5) * spread);
+        G.bullets.push({
+          x, y, vx: Math.cos(a) * 330, vy: Math.sin(a) * 330, r: 6,
+          dmg: dmg / Math.max(1, n * 0.55), life: 1.3, pierce: 1, hit: new Set(),
+          home: true, ally: true, owner: ownerId, vfx: ALLY_BOLT_VFX[col] || 'sword'
+        });
+      }
+      shots = n; Sfx.shoot();
+    } else if (kind === 'nova') {
+      const rad = sk.rad || 96;
+      allyRing(x, y, rad, col, 0.42); allySpark(x, y, col, 10);
+      for (const e of allyVictims(x, y, rad)) { allyDamage(e, dmg); hit++; }
+      Sfx.nova();
+    } else if (kind === 'chain') {
+      const list = allyNearest(x, y, 520, sk.count || 3);
+      let k = 1;
+      for (const e of list) {
+        allyRing(e.x, e.y, 30 + k * 6, col, 0.3);
+        spawnHit(e.x, e.y, col);
+        allyDamage(e, dmg * Math.pow(0.82, k - 1));
+        hit++; k++;
+      }
+      if (list.length) Sfx.nova();
+    } else if (kind === 'chill') {
+      const rad = sk.rad || 96;
+      allyRing(x, y, rad, col, 0.45);
+      for (const e of allyVictims(x, y, rad)) {
+        allyDamage(e, dmg);
+        if (sk.stun) e.stunT = Math.max(e.stunT || 0, sk.stun);
+        hit++;
+      }
+      Sfx.nova();
+    } else if (kind === 'drain') {
+      const rad = sk.rad || 92;
+      allyRing(x, y, rad, col, 0.42);
+      let total = 0;
+      for (const e of allyVictims(x, y, rad)) { allyDamage(e, dmg); total += dmg; hit++; }
+      if (total > 0 && G.player.hp > 0 && sk.leech) {
+        G.player.hp = Math.min(G.player.maxhp, G.player.hp + total * dmgMul() * sk.leech);
+      }
+      Sfx.buff();
+    }
+    // 技能名飘一下：谁出的手、出的哪一招，屏上看得见；纸底用深墨，别用亮色糊成一片
+    spawnText(x, y - 26, sk.name, save.skin === 'guigu' ? '#6b2a20' : col, 12);
+    return { name: sk.name, kind, dmg: +dmg.toFixed(2), shots, hit, cd: sk.cd };
+  }
+  // 独立于普攻的冷却。普攻那两处 early return 不能挡住技能计时。
+  function tickAllySkill(ent, ownerId, dt) {
+    const sk = allySkillOf(ownerId);
+    if (!sk) return;
+    if (ent.skCd == null) ent.skCd = (sk.cd || 8) * 0.5;   // 进图先蓄半程，别一开打就齐放
+    ent.skCd -= dt;
+    if (ent.skCd > 0) return;
+    if (!nearestEnemyFrom(ent.x, ent.y, 520)) { ent.skCd = 0.3; return; }
+    castAllySkill(ent, ownerId, sk);
+    ent.skCd = sk.cd || 8;
+  }
+
   function updatePet(dt) {
     if (!G.pet || !G.player) return;
     const def = petDef(); if (!def) return;
@@ -2133,6 +2271,7 @@
     pt.y += (ty - pt.y) * Math.min(1, dt * 6.5);
     pt.bob = (pt.bob || 0) + dt;
     if (G.state !== 'play') return;
+    tickAllySkill(pt, def.id, dt);   // 第116轮：技能独立冷却，别被普攻那句 early return 挡住
     pt.cd -= dt;
     if (pt.cd > 0) return;
     const t = nearestEnemyFrom(pt.x, pt.y, 430);
@@ -2294,6 +2433,7 @@
     mt.y += (ty - mt.y) * Math.min(1, dt * 6);
     mt.bob = (mt.bob || 0) + dt;
     if (G.state !== 'play') return;
+    tickAllySkill(mt, def.id, dt);   // 第116轮：同伴与灵宠同一套技能冷却
     mt.cd -= dt;
     if (mt.cd > 0) return;
     const t = nearestEnemyFrom(mt.x, mt.y, 470);
@@ -9472,8 +9612,10 @@
         '<div class="cs-empty">还没有灵宠。<br>有些是路上捡的卵孵的，有些是打出来的 —— 遇到了才有的带。</div></div>';
       return html;
     }
+    const ti = allyTier();
     html += '<div class="cave-sec"><div class="cs-title">灵宠</div>' +
-      '<div class="cs-note">带一只出门。它跟在后头，自己会出手，打得不重但不停。喂得勤，长得快。</div>';
+      '<div class="cs-note">带一只出门。它跟在后头，自己会出手，打得不重但不停。喂得勤，长得快。<br>' +
+      '各有一样看家本事，隔一阵自己使一回；威力跟着你的修为走 —— 眼下 <b>' + ti.label + '</b>（威势 ×' + ti.mul.toFixed(2) + '），' + ti.note + '。</div>';
     for (const e of owned) {
       const id = e.id;
       const p = petDefOf(id);
@@ -9482,9 +9624,11 @@
       const need = petXpNeed(e.lv || 1);
       const dmgUp = Math.round((petDmgMul(id) - 1) * 100);
       const catLabel = { pet: '灵宠', puppet: '傀儡', spirit: '器灵', avatar: '化身' }[p.cat] || '灵宠';
+      const ask = allySkillOf(id);
       html += '<div class="recrow' + (on ? ' can' : '') + '">' +
         '<div class="rr-main"><b>' + ico(p.icon || '🐾') + p.name + '　第 ' + (e.lv || 1) + ' 阶' + (on ? ' · 随行' : '') + '　<span class="pet-cat">' + catLabel + '</span></b>' +
-        '<em>' + p.desc + '　（' + p.from + '）　威势 +' + dmgUp + '%　修为 ' + Math.floor(e.xp || 0) + ' / ' + need + '</em></div>' +
+        '<em>' + p.desc + '　（' + p.from + '）　威势 +' + dmgUp + '%　修为 ' + Math.floor(e.xp || 0) + ' / ' + need + '</em>' +
+        (ask ? '<em>【' + ask.name + ' · ' + ask.cd + '秒】' + ask.desc + '</em>' : '') + '</div>' +
         '<div class="rr-right">' +
         '<button class="sr-btn' + (on ? ' ghost' : ' buy') + '" data-pet="' + id + '">' + (on ? '收回' : '放出') + '</button> ' +
         '<button class="sr-btn ghost" data-release="' + id + '">放生</button></div></div>';
@@ -9495,8 +9639,10 @@
 
   function renderCaveMate(lv) {
     const owned = save.mates || [];
+    const ti = allyTier();
     let html = '<div class="cave-sec"><div class="cs-title">同伴</div>' +
-      '<div class="cs-note">按剧情出现的人。带一个出门，他站你另一侧，出手比灵宠重，也比灵宠慢。</div>';
+      '<div class="cs-note">按剧情出现的人。带一个出门，他站你另一侧，出手比灵宠重，也比灵宠慢。<br>' +
+      '也各有一门原著里的本事，自己掐着时候使；眼下 <b>' + ti.label + '</b>（威势 ×' + ti.mul.toFixed(2) + '）。</div>';
     // 厉飞雨·双身份化名系统（P0-1）：七玄门篇章后解锁，不进队伍、不参战
     if (save.liUnlocked) {
       const faded = G.player && G.player.level >= (lifCfg().fadeRealm || 112);
@@ -9517,9 +9663,11 @@
       if (!m) continue;
       const on = save.mate === id;
       const perk = m.perkText || (m.perk && m.perk.label) || '';
+      const msk = allySkillOf(id);
       html += '<div class="recrow' + (on ? ' can' : '') + '">' +
         '<div class="rr-main"><b>' + ico(m.icon || '🙂') + m.name + (on ? ' · 同行' : '') + '</b>' +
-        '<em>' + m.desc + (perk ? '　【' + perk + '】' : '') + '　（' + m.from + '）</em></div>' +
+        '<em>' + m.desc + (perk ? '　【' + perk + '】' : '') + '　（' + m.from + '）</em>' +
+        (msk ? '<em>【' + msk.name + ' · ' + msk.cd + '秒】' + msk.desc + '</em>' : '') + '</div>' +
         '<div class="rr-right"><button class="sr-btn' + (on ? ' ghost' : ' buy') + '" data-mate="' + id + '">' +
         (on ? '暂别' : '同行') + '</button></div></div>';
     }
@@ -11769,6 +11917,42 @@
         unlocked: save.unlocked.slice(), cleared: save.cleared.slice(),
         sideOpen: save.unlocked.filter(id => { const m = MAPS.find(x => x.id === id); return m && m.side; }).length
       };
+    },
+    // 第116轮 · 同伴 / 灵宠技能探针（verify-ally-skills 用）
+    allySkills() {
+      const ti = allyTier();
+      const list = Object.keys(window.ALLY_SKILLS || {}).map(id => {
+        const sk = window.ALLY_SKILLS[id];
+        const d = (window.PETS || []).find(p => p.id === id) || (window.MATES || []).find(m => m.id === id);
+        return {
+          id, owner: d ? d.name : id, name: sk.name, kind: sk.kind, pow: sk.pow, cd: sk.cd,
+          rad: sk.rad || 0, count: sk.count || 0, stun: sk.stun || 0, leech: sk.leech || 0,
+          power: +allyPower(sk).toFixed(3), desc: sk.desc, canon: sk.canon, vfx: sk.vfx
+        };
+      });
+      return {
+        tier: { label: ti.label, mul: ti.mul, at: ti.at },
+        level: (save.cultivate && save.cultivate.level) || 1,
+        realmMul: +(1 + (G.realm.dmg || 0)).toFixed(2),
+        tiers: (window.ALLY_SKILL_TIERS || []).map(t => ({ at: t.at, label: t.label, mul: t.mul })),
+        list
+      };
+    },
+    allySkillPower(id, lv) { const sk = allySkillOf(id); return sk ? +allyPower(sk, lv).toFixed(4) : null; },
+    allySkillCast(id, lv) {
+      const sk = allySkillOf(id); if (!sk || !G.player) return null;
+      const ent = (G.pet && G.pet.id === id) ? G.pet : (G.mate && G.mate.id === id) ? G.mate
+        : { id, x: G.player.x, y: G.player.y };
+      const r = castAllySkill(ent, id, sk, lv);
+      return r ? Object.assign({}, r, { bullets: G.bullets.length, parts: G.parts.length }) : null;
+    },
+    allySkillCd(id) {
+      const e = (G.pet && G.pet.id === id) ? G.pet : (G.mate && G.mate.id === id) ? G.mate : null;
+      return e ? (e.skCd == null ? null : +e.skCd.toFixed(3)) : null;
+    },
+    allySkillSetCd(id, v) {
+      const e = (G.pet && G.pet.id === id) ? G.pet : (G.mate && G.mate.id === id) ? G.mate : null;
+      if (!e) return null; e.skCd = v; return +e.skCd.toFixed(3);
     },
     worldmap() { openWorldMap(); return 'map'; },
     toTitle() {

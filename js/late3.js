@@ -286,5 +286,117 @@
 
   // 前三部的老规矩：往表里推完东西，要把总表重新拼一次，
   // 否则 Items.get 认不出新加的灵兽袋与兽卵（它查的是 ALL_ITEMS 这一份快照）
+  // ========================= 六(2)、同伴 / 灵宠技能（第116轮） =========================
+  // 每个跟在身边的人与兽各有一门看家本事，按独立冷却自动出手，只作辅助攻击。
+  //
+  // 两条硬规矩：
+  //   ① 技能名必须原著可查 —— 逐条核验见 canon/ally-skills.md（词频 / 摘句 / 出处 / 关联强度）。
+  //      不自造「XX斩 / XX爆 / XX诀（原著无）」；借用通用词或体质名的，台账里都标了 borrowed。
+  //   ② 威力不另写一条等级曲线 —— 伤害统一从 damageEnemy() 出，它内部的 dmgMul()
+  //      已经把主角境界、装备、功法、增益一起算进去了。这里只叠「长期修为」档位
+  //      （ALLY_SKILL_TIERS），避免把战内境界又乘一遍变成双重放大。
+  //
+  // kind：bolt 单体重弹 | fan 扇形多弹 | nova 身周爆发 | chain 多目标 | chill 范围+定身 | drain 范围+回补
+  // pow：基础威力（进 damageEnemy 前的值）；cd：独立冷却秒；rad：范围；count：弹数 / 目标数
+  window.ALLY_SKILL_TIERS = [
+    { at: 0,   label: '初悟', mul: 1.00, note: '刚跟着，本事还收着' },
+    { at: 36,  label: '精进', mul: 1.30, note: '筑基之后，出手有了分量' },
+    { at: 112, label: '圆熟', mul: 1.60, note: '化神之后，神通渐成' },
+    { at: 260, label: '通玄', mul: 1.95, note: '大乘之后，一招便是一片' }
+  ];
+  window.ALLY_SKILLS = {
+    // ---- 同伴 ----
+    'm_nangongwan': {
+      name: '轮回神光', kind: 'nova', pow: 26, cd: 9.0, rad: 108, vfx: '#c0352a',
+      desc: '赤红光晕如佛光流转，罩住身周一片。这一招她轻易不肯动用。',
+      canon: { term: '轮回神光', n: 8, link: 'direct', src: '人界篇·第七百一十八章 凝光宝镜与轮回神光',
+        quote: '轮回神光！南宫师妹，你真想拼命不成！竟敢动用此神通！' }
+    },
+    'm_yuanyao': {
+      name: '还魂术', kind: 'drain', pow: 18, cd: 10.5, rad: 92, leech: 0.35, vfx: '#c9a6ff',
+      desc: '以魂力续命之术。伤敌之余，把散掉的生气收回几分给同行之人。',
+      canon: { term: '还魂术', n: 21, link: 'ability', src: '人界篇·第五百六十六章 还魂术',
+        quote: '也可以使用还魂术让师姐重新拥有肉身了',
+        note: '原著中此术是令魂魄重塑肉身，非攻击招式；此处取「魂力回补」之意作辅助攻击，已在台账标明。' }
+    },
+    'm_dayanshenjun': {
+      name: '大衍诀', kind: 'chain', pow: 20, cd: 8.0, count: 3, vfx: '#e8eef5',
+      desc: '一缕神念分作数道，同时落在几个敌人身上。大衍诀本来就是炼神识的。',
+      canon: { term: '大衍诀', n: 202, link: 'direct', src: '人界篇·极西之地千竹教段',
+        quote: '千竹教的创教始祖，大衍诀的创立之人，当年的大衍神君' }
+    },
+    // ---- 灵宠 ----
+    'p_tihun': {
+      name: '摄魂神光', kind: 'chill', pow: 20, cd: 9.5, rad: 100, stun: 0.45, vfx: '#4a3252',
+      desc: '一道青霞罩过去，鬼物在光里动弹不得。',
+      canon: { term: '摄魂神光', n: 6, link: 'direct', src: '人界篇·阴冥之地无相鬼王段',
+        quote: '啼魂的摄魂神光，竟然面对鬼物时失效了' }
+    },
+    'p_shijin': {
+      name: '虫云', kind: 'fan', pow: 12, cd: 7.0, count: 5, vfx: '#ffe98a',
+      desc: '一窝金虫散成一片小云，扑上去连法宝都咬。',
+      canon: { term: '虫云', n: 168, link: 'direct', src: '人界篇·第四百二十一章 封灵柱',
+        quote: '巨大的虫云瞬间就彻底淹没了它们' }
+    },
+    'p_liuyi': {
+      name: '冰封', kind: 'chill', pow: 16, cd: 9.0, rad: 96, stun: 0.50, vfx: '#bfe9ff',
+      desc: '雪白冰霜一口喷出，近身者立时被寒气封住。',
+      canon: { term: '冰封', n: 164, link: 'direct', src: '人界篇·六翼霜蚣喷涂寒气段',
+        quote: '立刻被寒气冰封了起来，化为一块白花花的冰雕' }
+    },
+    'p_yinyue': {
+      name: '七星月体', kind: 'bolt', pow: 30, cd: 10.0, pierce: 4, vfx: '#e8eef5',
+      desc: '月体一醒，一记银光直贯过去，比平日沉得多。',
+      canon: { term: '七星月体', n: 14, link: 'ability', src: '人界篇·第一千九百七十章 银月与七星月体',
+        quote: '七星月体意外的觉醒了，倒因祸得福了',
+        note: '原著为觉醒体质之名，非独立招式；此处以「觉醒一击」作技能名，已在台账标明。' }
+    },
+    'p_kui': {
+      name: '傀儡术', kind: 'fan', pow: 15, cd: 8.5, count: 3, vfx: '#9df0d0',
+      desc: '傀儡不会累，也不会躲，几道法诀同时打出去。',
+      canon: { term: '傀儡术', n: 89, link: 'direct', src: '人界篇·大衍神君自述段',
+        quote: '但若是我一开始不分心傀儡术，自创什么功法的话' }
+    },
+    'p_bingfeng': {
+      name: '寒焰', kind: 'nova', pow: 24, cd: 9.5, rad: 112, vfx: '#bfe9ff',
+      desc: '白濛濛的寒焰裹住周身，沾着一点连元婴都要被炼化。',
+      canon: { term: '寒焰', n: 172, link: 'direct', src: '人界篇·小极宫冰海段',
+        quote: '正有一只体形超过十丈，通体洁白无暇的冰凤，浑身被一层白濛濛寒焰包裹着' }
+    },
+    'p_xueyu': {
+      name: '蛛网', kind: 'chill', pow: 14, cd: 8.0, rad: 88, stun: 0.55, vfx: '#e8d9c0',
+      desc: '两道白液出口成网，粘上了就别想痛快挪步。',
+      canon: { term: '蛛网', n: 75, link: 'direct', src: '人界篇·虚天殿血玉蜘蛛段',
+        quote: '两道白花花的液体从白蜘蛛的口中喷出，并在半空中就化为了两张直径过丈的蛛网' }
+    },
+    'p_yunchi': {
+      name: '风刃', kind: 'fan', pow: 11, cd: 6.5, count: 3, vfx: '#9df0d0',
+      desc: '飞得比强弓利箭还快，掠过时带起几道风刃。',
+      canon: { term: '风刃', n: 191, link: 'borrowed', src: '人界篇·太南小会风系法术段',
+        quote: '十几道半月形的青色风刃，争先恐后的从旗尖上窜出',
+        note: '原著云翅鸟只作监视、不参战；此处取「疾飞如利箭」之意，借原著通用风系法术名，非其自有招式。' }
+    },
+    'p_mojiao': {
+      name: '黑水', kind: 'bolt', pow: 22, cd: 8.5, pierce: 3, vfx: '#4a3252',
+      desc: '一口黑色水柱直扑过来，沾上就是一片溃烂。',
+      canon: { term: '黑水', n: 64, link: 'direct', src: '人界篇·血色禁地墨蛟段',
+        quote: '这些黑水的威力就如此的可怕，那些更歹毒的紫液岂不可怕的更加离谱了' }
+    },
+    'p_shijinwang': {
+      name: '虫云', kind: 'nova', pow: 26, cd: 10.0, rad: 118, vfx: '#ffe98a',
+      desc: '数千成熟体育出的虫王，一散开便是遮天一片。',
+      canon: { term: '虫云', n: 168, link: 'direct', src: '人界篇·第四百二十一章 封灵柱',
+        quote: '只见远处的空中，不知何时出现了长达数十丈的巨大虫云',
+        note: '与噬金虫同名（原著同为虫云），但虫王是范围爆发，不是散弹；技能 id 各自独立。' }
+    },
+    'p_xiedaoren': {
+      name: '神雷', kind: 'chain', pow: 28, cd: 10.5, count: 3, vfx: '#ffe98a',
+      desc: '雷海里带出来的本事，几道金雷接连落下。',
+      canon: { term: '神雷', n: 652, link: 'borrowed', src: '人界篇·雷法通用段 / 仙界篇·蟹道人出自雷海',
+        quote: '此獠又要使用水罡神雷了，古兄快加速啊',
+        note: '「神雷」是原著雷法通用词，非蟹道人专属招式名；蟹道人出自雷海，故配雷法，已在台账标明。' }
+    }
+  };
+
   window.ALL_ITEMS = window.ITEMS.concat(window.MATERIALS);
 })();
