@@ -75,4 +75,13 @@ if (t) {
 
 ## 六、发布
 
-版本 `20261107A`：`index.html` **31 处**版本串（30 个 `?v=` + `<div id="ver">`）与 `sw.js BUILD` 一次改齐（第118轮被 `scenery3` 逮住过漏改静态串）。提交后 SSH 推送，按第118轮教训逐环节验证：`Publish whitelist site to gh-pages` → `gh-pages` 产物 → `pages build and deployment` 的 `conclusion` → 站点实际返回。
+版本 `20261107A`：`index.html` **31 处**版本串（30 个 `?v=` + `<div id="ver">`）与 `sw.js BUILD` 一次改齐（第118轮被 `scenery3` 逮住过漏改静态串）。提交 `2c70c2e` 后 SSH 推送，按第118轮教训逐环节验证：
+
+| 环节 | 结果 |
+| --- | --- |
+| `Publish whitelist site to gh-pages`（head `2c70c2e`） | `completed / success` |
+| `gh-pages` 产物版本串 | 唯一 `20261107A`，30 个 `?v=` |
+| `pages build and deployment`（commit `77f834f`） | 第一次 `completed / failure`（Page build failed，部署服务侧，与第119轮同类）；用 `POST /repos/Jerrygsz/CSJ/pages/builds` 请求全新构建后 `completed / success` |
+| 站点实际返回（无破缓存参数） | `<div id="ver">v20261107A</div>`、`sw.js BUILD='20261107A'`、全页版本串唯一 `A`、30 处 `?v=` 全对 |
+
+**排障经验（第119/120轮两次复现）**：白名单构建成功 ≠ 站点已更新。GitHub Pages 的 `pages build and deployment` 偶尔会在 `building` 阶段 `Page build failed.` 卡死；此时 `gh-pages` 产物其实已正确（仍是目标版本），只需用带凭据的 `POST /repos/.../pages/builds` 触发一次全新构建即可落地，不要改任何代码或重跑失败 job（重跑复用已取消的 deployment 毫无作用）。
