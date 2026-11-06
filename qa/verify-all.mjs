@@ -32,7 +32,7 @@ const ITEMS = [
   { key: 'ink-sprite', file: 'verify-ink-sprite.mjs', kind: 'gate',   desc: '水墨精灵 / 快捷栏 / 血条笔道' },
   { key: 'story-once', file: 'verify-story-once.mjs', kind: 'gate',   desc: '剧情只演一次（定时 / 过场 / 剧情图 / 收场 / 坊市）+ 跌境界一次性' },
   { key: 'hazards',    file: 'verify-hazards.mjs',    kind: 'gate',   desc: '48 只 Boss 补表覆盖 + 持续型招式判定' },
-  { key: 'mapscenery', file: 'verify-mapscenery.mjs', kind: 'metric', desc: '地图分得开的四项度量（只报数不判定）' },
+  { key: 'mapscenery', file: 'verify-mapscenery.mjs', kind: 'gate',   desc: '地图分得开八项（读实现真实数据，不复刻算法）' },
 ];
 
 const argv = process.argv.slice(2);

@@ -1479,11 +1479,33 @@
   // 2) 金皮相邻明度差：相邻主线图 bg.base 明度差 <18 时，把后一张沿 hue 等比推到 ≥18，
   //    钳在暗部带（保留金皮深色基调，不越 0.42 阈值以免墨皮误判）。零差必清。
   // 两者都在全量回填之后运行，m.bg 已就绪。
+  //
+  // ★ 篇章衔接必须在这里（算推进序之前）赋值：下面按 next 链走主线，
+  //   若把 xianjie 的 next 留在补丁之后，链会在这里断掉，仙界篇 34 张
+  //   （linghuan…feiyu）全部落进「支线」分支取同一个墨档 —— 换图时画面
+  //   几乎不变，但没有任何一层会报错。第113轮实测屏幕平均亮度差只有 0.3~0.8。
+  // 前传终点接上仙界篇：飞升仙界之后不是结束，是跌落
+  const xj = window.MAPS.find(x => x.id === 'xianjie');
+  if (xj) {
+    xj.next = 'linghuan';
+    xj.clearTitle = '飞升';
+    xj.clearDesc = '门开了。他一脚迈过去，脚下不是仙界——是灵寰界的一片荒地。他连自己是谁，都还没记起来。';
+  }
+
   (function () {
     const byId = new Map(window.MAPS.map(m => [m.id, m]));
     const root = window.MAPS.find(m => !m.side && !m.unlock);
     const spine = []; const seen = new Set(); let cur = root;
     while (cur && !seen.has(cur.id)) { seen.add(cur.id); spine.push(cur); cur = cur.next ? byId.get(cur.next) : null; }
+    // 链完整性兜底：next 链若中途断开（篇章衔接漏赋值、或以后新增篇章没接上），
+    // 剩余主线图会全被当成「支线」取同一个墨档 —— 整段几十张同色且全程静默。
+    // 宁可顺序粗略，不可静默同档：按 MAPS 主线顺序把漏网的补到链尾。
+    {
+      const mainTotal = window.MAPS.filter(m => !m.side).length;
+      if (spine.length < mainTotal) {
+        for (const m of window.MAPS) if (!m.side && !seen.has(m.id)) { seen.add(m.id); spine.push(m); }
+      }
+    }
     const N = Math.max(1, spine.length - 1);
 
     // 水墨皮 7 档同色系纸/墨（暖中性，不偏色相）
@@ -1501,7 +1523,17 @@
       const ripple = (idx % 2 === 0) ? 0.5 : -0.5;
       return PALETTE[Math.floor(Math.max(0, Math.min(6, 0.5 + frac * 5.5 + ripple)))];
     };
-    spine.forEach((m, i) => { m.inkBg = toneOf(i / N, i); });
+    // 相邻必差一档：下面 ripple（±0.5）只是让斜坡有呼吸感，靠它去「保证」相邻不同档并不可靠 ——
+    // u±0.5 一旦双双落进同一个整数区间，前后两张就是同一个墨色（第113轮实测 147 对里有 3 对：
+    // yinming→bianhai / moban→huangquan / diyi→huimoyuan）。这里直接对结果去重：
+    // 与链上前一张同档就往上挪一档，已到最沉一档则往下挪。
+    spine.forEach((m, i) => {
+      let t = Math.floor(Math.max(0, Math.min(6, 0.5 + (i / N) * 5.5 + ((i % 2 === 0) ? 0.5 : -0.5))));
+      if (i > 0 && spine[i - 1].inkBg && PALETTE[t].base === spine[i - 1].inkBg.base) {
+        t = (t < 6) ? t + 1 : t - 1;
+      }
+      m.inkBg = PALETTE[t];
+    });
 
     // 支线图：取所属篇章在主线中出现位置的色调
     const arcOrder = []; const arcSeen = new Set();
@@ -1528,22 +1560,18 @@
       if (!p.bg || !q.bg) continue;
       const y0 = lumY(p.bg.base), y1 = lumY(q.bg.base);
       if (Math.abs(y1 - y0) < 18) {
-        // 朝远离前一张的方向推 18，落点钳在暗部带；方向与全局「越往后越沉」一致（偏暗）
-        const target = clampY(y0 + (y1 >= y0 ? 18 : -18));
+        // 目标差取 19 而不是 18：hexOf 是 8bit 量化，按 18 推的实际会落到 17.0~17.99，
+        // 逐对都差一口气 —— 第113轮实测 41/147 对卡在这个区间，通过率被压到 47.6%。
+        // 撞到钳位带边缘时朝反方向推：暗部段连续好几张都贴着 22 的下界，单向往暗推谁都推不动。
+        const dir = (y1 >= y0) ? 1 : -1;
+        let target = clampY(y0 + dir * 19);
+        if (Math.abs(target - y0) < 18.5) target = clampY(y0 - dir * 19);
         const newBase = shiftY(q.bg.base, target);
         q.bg = { base: newBase, a: shiftY(q.bg.a || newBase, target), b: shiftY(q.bg.b || newBase, target) };
       }
     }
     window.__SCENERY_DONE = true;
   })();
-
-  // 前传终点接上仙界篇：飞升仙界之后不是结束，是跌落
-  const xj = window.MAPS.find(x => x.id === 'xianjie');
-  if (xj) {
-    xj.next = 'linghuan';
-    xj.clearTitle = '飞升';
-    xj.clearDesc = '门开了。他一脚迈过去，脚下不是仙界——是灵寰界的一片荒地。他连自己是谁，都还没记起来。';
-  }
 
   // ========================= 七(2)、仙界坊市「帝江坊」货架 =========================
   // 后传的坊市与前传不同：这里卖的是「法则之物」与魔族特有的灵材丹药，

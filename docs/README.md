@@ -4,7 +4,7 @@
 
 ## 1. 核心回归测试（无需浏览器/服务器）
 
-- **`verify-all.mjs`** — **一键跑完全部常驻验收（当前九个）**（第110轮新增）。自动起 8123 静态服务，
+- **`verify-all.mjs`** — **一键跑完全部常驻验收（当前九个，九个都是闸门）**（第110轮新增）。自动起 8123 静态服务，
   依次跑 scenery3 / smoke / ver / skin / mapdeck / ink-sprite / story-once / hazards / mapscenery，
   按退出码汇总，任一闸门红即非零退出。**改完任何东西先跑这个。**
   ```
@@ -33,6 +33,16 @@
   破境图「料没齐」的中性提示不记账。自己起静态服务（9096），不依赖外部端口。
   ```
   node qa/verify-story-once.mjs
+  ```
+- **`verify-mapscenery.mjs`** — 地图「分得开」八项，**第113轮由 metric 升为 gate**：
+  `spineGap`（主线图是否全在推进链上）/ `inkDistinct` / `inkAdjDiff` / `inkAdjSame` /
+  `jinAdjZero` / `jinAdjPass` / `decorTypes`。
+  **只读 `js/xianjie.js` 写进 `MAPS` 的真实字段，不复刻算法**——上一版自带一份 `guiguTierNew(i,N)`
+  模拟墨阶，报 98% 达标，而同期的 `m.inkBg` 里仙界篇 34 张（`linghuan…feiyu`）全是同一个 `#c5bca8`。
+  同理 `decorTypes` 改量 `MAP_CODEX[id].decor`（12 种），不再量已被 sc3 取代的 `decorScheme`（3 种）。
+  离线跑，不启浏览器，约 0.1s。
+  ```
+  node qa/verify-mapscenery.mjs
   ```
 - **`verify-quickfix.mjs`** — 真实浏览器验证「洞府内战斗快捷栏装配 / 功法运起」点击修复。需本机 Chrome + Playwright。
   ```
