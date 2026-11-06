@@ -937,13 +937,14 @@ body.rot #ver { visibility: hidden; }
 .bpip { display: flex; align-items: center; gap: var(--sp-1); padding: 0 8px; border-radius: var(--r-pill); background: rgba(10,12,18,0.76); border: 1px solid rgba(255,210,74,0.45); font-size: var(--fs-micro); color: var(--accent-soft); }
 .bpip span { font-style: normal; }
 .bpip b { font-weight: 700; font-variant-numeric: tabular-nums; }
-/* 水墨皮：深色玻璃金边胶囊在宣纸上像贴错的贴纸 → 翻成纸签墨线，与地图卡同语汇 */
+/* 第115轮：不显数字，退成半透明淡墨小印。取值与同一层 UI（sc3-paper 下的 .qb 快捷钮）
+   完全一致——纸底 0.30 / 墨线 0.18 / 柔角 10px / 无投影，让增益签和画面是一套东西。 */
 body[data-skin="guigu"] .bpip {
-  background: rgba(244,239,224,0.86); border: 1px solid rgba(58,53,44,0.42);
-  border-radius: 2px; color: #332f28;
+  background: rgba(244,239,224,0.30); border: 1px solid rgba(58,53,44,0.18);
+  border-radius: 10px; box-shadow: none; color: rgba(58,53,44,0.62);
 }
-body[data-skin="guigu"] .bpip b { color: #8f2f24; font-weight: 500; }
-body[data-skin="guigu"] .bpip span { filter: grayscale(1) sepia(0.22) contrast(0.92); opacity: .85; }
+body[data-skin="guigu"] .bpip b { color: inherit; font-weight: 400; }
+body[data-skin="guigu"] .bpip span { filter: grayscale(1) sepia(0.22) contrast(0.92); opacity: .55; }
 
 /* ---------- 双人联机面板 ---------- */
 .coop-body { display: flex; flex-direction: column; gap: var(--sp-3); }

@@ -901,7 +901,9 @@
       if (G.buffs[i].t <= 0) G.buffs.splice(i, 1);
     }
     // 秒数变了才重绘，别每帧都动 DOM
-    const sig = G.buffs.map(b => b.name + b.stat + Math.ceil(b.t)).join('|');
+    // 第115轮：签面不再显秒数，不必每秒重建 DOM；但仍要认「到期」这个变化，
+    // 否则 buff 归零后签会残留在屏上。用 t>0 的布尔代替秒数参与签名。
+    const sig = G.buffs.map(b => b.name + b.stat + (b.t > 0 ? '1' : '0')).join('|');
     if (sig !== G._buffSig) { G._buffSig = sig; renderBuffs(); }
   }
   function renderBuffs() {
@@ -912,7 +914,8 @@
     elBuffrow.innerHTML = bs.map(b => {
       const nm = { dmg: '伤', spd: '速', crit: '暴', armor: '御', regen: '回', pickup: '拾', xpMul: '修', atkSpd: '急', drop: '落' }[b.stat] || '益';
       const amt = b.stat === 'drop' ? ('+' + b.amount) : ('+' + Math.round(b.amount * 100) + '%');
-      return '<div class="bpip" title="' + b.name + '　' + nm + amt + '"><span>' + (b.icon || '✨') + '</span><b>' + nm + ' ' + Math.ceil(b.t) + 's</b></div>';
+      // 秒数只留在 title 里（桌面可查），签面只留图标 + 一个单字，不显数字
+      return '<div class="bpip" title="' + b.name + '　' + nm + amt + '　剩余 ' + Math.ceil(b.t) + ' 秒"><span>' + (b.icon || '✨') + '</span><b>' + nm + '</b></div>';
     }).join('');
   }
   function curDiff() { return G.diff || DIFFICULTIES[0]; }
