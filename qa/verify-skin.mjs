@@ -45,6 +45,19 @@ await page.evaluate(() => { window.__FR.enterMap('qixuan'); });
 await page.evaluate(() => { window.__FR.G.state = 'play'; window.__FR.skipStory(); window.__FR.muteStory(true); });
 await page.evaluate(() => { window.__FR.skin('guigu'); });
 await page.waitForTimeout(400);
+// 第115轮：增益签归位。#buffrow 原是 #hud 里唯一的 static 子元素，从 y=0 起排，
+// 与 absolute 的 #topbar 撞在一起、直接盖住生命条；现移进 topbar 末尾。这条守住「不再重叠」。
+const buffLayout = await page.evaluate(() => {
+  const br = document.getElementById('buffrow');
+  br.style.display = 'flex';
+  if (!br.children.length) br.innerHTML = '<div class="bpip"><span>✦</span><b>伤 12s</b></div>';
+  const a = br.getBoundingClientRect(), h = document.getElementById('hpwrap').getBoundingClientRect();
+  return { parent: br.parentElement.id, buffTop: Math.round(a.top), buffBottom: Math.round(a.bottom),
+           hpTop: Math.round(h.top), hpBottom: Math.round(h.bottom) };
+});
+ok(buffLayout.parent === 'topbar' && buffLayout.buffTop >= buffLayout.hpBottom,
+   '增益签归位到 topbar 末尾，不再压住生命条', buffLayout);
+await page.evaluate(() => { const br = document.getElementById('buffrow'); br.innerHTML = ''; br.style.display = 'none'; });
 m = await page.evaluate(() => ({
   skin: window.__FR.skin(), ds: document.body.dataset.skin,
   panelBg: getComputedStyle(document.querySelector('.panel') || document.body).backgroundColor,

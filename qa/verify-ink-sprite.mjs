@@ -124,16 +124,33 @@ const qbR = parseFloat(qb.radius);
 ok(qbR >= 3 && qbR <= 12, '快捷栏是柔角小印（3~12px，既非全圆盘也非硬直角）', qb);
 ok(qb.lum > 200 || /rgb\(2[0-9]{2}/.test(qb.bg), '快捷栏底翻宣纸（不再是深色玻璃）', qb);
 
-// ---------- 4) 血条：纸签墨条 ----------
+// ---------- 4) 血条：朱砂红相 + 柔化半透 + 两端飞白 ----------
+// 第102轮「淡墨飞白」把血条洗成暖灰 (122,98,82)；第115轮 Jerry 要求「还是要些血红色」，
+// 回朱砂 (178,58,44)。旧断言 chroma ≤ 60 就此作废，但不改成「什么都行」：
+//   ① 红相：每个色标 R 都明显高于 G/B（挡回灰褐、挡回绿红渐变）；
+//   ② 半透：alpha 不回到 1（挡回不透明胶囊色块，保住宣纸的通透）；
+//   ③ 两端飞白 mask（下面那条，沿用不变）。
+const grab = (bg) => [...bg.matchAll(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/g)]
+  .map(m => ({ rgb: [+m[1], +m[2], +m[3]], a: m[4] === undefined ? 1 : +m[4] }));
 const hp = await page.evaluate(() => getComputedStyle(document.getElementById('hpfill')).backgroundImage);
-// 第102轮起血条由朱砂改「低饱和淡墨飞白」。原先断言写死 178,58,44 这个朱砂色值，
-// 那条在第102轮就已作废、却一直没人重跑本脚本。这里改守灰阶纪律本身，判据沿用
-// 第108轮像素审计的口径：chroma > 60 才算「高饱和彩色」。现值 (122,98,82) → chroma 40；
-// 老朱砂 (178,58,44) → chroma 134，一眼可辨。
-const hpTriples = [...hp.matchAll(/rgba?\((\d+),\s*(\d+),\s*(\d+)/g)].map(m => [+m[1], +m[2], +m[3]]);
-const hpChroma = hpTriples.length ? Math.max(...hpTriples.map(t => Math.max(...t) - Math.min(...t))) : 999;
-ok(hpTriples.length > 0 && hpChroma <= 60,
-   '气血条是淡墨飞白（chroma ≤ 60，低饱和暖灰，不再是高饱和朱砂 / 绿红渐变）', { hp, hpChroma, stops: hpTriples.length });
+const hpStops = grab(hp);
+const hpRedLead = hpStops.length > 0 && hpStops.every(s => s.rgb[0] - Math.max(s.rgb[1], s.rgb[2]) >= 45);
+const hpSoft = hpStops.length > 0 && hpStops.every(s => s.a <= 0.95);
+ok(hpRedLead, '气血条是朱砂红相（R 明显高于 G/B，不再是无血色的暖灰）',
+   { hp, leads: hpStops.map(s => s.rgb[0] - Math.max(s.rgb[1], s.rgb[2])) });
+ok(hpSoft, '气血条保留柔化半透明（alpha ≤ 0.95，不回不透明色块）', { alphas: hpStops.map(s => s.a) });
+// 煞气：第115轮由灰绿沉成深墨灰，守住「低色度 + 低明度 + 够不透明」，
+// 免得以后又被洗回 (104,112,106) 那种带绿相的浅灰。
+const xp = await page.evaluate(() => getComputedStyle(document.getElementById('xpfill')).backgroundImage);
+const xpStops = grab(xp);
+const xpInk = xpStops.length > 0 && xpStops.every(s =>
+  Math.max(...s.rgb) - Math.min(...s.rgb) <= 20 && Math.max(...s.rgb) <= 90 && s.a >= 0.5);
+ok(xpInk, '煞气条是深墨灰（低色度 / 低明度 / 不透明，不再是浅灰绿）', { xp, stops: xpStops });
+// 空槽也要是淡墨：否则煞气低的时候整条仍是浅到看不见的纸底，改填充色等于白改。
+const xpTrough = await page.evaluate(() => getComputedStyle(document.getElementById('xpwrap')).backgroundColor);
+const tm = [...xpTrough.matchAll(/[\d.]+/g)].map(Number);
+ok(tm.length >= 4 && Math.max(tm[0], tm[1], tm[2]) <= 90,
+   '煞气空槽也是淡墨纸签（不是浅到看不见的纸底）', xpTrough);
 const maskOn = await page.evaluate(() => {
   const cs = getComputedStyle(document.getElementById('hpfill'));
   return cs.maskImage || cs.webkitMaskImage;

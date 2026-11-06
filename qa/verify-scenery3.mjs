@@ -367,8 +367,11 @@ ok(hud.qbs === 3 && hud.qbW === 46 && hud.qbH === 46 && hud.pips > 0,
    '三格快捷钮与技能栏全在、点击热区 46×46 不变（只改外观不删元素）', hud);
 ok(hud.qbShadow === 'none' && hud.hpShadow === 'none' && hud.pipShadow === 'none',
    '双重墨框 / 投影 / 纸签阴影全部去掉', { qb: hud.qbShadow, hp: hud.hpShadow, pip: hud.pipShadow });
-ok(!/178,\s*58,\s*44/.test(hud.hpFill || ''),
-   '血条不再是鲜红硬色块（改淡墨飞白）', hud.hpFill);
+// 第102轮写过「不得含 178,58,44（鲜红硬色块）」，第115轮 Jerry 要求血条回朱砂，该断言作废。
+// 这里改守 scenery3 真正在乎的那条：血条仍须是半透明柔化笔道，不能退回不透明实色块。
+const hpAlphas = [...(hud.hpFill || '').matchAll(/rgba\(\s*\d+,\s*\d+,\s*\d+,\s*([\d.]+)\s*\)/g)].map(m => +m[1]);
+ok(hpAlphas.length >= 3 && hpAlphas.every(a => a <= 0.95),
+   '血条虽回朱砂，仍是半透明柔化笔道（不是不透明硬色块）', { hpFill: hud.hpFill, hpAlphas });
 const hudOff = await page.evaluate(() => {
   document.body.classList.remove('sc3-paper');
   const v = getComputedStyle(document.querySelector('#quickbar .qb')).boxShadow;

@@ -912,7 +912,7 @@
     elBuffrow.innerHTML = bs.map(b => {
       const nm = { dmg: '伤', spd: '速', crit: '暴', armor: '御', regen: '回', pickup: '拾', xpMul: '修', atkSpd: '急', drop: '落' }[b.stat] || '益';
       const amt = b.stat === 'drop' ? ('+' + b.amount) : ('+' + Math.round(b.amount * 100) + '%');
-      return '<div class="bpip" title="' + b.name + '　' + nm + amt + '"><span>' + (b.icon || '✨') + '</span><b>' + nm + Math.ceil(b.t) + '</b></div>';
+      return '<div class="bpip" title="' + b.name + '　' + nm + amt + '"><span>' + (b.icon || '✨') + '</span><b>' + nm + ' ' + Math.ceil(b.t) + 's</b></div>';
     }).join('');
   }
   function curDiff() { return G.diff || DIFFICULTIES[0]; }

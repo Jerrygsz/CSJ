@@ -930,10 +930,20 @@ body.rot #ver { visibility: hidden; }
 .deck-peek i { display: block; width: 22px; height: 7px; border-radius: var(--r-sm); background: rgba(201,178,122,0.28); border: 1px solid rgba(201,178,122,0.45); }
 
 /* ---------- 限时增益条：服丹 / 催符后在身的属性 ---------- */
-#buffrow { display: none; gap: var(--sp-2); flex-wrap: wrap; margin-top: 4px; }
+/* 第115轮：#buffrow 原是 #hud 里唯一的 static 子元素，从 y=0 起排，而 #topbar 是
+   absolute top:0 —— 增益胶囊正好盖住 y=7–18 的 #hpwrap 生命条。现移进 #topbar 末尾，
+   随 flex 排在地名下方；padding-right 给右侧「大衍 / 禁制」让位。 */
+#buffrow { display: none; gap: var(--sp-2); flex-wrap: wrap; margin-top: 4px; padding-right: 104px; }
 .bpip { display: flex; align-items: center; gap: var(--sp-1); padding: 0 8px; border-radius: var(--r-pill); background: rgba(10,12,18,0.76); border: 1px solid rgba(255,210,74,0.45); font-size: var(--fs-micro); color: var(--accent-soft); }
 .bpip span { font-style: normal; }
 .bpip b { font-weight: 700; font-variant-numeric: tabular-nums; }
+/* 水墨皮：深色玻璃金边胶囊在宣纸上像贴错的贴纸 → 翻成纸签墨线，与地图卡同语汇 */
+body[data-skin="guigu"] .bpip {
+  background: rgba(244,239,224,0.86); border: 1px solid rgba(58,53,44,0.42);
+  border-radius: 2px; color: #332f28;
+}
+body[data-skin="guigu"] .bpip b { color: #8f2f24; font-weight: 500; }
+body[data-skin="guigu"] .bpip span { filter: grayscale(1) sepia(0.22) contrast(0.92); opacity: .85; }
 
 /* ---------- 双人联机面板 ---------- */
 .coop-body { display: flex; flex-direction: column; gap: var(--sp-3); }
@@ -1667,18 +1677,28 @@ body[data-skin="guigu"].sc3-paper #xpwrap {
   box-shadow: none;
 }
 body[data-skin="guigu"].sc3-paper #hpfill {
-  background: linear-gradient(90deg, rgba(122,98,82,0.42), rgba(122,98,82,0.72) 62%, rgba(122,98,82,0.34));
+  /* 第115轮：淡墨暖灰读不出血色，回到朱砂（但仍是半透明 + 两端飞白，不回 iOS 胶囊色块） */
+  background: linear-gradient(90deg, rgba(146,52,42,0.72), rgba(178,58,44,0.92) 62%, rgba(160,56,44,0.62));
   -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,0.35) 0%, #000 12%, #000 74%, rgba(0,0,0,0.04) 100%);
   mask-image: linear-gradient(90deg, rgba(0,0,0,0.35) 0%, #000 12%, #000 74%, rgba(0,0,0,0.04) 100%);
 }
 body[data-skin="guigu"].sc3-paper #xpfill {
-  background: linear-gradient(90deg, rgba(104,112,106,0.36), rgba(104,112,106,0.60) 62%, rgba(104,112,106,0.28));
+  /* 第115轮：去绿相、压明度、提不透明度，煞气沉成一道深墨 */
+  background: linear-gradient(90deg, rgba(52,50,47,0.62), rgba(38,37,35,0.86) 62%, rgba(58,55,52,0.52));
   -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,0.35) 0%, #000 12%, #000 74%, rgba(0,0,0,0.04) 100%);
   mask-image: linear-gradient(90deg, rgba(0,0,0,0.35) 0%, #000 12%, #000 74%, rgba(0,0,0,0.04) 100%);
 }
+/* 煞气槽单独压成淡墨纸签：只改填充色的话，煞气低时整条仍是浅到看不见的纸底。
+   血条槽保持浅纸底不动 —— 血少了要留白才看得出缺口。 */
+body[data-skin="guigu"].sc3-paper #xpwrap {
+  background: rgba(44,42,38,0.24); border-color: rgba(58,53,44,0.30);
+}
+/* 第115轮：血条翻朱砂、煞气翻深墨之后，半透明深墨字会糊在深底上。
+   沿用第97轮已验证的解法——深墨字 + 一圈纸白晕，字落在深条上或浅纸底上都立得住。 */
 body[data-skin="guigu"].sc3-paper .barlabel,
 body[data-skin="guigu"].sc3-paper .barval {
-  color: rgba(46,42,34,0.52); text-shadow: none;
+  color: rgba(36,31,22,0.90);
+  text-shadow: 0 0 2px #f6f1e2, 0 0 2px #f6f1e2, 0 1px 1px rgba(246,241,226,0.95);
 }
 body[data-skin="guigu"].sc3-paper #stats { color: rgba(51,47,40,0.56); }
 body[data-skin="guigu"].sc3-paper #mapName {
