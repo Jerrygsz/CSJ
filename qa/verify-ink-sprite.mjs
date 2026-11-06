@@ -118,12 +118,22 @@ const qb = await page.evaluate(() => {
   const lum = m ? (+m[0] + +m[1] + +m[2]) / 3 : 0;
   return { radius: cs.borderRadius, lum, bg: cs.backgroundImage.slice(0, 60) };
 });
-ok(qb.radius === '3px', '快捷栏改小方印（3px 圆角，不再是全圆盘）', qb);
+// 第102轮 UI 柔化把「3px 小方印」放松成柔角半透小印（三格钮去双重墨框），
+// 这里守的是「柔角、但不回退成全圆盘、也不回硬直角」这条不变式，不再是某一个写死的 px。
+const qbR = parseFloat(qb.radius);
+ok(qbR >= 3 && qbR <= 12, '快捷栏是柔角小印（3~12px，既非全圆盘也非硬直角）', qb);
 ok(qb.lum > 200 || /rgb\(2[0-9]{2}/.test(qb.bg), '快捷栏底翻宣纸（不再是深色玻璃）', qb);
 
 // ---------- 4) 血条：纸签墨条 ----------
 const hp = await page.evaluate(() => getComputedStyle(document.getElementById('hpfill')).backgroundImage);
-ok(/178,\s*58,\s*44/.test(hp), '气血条是朱砂笔道（不再是原版绿/红渐变）', hp);
+// 第102轮起血条由朱砂改「低饱和淡墨飞白」。原先断言写死 178,58,44 这个朱砂色值，
+// 那条在第102轮就已作废、却一直没人重跑本脚本。这里改守灰阶纪律本身，判据沿用
+// 第108轮像素审计的口径：chroma > 60 才算「高饱和彩色」。现值 (122,98,82) → chroma 40；
+// 老朱砂 (178,58,44) → chroma 134，一眼可辨。
+const hpTriples = [...hp.matchAll(/rgba?\((\d+),\s*(\d+),\s*(\d+)/g)].map(m => [+m[1], +m[2], +m[3]]);
+const hpChroma = hpTriples.length ? Math.max(...hpTriples.map(t => Math.max(...t) - Math.min(...t))) : 999;
+ok(hpTriples.length > 0 && hpChroma <= 60,
+   '气血条是淡墨飞白（chroma ≤ 60，低饱和暖灰，不再是高饱和朱砂 / 绿红渐变）', { hp, hpChroma, stops: hpTriples.length });
 const maskOn = await page.evaluate(() => {
   const cs = getComputedStyle(document.getElementById('hpfill'));
   return cs.maskImage || cs.webkitMaskImage;
