@@ -2554,8 +2554,9 @@
   // 只是探测中心换成随行者自己（r 更小），并额外跳过已死的怪。
   // 一处刻意的不同：贴身怪的预警圈比主角收得紧、权重减半。主角站桩不怕被推开，
   // 近身型随行者却要贴到 30px 才能出手；照抄主角那圈会把自己的目标一直推远。
+  let _thr = [];   // 性能优化：威胁列表复用，避免每只灵宠每帧 new 数组（零手感变化）
   function allyThreats(e) {
-    const out = [];
+    const out = _thr; out.length = 0;
     const R2 = ALLY_DODGE_R * ALLY_DODGE_R;
     for (const b of (G.ebullets || [])) {
       const dx = b.x - e.x, dy = b.y - e.y;
@@ -8088,6 +8089,7 @@
     ctx.fillRect(pt.x - pt.size / 2, pt.y - pt.size / 2, pt.size, pt.size);
     ctx.globalAlpha = 1;
   }
+  let _drawEnemies = [];   // 性能优化：敌人绘制排序复用，避免每帧 slice 分配（零视觉变化）
   function render() {
     let sx = 0, sy = 0;
     if (G.shake > 0) { sx = U.rand(-G.shake, G.shake); sy = U.rand(-G.shake, G.shake); }
@@ -8131,6 +8133,15 @@
     // sc3 已在纸底阶段取得并复用（ensureScenery3 带缓存，热路径只是一次字符串比较）
     if (sc3.on && sc3.terrainPat) { ctx.fillStyle = sc3.terrainPat; ctx.fillRect(G.cam.x, G.cam.y, W, H); }
 
+    // 性能优化·视口裁剪：相机视野矩形（含安全边距）。屏外实体不绘制 —— 纯渲染优化，零视觉变化。
+    const _vw = W / PR, _vh = H / PR;
+    const _bx0 = G.cam.x - 72,  _bx1 = G.cam.x + _vw + 72;   // 子弹 / 灵宠弹
+    const _by0 = G.cam.y - 72,  _by1 = G.cam.y + _vh + 72;
+    const _ex0 = G.cam.x - 96,  _ex1 = G.cam.x + _vw + 96;   // 敌人
+    const _ey0 = G.cam.y - 96,  _ey1 = G.cam.y + _vh + 96;
+    const _zx0 = G.cam.x - 360, _zx1 = G.cam.x + _vw + 360;  // 预警圈 / 持续区（Boss 冲击波半径大）
+    const _zy0 = G.cam.y - 360, _zy1 = G.cam.y + _vh + 360;
+
     drawDecor();
     // P1-2 地标：画在装饰之上、地面特效之下（满屏特效也不会盖住），明度 0.55，不参与碰撞
     if (sc3.on) sc3DrawLandmarks(sc3);
@@ -8140,10 +8151,11 @@
     for (const h of G.herbs) drawSpr('herb', h.x, h.y, 1.6, false);
     for (const l of G.loot) drawLoot(l);
     // 地面持续区先铺（贴地），预警圈与弹体压在上面
-    for (const z of G.zones) drawZone(z);
+    for (const z of G.zones) { if (z.x < _zx0 || z.x > _zx1 || z.y < _zy0 || z.y > _zy1) continue; drawZone(z); }
     for (const h of G.hazards) drawHazardGround(h);
     // Boss 出招预警：地上圈随前摇收拢、颜色由暗转亮 —— 给玩家那半秒反应
     for (const t of G.tells) {
+      if (t.x < _zx0 || t.x > _zx1 || t.y < _zy0 || t.y > _zy1) continue;
       const k = Math.max(0, Math.min(1, t.t / t.dur));      // 1 → 0
       ctx.save();
       ctx.globalAlpha = 0.20 + 0.45 * (1 - k);
@@ -8154,10 +8166,12 @@
       ctx.beginPath(); ctx.arc(t.x, t.y, Math.max(6, t.r * (0.35 + 0.65 * (1 - k))), 0, 6.28); ctx.fill();
       ctx.restore();
     }
-    for (const b of G.ebullets) drawEBullet(b);
+    for (const b of G.ebullets) { if (b.x < _bx0 || b.x > _bx1 || b.y < _by0 || b.y > _by1) continue; drawEBullet(b); }
 
-    const es = G.enemies.slice().sort((a, b) => a.y - b.y);
-    for (const e of es) drawEnemy(e);
+    const es = _drawEnemies; es.length = 0;
+    for (const e of G.enemies) es.push(e);
+    es.sort((a, b) => a.y - b.y);
+    for (const e of es) { if (e.x < _ex0 || e.x > _ex1 || e.y < _ey0 || e.y > _ey1) continue; drawEnemy(e); }
     if (G.boss) {
       const b = G.boss;
       ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.beginPath(); ctx.ellipse(b.x, b.y + b.r * 0.9, b.r * 0.9, b.r * 0.4, 0, 0, 6.28); ctx.fill();
@@ -8390,9 +8404,9 @@
     // 领域先铺在地上（玄冰的寒域 / 元磁的重力场），弹道再压上去
     for (const fd of (G.fieldSlow || [])) drawField(fd);
     // 弹道：每门功法长得不一样
-    for (const b of G.bullets) drawBulletVfx(b, 1);
+    for (const b of G.bullets) { if (b.x < _bx0 || b.x > _bx1 || b.y < _by0 || b.y > _by1) continue; drawBulletVfx(b, 1); }
     // 队友打出来的攻击：画出来，让你看得见他在出手（不参与命中判定）
-    for (const b of G.fxBullets) drawBulletVfx(b, 0.78);
+    for (const b of G.fxBullets) { if (b.x < _bx0 || b.x > _bx1 || b.y < _by0 || b.y > _by1) continue; drawBulletVfx(b, 0.78); }
     // 环绕：玄罡的金环 / 大庚剑阵的青碧飞剑
     for (const o of G.orbPos) drawOrb(o);
     // pixelfx 像素特效层：角色之后、飘字之前。关掉加法光（见 fxpix.js 文件头），否则在宣纸白底上等于没画
