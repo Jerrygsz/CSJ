@@ -559,7 +559,7 @@ ok(qRow.s.composition.focusCase === 'narrowgate' && qRow.s.mood === null &&
    qRow.s.focus.kind === 'narrowgate' && qRow.s.uiSoft === true,
    '标杆 qixuan 零回归：新增 6 类主景 / 21 张构图都没动它的章法与积墨', qRow.s.composition);
 // 交付口径一致性：仓库外的唯一真源可读时才验，保证 fanren 单独 clone 也能跑完前 11 组
-const truthPath = join(root, '..', 'mapCodex.json');
+const truthPath = join(root, 'codex', 'mapCodex.json');
 if (fs.existsSync(truthPath)) {
   const truth = JSON.parse(fs.readFileSync(truthPath, 'utf8'));
   const t3 = truth.maps.filter(m => m.batch === 3);
@@ -814,7 +814,7 @@ if (fs.existsSync(truthPath)) {
      '真源 meta.stage10 记录第七批交付版本 ' + (stage10Tok || '缺失') + '，不晚于当前构建 ' + (htmlVer7 || '未找到'),
      { stage10: truth7.meta.stage10 && truth7.meta.stage10.status, build: htmlVer7 });
   // 引用自洽（第七批口径）：章号 + 卷名必须与原著索引吻合，防止「下标当章号」的老毛病回潮
-  const idxPath = join(root, '..', '_scratch', 'novel-index.json');
+  const idxPath = join(root, 'codex', 'novel-index.json');
   if (fs.existsSync(idxPath)) {
     const idx = JSON.parse(fs.readFileSync(idxPath, 'utf8'));
     const chapters = (idx.ren && idx.ren.chapters) || [];
@@ -924,7 +924,7 @@ if (fs.existsSync(truthPath)) {
      '真源 meta：counts.maps / batch8 与运行时一致，八批 counts 相加等于收录数，style.quant 仍 24 类',
      { counts: truth8.meta.counts, runtime: N });
   // 引用自洽（第八批口径）：仙界篇章号 + 标题必须与原著索引吻合，防止「下标当章号」老毛病回潮
-  const idxPath8 = join(root, '..', '_scratch', 'novel-index.json');
+  const idxPath8 = join(root, 'codex', 'novel-index.json');
   if (fs.existsSync(idxPath8)) {
     const idx8 = JSON.parse(fs.readFileSync(idxPath8, 'utf8'));
     const chapters8 = (idx8.xian && idx8.xian.chapters) || [];

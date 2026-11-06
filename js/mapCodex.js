@@ -1,5 +1,5 @@
 // 自动生成，请勿手改。唯一真源：../../mapCodex.json
-// 生成器：_scratch/build-mapcodex.mjs ｜ 批次8 共 171 张（首批 18 + 第二批 11 + 第三批 21 + 第四批 19 + 第五批 19 + 第六批 19 + 第七批 30 + 第八批 34，人界篇 + 灵界篇 + 仙界篇收官）
+// 生成器：codex/build-mapcodex.mjs ｜ 批次8 共 171 张（首批 18 + 第二批 11 + 第三批 21 + 第四批 19 + 第五批 19 + 第六批 19 + 第七批 30 + 第八批 34，人界篇 + 灵界篇 + 仙界篇收官）
 // 只含渲染所需字段（含逐图 composition 构图章法）；考据正文 / 原文摘引 / 差异标注见《地图原著考据台账.md》。
 // 风格基线：Jerry 定调，标杆 fanren/qa/shot-codex-qixuan.png；后续每批沿用，不按 arc 分组。
 window.MAP_CODEX_STYLE = {

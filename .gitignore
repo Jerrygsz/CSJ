@@ -7,3 +7,17 @@ qa/_npc_chapter_raw.json
 qa/_maps.json
 qa/_commit_msg.txt
 qa/_msg.txt
+
+# ---- codex：唯一真源进仓库，派生物不进 ----
+# 进仓库：mapCodex.json（唯一真源）、novel-index.json（原著索引，可由 raw/ 重建）、
+#          map-keywords.json、全部 *.mjs 流水线脚本、refs-audit.md / refs-repair.md（审计证据）
+#
+# 以下全部可由 codex/ 里的脚本重跑重建，体积大且属于中间产物，不入库：
+codex/novel-hits.json
+codex/map-inventory.json
+codex/mapCodex.before-*.json
+codex/batch*-chapters.md
+codex/batch*-evidence.md
+codex/batch*-scenes.md
+codex/batch*-facts.md
+codex/batch*-pin.md

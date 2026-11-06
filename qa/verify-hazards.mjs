@@ -169,3 +169,11 @@ for (const [tag, sk, frames, wait] of [
 
 await b.close();
 console.log('\n截图：' + shots.join(' '));
+
+// 本脚本原先只打印不判定，导致「补表缺了」也不会让 CI 红。补上闸门语义：
+// 48 只 Boss 必须全部取到专属表（缺表 0 / 空表 0），否则非零退出。
+const hazFail = cov.miss.length + cov.bad.length;
+console.log('\n' + (hazFail === 0
+  ? '全绿：48 / 48 补表覆盖，缺表 0，空表 0'
+  : '失败：缺表 ' + cov.miss.length + '，空表 ' + cov.bad.length));
+process.exit(hazFail === 0 ? 0 : 1);

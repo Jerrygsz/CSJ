@@ -1,0 +1,332 @@
+[
+  {
+    "id": "baiguang",
+    "meanL": 200.5,
+    "maxC": 106,
+    "sat60Pct": 0.034,
+    "sat80Pct": 0.014,
+    "coolPct": 0.018,
+    "inkPct": 3,
+    "paperPct": 0
+  },
+  {
+    "id": "daoguo",
+    "meanL": 141,
+    "maxC": 106,
+    "sat60Pct": 0.034,
+    "sat80Pct": 0.016,
+    "coolPct": 0.012,
+    "inkPct": 0.3,
+    "paperPct": 4
+  },
+  {
+    "id": "dashengdian",
+    "meanL": 169.9,
+    "maxC": 106,
+    "sat60Pct": 0.034,
+    "sat80Pct": 0.016,
+    "coolPct": 0.017,
+    "inkPct": 1.1,
+    "paperPct": 5.1
+  },
+  {
+    "id": "diyi",
+    "meanL": 140.2,
+    "maxC": 106,
+    "sat60Pct": 0.034,
+    "sat80Pct": 0.015,
+    "coolPct": 0.012,
+    "inkPct": 0.6,
+    "paperPct": 4.1
+  },
+  {
+    "id": "fsjie",
+    "meanL": 140.3,
+    "maxC": 107,
+    "sat60Pct": 0.034,
+    "sat80Pct": 0.016,
+    "coolPct": 0.018,
+    "inkPct": 0.3,
+    "paperPct": 4
+  },
+  {
+    "id": "heihu",
+    "meanL": 201.2,
+    "maxC": 106,
+    "sat60Pct": 0.034,
+    "sat80Pct": 0.014,
+    "coolPct": 0.018,
+    "inkPct": 3.3,
+    "paperPct": 0
+  },
+  {
+    "id": "helian",
+    "meanL": 167.4,
+    "maxC": 106,
+    "sat60Pct": 0.035,
+    "sat80Pct": 0.016,
+    "coolPct": 0.017,
+    "inkPct": 1,
+    "paperPct": 2.4
+  },
+  {
+    "id": "huimoyuan",
+    "meanL": 152.8,
+    "maxC": 106,
+    "sat60Pct": 0.034,
+    "sat80Pct": 0.017,
+    "coolPct": 0.012,
+    "inkPct": 0.4,
+    "paperPct": 3.1
+  },
+  {
+    "id": "huirenjie",
+    "meanL": 200.4,
+    "maxC": 107,
+    "sat60Pct": 0.032,
+    "sat80Pct": 0.013,
+    "coolPct": 0.015,
+    "inkPct": 3.6,
+    "paperPct": 0
+  },
+  {
+    "id": "jiujie",
+    "meanL": 143.2,
+    "maxC": 106,
+    "sat60Pct": 0.034,
+    "sat80Pct": 0.016,
+    "coolPct": 0.012,
+    "inkPct": 0.4,
+    "paperPct": 7.3
+  },
+  {
+    "id": "lingzu",
+    "meanL": 167.6,
+    "maxC": 106,
+    "sat60Pct": 0.035,
+    "sat80Pct": 0.016,
+    "coolPct": 0.018,
+    "inkPct": 0.8,
+    "paperPct": 2.3
+  },
+  {
+    "id": "minghe2",
+    "meanL": 152.4,
+    "maxC": 106,
+    "sat60Pct": 0.035,
+    "sat80Pct": 0.016,
+    "coolPct": 0.017,
+    "inkPct": 0.7,
+    "paperPct": 3.2
+  },
+  {
+    "id": "qiangzhe",
+    "meanL": 152,
+    "maxC": 106,
+    "sat60Pct": 0.034,
+    "sat80Pct": 0.016,
+    "coolPct": 0.017,
+    "inkPct": 0.6,
+    "paperPct": 3.2
+  },
+  {
+    "id": "qingyuangong",
+    "meanL": 167.3,
+    "maxC": 106,
+    "sat60Pct": 0.034,
+    "sat80Pct": 0.016,
+    "coolPct": 0.017,
+    "inkPct": 1,
+    "paperPct": 2.4
+  },
+  {
+    "id": "qixuan",
+    "meanL": 203.7,
+    "maxC": 106,
+    "sat60Pct": 0.034,
+    "sat80Pct": 0.015,
+    "coolPct": 0.017,
+    "inkPct": 3.5,
+    "paperPct": 0
+  },
+  {
+    "id": "qunqiang",
+    "meanL": 152.6,
+    "maxC": 106,
+    "sat60Pct": 0.034,
+    "sat80Pct": 0.016,
+    "coolPct": 0.012,
+    "inkPct": 0.6,
+    "paperPct": 3.1
+  },
+  {
+    "id": "renzu",
+    "meanL": 152.7,
+    "maxC": 106,
+    "sat60Pct": 0.034,
+    "sat80Pct": 0.017,
+    "coolPct": 0.013,
+    "inkPct": 0.7,
+    "paperPct": 3.1
+  },
+  {
+    "id": "sanjie",
+    "meanL": 152.6,
+    "maxC": 106,
+    "sat60Pct": 0.034,
+    "sat80Pct": 0.017,
+    "coolPct": 0.02,
+    "inkPct": 0.4,
+    "paperPct": 3.2
+  },
+  {
+    "id": "shengshi",
+    "meanL": 201.4,
+    "maxC": 106,
+    "sat60Pct": 0.034,
+    "sat80Pct": 0.014,
+    "coolPct": 0.018,
+    "inkPct": 2.8,
+    "paperPct": 0
+  },
+  {
+    "id": "shiyin",
+    "meanL": 152.5,
+    "maxC": 106,
+    "sat60Pct": 0.034,
+    "sat80Pct": 0.015,
+    "coolPct": 0.017,
+    "inkPct": 0.7,
+    "paperPct": 3
+  },
+  {
+    "id": "tiandinggong",
+    "meanL": 153,
+    "maxC": 106,
+    "sat60Pct": 0.035,
+    "sat80Pct": 0.017,
+    "coolPct": 0.017,
+    "inkPct": 0.8,
+    "paperPct": 3.1
+  },
+  {
+    "id": "tianmo",
+    "meanL": 201.7,
+    "maxC": 106,
+    "sat60Pct": 0.034,
+    "sat80Pct": 0.014,
+    "coolPct": 0.012,
+    "inkPct": 2.8,
+    "paperPct": 0
+  },
+  {
+    "id": "untracked",
+    "meanL": 182.2,
+    "maxC": 134,
+    "sat60Pct": 1.217,
+    "sat80Pct": 1.121,
+    "coolPct": 0.184,
+    "inkPct": 3.5,
+    "paperPct": 5.4
+  },
+  {
+    "id": "xianjie",
+    "meanL": 152.3,
+    "maxC": 107,
+    "sat60Pct": 0.034,
+    "sat80Pct": 0.017,
+    "coolPct": 0.016,
+    "inkPct": 0.5,
+    "paperPct": 3
+  },
+  {
+    "id": "xianshi",
+    "meanL": 152.5,
+    "maxC": 106,
+    "sat60Pct": 0.034,
+    "sat80Pct": 0.017,
+    "coolPct": 0.013,
+    "inkPct": 0.5,
+    "paperPct": 3.1
+  },
+  {
+    "id": "xiaoling",
+    "meanL": 169.1,
+    "maxC": 106,
+    "sat60Pct": 0.034,
+    "sat80Pct": 0.016,
+    "coolPct": 0.013,
+    "inkPct": 1,
+    "paperPct": 5.5
+  },
+  {
+    "id": "xiaoxiuluo",
+    "meanL": 152.7,
+    "maxC": 106,
+    "sat60Pct": 0.035,
+    "sat80Pct": 0.017,
+    "coolPct": 0.017,
+    "inkPct": 0.6,
+    "paperPct": 3.2
+  },
+  {
+    "id": "xuechi",
+    "meanL": 162.5,
+    "maxC": 106,
+    "sat60Pct": 0.032,
+    "sat80Pct": 0.013,
+    "coolPct": 0.017,
+    "inkPct": 2.8,
+    "paperPct": 0.5
+  },
+  {
+    "id": "xuetian",
+    "meanL": 166.7,
+    "maxC": 106,
+    "sat60Pct": 0.034,
+    "sat80Pct": 0.016,
+    "coolPct": 0.017,
+    "inkPct": 1,
+    "paperPct": 2.1
+  },
+  {
+    "id": "zhandacheng",
+    "meanL": 201.2,
+    "maxC": 106,
+    "sat60Pct": 0.034,
+    "sat80Pct": 0.014,
+    "coolPct": 0.017,
+    "inkPct": 3.1,
+    "paperPct": 0
+  },
+  {
+    "id": "zhangtianping",
+    "meanL": 141,
+    "maxC": 106,
+    "sat60Pct": 0.034,
+    "sat80Pct": 0.016,
+    "coolPct": 0.013,
+    "inkPct": 0.3,
+    "paperPct": 4
+  },
+  {
+    "id": "zhanxian",
+    "meanL": 152.9,
+    "maxC": 106,
+    "sat60Pct": 0.034,
+    "sat80Pct": 0.017,
+    "coolPct": 0.012,
+    "inkPct": 0.7,
+    "paperPct": 3.1
+  },
+  {
+    "id": "zhenxian",
+    "meanL": 151.9,
+    "maxC": 106,
+    "sat60Pct": 0.034,
+    "sat80Pct": 0.016,
+    "coolPct": 0.012,
+    "inkPct": 0.7,
+    "paperPct": 3.1
+  }
+]

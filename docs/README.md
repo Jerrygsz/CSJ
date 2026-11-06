@@ -4,7 +4,18 @@
 
 ## 1. 核心回归测试（无需浏览器/服务器）
 
-- **`smoke.mjs`** — 用 Node + `vm` 沙箱加载全部游戏 JS，跑 **288 条断言**（功法/装备/怪物/商店/存档/突破等）。
+- **`verify-all.mjs`** — **一键跑完全部八个常驻验收**（第110轮新增）。自动起 8123 静态服务，
+  依次跑 scenery3 / smoke / ver / skin / mapdeck / ink-sprite / hazards / mapscenery，
+  按退出码汇总，任一闸门红即非零退出。**改完任何东西先跑这个。**
+  ```
+  node qa/verify-all.mjs                        # 全跑，约 1 分钟
+  node qa/verify-all.mjs --skip-hazards         # 跳过需要操作 Boss 的耗时项
+  node qa/verify-all.mjs --only=scenery3,smoke  # 只跑指定项
+  ```
+  为什么要有它：八批下来只有 scenery3 / smoke / ver 是每轮必跑的，其余五个全凭记忆挑着跑，
+  于是 `verify-ink-sprite` 的两条断言在第102轮 UI 柔化时就已作废、一直红到第109轮才被发现。
+
+- **`smoke.mjs`** — 用 Node + `vm` 沙箱加载全部游戏 JS，跑 **294 条断言**（功法/装备/怪物/商店/存档/突破等）。
   ```
   node qa/smoke.mjs
   ```

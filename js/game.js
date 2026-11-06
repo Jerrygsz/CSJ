@@ -5970,7 +5970,7 @@
   //   ⑤ 不引入彩色：墨皮用墨/纸灰阶，金皮用暗金暗部，全部低饱和；不碰 any 判定。
   //
   // 批次4：逐图原著考据驱动。Jerry 明确「不能全量铺开、不能按 arc/biome 机械分组」。
-  //   · 唯一真源：mapCodex.json → _scratch/build-mapcodex.mjs → js/mapCodex.js（window.MAP_CODEX）；
+  //   · 唯一真源：mapCodex.json → codex/build-mapcodex.mjs → js/mapCodex.js（window.MAP_CODEX）；
   //   · 收录一张启用一张：白名单直接取台账 key，后续补台账无需再改本文件；
   //   · 装饰权重 / 地标（数量·类型·名称）/ 贴地类型 / 墨色浓淡，一律按 map.id 查台账；
   //   · 未收录的 153 张图 ensureScenery3() 返回 {on:false}，装饰与绘制走原逻辑，逐字节不变；

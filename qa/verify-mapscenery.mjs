@@ -13,7 +13,8 @@
 import fs from 'fs';
 import vm from 'vm';
 
-const dir = 'js/';
+const ROOT = new URL('..', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
+const dir = ROOT + 'js/';
 const files = ['utils.js','audio.js','sprites.js','skills.js','enemies.js','story.js','items.js','maps.js','recipes.js','encounters.js','late.js','late2.js','late3.js','lingjie.js','xianjie.js'];
 const ctx = { console, Math, Date, JSON, Object, Array, String, Number, Boolean, parseInt, parseFloat, isNaN, Set, Map, Proxy };
 ctx.window = ctx; ctx.globalThis = ctx;
@@ -126,3 +127,26 @@ for (let i=1;i<spine.length;i++){
   if (!gAdjDiff[i-1]) gbad.push(`${spine[i-1].id}→${spine[i].id}`);
 }
 if (gbad.length) console.log('\n水墨皮相邻同档的对：\n  ' + gbad.join('\n  '));
+
+// ---- 目标判定（第110轮补）----
+// 本脚本一直只打印不判定，于是「有目标却不达标」也能一路绿灯跑过八批。
+// 这里把脚本头注释里写下的目标逐条算成达标 / 未达标，只报数、不改退出码
+// （度量脚本不阻断回归；哪条长期不达标，应单独拍板改判据或改实现，不能靠沉默放行）。
+const pct = (s) => parseFloat(String(s));
+const TARGETS = [
+  ['missingBg',        out.missingBg === 0,                       '缺 m.bg 的地图数 = 0'],
+  ['guiguDistinct',    out.guiguDistinctNew >= 5,                 '水墨皮生效底色种数 ≥ 5'],
+  ['guiguAdjDiff',     pct(out.guiguAdjDiffRate) >= 80,           '水墨皮相邻档位差 ≥1 的占比 ≥ 80%'],
+  ['jinAdjZero',       out.jinAdjZero === 0,                      '金皮相邻明度差 = 0 的对数 = 0'],
+  ['jinAdjPass',       pct(out.jinAdjPassRate) >= 80,             '金皮相邻明度差 ≥18 的占比 ≥ 80%（P0-3 原目标）'],
+  ['decorTypes',       out.decorTypes >= 12,                      '装饰物类型数 ≥ 12（P1-3 目标）'],
+];
+const miss = [];
+for (const [k, pass, desc] of TARGETS) {
+  const val = out[k] !== undefined ? out[k] : ({ guiguDistinct: out.guiguDistinctNew, guiguAdjDiff: out.guiguAdjDiffRate, jinAdjPass: out.jinAdjPassRate }[k]);
+  console.log((pass ? '  达标   ' : '  未达标 ') + desc + ' → ' + val);
+  if (!pass) miss.push(k + '=' + val);
+}
+console.log(miss.length
+  ? '\n未达标 ' + miss.length + ' 项：' + miss.join(' ／ ') + '（判据见脚本头注释，需单独拍板）'
+  : '\n目标全部达标');
