@@ -934,17 +934,22 @@ body.rot #ver { visibility: hidden; }
    absolute top:0 —— 增益胶囊正好盖住 y=7–18 的 #hpwrap 生命条。现移进 #topbar 末尾，
    随 flex 排在地名下方；padding-right 给右侧「大衍 / 禁制」让位。 */
 #buffrow { display: none; gap: var(--sp-2); flex-wrap: wrap; margin-top: 4px; padding-right: 104px; }
+/* 第115轮：单字签做成一排淡朱砂小方印，紧凑挨着；沿用地图卡图号印（.mc-num）
+   的朱砂色与 2px 方角，整行不再加框，align-self 让印按内容宽收拢、不撞右侧按钮。 */
+body[data-skin="guigu"] #buffrow {
+  gap: 2px; align-self: flex-start; padding-right: 0; max-width: calc(100% - 104px);
+  background: none; border: none; border-radius: 0; overflow: visible;
+}
 .bpip { display: flex; align-items: center; gap: var(--sp-1); padding: 0 8px; border-radius: var(--r-pill); background: rgba(10,12,18,0.76); border: 1px solid rgba(255,210,74,0.45); font-size: var(--fs-micro); color: var(--accent-soft); }
 .bpip span { font-style: normal; }
 .bpip b { font-weight: 700; font-variant-numeric: tabular-nums; }
-/* 第115轮：不显数字，退成半透明淡墨小印。取值与同一层 UI（sc3-paper 下的 .qb 快捷钮）
-   完全一致——纸底 0.30 / 墨线 0.18 / 柔角 10px / 无投影，让增益签和画面是一套东西。 */
+/* 半透明朱砂印蜕：淡朱砂底 + 细朱砂印边 + 方角 2px + 朱砂单字，无投影、无图标、无数字 */
 body[data-skin="guigu"] .bpip {
-  background: rgba(244,239,224,0.30); border: 1px solid rgba(58,53,44,0.18);
-  border-radius: 10px; box-shadow: none; color: rgba(58,53,44,0.62);
+  background: rgba(143,47,36,0.10); border: 1px solid rgba(143,47,36,0.42);
+  border-radius: 2px; box-shadow: none; color: #8f2f24;
+  justify-content: center; min-width: 22px; padding: 0 4px;
 }
 body[data-skin="guigu"] .bpip b { color: inherit; font-weight: 400; }
-body[data-skin="guigu"] .bpip span { filter: grayscale(1) sepia(0.22) contrast(0.92); opacity: .55; }
 
 /* ---------- 双人联机面板 ---------- */
 .coop-body { display: flex; flex-direction: column; gap: var(--sp-3); }

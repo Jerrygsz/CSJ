@@ -50,7 +50,7 @@ await page.waitForTimeout(400);
 const buffLayout = await page.evaluate(() => {
   const br = document.getElementById('buffrow');
   br.style.display = 'flex';
-  if (!br.children.length) br.innerHTML = '<div class="bpip"><span>✦</span><b>伤</b></div>';
+  if (!br.children.length) br.innerHTML = '<div class="bpip"><b>伤</b></div>';
   const a = br.getBoundingClientRect(), h = document.getElementById('hpwrap').getBoundingClientRect();
   return { parent: br.parentElement.id, buffTop: Math.round(a.top), buffBottom: Math.round(a.bottom),
            hpTop: Math.round(h.top), hpBottom: Math.round(h.bottom) };

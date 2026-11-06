@@ -914,8 +914,8 @@
     elBuffrow.innerHTML = bs.map(b => {
       const nm = { dmg: '伤', spd: '速', crit: '暴', armor: '御', regen: '回', pickup: '拾', xpMul: '修', atkSpd: '急', drop: '落' }[b.stat] || '益';
       const amt = b.stat === 'drop' ? ('+' + b.amount) : ('+' + Math.round(b.amount * 100) + '%');
-      // 秒数只留在 title 里（桌面可查），签面只留图标 + 一个单字，不显数字
-      return '<div class="bpip" title="' + b.name + '　' + nm + amt + '　剩余 ' + Math.ceil(b.t) + ' 秒"><span>' + (b.icon || '✨') + '</span><b>' + nm + '</b></div>';
+      // 签面只留一个单字：不显图标、不显数字。完整名 / 加成 / 剩余秒数都放进 title（桌面可查）
+      return '<div class="bpip" title="' + b.name + '　' + nm + amt + '　剩余 ' + Math.ceil(b.t) + ' 秒"><b>' + nm + '</b></div>';
     }).join('');
   }
   function curDiff() { return G.diff || DIFFICULTIES[0]; }
