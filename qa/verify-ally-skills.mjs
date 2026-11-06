@@ -1,6 +1,6 @@
 // 第116轮 · 同伴 / 灵宠技能常驻闸门
 //
-// 判据分十组：
+// 判据分十四组：
 //   A 覆盖   —— 页面里真实加载的 MATES + PETS 一个不漏，源码正则再兜一道
 //   B 原著   —— 技能名 / 词频 / 摘句 / 关联强度 逐条对上 canon/ally-skills.md 与已核验词频基线
 //   C 数值   —— 六种释放形态齐、威力与冷却都在设计带里、四档门槛取自 rangeModel.BANDS
@@ -12,6 +12,13 @@
 //   I 水墨   —— 第117轮：读一招真正画出来的粒子 / 印蜕 / 像素特效 / 出手动作，
 //               逐条对上六种形态各自的笔势清单；色阶只认 fxpix.PAL 四档
 //   J 反向   —— 第117轮：把法阵 / 像素特效 / 印蜕 / 动作 / 调色板逐个抽掉，闸门得红
+//   K 三功   —— 第118轮：护体 / 近身 / 远击三类齐，CD 与韩立当前境界功法攻速同口径，
+//               逐档拨 G.realm.atk 验证单调递减 + 下限钳制；三类都真实释放并数特效
+//   L 自由   —— 第118轮：可视范围内自主移动追怪、不再围绕韩立，坐标永远夹在视野矩形里
+//   M 生死   —— 第118轮：血量=主角满血 50%（不显血条）/ 受击 / 护体减伤 / 殒落落台账 /
+//               十息时钱够才自动扣 10000 复生 / 当时钱不够记欠费，此后攒够也不起身 /
+//               必须回洞府交钱 / 死亡台账与欠费台账都跨地图保留
+//   N 反向   —— 第118轮：把血量比例、三类集合、CD 曲线、复活价、经济结算、欠费状态、视野边界逐个注入坏数据
 //
 // 用法：node qa/verify-ally-skills.mjs
 import { createRequire } from 'node:module';
@@ -37,10 +44,13 @@ const CANON_FREQ = {
   '冰封': 164, '七星月体': 14, '傀儡术': 89, '寒焰': 172, '蛛网': 75,
   '风刃': 191, '黑水': 64, '神雷': 652
 };
-const ALLY_KINDS = ['bolt', 'fan', 'nova', 'chain', 'chill', 'drain'];
+const ALLY_KINDS = ['bolt', 'fan', 'nova', 'chain', 'chill', 'drain'];  // 第116轮本命绝学六种形态
 const WHITELIST_JUE = ['大衍诀'];            // canon/combat.md 第四节白名单里以「诀」收尾的
 const BANDS = [36, 56, 82, 112, 200, 260, 460];  // js/skills.js window.rangeModel.BANDS
 const ALLY_PALS = ['xue', 'jin', 'qi', 'mo'];     // 第117轮：只认 fxpix.js PAL 的四条六档色阶
+// 第118轮：三类常规功法。cdKey 是「韩立身上对应那一类功法」的 id，不是拍脑袋定的常数。
+const ART_KINDS = ['guard', 'melee', 'ranged'];
+const ART_CD_KEYS = { guard: 'nova', melee: 'frost', ranged: 'sword' };
 // 每种形态「至少得画出什么」：数字是粒子条数下限，来自主角功法同款原语的组合
 //（起手法阵 1、像素符文 1、主特效 1、朱砂印蜕 1、主角同款弯月 / 放射 / 折线 / 网）。
 const FX_NEED = {
@@ -100,6 +110,55 @@ function validateFx(list, fxById, pals) {
     if (f.kind !== s.kind) errs.push(s.id + ' 实机形态与数据表不符');
   }
   for (const p of pals) if (!list.some(s => s.pal === p)) errs.push('调色板 ' + p + ' 一条都没用上');
+  return errs;
+}
+
+// 第118轮 · 三功 / 自由行动 / 生死经济校验器：真实产物与注入数据共用（闸门得有牙）。
+function validateR118(d) {
+  const errs = [];
+  const A = d.arts || {}, C = d.cds || {}, S = d.state || {}, V = S.view || {};
+  if ((A.kinds || []).join(',') !== ART_KINDS.join(',')) errs.push('三类功法集合不对：' + (A.kinds || []).join(','));
+  for (const k of ART_KINDS) {
+    const t = (A.table || {})[k];
+    if (!t) { errs.push('缺功法 ' + k); continue; }
+    if (!/^[护近远]$/.test(t.tag || '')) errs.push(k + ' 标签不是单字功能标记');
+    if (t.cdKey !== ART_CD_KEYS[k]) errs.push(k + ' 没绑到主角对应功法 ' + ART_CD_KEYS[k]);
+    if (/[诀斩爆功法术]$/.test(t.name || '')) errs.push(k + ' 疑似自造招式名：' + t.name);
+    if (!(C[k] > 0)) errs.push(k + ' CD 非正');
+  }
+  if (!A.allKinds || !ART_KINDS.every(k => A.allKinds.includes(k))) errs.push('释放引擎没认三类新形态');
+  if (Math.abs(A.hpK - 0.5) > 1e-9) errs.push('血量比例不是主角满血 50%');
+  for (const key of ['pet', 'mate']) {
+    const e = S[key];
+    if (!e) continue;
+    if (e.maxhp !== Math.round((S.playerMaxhp || 0) * 0.5)) errs.push(key + ' 血量不是主角满血一半');
+    if (e.r !== A.r) errs.push(key + ' 碰撞半径不符');
+    if (e.x < V.x + A.viewEdge - 0.01 || e.x > V.x + V.w - A.viewEdge + 0.01 ||
+        e.y < V.y + A.viewEdge - 0.01 || e.y > V.y + V.h - A.viewEdge + 0.01) {
+      errs.push(key + ' 跑出了可视范围');
+    }
+  }
+  // CD 曲线：境界攻速涨 → CD 只能变快；极高境界被下限钳住
+  const walk = d.cdWalk || [];
+  for (let i = 1; i < walk.length; i++) {
+    for (const k of ART_KINDS) if (walk[i][k] > walk[i - 1][k] + 1e-6) errs.push(k + ' 境界涨了 CD 反而变慢');
+  }
+  if (!(A.floor > 0 && A.floor <= 0.3)) errs.push('CD 下限不合理');
+  if (walk.length && ART_KINDS.some(k => Math.abs(walk[walk.length - 1][k] - A.floor) > 1e-6)) {
+    errs.push('极高境界没被下限钳住');
+  }
+  if (A.reviveT !== 10) errs.push('自动复活不是十息');
+  if (A.reviveCost !== 10000) errs.push('复活价不是 10000 灵石');
+  for (const s of (d.steps || [])) {
+    if (s.kind === 'hurt' && !(s.after < s.before)) errs.push('受击没扣血');
+    if (s.kind === 'guard' && !(s.guardTaken < s.plainTaken)) errs.push('护体没减伤');
+    if (s.kind === 'dead' && (!s.dead || !s.inDeadMap)) errs.push('死亡没落台账');
+    if (s.kind === 'starve' && (s.revived || s.stones !== s.stones0 || !s.deadMapKept || !s.oweMarked)) errs.push('十息钱不够却复活 / 扣钱 / 没记欠费');
+    if (s.kind === 'owe' && (s.revived || s.stones !== s.stones0 || !s.oweKept)) errs.push('欠费后攒够钱却自动复生了');
+    if (s.kind === 'auto' && (!s.revived || s.stones0 - s.stones !== A.reviveCost)) errs.push('钱够的自动复活没扣 10000');
+    if (s.kind === 'pay' && (!s.ok || s.stones0 - s.stones !== A.reviveCost || !s.oweCleared)) errs.push('洞府交钱没扣 10000 / 没清欠费');
+    if (s.kind === 'payfail' && (s.ok || s.stones !== s.stones0)) errs.push('钱不够却交钱成功');
+  }
   return errs;
 }
 
@@ -358,6 +417,242 @@ const badFxCases = [
 ];
 for (const c of badFxCases) {
   const e = validateFx(c.ls, c.fx, ALLY_PALS);
+  ok(e.length > 0, '注入「' + c.label + '」会被拦下', e.slice(0, 2));
+}
+
+console.log('\n【K · 第118轮：三类功法 + CD 与韩立境界攻速齐平】');
+const r118 = await page.evaluate(() => {
+  const F = window.__FR, G = F.G;
+  const arts = F.allyArts();
+  const savedAtk = G.realm.atk;
+  // 手动拨 G.realm.atk（atkMul() 里唯一的境界来源），逐档读三类 CD
+  const walk = [0, 1, 3, 8, 18, 1000].map(a => {
+    G.realm.atk = a;
+    const c = F.allyArtCds();
+    return { atk: a, guard: c.guard, melee: c.melee, ranged: c.ranged, atkMul: c.atkMul };
+  });
+  G.realm.atk = savedAtk;
+  // 独立复算：直接读 skills.js 的真实功法配置 + 主角同款两个乘数，不复用 allyArtCd
+  const c = F.allyArtCds(), cdRef = {};
+  for (const k of ['guard', 'melee', 'ranged']) {
+    const t = arts.table[k], s = window.skillById(t.cdKey);
+    const lv = (G.player && G.player.skills && G.player.skills[t.cdKey]) || 1;
+    const base = k === 'melee' ? (s.atk.cdHit || 0.5) : window.skillAtk.cd(s.atk, lv);
+    cdRef[k] = { cdKey: t.cdKey, base: base, expect: Math.max(arts.floor, base * c.haste * c.atkMul) };
+  }
+  const id = G.pet ? G.pet.id : null;
+  // 清掉前面 E 组本命绝学留在实体上的起手计时，才能验证「三类功法不重置动作」
+  if (id) { F.allySetPos(id, G.player.x - 24, G.player.y + 10); G.pet.guardT = 0; G.pet.skCast = 0; }
+  const armor0 = F.allyArtCds().armor;
+  const cast = {};
+  for (const k of ['guard', 'melee', 'ranged']) {
+    if (!id) break;
+    G.parts.length = 0; G.texts.length = 0;
+    if (window.FX3) FX3.clear();
+    const b0 = G.bullets.filter(b => b.ally).length;
+    const r = F.allyCastArt(id, k);
+    cast[k] = {
+      r: r, rune: G.parts.filter(p => p.rune).length, ring: G.parts.filter(p => p.ring).length,
+      slash: G.parts.filter(p => p.slash).length, seal: G.texts.filter(t => t.seal).length,
+      bullets: G.bullets.filter(b => b.ally).length - b0,
+      guardT: G.pet.guardT, skCast: G.pet.skCast, total: G.parts.length
+    };
+  }
+  const armor1 = F.allyArtCds().armor;
+  G.parts.length = 0; G.texts.length = 0;
+  if (window.FX3) FX3.clear();
+  G.bullets = G.bullets.filter(b => !b.ally);
+  if (id) G.pet.guardT = 0;
+  return { arts: arts, cds: c, walk: walk, cdRef: cdRef, state: F.allyState(), cast: cast, armor0: armor0, armor1: armor1 };
+});
+ok(r118.arts.kinds.join(',') === ART_KINDS.join(','), '三类功法集合 = 护体 / 近身 / 远击', r118.arts.kinds);
+ok(ART_KINDS.every(k => r118.arts.table[k] && /^[护近远]$/.test(r118.arts.table[k].tag)),
+  '三类都用单字功能标签，不自造招式名');
+ok(ART_KINDS.every(k => r118.arts.table[k].cdKey === ART_CD_KEYS[k]),
+  '三类分别绑到主角 nova / frost / sword 的真实配置',
+  ART_KINDS.map(k => k + ':' + r118.arts.table[k].cdKey).join(' '));
+ok(ART_KINDS.every(k => r118.arts.allKinds.includes(k)), '释放引擎认得三种新形态', r118.arts.allKinds);
+ok(ART_KINDS.every(k => Math.abs(r118.cdRef[k].expect - r118.cds[k]) < 1e-3),
+  '三类 CD 与「skillAtk.cd × hasteMul × atkMul」主角同口径复算一致',
+  ART_KINDS.map(k => k + ': ' + r118.cds[k] + ' vs ' + r118.cdRef[k].expect.toFixed(4)).join(' | '));
+ok(r118.walk.every((w, i) => i === 0 || ART_KINDS.every(k => w[k] <= r118.walk[i - 1][k] + 1e-6)),
+  '境界攻速涨（realm.atk 0→18），三类 CD 只降不升',
+  r118.walk.map(w => w.atk + ':' + w.ranged.toFixed(3)).join(' '));
+ok(ART_KINDS.every(k => Math.abs(r118.walk[r118.walk.length - 1][k] - r118.arts.floor) < 1e-6),
+  '极高境界被 0.18s 下限钳住，不会一秒刷 90 发', r118.walk[r118.walk.length - 1]);
+ok(r118.walk[0].ranged > r118.walk[3].ranged, '炼气到元婴，远击间隔确实变快');
+ok(r118.cast.guard && r118.cast.guard.guardT > 0 && r118.cast.guard.ring >= 2 && r118.cast.guard.rune >= 2,
+  '护体真实释放：罩子挂上 + 双环 + 双层贴地阵');
+ok(r118.cast.melee && r118.cast.melee.slash >= 2 && r118.cast.melee.ring >= 1, '近身真实释放：两道弯月 + 身周环');
+ok(r118.cast.ranged && r118.cast.ranged.bullets >= 2 && r118.cast.ranged.slash >= 1, '远击真实释放：多枚追踪弹 + 弯月');
+ok(ART_KINDS.every(k => r118.cast[k] && r118.cast[k].r && r118.cast[k].r.light === true), '三类都走轻量呈现档');
+ok(ART_KINDS.every(k => r118.cast[k] && r118.cast[k].seal === 0 && r118.cast[k].skCast === 0),
+  '密集出手不飘印蜕、不重置起手动作（否则会一直抽）');
+ok(r118.armor1 > r118.armor0, '护体罩罩到韩立时，他的减伤也涨了一截',
+  { before: r118.armor0, after: r118.armor1 });
+
+console.log('\n【L · 第118轮：视野内自由行动，不再围绕韩立】');
+const move = await page.evaluate(() => {
+  const F = window.__FR, G = F.G;
+  if (!G.pet || !G.player) return null;
+  const id = G.pet.id, v = F.allyState().view, p = G.player;
+  const clamped = F.allySetPos(id, v.x - 500, v.y - 500);   // 强推到视野外，工厂会夹回来
+  G.enemies.length = 0;
+  const tx = v.x + v.w - 40, ty = v.y + v.h / 2;
+  G.enemies.push({
+    _id: 990001, type: 'wolf', x: tx, y: ty, hp: 1e9, maxhp: 1e9, r: 10, spd: 0, dmg: 0,
+    xpVal: 0, spr: 'wolf', hitFlash: 0, t: 0, dashT: 0, stunT: 0, _orbCd: {}, art: null, _artCd: 0, wob: 0
+  });
+  const d0 = Math.hypot(G.pet.x - tx, G.pet.y - ty);
+  const start = { x: G.pet.x, y: G.pet.y };
+  let maxFromPlayer = 0, everOutside = false;
+  for (let i = 0; i < 60; i++) {
+    F.allyMoveTick(0.05);
+    const e = G.pet;
+    maxFromPlayer = Math.max(maxFromPlayer, Math.hypot(e.x - p.x, e.y - p.y));
+    if (e.x < v.x + v.edge - 0.1 || e.x > v.x + v.w - v.edge + 0.1 ||
+        e.y < v.y + v.edge - 0.1 || e.y > v.y + v.h - v.edge + 0.1) everOutside = true;
+  }
+  const d1 = Math.hypot(G.pet.x - tx, G.pet.y - ty);
+  const end = { x: G.pet.x, y: G.pet.y };
+  G.enemies.length = 0;
+  G.bullets = G.bullets.filter(b => !b.ally);
+  G.parts.length = 0; G.texts.length = 0;
+  return { clamped: clamped, view: v, start: start, end: end, d0: +d0.toFixed(1), d1: +d1.toFixed(1),
+    moved: +Math.hypot(end.x - start.x, end.y - start.y).toFixed(1),
+    maxFromPlayer: +maxFromPlayer.toFixed(1), everOutside: everOutside };
+});
+ok(move && move.clamped.x >= move.view.x + move.view.edge - 0.01 &&
+   move.clamped.y >= move.view.y + move.view.edge - 0.01,
+  '强推到视野外会被夹回可视矩形', move && move.clamped);
+ok(move && !move.everOutside, '连续 60 帧自主移动，一次都没跑出可视范围');
+ok(move && move.d1 < move.d0 - 30, '真的自己朝敌人追过去了（不是围着韩立转）',
+  move && { d0: move.d0, d1: move.d1 });
+ok(move && move.maxFromPlayer > 60, '离韩立最远超过 60px，确实不再贴身跟随', move && move.maxFromPlayer);
+ok(/allyMove\(pt, dt, mode\)/.test(gsrc) && /allyMove\(mt, dt, mode\)/.test(gsrc),
+  'updatePet / updateMate 都接了自主移动');
+ok(/tickAllyArts\(pt, def\.id, dt\)/.test(gsrc) && /tickAllyArts\(mt, def\.id, dt\)/.test(gsrc),
+  '两个 update 都挂了三类功法独立冷却');
+ok(/function allyClampView[\s\S]{0,300}?G\.cam\.x \+ W - ALLY_VIEW_EDGE/.test(gsrc),
+  '视野边界按 G.cam 起的 W×H 矩形算，不是拍脑袋的圆形');
+
+console.log('\n【M · 第118轮：血量 / 受击 / 殒落 / 十息复活 / 灵石经济】');
+const life = await page.evaluate(() => {
+  const F = window.__FR, G = F.G;
+  if (!G.pet || !G.player) return null;
+  const id = G.pet.id, steps = [];
+  F.allySetDeadMap({}); F.allySetOweMap({}); F.setStones(0);
+  F.allySetPos(id, G.player.x - 24, G.player.y + 10);
+  G.pet.dead = false; G.pet.hp = G.pet.maxhp; G.pet.iv = 0; G.pet.guardT = 0;
+  const s0 = F.allyState(), maxhp = s0.pet.maxhp, playerMaxhp = s0.playerMaxhp;
+  // 普通一击 / 无敌帧去重 / 护体减伤
+  G.pet.iv = 0; G.pet.guardT = 0;
+  const b1 = F.allyState().pet.hp; F.allyHurt(id, 100); const a1 = F.allyState().pet.hp;
+  steps.push({ kind: 'hurt', before: b1, after: a1 });
+  const hpIv = F.allyState().pet.hp; F.allyHurt(id, 100); const hpIv2 = F.allyState().pet.hp;
+  G.pet.iv = 0; F.allySetGuard(id);
+  const b2 = F.allyState().pet.hp; F.allyHurt(id, 100); const a2 = F.allyState().pet.hp;
+  steps.push({ kind: 'guard', plainTaken: b1 - a1, guardTaken: b2 - a2 });
+  // 打到殒落
+  G.pet.guardT = 0;
+  for (let i = 0; i < 200 && !G.pet.dead; i++) { G.pet.iv = 0; F.allyHurt(id, 1000); }
+  const ds = F.allyState();
+  steps.push({ kind: 'dead', dead: ds.pet.dead, inDeadMap: !!ds.deadMap[id] });
+  // 十息到点灵石不够：不复活、不扣钱、死亡台账保留，并记一笔「欠费」
+  const st0 = F.allyState().stones;
+  for (let i = 0; i < 12; i++) F.allyTickRevive(1);
+  const sv = F.allyState();
+  steps.push({ kind: 'starve', revived: !sv.pet.dead, stones0: st0, stones: sv.stones, deadMapKept: !!sv.deadMap[id], oweMarked: !!sv.oweMap[id] });
+  // 欠费之后即使出去打怪攒够了钱，也不许自己起身 —— 必须回洞府交钱
+  F.setStones(20000);
+  const bo = F.allyState().stones;
+  const ov = F.allyTickRevive(0.05);
+  steps.push({ kind: 'owe', revived: !ov.petDead, stones0: bo, stones: ov.stones, oweKept: !!ov.oweMap[id] });
+  // 另起一次殒落，十息时钱够 —— 这才走「自动扣 10000 复生」
+  F.allySetOweMap({});
+  F.allySetDeadMap({ [id]: Date.now() });
+  G.pet.dead = true; G.pet.hp = 0; G.pet.deadT = 0; G.pet.starveNoted = 0;
+  F.setStones(20000);
+  const ba = F.allyState().stones;
+  let au = null;
+  for (let i = 0; i < 12; i++) au = F.allyTickRevive(1);
+  steps.push({ kind: 'auto', revived: !au.petDead, stones0: ba, stones: au.stones });
+  // 洞府交钱复活（欠费 + 钱够）：应当清掉欠费台账
+  F.allySetDeadMap({ [id]: Date.now() });
+  F.allySetOweMap({ [id]: true });
+  G.pet.dead = true; G.pet.hp = 0; G.pet.deadT = 0;
+  F.setStones(20000);
+  const bp = F.allyState().stones, pr = F.allyPayRevive(id);
+  steps.push({ kind: 'pay', ok: pr.ok, stones0: bp, stones: pr.stones, oweCleared: !pr.oweMap[id] });
+  // 洞府交钱复活（钱不够）
+  F.allySetDeadMap({ [id]: Date.now() });
+  F.allySetOweMap({ [id]: true });
+  G.pet.dead = true; G.pet.hp = 0;
+  F.setStones(9999);
+  const bf = F.allyState().stones, pf = F.allyPayRevive(id);
+  steps.push({ kind: 'payfail', ok: pf.ok, stones0: bf, stones: pf.stones });
+  // 跨地图：死亡台账与欠费台账都落 save，进图重建的实体仍是死的
+  F.allySetDeadMap({ [id]: Date.now() });
+  F.allySetOweMap({ [id]: true });
+  F.enterMap('houshan', 'easy');
+  if (G.state === 'dialog') F.skipStory();
+  const cr = F.allyState();
+  return { steps: steps, maxhp: maxhp, playerMaxhp: playerMaxhp, hpIvSame: hpIv === hpIv2,
+    cross: { dead: cr.pet ? cr.pet.dead : null, hasMark: !!cr.deadMap[id], oweKept: !!cr.oweMap[id], maxhp: cr.pet ? cr.pet.maxhp : null },
+    arts: F.allyArts(), cds: F.allyArtCds(), state: F.allyState() };
+});
+ok(life && life.maxhp === Math.round(life.playerMaxhp * 0.5),
+  '随行者血量 = 韩立满血的 50%', life && { maxhp: life.maxhp, player: life.playerMaxhp });
+ok(life && life.hpIvSame, '受击后有 0.55s 无敌帧，不会被每帧连击');
+ok(life && life.steps.find(s => s.kind === 'guard').guardTaken < life.steps.find(s => s.kind === 'guard').plainTaken,
+  '护体罩真的减伤了', life && life.steps.find(s => s.kind === 'guard'));
+ok(life && life.steps.find(s => s.kind === 'dead').dead && life.steps.find(s => s.kind === 'dead').inDeadMap,
+  '血量归零即殒落，并写进 save.allyDead 台账');
+ok(life && life.steps.find(s => s.kind === 'starve').deadMapKept,
+  '十息钱不够时死亡标记一直保留（能去别的图攒钱）');
+ok(life && life.steps.find(s => s.kind === 'starve').oweMarked, '十息钱不够会记入欠费台账');
+ok(life && !life.steps.find(s => s.kind === 'owe').revived && life.steps.find(s => s.kind === 'owe').oweKept,
+  '欠费后即使攒够钱也不自动起身（必须回洞府交钱）', life && life.steps.find(s => s.kind === 'owe'));
+ok(life && life.steps.find(s => s.kind === 'auto').revived, '十息时灵石够，才自动扣 10000 复生');
+ok(life && life.steps.find(s => s.kind === 'pay').ok && life.steps.find(s => s.kind === 'pay').oweCleared,
+  '洞府「交钱复活」可用，并清掉欠费台账');
+ok(life && !life.steps.find(s => s.kind === 'payfail').ok, '9999 灵石交钱会被拒');
+ok(life && life.cross.dead === true && life.cross.hasMark, '换图重建实体仍是殒落状态（台账跨地图保留）', life && life.cross);
+ok(life && life.cross.oweKept === true, '欠费台账跨地图 / 跨会话保留');
+ok(life && life.cross.maxhp === Math.round(life.state.playerMaxhp * 0.5), '换图后血量仍按韩立满血 50% 重算');
+ok(/['"]殒['"]/.test(gsrc) && /if \(pt\.dead\)/.test(gsrc) && /if \(mt\.dead\)/.test(gsrc),
+  '殒落只画一枚「殒」印，渲染段有 dead 分支');
+const petDraw = gsrc.slice(gsrc.indexOf('// 灵宠：第118轮'), gsrc.indexOf('// 同伴：第118轮'));
+ok(petDraw.length > 300 && !/maxhp/.test(petDraw), '灵宠绘制段没有血条（用户明确不显示）');
+ok(/save\.allyDead = Date\.now\(\)/.test(gsrc) || /save\.allyDead\[a\.id\] = Date\.now\(\)/.test(gsrc),
+  '死亡时间戳用绝对时间，切图不会丢');
+ok(/save\.stones -= ALLY_REVIVE_COST/.test(gsrc), '复活确实扣灵石（不是免费起身）');
+ok(/allyOwe:\s*\{\s*\}/.test(gsrc) && /s\.allyOwe && typeof s\.allyOwe/.test(gsrc),
+  '欠费台账有默认值与旧档迁移');
+ok(/if \(save\.allyOwe\[id\]\) continue/.test(gsrc) && /save\.allyOwe\[id\] = true/.test(gsrc),
+  '源码里欠费者被跳过、十息钱不够才记账');
+ok(/button\[data-revive\]/.test(gsrc) && /payReviveAlly\(/.test(gsrc), '洞府交钱按钮接到了点击委托');
+ok(errs.length === 0, '三类功法 / 自由行动 / 生死经济全程无 JS 报错', errs.slice(0, 3));
+
+console.log('\n【N · 反向注入：第118轮闸门得有牙】');
+const realR118 = { arts: r118.arts, cds: r118.cds, cdWalk: r118.walk, state: r118.state, steps: life.steps };
+ok(validateR118(realR118).length === 0, '真实产物通过第118轮校验器', validateR118(realR118).slice(0, 5));
+const badR118 = [
+  { label: '血量比例改成 100%', d: { ...realR118, arts: { ...realR118.arts, hpK: 1 } } },
+  { label: '三类少一类', d: { ...realR118, arts: { ...realR118.arts, kinds: ['guard', 'melee'] } } },
+  { label: 'cdKey 绑错功法', d: { ...realR118, arts: { ...realR118.arts, table: { ...realR118.arts.table, ranged: { ...realR118.arts.table.ranged, cdKey: 'fire' } } } } },
+  { label: 'CD 不随境界变（写平）', d: { ...realR118, cdWalk: realR118.cdWalk.map(w => ({ ...w, guard: 0.5, melee: 0.5, ranged: 0.5 })) } },
+  { label: '复活价改成 0', d: { ...realR118, arts: { ...realR118.arts, reviveCost: 0 } } },
+  { label: '钱不够却复活', d: { ...realR118, steps: realR118.steps.map(s => s.kind === 'starve' ? { ...s, revived: true } : s) } },
+  { label: '十息钱不够没记欠费', d: { ...realR118, steps: realR118.steps.map(s => s.kind === 'starve' ? { ...s, oweMarked: false } : s) } },
+  { label: '欠费后攒够钱却自动起身', d: { ...realR118, steps: realR118.steps.map(s => s.kind === 'owe' ? { ...s, revived: true } : s) } },
+  { label: '洞府交钱没清欠费', d: { ...realR118, steps: realR118.steps.map(s => s.kind === 'pay' ? { ...s, oweCleared: false } : s) } },
+  { label: '自动复活不扣钱', d: { ...realR118, steps: realR118.steps.map(s => s.kind === 'auto' ? { ...s, stones: s.stones0 } : s) } },
+  { label: '受击不扣血', d: { ...realR118, steps: realR118.steps.map(s => s.kind === 'hurt' ? { ...s, after: s.before } : s) } },
+  { label: '随行者跑出视野', d: { ...realR118, state: { ...realR118.state, pet: { ...realR118.state.pet, x: -9999 } } } }
+];
+for (const c of badR118) {
+  const e = validateR118(c.d);
   ok(e.length > 0, '注入「' + c.label + '」会被拦下', e.slice(0, 2));
 }
 

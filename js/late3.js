@@ -402,5 +402,39 @@
     }
   };
 
+  // ========================= 六(3)、三类功法（第118轮） =========================
+  // 韩立身上的功法分「护体 / 近身领域 / 远程定向」三类走法；随行的人与兽也各有这三种。
+  // 这里**不自造招式名**：三类只是「运使方式」的功能标签，不是原著里的独立功法名。
+  // 每个随行者唯一的招式名仍是 ALLY_SKILLS 里那条逐字核验过原著的本命绝学。
+  // 口径说明补在 canon/ally-skills.md 末尾，闸门会比对这张表与代码里的分类集合。
+  window.ALLY_ART_KINDS = ['guard', 'melee', 'ranged'];
+  window.ALLY_ARTS = {
+    guard:  { name: '护体', tag: '护', kind: 'guard',  pow: 0,    cdKey: 'nova',  pal: 'xue',
+              desc: '开一层护罩，替自己和近旁的韩立挡下近半伤害' },
+    melee:  { name: '近身', tag: '近', kind: 'melee',  pow: 0.55, rad: 54, cdKey: 'frost', pal: 'qi',
+              desc: '贴到敌人跟前，身周一小片同时见血' },
+    ranged: { name: '远击', tag: '远', kind: 'ranged', pow: 0.42, count: 2, cdKey: 'sword', pal: 'jin',
+              desc: '隔着半屏放出几道追踪的刃光' }
+  };
+  // cdKey 是「韩立身上对应那一类功法」的 id —— CD 不是拍脑袋定的，是去 skills.js 读
+  // 那门功法的真实 atk 配置，再乘 game.js:1339 主角那行同款的两个攻速乘数。
+  //   guard  ← nova  定神符（爆发类，cdBase 4.5 / cdPerLv 0.3 / cdMin 2.5）
+  //   melee  ← frost 冰冻术（近身领域，cdHit 0.5）
+  //   ranged ← sword 驱物术（远程定向，cd 0.85）
+  // 每只的形状/配色从它自己的本命绝学派生，不另写 14×3 条重复数据。
+  // mode 决定它在视野里怎么跑：本命是范围/定身/回补的偏贴身，弹道/连锁的偏拉开。
+  window.allyArtOf = function (id, kind) {
+    const base = window.ALLY_SKILLS[id], tpl = window.ALLY_ARTS[kind];
+    if (!base || !tpl) return null;
+    const near = ['nova', 'chill', 'drain'].indexOf(base.kind) >= 0;
+    return {
+      id: id, kind: kind, name: tpl.name, tag: tpl.tag, skKind: tpl.kind,
+      mode: near ? 'melee' : 'ranged',
+      pow: Math.round((base.pow || 10) * tpl.pow * 10) / 10,
+      rad: tpl.rad || 0, count: tpl.count || 0,
+      vfx: base.vfx, pal: base.pal || tpl.pal, desc: tpl.desc, cdKey: tpl.cdKey
+    };
+  };
+
   window.ALL_ITEMS = window.ITEMS.concat(window.MATERIALS);
 })();

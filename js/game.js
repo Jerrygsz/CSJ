@@ -198,6 +198,13 @@
       petFeed: { on: false, t: 0 },
       // 同伴：按剧情出现的，跟着一起打
       mates: [], mate: null,
+      // 第118轮：随行者殒落台账 { 实体id: Date.now() }。必须落 save 才能跨地图保留 ——
+      // 进图时 G.pet / G.mate 会整个重建，放 G 里一切图就丢了。灵石不够就一直挂着，
+      // 回洞府交钱复活时才清掉。
+      allyDead: {},
+      // 第118轮：欠费台账 { 实体id: true }。十息到点灵石不够就记一笔，此后哪怕打怪攒够了钱
+      // 也不再自动起身 —— 必须打完图出去、回洞府点「交钱复活」。落 save 才能跨地图 / 跨会话保留。
+      allyOwe: {},
       // 战斗右侧快捷栏：三格，每格 { kind:'pet'|'item', id }
       quick: [null, null, null],
       // 修为被封印（五鬼锁魂这类）：{ name, dmg, hp, note }
@@ -332,6 +339,10 @@
         petFeed: (s.petFeed && typeof s.petFeed === 'object') ? { on: !!s.petFeed.on, t: 0 } : { on: false, t: 0 },
         mates: Array.isArray(s.mates) ? s.mates.filter(x => typeof x === 'string') : [],
         mate: (typeof s.mate === 'string') ? s.mate : null,
+        // 第118轮：旧档没有殒落台账，补成空账（活着的随行者不受影响）
+        allyDead: (s.allyDead && typeof s.allyDead === 'object') ? s.allyDead : {},
+        // 第118轮：旧档没有欠费台账，补成空账（活着的随行者不受影响）
+        allyOwe: (s.allyOwe && typeof s.allyOwe === 'object') ? s.allyOwe : {},
         quick: Array.isArray(s.quick) ? s.quick.slice(0, 3) : [null, null, null],
         sealed: (s.sealed && typeof s.sealed === 'object') ? s.sealed : null,
         repBlack: s.repBlack || 0,
@@ -797,7 +808,8 @@
   // 是否已能拾取整屏（含四角）
   function pickupFull() { return pickupRaw() >= viewPickR(); }
   function critChance() { return 0.05 + rb('crit') + (G.bonus.crit || 0) + gb('crit') + passiveSum('crit') + buffSum('crit'); }
-  function armorRate() { return Math.min(0.62, rb('armor') + (G.bonus.armor || 0) + gb('armor') + passiveSum('armor') + buffSum('armor') + rp('armor')); }
+  // 第118轮：随行者的护体罩罩到韩立时，也给他加一层减伤（仍受 0.62 硬顶）
+  function armorRate() { return Math.min(0.62, rb('armor') + (G.bonus.armor || 0) + gb('armor') + passiveSum('armor') + buffSum('armor') + rp('armor') + allyGuardBonus()); }
   // 生命上限 = 基础 + 永久道具 + 境界累计 + 装备 + 葫芦功法
   // 形象跟着人走：袍色看境界，甲色看身上穿的护甲，封印了人就灰下去
   function heroTierOf(lv) {
@@ -1657,6 +1669,145 @@
     if (elCombo) elCombo.style.display = 'none';
   }
 
+  // ==========================================================================
+  // 第118轮 · 随行者会受伤、会殒落、要花灵石才回得来
+  // --------------------------------------------------------------------------
+  // 一条硬规矩：受伤走 hurtAlly()，绝不能复用 hitPlayer() —— 后者会改主角的
+  // iv / hurtFlash / hp，还会写 G.shake、G.flash、断连斩，甚至 coopDown() 判负。
+  // 随行者只改自己那几个字段，飘字与火花用纯视觉原语，屏震闪白一概不碰。
+  // ==========================================================================
+  const ALLY_HP_K = 0.5;          // 血量 = 韩立满血的 50%
+  const ALLY_R = 9;               // 碰撞半径（与联机队友 pt.r||9 同口径）
+  const ALLY_REVIVE_T = 10;       // 殒落后十息
+  const ALLY_REVIVE_COST = 10000; // 复生要的灵石
+  const ALLY_GUARD_DUR = 3.0;     // 护罩持续
+  const ALLY_GUARD_CUT = 0.45;    // 护罩内自己只吃 45% 伤害
+  const ALLY_GUARD_ARMOR = 0.18;  // 罩子罩到韩立时给他加的减伤
+
+  function allyEntById(id) {
+    return (G.pet && G.pet.id === id) ? G.pet : (G.mate && G.mate.id === id) ? G.mate : null;
+  }
+  function aliveAllies() {
+    const out = [];
+    if (G.pet && !G.pet.dead) out.push(G.pet);
+    if (G.mate && !G.mate.dead) out.push(G.mate);
+    return out;
+  }
+  // 护体罩罩到主角时并入 armorRate()（仍受它 0.62 的硬顶）
+  function allyGuardBonus() {
+    const p = G.player; if (!p) return 0;
+    for (const a of aliveAllies()) {
+      if (a.guardT > 0 && U.dist(p.x, p.y, a.x, a.y) < 96) return ALLY_GUARD_ARMOR;
+    }
+    return 0;
+  }
+  function firstAllyHit(x, y, r) {
+    for (const a of aliveAllies()) if (U.dist(a.x, a.y, x, y) < r + a.r) return a;
+    return null;
+  }
+  function hurtAllyAt(x, y, r, dmg) {
+    for (const a of aliveAllies()) if (U.dist(a.x, a.y, x, y) < r + a.r) hurtAlly(a, dmg);
+  }
+  function hurtAlliesAll(dmg) { for (const a of aliveAllies()) hurtAlly(a, dmg); }
+  function hurtAlly(a, dmg) {
+    if (!a || a.dead || a.iv > 0 || G.god) return;
+    const taken = Math.max(1, Math.round(dmg * (a.guardT > 0 ? ALLY_GUARD_CUT : 1)));
+    a.hp -= taken; a.iv = 0.55; a.hurtFlash = 0.2;
+    spawnText(a.x, a.y - 18, '-' + taken, save.skin === 'guigu' ? '#8f2f24' : '#ff7676', 12);
+    spawnHit(a.x, a.y, '#c0352a');
+    if (a.hp <= 0) { a.hp = 0; killAlly(a); }
+  }
+  function killAlly(a) {
+    a.dead = true; a.deadT = 0; a.guardT = 0; a.skCast = 0; a.starveNoted = 0;
+    allyRing(a.x, a.y, 42, '#8f2f24', 0.5);
+    allySpark(a.x, a.y, '#8f2f24', 8);
+    spawnText(a.x, a.y - 30, '殒', save.skin === 'guigu' ? '#6b2a20' : '#ff7676', 13, { seal: true });
+    if (!save.allyDead) save.allyDead = {};
+    save.allyDead[a.id] = Date.now();
+    if (save.allyOwe) delete save.allyOwe[a.id];   // 新一次殒落重新计时，不继承旧欠费
+    writeSave();
+    Sfx.hurt();
+    const d = (window.PETS || []).find(p => p.id === a.id) || (window.MATES || []).find(m => m.id === a.id);
+    const nm = d ? d.name : a.id;
+    // 钱不够时不能说「十息后复生」—— 第118轮口径是欠费不复生，得回洞府交钱
+    notify(nm + ' 殒了 · ' + ((save.stones || 0) >= ALLY_REVIVE_COST
+      ? '十息后扣 ' + ALLY_REVIVE_COST + ' 灵石复生'
+      : '灵石不够，出去攒够 ' + ALLY_REVIVE_COST + ' 回洞府交钱复生'));
+  }
+  function reviveAlly(a, fromCave) {
+    a.dead = false; a.deadT = 0; a.starveNoted = 0;
+    a.hp = a.maxhp; a.iv = 1.6; a.hurtFlash = 0.2; a.guardT = 0;
+    if (!fromCave && G.player) {
+      a.x = G.player.x + (a === G.mate ? 26 : -26);
+      a.y = G.player.y + 12;
+    }
+    allyRing(a.x, a.y, 52, '#c0352a', 0.55);
+    if (window.FX3) FX3.spawn('pickup', a.x, a.y, { pal: 'xue' });
+    spawnText(a.x, a.y - 34, '复生', save.skin === 'guigu' ? '#6b2a20' : '#7fe0a0', 13, { seal: true });
+    Sfx.levelup();
+    if (!save.allyDead) save.allyDead = {};
+    delete save.allyDead[a.id];
+    if (save.allyOwe) delete save.allyOwe[a.id];
+    writeSave();
+  }
+  // 每帧一次：满十息、灵石够，才自动扣钱复生。十息到点钱不够就记入「欠费」台账，
+  // 此后哪怕在别处打怪攒够了钱也不自动起身 —— 得打完图出去、回洞府点「交钱复活」。
+  // 欠费状态落在 save 里，切图 / 重开浏览器都在；只记一笔，不会反复弹提示。
+  function tickAllyRevive(dt) {
+    const dead = save.allyDead || {};
+    if (!save.allyOwe) save.allyOwe = {};
+    for (const id in dead) {
+      if (save.allyOwe[id]) continue;         // 欠费：只认洞府交钱，不认自动复生
+      const a = (G.pet && G.pet.id === id) ? G.pet : (G.mate && G.mate.id === id) ? G.mate : null;
+      if (!a) continue;                       // 没带出门的：台账留着，等洞府交钱
+      if (!a.dead) { delete dead[id]; writeSave(); continue; }
+      a.deadT = (a.deadT || 0) + dt;
+      if (a.deadT < ALLY_REVIVE_T) continue;
+      if ((save.stones || 0) < ALLY_REVIVE_COST) {
+        save.allyOwe[id] = true;
+        a.starveNoted = 1;
+        writeSave();
+        notify('灵石不足 · 打完这图出去攒够 ' + ALLY_REVIVE_COST + '，回洞府交钱才能复生');
+        continue;
+      }
+      save.stones -= ALLY_REVIVE_COST;
+      reviveAlly(a, false);
+      notify('复生 · 耗 ' + ALLY_REVIVE_COST + ' 灵石');
+      refreshTitle();
+    }
+  }
+  // 洞府「交钱复活」：不设 disabled 按钮（点击事件会上不来），钱不够在点击里提示。
+  function payReviveAlly(id) {
+    const dead = save.allyDead || {};
+    if (!dead[id]) return false;
+    if ((save.stones || 0) < ALLY_REVIVE_COST) {
+      notify('灵石不足 · 需 ' + ALLY_REVIVE_COST); Sfx.warn(); return false;
+    }
+    save.stones -= ALLY_REVIVE_COST;
+    if (save.allyOwe) delete save.allyOwe[id];
+    const a = (G.pet && G.pet.id === id) ? G.pet : (G.mate && G.mate.id === id) ? G.mate : null;
+    if (a) reviveAlly(a, true);
+    else { delete dead[id]; writeSave(); }
+    const d = (window.PETS || []).find(p => p.id === id) || (window.MATES || []).find(m => m.id === id);
+    notify((d ? d.name : id) + ' 复生 · 耗 ' + ALLY_REVIVE_COST + ' 灵石'); Sfx.buff();
+    if (G.state === 'cave') renderCave();
+    refreshTitle();
+    return true;
+  }
+  // 进图 / 洞府换人，三处创建点统一走这里，免得 hp / r / dead 口径各处漂。
+  function makeAlly(id, x, y) {
+    const p = G.player;
+    const maxhp = Math.max(1, Math.round((p ? p.maxhp : 100) * ALLY_HP_K));
+    const dead = !!(save.allyDead && save.allyDead[id]);
+    return {
+      id: id, x: x, y: y, cd: 0.6, bob: 0, r: ALLY_R,
+      maxhp: maxhp, hp: dead ? 0 : maxhp, dead: dead, deadT: 0,
+      iv: 0, hurtFlash: 0, guardT: 0, starveNoted: 0,
+      dir: 1, moving: false, gait: 0, roam: Math.random() * 6.28,
+      skCd: null, skCast: 0, artCd: { guard: 0.5, melee: 0.9, ranged: 1.3 }
+    };
+  }
+
   function hitPlayer(dmg) {
     const p = G.player; if (p.iv > 0 || G.god) return;
     if (G.state === 'down') return;          // P6：已经躺着了，别再挨打（免得重复触发倒地）
@@ -1777,6 +1928,9 @@
       const b = G.ebullets[i];
       b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt;
       if (U.dist(p.x, p.y, b.x, b.y) < b.r + p.r) { hitPlayer(b.dmg); G.ebullets.splice(i, 1); continue; }
+      // 第118轮：弹道擦到随行者，谁挨着谁吃；一发弹只打一个目标，等于替韩立挡了一下
+      const ah = firstAllyHit(b.x, b.y, b.r);
+      if (ah) { hurtAlly(ah, b.dmg); G.ebullets.splice(i, 1); continue; }
       if (pt && U.dist(pt.x, pt.y, b.x, b.y) < b.r + (pt.r || 9)) { if (window.Coop) window.Coop.addPartnerHurt(b.dmg); G.ebullets.splice(i, 1); continue; }
       // 天降物砸到地面：炸开再消失。没有这一下，它会径直穿过地面继续往下飞，
       // 玩家看到的是"东西掉进了地底"，而不是"砸在地上"。
@@ -2128,7 +2282,12 @@
   // G.realm.dmg，否则就是双重放大。额外只叠 ALLY_SKILL_TIERS：按长期修为
   // （save.cultivate.level）分四档，让「修为越高，同行之人出手越有分量」在洞府里看得见。
   // ==========================================================================
-  const ALLY_KINDS = ['bolt', 'fan', 'nova', 'chain', 'chill', 'drain'];
+  const ALLY_KINDS = ['bolt', 'fan', 'nova', 'chain', 'chill', 'drain', 'guard', 'melee', 'ranged'];
+  // 第118轮：三类常规功法的 CD 下限。道祖境主角 sword 间隔 0.044s，
+  // 两个随行者照抄会一秒刷 90 发 —— 糊屏又拖帧。下限只在极高境界生效，
+  // 低境界三类 CD 与主角完全相等（闸门按境界逐档比过）。
+  const ALLY_CD_FLOOR = 0.18;
+  const ALLY_VIEW_EDGE = 22;   // 可视矩形四边留白，别贴着屏幕边跑
   // 第117轮：水墨像素特效（FX3）只认 fxpix.js PAL 里的四条六档色阶。
   // 不是新配色 —— 水墨皮下 fxpix 会再用 INK_HEX 把每一档砍回本作墨阶。
   const ALLY_PALS = ['xue', 'jin', 'qi', 'mo'];
@@ -2190,15 +2349,18 @@
   //   spawnRune（贴地法阵，画在角色之前）、FX3 一次性像素符文、飞白笔触、tfStrike 身体曲线。
   // 不用 FX3.hold —— hold 是常驻领域法阵，浅纸下会被 draw() 压到 0.42，起手要看得见。
   function allyCastFx(ent, sk, col) {
-    ent.skCast = ALLY_CAST_T;
-    spawnRune(ent.x, ent.y, 22, col);
-    if (window.FX3) {
+    // 第118轮：三类常规功法出手极密，起手降级 —— 只留贴地小阵 + 三笔飞白，
+    // 不叠像素符文、不响清音、不做身体起手（否则 0.18s 一重置会一直抽）。
+    // 本命绝学仍走全套：脚下大阵 + 像素符文 + tfStrike 起手 + 一声清音。
+    if (!sk.light) ent.skCast = ALLY_CAST_T;
+    spawnRune(ent.x, ent.y, sk.light ? 14 : 22, col);
+    if (window.FX3 && !sk.light) {
       FX3.spawn('rune', ent.x, ent.y + 6, {
         pal: ALLY_PALS.indexOf(sk.pal) >= 0 ? sk.pal : 'qi', scale: 1.15
       });
     }
-    allySpark(ent.x, ent.y - 4, col, 6);
-    Sfx.gem();
+    allySpark(ent.x, ent.y - 4, col, sk.light ? 3 : 6);
+    if (!sk.light) Sfx.gem();
   }
   function allyVictims(x, y, rad) {
     return allEnemies().filter(e => !e._dead && U.dist(x, y, e.x, e.y) <= rad + (e.r || 0));
@@ -2309,12 +2471,44 @@
         G.player.hp = Math.min(G.player.maxhp, G.player.hp + total * dmgMul() * sk.leech);
       }
       Sfx.buff();
+    // ---- 第118轮：三类常规功法。复用上面同一套水墨原语，但不播大音效、不飘印蜕，
+    //      免得密集出手把屏幕糊满；本命绝学仍是节奏上的重音。 ----
+    } else if (kind === 'guard') {
+      ent.guardT = ALLY_GUARD_DUR;
+      allyRing(x, y, 46, col, 0.5);
+      allyRing(x, y, 30, col, 0.42, 46);        // 往身上收：罩子合拢
+      spawnRune(x, y, 34, col);                 // 第二层贴地阵，与起手那圈套成双环
+      allySpark(x, y, col, 6);
+      if (window.FX3) FX3.spawn('rune', x, y + 6, { pal: pal, scale: 0.8 });
+    } else if (kind === 'melee') {
+      const rad = sk.rad || 54;
+      const t = nearestEnemyFrom(x, y, 260);
+      const a = t ? Math.atan2(t.y - y, t.x - x) : 0;
+      spawnSlash(x + Math.cos(a) * 10, y - 4, a, col, 22, 1.7);
+      spawnSlash(x + Math.cos(a) * 16, y - 6, a, col, 30, 1.3);
+      allyRing(x, y, rad * 0.72, col, 0.28);
+      allySpark(x, y, col, 5);
+      for (const e of allyVictims(x, y, rad)) { allyDamage(e, dmg); hit++; }
+    } else if (kind === 'ranged') {
+      const t = nearestEnemyFrom(x, y, 520);
+      const base = t ? Math.atan2(t.y - y, t.x - x) : 0;
+      const n = sk.count || 2, spread = 0.32;
+      spawnSlash(x + Math.cos(base) * 14, y - 4, base, col, 24, 1.7);
+      for (let i = 0; i < n; i++) {
+        const a = base + (n === 1 ? 0 : (i / (n - 1) - 0.5) * spread);
+        G.bullets.push({
+          x: x, y: y, vx: Math.cos(a) * 350, vy: Math.sin(a) * 350, r: 5,
+          dmg: dmg / Math.max(1, n * 0.72), life: 1.3, pierce: 1, hit: new Set(),
+          home: true, ally: true, owner: ownerId, vfx: ALLY_BOLT_VFX[col] || 'sword'
+        });
+      }
+      shots = n;
     }
     // 技能名改成朱砂印蜕：淡朱砂方底 + 纸白字 + 细印边，与第115轮增益小方印同一语汇。
     // 只这一处传 seal，其余飘字（伤害 / 拾取 / 提示）逐字节保持原样。
     // 抬到 y-50：实拍里 y-26 正好和伤害飘字同一片，朱砂印被压得读不清。
-    spawnText(x, y - 50, sk.name, save.skin === 'guigu' ? '#6b2a20' : col, 14, { seal: true });
-    return { name: sk.name, kind, dmg: +dmg.toFixed(2), shots, hit, cd: sk.cd };
+    if (!sk.light) spawnText(x, y - 50, sk.name, save.skin === 'guigu' ? '#6b2a20' : col, 14, { seal: true });
+    return { name: sk.name, kind, dmg: +dmg.toFixed(2), shots, hit, cd: sk.cd, light: !!sk.light };
   }
   // 独立于普攻的冷却。普攻那两处 early return 不能挡住技能计时。
   function tickAllySkill(ent, ownerId, dt) {
@@ -2328,24 +2522,114 @@
     ent.skCd = sk.cd || 8;
   }
 
+  // ==========================================================================
+  // 第118轮 · 三类功法 + 视野内自由行动
+  // --------------------------------------------------------------------------
+  // CD 口径：game.js:1339 主角那行是 skillAtk.cd(a2, lv) * hasteMul() * atkMul()。
+  // 这里读 skills.js 里「对应那一类功法」的真实 atk 配置，乘同两个乘数 ——
+  // 韩立境界涨 → G.realm.atk 涨 → atkMul() 降 → 随行者出手跟着变快。
+  // 不另造等级曲线，也不碰本命绝学的 CD（它仍是隔一阵才来的重音）。
+  // ==========================================================================
+  function allyArtCd(kind) {
+    const art = (window.ALLY_ARTS || {})[kind];
+    const id = art ? art.cdKey : 'sword';
+    const s = window.skillById ? window.skillById(id) : null;
+    const a = (s && s.atk) ? s.atk : { cd: 0.85 };
+    const lv = (G.player && G.player.skills && G.player.skills[id]) || 1;
+    // 近身领域没有 cd，它的节奏是 cdHit（对同一敌人的命中间隔）
+    const base = kind === 'melee' ? (a.cdHit || 0.5)
+      : (window.skillAtk ? window.skillAtk.cd(a, lv) : 1);
+    return Math.max(ALLY_CD_FLOOR, base * hasteMul() * atkMul());
+  }
+  // 可视范围 = G.cam 起的 W×H 矩形（照 inView() 口径，兼容镜头滞后与倒地镜头）。
+  // 随行者只在这个矩形里跑，不会贴着韩立，也绝不跑到屏幕外面去。
+  function allyClampView(e) {
+    e.x = U.clamp(e.x, G.cam.x + ALLY_VIEW_EDGE, G.cam.x + W - ALLY_VIEW_EDGE);
+    e.y = U.clamp(e.y, G.cam.y + ALLY_VIEW_EDGE, G.cam.y + H - ALLY_VIEW_EDGE);
+  }
+  function allyTarget(e, maxd) {
+    let best = null, bd = maxd * maxd;
+    const x0 = G.cam.x - 6, x1 = G.cam.x + W + 6, y0 = G.cam.y - 6, y1 = G.cam.y + H + 6;
+    for (const en of allEnemies()) {
+      if (en._dead) continue;
+      if (en.x < x0 || en.x > x1 || en.y < y0 || en.y > y1) continue;  // 只打看得见的
+      const d = U.dist2(e.x, e.y, en.x, en.y);
+      if (d < bd) { bd = d; best = en; }
+    }
+    return best;
+  }
+  // 自主移动：近身型追到贴脸，拉开型保持一段距离；没敌人时在视野里绕着游走。
+  // 抄的是 updateEnemies 的 atan2 → cos/sin → x += px*spd*dt，只是目标由自己挑。
+  function allyMove(e, dt, mode) {
+    const t = allyTarget(e, 460);
+    let tx, ty;
+    if (t) {
+      const d = U.dist(e.x, e.y, t.x, t.y) || 1;
+      const ang = Math.atan2(t.y - e.y, t.x - e.x);
+      const want = mode === 'melee' ? 30 : 132;
+      const k = mode === 'melee'
+        ? (d > want ? 1 : (d < want * 0.7 ? -0.6 : 0))
+        : (d > want * 1.25 ? 1 : (d < want * 0.75 ? -0.8 : 0));
+      tx = e.x + Math.cos(ang) * 120 * k;
+      ty = e.y + Math.sin(ang) * 120 * k;
+      e.dir = Math.cos(ang) >= 0 ? 1 : -1;
+    } else {
+      e.roam = (e.roam || 0) + dt * 0.6;
+      tx = G.player.x + Math.cos(e.roam) * 130;
+      ty = G.player.y + Math.sin(e.roam * 0.8) * 100;
+    }
+    const dx = tx - e.x, dy = ty - e.y, dd = Math.hypot(dx, dy) || 1;
+    const step = Math.min(dd, (G.player.spd || 130) * 0.92 * dt);
+    e.moving = step > 0.6;
+    if (e.moving) {
+      e.x += dx / dd * step; e.y += dy / dd * step;
+      e.gait = (e.gait || 0) + dt * 9.5;
+    }
+    allyClampView(e);
+  }
+  function castAllyArt(ent, ownerId, art) {
+    const sk = {
+      name: art.tag, kind: art.skKind, pow: art.pow, rad: art.rad, count: art.count,
+      vfx: art.vfx, pal: art.pal, light: true
+    };
+    return castAllySkill(ent, ownerId, sk);
+  }
+  function tickAllyArts(ent, ownerId, dt) {
+    if (ent.dead || !G.player) return;
+    if (!ent.artCd) ent.artCd = { guard: 0.5, melee: 0.9, ranged: 1.3 };
+    for (const kind of (window.ALLY_ART_KINDS || ['guard', 'melee', 'ranged'])) {
+      ent.artCd[kind] -= dt;
+      if (ent.artCd[kind] > 0) continue;
+      const art = window.allyArtOf(ownerId, kind);
+      if (!art) { ent.artCd[kind] = 1; continue; }
+      const t = allyTarget(ent, 520);
+      if (!t) { ent.artCd[kind] = 0.25; continue; }
+      // 近身功法要真的贴到怪才放，否则原地挥空不好看
+      if (kind === 'melee' && U.dist(ent.x, ent.y, t.x, t.y) > (art.rad || 54) + 26) {
+        ent.artCd[kind] = 0.18; continue;
+      }
+      // 弹幕已经很密时先缓一手，别把 G.bullets 撑爆（主角后期也在连发）
+      if (G.bullets.length > 260) { ent.artCd[kind] = 0.2; continue; }
+      castAllyArt(ent, ownerId, art);
+      ent.artCd[kind] = allyArtCd(kind);
+    }
+  }
+
   function updatePet(dt) {
     if (!G.pet || !G.player) return;
     const def = petDef(); if (!def) return;
-    const p = G.player, pt = G.pet;
-    const dir = p.dir || 1;
-    // 跟在身后半步，不挡视线
-    const tx = p.x - 24 * dir, ty = p.y + 10;
-    // 真的在挪才迈步：灵宠是追着主人跑的，站定的时候腿得停下
-    pt.moving = Math.abs(tx - pt.x) + Math.abs(ty - pt.y) > 2;
-    if (pt.moving) pt.gait = (pt.gait || 0) + dt * 9.5;
-    pt.x += (tx - pt.x) * Math.min(1, dt * 6.5);
-    pt.y += (ty - pt.y) * Math.min(1, dt * 6.5);
+    const pt = G.pet;
     pt.bob = (pt.bob || 0) + dt;
+    if (pt.dead) return;                        // 第118轮：殒了就不动、不出手，等复活
+    // 第118轮：可视范围内自己找怪，不再围着韩立。本命是范围类的偏贴身，弹道类的偏拉开。
+    const mode = (window.allyArtOf(def.id, 'melee') || {}).mode || 'ranged';
+    allyMove(pt, dt, mode);
     if (G.state !== 'play') return;
-    tickAllySkill(pt, def.id, dt);   // 第116轮：技能独立冷却，别被普攻那句 early return 挡住
+    tickAllySkill(pt, def.id, dt);   // 第116轮：本命绝学独立冷却
+    tickAllyArts(pt, def.id, dt);    // 第118轮：护体 / 近身 / 远击三条独立冷却
     pt.cd -= dt;
     if (pt.cd > 0) return;
-    const t = nearestEnemyFrom(pt.x, pt.y, 430);
+    const t = allyTarget(pt, 430);
     if (!t) { pt.cd = 0.25; return; }
     const a = Math.atan2(t.y - pt.y, t.x - pt.x);
     // 灵宠出手比主人轻，胜在不停
@@ -2482,7 +2766,7 @@
   function setMate(id) {
     if (id && !hasMate(id)) return;
     save.mate = (save.mate === id) ? null : id;
-    G.mate = save.mate ? { id: save.mate, x: G.player ? G.player.x - 34 : 0, y: G.player ? G.player.y + 12 : 0, cd: 0.8, bob: 0 } : null;
+    G.mate = save.mate ? makeAlly(save.mate, G.player ? G.player.x - 34 : 0, G.player ? G.player.y + 12 : 0) : null;
     // 同伴特性走装备加成那一路：换人就要重算，否则上限和减伤还挂在上一个人身上
     if (G.player) { G.gear = gearBonus(); recalcMaxhp(true); }
     const d = mateDef();
@@ -2494,20 +2778,17 @@
   function updateMate(dt) {
     if (!G.mate || !G.player) return;
     const def = mateDef(); if (!def || def.id !== G.mate.id) return;
-    const p = G.player, mt = G.mate;
-    const dir = p.dir || 1;
-    // 站在另一侧，别和灵宠挤在一块
-    const tx = p.x + 30 * dir, ty = p.y + 12;
-    mt.moving = Math.abs(tx - mt.x) + Math.abs(ty - mt.y) > 2;
-    if (mt.moving) mt.gait = (mt.gait || 0) + dt * 9.5;
-    mt.x += (tx - mt.x) * Math.min(1, dt * 6);
-    mt.y += (ty - mt.y) * Math.min(1, dt * 6);
+    const mt = G.mate;
     mt.bob = (mt.bob || 0) + dt;
+    if (mt.dead) return;                        // 第118轮：与灵宠同一套殒落 / 复活
+    const mode = (window.allyArtOf(def.id, 'melee') || {}).mode || 'ranged';
+    allyMove(mt, dt, mode);
     if (G.state !== 'play') return;
     tickAllySkill(mt, def.id, dt);   // 第116轮：同伴与灵宠同一套技能冷却
+    tickAllyArts(mt, def.id, dt);    // 第118轮：三类功法
     mt.cd -= dt;
     if (mt.cd > 0) return;
-    const t = nearestEnemyFrom(mt.x, mt.y, 470);
+    const t = allyTarget(mt, 470);
     if (!t) { mt.cd = 0.3; return; }
     const a = Math.atan2(t.y - mt.y, t.x - mt.x);
     // 同伴比灵宠重得多，出手慢一拍
@@ -3012,6 +3293,7 @@
           artBurst(e.x, e.y, art, base); Sfx.shoot();
         }
       }
+      hurtAllyAt(e.x, e.y, e.r, e.dmg);   // 第118轮：小怪贴到谁，谁掉血
       if (U.dist(p.x, p.y, e.x, e.y) < e.r + p.r) {
         hitPlayer(e.dmg);
         if (art && e._artCd <= 0) {
@@ -3197,6 +3479,7 @@
           const near = U.dist(p.x, p.y, q.x, q.y) < q.r + p.r * 0.4;
           const nearPt = pt && U.dist(pt.x, pt.y, q.x, q.y) < q.r + (pt.r || 9) * 0.4;
           if (near) { q.hit = true; hitPlayer(h.dmg); }
+          hurtAllyAt(q.x, q.y, q.r * 0.7, h.dmg);   // 第118轮：地刺也扎随行者（各自的 iv 去重）
           if (nearPt && window.Coop) window.Coop.addPartnerHurt(h.dmg);
           if (q.hit || (q.age > q.d + 0.28 && !nearPt)) q.hit = true;   // 破土瞬间没踩上就作废
         }
@@ -3216,6 +3499,7 @@
       h.tickT -= dt;
       if (h.tickT <= 0) {
         h.tickT = h.tick; hitPlayer(h.dmg);
+        hurtAllyAt(h.x, h.y, h.r, h.dmg);   // 第118轮：光柱 / 横扫里的随行者一样掉血
         if (insidePt && window.Coop) window.Coop.addPartnerHurt(h.dmg);
       }
     }
@@ -3781,11 +4065,13 @@
         // 困阵：地上升起一圈阵纹，人站里面挪不动 —— 之前只扣血弹一行字，玩家完全看不出被打
         if (sk.dur) p.rootT = Math.max(p.rootT || 0, sk.dur);
         hitPlayer(dmg);
+        hurtAlliesAll(dmg);   // 第118轮：困阵是全场招，随行者也吃
         addZone(p.x, p.y, sk.rad || 58, Math.max(1.2, (sk.dur || 1.2) + 0.5), 'bind', { slow: 0.34 });
         spawnText(p.x, p.y - 34, sk.n, '#ff7ab0', 13); Sfx.warn(); break;
       case 'chill':
         if (sk.dur) { p.slowT = Math.max(p.slowT || 0, sk.dur); p.slowK = sk.slow || 0.45; }
         hitPlayer(dmg);
+        hurtAlliesAll(dmg);   // 第118轮：寒气罩全场
         addZone(p.x, p.y, sk.rad || 88, 2.4, 'ice', { slow: sk.slow || 0.45 });
         spawnText(p.x, p.y - 34, sk.n, '#8fd8ff', 13); Sfx.warn(); break;
       case 'pull': {
@@ -3794,13 +4080,14 @@
         p.x += (b.x - p.x) / dd * mv; p.y += (b.y - p.y) / dd * mv;
         // 漩涡：画在「被拽向的地方」，看得见"有东西在吸我"
         addZone(b.x, b.y, sk.rad || 108, 1.15, 'vortex', { pull: 62 });
-        hitPlayer(dmg); G.shake = Math.max(G.shake, 5); Sfx.warn(); break;
+        hitPlayer(dmg); hurtAlliesAll(dmg); G.shake = Math.max(G.shake, 5); Sfx.warn(); break;
       }
       case 'nova':
         // 爆发 = 重珠：珠子更大、带一圈脉动外环，撞上来有「这一下很重」的预感
         ringBurst(b.x, b.y, sk.num || 18, sk.spd || 190, dmg, 'heavy');
         G.parts.push({ ring: true, x: b.x, y: b.y, r: 10, maxr: (sk.rad || 150) * 0.9, life: 0.42, maxlife: 0.42, color: '#ff9a4a' });
         if (U.dist(p.x, p.y, b.x, b.y) < (sk.rad || 150)) hitPlayer(Math.round(dmg * 1.4));
+        hurtAllyAt(b.x, b.y, sk.rad || 150, Math.round(dmg * 1.4));   // 第118轮：爆发波及随行者
         G.shake = Math.max(G.shake, 10); Sfx.burst(); break;
       case 'heal': {
         const add = Math.round(b.maxhp * (sk.pct || 0.04));
@@ -3974,6 +4261,7 @@
 
     // 贴身碰撞与招式同档：突进扑到人身上也必须真疼，否则「躲突进」没有意义
     if (U.dist(p.x, p.y, b.x, b.y) < b.r + p.r) hitPlayer(bShot(b, 1));
+    hurtAllyAt(b.x, b.y, b.r, bShot(b, 1));   // 第118轮：Boss 撞到随行者也算
     b._flip = p.x < b.x;
   }
   function onBossDead() {
@@ -4630,6 +4918,13 @@
     // 第117轮：随行之人 / 灵宠的起手动作计时，和特效同一条时间轴（顿帧一起冻）。
     if (G.pet && G.pet.skCast > 0) G.pet.skCast = Math.max(0, G.pet.skCast - dt);
     if (G.mate && G.mate.skCast > 0) G.mate.skCast = Math.max(0, G.mate.skCast - dt);
+    // 第118轮：护罩 / 无敌帧 / 受击红边与特效同一条时间轴（顿帧里一起冻）
+    for (const a of [G.pet, G.mate]) {
+      if (!a) continue;
+      if (a.guardT > 0) a.guardT = Math.max(0, a.guardT - dt);
+      if (a.iv > 0) a.iv = Math.max(0, a.iv - dt);
+      if (a.hurtFlash > 0) a.hurtFlash = Math.max(0, a.hurtFlash - dt);
+    }
     for (let i = G.parts.length - 1; i >= 0; i--) {
       const p = G.parts[i]; p.life -= dt;
       if (p.life <= 0) { G.parts.splice(i, 1); continue; }
@@ -5971,6 +6266,7 @@
     updateSummon(dt);
     updateAvatar(dt);
     updateMate(dt);
+    tickAllyRevive(dt);   // 第118轮：十息自动复活 / 灵石不够就一直躺着
     tickQuickCd(dt);
     tickPetFeed(dt);
     // 共斗时客机只渲染 Boss（走房主快照镜像），不替房主跑 Boss 的 AI 与出招
@@ -7778,20 +8074,46 @@
       }
     }
 
-    // 灵宠：跟在身后半步，小一号
+    // 灵宠：第118轮起在可视范围内自己找怪打，不再贴着韩立
     if (G.pet && save.pet) {
       const pd = petDef();
       if (pd && pd.spr && Sprites[pd.spr]) {
         const pt = G.pet;
-        ctx.fillStyle = 'rgba(0,0,0,0.22)'; ctx.beginPath(); ctx.ellipse(pt.x, pt.y + 9, 7, 3, 0, 0, 6.28); ctx.fill();
-        // 跑起来走手绘帧，站着待机帧 —— 上下颠由 tf 出，不再另加 bob（会弹两次）
-        // 第117轮：出手那 0.28 秒走主角同款「含胸→探臂→收势」曲线；
-        // 不传 spr 就不会去抓手绘三帧（那些帧只有韩立有），只借程序化变换。
-        const ptf = pt.skCast > 0
-          ? tfStrike(ALLY_CAST_T - pt.skCast, (G.player && G.player.dir) || 1)
-          : pt.moving ? tfRun(pt.x, pt.y, pt.gait || 0, 1, pd.spr)
-            : tfIdle(pt.x, pt.y, pt.bob || 0, pd.spr);
-        drawSpr(pd.spr, pt.x, pt.y, pd.scale || 1.3, G.player && G.player.dir < 0, ptf);
+        if (pt.dead) {
+          // 殒落：只留一枚淡墨「殒」印。用户明确不显血条。
+          ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
+          ctx.fillStyle = save.skin === 'guigu' ? 'rgba(107,42,32,0.55)' : 'rgba(255,118,118,0.6)';
+          ctx.fillText('殒', pt.x, pt.y - 16);
+        } else {
+          ctx.fillStyle = 'rgba(0,0,0,0.22)'; ctx.beginPath(); ctx.ellipse(pt.x, pt.y + 9, 7, 3, 0, 0, 6.28); ctx.fill();
+          // 护体罩：实拍里浅纸底上单描一圈太淡，补一层极淡朱砂晕 + 外圈细印边，随 guardT 淡出
+          if (pt.guardT > 0) {
+            const gk = Math.min(1, pt.guardT / ALLY_GUARD_DUR);
+            ctx.fillStyle = 'rgba(143,47,36,' + (0.04 + 0.06 * gk) + ')';
+            ctx.beginPath(); ctx.arc(pt.x, pt.y - 2, 22, 0, 6.28); ctx.fill();
+            ctx.strokeStyle = 'rgba(143,47,36,' + (0.34 + 0.34 * gk) + ')';
+            ctx.lineWidth = 1.8;
+            ctx.beginPath(); ctx.arc(pt.x, pt.y - 2, 22, 0, 6.28); ctx.stroke();
+            ctx.strokeStyle = 'rgba(143,47,36,' + (0.14 + 0.18 * gk) + ')';
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.arc(pt.x, pt.y - 2, 27, 0, 6.28); ctx.stroke();
+          }
+          // 跑起来走手绘帧，站着待机帧 —— 上下颠由 tf 出，不再另加 bob（会弹两次）
+          // 第117轮：本命绝学出手那 0.28 秒走主角同款「含胸→探臂→收势」曲线；
+          // 第118轮：翻面改看自己的 dir，不再跟着韩立一起翻。
+          const ptf = pt.skCast > 0
+            ? tfStrike(ALLY_CAST_T - pt.skCast, pt.dir || 1)
+            : pt.moving ? tfRun(pt.x, pt.y, pt.gait || 0, 1, pd.spr)
+              : tfIdle(pt.x, pt.y, pt.bob || 0, pd.spr);
+          drawSpr(pd.spr, pt.x, pt.y, pd.scale || 1.3, (pt.dir || 1) < 0, ptf);
+          if (pt.hurtFlash > 0) {
+            // 受击只描一圈红边，不碰主角的屏震 / 闪白 / 连斩
+            const k = Math.min(1, pt.hurtFlash / 0.2);
+            ctx.strokeStyle = 'rgba(255,86,86,' + (0.2 + k * 0.34) + ')';
+            ctx.lineWidth = 1.2 + k * 1.4;
+            ctx.beginPath(); ctx.arc(pt.x, pt.y, 12 + (1 - k) * 5, 0, 6.28); ctx.stroke();
+          }
+        }
       }
     }
 
@@ -7814,25 +8136,48 @@
       ctx.globalAlpha = 1;
     }
 
-    // 同伴：站在另一侧，画个名牌好认
+    // 同伴：第118轮起同样自己找怪打，画个名牌好认
     if (G.mate && save.mate) {
       const md = mateDef();
       if (md && md.spr && Sprites[md.spr]) {
         const mt = G.mate;
-        ctx.fillStyle = 'rgba(0,0,0,0.22)'; ctx.beginPath(); ctx.ellipse(mt.x, mt.y + 10, 8, 3.5, 0, 0, 6.28); ctx.fill();
-        // 第117轮：同伴和灵宠共用同一套起手动作曲线
-        const mtf = mt.skCast > 0
-          ? tfStrike(ALLY_CAST_T - mt.skCast, (G.player && G.player.dir) || 1)
-          : mt.moving ? tfRun(mt.x, mt.y, mt.gait || 0, 1, md.spr)
-            : tfIdle(mt.x, mt.y, mt.bob || 0, md.spr);
-        drawSpr(md.spr, mt.x, mt.y, md.scale || 1.5, G.player && G.player.dir < 0, mtf);
-        const nm = (md.icon || '·') + ' ' + md.name;
-        ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
-        const tw = ctx.measureText(nm).width + 10;
-        ctx.fillStyle = 'rgba(10,20,30,0.6)';
-        ctx.fillRect(mt.x - tw / 2, mt.y - 38, tw, 14);
-        ctx.fillStyle = '#ffe0a8';
-        ctx.fillText(nm, mt.x, mt.y - 28);
+        if (mt.dead) {
+          ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
+          ctx.fillStyle = save.skin === 'guigu' ? 'rgba(107,42,32,0.55)' : 'rgba(255,118,118,0.6)';
+          ctx.fillText('殒', mt.x, mt.y - 16);
+        } else {
+          ctx.fillStyle = 'rgba(0,0,0,0.22)'; ctx.beginPath(); ctx.ellipse(mt.x, mt.y + 10, 8, 3.5, 0, 0, 6.28); ctx.fill();
+          if (mt.guardT > 0) {
+            const gk = Math.min(1, mt.guardT / ALLY_GUARD_DUR);
+            ctx.fillStyle = 'rgba(143,47,36,' + (0.04 + 0.06 * gk) + ')';
+            ctx.beginPath(); ctx.arc(mt.x, mt.y - 2, 24, 0, 6.28); ctx.fill();
+            ctx.strokeStyle = 'rgba(143,47,36,' + (0.34 + 0.34 * gk) + ')';
+            ctx.lineWidth = 1.8;
+            ctx.beginPath(); ctx.arc(mt.x, mt.y - 2, 24, 0, 6.28); ctx.stroke();
+            ctx.strokeStyle = 'rgba(143,47,36,' + (0.14 + 0.18 * gk) + ')';
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.arc(mt.x, mt.y - 2, 29, 0, 6.28); ctx.stroke();
+          }
+          // 第117轮：同伴和灵宠共用同一套起手动作曲线
+          const mtf = mt.skCast > 0
+            ? tfStrike(ALLY_CAST_T - mt.skCast, mt.dir || 1)
+            : mt.moving ? tfRun(mt.x, mt.y, mt.gait || 0, 1, md.spr)
+              : tfIdle(mt.x, mt.y, mt.bob || 0, md.spr);
+          drawSpr(md.spr, mt.x, mt.y, md.scale || 1.5, (mt.dir || 1) < 0, mtf);
+          if (mt.hurtFlash > 0) {
+            const k = Math.min(1, mt.hurtFlash / 0.2);
+            ctx.strokeStyle = 'rgba(255,86,86,' + (0.2 + k * 0.34) + ')';
+            ctx.lineWidth = 1.2 + k * 1.4;
+            ctx.beginPath(); ctx.arc(mt.x, mt.y, 13 + (1 - k) * 5, 0, 6.28); ctx.stroke();
+          }
+          const nm = (md.icon || '·') + ' ' + md.name;
+          ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
+          const tw = ctx.measureText(nm).width + 10;
+          ctx.fillStyle = 'rgba(10,20,30,0.6)';
+          ctx.fillRect(mt.x - tw / 2, mt.y - 38, tw, 14);
+          ctx.fillStyle = '#ffe0a8';
+          ctx.fillText(nm, mt.x, mt.y - 28);
+        }
       }
     }
 
@@ -8251,10 +8596,9 @@
     const wu = wuPenalty();
     if (wu) { G.realm.dmg *= wu.dmg; G.realm.atk *= wu.dmg; G.realm.spd *= wu.spd; }
     applyHeroSprite();
-    // 灵宠：有就带出来
-    G.pet = save.pet ? { id: save.pet, x: p.x - 24, y: p.y + 10, cd: 0.6, bob: 0 } : null;
-    // 同伴：剧情里跟来的人，站在另一侧
-    G.mate = save.mate ? { id: save.mate, x: p.x + 34, y: p.y + 12, cd: 0.8, bob: 0 } : null;
+    // 第118轮：统一走 makeAlly —— 带上血量 / 碰撞半径 / 殒落台账
+    G.pet = save.pet ? makeAlly(save.pet, p.x - 24, p.y + 10) : null;
+    G.mate = save.mate ? makeAlly(save.mate, p.x + 34, p.y + 12) : null;
     G.chaseDone = false;
     G.quickCd = [0, 0, 0];
     renderQuickBar();
@@ -9719,9 +10063,13 @@
       return html;
     }
     const ti = allyTier();
+    const cdTxt = '护体 ' + allyArtCd('guard').toFixed(2) + 's　近身 ' + allyArtCd('melee').toFixed(2) +
+      's　远击 ' + allyArtCd('ranged').toFixed(2) + 's';
     html += '<div class="cave-sec"><div class="cs-title">灵宠</div>' +
-      '<div class="cs-note">带一只出门。它跟在后头，自己会出手，打得不重但不停。喂得勤，长得快。<br>' +
-      '各有一样看家本事，隔一阵自己使一回；威力跟着你的修为走 —— 眼下 <b>' + ti.label + '</b>（威势 ×' + ti.mul.toFixed(2) + '），' + ti.note + '。</div>';
+      '<div class="cs-note">带一只出门。它会在你眼前这一屏里自己找怪打，近的贴身、远的拉开，不再绕着你转。<br>' +
+      '各有三门本事（护体 / 近身 / 远击）轮着使，出手快慢跟着你当前境界的功法走 —— 眼下 ' + cdTxt + '；<br>' +
+      '本命绝学 <b>' + ti.label + '</b>（威势 ×' + ti.mul.toFixed(2) + '）隔一阵来一下。' + ti.note + '<br>' +
+      '也会真挨打：血量是你满血的一半（不显血条）；殒了十息，灵石够就自动扣 10000 灵石复生；当时不够就欠着不复生，出去攒够钱，回洞府交钱才能起身。</div>';
     for (const e of owned) {
       const id = e.id;
       const p = petDefOf(id);
@@ -9731,11 +10079,26 @@
       const dmgUp = Math.round((petDmgMul(id) - 1) * 100);
       const catLabel = { pet: '灵宠', puppet: '傀儡', spirit: '器灵', avatar: '化身' }[p.cat] || '灵宠';
       const ask = allySkillOf(id);
-      html += '<div class="recrow' + (on ? ' can' : '') + '">' +
-        '<div class="rr-main"><b>' + ico(p.icon || '🐾') + p.name + '　第 ' + (e.lv || 1) + ' 阶' + (on ? ' · 随行' : '') + '　<span class="pet-cat">' + catLabel + '</span></b>' +
+      // 第118轮：三条完整说明在窄屏洞府里会把「已殒 / 交钱复活」挤成竖排，只留紧凑标签。
+      // 详细描述仍在 window.ALLY_ARTS 数据表里，闸门读的是数据表，不是这段排版文字。
+      // 不能用 <b>：.rr-main b 是 display:block，每个标签会各占一行（实拍里竖成六行）
+      const artTxt = (window.ALLY_ART_KINDS || []).map(k => {
+        const a = window.allyArtOf(id, k);
+        return a ? a.name : '';
+      }).filter(Boolean).join(' · ');
+      const dead = !!(save.allyDead && save.allyDead[id]);
+      const canPay = (save.stones || 0) >= ALLY_REVIVE_COST;
+      const owe = !!(save.allyOwe && save.allyOwe[id]);
+      html += '<div class="recrow' + (on && !dead ? ' can' : '') + '">' +
+        '<div class="rr-main"><b>' + ico(p.icon || '🐾') + p.name + '　第 ' + (e.lv || 1) + ' 阶' +
+        (dead ? ' · <span style="color:#8f2f24">已殒</span>' : (on ? ' · 随行' : '')) + '　<span class="pet-cat">' + catLabel + '</span></b>' +
         '<em>' + p.desc + '　（' + p.from + '）　威势 +' + dmgUp + '%　修为 ' + Math.floor(e.xp || 0) + ' / ' + need + '</em>' +
-        (ask ? '<em>【' + ask.name + ' · ' + ask.cd + '秒】' + ask.desc + '</em>' : '') + '</div>' +
+        (ask ? '<em>【' + ask.name + ' · ' + ask.cd + '秒】' + ask.desc + '</em>' : '') +
+        (artTxt ? '<em style="white-space:nowrap">三功：' + artTxt + '</em>' : '') +
+        (dead ? '<em style="color:#8f2f24">殒落中 · 复活需 ' + ALLY_REVIVE_COST + ' 灵石，现有 ' + Math.round(save.stones || 0) + '</em>' : '') +
+        (owe ? '<em style="color:#8f2f24">欠费待交 · 不会自动复生，出去攒够钱回洞府交钱</em>' : '') + '</div>' +
         '<div class="rr-right">' +
+        (dead ? '<button class="sr-btn' + (canPay ? ' buy' : ' ghost') + '" data-revive="' + id + '">交钱复活</button> ' : '') +
         '<button class="sr-btn' + (on ? ' ghost' : ' buy') + '" data-pet="' + id + '">' + (on ? '收回' : '放出') + '</button> ' +
         '<button class="sr-btn ghost" data-release="' + id + '">放生</button></div></div>';
     }
@@ -9746,9 +10109,13 @@
   function renderCaveMate(lv) {
     const owned = save.mates || [];
     const ti = allyTier();
+    const cdTxt = '护体 ' + allyArtCd('guard').toFixed(2) + 's　近身 ' + allyArtCd('melee').toFixed(2) +
+      's　远击 ' + allyArtCd('ranged').toFixed(2) + 's';
     let html = '<div class="cave-sec"><div class="cs-title">同伴</div>' +
-      '<div class="cs-note">按剧情出现的人。带一个出门，他站你另一侧，出手比灵宠重，也比灵宠慢。<br>' +
-      '也各有一门原著里的本事，自己掐着时候使；眼下 <b>' + ti.label + '</b>（威势 ×' + ti.mul.toFixed(2) + '）。</div>';
+      '<div class="cs-note">按剧情出现的人。带一个出门，他也在你眼前这一屏里自己找怪打，出手比灵宠重，也比灵宠慢。<br>' +
+      '护体 / 近身 / 远击三门轮着使，快慢跟着你当前境界 —— 眼下 ' + cdTxt + '；<br>' +
+      '本命绝学仍隔一阵来一下，眼下 <b>' + ti.label + '</b>（威势 ×' + ti.mul.toFixed(2) + '）。<br>' +
+      '同伴也会挨打、会殒落：血量是你满血的一半（不显血条），十息后灵石够才扣 10000 灵石复生；当时不够就欠着，出去攒够钱回洞府交钱，不会自己起身。</div>';
     // 厉飞雨·双身份化名系统（P0-1）：七玄门篇章后解锁，不进队伍、不参战
     if (save.liUnlocked) {
       const faded = G.player && G.player.level >= (lifCfg().fadeRealm || 112);
@@ -9770,11 +10137,27 @@
       const on = save.mate === id;
       const perk = m.perkText || (m.perk && m.perk.label) || '';
       const msk = allySkillOf(id);
-      html += '<div class="recrow' + (on ? ' can' : '') + '">' +
-        '<div class="rr-main"><b>' + ico(m.icon || '🙂') + m.name + (on ? ' · 同行' : '') + '</b>' +
+      // 第118轮：三条完整说明在窄屏洞府里会把「已殒 / 交钱复活」挤成竖排，只留紧凑标签。
+      // 详细描述仍在 window.ALLY_ARTS 数据表里，闸门读的是数据表，不是这段排版文字。
+      // 不能用 <b>：.rr-main b 是 display:block，每个标签会各占一行（实拍里竖成六行）
+      const artTxt = (window.ALLY_ART_KINDS || []).map(k => {
+        const a = window.allyArtOf(id, k);
+        return a ? a.name : '';
+      }).filter(Boolean).join(' · ');
+      const dead = !!(save.allyDead && save.allyDead[id]);
+      const canPay = (save.stones || 0) >= ALLY_REVIVE_COST;
+      const owe = !!(save.allyOwe && save.allyOwe[id]);
+      html += '<div class="recrow' + (on && !dead ? ' can' : '') + '">' +
+        '<div class="rr-main"><b>' + ico(m.icon || '🙂') + m.name +
+        (dead ? ' · <span style="color:#8f2f24">已殒</span>' : (on ? ' · 同行' : '')) + '</b>' +
         '<em>' + m.desc + (perk ? '　【' + perk + '】' : '') + '　（' + m.from + '）</em>' +
-        (msk ? '<em>【' + msk.name + ' · ' + msk.cd + '秒】' + msk.desc + '</em>' : '') + '</div>' +
-        '<div class="rr-right"><button class="sr-btn' + (on ? ' ghost' : ' buy') + '" data-mate="' + id + '">' +
+        (msk ? '<em>【' + msk.name + ' · ' + msk.cd + '秒】' + msk.desc + '</em>' : '') +
+        (artTxt ? '<em style="white-space:nowrap">三功：' + artTxt + '</em>' : '') +
+        (dead ? '<em style="color:#8f2f24">殒落中 · 复活需 ' + ALLY_REVIVE_COST + ' 灵石，现有 ' + Math.round(save.stones || 0) + '</em>' : '') +
+        (owe ? '<em style="color:#8f2f24">欠费待交 · 不会自动复生，出去攒够钱回洞府交钱</em>' : '') + '</div>' +
+        '<div class="rr-right">' +
+        (dead ? '<button class="sr-btn' + (canPay ? ' buy' : ' ghost') + '" data-revive="' + id + '">交钱复活</button> ' : '') +
+        '<button class="sr-btn' + (on ? ' ghost' : ' buy') + '" data-mate="' + id + '">' +
         (on ? '暂别' : '同行') + '</button></div></div>';
     }
     html += '</div>';
@@ -9882,7 +10265,7 @@
     if (save.pet === id) { save.pet = null; G.pet = null; notify('灵宠已收回'); }
     else {
       save.pet = id;
-      G.pet = G.player ? { id: id, x: G.player.x - 24, y: G.player.y + 10, cd: 0.6, bob: 0 } : G.pet;
+      G.pet = G.player ? makeAlly(id, G.player.x - 24, G.player.y + 10) : G.pet;
       const p = petDefOf(id);
       notify('灵宠随行 · ' + (p ? p.name : id) + '（第 ' + petLv(id) + ' 阶）'); Sfx.buff();
     }
@@ -11632,6 +12015,9 @@
     // 同伴：同行 / 暂别
     const mb = e.target.closest('button[data-mate]');
     if (mb) { setMate(mb.getAttribute('data-mate')); return; }
+    // 第118轮：随行者殒落后，洞府交钱复活（钱不够不设 disabled，在点击里提示）
+    const vr = e.target.closest('button[data-revive]');
+    if (vr) { payReviveAlly(vr.getAttribute('data-revive')); return; }
     // 厉飞雨·双身份化名切换
     const ib = e.target.closest('button[data-identity]');
     if (ib && !ib.disabled) { setIdentity(ib.getAttribute('data-identity')); renderCave(); return; }
@@ -12093,6 +12479,87 @@
     allySkillSetCd(id, v) {
       const e = (G.pet && G.pet.id === id) ? G.pet : (G.mate && G.mate.id === id) ? G.mate : null;
       if (!e) return null; e.skCd = v; return +e.skCd.toFixed(3);
+    },
+    // 第118轮 · 三类功法 / 自由行动 / 血量复活探针（verify-ally-skills 的 K~N 组用）
+    allyArts() {
+      return {
+        kinds: (window.ALLY_ART_KINDS || []).slice(),
+        table: JSON.parse(JSON.stringify(window.ALLY_ARTS || {})),
+        allKinds: ALLY_KINDS.slice(),
+        floor: ALLY_CD_FLOOR, viewEdge: ALLY_VIEW_EDGE,
+        hpK: ALLY_HP_K, r: ALLY_R, guardDur: ALLY_GUARD_DUR,
+        guardCut: ALLY_GUARD_CUT, guardArmor: ALLY_GUARD_ARMOR,
+        reviveT: ALLY_REVIVE_T, reviveCost: ALLY_REVIVE_COST
+      };
+    },
+    allyArtCd(kind) { return +allyArtCd(kind).toFixed(4); },
+    allyArtCds() {
+      return {
+        guard: +allyArtCd('guard').toFixed(4), melee: +allyArtCd('melee').toFixed(4),
+        ranged: +allyArtCd('ranged').toFixed(4),
+        haste: +hasteMul().toFixed(4), atkMul: +atkMul().toFixed(4),
+        realmAtk: +(G.realm.atk || 0).toFixed(4), level: G.player ? G.player.level : 0,
+        armor: +armorRate().toFixed(4)
+      };
+    },
+    allyState() {
+      const one = a => a ? {
+        id: a.id, hp: +a.hp.toFixed(1), maxhp: a.maxhp, r: a.r,
+        dead: !!a.dead, deadT: +(a.deadT || 0).toFixed(3),
+        guardT: +(a.guardT || 0).toFixed(3), iv: +(a.iv || 0).toFixed(3),
+        x: +a.x.toFixed(1), y: +a.y.toFixed(1), dir: a.dir, moving: !!a.moving,
+        artCd: a.artCd ? Object.assign({}, a.artCd) : null,
+        skCd: a.skCd == null ? null : +a.skCd.toFixed(3)
+      } : null;
+      return {
+        pet: one(G.pet), mate: one(G.mate),
+        playerMaxhp: G.player ? G.player.maxhp : 0,
+        view: { x: +G.cam.x.toFixed(1), y: +G.cam.y.toFixed(1), w: W, h: H, edge: ALLY_VIEW_EDGE },
+        stones: Math.round(save.stones || 0),
+        deadMap: Object.assign({}, save.allyDead || {}),
+        oweMap: Object.assign({}, save.allyOwe || {})
+      };
+    },
+    allyHurt(id, dmg) {
+      const a = allyEntById(id); if (!a) return null;
+      hurtAlly(a, dmg == null ? 30 : dmg);
+      return { hp: +a.hp.toFixed(1), dead: !!a.dead, guardT: +(a.guardT || 0).toFixed(3) };
+    },
+    allySetGuard(id, t) {
+      const a = allyEntById(id); if (!a) return null;
+      a.guardT = t == null ? ALLY_GUARD_DUR : t;
+      return { guardT: a.guardT, armor: +armorRate().toFixed(4) };
+    },
+    allyTickRevive(dt) {
+      tickAllyRevive(dt == null ? 0.05 : dt);
+      const s = window.__FR.allyState();
+      return { stones: s.stones, deadMap: s.deadMap, oweMap: s.oweMap, petDead: s.pet ? s.pet.dead : null, mateDead: s.mate ? s.mate.dead : null };
+    },
+    allyPayRevive(id) {
+      const ok = payReviveAlly(id);
+      return { ok: ok, stones: Math.round(save.stones || 0), deadMap: Object.assign({}, save.allyDead || {}), oweMap: Object.assign({}, save.allyOwe || {}) };
+    },
+    allySetDeadMap(map) {
+      save.allyDead = Object.assign({}, map || {}); writeSave();
+      return Object.assign({}, save.allyDead || {});
+    },
+    allySetOweMap(map) {
+      save.allyOwe = Object.assign({}, map || {}); writeSave();
+      return Object.assign({}, save.allyOwe || {});
+    },
+    allySetPos(id, x, y) {
+      const a = allyEntById(id); if (!a) return null;
+      a.x = x; a.y = y; allyClampView(a);
+      return { x: +a.x.toFixed(1), y: +a.y.toFixed(1) };
+    },
+    allyMoveTick(dt) {
+      updatePet(dt == null ? 0.05 : dt); updateMate(dt == null ? 0.05 : dt);
+      return window.__FR.allyState();
+    },
+    allyCastArt(id, kind) {
+      const a = allyEntById(id), art = window.allyArtOf(id, kind);
+      if (!a || !art) return null;
+      return castAllyArt(a, id, art);
     },
     worldmap() { openWorldMap(); return 'map'; },
     toTitle() {
