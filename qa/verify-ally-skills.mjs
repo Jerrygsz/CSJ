@@ -1,6 +1,6 @@
 // 第116轮 · 同伴 / 灵宠技能常驻闸门
 //
-// 判据分十四组：
+// 判据分十六组：
 //   A 覆盖   —— 页面里真实加载的 MATES + PETS 一个不漏，源码正则再兜一道
 //   B 原著   —— 技能名 / 词频 / 摘句 / 关联强度 逐条对上 canon/ally-skills.md 与已核验词频基线
 //   C 数值   —— 六种释放形态齐、威力与冷却都在设计带里、四档门槛取自 rangeModel.BANDS
@@ -19,6 +19,10 @@
 //               十息时钱够才自动扣 10000 复生 / 当时钱不够记欠费，此后攒够也不起身 /
 //               必须回洞府交钱 / 死亡台账与欠费台账都跨地图保留
 //   N 反向   —— 第118轮：把血量比例、三类集合、CD 曲线、复活价、经济结算、欠费状态、视野边界逐个注入坏数据
+//   O 侧身   —— 第119轮：遇攻击 / 碰撞时复用大衍挂机 autoDodgeDir 的三时间点 + 十二方向评分，
+//               但无 autoAnchor（不站桩）；实拍验证干净场面不乱躲、弹幕逼近真侧移、
+//               让完回到自由 AI、仍可被打中（不是无敌）、贴边不出可视范围
+//   P 反向   —— 第119轮：把锚点、方向数、时间点、侧身方向、位移、自由 AI 恢复、受击、边界逐个注入坏数据
 //
 // 用法：node qa/verify-ally-skills.mjs
 import { createRequire } from 'node:module';
@@ -653,6 +657,147 @@ const badR118 = [
 ];
 for (const c of badR118) {
   const e = validateR118(c.d);
+  ok(e.length > 0, '注入「' + c.label + '」会被拦下', e.slice(0, 2));
+}
+
+console.log('\n【O · 第119轮：遇险侧身（大衍挂机同口径，不站桩）】');
+const dodge = await page.evaluate(() => {
+  const F = window.__FR, G = F.G;
+  // M 组把随行者打死了、还留了欠费台账，先清干净，拿一个无威胁的战场
+  F.allySetDeadMap({}); F.allySetOweMap({});
+  if (!G.pet || !G.player) return null;
+  for (const a of [G.pet, G.mate]) {
+    if (!a) continue;
+    a.dead = false; a.hp = a.maxhp; a.deadT = 0; a.iv = 0;
+    a.dodgeT = 0; a.dodgePrev = null; a.dodging = false; a.dodgeThreats = 0; a.dodgeFx = 0;
+  }
+  G.enemies.length = 0; G.ebullets.length = 0; G.bullets.length = 0;
+  G.parts.length = 0; G.texts.length = 0;
+  G.boss = null; G.bossActive = false;
+  if (window.FX3) FX3.clear();
+  const id = G.pet.id, v = F.allyState().view;
+  F.allySetPos(id, v.x + v.w / 2, v.y + v.h / 2);
+
+  // ① 干净场面：不该乱躲
+  F.allyMoveTick(0.05);
+  const clean = F.allyDodgeInfo().pet;
+
+  // ② 一发正对随行者飞来的高速弹幕：应当侧身让，而不是顺着来向跑
+  F.allyClearThreats();
+  const shot = F.allyThreat(id, { vx: 260, vy: 0, dist: 95, r: 7 });
+  F.allyMoveTick(0.02);
+  const onThreat = F.allyDodgeInfo().pet;
+  const start = { x: onThreat.x, y: onThreat.y }, hp0 = onThreat.hp;
+  for (let i = 0; i < 10; i++) { F.allyAdvanceThreats(0.02); F.allyMoveTick(0.02); }
+  const after = F.allyDodgeInfo().pet;
+  const lateral = !!onThreat.dir && Math.abs(onThreat.dir.x) <= 0.6 && Math.abs(onThreat.dir.y) >= 0.5;
+
+  // ③ 威胁清掉、惯性走完：回到自由 AI，继续自己走（不站桩）
+  F.allyClearThreats();
+  for (let i = 0; i < 12; i++) F.allyMoveTick(0.05);
+  const relaxed = F.allyDodgeInfo().pet;
+  G.enemies.push({
+    _id: 990119, type: 'wolf', x: v.x + v.w - 40, y: v.y + v.h / 2,
+    hp: 1e9, maxhp: 1e9, r: 10, spd: 0, dmg: 0, xpVal: 0, spr: 'wolf',
+    hitFlash: 0, t: 0, dashT: 0, stunT: 0, _orbCd: {}, art: null, _artCd: 0, wob: 0
+  });
+  const freeStart = { x: G.pet.x, y: G.pet.y };
+  for (let i = 0; i < 10; i++) F.allyMoveTick(0.05);
+  const freeMoved = Math.hypot(G.pet.x - freeStart.x, G.pet.y - freeStart.y);
+  G.enemies.length = 0;
+
+  // ④ 会躲不等于无敌：直接打一下照样掉血
+  const hurtBefore = F.allyDodgeInfo().pet.hp;
+  const hurt = F.allyHurt(id, 20);
+
+  // ⑤ 贴到视野角上再给威胁：仍被夹在可视矩形里
+  F.allyClearThreats();
+  const edge = F.allySetPos(id, v.x + v.edge + 1, v.y + v.edge + 1);
+  F.allyThreat(id, { vx: -260, vy: -260, dist: 60 });
+  for (let i = 0; i < 8; i++) { F.allyAdvanceThreats(0.02); F.allyMoveTick(0.02); }
+  const es = F.allyState();
+  F.allyClearThreats();
+  const inView = es.pet.x >= v.x + v.edge - 0.01 && es.pet.x <= v.x + v.w - v.edge + 0.01 &&
+    es.pet.y >= v.y + v.edge - 0.01 && es.pet.y <= v.y + v.h - v.edge + 0.01;
+  return {
+    cfg: F.allyDodgeInfo(),
+    clean: { threats: clean.threats, dodging: clean.dodging, dir: clean.dir },
+    threat: {
+      threats: onThreat.threats, dodging: onThreat.dodging, dir: onThreat.dir,
+      lateral: lateral, moved: +Math.hypot(after.x - start.x, after.y - start.y).toFixed(1),
+      hp0: hp0, hp1: after.hp, shot: shot
+    },
+    free: { moved: +freeMoved.toFixed(1), dodging: relaxed.dodging, threats: relaxed.threats },
+    hurt: { before: hurtBefore, after: hurt ? hurt.hp : hurtBefore },
+    edge: { inView: inView, x: es.pet.x, y: es.pet.y, set: edge }
+  };
+});
+ok(dodge && dodge.cfg.anchorUsed === false, '随行者没有 autoAnchor 归位拉力（不站桩）');
+ok(dodge && dodge.cfg.dirs === 12 && dodge.cfg.times.join(',') === '0.1,0.24,0.4',
+  '侧身评分与韩立大衍挂机同口径：12 方向 + 三时间点',
+  dodge && { dirs: dodge.cfg.dirs, times: dodge.cfg.times });
+ok(dodge && dodge.clean.threats === 0 && !dodge.clean.dodging && !dodge.clean.dir,
+  '干净场面不乱躲', dodge && dodge.clean);
+ok(dodge && dodge.threat.threats > 0 && dodge.threat.dodging && !!dodge.threat.dir,
+  '弹幕逼近真的触发侧身', dodge && { threats: dodge.threat.threats, dir: dodge.threat.dir });
+ok(dodge && dodge.threat.lateral, '是侧身让半步，不是顺着弹幕跑', dodge && dodge.threat.dir);
+ok(dodge && dodge.threat.moved > 6, '确实挪开了位置', dodge && dodge.threat.moved);
+ok(dodge && dodge.free.moved > 1 && !dodge.free.dodging && dodge.free.threats === 0,
+  '威胁消失后回到自由 AI，继续自己走（不站桩）', dodge && dodge.free);
+ok(dodge && dodge.hurt.after < dodge.hurt.before, '会躲但不会无敌：直接命中仍掉血',
+  dodge && dodge.hurt);
+ok(dodge && dodge.edge.inView, '贴边躲避也没被推出可视范围', dodge && dodge.edge);
+
+const dodgeSrc = gsrc.slice(gsrc.indexOf('function allyThreats'), gsrc.indexOf('function allyClampView'));
+const moveSrc = gsrc.slice(gsrc.indexOf('function allyMove('), gsrc.indexOf('function castAllyArt('));
+ok(/DODGE_DIRS/.test(dodgeSrc) && /DODGE_T/.test(dodgeSrc) && /DODGE_STEP/.test(dodgeSrc) &&
+   /DODGE_NEAREST/.test(dodgeSrc) && /DODGE_NEAR/.test(dodgeSrc),
+  '源码直接复用大衍挂机的常量，不是另抄一份数字');
+// 只看代码行：注释里本来就要解释「为什么删掉 autoAnchor」，不能把说明文字当成实现
+const dodgeCode = dodgeSrc.replace(/^\s*\/\/.*$/gm, '');
+ok(!/G\.autoAnchor|DODGE_HOME_W|homeD|autoAnchor\s*[.:]/.test(dodgeCode),
+  '侧身评分的代码里没有站桩锚点 / 归位拉力');
+ok(/G\.ebullets/.test(dodgeSrc) && /G\.enemies/.test(dodgeSrc) && /G\.boss/.test(dodgeSrc),
+  '威胁来源与主角一致：弹幕 / 贴身怪 / Boss 冲刺');
+ok(/allyDodgeDir\(/.test(moveSrc) && /allyTarget\(/.test(moveSrc) && /allyClampView\(e\)/.test(moveSrc),
+  '自由 AI 与侧身并存，且仍夹在可视矩形里');
+
+console.log('\n【P · 反向注入：第119轮闸门得有牙】');
+// 第119轮校验器：真实产物与注入数据共用，保证「真躲开 / 不站桩 / 不无敌」都咬得住。
+function validateR119(d) {
+  const errs = [];
+  const C = d.cfg || {}, CL = d.clean || {}, TH = d.threat || {}, FR = d.free || {},
+    H = d.hurt || {}, ED = d.edge || {};
+  if (C.anchorUsed) errs.push('随行者有站桩锚点');
+  if (C.dirs !== 12) errs.push('方向数不是大衍挂机的 12');
+  if (!Array.isArray(C.times) || C.times.join(',') !== '0.1,0.24,0.4') errs.push('预测时间点没跟大衍挂机齐平');
+  if (!(C.step > 0) || !(C.nearest > 0) || !(C.radius > 0)) errs.push('探步 / 截断 / 探测半径不对');
+  if (CL.threats !== 0 || CL.dodging || CL.dir) errs.push('干净场面却在乱躲');
+  if (!(TH.threats > 0) || !TH.dodging || !TH.dir) errs.push('弹幕逼近没触发侧身');
+  if (!TH.lateral) errs.push('顺着弹幕跑，不是侧身让');
+  if (!(TH.moved > 6)) errs.push('要躲却没挪窝');
+  if (TH.hp1 !== TH.hp0) errs.push('躲避过程自己掉血了');
+  if (!(FR.moved > 1) || FR.dodging || FR.threats !== 0) errs.push('威胁消失后没回到自由 AI（站桩了）');
+  if (!(H.after < H.before)) errs.push('躲避变成无敌：直接打一下也不掉血');
+  if (!ED.inView) errs.push('贴边躲避被推出可视范围');
+  return errs;
+}
+const realR119 = dodge || {};
+ok(validateR119(realR119).length === 0, '真实产物通过第119轮校验器', validateR119(realR119).slice(0, 5));
+const badR119 = [
+  { label: '偷偷加了站桩锚点', d: { ...realR119, cfg: { ...realR119.cfg, anchorUsed: true } } },
+  { label: '方向数改成 4', d: { ...realR119, cfg: { ...realR119.cfg, dirs: 4 } } },
+  { label: '预测时间点改成单帧', d: { ...realR119, cfg: { ...realR119.cfg, times: [0.5] } } },
+  { label: '干净场面却在乱躲', d: { ...realR119, clean: { ...realR119.clean, dodging: true } } },
+  { label: '弹幕逼近没触发侧身', d: { ...realR119, threat: { ...realR119.threat, dir: null } } },
+  { label: '顺着弹幕跑', d: { ...realR119, threat: { ...realR119.threat, lateral: false } } },
+  { label: '要躲却没挪窝', d: { ...realR119, threat: { ...realR119.threat, moved: 0 } } },
+  { label: '躲完站桩不动', d: { ...realR119, free: { ...realR119.free, moved: 0 } } },
+  { label: '躲避变成无敌', d: { ...realR119, hurt: { ...realR119.hurt, after: realR119.hurt.before } } },
+  { label: '贴边被推出视野', d: { ...realR119, edge: { ...realR119.edge, inView: false } } }
+];
+for (const c of badR119) {
+  const e = validateR119(c.d);
   ok(e.length > 0, '注入「' + c.label + '」会被拦下', e.slice(0, 2));
 }
 

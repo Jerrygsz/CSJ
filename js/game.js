@@ -1804,6 +1804,7 @@
       maxhp: maxhp, hp: dead ? 0 : maxhp, dead: dead, deadT: 0,
       iv: 0, hurtFlash: 0, guardT: 0, starveNoted: 0,
       dir: 1, moving: false, gait: 0, roam: Math.random() * 6.28,
+      dodgeT: 0, dodgeFx: 0, dodgePrev: null, dodgeFrom: null, dodgeThreats: 0, dodging: false,
       skCd: null, skCast: 0, artCd: { guard: 0.5, melee: 0.9, ranged: 1.3 }
     };
   }
@@ -2288,6 +2289,11 @@
   // 低境界三类 CD 与主角完全相等（闸门按境界逐档比过）。
   const ALLY_CD_FLOOR = 0.18;
   const ALLY_VIEW_EDGE = 22;   // 可视矩形四边留白，别贴着屏幕边跑
+  // 第119轮：遇险侧身。与主角「大衍挂机」共用 DODGE_DIRS / DODGE_STEP / DODGE_T /
+  // DODGE_NEAR / DODGE_NEAREST 这一整套口径，只把探测中心换成随行者自己，
+  // 并且不设 autoAnchor —— 挂机躲完要回桩，它躲完接着自己找怪，所以不站桩。
+  const ALLY_DODGE_R = 300;       // 与 autoThreats 的 R 同口径
+  const ALLY_DODGE_HOLD = 0.28;   // 让开后顺着同一方向再走一小段，免得两帧一换原地抖
   // 第117轮：水墨像素特效（FX3）只认 fxpix.js PAL 里的四条六档色阶。
   // 不是新配色 —— 水墨皮下 fxpix 会再用 INK_HEX 把每一档砍回本作墨阶。
   const ALLY_PALS = ['xue', 'jin', 'qi', 'mo'];
@@ -2541,6 +2547,90 @@
       : (window.skillAtk ? window.skillAtk.cd(a, lv) : 1);
     return Math.max(ALLY_CD_FLOOR, base * hasteMul() * atkMul());
   }
+  // 第119轮：眼前这几秒真会撞上来的东西。来源、权重、最近条数截断都照 autoThreats()，
+  // 只是探测中心换成随行者自己（r 更小），并额外跳过已死的怪。
+  // 一处刻意的不同：贴身怪的预警圈比主角收得紧、权重减半。主角站桩不怕被推开，
+  // 近身型随行者却要贴到 30px 才能出手；照抄主角那圈会把自己的目标一直推远。
+  function allyThreats(e) {
+    const out = [];
+    const R2 = ALLY_DODGE_R * ALLY_DODGE_R;
+    for (const b of (G.ebullets || [])) {
+      const dx = b.x - e.x, dy = b.y - e.y;
+      const d2 = dx * dx + dy * dy;
+      if (d2 > R2) continue;
+      out.push({ x: b.x, y: b.y, vx: b.vx, vy: b.vy, r: (b.r || 6) + e.r + 10, w: 1, d2 });
+    }
+    for (const en of (G.enemies || [])) {
+      if (en._dead) continue;
+      const dx = en.x - e.x, dy = en.y - e.y;
+      const d2 = dx * dx + dy * dy;
+      if (d2 > DODGE_NEAR * DODGE_NEAR) continue;
+      const dd = Math.sqrt(d2) || 1;
+      out.push({
+        x: en.x, y: en.y,
+        vx: -dx / dd * (en.spd || 0), vy: -dy / dd * (en.spd || 0),
+        r: en.r + e.r + 4, w: 0.32, d2
+      });
+    }
+    if (out.length > DODGE_NEAREST) {
+      out.sort((a, b) => a.d2 - b.d2);
+      out.length = DODGE_NEAREST;
+    }
+    const bs = G.boss;
+    if (bs && G.bossActive) {
+      const dash = (bs.dashing || 0) > 0;
+      out.push({
+        x: bs.x, y: bs.y,
+        vx: dash ? Math.cos(bs.dashAng || 0) * bs.spd * 4.4 : 0,
+        vy: dash ? Math.sin(bs.dashAng || 0) * bs.spd * 4.4 : 0,
+        r: bs.r + e.r + 16, w: 1.2
+      });
+    }
+    return out;
+  }
+  // 这一帧该往哪让（单位向量）；null = 不必让。
+  // 评分与 autoDodgeDir() 逐字同口径：三个时间点 DODGE_T、试 DODGE_DIRS 个方向、
+  // 上一帧方向的 0.08 惯性、改善不足 0.02 就站住。唯一删掉的是 autoAnchor 的归位拉力。
+  function allyDodgeDir(e, th) {
+    if (!th || !th.length) return null;
+    const sp = (G.player && G.player.spd ? G.player.spd : 130) * 0.92;  // 与 allyMove 同速
+    const step = sp * DODGE_STEP;
+    const score = (qx, qy) => {
+      let s = 0;
+      for (let k = 0; k < DODGE_T.length; k++) {
+        const t = DODGE_T[k];
+        for (let i = 0; i < th.length; i++) {
+          const z = th[i];
+          const ddx = z.x + z.vx * t - qx, ddy = z.y + z.vy * t - qy;
+          const d = Math.hypot(ddx, ddy);
+          if (d >= z.r) continue;
+          const k2 = 1 - d / z.r;
+          s += k2 * k2 * z.w;
+        }
+      }
+      return s;   // 没有 anchor 项 —— 这就是「不站桩」
+    };
+    const stay = score(e.x, e.y);
+    const prev = e.dodgePrev;
+    let best = stay, bx = 0, by = 0;
+    for (let i = 0; i < DODGE_DIRS; i++) {
+      const a = i / DODGE_DIRS * Math.PI * 2;
+      const ux = Math.cos(a), uy = Math.sin(a);
+      let s = score(e.x + ux * step, e.y + uy * step);
+      if (prev) s += (1 - (ux * prev.x + uy * prev.y)) * 0.08;
+      if (s < best - 0.02) { best = s; bx = ux; by = uy; }
+    }
+    if (!bx && !by) return null;   // 被围住了：无处可让，按原来的打法继续
+    return { x: bx, y: by };
+  }
+  // 起步那一瞬留一缕淡墨，不每帧刷。poof 是 fxpix 原语，水墨皮下不会被 SC3_SOFT_RING 压成灰环。
+  function allyDodgeFx(e) {
+    if (e.dodgeFx > 0) return;
+    e.dodgeFx = 0.32;
+    e.dodgeFrom = { x: e.x, y: e.y };
+    if (window.FX3) FX3.spawn('poof', e.x, e.y, { pal: 'qi' });
+  }
+
   // 可视范围 = G.cam 起的 W×H 矩形（照 inView() 口径，兼容镜头滞后与倒地镜头）。
   // 随行者只在这个矩形里跑，不会贴着韩立，也绝不跑到屏幕外面去。
   function allyClampView(e) {
@@ -2559,30 +2649,56 @@
     return best;
   }
   // 自主移动：近身型追到贴脸，拉开型保持一段距离；没敌人时在视野里绕着游走。
-  // 抄的是 updateEnemies 的 atan2 → cos/sin → x += px*spd*dt，只是目标由自己挑。
+  // 第119轮：遇攻击 / 碰撞先侧身让半步 —— 用韩立开大衍挂机那套「预测三个时间点、
+  // 试十二个方向、挑最不疼的一条」，但没有 autoAnchor：让开之后立刻回到下面的自由 AI，
+  // 所以依旧不站桩、不绕着韩立、不出可视范围，三类功法也照常各自走 CD。
   function allyMove(e, dt, mode) {
-    const t = allyTarget(e, 460);
-    let tx, ty;
-    if (t) {
-      const d = U.dist(e.x, e.y, t.x, t.y) || 1;
-      const ang = Math.atan2(t.y - e.y, t.x - e.x);
-      const want = mode === 'melee' ? 30 : 132;
-      const k = mode === 'melee'
-        ? (d > want ? 1 : (d < want * 0.7 ? -0.6 : 0))
-        : (d > want * 1.25 ? 1 : (d < want * 0.75 ? -0.8 : 0));
-      tx = e.x + Math.cos(ang) * 120 * k;
-      ty = e.y + Math.sin(ang) * 120 * k;
-      e.dir = Math.cos(ang) >= 0 ? 1 : -1;
+    if (e.dodgeFx > 0) e.dodgeFx = Math.max(0, e.dodgeFx - dt);
+    const th = allyThreats(e);
+    e.dodgeThreats = th.length;
+    const dv = allyDodgeDir(e, th);
+    if (dv) {
+      if (!e.dodging) allyDodgeFx(e);
+      e.dodgePrev = dv; e.dodgeT = ALLY_DODGE_HOLD; e.dodging = true;
+    } else if (e.dodgeT > 0) {
+      e.dodgeT = Math.max(0, e.dodgeT - dt);   // 顺着原方向再走一小段，避免抖动
+      e.dodging = e.dodgeT > 0 && !!e.dodgePrev;
     } else {
-      e.roam = (e.roam || 0) + dt * 0.6;
-      tx = G.player.x + Math.cos(e.roam) * 130;
-      ty = G.player.y + Math.sin(e.roam * 0.8) * 100;
+      e.dodging = false; e.dodgePrev = null;
     }
-    const dx = tx - e.x, dy = ty - e.y, dd = Math.hypot(dx, dy) || 1;
-    const step = Math.min(dd, (G.player.spd || 130) * 0.92 * dt);
-    e.moving = step > 0.6;
+
+    const spd = (G.player && G.player.spd ? G.player.spd : 130) * 0.92;
+    let ux = 0, uy = 0, mv = 0;
+    if (e.dodging) {
+      const d = dv || e.dodgePrev;
+      ux = d.x; uy = d.y;
+      mv = spd * dt;
+      e.dir = ux >= 0 ? 1 : -1;
+    } else {
+      const t = allyTarget(e, 460);
+      let tx, ty;
+      if (t) {
+        const d = U.dist(e.x, e.y, t.x, t.y) || 1;
+        const ang = Math.atan2(t.y - e.y, t.x - e.x);
+        const want = mode === 'melee' ? 30 : 132;
+        const k = mode === 'melee'
+          ? (d > want ? 1 : (d < want * 0.7 ? -0.6 : 0))
+          : (d > want * 1.25 ? 1 : (d < want * 0.75 ? -0.8 : 0));
+        tx = e.x + Math.cos(ang) * 120 * k;
+        ty = e.y + Math.sin(ang) * 120 * k;
+        e.dir = Math.cos(ang) >= 0 ? 1 : -1;
+      } else {
+        e.roam = (e.roam || 0) + dt * 0.6;
+        tx = G.player.x + Math.cos(e.roam) * 130;
+        ty = G.player.y + Math.sin(e.roam * 0.8) * 100;
+      }
+      const dx = tx - e.x, dy = ty - e.y, dd = Math.hypot(dx, dy) || 1;
+      ux = dx / dd; uy = dy / dd;
+      mv = Math.min(dd, spd * dt);
+    }
+    e.moving = mv > 0.6;
     if (e.moving) {
-      e.x += dx / dd * step; e.y += dy / dd * step;
+      e.x += ux * mv; e.y += uy * mv;
       e.gait = (e.gait || 0) + dt * 9.5;
     }
     allyClampView(e);
@@ -8086,6 +8202,18 @@
           ctx.fillText('殒', pt.x, pt.y - 16);
         } else {
           ctx.fillStyle = 'rgba(0,0,0,0.22)'; ctx.beginPath(); ctx.ellipse(pt.x, pt.y + 9, 7, 3, 0, 0, 6.28); ctx.fill();
+          // 第119轮：侧身让的那一瞬，从旧位置拖一缕淡墨到新位置，起点落一枚朱砂小印。
+          // 直接 ctx 画、不走 G.parts，所以不会被 SC3_SOFT_RING 压成灰环；0.32 秒内淡出。
+          if (pt.dodgeFx > 0 && pt.dodgeFrom) {
+            const dk = pt.dodgeFx / 0.32, d = pt.dodgePrev || { x: 0, y: 1 };
+            // 尾迹按闪避方向固定拖 17px：起步那一帧才 2px 位移，画「起点→当前」会看不见
+            ctx.strokeStyle = 'rgba(86,82,74,' + (0.40 * dk) + ')';
+            ctx.lineWidth = 3.4 * dk + 0.6; ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.moveTo(pt.x - d.x * 17 * dk, pt.y - d.y * 17 * dk);
+            ctx.lineTo(pt.x, pt.y); ctx.stroke(); ctx.lineCap = 'butt';
+            ctx.strokeStyle = 'rgba(143,47,36,' + (0.48 * dk) + ')'; ctx.lineWidth = 1.2;
+            ctx.beginPath(); ctx.arc(pt.dodgeFrom.x, pt.dodgeFrom.y, 8, 0, 6.28); ctx.stroke();
+          }
           // 护体罩：实拍里浅纸底上单描一圈太淡，补一层极淡朱砂晕 + 外圈细印边，随 guardT 淡出
           if (pt.guardT > 0) {
             const gk = Math.min(1, pt.guardT / ALLY_GUARD_DUR);
@@ -8147,6 +8275,16 @@
           ctx.fillText('殒', mt.x, mt.y - 16);
         } else {
           ctx.fillStyle = 'rgba(0,0,0,0.22)'; ctx.beginPath(); ctx.ellipse(mt.x, mt.y + 10, 8, 3.5, 0, 0, 6.28); ctx.fill();
+          // 第119轮：同伴同款侧身拖影
+          if (mt.dodgeFx > 0 && mt.dodgeFrom) {
+            const dk = mt.dodgeFx / 0.32, d = mt.dodgePrev || { x: 0, y: 1 };
+            ctx.strokeStyle = 'rgba(86,82,74,' + (0.40 * dk) + ')';
+            ctx.lineWidth = 3.4 * dk + 0.6; ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.moveTo(mt.x - d.x * 17 * dk, mt.y - d.y * 17 * dk);
+            ctx.lineTo(mt.x, mt.y); ctx.stroke(); ctx.lineCap = 'butt';
+            ctx.strokeStyle = 'rgba(143,47,36,' + (0.48 * dk) + ')'; ctx.lineWidth = 1.2;
+            ctx.beginPath(); ctx.arc(mt.dodgeFrom.x, mt.dodgeFrom.y, 8, 0, 6.28); ctx.stroke();
+          }
           if (mt.guardT > 0) {
             const gk = Math.min(1, mt.guardT / ALLY_GUARD_DUR);
             ctx.fillStyle = 'rgba(143,47,36,' + (0.04 + 0.06 * gk) + ')';
@@ -10066,7 +10204,8 @@
     const cdTxt = '护体 ' + allyArtCd('guard').toFixed(2) + 's　近身 ' + allyArtCd('melee').toFixed(2) +
       's　远击 ' + allyArtCd('ranged').toFixed(2) + 's';
     html += '<div class="cave-sec"><div class="cs-title">灵宠</div>' +
-      '<div class="cs-note">带一只出门。它会在你眼前这一屏里自己找怪打，近的贴身、远的拉开，不再绕着你转。<br>' +
+      '<div class="cs-note">带一只出门。它会在你眼前这一屏里自己找怪打，近的贴身、远的拉开，不再绕着你转；<br>' +
+      '遇上弹幕或要撞上了，会像你开大衍挂机那样侧身让半步，让完接着自己打，不站桩。<br>' +
       '各有三门本事（护体 / 近身 / 远击）轮着使，出手快慢跟着你当前境界的功法走 —— 眼下 ' + cdTxt + '；<br>' +
       '本命绝学 <b>' + ti.label + '</b>（威势 ×' + ti.mul.toFixed(2) + '）隔一阵来一下。' + ti.note + '<br>' +
       '也会真挨打：血量是你满血的一半（不显血条）；殒了十息，灵石够就自动扣 10000 灵石复生；当时不够就欠着不复生，出去攒够钱，回洞府交钱才能起身。</div>';
@@ -10112,7 +10251,8 @@
     const cdTxt = '护体 ' + allyArtCd('guard').toFixed(2) + 's　近身 ' + allyArtCd('melee').toFixed(2) +
       's　远击 ' + allyArtCd('ranged').toFixed(2) + 's';
     let html = '<div class="cave-sec"><div class="cs-title">同伴</div>' +
-      '<div class="cs-note">按剧情出现的人。带一个出门，他也在你眼前这一屏里自己找怪打，出手比灵宠重，也比灵宠慢。<br>' +
+      '<div class="cs-note">按剧情出现的人。带一个出门，他也在你眼前这一屏里自己找怪打，出手比灵宠重，也比灵宠慢；<br>' +
+      '遇上弹幕或要撞上了，会像你开大衍挂机那样侧身让半步，让完接着自己打，不站桩。<br>' +
       '护体 / 近身 / 远击三门轮着使，快慢跟着你当前境界 —— 眼下 ' + cdTxt + '；<br>' +
       '本命绝学仍隔一阵来一下，眼下 <b>' + ti.label + '</b>（威势 ×' + ti.mul.toFixed(2) + '）。<br>' +
       '同伴也会挨打、会殒落：血量是你满血的一半（不显血条），十息后灵石够才扣 10000 灵石复生；当时不够就欠着，出去攒够钱回洞府交钱，不会自己起身。</div>';
@@ -12507,6 +12647,8 @@
         id: a.id, hp: +a.hp.toFixed(1), maxhp: a.maxhp, r: a.r,
         dead: !!a.dead, deadT: +(a.deadT || 0).toFixed(3),
         guardT: +(a.guardT || 0).toFixed(3), iv: +(a.iv || 0).toFixed(3),
+        dodging: !!a.dodging, dodgeThreats: a.dodgeThreats || 0,
+        dodgeHold: +(a.dodgeT || 0).toFixed(3),
         x: +a.x.toFixed(1), y: +a.y.toFixed(1), dir: a.dir, moving: !!a.moving,
         artCd: a.artCd ? Object.assign({}, a.artCd) : null,
         skCd: a.skCd == null ? null : +a.skCd.toFixed(3)
@@ -12556,6 +12698,49 @@
       updatePet(dt == null ? 0.05 : dt); updateMate(dt == null ? 0.05 : dt);
       return window.__FR.allyState();
     },
+    // 第119轮：遇险侧身的探针。anchorUsed 恒为 false —— 随行者没有 autoAnchor，不站桩。
+    allyDodgeInfo() {
+      const one = a => a ? {
+        id: a.id, x: +a.x.toFixed(1), y: +a.y.toFixed(1), hp: +a.hp.toFixed(1),
+        threats: a.dodgeThreats || 0, dodging: !!a.dodging,
+        hold: +(a.dodgeT || 0).toFixed(3),
+        dir: a.dodgePrev ? { x: +a.dodgePrev.x.toFixed(3), y: +a.dodgePrev.y.toFixed(3) } : null
+      } : null;
+      return {
+        pet: one(G.pet), mate: one(G.mate),
+        autoOn: !!G.autoOn, anchorUsed: false,
+        dirs: DODGE_DIRS, step: DODGE_STEP, times: DODGE_T.slice(),
+        near: DODGE_NEAR, nearest: DODGE_NEAREST, radius: ALLY_DODGE_R,
+        hold: ALLY_DODGE_HOLD,
+        view: { x: +G.cam.x.toFixed(1), y: +G.cam.y.toFixed(1), w: W, h: H, edge: ALLY_VIEW_EDGE }
+      };
+    },
+    // 在随行者正前方 dist 处放一发朝它飞来的敌方弹幕（测试「会不会侧身让开」）
+    allyThreat(id, opts) {
+      const a = allyEntById(id); if (!a) return null;
+      const o = opts || {};
+      const vx = o.vx == null ? (o.spd == null ? 220 : o.spd) : o.vx;
+      const vy = o.vy == null ? 0 : o.vy;
+      const L = Math.hypot(vx, vy) || 1;
+      const dist = o.dist == null ? 90 : o.dist;
+      const b = {
+        x: a.x - vx / L * dist, y: a.y - vy / L * dist,
+        vx: vx, vy: vy, r: o.r == null ? 6 : o.r,
+        dmg: o.dmg == null ? 10 : o.dmg, life: 5
+      };
+      G.ebullets.push(b);
+      return { x: +b.x.toFixed(1), y: +b.y.toFixed(1), vx: b.vx, vy: b.vy, r: b.r };
+    },
+    allyAdvanceThreats(dt) {
+      const t = dt == null ? 0.05 : dt;
+      for (let i = G.ebullets.length - 1; i >= 0; i--) {
+        const b = G.ebullets[i];
+        b.x += b.vx * t; b.y += b.vy * t;
+        if (b.life != null) { b.life -= t; if (b.life <= 0) G.ebullets.splice(i, 1); }
+      }
+      return G.ebullets.length;
+    },
+    allyClearThreats() { G.ebullets.length = 0; return 0; },
     allyCastArt(id, kind) {
       const a = allyEntById(id), art = window.allyArtOf(id, kind);
       if (!a || !art) return null;
