@@ -7,6 +7,9 @@ const req = createRequire('C:/Users/92997/.workbuddy/binaries/node/workspace/');
 const { chromium } = req('playwright');
 const here = dirname(fileURLToPath(import.meta.url));
 const root = dirname(here);
+// 实拍写进 qa/_out/（gitignore），不覆盖仓库里被跟踪的交付快照
+const OUT = join(here, '_out');
+fs.mkdirSync(OUT, { recursive: true });
 const PORT = 9094;
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.png': 'image/png' };
 const server = http.createServer((rq, rs) => {
@@ -83,7 +86,7 @@ ok(m2.card && /rgba\(60,\s*56,\s*48/.test(m2.card.border), '地图卡翻墨线�
 ok(m2.card && m2.card.radius === '2px', '地图卡圆角收方（卷轴纸）', m2.card && m2.card.radius);
 ok(m2.node === '2px', '路线节点变方形印章（圆角 2px）', m2.node);
 ok(m2.numColor && /rgb\(143,\s*47,\s*36\)/.test(m2.numColor), '图号翻朱砂小方印', m2.numColor);
-await page.screenshot({ path: 'qa/shot-skin-map-scroll.png' });
+await page.screenshot({ path: join(OUT, 'shot-skin-map-scroll.png') });
 await page.evaluate(() => { window.__FR.enterMap('qixuan'); window.__FR.G.state = 'play'; });
 
 // 2.6) 竖排对话框：正文/名帖竖排，提示移位
@@ -122,7 +125,7 @@ m4 = await page.evaluate(() => {
 });
 ok(m4.on && m4.shown === 'block' && /beast-lang\.png/.test(m4.bg), 'boss 在场：异兽插画浮现且挂图', m4);
 ok(m4.sealOn && m4.sealShown === 'flex' && /rgb\(185,\s*51,\s*37\)/.test(m4.sealBg), 'boss 在场：朱砂印盖落（妖）', m4);
-await page.screenshot({ path: 'qa/shot-skin-boss-art.png' });
+await page.screenshot({ path: join(OUT, 'shot-skin-boss-art.png') });
 await page.evaluate(() => { window.__FR.killBoss(); });
 await page.waitForTimeout(400);
 m4 = await page.evaluate(() => {
@@ -151,9 +154,9 @@ const m6 = await page.evaluate(() => {
   return { content: cs.content, bg: cs.backgroundColor, wm: cs.writingMode };
 });
 ok(m6 && /凡人/.test(m6.content) && /rgb\(185,\s*51,\s*37\)/.test(m6.bg) && m6.wm === 'vertical-rl', '大地图标题旁竖排朱砂印「凡人」', m6);
-await page.screenshot({ path: 'qa/shot-skin-map-seal.png' });
+await page.screenshot({ path: join(OUT, 'shot-skin-map-seal.png') });
 await page.evaluate(() => { window.__FR.enterMap('qixuan'); window.__FR.G.state = 'play'; });
-await page.screenshot({ path: 'qa/shot-skin-guigu.png' });
+await page.screenshot({ path: join(OUT, 'shot-skin-guigu.png') });
 
 // 3) 存档持久化：刷新后仍是水墨皮
 const savedRaw = await page.evaluate(k => localStorage.getItem(k), key);
@@ -178,7 +181,7 @@ const btnOn2 = await page.evaluate(() => ({
   gg: document.getElementById('skinGuigu').classList.contains('on')
 }));
 ok(btnOn2.jin && !btnOn2.gg, '按钮选中态回到鎏金', btnOn2);
-await page.screenshot({ path: 'qa/shot-skin-jin.png' });
+await page.screenshot({ path: join(OUT, 'shot-skin-jin.png') });
 
 await ctx.close();
 console.log('\n────────────────────────');

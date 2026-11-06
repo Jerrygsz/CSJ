@@ -2,6 +2,9 @@ node_modules/
 .DS_Store
 *.log
 qa/fx-*.png
+# 闸门实拍输出目录：verify-skin / verify-hazards 每次跑都会写这里（第111轮起）。
+# 仓库里 qa/shot-skin-*.png 与 qa/shots/haz-*.png 是第97~98轮的交付快照，只读留存、不再被覆盖。
+qa/_out/
 qa/_props.json
 qa/_npc_chapter_raw.json
 qa/_maps.json

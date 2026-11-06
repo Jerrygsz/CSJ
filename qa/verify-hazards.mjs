@@ -3,8 +3,14 @@
 //   · 判定：三种新招式是否真的「持续扣血 / 单次结算 / 到时间收掉」
 //   · 边界：走出光柱是否立刻停止扣血（否则就是无范围的全屏伤害）
 import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+import fs from 'node:fs';
 const req = createRequire('C:/Users/92997/.workbuddy/binaries/node/workspace/');
 const { chromium } = req('playwright');
+// 实拍写进 qa/_out/（gitignore），不覆盖仓库里被跟踪的交付快照
+const OUT = join(dirname(fileURLToPath(import.meta.url)), '_out');
+fs.mkdirSync(OUT, { recursive: true });
 
 const BOSSES = ['山贼头目','野狼帮帮主·贾天龙','七级妖兽','妙鹤真人','黑煞教长老','魔道执事','古魔主魂',
   '银翅夜叉','敖啸老祖','冰凤','鸾鸣门·双修夫妇','至阳上人','血云·血祭大阵','地渊·刑兽','米尊者',
@@ -162,7 +168,7 @@ for (const [tag, sk, frames, wait] of [
     pl.hp = pl.maxhp;
     for (let i = 0; i < wait; i++) { FR.tickFrames(1, 1 / 60); if (G.state !== 'play') G.state = 'play'; }
   }, { sk, wait });
-  const f = `qa/shots/${SKIN ? SKIN + '-' : ''}${tag}.png`;
+  const f = join(OUT, `${SKIN ? SKIN + '-' : ''}${tag}.png`);
   await p.screenshot({ path: f });
   shots.push(f);
 }

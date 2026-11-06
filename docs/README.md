@@ -15,6 +15,11 @@
   为什么要有它：八批下来只有 scenery3 / smoke / ver 是每轮必跑的，其余五个全凭记忆挑着跑，
   于是 `verify-ink-sprite` 的两条断言在第102轮 UI 柔化时就已作废、一直红到第109轮才被发现。
 
+  **跑完不留脏文件**（第111轮）：清单内的实拍一律写进 `qa/_out/`（已 gitignore）。
+  仓库里的 `qa/shot-skin-*.png`（5 张）与 `qa/shots/haz-*.png`（3 张）是第97~98轮的交付快照，
+  只读留存、不再被覆盖——在此之前每跑一次 verify-all 就会重写这 8 张，必须 `git checkout -- qa/` 才能干净。
+  一次性脚本（`verify-jiedan` / `verify-yanyue-boss` 等，不在本清单内）仍按各自历史路径出图。
+
 - **`smoke.mjs`** — 用 Node + `vm` 沙箱加载全部游戏 JS，跑 **294 条断言**（功法/装备/怪物/商店/存档/突破等）。
   ```
   node qa/smoke.mjs
