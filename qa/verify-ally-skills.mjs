@@ -1,6 +1,6 @@
 // 第116轮 · 同伴 / 灵宠技能常驻闸门
 //
-// 判据分八组：
+// 判据分十组：
 //   A 覆盖   —— 页面里真实加载的 MATES + PETS 一个不漏，源码正则再兜一道
 //   B 原著   —— 技能名 / 词频 / 摘句 / 关联强度 逐条对上 canon/ally-skills.md 与已核验词频基线
 //   C 数值   —— 六种释放形态齐、威力与冷却都在设计带里、四档门槛取自 rangeModel.BANDS
@@ -9,6 +9,9 @@
 //   F 冷却   —— 独立冷却真的挂在 updatePet / updateMate 上，不是写在数据表里当摆设
 //   G 反向   —— 喂四份坏数据给同一套校验器，必须都报错（闸门有牙）
 //   H 台账   —— 台账 14 段与代码表逐字段一致
+//   I 水墨   —— 第117轮：读一招真正画出来的粒子 / 印蜕 / 像素特效 / 出手动作，
+//               逐条对上六种形态各自的笔势清单；色阶只认 fxpix.PAL 四档
+//   J 反向   —— 第117轮：把法阵 / 像素特效 / 印蜕 / 动作 / 调色板逐个抽掉，闸门得红
 //
 // 用法：node qa/verify-ally-skills.mjs
 import { createRequire } from 'node:module';
@@ -37,6 +40,17 @@ const CANON_FREQ = {
 const ALLY_KINDS = ['bolt', 'fan', 'nova', 'chain', 'chill', 'drain'];
 const WHITELIST_JUE = ['大衍诀'];            // canon/combat.md 第四节白名单里以「诀」收尾的
 const BANDS = [36, 56, 82, 112, 200, 260, 460];  // js/skills.js window.rangeModel.BANDS
+const ALLY_PALS = ['xue', 'jin', 'qi', 'mo'];     // 第117轮：只认 fxpix.js PAL 的四条六档色阶
+// 每种形态「至少得画出什么」：数字是粒子条数下限，来自主角功法同款原语的组合
+//（起手法阵 1、像素符文 1、主特效 1、朱砂印蜕 1、主角同款弯月 / 放射 / 折线 / 网）。
+const FX_NEED = {
+  bolt:  { rune: 1, slash: 1,  fx3: 2, seal: 1 },
+  fan:   { rune: 1, slash: 3,  fx3: 2, seal: 1 },
+  nova:  { rune: 1, ray: 12, ring: 2, fx3: 2, seal: 1 },
+  chain: { rune: 1, bolt: 3, web: 6,  fx3: 2, seal: 1 },
+  chill: { rune: 1, web: 7,  ring: 2, fx3: 2, seal: 1 },
+  drain: { rune: 2, ring: 2, fx3: 2, seal: 1 }
+};
 
 // ---------------- 校验器（真实数据与注入数据共用，才谈得上「有牙」） ----------------
 function validate(list, defIds, mdText, freq) {
@@ -67,6 +81,25 @@ function validate(list, defIds, mdText, freq) {
     if (!sec.includes('词频：' + c.n)) errs.push(s.id + ' 台账词频不符');
     if (c.quote && !sec.includes('摘句：「' + c.quote + '」')) errs.push(s.id + ' 台账摘句不符');
   }
+  return errs;
+}
+
+// 第117轮 · 水墨呈现校验器：真实产物与注入数据共用，才谈得上「有牙」。
+function validateFx(list, fxById, pals) {
+  const errs = [];
+  for (const s of list) {
+    if (!pals.includes(s.pal)) errs.push(s.id + ' 调色板非法：' + s.pal);
+    const f = fxById[s.id];
+    if (!f) { errs.push(s.id + ' 没读到特效产物'); continue; }
+    const need = FX_NEED[s.kind] || {};
+    for (const k of Object.keys(need)) {
+      if (!(f[k] >= need[k])) errs.push(s.id + ' 缺 ' + k + '（要 ≥' + need[k] + '，实得 ' + f[k] + '）');
+    }
+    if (!(f.cast > 0)) errs.push(s.id + ' 起手动作没挂上');
+    if (!(f.total >= 8)) errs.push(s.id + ' 特效粒子过少：' + f.total);
+    if (f.kind !== s.kind) errs.push(s.id + ' 实机形态与数据表不符');
+  }
+  for (const p of pals) if (!list.some(s => s.pal === p)) errs.push('调色板 ' + p + ' 一条都没用上');
   return errs;
 }
 
@@ -255,6 +288,78 @@ const secs = (mdText.match(/^### [mp]_[a-z0-9_]+ · /gm) || []);
 ok(secs.length === 14, '台账正好 14 段', secs.length);
 ok(list.every(s => mdText.includes('### ' + s.id + ' · ')), '每段都能按实体 id 定位');
 ok(mdText.includes('没有一条是自造词') && mdText.includes('D:\\Games\\CSJ\\raw'), '台账写明了数据源与自造词结论');
+
+console.log('\n【I · 水墨呈现：每招都画出主角同款笔势】');
+// 逐招真实释放，数它到底往 G.parts / G.texts / FX3 里放了什么，不看源码里写了什么字
+const fxById = await page.evaluate((ids) => {
+  const o = {};
+  for (const id of ids) o[id] = window.__FR.allySkillFx(id);
+  return o;
+}, list.map(s => s.id));
+const fxRealErrs = validateFx(list, fxById, ALLY_PALS);
+ok(fxRealErrs.length === 0, '14 条技能的特效产物逐条达标', fxRealErrs.slice(0, 8));
+ok(Object.keys(fxById).length === 14, '14 条技能都读到了真实特效产物');
+ok(live.fr.pals.join(',') === ALLY_PALS.join(','), '运行时调色板合法集与基线一致', live.fr.pals);
+ok(ALLY_PALS.every(p => list.some(s => s.pal === p)), '四档水墨色阶都用上了',
+  ALLY_PALS.map(p => p + ':' + list.filter(s => s.pal === p).length).join(' '));
+ok(list.every(s => /^#[0-9a-f]{6}$/i.test(s.vfx)), '技能主色都是 #hex，交给 inkify 砍色',
+  list.filter(s => !/^#[0-9a-f]{6}$/i.test(s.vfx)).map(s => [s.id, s.vfx]));
+ok(Object.values(fxById).every(f => f.seal === 1), '每招一枚朱砂印蜕技能名，不多不少');
+ok(Object.values(fxById).every(f => f.rune >= 1), '每招都有起手贴地法阵');
+ok(Object.values(fxById).every(f => f.fx3 >= 2), '每招都有起手 + 主特效两层水墨像素特效');
+ok(Object.values(fxById).every(f => f.cast > 0), '每招都挂上了随行实体的出手动作');
+ok(list.filter(s => ['bolt', 'fan'].includes(s.kind)).every(s => fxById[s.id].slash >= 1),
+  '弹道类都有弯月刃（主角 fireActive 同款）');
+ok(list.filter(s => s.kind === 'nova').every(s => fxById[s.id].ray >= 12 && fxById[s.id].ring >= 2),
+  '爆发类都有 12 道放射飞白 + 双环');
+ok(list.filter(s => s.kind === 'chain').every(s => fxById[s.id].bolt >= 3 && fxById[s.id].web >= 6),
+  '连锁类都有天雷折线 + 落点雷网');
+ok(list.filter(s => s.kind === 'chill').every(s => fxById[s.id].web >= 7), '定身类都有蛛网 / 冰纹');
+ok(list.filter(s => s.kind === 'drain').every(s => fxById[s.id].rune >= 2 && fxById[s.id].ring >= 2),
+  '回补类都有双层法阵 + 收缩环');
+// 静态再兜一道：这些原语确实写在释放段里，不是探针自己造出来的假数据
+const castSeg = gsrc.slice(gsrc.indexOf('function castAllySkill'), gsrc.indexOf('function tickAllySkill'));
+const startSeg = gsrc.slice(gsrc.indexOf('function allyCastFx'), gsrc.indexOf('function castAllySkill'));
+ok(castSeg.length > 1000 && startSeg.length > 200, '源码里能切出释放段与起手段');
+ok(/allyCastFx\(ent, sk, col\)/.test(castSeg), '六招共用同一套起手仪式');
+ok(/spawnRune\(/.test(startSeg) && /FX3\.spawn\('rune'/.test(startSeg),
+  '起手用贴地法阵 + 一次性像素符文（不用会被浅纸压暗的 hold）');
+ok(/ent\.skCast = ALLY_CAST_T/.test(startSeg), '起手把出手动作计时挂到实体上');
+ok(['spawnSlash(', 'spawnWeb(', 'allyBolt(', 'allyRays(', "FX3.spawn('nova'", 'seal: true']
+  .every(k => castSeg.includes(k)), '主角同款弯月 / 雷网 / 天雷 / 飞白 / 像素爆发 / 印蜕都真在释放段里');
+ok(/const ALLY_PALS = \['xue', 'jin', 'qi', 'mo'\]/.test(gsrc), '调色板合法集写死在代码里');
+// 实拍教训：米白会被 inkify 判成高饱和砍成赭石，与朱砂底同色。印蜕字色必须 d=0 纯灰阶才放行。
+ok(/ctx\.fillStyle = '#ffffff'; ctx\.fillText\(t\.text, t\.x, t\.y - 3\)/.test(gsrc),
+  '朱砂印蜕的字色是纯白纯灰阶（inkify 放行，不会被砍成赭石糊在红底上）');
+ok(/for \(const t of G\.texts\) if \(!t\.seal\) drawOneText\(t\);[\s\S]{0,120}?if \(t\.seal\) drawOneText\(t\);/.test(gsrc),
+  '印蜕排在伤害数字之后画，不会被压住');
+const fxsrc = fs.readFileSync(join(ROOT, 'js', 'fxpix.js'), 'utf8');
+ok(/window\.INK_HEX/.test(fxsrc) && /light: 0/.test(fxsrc),
+  '像素特效走 INK_HEX 砍色且关掉加法光（宣纸白底不糊）');
+ok(/tfStrike\(ALLY_CAST_T - pt\.skCast/.test(gsrc) && /tfStrike\(ALLY_CAST_T - mt\.skCast/.test(gsrc),
+  '灵宠 / 同伴绘制层都接了主角同款出手曲线');
+const at = await page.evaluate(() => window.__FR.atkTotal());
+ok(Math.abs(at.castT - at.atkTotal) < 1e-9, '起手动作时长与主角 ATK_TOTAL 一致', at);
+ok(errs.length === 0, '加上特效后全程仍无 JS 报错', errs.slice(0, 3));
+
+console.log('\n【J · 反向注入：水墨呈现闸门得有牙】');
+const withPatched = (i, patch) => {
+  const o = Object.assign({}, fxById);
+  o[list[i].id] = Object.assign({}, o[list[i].id], patch);
+  return o;
+};
+const badFxCases = [
+  { label: '起手法阵被删', fx: withPatched(0, { rune: 0 }), ls: list },
+  { label: '水墨像素特效被删', fx: withPatched(1, { fx3: 0 }), ls: list },
+  { label: '朱砂印蜕被删', fx: withPatched(2, { seal: 0 }), ls: list },
+  { label: '出手动作被删', fx: withPatched(3, { cast: 0 }), ls: list },
+  { label: '调色板写成霓虹', fx: fxById, ls: list.map((s, i) => i === 4 ? { ...s, pal: 'neon' } : s) },
+  { label: '放射飞白偷工减料', fx: withPatched(list.findIndex(s => s.kind === 'nova'), { ray: 2 }), ls: list }
+];
+for (const c of badFxCases) {
+  const e = validateFx(c.ls, c.fx, ALLY_PALS);
+  ok(e.length > 0, '注入「' + c.label + '」会被拦下', e.slice(0, 2));
+}
 
 console.log('\n===================================');
 console.log('  ' + pass + ' 通过 / ' + fail + ' 失败');

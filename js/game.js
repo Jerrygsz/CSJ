@@ -2129,6 +2129,13 @@
   // （save.cultivate.level）分四档，让「修为越高，同行之人出手越有分量」在洞府里看得见。
   // ==========================================================================
   const ALLY_KINDS = ['bolt', 'fan', 'nova', 'chain', 'chill', 'drain'];
+  // 第117轮：水墨像素特效（FX3）只认 fxpix.js PAL 里的四条六档色阶。
+  // 不是新配色 —— 水墨皮下 fxpix 会再用 INK_HEX 把每一档砍回本作墨阶。
+  const ALLY_PALS = ['xue', 'jin', 'qi', 'mo'];
+  // 起手动作时长 = 主角 ATK_WIND + ATK_STRIKE + ATK_RECOV（0.28s）。
+  // 这里不直接引用 ATK_TOTAL：那个 const 定义在渲染段，IIFE 顶层走到本行时还没初始化（TDZ）。
+  // 闸门拿 __FR.atkTotal() 与这里比对，防止两处漂开。
+  const ALLY_CAST_T = 0.28;
   // 沿用第280轮的弹体画法，只把数据表里的色值映射到已有的 vfx 键；
   // 环 / 粒子 / 飘字直接用色值，不改 drawBulletVfx。
   const ALLY_BOLT_VFX = {
@@ -2147,18 +2154,51 @@
     const L = (lv == null) ? ((save.cultivate && save.cultivate.level) || 1) : lv;
     return (sk.pow || 10) * (allyTierAt(L).mul || 1);
   }
-  function allyRing(x, y, rad, color, life) {
-    G.parts.push({ ring: true, x, y, r: 8, maxr: rad, life: life || 0.36, maxlife: life || 0.36, color });
+  function allyRing(x, y, rad, color, life, from) {
+    // from>0 时是「往身上收」的收缩环（还魂术收魂用）；不传则照旧从内往外晕开。
+    G.parts.push({ ring: true, x, y, r: from || 8, maxr: rad, life: life || 0.36, maxlife: life || 0.36, color });
   }
+  // 第117轮：飞白。原来是几粒 3px 小方块，在浅宣纸上像撒了一把纸屑；
+  // 改成细长笔触（复用 drawPart 的 spark 分支，尾巴朝速度反面拖），才像墨被甩出去。
   function allySpark(x, y, color, n) {
     const k = n || 6;
     for (let i = 0; i < k; i++) {
       const a = i / k * 6.283 + Math.random() * 0.4;
+      const sp = U.rand(70, 160);
       G.parts.push({
-        x, y, vx: Math.cos(a) * U.rand(70, 150), vy: Math.sin(a) * U.rand(70, 150) - 30,
-        life: 0.3, maxlife: 0.3, size: 3, color
+        spark: true, x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 30,
+        len: U.rand(8, 17), w: U.rand(1.2, 2.3),
+        life: 0.34, maxlife: 0.34, color
       });
     }
+  }
+  // 放射光条：主角 novaBlast 的金光爆发同款。水墨皮下 ray 会被 SC3_SOFT_RING
+  // 压到 0.26 并归墨色 —— 正好是「飞白」，不是被削弱，反而是这套画风要的浓淡。
+  function allyRays(x, y, rad, color, n) {
+    const k = n || 12;
+    for (let i = 0; i < k; i++) {
+      const ang = i * 6.283 / k + U.rand(-0.07, 0.07);
+      G.parts.push({ ray: true, x, y, ang, len: rad * U.rand(0.66, 0.98), life: 0.36, maxlife: 0.36, color });
+    }
+  }
+  // 天落雷折线：与主角 thunderStrike 同一个 drawBolt，字段一致即可，不改渲染层。
+  function allyBolt(x, y, color) {
+    G.parts.push({ bolt: true, x, y0: y - 200, y, life: 0.40, maxlife: 0.40, color, seed: Math.random() * 100 });
+  }
+  // 起手仪式：韩立每门功法都有「脚下符文 / 出手动作 / 一声清音」，随行之人此前全没有，
+  // 技能像凭空冒出来的一圈环。这里补齐同一套，且只用不受 SC3_SOFT_RING 柔化的原语：
+  //   spawnRune（贴地法阵，画在角色之前）、FX3 一次性像素符文、飞白笔触、tfStrike 身体曲线。
+  // 不用 FX3.hold —— hold 是常驻领域法阵，浅纸下会被 draw() 压到 0.42，起手要看得见。
+  function allyCastFx(ent, sk, col) {
+    ent.skCast = ALLY_CAST_T;
+    spawnRune(ent.x, ent.y, 22, col);
+    if (window.FX3) {
+      FX3.spawn('rune', ent.x, ent.y + 6, {
+        pal: ALLY_PALS.indexOf(sk.pal) >= 0 ? sk.pal : 'qi', scale: 1.15
+      });
+    }
+    allySpark(ent.x, ent.y - 4, col, 6);
+    Sfx.gem();
   }
   function allyVictims(x, y, rad) {
     return allEnemies().filter(e => !e._dead && U.dist(x, y, e.x, e.y) <= rad + (e.r || 0));
@@ -2182,12 +2222,20 @@
     const x = ent.x, y = ent.y;
     const dmg = allyPower(sk, lv);
     const col = sk.vfx || '#ffe98a';
+    const pal = ALLY_PALS.indexOf(sk.pal) >= 0 ? sk.pal : 'qi';
     const kind = ALLY_KINDS.indexOf(sk.kind) >= 0 ? sk.kind : 'bolt';
     let hit = 0, shots = 0;
+
+    // 第117轮：六招共用的起手仪式 —— 脚下法阵 + 水墨像素符文 + 出手动作 + 飞白，
+    // 全是主角功法用过的、且不受 SC3_SOFT_RING 柔化的原语。伤害口径一个字没动。
+    allyCastFx(ent, sk, col);
 
     if (kind === 'bolt') {
       const t = nearestEnemyFrom(x, y, 520);
       const a = t ? Math.atan2(t.y - y, t.x - x) : ((G.player.dir || 1) >= 0 ? 0 : Math.PI);
+      // 身前一道弯月：fireActive 剑系同款。以前只有弹飞出去，看不出「谁挥的」。
+      spawnSlash(x + Math.cos(a) * 14, y - 5 + Math.sin(a) * 14, a, col, 28, 2.0);
+      if (window.FX3) FX3.spawn('crit', x, y - 4, { pal, scale: 0.9 });
       G.bullets.push({
         x, y, vx: Math.cos(a) * 380, vy: Math.sin(a) * 380, r: 8,
         dmg, life: 1.5, pierce: sk.pierce || 3, hit: new Set(), home: true,
@@ -2198,6 +2246,9 @@
       const t = nearestEnemyFrom(x, y, 520);
       const base = t ? Math.atan2(t.y - y, t.x - x) : 0;
       const n = sk.count || 3, spread = 0.72;
+      // 三层错开的半月弧，先把「扇」这个形画出来，弹才有出处
+      for (let j = 0; j < 3; j++) spawnSlash(x, y - 4, base, col, 26 + j * 10, 1.7 - j * 0.24);
+      if (window.FX3) FX3.spawn('poof', x, y, { pal });
       for (let i = 0; i < n; i++) {
         const a = base + (n === 1 ? 0 : (i / (n - 1) - 0.5) * spread);
         G.bullets.push({
@@ -2209,22 +2260,37 @@
       shots = n; Sfx.shoot();
     } else if (kind === 'nova') {
       const rad = sk.rad || 96;
-      allyRing(x, y, rad, col, 0.42); allySpark(x, y, col, 10);
+      allyRing(x, y, rad, col, 0.42);
+      allyRing(x, y, rad * 0.62, col, 0.32);       // 双环：外晕 + 内核，和 novaBlast 一个层次
+      allyRays(x, y, rad, col, 12);                 // 12 道飞白放射
+      allySpark(x, y, col, 12);
+      if (window.FX3) FX3.spawn('nova', x, y, { pal });
+      G.shake = Math.max(G.shake, 3);              // 只给一点落笔的顿感，比主角 Boss 技（10+）轻得多
       for (const e of allyVictims(x, y, rad)) { allyDamage(e, dmg); hit++; }
       Sfx.nova();
     } else if (kind === 'chain') {
       const list = allyNearest(x, y, 520, sk.count || 3);
       let k = 1;
       for (const e of list) {
+        allyBolt(e.x, e.y, col);                   // 自天而降的折线，thunderStrike 同款画法
+        spawnWeb(e.x, e.y, 26 + k * 6, col);      // 落点雷网 / 神念网
         allyRing(e.x, e.y, 30 + k * 6, col, 0.3);
         spawnHit(e.x, e.y, col);
         allyDamage(e, dmg * Math.pow(0.82, k - 1));
         hit++; k++;
       }
-      if (list.length) Sfx.nova();
+      if (list.length) {
+        if (window.FX3) FX3.spawn('rune', list[0].x, list[0].y + 6, { pal });
+        Sfx.nova();
+      }
     } else if (kind === 'chill') {
       const rad = sk.rad || 96;
       allyRing(x, y, rad, col, 0.45);
+      allyRing(x, y, rad * 0.7, col, 0.34);
+      // 蛛网 / 冰纹：三道交错细线网，正好是「白液出口成网」「寒气封住」的字面画法
+      for (let i = 0; i < 3; i++) spawnWeb(x, y, rad * (0.5 + i * 0.22), col, i === 0);
+      allySpark(x, y, col, 10);
+      if (window.FX3) FX3.spawn('rune', x, y + 6, { pal });
       for (const e of allyVictims(x, y, rad)) {
         allyDamage(e, dmg);
         if (sk.stun) e.stunT = Math.max(e.stunT || 0, sk.stun);
@@ -2234,6 +2300,9 @@
     } else if (kind === 'drain') {
       const rad = sk.rad || 92;
       allyRing(x, y, rad, col, 0.42);
+      allyRing(x, y, 8, col, 0.46, rad * 0.9);    // 收缩环：墨往身上收，读作「把生气收回来」
+      spawnRune(x, y, rad * 0.42, col);            // 第二层贴地阵，与起手那圈套成双环
+      if (window.FX3) FX3.spawn('pickup', x, y, { pal });
       let total = 0;
       for (const e of allyVictims(x, y, rad)) { allyDamage(e, dmg); total += dmg; hit++; }
       if (total > 0 && G.player.hp > 0 && sk.leech) {
@@ -2241,8 +2310,10 @@
       }
       Sfx.buff();
     }
-    // 技能名飘一下：谁出的手、出的哪一招，屏上看得见；纸底用深墨，别用亮色糊成一片
-    spawnText(x, y - 26, sk.name, save.skin === 'guigu' ? '#6b2a20' : col, 12);
+    // 技能名改成朱砂印蜕：淡朱砂方底 + 纸白字 + 细印边，与第115轮增益小方印同一语汇。
+    // 只这一处传 seal，其余飘字（伤害 / 拾取 / 提示）逐字节保持原样。
+    // 抬到 y-50：实拍里 y-26 正好和伤害飘字同一片，朱砂印被压得读不清。
+    spawnText(x, y - 50, sk.name, save.skin === 'guigu' ? '#6b2a20' : col, 14, { seal: true });
     return { name: sk.name, kind, dmg: +dmg.toFixed(2), shots, hit, cd: sk.cd };
   }
   // 独立于普攻的冷却。普攻那两处 early return 不能挡住技能计时。
@@ -4520,7 +4591,11 @@
       life: 0.4, maxlife: 0.4
     });
   }
-  function spawnText(x, y, text, color, size) { G.texts.push({ x, y, vy: -30, life: 0.8, maxlife: 0.8, text: String(text), color, size }); }
+  // 第117轮新增可选 opts.seal：技能名飘字改画成朱砂印蜕。不传则逐字节保持原样
+  //（伤害数字、拾取提示、联机分成等 29 处都在用，不能一起改）。
+  function spawnText(x, y, text, color, size, opts) {
+    G.texts.push({ x, y, vy: -30, life: 0.8, maxlife: 0.8, text: String(text), color, size, seal: !!(opts && opts.seal) });
+  }
   // 重击的「惊艳一刻」：纸面透一层朱砂晕，0.32 秒散尽。
   // 节流 300ms —— 攻速拉起来后几乎每刀都暴击，不节流就成了"一直泛红"，反而不惊艳。
   const elCritFlash = document.getElementById('critFlash');
@@ -4552,6 +4627,9 @@
   }
   function updateParts(dt) {
     if (window.FX3) FX3.update(dt);   // pixelfx 特效推进（顿帧里也跟着冻，手感才一致）
+    // 第117轮：随行之人 / 灵宠的起手动作计时，和特效同一条时间轴（顿帧一起冻）。
+    if (G.pet && G.pet.skCast > 0) G.pet.skCast = Math.max(0, G.pet.skCast - dt);
+    if (G.mate && G.mate.skCast > 0) G.mate.skCast = Math.max(0, G.mate.skCast - dt);
     for (let i = G.parts.length - 1; i >= 0; i--) {
       const p = G.parts[i]; p.life -= dt;
       if (p.life <= 0) { G.parts.splice(i, 1); continue; }
@@ -7707,8 +7785,12 @@
         const pt = G.pet;
         ctx.fillStyle = 'rgba(0,0,0,0.22)'; ctx.beginPath(); ctx.ellipse(pt.x, pt.y + 9, 7, 3, 0, 0, 6.28); ctx.fill();
         // 跑起来走手绘帧，站着待机帧 —— 上下颠由 tf 出，不再另加 bob（会弹两次）
-        const ptf = pt.moving ? tfRun(pt.x, pt.y, pt.gait || 0, 1, pd.spr)
-          : tfIdle(pt.x, pt.y, pt.bob || 0, pd.spr);
+        // 第117轮：出手那 0.28 秒走主角同款「含胸→探臂→收势」曲线；
+        // 不传 spr 就不会去抓手绘三帧（那些帧只有韩立有），只借程序化变换。
+        const ptf = pt.skCast > 0
+          ? tfStrike(ALLY_CAST_T - pt.skCast, (G.player && G.player.dir) || 1)
+          : pt.moving ? tfRun(pt.x, pt.y, pt.gait || 0, 1, pd.spr)
+            : tfIdle(pt.x, pt.y, pt.bob || 0, pd.spr);
         drawSpr(pd.spr, pt.x, pt.y, pd.scale || 1.3, G.player && G.player.dir < 0, ptf);
       }
     }
@@ -7738,8 +7820,11 @@
       if (md && md.spr && Sprites[md.spr]) {
         const mt = G.mate;
         ctx.fillStyle = 'rgba(0,0,0,0.22)'; ctx.beginPath(); ctx.ellipse(mt.x, mt.y + 10, 8, 3.5, 0, 0, 6.28); ctx.fill();
-        const mtf = mt.moving ? tfRun(mt.x, mt.y, mt.gait || 0, 1, md.spr)
-          : tfIdle(mt.x, mt.y, mt.bob || 0, md.spr);
+        // 第117轮：同伴和灵宠共用同一套起手动作曲线
+        const mtf = mt.skCast > 0
+          ? tfStrike(ALLY_CAST_T - mt.skCast, (G.player && G.player.dir) || 1)
+          : mt.moving ? tfRun(mt.x, mt.y, mt.gait || 0, 1, md.spr)
+            : tfIdle(mt.x, mt.y, mt.bob || 0, md.spr);
         drawSpr(md.spr, mt.x, mt.y, md.scale || 1.5, G.player && G.player.dir < 0, mtf);
         const nm = (md.icon || '·') + ' ' + md.name;
         ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
@@ -7814,7 +7899,28 @@
     // 第102轮：浅纸上只把常驻领域法阵（hold）压到 0.42，一次性命中 / 暴击特效不受影响
     if (window.FX3) FX3.draw(ctx, SC3_SOFT_RING ? 0.42 : 1);
     for (const pt of G.parts) if (!pt.rune) drawPart(pt);
-    for (const t of G.texts) { ctx.globalAlpha = Math.max(0, t.life / t.maxlife); ctx.fillStyle = t.color; ctx.font = 'bold ' + t.size + 'px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(t.text, t.x, t.y); ctx.globalAlpha = 1; }
+    // 印蜕最后画：伤害数字也走 G.texts，先画它们，技能名才不会被压住读不清（第117轮实拍修正）。
+    const drawOneText = (t) => {
+      ctx.globalAlpha = Math.max(0, t.life / t.maxlife);
+      ctx.font = 'bold ' + t.size + 'px sans-serif'; ctx.textAlign = 'center';
+      if (t.seal) {
+        // 朱砂印蜕：方底 + 细印边 + 方角 + 纸白字，与顶栏增益小方印同一套语汇。
+        // 色值照样过 inkify 拦截器，水墨皮自动归朱砂，鎏金皮也读得清。
+        const w = ctx.measureText(t.text).width + 14, h = t.size + 10;
+        ctx.fillStyle = 'rgba(143,47,36,0.90)'; ctx.fillRect(t.x - w / 2, t.y - h + 4, w, h);
+        ctx.strokeStyle = 'rgba(143,47,36,0.98)'; ctx.lineWidth = 1.2;
+        ctx.strokeRect(t.x - w / 2 + 0.6, t.y - h + 4.6, w - 1.2, h - 1.2);
+        // 字色必须是纯灰阶：inkify 的饱和度判据 s=d/(1-|2l-1|) 会把「米白」#fff8ec
+        // 算成高饱和暖色，再砍成赭石 —— 和朱砂底几乎同色，实拍里整枚印读不出字。
+        // d=0 才走 s<0.22 原样放行（主角剑光的白芯也是这么写的）。
+        ctx.fillStyle = '#ffffff'; ctx.fillText(t.text, t.x, t.y - 3);
+      } else {
+        ctx.fillStyle = t.color; ctx.fillText(t.text, t.x, t.y);
+      }
+      ctx.globalAlpha = 1;
+    };
+    for (const t of G.texts) if (!t.seal) drawOneText(t);
+    for (const t of G.texts) if (t.seal) drawOneText(t);
 
     ctx.restore();
 
@@ -11927,7 +12033,7 @@
         return {
           id, owner: d ? d.name : id, name: sk.name, kind: sk.kind, pow: sk.pow, cd: sk.cd,
           rad: sk.rad || 0, count: sk.count || 0, stun: sk.stun || 0, leech: sk.leech || 0,
-          power: +allyPower(sk).toFixed(3), desc: sk.desc, canon: sk.canon, vfx: sk.vfx
+          power: +allyPower(sk).toFixed(3), desc: sk.desc, canon: sk.canon, vfx: sk.vfx, pal: sk.pal || null
         };
       });
       return {
@@ -11935,8 +12041,42 @@
         level: (save.cultivate && save.cultivate.level) || 1,
         realmMul: +(1 + (G.realm.dmg || 0)).toFixed(2),
         tiers: (window.ALLY_SKILL_TIERS || []).map(t => ({ at: t.at, label: t.label, mul: t.mul })),
+        pals: ALLY_PALS.slice(),
         list
       };
+    },
+    // 第117轮 · 水墨呈现探针：把一招真正画出来的东西数清楚（verify-ally-skills 的 I / J 组用）。
+    // 自包含：临时靶子保证 chain / nova / chill / drain 都有落点，统计完立刻收干净。
+    atkTotal() { return { castT: ALLY_CAST_T, atkTotal: ATK_TOTAL }; },
+    allySkillFx(id) {
+      const sk = allySkillOf(id); if (!sk || !G.player) return null;
+      const ent = (G.pet && G.pet.id === id) ? G.pet : (G.mate && G.mate.id === id) ? G.mate
+        : { id, x: G.player.x, y: G.player.y };
+      const dummies = [];
+      for (let i = 0; i < 3; i++) {
+        dummies.push({
+          _id: 901000 + i, type: 'wolf', x: G.player.x + 42 + i * 24, y: G.player.y + (i - 1) * 14,
+          hp: 1e9, maxhp: 1e9, r: 10, spd: 0, dmg: 0, xpVal: 0, spr: 'wolf',
+          hitFlash: 0, t: 0, dashT: 0, stunT: 0, _orbCd: {}, art: null, _artCd: 0, wob: 0
+        });
+      }
+      G.enemies.push.apply(G.enemies, dummies);
+      G.parts.length = 0; G.texts.length = 0;
+      if (window.FX3) FX3.clear();
+      const r = castAllySkill(ent, id, sk, 1);
+      const cnt = f => G.parts.filter(f).length;
+      const out = {
+        id, name: r && r.name, kind: r && r.kind, pal: sk.pal || null,
+        rune: cnt(p => p.rune), slash: cnt(p => p.slash), web: cnt(p => p.web),
+        bolt: cnt(p => p.bolt), ray: cnt(p => p.ray), ring: cnt(p => p.ring),
+        spark: cnt(p => p.spark), seal: G.texts.filter(t => t.seal).length,
+        fx3: window.FX3 ? FX3.count() : 0, cast: ent.skCast || 0, total: G.parts.length
+      };
+      for (const e of dummies) { const i = G.enemies.indexOf(e); if (i >= 0) G.enemies.splice(i, 1); }
+      G.parts.length = 0; G.texts.length = 0;
+      if (window.FX3) FX3.clear();
+      G.bullets = G.bullets.filter(b => !b.ally);
+      return out;
     },
     allySkillPower(id, lv) { const sk = allySkillOf(id); return sk ? +allyPower(sk, lv).toFixed(4) : null; },
     allySkillCast(id, lv) {
