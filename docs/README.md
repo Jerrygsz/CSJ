@@ -2,6 +2,18 @@
 
 本目录收录《凡人·长生劫》的测试与可视化验收脚本。所有脚本均**相对本仓库定位游戏入口**，克隆到任意路径后无需改路径即可运行（Playwright 依赖仍解析自 WorkBuddy 隔离 node 工作区，仅本机可用）。
 
+## 发布链路（第114轮起）
+
+**线上只发白名单，`main` 继续放全套开发资产。**
+
+- **`scripts/build-site.mjs`** — 从 `index.html` 的 `src/href`、`serviceWorker.register()`、CSS 的 `url()` 反推网页真正加载的资源，生成 `_site/`（32 文件 + `.nojekyll`，约 4.43 MB）。**不手写清单**，改引用即自动跟上。内置三道断言：引用文件不存在 / 混入 `qa|codex|raw|docs` 等开发资产 / 超 60 文件或 10 MB。
+  ```
+  node scripts/build-site.mjs
+  ```
+- **`.github/workflows/pages.yml`** — push `main` 且仅运行文件路径变更时，把 `_site/` 以单提交覆盖到 `gh-pages` 分支；只改文档 / 闸门 / 考据不触发发布。
+- GitHub Pages 的 Source 已设为 **`gh-pages` / `root`**。⚠️ **改 Source 本身不触发重建**，需再请求一次 Pages 构建（或等 workflow 下次推送），并用构建记录里的 commit 与线上 404 复核。
+- 于是 `codex/` 台账、`qa/` 闸门、`docs/`、`tools/`、原著素材、`.workbuddy/` 都不再公网可读。两本原著全文与 441 张历史截图已移到本地 `D:\Games\CSJ`，详见 `第114轮-发布资产与开发资产分离.md`。
+
 ## 1. 核心回归测试（无需浏览器/服务器）
 
 - **`verify-all.mjs`** — **一键跑完全部常驻验收（当前九个，九个都是闸门）**（第110轮新增）。自动起 8123 静态服务，
@@ -16,8 +28,9 @@
   于是 `verify-ink-sprite` 的两条断言在第102轮 UI 柔化时就已作废、一直红到第109轮才被发现。
 
   **跑完不留脏文件**（第111轮）：清单内的实拍一律写进 `qa/_out/`（已 gitignore）。
-  仓库里的 `qa/shot-skin-*.png`（5 张）与 `qa/shots/haz-*.png`（3 张）是第97~98轮的交付快照，
-  只读留存、不再被覆盖——在此之前每跑一次 verify-all 就会重写这 8 张，必须 `git checkout -- qa/` 才能干净。
+  仓库里的 `qa/shot-skin-*.png`（5 张）与 `qa/shots/haz-*.png`（4 张）是第97~98轮的交付快照，
+  只读留存、不再被覆盖——在此之前每跑一次 verify-all 就会重写这 9 张，必须 `git checkout -- qa/` 才能干净。
+  第114轮起其余 441 张历史截图一律本地留档、不入库（`qa/*.png` 已 gitignore，9 张快照有例外规则）。
   一次性脚本（`verify-jiedan` / `verify-yanyue-boss` 等，不在本清单内）仍按各自历史路径出图。
 
 - **`smoke.mjs`** — 用 Node + `vm` 沙箱加载全部游戏 JS，跑 **294 条断言**（功法/装备/怪物/商店/存档/突破等）。
