@@ -4,8 +4,8 @@
 
 ## 1. 核心回归测试（无需浏览器/服务器）
 
-- **`verify-all.mjs`** — **一键跑完全部八个常驻验收**（第110轮新增）。自动起 8123 静态服务，
-  依次跑 scenery3 / smoke / ver / skin / mapdeck / ink-sprite / hazards / mapscenery，
+- **`verify-all.mjs`** — **一键跑完全部常驻验收（当前九个）**（第110轮新增）。自动起 8123 静态服务，
+  依次跑 scenery3 / smoke / ver / skin / mapdeck / ink-sprite / story-once / hazards / mapscenery，
   按退出码汇总，任一闸门红即非零退出。**改完任何东西先跑这个。**
   ```
   node qa/verify-all.mjs                        # 全跑，约 1 分钟
@@ -26,6 +26,14 @@
   ```
   退出码 0 = 全过。**改完游戏第一道关。**
 
+- **`verify-story-once.mjs`** — 剧情只演一次：**31 条断言**。同一张图刷第二遍时，战斗内定时剧情、
+  地图 `intro` 过场、`type:'story'` 剧情图整场、收场台词、坊市开场白都不再重念；
+  古传送阵「跌回炼气期四层」只发生一次（重修把修为补回来后再刷也不会再跌）。
+  记账统一落 `save.seen`（`intro:` / `scene:` / `outro:` 前缀）；抉择类 `zhuji_out_ask` 豁免、
+  破境图「料没齐」的中性提示不记账。自己起静态服务（9096），不依赖外部端口。
+  ```
+  node qa/verify-story-once.mjs
+  ```
 - **`verify-quickfix.mjs`** — 真实浏览器验证「洞府内战斗快捷栏装配 / 功法运起」点击修复。需本机 Chrome + Playwright。
   ```
   node qa/verify-quickfix.mjs

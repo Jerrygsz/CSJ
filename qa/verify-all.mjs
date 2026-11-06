@@ -1,4 +1,4 @@
-// 一键回归：把八个常驻验收脚本一次跑完，谁红谁绿一眼看全。
+// 一键回归：把常驻验收脚本一次跑完（当前九个），谁红谁绿一眼看全。
 //
 // 动机（第110轮）：八批下来只有 verify-scenery3 / smoke / verify-ver 是每轮必跑的，
 // 其余五个全凭记忆挑着跑，结果 verify-ink-sprite 的两条断言在第102轮 UI 柔化时就已作废、
@@ -30,6 +30,7 @@ const ITEMS = [
   { key: 'skin',       file: 'verify-skin.mjs',       kind: 'gate',   desc: '双皮配色与明度纪律' },
   { key: 'mapdeck',    file: 'verify-mapdeck.mjs',    kind: 'gate',   desc: '地图卡层级与章节印记' },
   { key: 'ink-sprite', file: 'verify-ink-sprite.mjs', kind: 'gate',   desc: '水墨精灵 / 快捷栏 / 血条笔道' },
+  { key: 'story-once', file: 'verify-story-once.mjs', kind: 'gate',   desc: '剧情只演一次（定时 / 过场 / 剧情图 / 收场 / 坊市）+ 跌境界一次性' },
   { key: 'hazards',    file: 'verify-hazards.mjs',    kind: 'gate',   desc: '48 只 Boss 补表覆盖 + 持续型招式判定' },
   { key: 'mapscenery', file: 'verify-mapscenery.mjs', kind: 'metric', desc: '地图分得开的四项度量（只报数不判定）' },
 ];

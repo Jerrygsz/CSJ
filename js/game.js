@@ -165,6 +165,10 @@
       settings: { autoSave: true, manualSave: true },
       best: { time: 0, kills: 0, level: 1 },
       wins: 0, seen: [],
+      // 剧情只演一次：intro / scene / outro 三类节点键也记在 seen 里（见 storySeen）。
+      // 古传送阵跌境界是「一次性剧情代价」——重修把修为补回来时 save.wounded 会被清空，
+      // 只靠 !save.wounded 判断，第二次进这张图就会再跌一回，故单独立一个不回退的标志。
+      woundedDone: false,
       // 生涯累计（跨局、跨图、跨轮回都不清零）：首页报的是这些，不是单局最高
       totalKills: 0, playTime: 0,
       inventory: {}, bonuses: {}, totalItems: 0,
@@ -345,6 +349,8 @@
         // 移栽品种老存档：没有这个字段就补成空账
         gardenSeed: (s.gardenSeed && typeof s.gardenSeed === 'object') ? s.gardenSeed : {},
         wounded: (s.wounded && typeof s.wounded === 'object') ? s.wounded : null,
+        // 古传送阵只跌一次：旧档按「已通关 guchuan」认账，免得老玩家再跌一遍
+        woundedDone: !!s.woundedDone || (Array.isArray(s.cleared) && s.cleared.indexOf('guchuan') >= 0),
         // 天人有五衰：老存档没有这个字段，读进来补成空账（压在身上的衰为 0）
         wushuai: (s.wushuai && typeof s.wushuai === 'object')
           ? { n: Math.max(0, (s.wushuai.n || 0) | 0), log: (s.wushuai.log && typeof s.wushuai.log === 'object') ? s.wushuai.log : {} }
@@ -4711,16 +4717,35 @@
     }
   }
 
+  // ---------- 剧情只演一次 ----------
+  // 剧情是「经历」，不是地图附件：同一张图刷第二遍时，开场过场、剧情图整场、
+  // 收场台词都不该再念一遍；古传送阵那种必跌境界的更是只能发生一次。
+  // 记法统一落在 save.seen（跨局、跨读档都在）：
+  //   战斗内定时剧情 → 原始节点 id（历史存档已经在用这个字段，保持兼容）
+  //   地图开场过场   → 'intro:<图id>'
+  //   剧情图整场     → 'scene:<剧情键>'（破境图的 _lock 变体单独记账）
+  //   收场台词       → 'outro:<收场键>'
+  // 只在「真的演完」时记账：看到一半退出、关页面都不算 —— 剧情不能因为意外而丢。
+  function storySeen(key) {
+    return !!key && Array.isArray(save.seen) && save.seen.indexOf(key) >= 0;
+  }
+  function storyMarkSeen(key) {
+    if (!key) return;
+    if (!Array.isArray(save.seen)) save.seen = [];
+    if (save.seen.indexOf(key) < 0) { save.seen.push(key); writeSave(); }
+  }
+
   // ---------- 战斗内定时剧情 ----------
   function checkStory() {
     if (!G.map || G.storyMute) return;   // 调试/体检时可静音剧情对白
     for (const s of STORY) {
       if (s.map !== G.mapId) continue;
       if (s.done) continue;
+      if (storySeen(s.id)) continue;   // 这一世已经演过：重刷同图不再重播，奖励也不再重复给
       if (s.t != null && G.time >= s.t) {
         s.done = true;
-        if (save.seen.indexOf(s.id) < 0) save.seen.push(s.id);
         showLines(s.lines, () => {
+          storyMarkSeen(s.id);
           applyStoryReward(s);
           G.state = 'play'; last = performance.now();
           G.coopRole = (window.Net && window.Net.self() && window.Net.isHost()) ? 'host' : (window.Net && window.Net.self() ? 'client' : null);
@@ -8024,10 +8049,12 @@
     if (save.sealed) setTimeout(function () { if (G.state === 'play') banner('修为被封 · ' + (save.sealed.name || '煞气')); }, 900);
 
     if (m.type === 'story') {
-      G.state = 'dialog';
       // 破境剧情图（闭府结丹 / 云梦山结婴…）的开场要按「门开不开得了」分流：
       // 物事没备齐，就不能演「丹成」那一版，否则对话说成了、结算却说没成（自相矛盾）。
-      showLines(storyLinesOf(m, id), () => onStoryMapDone(m), 'map:' + id);
+      const sc = storySceneOf(m, id);
+      if (storySeen(sc.key)) { onStoryMapDone(m); return; }   // 演过就不再念，后果照走（奖励/破境判定不受影响）
+      G.state = 'dialog';
+      showLines(sc.lines, () => { storyMarkSeen(sc.key); onStoryMapDone(m); }, 'map:' + id);
       return;
     }
     if (m.type === 'market') {
@@ -8048,10 +8075,13 @@
         openShop();
       };
       // 坊市也有它自己的开场白（太南小会：金光上人的升仙令、万小山）
-      // 只讲一次 —— 坊市是可以反复进出的，没有「已通」判断的话每进一次就把整段开场重念一遍
-      if (MAP_STORIES[m.id] && MAP_STORIES[m.id].length && (save.cleared || []).indexOf(m.id) < 0) {
+      // 只讲一次 —— 坊市可以反复进出；原先按「是否通关」判断，没通关时每进一次就把整段开场重念一遍。
+      // 现在与其它剧情统一走「已看节点」记账，进过一次就再不念。
+      const mktKey = 'intro:' + m.id;
+      const mktLines = MAP_STORIES[m.id];
+      if (mktLines && mktLines.length && !storySeen(mktKey)) {
         G.state = 'dialog';
-        showLines(MAP_STORIES[m.id], meetThenShop, 'map:' + m.id);
+        showLines(mktLines, () => { storyMarkSeen(mktKey); meetThenShop(); }, 'map:' + m.id);
         return;
       }
       meetThenShop();
@@ -8059,15 +8089,18 @@
     }
     // 战斗 / 剧情战
     if (m.intro && MAP_STORIES[m.intro]) {
-      G.state = 'dialog';
-      showLines(MAP_STORIES[m.intro], () => {
+      const afterIntro = () => {
         G.state = 'play'; last = performance.now();
         G.coopRole = (window.Net && window.Net.self() && window.Net.isHost()) ? 'host' : (window.Net && window.Net.self() ? 'client' : null);
         // 剧情战（type:'boss'）：开门即 Boss，无小怪阶段，过场播完直接放 Boss。
         // 战斗图（type:'combat'）：intro 只是过场，播完必须回到正常战斗循环——
         //   先刷小怪、到点（bossAt）再放 Boss；在此直接 spawnBoss() 会把整个小怪阶段跳过（peak=0）。
         if (m.type === 'boss') spawnBoss();
-      }, 'map:' + id);
+      };
+      const introKey = 'intro:' + m.id;
+      if (storySeen(introKey)) { afterIntro(); return; }   // 过场看过就直接开打，别再念一遍
+      G.state = 'dialog';
+      showLines(MAP_STORIES[m.intro], () => { storyMarkSeen(introKey); afterIntro(); }, 'map:' + id);
       return;
     }
     if (save.settings.autoSave) writeSave();
@@ -8100,6 +8133,17 @@
       ['旁白', '东西一样样收了回去，他转身退回原处。']
     ];
   }
+  // 剧情图这一场「到底是哪一版」+ 该不该记账。
+  // 口径必须和 storyLinesOf 完全一致，否则会出现「记了 A 版的账、播的却是 B 版」。
+  // 料没齐时那段中性兜底（「还差着…」）不是正剧，不记账 —— 备齐了还要再演一次正剧。
+  function storySceneOf(m, id) {
+    const lines = storyLinesOf(m, id);
+    if (!m || !m.endLevel) return { lines: lines, key: 'scene:' + id };
+    const g = breakReqFor(m.endLevel);
+    if (!g || breakReadyNow(g)) return { lines: lines, key: 'scene:' + id };
+    const lockKey = id + '_lock';
+    return MAP_STORIES[lockKey] ? { lines: lines, key: 'scene:' + lockKey } : { lines: lines, key: null };
+  }
   function startOutro() {
     const m = G.map; if (!m) return;
     let key = m.outro || (m.id === 'houshan' ? 'houtro' : m.id === 'mishi' ? 'moutro' : m.id === 'yaoyuan' ? 'yooutro' : m.id === 'xuese' ? 'xsoutro' : null);
@@ -8129,9 +8173,16 @@
     // 奖励与结算照常走 finishMap，一样不少。
     if (lines && G.coopRole === 'client' && G.coopShared) { finishMap(m); return; }
     if (lines) {
+      // 收场台词同样只念一次：重刷已通过的图，直接进结算。
+      // 例外：zhuji_out_ask 是「要不要就此破境」的抉择，跳过去等于替玩家做了决定，故每次都问。
+      const askBreak = (key === 'zhuji_out_ask');
+      const outroKey = 'outro:' + key;
+      if (!askBreak && storySeen(outroKey)) { finishMap(m); return; }
       G.state = 'dialog';
       // 「已备齐破境之物」分支：播完询问对白后，让玩家自己选「进阶 / 暂不进阶」
-      const onEnd = (key === 'zhuji_out_ask') ? () => zhujiAskBreak(m) : () => finishMap(m);
+      const onEnd = askBreak
+        ? () => zhujiAskBreak(m)
+        : () => { storyMarkSeen(outroKey); finishMap(m); };
       showLines(lines, onEnd, 'outro:' + m.id);
     } else finishMap(m);
   }
@@ -8289,10 +8340,11 @@
     }
     // 古传送阵：为南宫婉疗伤，修为被吸干 —— 原著第403章左右：跌回「炼气期四层」。
     // 照原著照抄：真跌到炼气期四层。恢复不走打怪，走「回洞府闭关 + 大量服食丹药」，见 REBUILD_STAGES。
-    if (m.id === 'guchuan' && !save.wounded) {
+    if (m.id === 'guchuan' && !save.wounded && !save.woundedDone) {
       const lv0 = save.cultivate.level || 1;
       if (lv0 > 7) {
         save.wounded = { to: lv0, mult: 1 };
+        save.woundedDone = true;   // 一次性代价：重修补回修为后再进这张图，不会再跌第二回
         // 炼气期四层在境界表里是 Lv7（Lv4 只是「炼气期二层」），别按数字直觉写 4
         save.cultivate.level = 7;
         save.cultivate.xp = 0;
