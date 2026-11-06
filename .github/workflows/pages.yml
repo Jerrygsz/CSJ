@@ -1,0 +1,56 @@
+# 第114轮｜只把网页必需资源发到 gh-pages，main 继续放全套开发资产
+#
+# 为什么这样做：GitHub Pages 原先直接从 main 根目录整棵发布，
+# 导致 codex/ 台账、qa/ 闸门脚本、docs/、原著素材全部公网可读。
+# 现在由 scripts/build-site.mjs 生成白名单产物 _site/，推到 gh-pages 分支，
+# 把 Pages 的 Source 切到 gh-pages / root 后，线上就只剩约 4.5 MB 的运行文件。
+name: Publish whitelist site to gh-pages
+
+on:
+  push:
+    branches: [main]
+    # 只改文档/闸门/考据时不触发发布，省 Actions 额度
+    paths:
+      - 'index.html'
+      - 'sw.js'
+      - 'css/**'
+      - 'js/**'
+      - 'assets/**'
+      - 'scripts/build-site.mjs'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages-publish
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build whitelist site
+        run: node scripts/build-site.mjs
+
+      # 每次用全新单提交覆盖发布分支；main 的历史与内容不受影响
+      - name: Publish to gh-pages
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          cd _site
+          git init -q
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Deploy ${SHA} (whitelist site)"
+          git push --force "https://x-access-token:${TOKEN}@github.com/${REPO}.git" HEAD:gh-pages
