@@ -58,12 +58,12 @@ await page.waitForTimeout(160);
 const dom3 = await page.evaluate(() => document.getElementById('autoBtn').style.display);
 ok(b3.should === false && dom3 === 'none', '坊市上按钮不出现', { should: b3.should, dom: dom3 });
 
-// ---------------------------------------------------------------- 2. 站桩
-console.log('\n== 2. 站桩：开了就不认方向键 ==');
+// ---------------------------------------------------------------- 2. 无威胁时待命
+console.log('\n== 2. 无威胁时待命：开了就不认方向键 ==');
 await boot('houshan');
 await page.waitForTimeout(140);
-// 先把怪清干净：这一段验的是「按键不生效」，躲弹幕另在第 9 段
-// （不清的话怪贴上来时侧身让半步，位移就不是 0 了 —— 那是第 9 段要验的事）
+// 先把怪清干净：这一段验的是「按键不生效、无怪不瞎走」。躲弹幕 / 索敌另在第 9 段
+// （不清的话怪贴上来时侧身或主动靠近，位移就不是 0 了 —— 那是第 9 段要验的事）
 await page.evaluate(() => { window.__FR.clear(); window.__FR.autoMode(true); });
 const s0 = await page.evaluate(() => window.__FR.autoInfo());
 await page.keyboard.down('ArrowRight'); await page.keyboard.down('ArrowDown');
@@ -192,8 +192,8 @@ const n = await page.evaluate(() => {
 ok(n.on1 === true, '前一张图开着', n.on1);
 ok(n.on2 === false, '换图后自动复位（「到结算为止」的边界就在这儿）', { map: n.map, on: n.on2 });
 
-// ---------------------------------------------------------------- 9. 顺带躲一下
-console.log('\n== 9. 自动战斗会侧身让开，但不是跑开 ==');
+// ---------------------------------------------------------------- 9. 大衍挂机 = 灵宠同款自由 AI
+console.log('\n== 9. 大衍挂机 = 灵宠同款自由 AI：侧身 + 主动索敌 + 风筝 ==');
 const dj = await page.evaluate(() => {
   const F = window.__FR;
   const boot = () => {
@@ -203,7 +203,7 @@ const dj = await page.evaluate(() => {
     F.clear(); F.heal();
   };
   const loop = (n, onFrame) => {
-    let maxMove = 0, drift = 0;
+    let maxMove = 0;
     const p0 = F.autoDodgeInfo();
     for (let i = 0; i < n; i++) {
       if (onFrame) onFrame(i);
@@ -212,42 +212,65 @@ const dj = await page.evaluate(() => {
       if (!d) continue;
       if (d.state === 'dialog') F.skipStory();
       maxMove = Math.max(maxMove, Math.hypot(d.px - p0.px, d.py - p0.py));
-      if (d.anchor) drift = Math.max(drift, Math.hypot(d.px - d.anchor.x, d.py - d.anchor.y));
     }
     const d = F.autoDodgeInfo();
-    return { hp0: p0.hp, hp1: d.hp, lost: p0.hp - d.hp, maxMove: +maxMove.toFixed(1), drift: +drift.toFixed(1) };
+    return { hp0: p0.hp, hp1: d.hp, lost: p0.hp - d.hp, maxMove: +maxMove.toFixed(1) };
   };
 
-  // ① 站着不动挨一发：对照组
+  // ① 对照：关自动，挨一发（人站着不动）
   boot(); F.autoMode(false); F.autoShot(180, 190, 30);
   const stand = loop(45);
-  // ② 同一发弹幕，开着自动
+  // ② 同一发弹幕，开自动 → 侧身让开（沿用灵宠同款 dodge 评分）
   boot(); F.autoMode(true); F.autoShot(180, 190, 30);
   const one = loop(45);
-  const dir0 = F.autoDodgeInfo();
-  // ③ 躲完回原位
-  const home = loop(120);
-  const endD = F.autoDodgeInfo();
-  const backDist = endD.anchor ? Math.hypot(endD.px - endD.anchor.x, endD.py - endD.anchor.y) : -1;
-  // ④ 弹幕流：站 vs 自动，各挨 300 帧
+  // ③ 弹幕流：站 vs 自动，各挨 300 帧
   boot(); F.autoMode(false);
   const bStand = loop(300, i => { if (i % 8 === 0) F.autoShot(210, 200, 25); });
   boot(); F.autoMode(true);
   const bAuto = loop(300, i => { if (i % 8 === 0) F.autoShot(210, 200, 25); });
-  // ⑤ Boss 算威胁
+  // ④ Boss 算威胁（贴上来会被侧让）
   boot(); F.autoMode(true); F.boss();
   const nearBoss = F.autoDodgeInfo();
-  return { stand, one, dir0, home, backDist: +backDist.toFixed(1), bStand, bAuto, nearBoss: nearBoss.threats };
+
+  // ⑤ 主动索敌：清场后右侧放一只狼（高血确保观测期间不死），开自动应朝狼靠近（不再站桩）
+  boot(); F.god(true); F.autoMode(true); F.setSpawn(false);
+  F.spawnNear(220, 0, 'wolf', false, 100000);
+  const seek0 = F.enemyNear();
+  const seekP0 = F.autoDodgeInfo();
+  for (let i = 0; i < 60; i++) { F.tickFrames(1); }
+  const seek1 = F.enemyNear();
+  const seekP1 = F.autoDodgeInfo();
+  const seekMove = +Math.hypot(seekP1.px - seekP0.px, seekP1.py - seekP0.py).toFixed(1);
+
+  // ⑥ Boss/精英风筝：清场后近距离放一只精英狼，开自动应保持中远距离、不贴脸
+  boot(); F.god(true); F.autoMode(true); F.setSpawn(false);
+  F.spawnNear(70, 0, 'wolf', true, 200);
+  const kit0 = F.enemyNear();
+  const kitP0 = F.autoDodgeInfo();
+  for (let i = 0; i < 90; i++) { F.tickFrames(1); }
+  const kit1 = F.enemyNear();
+  const kitP1 = F.autoDodgeInfo();
+  const kitMove = +Math.hypot(kitP1.px - kitP0.px, kitP1.py - kitP0.py).toFixed(1);
+
+  return {
+    stand, one, bStand, bAuto, nearBoss: nearBoss.threats,
+    seek: { dist0: seek0 ? seek0.dist : null, dist1: seek1 ? seek1.dist : null, move: seekMove, target: seekP1.target },
+    kit: { dist0: kit0 ? kit0.dist : null, dist1: kit1 ? kit1.dist : null, move: kitMove, target: kitP1.target }
+  };
 });
 ok(dj.stand.lost > 0 && dj.stand.maxMove < 1, '关着自动：一发弹幕打在身上，人也不动（对照组）', dj.stand);
 ok(dj.one.lost === 0, '开着自动：同一发弹幕一滴血没掉（侧身让开了）', dj.one);
 ok(dj.one.maxMove > 15, '让开的那一下是真挪了步（不是判定放宽了）', dj.one.maxMove);
 ok(dj.one.maxMove < 90, '只让半步：位移没超过一个身位，人还在原地附近', dj.one.maxMove);
-ok(dj.home.maxMove < 95, '连躲几秒也不往外跑（远处的怪不算威胁）', dj.home);
-ok(dj.backDist < 25, '躲完自己走回原来站着的地方', dj.backDist);
 ok(dj.bAuto.lost * 3 < dj.bStand.lost, '弹幕流：自动比站着少挨一大截（不到三分之一）', { stand: dj.bStand.lost, auto: dj.bAuto.lost });
-ok(dj.bAuto.drift < 100, '整段弹幕下来人没被赶出场：离锚点始终不到 100px', dj.bAuto.drift);
 ok(dj.nearBoss >= 1, 'Boss 贴上来也算威胁（冲刺时会侧让）', dj.nearBoss);
+ok(dj.seek.dist1 != null && dj.seek.dist0 != null && dj.seek.move > 20, '清场后放狼，自动真的走过去（主动索敌，不再站桩）', dj.seek);
+ok(dj.seek.dist1 != null && dj.seek.dist1 < dj.seek.dist0 - 30, '人朝狼靠近、把距离压下来（不是原地发呆）', dj.seek);
+ok(dj.seek.target === 'mob', '索敌目标确实是那只狼', dj.seek.target);
+ok(dj.kit.dist1 != null && dj.kit.move > 20, '近距离放精英狼，自动真的在走位（风筝，不是站着）', dj.kit);
+ok(dj.kit.dist1 != null && dj.kit.dist1 > 150, '风筝保持中远距离、不贴脸', dj.kit);
+ok(dj.kit.dist1 != null && dj.kit.dist1 < 340, '但也没跑出攻击范围（还在慢慢磨）', dj.kit);
+ok(dj.kit.target === 'elite', '风筝目标是那只精英狼', dj.kit.target);
 
 // ---------------------------------------------------------------- 10. 升级/突破三选一也要自己选
 // 这块面板和煞气顿悟不是同一套：卡挂在 elCards 上、点了走 chooseCard，而不是 G.cardsNow。

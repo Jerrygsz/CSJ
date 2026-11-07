@@ -2290,9 +2290,9 @@
   const ALLY_CD_FLOOR = 0.18;
   const ALLY_VIEW_EDGE = 22;   // 可视矩形四边留白，别贴着屏幕边跑
   // 第119轮：遇险侧身。与主角「大衍挂机」共用 DODGE_DIRS / DODGE_STEP / DODGE_T /
-  // DODGE_NEAR / DODGE_NEAREST 这一整套口径，只把探测中心换成随行者自己，
-  // 并且不设 autoAnchor —— 挂机躲完要回桩，它躲完接着自己找怪，所以不站桩。
-  const ALLY_DODGE_R = 300;       // 与 autoThreats 的 R 同口径
+  // DODGE_NEAR / DODGE_NEAREST 这一整套口径，只把探测中心换成随行者自己。
+  // 第122轮起主角大衍挂机也复用同一套（playerAutoDir），所以主角同样不站桩、不回锚点。
+  const ALLY_DODGE_R = 300;       // 与主角大衍挂机威胁半径同口径（弹幕 300px 内才算威胁）
   const ALLY_DODGE_HOLD = 0.28;   // 让开后顺着同一方向再走一小段，免得两帧一换原地抖
   // 第120轮：对 Boss / 精英怪的风筝间距。远到「还能用基础弹道打到」就好（灵宠弹道约 360px、
   // 同伴约 429px），所以取 250：留足余量不贴脸，又不至于够不着。普通怪不走这条。
@@ -2551,9 +2551,9 @@
       : (window.skillAtk ? window.skillAtk.cd(a, lv) : 1);
     return Math.max(ALLY_CD_FLOOR, base * hasteMul() * atkMul());
   }
-  // 第119轮：眼前这几秒真会撞上来的东西。来源、权重、最近条数截断都照 autoThreats()，
-  // 只是探测中心换成随行者自己（r 更小），并额外跳过已死的怪。
-  // 一处刻意的不同：贴身怪的预警圈比主角收得紧、权重减半。主角站桩不怕被推开，
+  // 第119轮：眼前这几秒真会撞上来的东西。灵宠/同伴与主角大衍挂机共用同一套威胁口径
+  // （来源、权重、最近条数截断一致），只是探测中心换成各自自己（r 更小），并额外跳过已死的怪。
+  // 一处刻意的不同：贴身怪的预警圈比主角收得紧、权重减半。主角大衍挂机自由 AI 也不怕被推开，
   // 近身型随行者却要贴到 30px 才能出手；照抄主角那圈会把自己的目标一直推远。
   function allyThreats(e) {
     // 第121轮·C档：每灵宠私有威胁数组 e._threats（首次 new 一次后复用，零每帧分配），
@@ -2597,8 +2597,8 @@
     return out;
   }
   // 这一帧该往哪让（单位向量）；null = 不必让。
-  // 评分与 autoDodgeDir() 逐字同口径：三个时间点 DODGE_T、试 DODGE_DIRS 个方向、
-  // 上一帧方向的 0.08 惯性、改善不足 0.02 就站住。唯一删掉的是 autoAnchor 的归位拉力。
+  // 评分与主角大衍挂机 playerAutoDir() 同口径：三个时间点 DODGE_T、试 DODGE_DIRS 个方向、
+  // 上一帧方向的 0.08 惯性、改善不足 0.02 就站住。主角那套 autoAnchor 归位拉力已删。
   function allyDodgeDir(e, th) {
     if (!th || !th.length) return null;
     const sp = (G.player && G.player.spd ? G.player.spd : 130) * 0.92;  // 与 allyMove 同速
@@ -4474,6 +4474,7 @@
     return U.pick(pool.slice(0, n));
   }
   function spawnDirector(dt) {
+    if (G.spawnOff) return;   // 回归专用：冻结刷怪，便于隔离测量单只敌人的索敌 / 风筝
     G.spawnT -= dt;
     if (G.spawnT <= 0) {
       if (G.enemies.length < 140) { const b = budget(); for (let i = 0; i < b.batch; i++) spawnEnemy(pickType()); }
@@ -5916,9 +5917,10 @@
     resumePlay();
   }
 
-  // ==================== 自动战斗（站桩挂机） ====================
-  // 点「自动」之后人就站着不动，剩下全交给它：
+  // ==================== 自动战斗（自由索敌挂机） ====================
+  // 点「自动」之后人就交给大衍神识自主行动，剩下全交给它：
   //   怪进范围就开火（fireWeapons 本来就是自动索敌，不必另写一套），
+  //   自己找最近的怪贴上去打、遇 Boss/精英拉距离风筝、眼前有弹幕就侧身让半步，
   //   对白一句句自己点过去，煞气满 / 升级的三选一自己选第一张，
   //   进了结算画面就收工 —— 一张图一趟，不跨图。
   // 两件它不做的事：不替玩家花灵石（祭炼面板直接收掉），不替客机点房主的对白。
@@ -5968,109 +5970,101 @@
     if (!!G.autoOn === on) return G.autoOn;
     G.autoOn = on;
     G.autoT = on ? 0.6 : 0;   // 开起来先停半拍，别一开就把第一句对白点掉
-    // 锚点 = 开自动时脚下这一块：躲开之后还会自己走回来，不至于一路漂到天涯
-    G.autoAnchor = (on && G.player) ? { x: G.player.x, y: G.player.y } : null;
+    // 第122轮：不再设锚点 —— 大衍挂机现在是灵宠同款自由 AI，躲完接着自己找怪，不回桩。
+    G.autoAnchor = null;
     G.autoDodge = null; G.autoDodgePrev = null;
+    // 重置主角的侧身/风筝状态，免得上一趟残留的 dodging 在新一趟开头乱走
+    if (G.player) { G.player.dodging = false; G.player.dodgePrev = null; G.player.dodgeT = 0; G.player.dodgeFx = 0; G.player.dodgeFrom = null; G.player.kiting = false; G.player.autoThrEvery = 0; }
     if (elAutoBtn) elAutoBtn.classList.toggle('on', on);
     if (!silent) {
-      if (on) { banner('自动战斗 · 开启（站桩，遇险侧身）'); Sfx.buff(); }
+      if (on) { banner('自动战斗 · 开启（自由索敌，遇险侧身）'); Sfx.buff(); }
       else banner('自动战斗 · 关闭');
     }
     return G.autoOn;
   }
-  // ---------- 自动战斗的「躲」 ----------
-  // 站桩不等于站着挨打。但也不能做成「贴脸就退」——那样会被一群怪推着满场跑，
-  // 反倒成了另一种失控。这里的做法是：只把「眼前这几秒真的会撞上」的东西当成威胁，
-  // 试一圈方向，哪边最不疼就往哪边让半步，让开就立刻站住。
+  // ---------- 自动战斗的「躲」+ 自由索敌 ----------
+  // 第122轮：韩立大衍挂机彻底改成灵宠同款自由 AI —— 主动索敌、遇 Boss/精英风筝、
+  // 遇险侧身，不再站桩、不再回锚点。直接复用 allyThreats / allyDodgeDir / allyTarget，
+  // 唯独去掉 allyClampView（相机跟着主角，夹视野会把人钉在屏幕中心走不动）和
+  // 「绕主角游走」（无怪时原地待命）。主角不是 makeAlly 创建、没有 dodge 字段，
+  // 这里防御式初始化，避免读到 undefined。
   const DODGE_DIRS = 12;      // 顺时针试这么多方向（含原地不动）
   const DODGE_STEP = 0.18;    // 一步探多远（秒），只探半步，不是逃
   const DODGE_T = [0.1, 0.24, 0.4];   // 按这几个时间点预测威胁位置
   const DODGE_NEAR = 140;     // 小怪只在这个半径内才算威胁
   const DODGE_NEAREST = 22;   // 最多只看最近这么多条威胁（虫群图一屏几百发，看不过来也不必看）
-  const DODGE_HOME = 14;      // 回到锚点这个范围内就站住（留一点死区，免得来回抖）
-  const DODGE_HOME_R = 40;    // 锚点周围这么一圈算「原地」，不收不罚
-  const DODGE_HOME_W = 0.55;  // 往家走的拉力：要压得住「随便走哪边都一样」的平局，压不住要命的弹幕
 
-  // 把眼前会撞上的东西列出来：弹幕 / 贴身的小怪 / 正在冲的 Boss
-  // 只留最近的一小撮：虫群那类图一屏能有两三百发，全算一遍是白花力气，
-  // 而真正决定往哪躲的本来就是最近那几发。
-  function autoThreats(p) {
-    const out = [];
-    const R = 300, R2 = R * R;
-    for (const b of G.ebullets) {
-      const dx = b.x - p.x, dy = b.y - p.y;
-      const d2 = dx * dx + dy * dy;
-      if (d2 > R2) continue;
-      out.push({ x: b.x, y: b.y, vx: b.vx, vy: b.vy, r: (b.r || 6) + p.r + 10, w: 1, d2 });
-    }
-    for (const e of G.enemies) {
-      const dx = e.x - p.x, dy = e.y - p.y;
-      const d2 = dx * dx + dy * dy;
-      if (d2 > DODGE_NEAR * DODGE_NEAR) continue;
-      // 小怪是朝人走的，预测要带上它的速度，否则永远只在「已经贴上」才算威胁
-      const dd = Math.sqrt(d2) || 1;
-      out.push({ x: e.x, y: e.y, vx: -dx / dd * e.spd, vy: -dy / dd * e.spd, r: e.r + p.r + 14, w: 0.55, d2 });
-    }
-    if (out.length > DODGE_NEAREST) {
-      out.sort((a, b) => a.d2 - b.d2);
-      out.length = DODGE_NEAREST;
-    }
-    const b = G.boss;
-    if (b && G.bossActive) {
-      const dash = (b.dashing || 0) > 0;
-      out.push({
-        x: b.x, y: b.y,
-        vx: dash ? Math.cos(b.dashAng || 0) * b.spd * 4.4 : 0,
-        vy: dash ? Math.sin(b.dashAng || 0) * b.spd * 4.4 : 0,
-        r: b.r + p.r + 16, w: 1.2
-      });
-    }
-    return out;
+  // 主角侧身/风筝状态防御式初始化（灵宠由 makeAlly 建好这些字段，主角没有）
+  function playerAutoInit(p) {
+    if (p.dodgeFx == null) p.dodgeFx = 0;
+    if (p.dodgeFrom == null) p.dodgeFrom = null;
+    if (p.dodgePrev == null) p.dodgePrev = null;
+    if (p.dodgeT == null) p.dodgeT = 0;
+    if (p.dodging == null) p.dodging = false;
+    if (p.kiting == null) p.kiting = false;
+    if (p.autoThrEvery == null) p.autoThrEvery = 0;
   }
-  // 返回这一帧该往哪迈（单位向量）；null = 站住
-  function autoDodgeDir(p) {
-    const th = autoThreats(p);
-    const anch = G.autoAnchor;
-    const hx = anch ? anch.x - p.x : 0, hy = anch ? anch.y - p.y : 0;
-    const homeD = Math.hypot(hx, hy);
-    // 眼前干净：躲开了就走回原来站着的地方，走到附近就停
-    if (!th.length) return (anch && homeD > DODGE_HOME) ? { x: hx / homeD, y: hy / homeD, back: 1 } : null;
-    const sp = p.spd * spdMul() * (1 + (G.bonus.spd || 0));
-    const step = sp * DODGE_STEP;
-    const score = (qx, qy) => {
-      let s = 0;
-      for (let k = 0; k < DODGE_T.length; k++) {
-        const t = DODGE_T[k];
-        for (let i = 0; i < th.length; i++) {
-          const x = th[i];
-          const ddx = x.x + x.vx * t - qx, ddy = x.y + x.vy * t - qy;
-          const d = Math.hypot(ddx, ddy);
-          if (d >= x.r) continue;
-          const k2 = 1 - d / x.r;
-          s += k2 * k2 * x.w;
-        }
+  // 大衍挂机每帧的方向：复用灵宠三件套（allyThreats / allyDodgeDir / allyTarget）。
+  // 返回 {dx, dy} 给 update() 当移动方向；遇威胁侧身、有怪主动索敌、Boss/精英风筝，
+  // 无怪原地待命。C档同款节流：威胁评估每 ALLY_EVAL_EVERY 帧算一次（~30Hz）。
+  function playerAutoDir(p, dt) {
+    playerAutoInit(p);
+    p.autoThrEvery++;
+    const doEval = !p.dodging && p.autoThrEvery >= ALLY_EVAL_EVERY;
+    if (doEval) {
+      p.autoThrEvery = 0;
+      const th = allyThreats(p);
+      p.dodgeThreats = th.length;
+      const dv = allyDodgeDir(p, th);
+      if (dv) {
+        if (!p.dodging && p.dodgeFx <= 0) { p.dodgeFx = 0.32; p.dodgeFrom = { x: p.x, y: p.y }; if (window.FX3) FX3.spawn('poof', p.x, p.y, { pal: 'qi' }); }
+        p.dodgePrev = dv; p.dodgeT = ALLY_DODGE_HOLD; p.dodging = true;
       }
-      if (anch) {
-        // 离家越远越想回去。不是「不许走远」，只是在同样能躲开的几条路里，挑更靠家的一条：
-        // 否则一场架下来一步一步往边上挪，最后人跑到半屏外，就不叫站桩了。
-        const od = Math.hypot(qx - anch.x, qy - anch.y);
-        s += Math.max(0, od - DODGE_HOME_R) / DODGE_HOME_R * DODGE_HOME_W;
-      }
-      return s;
-    };
-    const stay = score(p.x, p.y);
-    // 上一帧往哪边让的：同样的好坏，宁可接着往原来那个方向走，免得两帧一换来原地抖
-    const prev = G.autoDodgePrev;
-    let best = stay, bx = 0, by = 0;
-    for (let i = 0; i < DODGE_DIRS; i++) {
-      const a = i / DODGE_DIRS * Math.PI * 2;
-      const ux = Math.cos(a), uy = Math.sin(a);
-      let s = score(p.x + ux * step, p.y + uy * step);
-      if (prev) s += (1 - (ux * prev.x + uy * prev.y)) * 0.08;
-      if (s < best - 0.02) { best = s; bx = ux; by = uy; }
+    } else if (!p.dodging) {
+      p.dodgeThreats = p._threats ? p._threats.length : 0;
     }
-    if (!bx && !by) return null;   // 让不出更好的位置：站住（被围住的时候本来就无处可躲）
-    return { x: bx, y: by };
+    // dodging 锁定期间方向由 dodgePrev 维持，每帧推进
+    if (p.dodging) {
+      p.dodgeT = Math.max(0, p.dodgeT - dt);
+      p.dodging = p.dodgeT > 0 && !!p.dodgePrev;
+    } else {
+      p.dodgePrev = null;
+    }
+
+    let dx = 0, dy = 0;
+    if (p.dodging) {
+      const d = p.dodgePrev || { x: 0, y: 1 };
+      dx = d.x; dy = d.y;
+      p.dir = dx >= 0 ? 1 : -1;
+    } else {
+      const t = allyTarget(p, 460);
+      if (t) {
+        const d = U.dist(p.x, p.y, t.x, t.y) || 1;
+        const ang = Math.atan2(t.y - p.y, t.x - p.x);
+        // 遇 Boss / 精英：拉到能打到的距离慢慢磨（风筝）；普通怪走灵宠远击口径
+        const big = (t === G.boss) || (!!t.elite);
+        p.kiting = big;
+        let want, k;
+        if (big) {
+          want = ALLY_KITE_WANT;
+          const ap = ALLY_KITE_WANT * 1.12, bf = ALLY_KITE_WANT * 0.8;
+          k = d > ap ? 1 : (d < bf ? -0.85 : 0);
+        } else {
+          want = 132;
+          k = d > want * 1.25 ? 1 : (d < want * 0.75 ? -0.8 : 0);
+        }
+        const tx = p.x + Math.cos(ang) * 120 * k;
+        const ty = p.y + Math.sin(ang) * 120 * k;
+        const ddx = tx - p.x, ddy = ty - p.y, dd = Math.hypot(ddx, ddy) || 1;
+        dx = ddx / dd; dy = ddy / dd;
+        p.dir = Math.cos(ang) >= 0 ? 1 : -1;
+      } else {
+        p.kiting = false;   // 无怪：原地待命（不绕主角、不追边、不出画面）
+      }
+    }
+    G.autoDodge = (dx || dy) ? { x: dx, y: dy } : null;
+    G.autoDodgePrev = p.dodging ? { x: dx, y: dy } : null;
+    return { dx, dy };
   }
 
   // 每帧一次：只处理「停在 play 之外、本来等人点一下」的地方；打仗本身仍归 update
@@ -6338,17 +6332,16 @@
 
     const p = G.player;
     if (!p) return;   // 进图过渡帧：state 已切到 play，人还没立起来
+    if (p.dodgeFx > 0) p.dodgeFx = Math.max(0, p.dodgeFx - dt);   // 侧身淡墨尾迹计时（每帧淡出）
     let dx = 0, dy = 0;
-    // 自动战斗：站桩 —— 键与摇杆一律不认，脚下生根，剩下的交给自动索敌；
-    // 只有「马上要撞上」的时候才侧身让半步（躲的是弹幕和冲刺，不是躲怪）
+    // 自动战斗：大衍挂机 = 灵宠同款自由 AI —— 键与摇杆一律不认，剩下的交给自动索敌；
+    // 主动找怪打、遇 Boss/精英风筝、遇险侧身让半步（躲的是弹幕和冲刺，不是躲怪）
     if (!G.autoOn) {
       if (keys.left) dx--; if (keys.right) dx++; if (keys.up) dy--; if (keys.down) dy++;
       if (jx !== 0 || jy !== 0) { dx = jx; dy = jy; }
     } else {
-      const dv = autoDodgeDir(p);
-      G.autoDodge = dv || null;
-      if (dv) { dx = dv.x; dy = dv.y; G.autoDodgePrev = dv.back ? null : { x: dv.x, y: dv.y }; }
-      else G.autoDodgePrev = null;
+      const ad = playerAutoDir(p, dt);
+      dx = ad.dx; dy = ad.dy;
     }
     const len = Math.hypot(dx, dy) || 1;
     // 定身（夺舍 / 禁制 / 蛛丝）与冻缓（极寒之气）：Boss 招式里"控"的那一半
@@ -8373,6 +8366,16 @@
     const p = G.player;
     if (p) {
       ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.beginPath(); ctx.ellipse(p.x, p.y + 8, 9, 4, 0, 0, 6.28); ctx.fill();
+      // 第122轮：韩立侧身让的那一瞬，同款淡墨尾迹 + 朱砂小印（与灵宠/同伴一致）
+      if (p.dodgeFx > 0 && p.dodgeFrom) {
+        const dk = p.dodgeFx / 0.32, d = p.dodgePrev || { x: 0, y: 1 };
+        ctx.strokeStyle = 'rgba(86,82,74,' + (0.40 * dk) + ')';
+        ctx.lineWidth = 3.4 * dk + 0.6; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(p.x - d.x * 17 * dk, p.y - d.y * 17 * dk);
+        ctx.lineTo(p.x, p.y); ctx.stroke(); ctx.lineCap = 'butt';
+        ctx.strokeStyle = 'rgba(143,47,36,' + (0.48 * dk) + ')'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.arc(p.dodgeFrom.x, p.dodgeFrom.y, 8, 0, 6.28); ctx.stroke();
+      }
       drawSpr('hanli', p.x, p.y, 1.7, p.dir < 0, playerTf(p));
       if (p.hurtFlash > 0) {
         // 受击提示只描一圈红边，不糊一层红饼：打起来最需要看清的就是自己站在哪，
@@ -13480,12 +13483,14 @@
     autoDodgeInfo() {
       const p = G.player;
       if (!p) return null;
-      const th = autoThreats(p);
-      const dir = G.autoOn ? autoDodgeDir(p) : null;
+      const th = allyThreats(p);
+      const dir = (G.autoOn && p.dodging && p.dodgePrev) ? { x: +p.dodgePrev.x.toFixed(2), y: +p.dodgePrev.y.toFixed(2) } : null;
+      const t = allyTarget(p, 460);
       return {
         on: !!G.autoOn, state: G.state, threats: th.length,
-        dir: dir ? { x: +dir.x.toFixed(2), y: +dir.y.toFixed(2), back: !!dir.back } : null,
-        anchor: G.autoAnchor ? { x: +G.autoAnchor.x.toFixed(1), y: +G.autoAnchor.y.toFixed(1) } : null,
+        dir, kiting: !!p.kiting,
+        target: t ? (t === G.boss ? 'boss' : (t.elite ? 'elite' : 'mob')) : null,
+        anchor: null,
         px: +p.x.toFixed(1), py: +p.y.toFixed(1), hp: Math.ceil(p.hp)
       };
     },
@@ -13591,6 +13596,27 @@
         const a = Math.random() * 6.28, dd = U.rand(120, 240);
         G.enemies.push(makeEnemy(type, G.player.x + Math.cos(a) * dd, G.player.y + Math.sin(a) * dd, hpMulBase(), dmgMulBase()));
       }
+    },
+    // 在主角附近的确定位置生成一只怪（避开 spawnEnemy 的随机边缘），供回归验证主动索敌 / 风筝
+    spawnNear(dx, dy, type, elite, hpMul) {
+      if (!G.player) return null;
+      const t = (type && ENEMY_TYPES[type]) ? type : 'wolf';
+      const e = makeEnemy(t, G.player.x + (dx || 0), G.player.y + (dy || 0), hpMulBase(), dmgMulBase());
+      if (elite) { e.elite = true; e.r = 16; e.xpVal = 30; if (e.spr === 'wolf') e.scale = 1.8; }
+      if (hpMul) { e.maxhp *= hpMul; e.hp = e.maxhp; }
+      G.enemies.push(e);
+      return { x: +e.x.toFixed(1), y: +e.y.toFixed(1), elite: !!elite };
+    },
+    // 冻结 / 恢复刷怪（回归隔离单只敌人测量用）
+    setSpawn(on) { G.spawnOff = !on; return !!G.spawnOff; },
+    // 最近一只敌人（含 Boss）相对主角的信息，供回归量「主动靠近 / 风筝距离」
+    enemyNear() {
+      const p = G.player; if (!p) return null;
+      let best = null, bd = Infinity;
+      for (const e of (G.enemies || [])) { if (e._dead) continue; const d = Math.hypot(e.x - p.x, e.y - p.y); if (d < bd) { bd = d; best = e; } }
+      if (G.boss && G.bossActive) { const d = Math.hypot(G.boss.x - p.x, G.boss.y - p.y); if (d < bd) { bd = d; best = G.boss; } }
+      if (!best) return null;
+      return { dx: +(best.x - p.x).toFixed(1), dy: +(best.y - p.y).toFixed(1), dist: +bd.toFixed(1), elite: !!best.elite, boss: best === G.boss };
     },
     elite(i) { if (G.player) spawnElite(i || 0); },
     boss(kind) {
