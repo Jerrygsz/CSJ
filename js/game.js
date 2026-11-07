@@ -2297,6 +2297,7 @@
   // 第120轮：对 Boss / 精英怪的风筝间距。远到「还能用基础弹道打到」就好（灵宠弹道约 360px、
   // 同伴约 429px），所以取 250：留足余量不贴脸，又不至于够不着。普通怪不走这条。
   const ALLY_KITE_WANT = 250;
+  const ALLY_EVAL_EVERY = 2;     // 第121轮·C档：威胁评估节流帧数（2 = ~30Hz；1 = 每帧不节流）。调试钩子 allyMoveTick 会临时置为阈值强制评估。
   // 第117轮：水墨像素特效（FX3）只认 fxpix.js PAL 里的四条六档色阶。
   // 不是新配色 —— 水墨皮下 fxpix 会再用 INK_HEX 把每一档砍回本作墨阶。
   const ALLY_PALS = ['xue', 'jin', 'qi', 'mo'];
@@ -2554,9 +2555,12 @@
   // 只是探测中心换成随行者自己（r 更小），并额外跳过已死的怪。
   // 一处刻意的不同：贴身怪的预警圈比主角收得紧、权重减半。主角站桩不怕被推开，
   // 近身型随行者却要贴到 30px 才能出手；照抄主角那圈会把自己的目标一直推远。
-  let _thr = [];   // 性能优化：威胁列表复用，避免每只灵宠每帧 new 数组（零手感变化）
   function allyThreats(e) {
-    const out = _thr; out.length = 0;
+    // 第121轮·C档：每灵宠私有威胁数组 e._threats（首次 new 一次后复用，零每帧分配），
+    // 隔离多灵宠的同时避免共享 _thr 被互相覆盖。
+    let out = e._threats;
+    if (!out) { out = []; e._threats = out; }
+    out.length = 0;
     const R2 = ALLY_DODGE_R * ALLY_DODGE_R;
     for (const b of (G.ebullets || [])) {
       const dx = b.x - e.x, dy = b.y - e.y;
@@ -2658,23 +2662,37 @@
   // 所以依旧不站桩、不绕着韩立、不出可视范围，三类功法也照常各自走 CD。
   function allyMove(e, dt, mode) {
     if (e.dodgeFx > 0) e.dodgeFx = Math.max(0, e.dodgeFx - dt);
-    const th = allyThreats(e);
-    e.dodgeThreats = th.length;
-    const dv = allyDodgeDir(e, th);
-    if (dv) {
-      if (!e.dodging) allyDodgeFx(e);
-      e.dodgePrev = dv; e.dodgeT = ALLY_DODGE_HOLD; e.dodging = true;
-    } else if (e.dodgeT > 0) {
-      e.dodgeT = Math.max(0, e.dodgeT - dt);   // 顺着原方向再走一小段，避免抖动
+
+    // 第121轮·C档性能：威胁评估（扫描弹幕+评分）节流到 ~30Hz（每 ALLY_EVAL_EVERY 帧算一次），
+    // 移动/插值仍每帧 60Hz。dodging 锁定期间方向由 dodgePrev 维持，跳过整段评估扫描更省。
+    if (e._thrEvery == null) e._thrEvery = 0;
+    e._thrEvery++;
+    if (!e.dodging && e._thrEvery >= ALLY_EVAL_EVERY) {
+      e._thrEvery = 0;
+      e._threats = allyThreats(e);
+      e.dodgeThreats = e._threats.length;
+      const dv = allyDodgeDir(e, e._threats);
+      if (dv) {
+        if (!e.dodging) allyDodgeFx(e);
+        e.dodgePrev = dv; e.dodgeT = ALLY_DODGE_HOLD; e.dodging = true;
+      }
+    } else if (!e.dodging) {
+      e.dodgeThreats = e._threats ? e._threats.length : 0;
+    }
+
+    // dodging 状态每帧推进（沿用 dodgePrev 方向），移动插值每帧做
+    if (e.dodging) {
+      e.dodgeT = Math.max(0, e.dodgeT - dt);
       e.dodging = e.dodgeT > 0 && !!e.dodgePrev;
     } else {
-      e.dodging = false; e.dodgePrev = null;
+      e.dodgePrev = null;
     }
 
     const spd = (G.player && G.player.spd ? G.player.spd : 130) * 0.92;
     let ux = 0, uy = 0, mv = 0;
     if (e.dodging) {
-      const d = dv || e.dodgePrev;
+      // 第121轮·C档：dodging 锁定期间方向由 dodgePrev 维持（节流下 dodging 时不重算 dv），直接用 dodgePrev。
+      const d = e.dodgePrev || { x: 0, y: 1 };
       ux = d.x; uy = d.y;
       mv = spd * dt;
       e.dir = ux >= 0 ? 1 : -1;
@@ -12728,6 +12746,9 @@
       return { x: +a.x.toFixed(1), y: +a.y.toFixed(1) };
     },
     allyMoveTick(dt) {
+      // 第121轮·C档：调试探针强制每帧评估（绕过威胁节流），保证九闸门单次 tick 即触发闪避，行为不变。
+      if (G.pet) G.pet._thrEvery = ALLY_EVAL_EVERY;
+      if (G.mate) G.mate._thrEvery = ALLY_EVAL_EVERY;
       updatePet(dt == null ? 0.05 : dt); updateMate(dt == null ? 0.05 : dt);
       return window.__FR.allyState();
     },
