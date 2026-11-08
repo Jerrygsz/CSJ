@@ -8809,6 +8809,10 @@
   // 其余洞府保持原「重进地图」行为。新增动画地图时同步登记即可。
   // 回看是纯播放：不重进地图、不弹难度面板、不写 save.seen、不吞奖励。
   const CUTSCENE_CAVE = { qixuan: 'qixuan', houshan: 'houshan' };
+  // 剧情回顾列表的「已阅」标记：与 startMap() / storySceneOf() 写进 save.seen 的键一致。
+  // qixuan 是整场剧情图（scene:qixuan），houshan 是战斗图进图序章（cut:houshan）。
+  // 只用于展示，不写、不删；铺新图时同步登记。
+  const CUTSCENE_SEEN = { qixuan: 'scene:qixuan', houshan: 'cut:houshan' };
 
   function startMap(id, diffId) {
     const m = MAPS.find(x => x.id === id);
@@ -9899,6 +9903,8 @@
     for (const k of c.crafts) t.push({ id: k, name: RECIPE_KINDS[k].name });
     if (c.gardens && c.gardens.length) t.push({ id: 'garden', name: '药圃' });
     t.push({ id: 'rest', name: '静修' });
+    // 剧情回顾是全洞府共用的页签：没有自己洞府的图（如后山）也在这里回看。
+    t.push({ id: 'story', name: '剧情回顾' });
     return t;
   }
   function openCave(caveId) {
@@ -9945,8 +9951,39 @@
     else if (tab === 'break') html = renderCaveBreak(lv);
     else if (tab === 'garden') html = renderCaveGarden(c, lv);
     else if (tab === 'rest') html = renderCaveRest(c, lv);
+    else if (tab === 'story') html = renderCaveStory();
     else html = renderCaveCraft(c, tab, lv);
     elCaveBody.innerHTML = rarize(html);
+  }
+
+  // ==================== 洞府「剧情回顾」 ====================
+  // 列出 CUTSCENES 里所有已接入动画的地图，点「回看」直接 Cutscene.replay(id)。
+  // 与 caveStory「重温此段」的区别：那个按洞府归属只播本图，这个跨全部地图，
+  // 所以没有洞府的图（如后山）也有回看入口。
+  // 纯播放：不重进地图、不弹难度面板、不写 save.seen、不吞奖励、不改修行进度。
+  function renderCaveStory() {
+    const C = window.Cutscene;
+    const ids = (C && typeof C.cutscenes === 'function') ? C.cutscenes() : [];
+    if (!ids.length) return '<div class="cave-sec empty"><div class="cs-empty">尚无已录的剧情过场</div></div>';
+    const CN = ['壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖', '拾'];
+    let h = '<div class="cave-sec"><div class="cs-title">剧情回顾 · ' + ids.length + ' 段</div>'
+          + '<div class="cs-note">只重播过场，不重进地图、不领奖励、不改修行进度；老存档亦能看。人物衣着仍是当前护甲。</div>'
+          + '<div class="brk-list">';
+    ids.forEach((id, i) => {
+      const m = MAPS.find(x => x.id === id);
+      const meta = (typeof C.meta === 'function') ? C.meta(id) : null;
+      const lines = (MAP_STORIES[id] || []).length;
+      const seen = storySeen(CUTSCENE_SEEN[id] || ('scene:' + id));
+      h += '<div class="brk-row cs-row">'
+         + '<i>' + (CN[i] || (i + 1)) + '</i>'
+         + '<span><span class="cs-nm">' + (m ? m.name : id) + '</span>'
+         + '<span class="cs-meta">' + (meta ? meta.title + ' · ' + meta.sub + ' · ' : '')
+         + (meta ? meta.shots + ' 拍 / ' + meta.dur.toFixed(1) + 's · ' : '')
+         + lines + ' 句台词 · ' + (seen ? '已阅' : '未阅') + '</span></span>'
+         + '<button class="btn small" data-story="' + id + '">回看 ▸</button>'
+         + '</div>';
+    });
+    return h + '</div></div>';
   }
 
   // ==================== 洞府分组折叠（手风琴） ====================
@@ -12265,6 +12302,14 @@
         elCaveBody.scrollTop += d;
         if (Math.abs(elCaveBody.scrollTop - before) < 0.5) break;
       }
+      return;
+    }
+    // 剧情回顾：点「回看」只播过场（跨全部地图，含没有洞府的图），不重进地图不记账
+    const csBtn = e.target.closest('button[data-story]');
+    if (csBtn) {
+      const id = csBtn.getAttribute('data-story');
+      if (window.Cutscene && (window.MAP_STORIES[id] || []).length) window.Cutscene.replay(id);
+      else notify('这段过场尚未录入');
       return;
     }
     // 按钮必须排在整行之前判：

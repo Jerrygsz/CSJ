@@ -850,6 +850,14 @@
     lines: function () { return LINES.slice(); },
     force: false,
     cutscenes: function () { return Object.keys(CUTSCENES); },
+    // 洞府「剧情回顾」列表用：章节卡 / 地点 / 拍数 / 时长都从分镜表读，不在 UI 另写一份。
+    meta: function (mapId) {
+      var c = CUTSCENES[mapId];
+      if (!c) return null;
+      var sh = c.shots, last = sh[sh.length - 1];
+      return { id: mapId, title: c.title, sub: c.sub, seal: c.seal,
+               shots: sh.length, dur: +(last.t + last.dur).toFixed(1) };
+    },
     mapId: function () { return curMap; },
     available: function () {
       if (this.force || window.__CSJ_CUTSCENE_FORCE__) return true;

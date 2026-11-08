@@ -444,6 +444,108 @@ try {
   ok('49 自动化回归下后山直接 play，不建层不记账（verify-story-once 等旧闸门照旧）',
      out.hsVanilla.state === 'play' && out.hsVanilla.active === false
      && out.hsVanilla.display === 'none' && out.hsVanilla.seen === false, out.hsVanilla);
+
+  // ---- K 洞府「剧情回顾」页签：跨全部地图点播（含没有洞府的 houshan）----
+  await fresh({ armor: 'a_tiancan' });
+  await page.evaluate(() => {
+    const k = 'fanren_save_v1', s = JSON.parse(localStorage.getItem(k) || '{}');
+    s.seen = ['scene:qixuan'];          // 山门已阅、后山未阅
+    localStorage.setItem(k, JSON.stringify(s));
+  });
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForTimeout(500);
+  await page.evaluate(() => { window.Cutscene.force = true; });
+  out.review = await page.evaluate(() => {
+    const F = window.__FR;
+    F.cave('qixuan');
+    const tabs = F.caveTabsOf('qixuan');
+    F.caveTab('story');
+    const body = document.getElementById('caveBody');
+    return {
+      tabs, title: (body.querySelector('.cs-title') || {}).textContent,
+      rows: [...body.querySelectorAll('.cs-row')].map(r => ({
+        nm: (r.querySelector('.cs-nm') || {}).textContent,
+        meta: (r.querySelector('.cs-meta') || {}).textContent,
+        id: (r.querySelector('button[data-story]') || {}).getAttribute('data-story')
+      })),
+      ids: window.Cutscene.cutscenes(), meta: window.Cutscene.meta('houshan'),
+      overflow: body.scrollWidth > body.clientWidth + 2, state: F.G.state
+    };
+  });
+  ok('50 洞府新增「剧情回顾」页签，列表跨全部地图（含没有洞府的后山）',
+     out.review.tabs.indexOf('story') >= 0 && out.review.ids.length === 2
+     && out.review.rows.length === 2 && out.review.rows[0].id === 'qixuan'
+     && out.review.rows[1].id === 'houshan'
+     && /七玄门·后山/.test(out.review.rows[1].nm) && out.review.state === 'cave', out.review);
+  ok('51 列表元数据取自分镜表与 MAP_STORIES，已阅/未阅按 save.seen 显示',
+     /2 段/.test(out.review.title)
+     && /卷一 · 七玄门/.test(out.review.rows[0].meta) && /9 拍 \/ 28\.4s/.test(out.review.rows[0].meta)
+     && /8 句台词 · 已阅/.test(out.review.rows[0].meta)
+     && /卷一 · 后山采药/.test(out.review.rows[1].meta) && /8 句台词 · 未阅/.test(out.review.rows[1].meta)
+     && out.review.overflow === false, out.review);
+  ok('52 Cutscene.meta() 返回章节卡/地点/拍数/时长，与分镜表同源',
+     out.review.meta && out.review.meta.title === '卷一 · 后山采药'
+     && out.review.meta.sub === '青牛山北麓 · 神手谷'
+     && out.review.meta.shots === 9 && out.review.meta.dur === 28.4, out.review.meta);
+
+  out.reviewPlay = await page.evaluate(() => {
+    const F = window.__FR;
+    document.querySelector('#caveBody button[data-story="houshan"]').click();
+    const root = document.getElementById('csHost').shadowRoot;
+    const s = JSON.parse(localStorage.getItem('fanren_save_v1') || '{}');
+    return {
+      active: window.Cutscene.active(), map: window.Cutscene.mapId(),
+      display: document.getElementById('csHost').style.display,
+      linesSame: JSON.stringify(window.Cutscene.lines()) === JSON.stringify(window.MAP_STORIES.houshan),
+      title: root.querySelector('#chapter .ct').textContent,
+      shots: root.querySelectorAll('#shotList div').length,
+      seen: (s.seen || []).slice(), state: F.G.state, pf: F.G.pf,
+      caveShown: document.getElementById('cave').style.display
+    };
+  });
+  ok('53 点「回看」直接建过场层：后山台词逐字同源、分镜 9 拍',
+     out.reviewPlay.active === true && out.reviewPlay.display === 'block'
+     && out.reviewPlay.map === 'houshan' && out.reviewPlay.linesSame === true
+     && /后山采药/.test(out.reviewPlay.title) && out.reviewPlay.shots === 9, out.reviewPlay);
+  ok('54 点播是纯播放：不写 seen、不重进地图、不弹难度面板、洞府仍在',
+     JSON.stringify(out.reviewPlay.seen) === JSON.stringify(['scene:qixuan'])
+     && out.reviewPlay.state === 'cave' && !out.reviewPlay.pf
+     && out.reviewPlay.caveShown === 'flex', out.reviewPlay);
+  await page.evaluate(() => document.getElementById('csHost').shadowRoot.getElementById('csSkipBtn').click());
+  await page.waitForTimeout(250);
+  out.reviewEnd = await page.evaluate(() => {
+    const F = window.__FR, s = JSON.parse(localStorage.getItem('fanren_save_v1') || '{}');
+    return { active: window.Cutscene.active(), display: document.getElementById('csHost').style.display,
+             state: F.G.state, seen: (s.seen || []).slice(),
+             rows: document.querySelectorAll('#caveBody .cs-row').length };
+  });
+  ok('55 播完只收层回洞府：账本一字不改、列表仍在、不进战斗',
+     out.reviewEnd.active === false && out.reviewEnd.display === 'none'
+     && out.reviewEnd.state === 'cave' && out.reviewEnd.rows === 2
+     && JSON.stringify(out.reviewEnd.seen) === JSON.stringify(['scene:qixuan']), out.reviewEnd);
+
+  out.reviewQX = await page.evaluate(() => {
+    document.querySelector('#caveBody button[data-story="qixuan"]').click();
+    const root = document.getElementById('csHost').shadowRoot;
+    return { active: window.Cutscene.active(), map: window.Cutscene.mapId(),
+             title: root.querySelector('#chapter .ct').textContent,
+             linesSame: JSON.stringify(window.Cutscene.lines()) === JSON.stringify(window.MAP_STORIES.qixuan) };
+  });
+  ok('56 连点另一段能切回山门分镜，台词与章节卡都不串台',
+     out.reviewQX.active === true && out.reviewQX.map === 'qixuan'
+     && /七玄门/.test(out.reviewQX.title) && out.reviewQX.linesSame === true, out.reviewQX);
+  await page.evaluate(() => document.getElementById('csHost').shadowRoot.getElementById('csSkipBtn').click());
+  await page.waitForTimeout(200);
+
+  await fresh({ skin: 'guigu' });
+  out.reviewInk = await page.evaluate(() => {
+    const F = window.__FR; F.cave('qixuan'); F.caveTab('story');
+    const b = document.getElementById('caveBody');
+    return { rows: b.querySelectorAll('.cs-row').length, ink: window.SKIN_INK === true,
+             overflow: b.scrollWidth > b.clientWidth + 2 };
+  });
+  ok('57 墨皮下剧情回顾列表仍完整、无横向溢出',
+     out.reviewInk.rows === 2 && out.reviewInk.ink === true && out.reviewInk.overflow === false, out.reviewInk);
 } catch (e) {
   out.fatal = String(e && e.stack || e).slice(0, 600);
   ok('运行未抛异常', false, out.fatal);

@@ -739,6 +739,11 @@ body.rot #ver { visibility: hidden; }
 .cs-empty { color: var(--text-4); font-size: var(--fs-cap); text-align: center; padding: var(--sp-6) 0; }
 .cave-sec.empty { flex: 1; justify-content: center; }
 .cave-sec.empty .cs-empty { padding: 0; }
+/* 剧情回顾：一段一行，复用突破清单的行底，右端挂「回看」按钮 */
+.cs-row > span { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.cs-row .cs-nm { color: var(--accent); font-size: var(--fs-cap); letter-spacing: .5px; }
+.cs-row .cs-meta { color: var(--text-3); font-size: var(--fs-micro); line-height: 1.5; }
+.cs-row .btn { flex: none; }
 .statgrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-1); }
 .statcell { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-2); background: rgba(255,255,255,0.04); border: 1px solid rgba(201,162,74,0.16); border-radius: var(--r-md); padding: 4px 8px; }
 .statcell i { font-style: normal; color: var(--text-3); font-size: var(--fs-micro); }
@@ -1500,6 +1505,8 @@ body[data-skin="guigu"] {
 /* 区块标题 / 小节标题：#b5714b 在纸上只有 3.24:1 */
 body[data-skin="guigu"] .cs-title { color: #8f4f2e; border-left-color: rgba(143,79,46,0.55); }
 body[data-skin="guigu"] .cs-sub { color: #5a5142; border-left-color: rgba(60,56,48,0.32); }
+/* 剧情回顾行名沿用标题的深棕：默认 var(--accent) 在纸上仅 2.98:1 */
+body[data-skin="guigu"] .cs-nm { color: #8f4f2e; }
 
 /* 成算 / 稀缺提示：青灰 3.71:1 → 5.1:1 */
 body[data-skin="guigu"] .rr-rate,
