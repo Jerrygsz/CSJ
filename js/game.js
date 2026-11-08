@@ -5748,6 +5748,25 @@
     const total = span.end - span.start + 1;
     return realmName(lv) + '·第' + layer + '/' + total + '层';
   }
+
+  // ============ 境界唯一真源 ============
+  // 全游戏所有「当前境界」的显示与文案一律走这三个函数，不再各读 G.player.level / save.best.level。
+  // 根因：进高级图时 startMap 会用地图下限 startLevel 把战斗等级 p.level 夹逼抬高
+  //（真实修为 Lv240 在图里被抬到 Lv252），那截只是战斗平衡、不是韩立真修到的层数。
+  // 若 HUD 读 p.level、修行图读存档，就会出现「合体后期·第13/20层 vs 第1/20层」这类分叉。
+  // 故进图时记下夹逼偏移 G.runClampGap，取境界时扣掉它；局外一律只读永久修为存档。
+  const OUT_OF_RUN = { title: 1, map: 1, wanling: 1, diff: 1, cave: 1, sweep: 1, prefight: 1 };
+  function curRealmLevel() {
+    const c = (save.cultivate && save.cultivate.level) || 1;
+    const p = G.player;
+    // 局外（选图 / 洞府 / 坊市 / 标题 / 战前运功）：只认存档永久修为，不受上一局残留对象影响
+    if (!p || OUT_OF_RUN[G.state]) return c;
+    // 局内：扣掉进图时被地图下限抬高的那截，剩下的才是真修为；已落盘的存档取较高者
+    return Math.max(c, (p.level || 1) - (G.runClampGap || 0));
+  }
+  function curRealmName() { return realmName(curRealmLevel()); }
+  function curRealmLabel() { return stageLabel({ level: curRealmLevel() }); }
+
   function shaSt() {
     if (!G.sha) G.sha = { v: 0, need: SHA_NEED, dmgT: 0, x2T: 0, sayT: 26 };
     return G.sha;
@@ -8536,7 +8555,7 @@
     // 条上补「当前 / 上限」：只有比例看不出还差多少，也没法判断一颗丹够不够
     if (elHpval) elHpval.textContent = Math.max(0, Math.ceil(p.hp)) + '/' + Math.ceil(p.maxhp);
     if (elXpval) elXpval.textContent = Math.floor(sst.v) + '/' + Math.ceil(sst.need);
-    elLevel.textContent = stageLabel(p) + (sst.dmgT > 0 ? '　·　杀意' : '');
+    elLevel.textContent = curRealmLabel() + (sst.dmgT > 0 ? '　·　杀意' : '');
     elTime.textContent = fmtTime(G.time);
     elKills.textContent = '斩 ' + G.kills;
     if (elBag) elBag.textContent = '袋 ' + (G.runLoot ? G.runLoot.length : 0);
@@ -8646,6 +8665,8 @@
     // 自动战斗只管这一趟：进新图一律复位，得重新点一次（「到结算为止」的边界就在这儿）
     G.autoOn = false; G.autoT = 0; G.autoAnchor = null; G.autoDodge = null; G.autoDodgePrev = null;
     G.realmIdx = 0; G.realm = { dmg: 0, atk: 0, spd: 0 }; G.realmHp = 0;
+    // 本局「地图下限夹逼偏移」：进图后由 startMap 重算，出图前一直有效
+    G.runClampGap = 0;
     resetCombo();
     for (const s of STORY) s.done = false;
     // 带入永久进度（跨地图不清零）：道具加成 + 装备加成
@@ -8663,23 +8684,25 @@
     if (!save.cultivate) save.cultivate = { level: 1, xp: 0, skills: {} };
     const c = save.cultivate;
     if (!c.skills) c.skills = {};
-    // 破境图（地火之屋等）设有 startLevel 下限：进图会把战斗等级 p.level 抬到底线（如炼气期十三层），
-    // 这只为战斗平衡，不代表玩家真修到了这一层。若把这条「夹逼」回写进存档修为，
-    // 突破门槛就会只认被地图抬高的 level、而不是玩家真实修为 —— 即「以 level 论、不以修为论」。
-    // 故：p.level 恰好等于本图下限、且存档修为本就低于该下限时，视为夹逼，不回写存档修为。
-    const floor = (G.map && G.map.startLevel) || 0;
-    const clampedOnly = (p.level === floor && (c.level || 1) < floor);
-    // 出图落盘：战斗中涨上来的等级与经验，一并续进永久修为，不得丢弃。
-    //  - 跨了整级：整级写回，本层未跨完的零头经验也续上（不再把 c.xp 清零）；
-    //  - 没跨整级、但本层经验条又涨了（如炼虚初期·圆满）：把这一截续进永久修为，别让人「出图又变回初期」。
-    // 图的下限把等级夹逼抬高的情况（clampedOnly）不算自己修来的，照旧不回写。
-    if (!clampedOnly) {
-      if (p.level > (c.level || 1)) { c.level = p.level; c.xp = p.xp; }
-      else if (p.level === (c.level || 1) && p.xp > (c.xp || 0)) { c.xp = p.xp; }
+    // 本局真实修为 = 战斗等级 - 进图时被地图下限夹逼抬高的偏移（G.runClampGap）。
+    // 旧写法只认「p.level 恰好等于下限」这一种夹逼；一旦在夹逼图里升了一级，
+    // 就会把被抬高的十几层整个写回存档，出图后境界凭空暴涨 —— 这正是「境界总是混乱」的病根。
+    const gap = G.runClampGap || 0;
+    const realLv = Math.max(1, (p.level || 1) - gap);
+    // 出图落盘：战斗中真修来的等级与经验，一并续进永久修为，不得丢弃。
+    //  - 跨了整级：整级写回，本层未跨完的零头经验也续上；
+    //  - 没跨整级、但本层经验条又涨了：把这一截续进永久修为，别让人「出图又变回初期」。
+    //  - 夹逼期间 p.xp 是按被抬高的等级起算的经验条，与真实层的经验条不同源，不能混写；
+    //    这一局只落整级增量，零头从真实层重新起算。
+    if (gap > 0) {
+      if (realLv > (c.level || 1)) { c.level = realLv; c.xp = 0; }
+    } else {
+      if (realLv > (c.level || 1)) { c.level = realLv; c.xp = p.xp; }
+      else if (realLv === (c.level || 1) && p.xp > (c.xp || 0)) { c.xp = p.xp; }
     }
     for (const k in p.skills) if ((p.skills[k] || 0) > (c.skills[k] || 0)) c.skills[k] = p.skills[k];
     if (c.level > (save.best.level || 1)) save.best.level = c.level;
-    // 最高境界记录不得高于「真实永久修为」：被地图下限夹逼临时抬高的战斗等级（clampedOnly），
+    // 最高境界记录不得高于「真实永久修为」：被地图下限夹逼临时抬高的战斗等级，
     // 或道陨时按战斗等级写入的 best，都可能虚高；这里把它拉回真实修为，
     // 否则会出现「修行图/世界地图显示更高、战斗里却更低」的境界分叉。
     if ((save.best.level || 1) > (c.level || 1)) save.best.level = c.level;
@@ -8720,7 +8743,7 @@
     hideAllOverlays();
     if (elPfName && m) elPfName.textContent = m.name;
     if (elPfSub && m) elPfSub.textContent = (m.pos || '') + '　·　择定身上要运的功法，再入山。';
-    if (elPfRealm) elPfRealm.textContent = stageLabel({ level: lv });
+    if (elPfRealm) elPfRealm.textContent = curRealmLabel();
     renderPreFight();
     if (elPf) elPf.style.display = 'flex';
   }
@@ -8812,6 +8835,9 @@
     p.level = Math.max(1, cult.level || 1, levelFromMap);
     p.next = xpNeed(p.level);
     p.xp = clampedUp ? 0 : (cult.xp || 0);
+    // 记下被地图下限抬高的那截：战斗数值照旧用 p.level，但境界显示与出图落盘都得扣掉它，
+    // 否则「在夹逼图里升一级」就会把被抬高的十几层一并写回永久修为，境界凭空暴涨。
+    G.runClampGap = Math.max(0, p.level - Math.max(1, cult.level || 1));
     // 身上运转哪几门功法，由「已装配」决定；没装任何一门时自动运起主力
     p.skills = buildPlayerSkills(p.level, m);
     // 身外化身：学到就常驻（不看槽位，它是被动）
@@ -8842,7 +8868,7 @@
     G.coopRole = (window.Net && window.Net.self() && window.Net.isHost()) ? 'host' : (window.Net && window.Net.self() ? 'client' : null);
     G._claimedDrops = new Set(); G._hostVacuum = false; G._endSent = false;
     // 一进门就跨了大境界（筑基 / 结丹）：这一声得给，别让人不知道自己现在在哪一层
-    if (realmName(p.level) !== realmBefore) banner('境界 · ' + realmName(p.level));
+    if (curRealmName() !== realmBefore) banner('境界 · ' + curRealmName());
     // 绿液区：进门那一滴绿液已经入土，这一畦「灵润」，草木正催
     if (G.alchWet) setTimeout(function () { if (G.state === 'play') banner('灵润 · 绿液入土，这一畦可采高年份'); }, 700);
     // 破境图：物事未齐时进门就提醒一句 —— 此图可打可拾，破不了境
@@ -9272,7 +9298,7 @@
     }
     G.victoryTitle = ''; G.victoryDesc = '';   // 一张图一套结局，用过即清，别带到下一张
     if (elVictoryStats) elVictoryStats.style.display = (m.type === 'story' || m.type === 'market') ? 'none' : 'flex';
-    elVTime.textContent = fmtTime(G.time); elVKills.textContent = G.kills; elVLevel.textContent = stageLabel(G.player);
+    elVTime.textContent = fmtTime(G.time); elVKills.textContent = G.kills; elVLevel.textContent = curRealmLabel();
     renderVictoryLoot(gained, newly, cave, newDiff);
     elVictory.style.display = 'flex';
     refreshTitle();
@@ -9366,7 +9392,7 @@
       const wanN = wanAll.filter(i => inv[i.id]).length;
       elTitleBag.innerHTML =
         '<div class="ts-hd">道途</div><div class="ts-grid">' +
-        tsRow('当前境界', stageLabel(save.cultivate)) +
+        tsRow('当前境界', curRealmLabel()) +
         tsRow('破关', clearedMain + '/' + main.length) +
         tsRow('功法', skillN + '/' + skillAll) +
         tsRow('洞府', (save.caves || []).length + '/' + caveAll) +
@@ -9503,7 +9529,7 @@
     }).join('');
     elWanlingList.innerHTML = total ? rows : '<div class="wl-empty">榜上暂无名录。</div>';
     if (elWlCollected) elWlCollected.textContent = '已收录 ' + collected + ' / ' + total;
-    if (elWlRealm) elWlRealm.textContent = stageLabel(save.cultivate);
+    if (elWlRealm) elWlRealm.textContent = curRealmLabel();
   }
   function openWanling() {
     G.state = 'wanling';
@@ -9638,8 +9664,8 @@
   function renderWorldMap() {
     if (!elWmList) return;
     if (elWmStones) elWmStones.textContent = '灵石 ' + (save.stones || 0);
-    if (elWmRealm) elWmRealm.textContent = stageLabel(save.cultivate);
-    if (elWlRealm) elWlRealm.textContent = stageLabel(save.cultivate);   // 万灵榜页头境界与修行图保持同一口径（避免开关面板才刷新）
+    if (elWmRealm) elWmRealm.textContent = curRealmLabel();
+    if (elWlRealm) elWlRealm.textContent = curRealmLabel();   // 万灵榜页头境界与修行图保持同一口径（避免开关面板才刷新）
     if (elWmBag) elWmBag.textContent = '储物袋 ' + (save.totalItems || 0) + ' 件';
     const mains = MAPS.filter(m => !m.side);
     const sides = MAPS.filter(m => m.side && save.unlocked.indexOf(m.id) >= 0).sort((a, b) => (a.sorder || 0) - (b.sorder || 0));
@@ -9843,7 +9869,7 @@
     if (elCaveDesc) elCaveDesc.textContent = c.quote;
     if (elCavePos) elCavePos.textContent = c.pos + '　·　' + c.desc;
     if (elCaveStones) elCaveStones.textContent = '灵石 ' + Math.round(save.stones || 0);
-    if (elCaveRealm) elCaveRealm.textContent = realmName(lv);
+    if (elCaveRealm) elCaveRealm.textContent = curRealmLabel();
     if (elCaveBag) elCaveBag.textContent = '储物袋 ' + (save.totalItems || 0) + ' 件';
     // tabs
     if (elCaveTabs) {
@@ -9939,7 +9965,7 @@
     const crit = 0.05 + rb('crit') + (save.bonuses.crit || 0) + (g.crit || 0);
     const armor = Math.min(0.62, rb('armor') + (save.bonuses.armor || 0) + (g.armor || 0));
     const rows = [
-      ['境界', realmName(lv)],
+      ['境界', curRealmName()],
       ['生命上限', Math.round(maxhp)],
       ['伤害倍率', '×' + dmg.toFixed(2)],
       ['出手间隔', '×' + atk.toFixed(2)],
@@ -10409,7 +10435,7 @@
       html += '<div class="cave-sec"><div class="cs-title">重修 · 修为受创</div>' +
         '<div class="cs-note">被南宫婉吸干修为，跌回 <b>炼气期四层</b>（原著如此）。' +
         '原著里他在小寰岛闭府，大量服食丹药：<b>一年</b>回到炼气期九层，<b>再一年</b>重回筑基，' +
-        '<b>又六年</b>修成大衍诀第二层与身外化身，五十一岁筑基后期。眼下修到 <b>' + realmName(lv) + '</b>。</div>';
+        '<b>又六年</b>修成大衍诀第二层与身外化身，五十一岁筑基后期。眼下修到 <b>' + curRealmName() + '</b>。</div>';
       for (const st of (window.REBUILD_STAGES || [])) {
         const done = lv >= st.lv;
         const can = !done && (save.stones || 0) >= st.stones;
@@ -11069,7 +11095,7 @@
       '<div class="cs-note">' + c.restTip + '</div>' +
       '<div class="restbox">' +
       '<div class="statgrid">' +
-      '<div class="statcell"><i>当前境界</i><b>' + stageLabel({ level: lv }) + '</b></div>' +
+      '<div class="statcell"><i>当前境界</i><b>' + curRealmLabel() + '</b></div>' +
       '<div class="statcell"><i>此地可修至</i><b>' + realmName(c.capLevel) + '</b></div>' +
       '<div class="statcell"><i>修为积累</i><b>' + xp + ' / ' + need + '</b></div>' +
       '<div class="statcell"><i>每次所得</i><b>' + Math.round(need * c.restXp) + ' 修为</b></div>' +
@@ -11310,6 +11336,7 @@
   }
 
   // ---------- 洞府操作 ----------
+  // 装备 / 购买门槛只认永久修为，不跟本局等级浮动；境界「显示」请一律用 curRealmLabel()
   function curCultLevel() { return Math.max(save.cultivate.level || 1, save.best.level || 1); }
   function syncBestLevel() {
     if ((save.cultivate.level || 1) > (save.best.level || 1)) save.best.level = save.cultivate.level;
@@ -11847,7 +11874,7 @@
     if ((save.cultivate.level || 1) > (save.best.level || 1)) save.best.level = (save.cultivate.level || 1);
     writeSave();
     Sfx.lose();
-    elGoTime.textContent = fmtTime(G.time); elGoKills.textContent = G.kills; elGoLevel.textContent = stageLabel(G.player);
+    elGoTime.textContent = fmtTime(G.time); elGoKills.textContent = G.kills; elGoLevel.textContent = curRealmLabel();
     // 道陨的代价：灵石折半（永退不回）＋ 道具折半（再战通关可取回）
     const toll = deathToll();
     if (elGoToll) {
@@ -12664,6 +12691,7 @@
         state: G.state, time: +G.time.toFixed(1), kills: G.kills, god: !!G.god, ts: G.ts || 1,
         mapId: G.mapId, mapName: G.map ? G.map.name : null, mapType: G.map ? G.map.type : null,
         level: p ? p.level : 0, realm: p ? realmName(p.level) : null,
+        realmLevel: curRealmLevel(), realmLabel: curRealmLabel(),   // 境界唯一真源（与 HUD / 修行图同口径）
         xp: p ? Math.floor(p.xp) : 0, next: p ? p.next : 0,
         hp: p ? Math.ceil(p.hp) : 0, maxhp: p ? p.maxhp : 0,
         enemies: G.enemies.length, bullets: G.bullets.length, ebullets: G.ebullets.length,
@@ -13635,7 +13663,7 @@
         maxhp: G.player ? G.player.maxhp : 0, runP: JSON.parse(JSON.stringify(G.runP || {})) };
     },
     openRefine() { openRefine(); return G.state; },
-    stage() { return G.player ? stageLabel(G.player) : ''; },
+    stage() { return G.player ? curRealmLabel() : ''; },
     resetRunBuffs() { resetRunBuffs(); return true; },
     dash() { return dashPlayer(); },
     summon() { spawnSummon(); return G.summon ? { name: G.summon.name, spr: G.summon.spr, max: G.summon.max } : null; },
@@ -13649,12 +13677,13 @@
     levelUp(n) { for (let i = 0; i < (n || 1); i++) { const p = G.player; p.level++; p.next = xpNeed(p.level); } },
     realm(n) {
       if (!G.player) return '未开始';
+      G.runClampGap = 0;   // 调试口直接定境界，先清掉上一局的夹逼偏移，免得真源被污染
       G.player.level = Math.max(1, n || 1);
       G.realmIdx = 0; G.realm = { dmg: 0, atk: 0, spd: 0 }; G.realmHp = 0;
       checkRealm(true);
       recalcMaxhp(); G.player.hp = G.player.maxhp;
       syncCultivate();
-      return realmName(G.player.level);
+      return curRealmName();
     },
     combo(n) { G.combo = n || 0; G.comboT = 3; showCombo(); return G.combo; },
     openLevel() { if (G.state === 'play') queueLevelUp(); },
