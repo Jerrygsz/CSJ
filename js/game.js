@@ -8805,6 +8805,11 @@
     }
     elPfBody.innerHTML = rarize(html);
   }
+  // 洞府「重温此段」→ 剧场回看：只有列在这里的洞府把按钮改成「播过场」，
+  // 其余洞府保持原「重进地图」行为。新增动画地图时同步登记即可。
+  // 回看是纯播放：不重进地图、不弹难度面板、不写 save.seen、不吞奖励。
+  const CUTSCENE_CAVE = { qixuan: 'qixuan', houshan: 'houshan' };
+
   function startMap(id, diffId) {
     const m = MAPS.find(x => x.id === id);
     if (!m) return;
@@ -8980,6 +8985,31 @@
       G.state = 'dialog';
       showLines(MAP_STORIES[m.intro], () => { storyMarkSeen(introKey); afterIntro(); }, 'map:' + id);
       return;
+    }
+    // ===== 第二张地图「七玄门·后山」：进图序章（独立过场层）=====
+    // 这是战斗图，动画必须放在战斗初始化全部完成之后：只把 G.state 临时压成 dialog 冻住主循环，
+    // 播完恢复 play 并重置 last —— 否则 28 秒过场会把 dt 攒成一发扑面而来的怪潮。
+    // 台词来自 MAP_STORIES.houshan（原著后山采药段），与战斗内 hs_open / hs_meet / hs_clue
+    // 三个定时节点互不重叠：序章讲入门后的日常，那三段讲这一趟采药的具体事，不重播同一句。
+    // 联机按既定口径直接开打：不建层、不写 seen；自动化回归由 available() 判掉，旧闸门照旧走。
+    if (id === 'houshan' && window.Cutscene && window.Cutscene.available()
+        && !storySeen('cut:houshan') && !G.coopRole) {
+      const hsLines = MAP_STORIES.houshan || [];
+      if (hsLines.length) {
+        G.state = 'dialog';
+        G.dialogLines = hsLines; G.dialogIdx = 0; G.dialogSynced = false;
+        G.dialogId = 'map:houshan';
+        G.cutscene = true;
+        G.dialogEnd = () => {
+          storyMarkSeen('cut:houshan');
+          G.state = 'play'; last = performance.now();
+        };
+        window.Cutscene.play(hsLines, () => {
+          G.cutscene = false;
+          const f = G.dialogEnd; G.dialogEnd = null; G.dialogLines = null;
+          if (f) f();
+        }, 'map:houshan');
+      }
     }
     if (save.settings.autoSave) writeSave();
   }
@@ -12184,6 +12214,13 @@
   if (document.getElementById('caveClose')) document.getElementById('caveClose').addEventListener('click', openWorldMap);
   if (document.getElementById('caveStory')) document.getElementById('caveStory').addEventListener('click', () => {
     const c = CAVES[G.caveId]; if (!c) return;
+    // 剧场入口：这张洞府已接入剧情动画时，「重温此段」直接重播过场。
+    // 老存档也能看 —— 不依赖 save.seen，不改账本，不重进地图，不弹难度面板。
+    const csId = CUTSCENE_CAVE[c.from];
+    if (csId && window.Cutscene && window.Cutscene.available() && MAP_STORIES[csId]) {
+      window.Cutscene.replay(csId);
+      return;
+    }
     // 重温不能替玩家定难度：一律先弹难度面板，让人自己挑（以前直接按凡境进）
     openDiffPick(c.from);
   });

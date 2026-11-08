@@ -275,7 +275,9 @@ try {
     const sprAtAnim = window.Sprites.hanli;          // 动画里韩立读的就是这张
     const root = document.getElementById('csHost').shadowRoot;
     root.getElementById('csSkipBtn').click();
-    F.unlockAll(); F.enterMap('houshan');            // 播完进战斗图，startMap 会再 applyHeroSprite()
+    F.unlockAll();
+    window.Cutscene.force = false;                   // 这一段只验「播完进战斗图」，别触发后山序章
+    F.enterMap('houshan');                            // startMap 会再 applyHeroSprite()
     const s = JSON.parse(localStorage.getItem('fanren_save_v1') || '{}');
     return { sameCanvas: window.Sprites.hanli === sprAtAnim,
              armor: s.equip && s.equip.armor, state: F.G.state };
@@ -283,6 +285,165 @@ try {
   ok('32 播完进战斗图，人物仍是同一张当前护甲画布',
      out.battle.sameCanvas === true && out.battle.armor === 'a_tiancan', out.battle);
   ok('33 战斗图正常进入 play', out.battle.state === 'play', out.battle.state);
+
+  // ---- G 剧场入口：洞府「重温此段」直连过场，老存档也能看 ----
+  await fresh({ armor: 'a_tiancan' });
+  await page.evaluate(() => {
+    const k = 'fanren_save_v1', s = JSON.parse(localStorage.getItem(k) || '{}');
+    s.seen = ['scene:qixuan', 'cut:houshan'];   // 两张都「演过」的老存档
+    localStorage.setItem(k, JSON.stringify(s));
+  });
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForTimeout(500);
+  await page.evaluate(() => { window.Cutscene.force = true; });
+  out.theater = await page.evaluate(() => {
+    const F = window.__FR;
+    F.cave('qixuan');                              // 药庐草舍洞府
+    const before = F.G.state;
+    document.getElementById('caveStory').click(); // 「重温此段」
+    const root = document.getElementById('csHost').shadowRoot;
+    const s = JSON.parse(localStorage.getItem('fanren_save_v1') || '{}');
+    return {
+      before, state: F.G.state, pf: F.G.pf,
+      active: window.Cutscene.active(), display: document.getElementById('csHost').style.display,
+      mapId: window.Cutscene.mapId(),
+      linesSame: JSON.stringify(window.Cutscene.lines()) === JSON.stringify(window.MAP_STORIES.qixuan),
+      shotCount: root.querySelectorAll('#shotList div').length,
+      seen: (s.seen || []).slice()
+    };
+  });
+  ok('35 洞府「重温此段」直接建过场层，不弹难度面板不重进地图',
+     out.theater.active === true && out.theater.display === 'block'
+     && !out.theater.pf && out.theater.state === out.theater.before && out.theater.before === 'cave', out.theater);
+  ok('36 老存档（seen 已写）照样能回看，台词仍同源 MAP_STORIES.qixuan',
+     out.theater.linesSame === true && out.theater.mapId === 'qixuan' && out.theater.shotCount === 9, out.theater);
+  ok('37 回看是纯播放：账本一字不改',
+     JSON.stringify(out.theater.seen) === JSON.stringify(['scene:qixuan', 'cut:houshan']), out.theater.seen);
+  await page.evaluate(() => document.getElementById('csHost').shadowRoot.getElementById('csSkipBtn').click());
+  await page.waitForTimeout(250);
+  out.theaterEnd = await page.evaluate(() => {
+    const F = window.__FR, s = JSON.parse(localStorage.getItem('fanren_save_v1') || '{}');
+    return { active: window.Cutscene.active(), display: document.getElementById('csHost').style.display,
+             state: F.G.state, seen: (s.seen || []).slice() };
+  });
+  ok('38 回看播完只收层，不写 seen、不进战斗',
+     out.theaterEnd.active === false && out.theaterEnd.display === 'none'
+     && out.theaterEnd.state === 'cave'
+     && JSON.stringify(out.theaterEnd.seen) === JSON.stringify(['scene:qixuan', 'cut:houshan']), out.theaterEnd);
+
+  // ---- H 第二张地图：houshan 进图序章 ----
+  await fresh({ armor: 'a_xuemo' });
+  out.hs = await page.evaluate(() => {
+    const F = window.__FR;
+    F.enterMap('houshan');
+    const G = F.G, root = document.getElementById('csHost').shadowRoot;
+    return {
+      state: G.state, id: G.dialogId, n: G.dialogLines ? G.dialogLines.length : 0,
+      active: window.Cutscene.active(), display: document.getElementById('csHost').style.display,
+      mapId: window.Cutscene.mapId(), shots: window.Cutscene.shots.length,
+      li: window.Cutscene.shots.filter(s => s.li != null).map(s => s.li),
+      linesSame: JSON.stringify(window.Cutscene.lines()) === JSON.stringify(window.MAP_STORIES.houshan),
+      chapter: root.querySelector('#chapter .ct').textContent,
+      seal: root.getElementById('seal').textContent,
+      scene: root.getElementById('scene').dataset.scene,
+      sceneSkin: root.querySelector('.csBody').dataset.skin,
+      shotCount: root.querySelectorAll('#shotList div').length,
+      armor: JSON.parse(localStorage.getItem('fanren_save_v1')).equip.armor
+    };
+  });
+  ok('39 首进后山建独立过场层（9 拍，章节卡/印章/场景都切到后山）',
+     out.hs.active === true && out.hs.display === 'block' && out.hs.mapId === 'houshan'
+     && out.hs.shots === 9 && out.hs.shotCount === 9
+     && /后山采药/.test(out.hs.chapter) && out.hs.seal === '採藥'
+     && out.hs.scene === 'forest' && out.hs.sceneSkin === 'paper', out.hs);
+  ok('40 后山过场仍兼容 dialog 状态契约（map:houshan / 8 句）',
+     out.hs.state === 'dialog' && out.hs.id === 'map:houshan' && out.hs.n === 8, out.hs);
+  ok('41 后山 8 句台词逐字同源 MAP_STORIES.houshan，li 按 0..7 不跳句',
+     out.hs.linesSame === true && JSON.stringify(out.hs.li) === JSON.stringify([0,1,2,3,4,5,6,7]), out.hs);
+  ok('42 后山动画人物取当前护甲（玄玉甲）',
+     out.hs.armor === 'a_xuemo', out.hs.armor);
+  await page.evaluate(() => document.getElementById('csHost').shadowRoot.querySelectorAll('#shotList div')[6].click());
+  await page.waitForTimeout(650);
+  out.pixel3 = await heroPixelProbe();
+  ok('43 后山动画韩立逐像素 = 当前护甲 Sprites.hanli',
+     out.pixel3.rate >= 0.99 && out.pixel3.sampled > 0, out.pixel3);
+  ok('44 后山与山门两套分镜用同一张当前护甲画布（玄玉甲 ≠ 冰蚕衣）',
+     JSON.stringify(out.pixel3.robe) !== JSON.stringify([216,210,192]), out.pixel3.robe);
+
+  out.hsSkip = await page.evaluate(() => {
+    const F = window.__FR;
+    document.getElementById('csHost').shadowRoot.getElementById('csSkipBtn').click();
+    const s = JSON.parse(localStorage.getItem('fanren_save_v1') || '{}');
+    return { state: F.G.state, seen: (s.seen || []).indexOf('cut:houshan') >= 0,
+             active: window.Cutscene.active(), display: document.getElementById('csHost').style.display };
+  });
+  ok('45 后山过场演完/跳过恢复 play 并写 cut:houshan',
+     out.hsSkip.state === 'play' && out.hsSkip.seen === true
+     && out.hsSkip.active === false && out.hsSkip.display === 'none', out.hsSkip);
+  out.hsRe = await page.evaluate(() => {
+    const F = window.__FR;
+    F.enterMap('houshan');
+    return { active: window.Cutscene.active(), display: document.getElementById('csHost').style.display,
+             state: F.G.state };
+  });
+  ok('46 重进后山不再播（seen 生效，刷图不被打断）',
+     out.hsRe.active === false && out.hsRe.display === 'none' && out.hsRe.state === 'play', out.hsRe);
+
+  await fresh({ armor: 'a_tiancan' });
+  out.hsCoop = await page.evaluate(() => {
+    const F = window.__FR;
+    const oldSelf = window.Net.self, oldHost = window.Net.isHost;
+    window.Net.self = () => 'fake-peer'; window.Net.isHost = () => true;
+    F.enterMap('houshan');
+    const s = JSON.parse(localStorage.getItem('fanren_save_v1') || '{}');
+    const r = { role: F.G.coopRole, active: window.Cutscene.active(),
+                display: document.getElementById('csHost').style.display,
+                seen: (s.seen || []).indexOf('cut:houshan') >= 0, state: F.G.state };
+    window.Net.self = oldSelf; window.Net.isHost = oldHost;
+    return r;
+  });
+  ok('47 联机进后山直接开打：不建层、不写 seen',
+     out.hsCoop.active === false && out.hsCoop.display === 'none'
+     && out.hsCoop.seen === false && out.hsCoop.state === 'play', out.hsCoop);
+
+  // ---- I 两张图分镜互不串台 ----
+  out.mix = await page.evaluate(() => {
+    const C = window.Cutscene, root = document.getElementById('csHost').shadowRoot;
+    const list = C.cutscenes();
+    C.replay('houshan');
+    const a = { map: C.mapId(), n: C.shots.length,
+                title: root.querySelector('#chapter .ct').textContent,
+                shots: root.querySelectorAll('#shotList div').length,
+                lines: C.lines().length };
+    C.stop(); C.replay('qixuan');
+    const b = { map: C.mapId(), n: C.shots.length,
+                title: root.querySelector('#chapter .ct').textContent,
+                shots: root.querySelectorAll('#shotList div').length,
+                lines: C.lines().length };
+    C.stop();
+    return { list, a, b };
+  });
+  ok('48 后山 ↔ 山门来回切，分镜/章节卡/拍列表/台词都跟着换，不串台',
+     out.mix.list.indexOf('qixuan') >= 0 && out.mix.list.indexOf('houshan') >= 0
+     && out.mix.a.map === 'houshan' && /后山采药/.test(out.mix.a.title)
+     && out.mix.a.n === 9 && out.mix.a.shots === 9 && out.mix.a.lines === 8
+     && out.mix.b.map === 'qixuan' && /七玄门/.test(out.mix.b.title)
+     && out.mix.b.n === 9 && out.mix.b.shots === 9 && out.mix.b.lines === 8, out.mix);
+
+  // ---- J 自动化回归下 houshan 仍是原战斗图（旧闸门不破）----
+  await fresh();
+  out.hsVanilla = await page.evaluate(() => {
+    const F = window.__FR;
+    window.Cutscene.force = false;
+    F.enterMap('houshan');
+    const s = JSON.parse(localStorage.getItem('fanren_save_v1') || '{}');
+    return { state: F.G.state, active: window.Cutscene.active(),
+             display: document.getElementById('csHost').style.display,
+             seen: (s.seen || []).indexOf('cut:houshan') >= 0 };
+  });
+  ok('49 自动化回归下后山直接 play，不建层不记账（verify-story-once 等旧闸门照旧）',
+     out.hsVanilla.state === 'play' && out.hsVanilla.active === false
+     && out.hsVanilla.display === 'none' && out.hsVanilla.seen === false, out.hsVanilla);
 } catch (e) {
   out.fatal = String(e && e.stack || e).slice(0, 600);
   ok('运行未抛异常', false, out.fatal);

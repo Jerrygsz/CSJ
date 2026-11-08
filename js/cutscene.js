@@ -1,8 +1,11 @@
-/* 凡人·长生劫 —— 第一张地图「七玄门·山门」剧情动画（独立过场层）
+/* 凡人·长生劫 —— 剧情动画（独立过场层）
  *
  * 来源：preview/cutscene-qixuan.html 原型（9 拍 / 28.4s），演出与程序化场景原样搬入。
+ *   - 已接入：qixuan 七玄门·山门（第一张）、houshan 七玄门·后山（第二张）；
+ *     CUTSCENES 是分镜表，新增一张图只需加一段 shots + 一段 MAP_STORIES 台词。
  *   - Shadow DOM 挂载，CSS / id / class 与主游戏完全隔离，零冲突。
- *   - 台词不写死：play(lines) 传入 MAP_STORIES.qixuan，按 li 索引逐字取用，严格同源。
+ *   - 台词不写死：play(lines, onEnd, 'map:<id>') 按 li 索引从 MAP_STORIES.<id> 逐字取用，严格同源；
+ *     剧场回看用 'replay:<id>'，只播不记账。
  *   - 人物读 window.Sprites：startMap() 已调 applyHeroSprite()，Sprites.hanli 就是当前护甲，
  *     过场与随后的战斗读同一张图，衣着天然一致。
  *   - 只读 window.SKIN_INK，不改写：双皮跟主游戏走，无副作用。
@@ -49,35 +52,76 @@
 
   // ===================== 分镜时间轴 =====================
   // 数据结构即未来铺 171 图的模板：每张图一段 shots，t/dur 秒，cam 为连续镜头参数。
-  var SHOTS = [
-    { id:0, t:0,    dur:2.4, kind:'chapter', scene:'village', fx:'unroll',
-      cam:{ z:[1.00,1.05], x:[0,-8], y:[0,0] }, label:'卷一 · 七玄门' },
-    { id:1, t:2.4,  dur:3.2, scene:'village', fx:'mist',
-      li: 0,
-      cam:{ z:[1.05,1.16], x:[-8,-18], y:[0,-10] } },
-    { id:2, t:5.6,  dur:3.4, scene:'village', actors:[['hanli','L']], fx:'ink',
-      li: 1,
-      cam:{ z:[1.16,1.22], x:[-18,-6], y:[-10,4] } },
-    { id:3, t:9.0,  dur:3.6, scene:'gate', fx:'unroll',
-      li: 2,
-      cam:{ z:[1.00,1.12], x:[16,-6], y:[0,-8] } },
-    { id:4, t:12.6, dur:3.0, scene:'trial', actors:[['hanli','L'],['zhangtie','R']], fx:'ink',
-      li: 3,
-      cam:{ z:[1.02,1.15], x:[0,0], y:[0,-6] } },
-    { id:5, t:15.6, dur:2.8, scene:'gate', actors:[['hanli','L'],['zhangtie','R']], fx:'dim',
-      li: 4,
-      cam:{ z:[1.15,1.09], x:[0,6], y:[-6,0] } },
-    { id:6, t:18.4, dur:3.0, scene:'hut', actors:[['mo','R']], fx:'seal',
-      li: 5,
-      cam:{ z:[1.00,1.11], x:[10,0], y:[0,-4] } },
-    { id:7, t:21.4, dur:3.2, scene:'hut', actors:[['hanli','L']], fx:'glow',
-      li: 6,
-      cam:{ z:[1.11,1.17], x:[0,-8], y:[-4,0] } },
-    { id:8, t:24.6, dur:3.8, scene:'hill', fx:'roll',
-      li: 7,
-      cam:{ z:[1.20,1.00], x:[-10,0], y:[0,0] } }
-  ];
-  var TOTAL = SHOTS[SHOTS.length-1].t + SHOTS[SHOTS.length-1].dur;
+  // CUTSCENES.<mapId> 由 play(..., id) 选中；台词只写 li 索引，正文运行时从 MAP_STORIES.<mapId> 注入，
+  // 动画模块绝不另写一句台词。新增一张图 = 往这里加一个 shots 段 + 往 MAP_STORIES 加台词。
+  var CUTSCENES = {
+    qixuan: {
+      title: '卷一 · 七玄门', sub: '越国 · 镜州 青牛山', seal: '七玄',
+      shots: [
+        { id:0, t:0,    dur:2.4, kind:'chapter', scene:'village', fx:'unroll',
+          cam:{ z:[1.00,1.05], x:[0,-8], y:[0,0] }, label:'卷一 · 七玄门' },
+        { id:1, t:2.4,  dur:3.2, scene:'village', fx:'mist',
+          li: 0,
+          cam:{ z:[1.05,1.16], x:[-8,-18], y:[0,-10] } },
+        { id:2, t:5.6,  dur:3.4, scene:'village', actors:[['hanli','L']], fx:'ink',
+          li: 1,
+          cam:{ z:[1.16,1.22], x:[-18,-6], y:[-10,4] } },
+        { id:3, t:9.0,  dur:3.6, scene:'gate', fx:'unroll',
+          li: 2,
+          cam:{ z:[1.00,1.12], x:[16,-6], y:[0,-8] } },
+        { id:4, t:12.6, dur:3.0, scene:'trial', actors:[['hanli','L'],['zhangtie','R']], fx:'ink',
+          li: 3,
+          cam:{ z:[1.02,1.15], x:[0,0], y:[0,-6] } },
+        { id:5, t:15.6, dur:2.8, scene:'gate', actors:[['hanli','L'],['zhangtie','R']], fx:'dim',
+          li: 4,
+          cam:{ z:[1.15,1.09], x:[0,6], y:[-6,0] } },
+        { id:6, t:18.4, dur:3.0, scene:'hut', actors:[['mo','R']], fx:'seal',
+          li: 5,
+          cam:{ z:[1.00,1.11], x:[10,0], y:[0,-4] } },
+        { id:7, t:21.4, dur:3.2, scene:'hut', actors:[['hanli','L']], fx:'glow',
+          li: 6,
+          cam:{ z:[1.11,1.17], x:[0,-8], y:[-4,0] } },
+        { id:8, t:24.6, dur:3.8, scene:'hill', fx:'roll',
+          li: 7,
+          cam:{ z:[1.20,1.00], x:[-10,0], y:[0,0] } }
+      ]
+    },
+    houshan: {
+      title: '卷一 · 后山采药', sub: '青牛山北麓 · 神手谷', seal: '採藥',
+      shots: [
+        { id:0, t:0,    dur:2.4, kind:'chapter', scene:'forest', fx:'unroll',
+          cam:{ z:[1.00,1.06], x:[0,-10], y:[0,0] }, label:'卷一 · 后山采药' },
+        { id:1, t:2.4,  dur:3.2, scene:'forest', fx:'mist',
+          li: 0,
+          cam:{ z:[1.06,1.17], x:[-10,-20], y:[0,-12] } },
+        { id:2, t:5.6,  dur:3.4, scene:'forest', actors:[['hanli','L'],['zhangtie','R']], fx:'ink',
+          li: 1,
+          cam:{ z:[1.17,1.21], x:[-20,-6], y:[-12,4] } },
+        { id:3, t:9.0,  dur:3.6, scene:'hut', actors:[['mo','R']], fx:'unroll',
+          li: 2,
+          cam:{ z:[1.00,1.13], x:[14,-4], y:[0,-8] } },
+        { id:4, t:12.6, dur:3.0, scene:'hut', actors:[['mo','R']], fx:'dim',
+          li: 3,
+          cam:{ z:[1.13,1.08], x:[-4,6], y:[-8,0] } },
+        { id:5, t:15.6, dur:2.8, scene:'fall', fx:'ink',
+          li: 4,
+          cam:{ z:[1.02,1.16], x:[0,0], y:[0,-10] } },
+        { id:6, t:18.4, dur:3.0, scene:'herb', actors:[['hanli','L']], fx:'glow',
+          li: 5,
+          cam:{ z:[1.16,1.20], x:[0,-8], y:[-10,0] } },
+        { id:7, t:21.4, dur:3.2, scene:'cave', fx:'seal',
+          li: 6,
+          cam:{ z:[1.00,1.14], x:[10,-6], y:[0,-6] } },
+        { id:8, t:24.6, dur:3.8, scene:'hill', fx:'roll',
+          li: 7,
+          cam:{ z:[1.20,1.00], x:[-10,0], y:[0,0] } }
+      ]
+    }
+  };
+  var curMap = 'qixuan', SHOTS = CUTSCENES.qixuan.shots;
+  function totalOf() { return SHOTS[SHOTS.length-1].t + SHOTS[SHOTS.length-1].dur; }
+  var TOTAL = totalOf();
+  var SCENE_KEYS = ['village','gate','trial','hut','hill','forest','fall','herb','cave'];
 
   // ===================== 程序化场景（烘焙一次） =====================
   function rnd(seed) { var s = seed; return function () { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; }; }
@@ -229,6 +273,100 @@
       walker(232, 536, 1); walker(268, 552, .86);
       pine(g, 74, 590, 1.2); pine(g, 412, 570, .9);
       mist(g, 250, 170, .48); titleSeal(g, '後山');
+    } else if (key === 'forest') {
+      // 后山晨雾：三层远山 + 一排高对比近松。
+      // 不能用 pine()：它拿 C.mid / C.near 画，墨皮下与背景同色，松林会整片消失。
+      ridge(g, 320, 108, C.far, 3); ridge(g, 420, 82, C.mid, 23); ridge(g, 520, 56, C.near, 41, 18);
+      var needle = skin === 'paper' ? 'rgba(58,48,30,.66)' : 'rgba(196,208,200,.40)';
+      var trunk  = skin === 'paper' ? 'rgba(58,48,30,.50)' : 'rgba(206,216,206,.26)';
+      function bpine(px, py, ps) {
+        g.strokeStyle = trunk; g.lineWidth = 5 * ps;
+        g.beginPath(); g.moveTo(px, py); g.lineTo(px - 3 * ps, py - 78 * ps); g.stroke();
+        g.fillStyle = needle;
+        for (var pi = 0; pi < 4; pi++) {
+          var pyy = py - (38 + pi * 22) * ps, pww = (40 - pi * 9) * ps;
+          g.beginPath(); g.ellipse(px, pyy, pww, 10 * ps, 0, 0, Math.PI * 2); g.fill();
+        }
+      }
+      bpine(46, 646, 1.5); bpine(132, 608, 1.1); bpine(358, 614, 1.25); bpine(444, 650, 1.55);
+      g.strokeStyle = C.line; g.globalAlpha = .18; g.lineWidth = 2;
+      for (var fi = 0; fi < 5; fi++) { g.beginPath(); g.moveTo(0, 620 + fi * 34); g.bezierCurveTo(150, 606 + fi * 34, 330, 636 + fi * 34, 480, 614 + fi * 34); g.stroke(); }
+      g.globalAlpha = 1; mist(g, 280, 210, .55); mist(g, 500, 150, .35); titleSeal(g, '後山');
+    } else if (key === 'fall') {
+      // 赤水峰瀑布：不规则岩壁夹一道亮水帘，落进潭里溅成雾。
+      // 水色不能取 C.paper（墨皮下是深色，会糊成一片），按皮另给一套半透明亮水。
+      ridge(g, 300, 96, C.far, 17);
+      g.fillStyle = C.near;
+      g.beginPath(); g.moveTo(0, 268); g.lineTo(150, 250); g.lineTo(176, 430); g.lineTo(158, 700); g.lineTo(0, 720); g.closePath(); g.fill();
+      g.beginPath(); g.moveTo(480, 254); g.lineTo(322, 244); g.lineTo(300, 430); g.lineTo(318, 704); g.lineTo(480, 724); g.closePath(); g.fill();
+      g.strokeStyle = C.line; g.globalAlpha = .22; g.lineWidth = 2;
+      for (var ri = 0; ri < 6; ri++) {
+        g.beginPath(); g.moveTo(8, 320 + ri * 62); g.lineTo(120 + (ri % 2) * 26, 300 + ri * 62); g.stroke();
+        g.beginPath(); g.moveTo(472, 306 + ri * 62); g.lineTo(360 - (ri % 2) * 22, 288 + ri * 62); g.stroke();
+      }
+      g.globalAlpha = 1;
+      var water  = skin === 'paper' ? 'rgba(255,253,244,.88)' : 'rgba(186,204,210,.54)';
+      var water2 = skin === 'paper' ? 'rgba(176,164,132,.32)' : 'rgba(90,106,116,.30)';
+      g.fillStyle = water;
+      g.beginPath(); g.moveTo(166, 248); g.lineTo(316, 244); g.lineTo(304, 690); g.lineTo(176, 694); g.closePath(); g.fill();
+      [[182,16],[214,7],[238,22],[272,9],[296,13]].forEach(function (f) {
+        g.fillStyle = water2; g.fillRect(f[0], 256, f[1], 434);
+      });
+      g.fillStyle = C.mid; g.globalAlpha = .85;
+      g.beginPath(); g.ellipse(240, 706, 132, 30, 0, 0, Math.PI * 2); g.fill(); g.globalAlpha = 1;
+      g.strokeStyle = water; g.globalAlpha = .55; g.lineWidth = 2;
+      for (var wi2 = 0; wi2 < 3; wi2++) { g.beginPath(); g.ellipse(240, 706, 42 + wi2 * 38, 9 + wi2 * 6, 0, 0, Math.PI * 2); g.stroke(); }
+      g.globalAlpha = 1;
+      mist(g, 640, 150, .6); titleSeal(g, '赤水');
+    } else if (key === 'herb') {
+      // 神手谷药圃：田垄 + 药苗 + 亮色药架（墨皮下 C.wood 会没进背景，这里另给对比色）
+      ridge(g, 340, 70, C.far, 29);
+      g.fillStyle = C.mid; g.globalAlpha = .45; g.fillRect(0, 500, 480, 364); g.globalAlpha = 1;
+      g.strokeStyle = C.line; g.globalAlpha = .3; g.lineWidth = 2;
+      for (var hi = 0; hi < 6; hi++) { g.beginPath(); g.moveTo(0, 540 + hi * 52); g.bezierCurveTo(160, 528 + hi * 52, 320, 552 + hi * 52, 480, 536 + hi * 52); g.stroke(); }
+      g.globalAlpha = 1;
+      for (var hj = 0; hj < 7; hj++) {
+        var hx = 42 + hj * 66, hy = 536 + (hj % 2) * 46;
+        g.fillStyle = C.near; g.fillRect(hx - 3, hy - 16, 6, 20);
+        g.fillStyle = C.gold; g.globalAlpha = .52;
+        g.beginPath(); g.ellipse(hx, hy - 20, 9, 6, 0, 0, Math.PI * 2); g.fill(); g.globalAlpha = 1;
+      }
+      var hb = skin === 'paper' ? 'rgba(74,62,42,.62)' : 'rgba(206,216,206,.30)';
+      g.fillStyle = hb;
+      g.fillRect(346, 316, 7, 150); g.fillRect(438, 316, 7, 150);
+      g.fillRect(342, 344, 100, 8); g.fillRect(342, 392, 100, 8); g.fillRect(342, 440, 100, 8);
+      g.fillStyle = C.gold; g.globalAlpha = .45;
+      for (var hj2 = 0; hj2 < 6; hj2++) g.fillRect(352 + hj2 * 15, 330, 9, 14);
+      g.globalAlpha = 1;
+      house(g, 40, 430, 88, 60);
+      mist(g, 260, 160, .4); titleSeal(g, '藥圃');
+    } else if (key === 'cave') {
+      // 山涧石缝：两块实岩壁夹一线天光，缝底碎石 + 一点青绿（掌天瓶伏笔，瓶由 hs_clue 交代）
+      ridge(g, 380, 80, C.far, 37);
+      var rock = skin === 'paper' ? 'rgba(74,62,42,.78)' : 'rgba(8,11,16,.80)';
+      var lit  = skin === 'paper' ? 'rgba(255,250,232,.66)' : 'rgba(196,210,214,.28)';
+      g.fillStyle = rock;
+      g.beginPath(); g.moveTo(0, 210); g.lineTo(184, 176); g.lineTo(204, 430); g.lineTo(188, 864); g.lineTo(0, 864); g.closePath(); g.fill();
+      g.beginPath(); g.moveTo(480, 196); g.lineTo(296, 170); g.lineTo(282, 430); g.lineTo(296, 864); g.lineTo(480, 864); g.closePath(); g.fill();
+      g.fillStyle = lit;
+      g.beginPath(); g.moveTo(184, 176); g.lineTo(296, 170); g.lineTo(282, 864); g.lineTo(188, 864); g.closePath(); g.fill();
+      g.strokeStyle = C.ink; g.globalAlpha = .22; g.lineWidth = 2;
+      g.beginPath(); g.moveTo(184, 176); g.lineTo(204, 430); g.lineTo(188, 864); g.stroke();
+      g.beginPath(); g.moveTo(296, 170); g.lineTo(282, 430); g.lineTo(296, 864); g.stroke();
+      for (var ci = 0; ci < 7; ci++) {
+        g.beginPath(); g.moveTo(6, 268 + ci * 78); g.lineTo(140 - (ci % 3) * 22, 250 + ci * 78); g.stroke();
+        g.beginPath(); g.moveTo(474, 254 + ci * 78); g.lineTo(340 + (ci % 3) * 20, 240 + ci * 78); g.stroke();
+      }
+      g.globalAlpha = 1;
+      g.fillStyle = rock;
+      [[196,690,26],[268,716,20],[224,742,17],[286,676,14]].forEach(function (s) {
+        g.beginPath(); g.ellipse(s[0], s[1], s[2], s[2] * .55, 0, 0, Math.PI * 2); g.fill();
+      });
+      var jg = g.createRadialGradient(244, 660, 4, 244, 660, 92);
+      jg.addColorStop(0, skin === 'paper' ? 'rgba(72,150,96,.76)' : 'rgba(127,214,160,.70)');
+      jg.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = jg; g.fillRect(152, 568, 184, 184);
+      mist(g, 470, 180, .3); titleSeal(g, '山澗');
     }
     ground(g);
     paperGrain(g, key.length * 37 + 11);
@@ -365,7 +503,7 @@
   function rebake() {
     // 主游戏里只读全局 SKIN_INK：绝不改写，否则会污染主游戏自己的水墨/纸皮渲染。
     skin = window.SKIN_INK ? 'ink' : 'paper'; C = THEME[skin];
-    ['village','gate','trial','hut','hill'].forEach(function (k) { sceneCache[k] = bake(k); });
+    SCENE_KEYS.forEach(function (k) { sceneCache[k] = bake(k); });   // 所有分镜的场景一次烘焙，换图零重绘
     ['hanli','mo','zhangtie'].forEach(function (k) { actorCache[k] = bakeActor(k); });
     var gc = D.createElement('canvas'); gc.width = 480; gc.height = 864;
     var gg = gc.getContext('2d'), r = rnd(991);
@@ -559,7 +697,7 @@
     if (cb) cb();
     if (mode === 'solo' && !seen) {
       seen = true; reward = '—（本图无剧情奖励）';
-      $('sSeen').textContent = '已写 scene:qixuan'; $('sSeen').className = 'g';
+      $('sSeen').textContent = '演毕 · ' + curMap; $('sSeen').className = 'g';
       $('sReward').textContent = reward;
       sfx('bell');
     }
@@ -604,8 +742,9 @@
   }
 
   // ===================== 控件 =====================
-  function updateShotList() {
+  function updateShotList(rebuild) {
     var box = $('shotList');
+    if (rebuild) box.innerHTML = '';   // 换地图：分镜列表必须重建，否则还挂着上一张图的拍名
     if (!box.children.length) {
       SHOTS.forEach(function (sh) {
         var d = D.createElement('div');
@@ -618,6 +757,19 @@
     box.querySelectorAll('div').forEach(function (d) {
       d.classList.toggle('on', !coopShown && +d.dataset.i === curShot);
     });
+  }
+  // 切到某张图的分镜：换 shots / 总时长 / 章节卡 / 印章 / 拍序列表。
+  // play() 每次都调，剧场回看与进图首演走同一条路，不会残留上一张图的分镜。
+  function setCutscene(mapId) {
+    var cs = CUTSCENES[mapId] || CUTSCENES.qixuan;
+    curMap = CUTSCENES[mapId] ? mapId : 'qixuan';
+    SHOTS = cs.shots; TOTAL = totalOf();
+    root.querySelector('#chapter .ct').textContent = cs.title;
+    root.querySelector('#chapter .cs').textContent = cs.sub;
+    D.getElementById('seal').textContent = cs.seal;
+    D.getElementById('bmSub').textContent = curMap + ' 剧情过场 · 联机不建层';
+    updateShotList(true);
+    $('sTime').textContent = '0.0 / ' + TOTAL.toFixed(1) + 's';
   }
   function jump(idx) {
     if (coopShown) enterSolo();
@@ -694,9 +846,11 @@
   window.Cutscene = {
     root: root,
     host: host,
-    shots: SHOTS,
+    get shots() { return SHOTS; },          // 当前分镜（随 mapId 切换），不是启动时那一份
     lines: function () { return LINES.slice(); },
     force: false,
+    cutscenes: function () { return Object.keys(CUTSCENES); },
+    mapId: function () { return curMap; },
     available: function () {
       if (this.force || window.__CSJ_CUTSCENE_FORCE__) return true;
       if (window.__CSJ_QA__) return false;
@@ -705,7 +859,10 @@
     },
     active: function () { return active; },
     play: function (lines, onEnd, id) {
-      applyLines(lines || (window.MAP_STORIES && window.MAP_STORIES.qixuan) || []);
+      // id 形如 'map:qixuan' / 'replay:houshan'：分镜与台词都按 mapId 取，同源不串台。
+      var mapId = (String(id || '').match(/^(?:map|replay):([A-Za-z0-9_]+)$/) || [])[1] || 'qixuan';
+      setCutscene(mapId);
+      applyLines(lines || (window.MAP_STORIES && window.MAP_STORIES[mapId]) || []);
       onDone = onEnd || null;
       active = true;
       mode = 'solo'; coopShown = false; seen = false;
@@ -721,6 +878,10 @@
       sfx('unroll');
       setPlaying(true);
       return true;
+    },
+    // 剧场回看：只播、不进地图、不写 save.seen、不动奖励（由调用方保证）。
+    replay: function (mapId, onEnd) {
+      return this.play((window.MAP_STORIES || {})[mapId] || [], onEnd || null, 'replay:' + mapId);
     },
     stop: function () {
       if (!active) return;
