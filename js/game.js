@@ -8665,6 +8665,10 @@
     }
     for (const k in p.skills) if ((p.skills[k] || 0) > (c.skills[k] || 0)) c.skills[k] = p.skills[k];
     if (c.level > (save.best.level || 1)) save.best.level = c.level;
+    // 最高境界记录不得高于「真实永久修为」：被地图下限夹逼临时抬高的战斗等级（clampedOnly），
+    // 或道陨时按战斗等级写入的 best，都可能虚高；这里把它拉回真实修为，
+    // 否则会出现「修行图/世界地图显示更高、战斗里却更低」的境界分叉。
+    if ((save.best.level || 1) > (c.level || 1)) save.best.level = c.level;
   }
 
   // ================= 战前运功：进要动手的图之前，先把功法运起 / 卸下 =================
@@ -11809,7 +11813,7 @@
     syncCultivate();
     if (G.time > save.best.time) save.best.time = G.time;
     if (G.kills > save.best.kills) save.best.kills = G.kills;
-    if (G.player.level > save.best.level) save.best.level = G.player.level;
+    if ((save.cultivate.level || 1) > (save.best.level || 1)) save.best.level = (save.cultivate.level || 1);
     writeSave();
     Sfx.lose();
     elGoTime.textContent = fmtTime(G.time); elGoKills.textContent = G.kills; elGoLevel.textContent = realmName(G.player.level);
