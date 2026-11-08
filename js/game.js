@@ -10471,8 +10471,21 @@
     html += '</div>';
     return html;
   }
+  // 修为门槛行：须达「本境巅峰」（下一道门的前一层）才能冲关。
+  // 这道门槛原先不进清单，于是玩家常见「丹/材/石全齐、却无突破按钮、也不知差哪样」的死结 —— 这里显式列出。
+  // 只对「下一道该破的门」显示：进阶页会把所有大境界门一并渲染，若每关都列，
+  // 玩家远远没到的高阶关会满屏「差修为到巅峰 LvN」，反成噪声。
+  function breakLevelRow(b) {
+    if (!b) return '';
+    const gate = nextBreakGate(save.cultivate.level || 1);
+    if (!gate || gate.lv !== b.lv) return '';
+    const needLv = (b.lv || 0) - 1;
+    if ((save.cultivate.level || 1) >= needLv) return '';
+    return breakRow(false, '修', '修为至 ' + (b.from || '') + '·巅峰(Lv' + needLv + ')　' +
+      (save.cultivate.level || 1) + ' / ' + needLv + '（闭关静修或入图历练积累）', '');
+  }
   function renderBreakList(b) {
-    let h = '';
+    let h = breakLevelRow(b);
     for (const it of (b.items || [])) {
       const have = save.inventory[it[0]] || 0;
       h += breakRow(have >= it[1], '丹', breakNameOf(it[0]) + '　' + have + ' / ' + it[1], it[0]);
@@ -10529,7 +10542,7 @@
         '余下 <b>' + wuTake(b, 0) + '</b> 道只能扛 —— 押' + wuName(b) + '越多，把握越高，可避开的衰越少。</div>';
     }
     html += '<div class="cs-note brk-hint">缺哪一样，点那一行就写它去哪儿取。</div>';
-    html += '<div class="brk-list">';
+    html += '<div class="brk-list">' + breakLevelRow(b);
     for (const it of (b.items || [])) {
       const have = save.inventory[it[0]] || 0;
       html += breakRow(have >= it[1], '丹', breakNameOf(it[0]) + '　' + have + ' / ' + it[1], it[0]);
@@ -11033,7 +11046,10 @@
     // 闭关再坐也是空耗，且按原著此时需要特定的进阶之法（丹 / 术 / 劫）。
     // 依原著简要提示进阶之法，并列出尚须备的物事，指向「进阶」页。
     const gate = nextBreakGate(lv);
-    const atGate = gate && realmName(lv) === gate.from;
+    // 只有站到「本境巅峰」（下一道大境界门的前一层，如炼虚后期 Lv199）才算卡在门口；
+    // 用 breakLevelOk（lv >= gate.lv-1）而非「境界名相同」，否则整个炼虚后期（Lv180–199）
+    // 都会被误判为巅峰、闭关按钮被禁用，玩家连在境界内攒到巅峰都做不到。
+    const atGate = gate && breakLevelOk(gate);
     let gateBox = '';
     if (atGate) {
       const miss = breakMissing(gate);
