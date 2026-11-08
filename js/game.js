@@ -5269,6 +5269,13 @@
   }
   function advanceDialog() {
     const lines = G.dialogLines; if (!lines) return;
+    // 过场层正在演：被 skipStory / 点跳过时先收层，再把这句对话直接推到末尾，
+    // 让原有 dialogEnd 去记账与结算（stop 不触发 onDone，避免两条路重复执行）。
+    if (G.cutscene) {
+      G.cutscene = false;
+      if (window.Cutscene) window.Cutscene.stop();
+      G.dialogIdx = lines.length - 1;
+    }
     if (G.dialogIsChoice) return;   // 抉择未选前，点击不推进剧情
     G.dialogIdx++;
     if (G.dialogIdx >= lines.length) {
@@ -8903,6 +8910,26 @@
       // 破境剧情图（闭府结丹 / 云梦山结婴…）的开场要按「门开不开得了」分流：
       // 物事没备齐，就不能演「丹成」那一版，否则对话说成了、结算却说没成（自相矛盾）。
       const sc = storySceneOf(m, id);
+      // ===== 第一张地图「七玄门·山门」：独立过场层 =====
+      // 剧情 / 对白 / 场景严格来自 MAP_STORIES.qixuan（过场层按 li 索引逐字取用，不另写台词）。
+      // 人物衣着则走当前护甲：startMap 已调 applyHeroSprite()，Sprites.hanli 就是这一局
+      // 身上穿的那件，过场与随后战斗读同一张图，衣色不会跳。
+      // 联机按既定口径：进图直接开打 / 结算，不建过场层、不写 seen，后果（奖励 / 解锁）照走，
+      // 把首次演出留给单机。自动化回归由 Cutscene.available() 判掉，走原对白通道以保住闸门。
+      if (id === 'qixuan' && window.Cutscene && window.Cutscene.available() && !storySeen(sc.key)) {
+        if (G.coopRole) { onStoryMapDone(m); return; }   // 跳过 ≠ 演完：不记账
+        G.state = 'dialog';
+        G.dialogLines = sc.lines; G.dialogIdx = 0; G.dialogSynced = false;
+        G.dialogId = 'map:' + id;
+        G.dialogEnd = () => { storyMarkSeen(sc.key); onStoryMapDone(m); };
+        G.cutscene = true;
+        window.Cutscene.play(sc.lines, () => {
+          G.cutscene = false;
+          const f = G.dialogEnd; G.dialogEnd = null; G.dialogLines = null;
+          if (f) f();
+        }, 'map:' + id);
+        return;
+      }
       if (storySeen(sc.key)) { onStoryMapDone(m); return; }   // 演过就不再念，后果照走（奖励/破境判定不受影响）
       G.state = 'dialog';
       showLines(sc.lines, () => { storyMarkSeen(sc.key); onStoryMapDone(m); }, 'map:' + id);

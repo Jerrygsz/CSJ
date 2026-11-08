@@ -579,8 +579,9 @@ if (fs.existsSync(truthPath)) {
   const htmlVer = (html.match(/sw\.js\?v=(20\d{6}[A-Z])/) || [])[1];
   const swVer = (swSrc.match(/const BUILD = '([^']+)'/) || [])[1];
   const verHits = htmlVer ? (html.match(new RegExp(htmlVer, 'g')) || []).length : 0;
-  ok(!!htmlVer && htmlVer === swVer && verHits === 31,
-     'index.html 31 处版本号与 sw.js BUILD 自洽（当前 ' + (htmlVer || '未找到') + '）',
+  // 32 = 原有 31 处 + 剧情动画模块 js/cutscene.js。以后每新增一条带 ?v= 的脚本引用，此处同步 +1。
+  ok(!!htmlVer && htmlVer === swVer && verHits === 32,
+     'index.html 32 处版本号与 sw.js BUILD 自洽（当前 ' + (htmlVer || '未找到') + '）',
      { html: verHits, sw: swVer });
 } else {
   console.log('   （仓库外唯一真源不可读，跳过 3 条交付口径断言；前 12 组不受影响）');
