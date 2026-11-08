@@ -2960,6 +2960,18 @@
     for (const b of (window.BREAKTHROUGH || [])) if (b.lv === nextLv) return b;
     return null;
   }
+  // 当前境界之上、最近的一道「大境界门」：用于瓶颈时按原著提示进阶之法
+  function nextBreakGate(lv) {
+    let best = null;
+    for (const b of (window.BREAKTHROUGH || [])) {
+      if (b.lv > lv && (!best || b.lv < best.lv)) best = b;
+    }
+    return best;
+  }
+  // 去掉原著引文页码，让进阶提示干净一点（仍保留方法要点）
+  function stripCite(s) {
+    return (s || '').replace(/（V[^）]*）/g, '').replace(/\(V[^)]*\)/g, '').replace(/\s{2,}/g, ' ').trim();
+  }
   // 修为是否已达「下一道门的前一层」（当前境界巅峰）：筑基需炼气期十三层(35)、结丹需筑基后期(55)…
   function breakLevelOk(b) { return !b || (save.cultivate.level || 1) >= ((b.lv || 0) - 1); }
   function breakMissing(b) {
@@ -8643,7 +8655,14 @@
     // 故：p.level 恰好等于本图下限、且存档修为本就低于该下限时，视为夹逼，不回写存档修为。
     const floor = (G.map && G.map.startLevel) || 0;
     const clampedOnly = (p.level === floor && (c.level || 1) < floor);
-    if (p.level > (c.level || 1) && !clampedOnly) { c.level = p.level; c.xp = 0; }
+    // 出图落盘：战斗中涨上来的等级与经验，一并续进永久修为，不得丢弃。
+    //  - 跨了整级：整级写回，本层未跨完的零头经验也续上（不再把 c.xp 清零）；
+    //  - 没跨整级、但本层经验条又涨了（如炼虚初期·圆满）：把这一截续进永久修为，别让人「出图又变回初期」。
+    // 图的下限把等级夹逼抬高的情况（clampedOnly）不算自己修来的，照旧不回写。
+    if (!clampedOnly) {
+      if (p.level > (c.level || 1)) { c.level = p.level; c.xp = p.xp; }
+      else if (p.level === (c.level || 1) && p.xp > (c.xp || 0)) { c.xp = p.xp; }
+    }
     for (const k in p.skills) if ((p.skills[k] || 0) > (c.skills[k] || 0)) c.skills[k] = p.skills[k];
     if (c.level > (save.best.level || 1)) save.best.level = c.level;
   }
@@ -8768,8 +8787,13 @@
     const cult = save.cultivate || { level: 1, skills: {} };
     // 记下「进来之前」的境界：有些人进图就会被图的下限抬上去（筑基 / 结丹）
     const realmBefore = realmName(Math.max(1, cult.level || 1));
-    p.level = Math.max(1, cult.level || 1, save.wounded ? 0 : (m.startLevel || 1));
+    const levelFromMap = save.wounded ? 0 : (m.startLevel || 1);
+    // 图的下限若高过自身修为，则被「夹逼」抬高——这部分不是自己修来的，经验从零算起；
+    // 否则把永久修为里攒的经验（c.xp）一并带进本局，出图再续回，进度连续不丢。
+    const clampedUp = levelFromMap > (cult.level || 1);
+    p.level = Math.max(1, cult.level || 1, levelFromMap);
     p.next = xpNeed(p.level);
+    p.xp = clampedUp ? 0 : (cult.xp || 0);
     // 身上运转哪几门功法，由「已装配」决定；没装任何一门时自动运起主力
     p.skills = buildPlayerSkills(p.level, m);
     // 身外化身：学到就常驻（不看槽位，它是被动）
@@ -10986,6 +11010,25 @@
       const pend = pendingEncOf(src);
       if (pend) encBtn += '<button class="btn small" data-enc="' + pend.id + '">际遇 · ' + pend.name + '</button>';
     }
+    // 大境界瓶颈：已站在「下一道大境界门」之前的本境巅峰（如炼虚后期，门后是合体），
+    // 闭关再坐也是空耗，且按原著此时需要特定的进阶之法（丹 / 术 / 劫）。
+    // 依原著简要提示进阶之法，并列出尚须备的物事，指向「进阶」页。
+    const gate = nextBreakGate(lv);
+    const atGate = gate && realmName(lv) === gate.from;
+    let gateBox = '';
+    if (atGate) {
+      const miss = breakMissing(gate);
+      const needLine = miss.length
+        ? ('　尚须备：' + missLabels(gate).join('、'))
+        : '　物事已齐，可往任一洞府「进阶」页冲关';
+      gateBox = '<div class="cave-sec"><div class="cs-title">进阶 · ' + (gate.from || '') + ' → ' + (gate.realm || '') + '</div>' +
+        '<div class="resttip warn">' + (gate.tip ? stripCite(gate.tip) : '') + needLine + '。</div></div>';
+    }
+    const restNote = atGate
+      ? '<div class="resttip warn">修为已至 ' + (gate.from || '') + ' 巅峰 · 大境界门未开，闭关无用。</div>'
+      : (capped
+        ? '<div class="resttip warn">此地灵气已尽，再坐也是空耗。须往更远处去。</div>'
+        : '<div class="resttip">按现下灵石，可坐 ' + Math.floor((save.stones || 0) / c.restStone) + ' 次。</div>');
     return (encBtn ? '<div class="cave-sec">' + encBtn + '</div>' : '') +
       '<div class="cave-sec"><div class="cs-title">闭关静修</div>' +
       '<div class="cs-note">' + c.restTip + '</div>' +
@@ -10998,13 +11041,11 @@
       '<div class="statcell"><i>每次耗灵石</i><b>' + c.restStone + '</b></div>' +
       '<div class="statcell"><i>袋中灵石</i><b>' + (save.stones || 0) + '</b></div>' +
       '</div>' +
-      (capped
-        ? '<div class="resttip warn">此地灵气已尽，再坐也是空耗。须往更远处去。</div>'
-        : '<div class="resttip">按现下灵石，可坐 ' + Math.floor((save.stones || 0) / c.restStone) + ' 次。</div>') +
+      restNote +
       '<div class="restbtns">' +
-      '<button class="btn small" data-rest="1"' + (capped ? ' disabled' : '') + '>闭关一次</button>' +
-      '<button class="btn small" data-rest="5"' + (capped ? ' disabled' : '') + '>闭关五次</button>' +
-      '</div></div></div>';
+      '<button class="btn small" data-rest="1"' + (capped || atGate ? ' disabled' : '') + '>闭关一次</button>' +
+      '<button class="btn small" data-rest="5"' + (capped || atGate ? ' disabled' : '') + '>闭关五次</button>' +
+      '</div></div></div>' + gateBox;
   }
 
   // ---------- 太南小会 ----------
@@ -11376,7 +11417,14 @@
         const mi = Items.get(mn.item);
         notify('修为已至 ' + mn.realm + ' 关口 · 须服「' + (mi ? mi.name : mn.item) + '」');
       } else {
-        notify('修为已至瓶颈 · 回「进阶」页备料冲关');
+        // 撞上大境界门：依原著简要提示进阶之法，并指向「进阶」页（方法详见于洞府右侧提示）
+        const gate = G.breakPending || nextBreakGate(save.cultivate.level || 1);
+        if (gate) {
+          banner('修为已至 ' + (gate.from || '') + ' 巅峰 · 进阶「' + (gate.realm || '') + '」：'
+            + stripCite(gate.tip) + '　回「进阶」页备料冲关');
+        } else {
+          notify('修为已至瓶颈 · 回「进阶」页备料冲关');
+        }
       }
       Sfx.warn();
     } else if (!n) {
@@ -13458,6 +13506,8 @@
     addMats(n) { const pool = (G.map && G.map.mats) || ['m_chijing', 'm_jingtie', 'm_fuzhi', 'm_lingmo']; for (const id of pool) { save.inventory[id] = (save.inventory[id] || 0) + (n || 3); save.totalItems = (save.totalItems || 0) + (n || 3); } writeSave(); if (G.state === 'cave') renderCave(); return pool.length; },
     mats() { const o = {}; for (const k in save.inventory) if (Items.mat(k)) o[k] = save.inventory[k]; return o; },
     setLevel(n) { save.cultivate.level = Math.max(1, n || 1); save.cultivate.xp = 0; syncBestLevel(); clearWoundedIfDone(); writeSave(); if (G.state === 'cave') renderCave(); return save.cultivate.level; },
+    // 调试口：给本局战斗经验直接加 v（不触发升级循环），用于验收「战斗内涨经验出图不丢」
+    addXp(v) { if (G.player) { G.player.xp += (v || 0); return G.player.xp; } return null; },
     // 3 分钟单局循环的调试口
     sha(n) { if (n != null) gainSha(n); return { v: G.sha ? G.sha.v : 0, need: G.sha ? G.sha.need : 0, pending: (G.sha && G.sha.pending) || 0, dmgT: (G.sha && G.sha.dmgT) || 0 }; },
     insight() { return JSON.parse(JSON.stringify(G.insight || {})); },
@@ -13682,6 +13732,8 @@
       if (n == null) return save.cultivate.level || 1;
       save.cultivate.level = Math.max(1, n | 0); writeSave(); return save.cultivate.level;
     },
+    cultXp() { return Math.floor(save.cultivate.xp || 0); },
+    xpNeed() { return G.player ? (G.player.next || 0) : 0; },
     sfx(name) { if (typeof Sfx[name] === 'function') { Sfx[name](); return 'played:' + name; } return 'no such sfx'; },
     sfxList: ['hit', 'shoot', 'fire', 'nova', 'gem', 'heal', 'buff', 'burst', 'hurt', 'enemyDie', 'boss', 'warn', 'bossPhase', 'levelup', 'win', 'lose']
   };
