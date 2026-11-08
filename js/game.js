@@ -5715,7 +5715,6 @@
   // 灵石可以当场祭炼，把某门功法再推一档。出图/重开即清空，下一局重新滚雪球。
   const SHA_NEED = 120;
   const REFINE_COST = [3, 5, 8, 12, 18];
-  const TIER_WORDS = ['小成', '大成', '圆满'];
   const INSIGHT_SAY = [
     '灵力由散入凝，始有脉络可循。', '丹田如潭，静水流深。', '气行一周天，骨缝里都是凉的。',
     '神识外放数十丈，虫蚁动静皆知。', '法力覆体，凡铁难伤。', '心念一动，法与身合。',
@@ -5726,13 +5725,28 @@
     '灵气入体，化作星屑。', '不争一时，只争那一线。', '这道坎，早晚要自己迈。',
     '若无今日之苦，何来他年之远。', '心静则气顺，气顺则法成。', '一息尚存，便未到头。'
   ];
-  // 段位：炼气期照旧「炼气X层」；筑基以上换成「境界·小成/大成/圆满」
+  // 段位：炼气期照旧「炼气X层」；筑基以上显示「境界·第N/M层」。
+  // 原著以「初期 / 中期 / 后期 / 大圆满」为大境界，更细的梯度统称「层」（炼气期本就一层层数上来），
+  // 故每一大境界内部用「第几层 / 共几层」标进度：既贴合原著说法，也不会像 小成/大成/圆满 那样
+  // 在每一整级之间来回跳——一个炼虚初期跨 15 整级，旧写法会循环 15 次，看着就是乱跳。
+  // 这样无论战斗内还是修行图 / 世界地图 / 结算页，看到的都是同一个稳定、只增不减的「层」。
+  function realmSpan(lv) {
+    lv = Math.max(1, lv || 1);
+    let start = REALM_LAYERS[0].lv, end = REALM_LAYERS[0].lv;
+    for (let i = 0; i < REALM_LAYERS.length; i++) {
+      if (REALM_LAYERS[i].lv <= lv) { start = REALM_LAYERS[i].lv; end = (REALM_LAYERS[i + 1] ? REALM_LAYERS[i + 1].lv - 1 : lv); }
+      else break;
+    }
+    return { start: start, end: end };
+  }
   function stageLabel(p) {
     if (!p) return '';
-    const base = realmName(p.level);
-    if (p.level < 36) return base;
-    const ratio = p.next > 0 ? U.clamp(p.xp / p.next, 0, 1) : 0;
-    return base + '·' + TIER_WORDS[Math.min(2, Math.floor(ratio * 3))];
+    const lv = p.level || 1;
+    if (lv < 36) return realmName(lv);              // 炼气期：层数即境界，照旧「炼气期X层」
+    const span = realmSpan(lv);
+    const layer = lv - span.start + 1;
+    const total = span.end - span.start + 1;
+    return realmName(lv) + '·第' + layer + '/' + total + '层';
   }
   function shaSt() {
     if (!G.sha) G.sha = { v: 0, need: SHA_NEED, dmgT: 0, x2T: 0, sayT: 26 };
@@ -8706,7 +8720,7 @@
     hideAllOverlays();
     if (elPfName && m) elPfName.textContent = m.name;
     if (elPfSub && m) elPfSub.textContent = (m.pos || '') + '　·　择定身上要运的功法，再入山。';
-    if (elPfRealm) elPfRealm.textContent = realmName(lv);
+    if (elPfRealm) elPfRealm.textContent = stageLabel({ level: lv });
     renderPreFight();
     if (elPf) elPf.style.display = 'flex';
   }
@@ -9258,7 +9272,7 @@
     }
     G.victoryTitle = ''; G.victoryDesc = '';   // 一张图一套结局，用过即清，别带到下一张
     if (elVictoryStats) elVictoryStats.style.display = (m.type === 'story' || m.type === 'market') ? 'none' : 'flex';
-    elVTime.textContent = fmtTime(G.time); elVKills.textContent = G.kills; elVLevel.textContent = realmName(G.player.level);
+    elVTime.textContent = fmtTime(G.time); elVKills.textContent = G.kills; elVLevel.textContent = stageLabel(G.player);
     renderVictoryLoot(gained, newly, cave, newDiff);
     elVictory.style.display = 'flex';
     refreshTitle();
@@ -9335,7 +9349,7 @@
         tsRow('累计斩敌', (save.totalKills || 0).toLocaleString('en-US')) +
         tsRow('修行时长', fmtSpan(save.playTime || 0)) +
         tsRow('通关', save.wins + ' 次') +
-        tsRow('最高境界', realmName(save.best.level || 1)) +
+        tsRow('最高境界', stageLabel({ level: save.best.level || 1 })) +
         (rp.cycles ? tsRow('轮回余荫', '第 ' + rp.cycles + ' 世 · 已加成', true) : '') +
         '</div>';
     }
@@ -9352,7 +9366,7 @@
       const wanN = wanAll.filter(i => inv[i.id]).length;
       elTitleBag.innerHTML =
         '<div class="ts-hd">道途</div><div class="ts-grid">' +
-        tsRow('当前境界', realmName(save.cultivate.level || 1)) +
+        tsRow('当前境界', stageLabel(save.cultivate)) +
         tsRow('破关', clearedMain + '/' + main.length) +
         tsRow('功法', skillN + '/' + skillAll) +
         tsRow('洞府', (save.caves || []).length + '/' + caveAll) +
@@ -9489,7 +9503,7 @@
     }).join('');
     elWanlingList.innerHTML = total ? rows : '<div class="wl-empty">榜上暂无名录。</div>';
     if (elWlCollected) elWlCollected.textContent = '已收录 ' + collected + ' / ' + total;
-    if (elWlRealm) elWlRealm.textContent = realmName(Math.max(save.cultivate.level || 1, save.best.level || 1));
+    if (elWlRealm) elWlRealm.textContent = stageLabel(save.cultivate);
   }
   function openWanling() {
     G.state = 'wanling';
@@ -9624,7 +9638,8 @@
   function renderWorldMap() {
     if (!elWmList) return;
     if (elWmStones) elWmStones.textContent = '灵石 ' + (save.stones || 0);
-    if (elWmRealm) elWmRealm.textContent = realmName(Math.max(save.cultivate.level || 1, save.best.level || 1));
+    if (elWmRealm) elWmRealm.textContent = stageLabel(save.cultivate);
+    if (elWlRealm) elWlRealm.textContent = stageLabel(save.cultivate);   // 万灵榜页头境界与修行图保持同一口径（避免开关面板才刷新）
     if (elWmBag) elWmBag.textContent = '储物袋 ' + (save.totalItems || 0) + ' 件';
     const mains = MAPS.filter(m => !m.side);
     const sides = MAPS.filter(m => m.side && save.unlocked.indexOf(m.id) >= 0).sort((a, b) => (a.sorder || 0) - (b.sorder || 0));
@@ -11038,7 +11053,7 @@
       '<div class="cs-note">' + c.restTip + '</div>' +
       '<div class="restbox">' +
       '<div class="statgrid">' +
-      '<div class="statcell"><i>当前境界</i><b>' + realmName(lv) + '</b></div>' +
+      '<div class="statcell"><i>当前境界</i><b>' + stageLabel({ level: lv }) + '</b></div>' +
       '<div class="statcell"><i>此地可修至</i><b>' + realmName(c.capLevel) + '</b></div>' +
       '<div class="statcell"><i>修为积累</i><b>' + xp + ' / ' + need + '</b></div>' +
       '<div class="statcell"><i>每次所得</i><b>' + Math.round(need * c.restXp) + ' 修为</b></div>' +
@@ -11816,7 +11831,7 @@
     if ((save.cultivate.level || 1) > (save.best.level || 1)) save.best.level = (save.cultivate.level || 1);
     writeSave();
     Sfx.lose();
-    elGoTime.textContent = fmtTime(G.time); elGoKills.textContent = G.kills; elGoLevel.textContent = realmName(G.player.level);
+    elGoTime.textContent = fmtTime(G.time); elGoKills.textContent = G.kills; elGoLevel.textContent = stageLabel(G.player);
     // 道陨的代价：灵石折半（永退不回）＋ 道具折半（再战通关可取回）
     const toll = deathToll();
     if (elGoToll) {
