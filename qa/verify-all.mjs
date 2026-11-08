@@ -1,4 +1,4 @@
-// 一键回归：把常驻验收脚本一次跑完（当前十一个），谁红谁绿一眼看全。
+// 一键回归：把常驻验收脚本一次跑完（当前十二个），谁红谁绿一眼看全。
 //
 // 动机（第110轮）：八批下来只有 verify-scenery3 / smoke / verify-ver 是每轮必跑的，
 // 其余五个全凭记忆挑着跑，结果 verify-ink-sprite 的两条断言在第102轮 UI 柔化时就已作废、
@@ -35,6 +35,7 @@ const ITEMS = [
   { key: 'mapscenery', file: 'verify-mapscenery.mjs', kind: 'gate',   desc: '地图分得开八项（读实现真实数据，不复刻算法）' },
   { key: 'ally-skills', file: 'verify-ally-skills.mjs', kind: 'gate',  desc: '同伴 / 灵宠技能：原著考据 + 覆盖 + 境界四档 + 六形态实机 + 水墨呈现 + 三类功法 + 自由行动 + 生死经济 + 遇险侧身（大衍挂机同口径、不站桩） + 双向反向注入' },
   { key: 'realm-single', file: 'repro-realm-single-source.mjs', kind: 'gate', desc: '境界唯一真源：夹逼图内外同口径（HUD/结算/道陨/通览/修行图/万灵榜/洞府/静修）+ 图内升级不暴涨 + 非夹逼图正常落盘' },
+  { key: 'xianjie-order', file: 'repro-xianjie-break.mjs', kind: 'gate', desc: '仙界进阶次序：破境门按原著真仙→金仙→太乙→大罗→道祖升序 + 组头/默认展开/冲关入口都落在下一关' },
 ];
 
 const argv = process.argv.slice(2);

@@ -10428,7 +10428,11 @@
   }
 
   function renderCaveBreak(lv) {
-    const list = window.BREAKTHROUGH || [];
+    // 进阶清单必须按原著境界先后从低到高走，不吃数据文件里的书写顺序。
+    // 仙界四关曾在 xianjie.js 里倒着 push，导致真仙期先看到「大罗期 → 道祖」、
+    // 默认展开的也是终局关，该破的「真仙期 → 金仙」被压在最底下。
+    // 这里按 lv 升序再排一次做兜底；pending（默认展开的那一关）也随之指向紧邻的下一关。
+    const list = (window.BREAKTHROUGH || []).slice().sort((a, b) => (a.lv || 0) - (b.lv || 0));
     let html = '';
     // 修为受创：原著里跌回炼气期四层，靠在小寰岛闭关、大量服食丹药一层层修回来
     if (save.wounded) {
