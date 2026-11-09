@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CSJ · Boss 登场 0.8s 镜头 POC（不发布）</title>
+<style>
+  :root { color-scheme: light; }
+  body { margin:0; padding:18px 20px 30px; background:#f5f1e8; color:#2f2a22;
+         font:14px/1.7 "PingFang SC","Microsoft YaHei",system-ui,sans-serif; }
+  h1 { font-size:19px; margin:0 0 4px; }
+  h2 { font-size:15px; margin:22px 0 8px; border-left:3px solid #a9703c; padding-left:9px; }
+  p { margin:6px 0; }
+  code { background:#e9e1d1; padding:1px 5px; border-radius:3px; font-size:12px; }
+  .note { color:#6b6152; font-size:12.5px; }
+  .bar { display:flex; flex-wrap:wrap; gap:7px; align-items:center; margin:10px 0 12px; }
+  button { font:inherit; font-size:13px; padding:5px 12px; border:1px solid #b9a98c;
+           border-radius:5px; background:#fffdf7; color:#3b3327; cursor:pointer; }
+  button:hover { background:#f0e7d4; }
+  button.on { background:#8f4f2e; color:#fff8ea; border-color:#8f4f2e; }
+  label { font-size:12.5px; color:#5b5142; }
+  input[type=range] { width:130px; vertical-align:middle; }
+  #gameFrame { width:480px; height:760px; border:1px solid #c3b498; border-radius:6px;
+               background:#ddd; display:block; }
+  #kv { white-space:pre; font:12px/1.55 Consolas,Menlo,monospace; background:#efe8d9;
+        border:1px solid #d6c9ae; border-radius:5px; padding:10px 12px; min-width:330px; }
+  .row { display:flex; gap:18px; align-items:flex-start; flex-wrap:wrap; }
+  #err { display:none; background:#f8e3de; border:1px solid #d99; color:#8a3527;
+         padding:8px 12px; border-radius:5px; margin:10px 0; font-size:13px; }
+  .shots { display:flex; gap:12px; flex-wrap:wrap; }
+  .shots img { width:230px; border:1px solid #c9bda4; border-radius:4px; }
+  figure { margin:0; } figcaption { font-size:12px; color:#6b6152; width:230px; margin-top:4px; }
+</style>
+</head>
+<body>
+<h1>Boss 登场 · 0.8s 主画布短镜头 POC</h1>
+<p class="note">只验证「战斗不中断时，主画布相机做一次极短推近/归位」值不值。<b>不入发布清单</b>：<code>preview/**</code> 不在 <code>index.html</code> 引用、不进 <code>_site/</code>，线上 404。<code>game.js</code> 零改动。</p>
+<div id="err"></div>
+
+<div class="bar">
+  <button id="btnPlay">▶ 播放 0.8s</button>
+  <button id="btnReplay">↻ 重播</button>
+  <button id="btnStop">■ 停止 / 归位</button>
+  <span style="width:12px"></span>
+  <label>定格 <input type="range" id="rngSeek" min="0" max="80" value="30"> <span id="seekVal">0.30s</span></label>
+  <span style="width:12px"></span>
+  <label>幅度 <input type="range" id="rngAmp" min="40" max="200" step="10" value="110"> <span id="ampVal">110px</span></label>
+  <span style="width:12px"></span>
+  <button id="btnSkin">皮肤：纸皮</button>
+</div>
+
+<div class="row">
+  <div>
+    <p class="cap note">↓ 真实游戏画面（iframe 载入 <code>../index.html</code>）</p>
+    <iframe id="gameFrame" src="../index.html" title="CSJ 游戏画布"></iframe>
+  </div>
+  <div>
+    <h2 style="margin-top:2px">实时状态</h2>
+    <div id="kv">等待注入…</div>
+    <h2>注入原理</h2>
+    <p class="note">play 态每帧 <code>update()</code> 会把 <code>G.cam</code> 硬跟随覆盖，所以外部每帧写会被冲掉。这里给 <code>G.cam</code> 套 Proxy：<code>get(x|y)</code> 返回剧情镜头（render 的视差 / 裁剪 / translate / 装饰全读它），<code>set(x|y)</code> 照常写回原对象（保留硬跟随基准）。投影 = 基准 + 偏移，0.26s 推近 → 0.18s 保持 → 0.36s 归位。</p>
+    <p class="note">世界<b>不冻结</b>：怪照动、玩家照可操作。这正是它比 28s 过场风险低的地方，也是要看的观感问题——镜头挪走 0.8s 会不会让人找不到自己。</p>
+  </div>
+</div>
+
+<h2>实拍对照（由 <code>qa/_out/shot-boss-beat.mjs</code> 生成）</h2>
+<div class="shots">
+  <figure><img src="../qa/_out/beat-01-before-paper.png" alt="镜头前"><figcaption>镜头前 · 纸皮</figcaption></figure>
+  <figure><img src="../qa/_out/beat-02-peak-paper.png" alt="镜头峰值"><figcaption>0.30s 峰值 · 纸皮</figcaption></figure>
+  <figure><img src="../qa/_out/beat-03-after-ink.png" alt="归位后"><figcaption>归位后 · 墨皮</figcaption></figure>
+</div>
+<p class="note" style="margin-top:14px">打开方式：<code>node qa/_out/serve-camera-poc.mjs</code> 后访问本页；直接双击 <code>file://</code> 会被同源策略挡住。</p>
+
+<script>
+(function () {
+  var frame = document.getElementById('gameFrame');
+  var W = null, ready = false, skin = 'jin', amp = 110;
+  var err = document.getElementById('err');
+  function showErr(m) { err.style.display = 'block'; err.textContent = m; }
+  function hideErr() { err.style.display = 'none'; }
+
+  function setSkinInGame(sk) {
+    try {
+      var k = 'fanren_save_v1';
+      var s = JSON.parse(W.localStorage.getItem(k) || '{}');
+      s.skin = sk;
+      W.localStorage.setItem(k, JSON.stringify(s));
+    } catch (e) { showErr('写皮肤失败：' + e.message); }
+  }
+
+  function onRuntime() {
+    try {
+      W = frame.contentWindow;
+      if (!W.__BOSS_BEAT__) { showErr('window.__BOSS_BEAT__ 未就绪：' + (W.__BOSS_BEAT_ERR__ || '未知')); return; }
+      ready = true; hideErr();
+      W.__BOSS_BEAT__.prepare();
+    } catch (e) { showErr('注入失败：' + e.message); }
+  }
+
+  function inject() {
+    try {
+      W = frame.contentWindow;
+      if (W.__BOSS_BEAT__) { onRuntime(); return; }
+      var s = W.document.createElement('script');
+      s.src = '/preview/boss-beat-runtime.js';
+      s.onload = onRuntime;
+      s.onerror = function () { showErr('boss-beat-runtime.js 加载失败（请用静态服务打开）'); };
+      W.document.head.appendChild(s);
+    } catch (e) { showErr('iframe 同源访问被拒绝：' + e.message + '。请用本地静态服务打开本页。'); }
+  }
+
+  frame.addEventListener('load', function () { ready = false; inject(); });
+
+  function start() {
+    if (!ready) return;
+    W.__BOSS_BEAT__.play({ dur: 0.8, amp: amp, paused: false });
+  }
+  document.getElementById('btnPlay').onclick = start;
+  document.getElementById('btnReplay').onclick = function () {
+    if (!ready) return;
+    W.__BOSS_BEAT__.prepare();
+    setTimeout(start, 260);
+  };
+  document.getElementById('btnStop').onclick = function () { if (ready) W.__BOSS_BEAT__.stop(); };
+  document.getElementById('btnSkin').onclick = function () {
+    skin = skin === 'jin' ? 'guigu' : 'jin';
+    this.textContent = '皮肤：' + (skin === 'jin' ? '纸皮' : '墨皮');
+    this.classList.toggle('on', skin === 'guigu');
+    if (!W) return;
+    setSkinInGame(skin);
+    ready = false;
+    W.location.reload();
+  };
+  var rs = document.getElementById('rngSeek');
+  rs.oninput = function () {
+    document.getElementById('seekVal').textContent = (rs.value / 100).toFixed(2) + 's';
+    if (ready && !W.__BOSS_BEAT__.state().active) W.__BOSS_BEAT__.play({ dur: 0.8, amp: amp, paused: true });
+    if (ready) W.__BOSS_BEAT__.seek(rs.value / 100);
+  };
+  var ra = document.getElementById('rngAmp');
+  ra.oninput = function () { amp = +ra.value; document.getElementById('ampVal').textContent = amp + 'px'; };
+
+  setInterval(function () {
+    if (!ready) return;
+    try {
+      var s = W.__BOSS_BEAT__.state();
+      document.getElementById('kv').textContent =
+        'active    ' + s.active + '   paused ' + s.paused + '\n' +
+        't         ' + s.t + ' / ' + s.dur + 's\n' +
+        'offset    (' + s.offset.x + ', ' + s.offset.y + ')\n' +
+        'proj      (' + s.proj.x + ', ' + s.proj.y + ')\n' +
+        'real      ' + (s.real ? '(' + s.real.x + ', ' + s.real.y + ')' : '-') + '\n' +
+        'G.cam     (' + s.gameCam.x + ', ' + s.gameCam.y + ')\n' +
+        'override  ' + s.overridden + '\n' +
+        'state     ' + s.gameState + '   map ' + s.mapId + '\n' +
+        'boss      ' + s.boss + '   enemies ' + s.enemies;
+    } catch (e) { document.getElementById('kv').textContent = '轮询中断：' + e.message; }
+  }, 160);
+})();
+</script>
+</body>
+</html>

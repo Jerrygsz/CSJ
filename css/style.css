@@ -435,7 +435,16 @@ body.rot #ver { visibility: hidden; }
 .toll:empty { display: none; }
 
 /* ---------- 对话 ---------- */
-#dialog { background: rgba(8,10,14,0.35); justify-content: flex-end; padding-bottom: 8%; }
+/* 对白遮罩：只在对话框身后压一层薄暗，上半屏留给主画布。
+   原先整屏 rgba(8,10,14,.35) 会把战斗地图压成灰雾，剧情镜头与地形都看不清；
+   #dialogbox 自带不透明纸底，放宽遮罩不影响对白文字对比度。
+   破境演出 #dialog.break-scene 有独立的整屏暗场，选择器优先级更高，不受此处影响。 */
+#dialog {
+  background: linear-gradient(180deg,
+    rgba(8,10,14,0) 0%, rgba(8,10,14,0) 40%,
+    rgba(8,10,14,0.08) 62%, rgba(8,10,14,0.26) 100%);
+  justify-content: flex-end; padding-bottom: 8%;
+}
 #dialogbox { position: relative; width: 92%; max-width: 460px; background: var(--paper); color: var(--ink); border: 2px solid var(--line-gold); border-radius: var(--r-lg); padding: var(--sp-4); text-align: left; box-shadow: 0 8px 30px rgba(0,0,0,0.6); cursor: pointer; }
 /* 纸底按下去只压一点亮度：整框缩放会让对话文字跟着抖 */
 #dialogbox:active { filter: brightness(0.955); }

@@ -1,4 +1,8 @@
-// 战斗地图内的定时剧情（按地图 id 绑定，重打地图会重播）
+// 战斗地图内的定时剧情：按地图 id 绑定，到 G.time >= s.t（游戏内秒）时由 checkStory() 触发。
+// 「只演一次」是双账本：本次页面会话用 s.done 防重（startMap() 里逐条重置），
+// 跨局用永久账本 save.seen（checkStory() 判重，演完才在 onEnd 里 storyMarkSeen 落盘，
+// 奖励 applyStoryReward 也绑在同一个回调里）。故重打同一张图不再重播、奖励也不重复发。
+// 旧注释「重打地图会重播」是第112轮加 save.seen 之前的行为，已作废。
 window.STORY = [
   {
     id: 'hs_open', map: 'houshan', t: 2, lines: [

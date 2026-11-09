@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>主画布镜头 POC · Cinematic Director Lite 观感验证</title>
+<style>
+  :root{ --paper:#f2ead8; --ink:#2b2620; --line:#cbbfa6; --accent:#8f4f2e; --panel:#fffaf0; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+       font:14px/1.7 -apple-system,"PingFang SC","Microsoft YaHei",system-ui,sans-serif}
+  header{padding:22px 28px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+  h1{margin:0 0 6px;font-size:21px;letter-spacing:.04em}
+  .sub{color:#6b6152;font-size:13px;margin:0}
+  .badges{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+  .badge{font-size:12px;border:1px solid var(--line);border-radius:3px;padding:2px 9px;background:#f7f0df;color:#6b6152}
+  .badge b{color:var(--accent)}
+  main{display:flex;gap:20px;padding:20px 28px;align-items:flex-start;flex-wrap:wrap}
+  .screen{flex:0 0 480px;max-width:100%}
+  .screen .cap{font-size:12px;color:#6b6152;margin:0 0 8px}
+  #gameFrame{display:block;width:480px;height:900px;border:1px solid var(--line);
+             background:#111;border-radius:4px;box-shadow:0 6px 24px rgba(43,38,32,.16)}
+  .side{flex:1 1 330px;min-width:300px;max-width:520px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:14px 16px;margin-bottom:14px}
+  .card h2{margin:0 0 10px;font-size:14px;color:var(--accent);letter-spacing:.05em}
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:9px;align-items:center}
+  button{font:13px/1.4 inherit;padding:7px 12px;border:1px solid var(--line);border-radius:4px;
+         background:#fffdf7;color:var(--ink);cursor:pointer}
+  button:hover{border-color:var(--accent);color:var(--accent)}
+  button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  button.primary:hover{color:#fff;filter:brightness(1.08)}
+  button.on{background:#e8dcc2;border-color:var(--accent);color:var(--accent)}
+  .steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(146px,1fr));gap:6px}
+  .steps button{text-align:left;font-size:12px;padding:5px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .kv{font:12px/1.8 ui-monospace,Consolas,monospace;background:#f6efdd;border:1px solid var(--line);
+      border-radius:3px;padding:8px 10px;white-space:pre-wrap;word-break:break-all;min-height:96px}
+  .note{font-size:12px;color:#6b6152;margin:8px 0 0}
+  .warn{background:#fbf0e6;border-left:3px solid var(--accent);padding:9px 12px;font-size:12px;color:#5b4a3a;margin:0 0 14px}
+  .gallery{padding:0 28px 32px}
+  .gallery h2{font-size:15px;color:var(--accent);margin:18px 0 8px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+  figure{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:8px}
+  figure img{display:block;width:100%;height:auto;background:#ddd;border-radius:2px}
+  figcaption{font-size:12px;color:#6b6152;margin-top:7px;line-height:1.5}
+  #err{display:none;background:#fbe9e4;border:1px solid #c47b62;color:#8a3b25;
+       padding:12px 16px;margin:16px 28px;border-radius:4px;font-size:13px}
+  code{font:12px ui-monospace,Consolas,monospace;background:#eee5d0;padding:1px 4px;border-radius:2px}
+</style>
+</head>
+<body>
+<header>
+  <h1>主画布镜头 POC · 「不脱节」到底值不值</h1>
+  <p class="sub">同一个游戏、同一张后山地图、同一套原生对白 —— 只把镜头从 Shadow DOM 插画换成主画布 <code>G.cam</code> 平移。</p>
+  <div class="badges">
+    <span class="badge">零源码改动：<b>game.js / index.html / sw.js / css 一行未动</b></span>
+    <span class="badge"><b>preview/**</b> 与 <b>qa/_out/**</b> 不在发布清单</span>
+    <span class="badge">对白复用 <code>__FR.showLines()</code></span>
+    <span class="badge">台词同源 <code>MAP_STORIES.houshan</code></span>
+  </div>
+</header>
+
+<div id="err">游戏 iframe 没能加载。请用本地静态服务打开本页（例如 <code>node qa/_out/serve-camera-poc.mjs</code> 后访问提示的 URL），直接双击 file:// 会被浏览器的同源策略挡住。下方「实拍对照」仍可正常查看。</div>
+
+<main>
+  <section class="screen">
+    <p class="cap">↓ 真实游戏画面（iframe 载入 <code>../index.html</code>），演出层由 <code>camera-poc-runtime.js</code> 注入</p>
+    <iframe id="gameFrame" src="../index.html" title="CSJ 游戏画布"></iframe>
+  </section>
+
+  <section class="side">
+    <div class="card">
+      <h2>播放控制</h2>
+      <div class="row">
+        <button id="btnPlay" class="primary">▶ 播放主画布镜头</button>
+        <button id="btnSkip">跳过 ▸</button>
+        <button id="btnReplay">重播</button>
+      </div>
+      <div class="row">
+        <span style="font-size:12px;color:#6b6152">皮肤</span>
+        <button class="skinBtn on" data-skin="jin">纸皮</button>
+        <button class="skinBtn" data-skin="guigu">墨皮</button>
+        <span style="font-size:12px;color:#6b6152;margin-left:8px">淡出</span>
+        <button id="btnFade" class="on">盖世界</button>
+        <button id="btnDebug">拍号</button>
+      </div>
+      <div class="row">
+        <button id="btnBackdrop" class="on">透出地形：开</button>
+        <span style="font-size:12px;color:#6b6152">关掉可看原生 #dialog 遮罩的原始观感</span>
+      </div>
+      <p class="note">「盖世界」= fade 层 z-index 9，盖住主画布但保留 HUD 与原生 #dialog（等价设计里的 screen-space fillRect）；再点一下切「全黑」z-index 58，连对话框一起盖。</p>
+      <p class="note"><b>实拍发现</b>：原生 <code>#dialog</code> 的全屏遮罩（<code>css/style.css:438</code>）会把主画布压成灰雾，镜头平移几乎看不出来。「透出地形」用一条注入样式把遮罩去掉（源码 0 改动），用来判断「如果解决遮罩，主画布镜头值不值」。</p>
+    </div>
+
+    <div class="card">
+      <h2>逐拍定位（实拍 / 静态检查）</h2>
+      <div class="steps" id="steps"></div>
+      <p class="note">点任一拍会暂停时间轴，把镜头与对白定格在该拍起始状态。用于核对视差、视口裁剪、装饰是否跟着镜头走。</p>
+    </div>
+
+    <div class="card">
+      <h2>实时状态</h2>
+      <div class="kv" id="kv">等待注入…</div>
+      <p class="note"><code>gameCam</code> 应始终等于 <code>cam</code> —— 这就是「整帧替换单一真源」的零侵入版：dialog 态下 <code>update()</code> 不跑，<code>G.cam</code> 不会被硬跟随覆盖。</p>
+    </div>
+
+    <div class="warn">
+      <b>POC 与正式设计的边界</b>：这里用 <code>G.state='dialog'</code> 天然冻结世界，<b>没有</b>实现 v2 的 <code>update():6360</code> 世界锁定短路、capture 输入总闸、once guard、状态归属与注册式 API。dialog 态下玩家仍能吃药 / 暂停等少数操作，POC 只用来看画面，不验玩法。
+    </div>
+  </section>
+</main>
+
+<section class="gallery">
+  <h2>实拍对照 · 插画版（既有 js/cutscene.js） vs 主画布版（本 POC）</h2>
+  <div class="grid">
+    <figure><img src="../qa/_out/hs-2-forest-ink.png" alt="插画版 后山森林">
+      <figcaption><b>插画版</b> · Shadow DOM 程序化场景，9 拍 28.4s。人物按当前护甲，但与战斗地形是两张画布。</figcaption></figure>
+    <figure><img src="../qa/_out/poc-02-cam-right-ink-clear.png" alt="主画布版 镜头右移 透出地形">
+      <figcaption><b>主画布版 · 透出地形</b> · 镜头右移，真实后山地形 / 装饰 / 视差一起动，对白仍是原生 #dialog。</figcaption></figure>
+    <figure><img src="../qa/_out/poc-03-cam-left-paper-clear.png" alt="主画布版 镜头左移 纸皮 透出地形">
+      <figcaption><b>主画布版 · 纸皮</b> · 镜头左移，主角偏离画面中心，验证双皮与视口裁剪跟随。</figcaption></figure>
+    <figure><img src="../qa/_out/poc-02-cam-right-ink.png" alt="原生遮罩下的主画布版">
+      <figcaption><b>关键代价</b> · 直接复用 <code>showLines()</code> 时，原生 #dialog 全屏遮罩把主画布压成灰雾，镜头移动几乎看不出来。</figcaption></figure>
+    <figure><img src="../qa/_out/poc-05-after-ink.png" alt="主画布版 播完进战斗">
+      <figcaption><b>播完进战斗</b> · 镜头归位、对白收起、<code>G.state='play'</code>，画布从没换过。</figcaption></figure>
+  </div>
+  <p class="note" style="margin-top:14px">图片由 <code>qa/_out/shot-camera-poc.mjs</code> 生成；该目录被 .gitignore 忽略，不入库、不发布。若此处显示空白，先跑一次实拍脚本。</p>
+</section>
+
+<script>
+(function(){
+  var frame = document.getElementById('gameFrame');
+  var W = null, ready = false, booted = false;
+  var runtimeURL = new URL('camera-poc-runtime.js', location.href).href;
+  var err = document.getElementById('err');
+
+  function showErr(msg){
+    err.style.display = 'block';
+    if (msg) err.textContent = msg;
+  }
+
+  frame.addEventListener('load', function(){
+    try {
+      W = frame.contentWindow;
+      var doc = frame.contentDocument;
+      if (!doc || !W.__FR) { showErr(); return; }
+      if (W.__CAM_POC__) { onRuntime(); return; }
+      var s = doc.createElement('script');
+      s.src = runtimeURL;
+      s.onload = onRuntime;
+      s.onerror = function(){ showErr('运行时注入失败：' + runtimeURL + '。请确认通过本地静态服务打开。'); };
+      doc.body.appendChild(s);
+    } catch (e) { showErr('iframe 同源访问被拒绝：' + e.message + '。请用本地静态服务打开本页。'); }
+  });
+
+  function onRuntime(){
+    ready = !!(W && W.__CAM_POC__);
+    if (!ready) { showErr('window.__CAM_POC__ 未就绪。'); return; }
+    var list = W.__CAM_POC__.steps();
+    var box = document.getElementById('steps');
+    box.innerHTML = '';
+    list.forEach(function(s){
+      var b = document.createElement('button');
+      b.textContent = (s.i+1) + ' · ' + s.label;
+      b.title = s.t;
+      b.onclick = function(){ ensureStatic(); W.__CAM_POC__.goto(s.i, {debug: debugOn}); };
+      box.appendChild(b);
+    });
+    poll();
+  }
+
+  var skin = 'jin', fadeScreen = false, debugOn = false, backdropClear = true;
+
+  function prep(){
+    if (!ready) return false;
+    W.__CAM_POC__.prepare({ skin: skin, equip: 'a_tiancan' });
+    W.__FR.enterMap('houshan');
+    return true;
+  }
+
+  function ensureStatic(){
+    if (!ready) return;
+    var st = W.__CAM_POC__.state();
+    if (!st.active) {
+      prep();
+      W.__CAM_POC__.start({ autoPlay:false, fadeMode: fadeScreen?'screen':'canvas',
+                            backdrop: backdropClear?'clear':'normal', debug:debugOn });
+    }
+  }
+
+  document.getElementById('btnPlay').onclick = function(){
+    if (!ready) { showErr(); return; }
+    if (W.__CAM_POC__.state().active) W.__CAM_POC__.skip();
+    prep();
+    W.__CAM_POC__.start({ autoPlay:true, lineDur:2.1, fadeMode: fadeScreen?'screen':'canvas',
+                          backdrop: backdropClear?'clear':'normal', debug:debugOn });
+  };
+  document.getElementById('btnSkip').onclick = function(){ if (ready) W.__CAM_POC__.skip(); };
+  document.getElementById('btnReplay').onclick = function(){
+    if (!ready) return;
+    W.__CAM_POC__.reset(); prep();
+    W.__CAM_POC__.start({ autoPlay:true, lineDur:2.1, fadeMode: fadeScreen?'screen':'canvas',
+                          backdrop: backdropClear?'clear':'normal', debug:debugOn });
+  };
+  Array.prototype.forEach.call(document.querySelectorAll('.skinBtn'), function(b){
+    b.onclick = function(){
+      skin = b.getAttribute('data-skin');
+      Array.prototype.forEach.call(document.querySelectorAll('.skinBtn'), function(x){ x.classList.remove('on'); });
+      b.classList.add('on');
+      if (ready) W.__FR.skin(skin);
+    };
+  });
+  document.getElementById('btnFade').onclick = function(){
+    fadeScreen = !fadeScreen;
+    this.textContent = fadeScreen ? '全黑' : '盖世界';
+    this.classList.toggle('on', !fadeScreen);
+    if (ready) W.__CAM_POC__.setFadeMode(fadeScreen ? 'screen' : 'canvas');
+  };
+  document.getElementById('btnDebug').onclick = function(){
+    debugOn = !debugOn;
+    this.classList.toggle('on', debugOn);
+    if (ready) W.__CAM_POC__.setDebug(debugOn);
+  };
+  document.getElementById('btnBackdrop').onclick = function(){
+    backdropClear = !backdropClear;
+    this.textContent = '透出地形：' + (backdropClear ? '开' : '关');
+    this.classList.toggle('on', backdropClear);
+    if (ready) W.__CAM_POC__.setBackdrop(backdropClear ? 'clear' : 'normal');
+  };
+
+  function poll(){
+    var kv = document.getElementById('kv');
+    function render(){
+      if (!ready) return;
+      try {
+        var s = W.__CAM_POC__.state();
+        kv.textContent =
+          '拍次      ' + s.step + '/' + s.total + '  ' + s.label + '\n' +
+          '类型      ' + s.kind + '   state=' + s.gameState + '\n' +
+          'proj      (' + s.cam.x + ', ' + s.cam.y + ')\n' +
+          'G.cam     (' + s.gameCam.x + ', ' + s.gameCam.y + ')\n' +
+          'fade      ' + s.fade + '   对白 ' + (s.dlgIdx+1) + '/' + s.dlgN + '\n' +
+          '播放      ' + s.active + '   auto=' + s.autoPlay + '   end=' + (s.finished||'-') +
+          '\n遮罩      ' + (s.backdrop === 'clear' ? '已透出地形' : '原生 #dialog');
+      } catch(e) { kv.textContent = '轮询中断：' + e.message; }
+    }
+    render();
+    setInterval(render, 200);
+  }
+})();
+</script>
+</body>
+</html>
