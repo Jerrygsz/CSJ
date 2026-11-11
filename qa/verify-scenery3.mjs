@@ -579,9 +579,10 @@ if (fs.existsSync(truthPath)) {
   const htmlVer = (html.match(/sw\.js\?v=(20\d{6}[A-Z])/) || [])[1];
   const swVer = (swSrc.match(/const BUILD = '([^']+)'/) || [])[1];
   const verHits = htmlVer ? (html.match(new RegExp(htmlVer, 'g')) || []).length : 0;
-  // 32 = 原有 31 处 + 剧情动画模块 js/cutscene.js。以后每新增一条带 ?v= 的脚本引用，此处同步 +1。
-  ok(!!htmlVer && htmlVer === swVer && verHits === 32,
-     'index.html 32 处版本号与 sw.js BUILD 自洽（当前 ' + (htmlVer || '未找到') + '）',
+  // 33 = 原有 31 处 + 剧情动画模块 js/cutscene.js + 支线按章回重排模块 js/maps-order.js。
+  // 以后每新增一条带 ?v= 的脚本引用，此处同步 +1。
+  ok(!!htmlVer && htmlVer === swVer && verHits === 33,
+     'index.html 33 处版本号与 sw.js BUILD 自洽（当前 ' + (htmlVer || '未找到') + '）',
      { html: verHits, sw: swVer });
 
   // ---- 时间线守门（按 D:/Games/CSJ/raw 原著全文校对后的四处时序 + 两段台词归属） ----
@@ -601,6 +602,64 @@ if (fs.existsSync(truthPath)) {
     .map(k => (window.MAP_STORIES[k] || []).map(x => x[0] + '：' + x[1]).join('')).join('|'));
   ok(!/九道仙劫|不再是凡胎/.test(tlLines) && /马良/.test(tlLines) && /轩九灵/.test(tlLines) && /九劫灭灵大法/.test(tlLines),
      '真仙之身/九劫现台词按原著归属马良与轩九灵，不再写成韩立渡九道仙劫', tlLines.slice(0, 90));
+
+  // ---- 支线按章回重排 + 考据引用全量对齐（20261111C） ----
+  // 支线只改物理位置；主线 148 张的 id / 顺序 / unlock / next 一律不动，存档按 id 记账。
+  const tlAllTruth = truth.maps.slice().sort((a, b) => a.order - b.order).map(m => m.id);
+  const tlAllRun = await page.evaluate(() => window.MAPS.map(m => m.id));
+  const tlAllDiff = tlAllTruth.map((id, i) => tlAllRun[i] === id ? null : i + ':' + id + '≠' + tlAllRun[i]).filter(Boolean);
+  const ordSet = new Set(truth.maps.map(m => m.order));
+  ok(tlAllRun.length === 171 && tlAllDiff.length === 0 && ordSet.size === 171 &&
+     Math.min(...truth.maps.map(m => m.order)) === 1 && Math.max(...truth.maps.map(m => m.order)) === 171,
+     '全 171 张：真源 order 唯一且与运行时 MAPS 数组逐位一致（含 23 张支线）',
+     { run: tlAllRun.length, uniq: ordSet.size, diff: tlAllDiff.slice(0, 6) });
+
+  const so = await page.evaluate(() => ({
+    diag: window.MAPS_SIDE_ORDER || null,
+    sides: window.MAPS.filter(m => m.side).map(m => ({ id: m.id, s: m.sorder }))
+  }));
+  ok(so.diag && so.diag.applied === 23 && so.diag.total === 171 && so.diag.main === 148 &&
+     so.diag.side === 23 && so.diag.missing.length === 0 && so.diag.leftover.length === 0 &&
+     so.diag.unknownBefore.length === 0,
+     '支线重排模块：23 张全部落位、主线 148 张不变、无丢图无未知锚点', so.diag);
+  ok(so.sides.length === 23 && so.sides.every((x, i) => x.s === i + 1),
+     '支线牌序 sorder = 1..23，与按章回重排后的数组顺序一致', so.sides.filter((x, i) => x.s !== i + 1));
+
+  // refs 首条按「章标题反查索引」（codex/README 硬纪律 2/3），同名章用章号 + 卷号消歧
+  const nidx = JSON.parse(fs.readFileSync(join(root, 'codex/novel-index.json'), 'utf8'));
+  const CN = /第([一二三四五六七八九十百千两零〇]+)章/;
+  const CV = /第([一二三四五六七八九十百千两零〇]+)卷/;
+  const nOf = (raw, fallbackPart) => {
+    let part = /仙界篇/.test(raw) ? 'xian' : (/人界篇/.test(raw) ? 'ren' : fallbackPart);
+    const title = (raw.match(/《([^》]+)》/) || [])[1] || null;
+    const cm = CN.exec(raw), vm = CV.exec(raw);
+    const label = cm ? '第' + cm[1] + '章' : null, vol = vm ? '第' + vm[1] + '卷' : null;
+    let cand = title ? nidx[part].chapters.filter(c => c.title === title) : [];
+    if (cand.length > 1 && label) { const c2 = cand.filter(c => c.label === label); if (c2.length) cand = c2; }
+    if (cand.length > 1 && vol) { const c3 = cand.filter(c => c.vol === vol); if (c3.length) cand = c3; }
+    if (!cand.length && label) cand = nidx[part].chapters.filter(c => c.label === label);
+    return cand.length ? cand[0].n : null;
+  };
+  const cxById = new Map(truth.maps.map(m => [m.id, m]));
+  const fallback = m => m.arc === 'M' ? 'xian' : 'ren';
+  const sideNs = so.sides.map(x => ({ id: x.id, n: nOf((cxById.get(x.id) || {}).refs ? cxById.get(x.id).refs[0] : '', fallback(cxById.get(x.id) || {})) }));
+  const sideInv = sideNs.slice(1).map((x, i) => x.n != null && sideNs[i].n != null && x.n < sideNs[i].n
+    ? sideNs[i].id + ':' + sideNs[i].n + '<' + sideNs[i - 1].n : null).filter(Boolean);
+  ok(sideNs.every(x => x.n != null) && sideInv.length === 0,
+     '23 张支线主锚章序按原著单调不降（refs 首条按章标题反查）',
+     { inv: sideInv, first: sideNs.slice(0, 3), last: sideNs.slice(-3) });
+
+  const refBad = [], refUnsorted = [], refIllegal = [];
+  for (const m of truth.maps) {
+    const refs = m.refs || [];
+    if (refs.some(r => !/第[一二三四五六七八九十百千两零〇]+章/.test(r) && !/《[^》]+》/.test(r))) refIllegal.push(m.id);
+    const ns = refs.map(r => nOf(r, fallback(m)));
+    if (ns.some(n => n == null)) refBad.push(m.id);
+    if (ns.some((n, i) => i && n != null && ns[i - 1] != null && n < ns[i - 1])) refUnsorted.push(m.id);
+  }
+  ok(refBad.length === 0 && refUnsorted.length === 0 && refIllegal.length === 0,
+     '全量 refs 均可按章标题反查、按章号升序、无「差异核对报告」类非法条',
+     { bad: refBad.slice(0, 5), unsorted: refUnsorted.slice(0, 5), illegal: refIllegal.slice(0, 5) });
 } else {
   console.log('   （仓库外唯一真源不可读，跳过 3 条交付口径断言；前 12 组不受影响）');
 }

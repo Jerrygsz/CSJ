@@ -1168,7 +1168,7 @@
 
     // ================= 后期支线（奇遇开启，side 图） =================
     {
-      id: 'linghuang', side: true, sorder: 21, name: '灵皇大比', pos: '灵界·圣岛 擂场', arc: 'K',
+      id: 'linghuang', side: true, sorder: 17, name: '灵皇大比', pos: '灵界·圣岛 擂场', arc: 'K',
       type: 'boss', tag: '支线', unlockBy: 'e_linghuang',
       desc: '灵皇大比，灵界百族抢名分的地方。台上只认胜负，不认来历。',
       startLevel: 200, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
@@ -1184,7 +1184,7 @@
       clearDesc: '台上只剩他一个人。名分这种东西，打出来比求来快。'
     },
     {
-      id: 'zhandacheng', side: true, sorder: 22, name: '斩大乘', pos: '灵界·荒原', arc: 'L',
+      id: 'zhandacheng', side: true, sorder: 19, name: '斩大乘', pos: '灵界·荒原', arc: 'L',
       type: 'boss', tag: '支线', unlockBy: 'e_zhandacheng',
       desc: '一名大乘修士拦路，说是要试试「新晋大乘」的斤两。',
       startLevel: 260, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
@@ -1200,7 +1200,7 @@
     },
     {
       // 斩大乘的后续：圣岛不会白看着一位大乘死在外面。只能由「斩大乘」打通后接出。
-      id: 'shengshi', side: true, sorder: 28, name: '圣岛使者再来', pos: '灵界·荒原', arc: 'L',
+      id: 'shengshi', side: true, sorder: 18, name: '圣岛使者再来', pos: '灵界·荒原', arc: 'L',
       sideOf: 'zhandacheng',   // 支线挂支线：斩了大乘，圣岛才派人来问
       type: 'story', tag: '支线',
       desc: '斩了大乘的第三天，荒原上来了一位白袍使者。他没带剑，只带了一句话。',
@@ -1211,7 +1211,7 @@
       clearDesc: '圣岛不问对错，只问一句：「你还要往上走吗。」答了这句，飞升之劫就躲不掉了。'
     },
     {
-      id: 'heihu', side: true, sorder: 23, name: '黑葫城', pos: '魔界·黑葫城', arc: 'L',
+      id: 'heihu', side: true, sorder: 20, name: '黑葫城', pos: '魔界·黑葫城', arc: 'L',
       type: 'story', tag: '支线', unlockBy: 'e_heihu',
       desc: '魔界边城，黑葫城里什么都卖，什么都不问来路。',
       startLevel: 260, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
@@ -1221,7 +1221,7 @@
       clearDesc: '城里的规矩：付得起灵石，就没人问你从哪来。'
     },
     {
-      id: 'baiguang', side: true, sorder: 24, name: '白光界', pos: '魔界·白光界', arc: 'L',
+      id: 'baiguang', side: true, sorder: 21, name: '白光界', pos: '魔界·白光界', arc: 'L',
       type: 'boss', tag: '支线', unlockBy: 'e_baiguang',
       desc: '魔界夹缝里的一方白光小界，界里钉着一枚土皇钉。',
       startLevel: 260, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
@@ -1236,7 +1236,7 @@
       clearDesc: '土皇钉被拔出来，白光界开始塌。最后一刻退出来，手里多了一截仙藤——还有那枚钉着一界乾土法则的土皇钉。'
     },
     {
-      id: 'tianmo', side: true, sorder: 25, name: '天魔契约', pos: '灵界·荒原', arc: 'L',
+      id: 'tianmo', side: true, sorder: 22, name: '天魔契约', pos: '灵界·荒原', arc: 'L',
       type: 'story', tag: '支线', unlockBy: 'e_tianmo',
       desc: '荒原上摆着一纸契约。签了，力量来得快；代价写在最后一行。',
       startLevel: 330, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
@@ -1246,7 +1246,7 @@
       clearDesc: '他签了。不是贪那点力量——而是这缕神魂已经吞过真仙，他不收，别的更不收。'
     },
     {
-      id: 'huirenjie', side: true, sorder: 27, name: '重回人界', pos: '人界·越国 山边小村', arc: 'L',
+      id: 'huirenjie', side: true, sorder: 23, name: '重回人界', pos: '人界·越国 山边小村', arc: 'L',
       type: 'story', tag: '支线', unlockBy: 'e_huirenjie',
       desc: '飞升之前，回一趟人界。村口那棵老树还在。',
       startLevel: 420, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
@@ -2349,7 +2349,7 @@
     {
       // 原著（1047 岁）：安远城城破之后，他在虞阳城落脚，这才回青罗沙漠取回储物袋。
       // 原来挂在 arc L、靠 liangzu 的际遇引出，等于放到大后期才开——按原著挪回「初入灵界」。
-      id: 'yuyang', side: true, sorder: 2, name: '虞阳城', pos: '灵界·天元境 虞阳城', arc: 'I',
+      id: 'yuyang', side: true, sorder: 15, name: '虞阳城', pos: '灵界·天元境 虞阳城', arc: 'I',
       type: 'market', tag: '坊市',
       desc: '妖族自己的城。墙是兽骨夯的，坊市里卖的货和人族坊市不是一路——伴妖草论把抓，妖丹按颗数。',
       shopSub: '妖族坊市。伴妖草、妖丹是这里的硬通货，真灵材料也收，就是价高些。',
@@ -2361,7 +2361,7 @@
       clearDesc: '灵石换了几把伴妖草、几颗妖丹。城西斗场还在嚷，说今日有外乡人下场。'
     },
     {
-      id: 'yuyang_dou', side: true, sorder: 3, name: '虞阳城·城斗场', pos: '灵界·虞阳城 斗场', arc: 'I',
+      id: 'yuyang_dou', side: true, sorder: 16, name: '虞阳城·城斗场', pos: '灵界·虞阳城 斗场', arc: 'I',
       sideOf: 'yuyang',        // 支线挂支线：斗场就在虞阳城里
       type: 'boss', tag: '支线', unlock: null, next: null,
       desc: '妖族城里的斗场，规矩只有一条：下场的人，输赢自己认。今日压了外乡人的彩头，堆得比石桌还高。',

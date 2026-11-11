@@ -186,7 +186,7 @@ window.MAPS = [
   // ==================== 支线：因缘所至，另行成图 ====================
   // 只有在该图遇到「正确的人或事」并谈完，才出现在修行图上（见 js/encounters.js）
   {
-    id: 'mkuang', side: true, sorder: 1, name: '后山·废弃矿洞', pos: '青牛山北麓 旧矿脉',
+    id: 'mkuang', side: true, sorder: 3, name: '后山·废弃矿洞', pos: '青牛山北麓 旧矿脉',
     type: 'combat', tag: '支线', unlockBy: 'e_zhou',
     desc: '山塌了半边，铁矿石露在外头。洞底爬出来几只石甲兽，把矿道当成了自己的窝。',
     startLevel: 3, startSkills: { sword: 1 },
@@ -201,7 +201,7 @@ window.MAPS = [
     clearDesc: '矿道通了。碎石堆里挑出来的铁，够打两件好器。'
   },
   {
-    id: 'zhangtie', side: true, sorder: 2, name: '后山·张铁的铁匠棚', pos: '青牛山北麓 松林边',
+    id: 'zhangtie', side: true, sorder: 1, name: '后山·张铁的铁匠棚', pos: '青牛山北麓 松林边',
     type: 'story', tag: '支线', unlockBy: 'e_tie',
     desc: '半塌的铁匠棚，风箱、丁字锤、半截断剑。炉膛冷了半年，铁砧上还压着一块铁牌。',
     startLevel: 7, startSkills: { sword: 3, fire: 1 },
@@ -211,7 +211,7 @@ window.MAPS = [
     clearDesc: '铁牌收进怀里。人被炼成了傀儡，牌子倒还留着。'
   },
   {
-    id: 'yanwu', side: true, sorder: 3, name: '七玄门·演武场', pos: '七玄门 前山校场',
+    id: 'yanwu', side: true, sorder: 2, name: '七玄门·演武场', pos: '七玄门 前山校场',
     type: 'combat', tag: '支线', unlockBy: 'e_li',
     desc: '木剑对木剑，点到为止。同门切磋，输赢都不伤和气，只是谁也不肯先认。',
     startLevel: 9, startSkills: { sword: 3, fire: 1 },
@@ -249,7 +249,7 @@ window.MAPS = [
     clearDesc: '灵猿伏地。绿液浇过的那一角，草木比人还高——这一畦剩下的药，够开好几炉。'
   },
   {
-    id: 'heixiang', side: true, sorder: 5, name: '太南小会·后巷', pos: '太南山 小会后巷',
+    id: 'heixiang', side: true, sorder: 6, name: '太南小会·后巷', pos: '太南山 小会后巷',
     type: 'story', tag: '支线', unlockBy: 'e_huo',
     desc: '一条窄巷，两边支着棚子。此处不问来路，只问价钱。',
     startLevel: 8, startSkills: { sword: 3, fire: 1 },
@@ -259,7 +259,7 @@ window.MAPS = [
     clearDesc: '玄铁沉手，寒铁握久了掌心发麻。巷口那人收了灵石，转身就没影了。'
   },
   {
-    id: 'xuechi', side: true, sorder: 6, name: '血色禁地·血池', pos: '血色禁地 北侧洼地',
+    id: 'xuechi', side: true, sorder: 7, name: '血色禁地·血池', pos: '血色禁地 北侧洼地',
     type: 'combat', tag: '支线', unlockBy: 'e_moxiu',
     desc: '听不见虫叫的地方。血从石缝里渗出来，积成一池，池边长着会变色的草。',
     startLevel: 24, startSkills: { sword: 5, fire: 3, orb: 2, nova: 1 },

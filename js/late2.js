@@ -211,7 +211,7 @@
       clearDesc: '分到天泉峰，做了外事弟子。师门只当他是炼气期的散修，学了些杂学，没人多问。'
     },
     {
-      id: 'luoyunyaoyuan', side: true, sorder: 7.2, sideOf: 'luoyun', arc: 'F',
+      id: 'luoyunyaoyuan', side: true, sorder: 12, sideOf: 'luoyun', arc: 'F',
       name: '天泉峰·药园', pos: '落云宗·天泉峰 半山 无名小石山',
       type: 'story', tag: '支线',
       desc: '慕沛灵带他到的那片药园：百余丈，三间茅屋，园后一座无名小石山。看管药园的差事接下了，往后的时日便是自己的。',
@@ -908,7 +908,7 @@
       clearDesc: '付家灭了。辛如音的骨灰埋在堡后的梅树下，算是还了。'
     },
     {
-      id: 'huixiang', side: true, sorder: 12, name: '越国·五里沟', pos: '越国·镜州 五里沟',
+      id: 'huixiang', side: true, sorder: 13, name: '越国·五里沟', pos: '越国·镜州 五里沟',
       type: 'story', tag: '支线', unlockBy: 'e_huixiang', arc: 'F',
       desc: '走了这么多年，村口那棵老树还在。',
       startLevel: 82, startSkills: { sword: 6, fire: 4, orb: 4, nova: 4, frost: 4 },
@@ -918,7 +918,7 @@
       clearDesc: '父母坟上添了新土。韩家如今是越国的望族，没人认得他。'
     },
     {
-      id: 'zijian', side: true, sorder: 13, name: '乱星海·紫灵', pos: '乱星海·妙音门旧地',
+      id: 'zijian', side: true, sorder: 14, name: '乱星海·紫灵', pos: '乱星海·妙音门旧地',
       type: 'story', tag: '支线', unlockBy: 'e_zijian', arc: 'H',
       desc: '妙音门早散了。紫灵被星宫扣着，赎她的价钱是一枚妖丹。',
       startLevel: 92, startSkills: { sword: 6, fire: 5, orb: 5, nova: 4, frost: 5 },

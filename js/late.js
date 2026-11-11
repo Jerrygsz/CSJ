@@ -403,7 +403,7 @@
 
     // ---------------- 支线：因缘所至 ----------------
     {
-      id: 'heisha', side: true, sorder: 7, name: '越国·京城皇宫', pos: '越国·京城 皇宫地宫',
+      id: 'heisha', side: true, sorder: 10, name: '越国·京城皇宫', pos: '越国·京城 皇宫地宫',
       type: 'combat', tag: '支线', unlockBy: 'e_liujing',
       desc: '护秦府入京，撞见黑煞教在宫墙底下血祭。教主不是别人，是越皇。',
       startLevel: 38, startSkills: { sword: 4, fire: 3, orb: 2, nova: 2 },
@@ -420,7 +420,7 @@
       clearDesc: '越皇伏诛。虚天残图、血凝五行丹、《玄阴经》残本，都归了正道这边。'
     },
     {
-      id: 'shiku', side: true, sorder: 8, name: '灵石矿·魔道矿场', pos: '越国边境 灵矿脉',
+      id: 'shiku', side: true, sorder: 9, name: '灵石矿·魔道矿场', pos: '越国边境 灵矿脉',
       type: 'combat', tag: '支线', unlockBy: 'e_captain',
       desc: '魔道六宗占了七派的灵石矿。正道修士要突一次，矿里守着的可不止人。',
       startLevel: 40, startSkills: { sword: 5, fire: 3, orb: 3, nova: 2 },
@@ -441,7 +441,7 @@
   // 陆师兄归位：原著里他死在血色禁地之前（欲害陈巧倩、夺筑基丹），
   // 不是在地火之屋里抢丹。地火之屋那一炉，从头到尾只有韩立一个人。
   window.MAPS.push({
-    id: 'luxiong', side: true, sorder: 6.5, name: '黄枫谷·下山岔道', pos: '黄枫谷 山门外 岔道',
+    id: 'luxiong', side: true, sorder: 5, name: '黄枫谷·下山岔道', pos: '黄枫谷 山门外 岔道',
     type: 'combat', tag: '支线', unlockBy: 'e_luxiong', arc: 'B',
     // 地点在山门外，故挂黄枫谷·山门那张卡下（际遇仍在百药园遇上，见 encounters.js e_luxiong）
     sideOf: 'huangfeng',
@@ -464,7 +464,7 @@
   // 反被韩立灭了神魂，从储物袋里得了《大衍诀》前四层。
   // 前四层到这儿为止；后三层在极西之地大衍神君手上，那是元婴以后的事。
   window.MAPS.push({
-    id: 'linxiong', side: true, sorder: 6.6, name: '内门·洞府夜变', pos: '黄枫谷·内门 洞府',
+    id: 'linxiong', side: true, sorder: 8, name: '内门·洞府夜变', pos: '黄枫谷·内门 洞府',
     type: 'boss', tag: '支线', unlockBy: 'e_lin', arc: 'C',
     desc: '筑基之后分下的洞府。夜里石门被人从外头推开——来的是同门，来的也不只是同门。',
     startLevel: 36, startSkills: { sword: 4, fire: 3, orb: 2, nova: 2 },
