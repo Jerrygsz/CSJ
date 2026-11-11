@@ -352,19 +352,23 @@ ok(jinSoft.cls === false && jinSoft.s.uiSoft === false && jinSoft.s.softRing ===
 await enter('xuechi', 'guigu');
 const hud = await page.evaluate(() => {
   const q = document.querySelector('#quickbar .qb');
+  const pb = document.getElementById('parryBtn');   // 20261111E：第 3 格拆成独立浮动键
   const pip = document.querySelector('#skillrow .pip');
   const hp = document.getElementById('hpwrap');
   const cs = (e) => e ? getComputedStyle(e) : null;
   return {
-    qbs: document.querySelectorAll('#quickbar .qb').length, pips: document.querySelectorAll('#skillrow .pip').length,
+    // 三格 = #quickbar 的 1/2 格 + 独立弹反键
+    qbs: document.querySelectorAll('#quickbar .qb').length + (pb ? 1 : 0),
+    pbW: pb ? pb.offsetWidth : 0,
+    pips: document.querySelectorAll('#skillrow .pip').length,
     qbW: q && Math.round(q.getBoundingClientRect().width), qbH: q && Math.round(q.getBoundingClientRect().height),
     qbShadow: cs(q) && cs(q).boxShadow, hpShadow: cs(hp) && cs(hp).boxShadow,
     pipShadow: cs(pip) && cs(pip).boxShadow,
     hpFill: cs(document.getElementById('hpfill')) && cs(document.getElementById('hpfill')).backgroundImage
   };
 });
-ok(hud.qbs === 3 && hud.qbW === 46 && hud.qbH === 46 && hud.pips > 0,
-   '三格快捷钮与技能栏全在、点击热区 46×46 不变（只改外观不删元素）', hud);
+ok(hud.qbs === 3 && hud.qbW === 46 && hud.qbH === 46 && hud.pbW >= 60 && hud.pips > 0,
+   '三格快捷钮与技能栏全在：1/2 格热区 46×46 不变、弹反键独立放大（≥60）', hud);
 ok(hud.qbShadow === 'none' && hud.hpShadow === 'none' && hud.pipShadow === 'none',
    '双重墨框 / 投影 / 纸签阴影全部去掉', { qb: hud.qbShadow, hp: hud.hpShadow, pip: hud.pipShadow });
 // 第102轮写过「不得含 178,58,44（鲜红硬色块）」，第115轮 Jerry 要求血条回朱砂，该断言作废。

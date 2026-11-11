@@ -215,6 +215,8 @@
       ach: {}, greenLiquid: 0,
       // 弹反载体补发标记：新档自带三件故直接置 true；旧档由 backfillGuardCarriers 补发后改写
       gift_guard: true,
+      // 弹反键自定义位置：{ x, y } 按舞台宽高的比例（0..1，指按钮中心）；null = 用 CSS 默认位
+      parryPos: null,
       // 炼丹炉数：原著「炼丹次数越多，成丹几率越大」——每开一炉 +0.4%，至多 +12%
       alchemy: { n: 0 },
       // 天人有五衰（后传 X2C327，24 次）：n = 还压在身上的衰有几层；
@@ -359,6 +361,10 @@
         gift_zhilongguo: !!s.gift_zhilongguo,
         gift_heti: !!s.gift_heti,
         gift_guard: !!s.gift_guard,
+        // 弹反键位置：只认合法的 0..1 比例，脏数据一律回默认位
+        parryPos: (s.parryPos && isFinite(s.parryPos.x) && isFinite(s.parryPos.y)
+          && s.parryPos.x >= 0 && s.parryPos.x <= 1 && s.parryPos.y >= 0 && s.parryPos.y <= 1)
+          ? { x: +s.parryPos.x, y: +s.parryPos.y } : null,
         // 外观皮肤：'jin' 鎏金古卷（默认）| 'guigu' 鬼谷水墨
         skin: (s.skin === 'guigu') ? 'guigu' : 'jin',
         // 移栽品种老存档：没有这个字段就补成空账
@@ -1540,6 +1546,9 @@
   function damageEnemy(e, dmg) {
     if (e._dead) return;
     let d = dmg * dmgMul();
+    // 弹反打出的「破绽」：这段时间里它挨打更疼。只对这一只生效，换目标不串。
+    const _pj = window.PARRY && window.PARRY.JUICE;
+    if (_pj && G.parry && G.parry.vulnT > 0 && G.parry.vulnE === e) d *= (_pj.vulnMul || 1.35);
     const crit = Math.random() < critChance();
     if (crit) d *= 1.8;
     e.hp -= d; e.hitFlash = 0.12;
@@ -1845,6 +1854,91 @@
     }
     return null;
   }
+  // ---------- 弹反命中的「爽感」（20261111E）----------
+  // 数值全在 js/parry.js 的 JUICE；这里只负责把它落成顿帧 / 震动 / 音效 / 粒子 / 击退 / 破绽。
+  function parryJ() {
+    return (window.PARRY && window.PARRY.JUICE) || {
+      hitStop: 0.10, shakeTap: 14, shakeCounter: 4, knock: 26, stun: 0.34,
+      vulnSec: 1.3, vulnMul: 1.35, chainWin: 1.5, chainMax: 5, chainDamage: 0.18,
+      shaBack: 7, sparkN: 10, hapticTap: [18, 22, 34], hapticBoss: [24, 26, 46]
+    };
+  }
+  // 触屏震动：桌面浏览器没有 navigator.vibrate → 静默跳过（不报错、不提示）
+  function haptic(pat) {
+    try {
+      if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') navigator.vibrate(pat);
+    } catch (e) {}
+  }
+  // 贴边金环一闪（DOM 层，不随镜头抖）。节流 90ms：连反也不会卡成常亮。
+  let _parryHitAt = 0;
+  function parryHitFlash() {
+    if (!elParryHit) return;
+    const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    if (now - _parryHitAt < 90) return;
+    _parryHitAt = now;
+    try {
+      elParryHit.classList.remove('go');
+      void elParryHit.offsetWidth;   // 强制重排，同一段动画才能连着播
+      elParryHit.classList.add('go');
+    } catch (e) {}
+  }
+  // 一整套命中反馈：顿帧 → 震动 → 音效 → 金环 → 刀光冲击波 → 击退硬直破绽 → 连反
+  // 返回本次连反层数（1 = 断连后的第一下）
+  function parryJuice(src, ang) {
+    const J = parryJ(), p = G.player, pr = G.parry;
+    // 连反链：上一次成功仍在窗口内 → 累加；否则重新从 1 起
+    pr.chain = (pr.chain > 0 && pr.chainT > 0) ? Math.min(J.chainMax, pr.chain + 1) : 1;
+    pr.chainT = J.chainWin;
+
+    // 1) 世界停一拍 + 镜头震动。这一下必须"实"
+    G.hitStop = Math.max(G.hitStop, J.hitStop);
+    G.shake = Math.max(G.shake, J.shakeTap);
+
+    // 2) 手心里震一下（Boss 被打退时节奏更长）
+    const isBoss = !!(src && (src.boss || src === G.boss));
+    haptic(isBoss ? J.hapticBoss : J.hapticTap);
+
+    // 3) 金铁交击（专属音效，不是普通受击）
+    if (Sfx && Sfx.parry) Sfx.parry(pr.chain);
+
+    // 4) 贴边金环一闪 + 按钮自己亮一下（按下去的手也得到回音）
+    parryHitFlash();
+    if (elParryBtn && elParryBtn.classList) { elParryBtn.classList.remove('ok'); void elParryBtn.offsetWidth; elParryBtn.classList.add('ok'); }
+
+    // 5) 主角身前一记弯月刀光 + 一圈冲击波（朝来袭方向）
+    //    水墨皮：刀光/冲击波改朱砂，并给 ring 打 hard 标记 —— 这是「一次性命中反馈」，
+    //    不该被浅宣纸的降彩规则(softRingFx)压成灰线，否则弹反在纸皮上毫无存在感。
+    const ink = !!(save && save.skin === 'guigu');
+    const a0 = (typeof ang === 'number' && isFinite(ang)) ? ang : -Math.PI / 2;
+    if (p) {
+      G.parts.push({ slash: true, x: p.x, y: p.y, ang: a0, arc: 2.0, rad: p.r * 2.9, life: 0.26, maxlife: 0.26, color: ink ? '#c0352a' : '#ffe6a8' });
+      G.parts.push({ ring: true, hard: true, x: p.x, y: p.y, r: 4, maxr: p.r * 3.6, life: 0.30, maxlife: 0.30, color: ink ? '#a8281e' : '#fff3cf' });
+    }
+
+    // 6) 反震真落到对方身上：击退 + 硬直 + 破绽 + 火星
+    if (src && src.hp != null && !src._dead) {
+      const k = isBoss ? J.knock * 0.45 : J.knock;
+      src.x += Math.cos(a0) * k; src.y += Math.sin(a0) * k;
+      src.hitFlash = Math.max(src.hitFlash || 0, 0.24);
+      if (src.stunT != null) src.stunT = Math.max(src.stunT, isBoss ? J.stun * 0.7 : J.stun);
+      if (window.FX3) FX3.spawn('crit', src.x, src.y - (src.r || 18) * 0.3, { pal: save.skin === 'guigu' ? 'xue' : 'jin', scale: 1.3 });
+      G.parts.push({ ring: true, hard: true, x: src.x, y: src.y, r: 6, maxr: (src.r || 20) * 3.2, life: 0.26, maxlife: 0.26, color: ink ? '#c0352a' : '#ffd88a' });
+      for (let i = 0; i < J.sparkN; i++) {
+        const a2 = a0 + U.rand(-1.1, 1.1);
+        G.parts.push({
+          x: src.x, y: src.y, vx: Math.cos(a2) * U.rand(110, 250), vy: Math.sin(a2) * U.rand(110, 250) - 30,
+          life: 0.32, maxlife: 0.32, size: ink ? 4 : 3, color: ink ? (i % 2 ? '#c0352a' : '#8c1f16') : (i % 2 ? '#ffe9a8' : '#ff9d5c')
+        });
+      }
+      G.shake = Math.max(G.shake, J.shakeTap + J.shakeCounter);
+      spawnText(src.x, src.y - (src.r || 12) - 20, '破绽', '#ffb060', 13);
+    }
+
+    // 7) 连反：把「接连格了几次」说清楚（伤害加成在 hitPlayer 里算）
+    if (p && pr.chain >= 2) spawnText(p.x, p.y - p.r - 26, '连反 ×' + pr.chain, '#ffe6a8', 17);
+    return pr.chain;
+  }
+
   function parryAttr(skLike, srcLike) {
     const P = window.PARRY; if (!P) return 'phys';
     // 弹体渲染类 k → 招式 fx：fan/beam/ring/nova/rain/mist 与 FX_ATTR 同口径（shard=扇/blade=剑光等）
@@ -1910,6 +2004,9 @@
   function updateParry(dt) {
     const pr = G.parry; if (!pr) return;
     const c = parryCarrier();
+    // 连反窗口 / 破绽计时：与状态机无关，收招之后照样走
+    if (pr.chainT > 0) { pr.chainT -= dt; if (pr.chainT <= 0) { pr.chainT = 0; pr.chain = 0; } }
+    if (pr.vulnT > 0) { pr.vulnT -= dt; if (pr.vulnT <= 0) { pr.vulnT = 0; pr.vulnE = null; } }
     if (pr.state === 'arming') {
       if (c && c.tap && (G.time - pr.pressT) >= c.tap.window) { pr.state = 'hold'; pr.holdT = 0; pr.shaLow = false; }
     } else if (pr.state === 'hold') {
@@ -1960,7 +2057,16 @@
       if (pr && pr.handled) {
         let taken = dmg * (1 - pr.reduce);
         taken *= (1 - armorRate());           // 护甲仍叠加（两者独立减免）
-        p.hp -= taken; p.iv = 0.4; p.hurtFlash = 0.18; G.shake = 6; G.flash = Math.max(G.flash, 0.32); Sfx.hurt();
+        p.hp -= taken; p.iv = 0.4;
+        if (pr.type === 'tap') {
+          // 格开成功：不给红色受伤闪 + 不给受伤音（那是在告诉玩家「你挨打了」，
+          // 和「我挡下来了」是相反的情绪）。反馈全部交给 parryJuice 的金环 / 顿帧 / 金铁声。
+          p.hurtFlash = 0.06;
+        } else {
+          p.hurtFlash = 0.18; G.shake = Math.max(G.shake, 6);
+          G.flash = Math.max(G.flash, pr.lowSha ? 0.26 : 0.18);   // 护体 / 格挡仍是「硬接下来」的闷响
+          Sfx.hurt();
+        }
         const col = pr.lowSha ? '#ffb060' : (pr.type === 'tap' ? '#7fe0a0' : '#9ad8ff');
         const label = pr.lowSha ? '格挡'
           : (pr.type === 'tap'
@@ -1969,12 +2075,29 @@
         spawnText(p.x, p.y - p.r - 6, label, col, 15);
         G.parts.push({ ring: true, x: p.x, y: p.y, r: 6, maxr: p.r * 2.2, life: 0.28, maxlife: 0.28, color: col });
         if (pr.type === 'tap') {
+          const J = parryJ();
+          const ang = (pr.src && pr.src.x != null) ? Math.atan2(pr.src.y - p.y, pr.src.x - p.x) : -Math.PI / 2;
+          // 命中反馈整包：顿帧 / 震动 / 音效 / 金环 / 刀光冲击波 / 击退硬直 / 连反链
+          const chain = parryJuice(pr.src, ang);
           if (pr.counter > 0 && pr.src && pr.src.hp != null && !pr.src._dead) {
-            const cdmg = Math.max(1, Math.round(dmg * pr.counter));
+            // 连反越顺，反震越重（每层 +18%，上限 5 层）
+            const mul = 1 + (chain - 1) * (J.chainDamage || 0.18);
+            const cdmg = Math.max(1, Math.round(dmg * pr.counter * mul));
             damageEnemy(pr.src, cdmg);
-            spawnText(pr.src.x, pr.src.y - (pr.src.r || 12) - 4, '反震 ' + cdmg, '#7fe0a0', 13);
+            spawnText(pr.src.x, pr.src.y - (pr.src.r || 12) - 4, '反震 ' + cdmg, '#7fe0a0', chain >= 2 ? 17 : 14, { seal: true });
+            // 破绽：反震之后这一小段里它挨打更疼（只认这一只，换目标不串）
+            // 注意写回 G.parry —— 这里的 pr 是 parryResolve 的返回值，不是状态对象
+            if (G.parry) { G.parry.vulnE = pr.src; G.parry.vulnT = J.vulnSec; }
           }
           if (pr.special) applyParrySpecial(pr.special, pr.src);
+          // 奖励：返还一点煞气（不足一池，且连反越多回得越多），鼓励接着格
+          if (G.sha) {
+            const back = Math.round((J.shaBack || 7) * (1 + (chain - 1) * 0.35));
+            const before = G.sha.v;
+            G.sha.v = Math.min(G.sha.need, G.sha.v + back);
+            const got = Math.round(G.sha.v - before);
+            if (got >= 3) spawnText(p.x + 16, p.y - p.r - 4, '煞气 +' + got, '#8fd6ff', 12);
+          }
           // 单击成功：转为长按态继续护体（若仍按住），否则收招（无 CD，鼓励连反）
           const c2 = parryCarrier();
           const wt = (c2 && c2.tap && c2.tap.window) || window.PARRY.TAP.window;
@@ -2334,6 +2457,8 @@
     const fight = G.map && (G.map.type === 'combat' || G.map.type === 'boss' || G.map.type === 'chase');
     const show = !!fight && (G.state === 'play' || G.state === 'dialog');
     elQuick.classList.toggle('on', !!show);
+    // 弹反键是独立元素，跟着同一套显隐规则走（拖动调整位置时强制显示）
+    if (elParryBtn) elParryBtn.classList.toggle('on', !!(show || parryDragActive()));
     for (let i = 0; i < elQuickBtns.length; i++) {
       if (i === 2) continue;   // 第 3 格 = 弹反，由 paintParryHud 每帧绘制
       const b = elQuickBtns[i], slot = quickSlot(i), lab = quickLabel(slot);
@@ -2354,6 +2479,9 @@
     const pr = G.parry; const btn = elQuickBtns && elQuickBtns[2];
     if (elParryEdge) elParryEdge.classList.toggle('on', !!(pr && pr.state === 'hold'));
     if (!btn) return;
+    // 自己是独立元素，显隐不靠 #quickbar 的 .on —— 每帧按当前局面自己判（拖动时强制显示）
+    const fight = G.map && (G.map.type === 'combat' || G.map.type === 'boss' || G.map.type === 'chase');
+    btn.classList.toggle('on', !!(parryDragActive() || (fight && (G.state === 'play' || G.state === 'dialog'))));
     const c = parryCarrier();
     const ic = btn.querySelector('.qb-icon');
     if (ic) ic.textContent = (c && c.icon) || '🛡';
@@ -2363,6 +2491,91 @@
     btn.title = c ? (c.name + ' · 按住护体（耗煞气、减速），单击格开反震　按 3 或点一下')
       : '护体法宝（洞府 · 护体槽装配，需 Lv' + ((c && c.req) || 8) + '）';
   }
+  // ---------- 弹反键位置（save.parryPos：舞台比例 0..1，指按钮中心） ----------
+  // 存比例不存像素：换手机、转横屏、窗口缩放都不会跑到屏幕外。
+  function parryStage() { return document.getElementById('stage') || document.body; }
+  function applyParryBtnPos() {
+    if (!elParryBtn) return;
+    const st = parryStage();
+    const sw = st.clientWidth || 480, sh = st.clientHeight || 800;
+    const bw = elParryBtn.offsetWidth || 72, bh = elParryBtn.offsetHeight || 72;
+    const pos = save && save.parryPos;
+    if (pos && isFinite(pos.x) && isFinite(pos.y)) {
+      const cx = Math.max(bw / 2, Math.min(sw - bw / 2, pos.x * sw));
+      const cy = Math.max(bh / 2, Math.min(sh - bh / 2, pos.y * sh));
+      elParryBtn.style.left = Math.round(cx - bw / 2) + 'px';
+      elParryBtn.style.top = Math.round(cy - bh / 2) + 'px';
+      elParryBtn.style.right = 'auto';
+      elParryBtn.style.transform = 'none';
+    } else {
+      elParryBtn.style.left = '';
+      elParryBtn.style.top = '';
+      elParryBtn.style.right = '';
+      elParryBtn.style.transform = '';
+    }
+  }
+  function parryDragActive() { return !!(document.body && document.body.classList.contains('parry-drag')); }
+  function openParryPosEdit() {
+    if (!elParryBtn) return;
+    // 面板收起、画面留给拖动；G.state 仍是 pause，主循环不动，背景就是一帧战场
+    if (elPause) elPause.style.display = 'none';
+    document.body.classList.add('parry-drag');
+    elParryBtn.classList.add('on');
+    applyParryBtnPos();
+    haptic(10);
+  }
+  function closeParryPosEdit() {
+    document.body.classList.remove('parry-drag');
+    if (elPause) elPause.style.display = 'flex';
+    if (elQuick) elQuick.classList.remove('on');
+    renderQuickBar();
+  }
+  let _pdrag = null;
+  function bindParryDrag() {
+    if (!elParryBtn) return;
+    elParryBtn.addEventListener('pointerdown', ev => {
+      if (!parryDragActive()) return;
+      ev.preventDefault(); ev.stopPropagation();
+      const st = parryStage(), rect = st.getBoundingClientRect();
+      const scale = (rect.width > 0 && st.clientWidth > 0) ? (rect.width / st.clientWidth) : 1;
+      _pdrag = {
+        id: ev.pointerId, sx: ev.clientX, sy: ev.clientY,
+        ox: elParryBtn.offsetLeft, oy: elParryBtn.offsetTop,
+        scale: scale || 1
+      };
+      try { elParryBtn.setPointerCapture(ev.pointerId); } catch (e) {}
+      elParryBtn.style.cursor = 'grabbing';
+    });
+    elParryBtn.addEventListener('pointermove', ev => {
+      if (!_pdrag || _pdrag.id !== ev.pointerId) return;
+      ev.preventDefault();
+      const st = parryStage();
+      const sw = st.clientWidth || 480, sh = st.clientHeight || 800;
+      const bw = elParryBtn.offsetWidth || 72, bh = elParryBtn.offsetHeight || 72;
+      const x = Math.max(0, Math.min(sw - bw, _pdrag.ox + (ev.clientX - _pdrag.sx) / _pdrag.scale));
+      const y = Math.max(0, Math.min(sh - bh, _pdrag.oy + (ev.clientY - _pdrag.sy) / _pdrag.scale));
+      elParryBtn.style.left = Math.round(x) + 'px';
+      elParryBtn.style.top = Math.round(y) + 'px';
+      elParryBtn.style.right = 'auto';
+      elParryBtn.style.transform = 'none';
+    });
+    const fin = ev => {
+      if (!_pdrag) return;
+      if (ev && ev.pointerId != null && _pdrag.id !== ev.pointerId) return;
+      const st = parryStage();
+      const sw = st.clientWidth || 480, sh = st.clientHeight || 800;
+      const bw = elParryBtn.offsetWidth || 72, bh = elParryBtn.offsetHeight || 72;
+      const cx = elParryBtn.offsetLeft + bw / 2, cy = elParryBtn.offsetTop + bh / 2;
+      save.parryPos = { x: +(cx / sw).toFixed(4), y: +(cy / sh).toFixed(4) };
+      writeSave();
+      _pdrag = null;
+      elParryBtn.style.cursor = '';
+      haptic(12);
+    };
+    elParryBtn.addEventListener('pointerup', fin);
+    elParryBtn.addEventListener('pointercancel', fin);
+  }
+
   function paintQuickCd(i) {
     const b = elQuickBtns[i]; if (!b) return;
     const t = G.quickCd ? (G.quickCd[i] || 0) : 0;
@@ -8232,7 +8445,8 @@
     const life = Math.max(0, pt.life / pt.maxlife);
     // 第102轮：浅宣纸上把「环形 / 放射」这类跟着人走的持续特效退到纸后（去彩、降 alpha），
     // 命中 / 暴击 / 拾取等一次性反馈不受影响；深底图 / 鎏金皮完全不变。
-    const softRingFx = SC3_SOFT_RING && (pt.ring || pt.ray);
+    // hard:true = 一次性命中反馈（弹反的冲击波），不进浅宣纸的降彩队列
+    const softRingFx = SC3_SOFT_RING && !pt.hard && (pt.ring || pt.ray);
     const kFx = softRingFx ? 0.26 : 1;
     const inkFx = 'rgba(74,70,60,0.8)';
     // 粒子半径一律不许为负：收缩/外扩类特效算过头就会喂给 arc 一个负数，直接抛错
@@ -8850,7 +9064,11 @@
     if (window.Coop) window.Coop.reset();
     G.player = newPlayer();
     // 弹反状态（凡人味防御 · 20261111D）：每图复位，得重新按一次
-    G.parry = { state: 'idle', pressT: 0, holdT: 0, cd: 0, shaLow: false };
+    // 弹反：状态机 + 连反链（chain/chainT）+ 破绽易伤（vulnE/vulnT）+ 最近一次成功的记录（QA 探针用）
+    G.parry = {
+      state: 'idle', pressT: 0, holdT: 0, cd: 0, shaLow: false,
+      chain: 0, chainT: 0, vulnE: null, vulnT: 0, last: null
+    };
     G.etch = [];   // 蚀 DoT：{ e, t, acc, dmg }
     G.enemies = []; G.bullets = []; G.ebullets = []; G.gems = []; G.herbs = []; G.parts = []; G.texts = []; G.loot = []; G.tells = []; G.zones = []; G.hazards = [];
     G.reclaimedLost = null;   // 上一张图"寻回失落"的结算提示不带到这张图
@@ -11824,7 +12042,11 @@
       // 闪身：空格或 Shift，桌面端不用去点右下角那颗按钮
       if (G.state === 'play' || G.state === 'dialog') { e.preventDefault(); dashPlayer(); }
     }
-    else if (k === 'escape' || k === 'p') { if (G.state === 'play') doPause(); else if (G.state === 'pause') doResume(); }
+    else if (k === 'escape' || k === 'p') {
+      if (parryDragActive()) closeParryPosEdit();            // 正在拖弹反键：ESC = 收起拖动面板
+      else if (G.state === 'play') doPause();
+      else if (G.state === 'pause') doResume();
+    }
   });
   window.addEventListener('keyup', e => {
     const k = e.key.toLowerCase();
@@ -11866,12 +12088,23 @@
   const elSkillrow = document.getElementById('skillrow');
   const elBuffrow = document.getElementById('buffrow');
   const elQuick = document.getElementById('quickbar');
-  const elQuickBtns = elQuick ? Array.prototype.slice.call(elQuick.querySelectorAll('.qb')) : [];
+  // 弹反键独立浮动：比 1/2 格更大、位置可拖动自定义（暂停菜单）。它仍是「第 3 格」，
+  // 所以 elQuickBtns[2] 指向它，着色 / 冷却 / 状态全部沿用原来那套绘制逻辑。
+  const elParryBtn = document.getElementById('parryBtn');
+  const elQuickBtns = (() => {
+    const arr = (elQuick && elQuick.querySelectorAll) ? Array.prototype.slice.call(elQuick.querySelectorAll('.qb')) : [];
+    if (arr.length > 2) arr.length = 2;                       // 1/2 格原样
+    if (elParryBtn && arr.length === 2) arr.push(elParryBtn);  // 第 3 格 = 独立弹反键
+    return arr;
+  })();
   const elParryEdge = document.getElementById('parryEdge');   // 长按护体的边缘泛红（煞气外溢）
+  const elParryHit = document.getElementById('parryHit');     // 弹反成功那一瞬的贴边金环
+  const elParryDragBar = document.getElementById('parryDragBar');
   // 战斗右侧三格：按下即放。之前这三颗按钮只画了图标，一个监听都没挂，
   // 所以丹药符箓摆上去点不出任何反应 —— 这里把「点」和「按 1/2/3」都接上。
   // 第 3 格（i===2）是弹反：按下开始、松开收招，与 1/2 格的「按一下就用」不同。
   elQuickBtns.forEach((btn, i) => {
+    if (!btn) return;                       // 无 DOM 桩下可能是空洞
     btn.setAttribute('data-key', i + 1);   // 角上的键位号
     if (i === 2) {
       btn.addEventListener('pointerdown', ev => {
@@ -12208,6 +12441,7 @@
     G.state = 'pause'; elPause.style.display = 'flex';
     // 快捷栏压在对话层之上（战斗中要一直点得到），暂停时先收起来，别浮在菜单上
     if (elQuick) elQuick.classList.remove('on');
+    if (elParryBtn) elParryBtn.classList.remove('on');   // 弹反键同理（独立元素，得单独收）
     // 联机时才给「离开房间」的出口，单人时别占位置
     if (elPauseLeaveCoop) elPauseLeaveCoop.style.display = (window.Net && window.Net.self()) ? '' : 'none';
     // 联机：我暂停 → 对方也一起停下（双方好说话）
@@ -12215,7 +12449,7 @@
   }
   function doResume() {
     elPause.style.display = 'none'; G.state = 'play'; last = performance.now();
-    renderQuickBar();
+    renderQuickBar(); applyParryBtnPos();
     if (window.Coop) window.Coop.sendPause(false);
   }
   // 联机：对方暂停 / 恢复 → 本地跟着停 / 继续（不回环广播，避免互相触发）
@@ -12271,6 +12505,19 @@
   document.getElementById('vRetry').addEventListener('click', () => startMap(G.mapId || save.mapId || 'qixuan'));
   document.getElementById('vBack').addEventListener('click', openWorldMap);
   document.getElementById('resumeBtn').addEventListener('click', doResume);
+  // 弹反键位置：暂停菜单里进去拖，松手即存档；「恢复默认」回到 CSS 默认位（右侧 1/2 格下方）
+  const elParryPosEdit = document.getElementById('parryPosEdit');
+  const elParryPosReset = document.getElementById('parryPosReset');
+  const elParryDragDone = document.getElementById('parryDragDone');
+  if (elParryPosEdit) elParryPosEdit.addEventListener('click', () => openParryPosEdit());
+  if (elParryPosReset) elParryPosReset.addEventListener('click', () => {
+    save.parryPos = null; writeSave(); applyParryBtnPos();
+    banner('弹反键已回默认位置'); haptic(12);
+  });
+  if (elParryDragDone) elParryDragDone.addEventListener('click', () => closeParryPosEdit());
+  bindParryDrag();
+  applyParryBtnPos();
+  window.addEventListener('resize', () => applyParryBtnPos());
   document.getElementById('restartBtn').addEventListener('click', () => startMap(G.mapId || save.mapId || 'qixuan'));
   document.getElementById('pauseBack').addEventListener('click', () => { elPause.style.display = 'none'; openWorldMap(); });
   document.getElementById('wmClose').addEventListener('click', () => { hideAllOverlays(); G.state = 'title'; elTitle.style.display = 'flex'; refreshTitle(); });
@@ -13342,6 +13589,35 @@
     parryCarrier() { const c = parryCarrier(); return c ? { id: c.itemId, name: c.name, req: c.req, enabled: c.enabled, tier: c.tier } : null; },
     parryEquip(id) { save.equip = save.equip || {}; save.equip.guard = id || null; return save.equip.guard; },
     parryPress: parryPress, parryRelease: parryRelease,
+    // 弹反键位置 / 手感（20261111E）：拖动定位与命中反馈的探针
+    parryPos() { return save.parryPos ? Object.assign({}, save.parryPos) : null; },
+    parrySetPos(x, y) { save.parryPos = { x: +x, y: +y }; applyParryBtnPos(); return save.parryPos; },
+    parryBtnRect() {
+      if (!elParryBtn) return null;
+      const st = parryStage();
+      return { left: elParryBtn.offsetLeft, top: elParryBtn.offsetTop, w: elParryBtn.offsetWidth, h: elParryBtn.offsetHeight, sw: st.clientWidth, sh: st.clientHeight };
+    },
+    parryVuln() { return G.parry ? { e: !!G.parry.vulnE, t: +(G.parry.vulnT || 0).toFixed(3), chain: G.parry.chain || 0 } : null; },
+    parryHitTest(dmg, srcIdx) {
+      // 造一个「刚刚格开」的场景：arming 态下给一次攻击，返回减伤 / 连反 / 手感数值
+      const c = parryCarrier(); if (!c || !c.tap) return { ok: false, reason: 'no-carrier' };
+      const pr = G.parry; pr.state = 'arming'; pr.pressT = G.time;
+      if (G.player) G.player.iv = 0;
+      const src = (typeof srcIdx === 'number' && G.enemies) ? G.enemies[srcIdx] : null;
+      const before = G.player ? G.player.hp : 0;
+      const eb = src ? { x: src.x, y: src.y } : null;
+      hitPlayer(dmg || 60, { n: 'test', fx: 'blade' }, src);
+      return {
+        ok: true,
+        taken: +((before - (G.player ? G.player.hp : 0))).toFixed(1),
+        chain: pr.chain,
+        hitStop: +(G.hitStop || 0).toFixed(3),
+        shake: +(G.shake || 0).toFixed(1),
+        vulnT: +(pr.vulnT || 0).toFixed(2),
+        stun: src ? +(src.stunT || 0).toFixed(2) : null,
+        moved: src && eb ? { dx: +(src.x - eb.x).toFixed(1), dy: +(src.y - eb.y).toFixed(1) } : null
+      };
+    },
     forcePartner(x, y) { const g = G; if (!g) return false; if (!g.partner) g.partner = { r: 9, name: 't', level: 1, hp: 1, maxhp: 1, map: null, last: 0, shown: false, tx: 0, ty: 0, x: 0, y: 0 }; g.partner.x = x; g.partner.y = y; g.partner.tx = x; g.partner.ty = y; g.partner.shown = true; g.partner.map = (g.mapId || (g.map && g.map.id)); g.partner.last = performance.now(); return true; },
     stepEnemies(dt) { if (G.coopRole === 'host') { updateEnemies(dt || 0.1); return G.enemies.length; } return -1; },
     // ---- 联机 P4 测试钩子（共享战斗结算）----

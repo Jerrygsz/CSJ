@@ -21,7 +21,7 @@ window.PARRY = (function () {
 
   // —— 0. 元信息 ——
   const META = {
-    version: 'runtime-20261111D',
+    version: 'runtime-20261111E',
     status: '已接入 runtime（凡人味弹反 · 长按共用煞气池 + 单击卡点反伤）',
     note: '数值为初版，需配合平衡脚本验证“长按3s+CD1s 是否导致 Boss 战站桩”。接入版见 game.js 的 parry* 系列函数。'
   };
@@ -133,6 +133,26 @@ window.PARRY = (function () {
     note: '客机不本地结算敌人伤害；本版弹反仅单人/房主生效。预留 G.parry 状态同步位，客机侧只读渲染。',
   };
 
+  // —— 9.5 命中的「爽感」（20261111E）——
+  // 口径：弹反成功必须「实」——世界停一拍、屏幕抖一下、手心里震一下、Boss 被打退半步。
+  // 只影响观感与少量反震数值，不改 MATRIX / 减伤口径。
+  const JUICE = {
+    hitStop: 0.10,        // 顿帧（秒）：格开那一下世界停一拍。普通暴击才 0.018
+    shakeTap: 14,         // 屏幕震动幅度（G.shake 每秒衰减 40 → 约 0.35s 散尽）
+    shakeCounter: 4,      // 反震真打到身上时再补一点
+    knock: 26,            // 反震把来源推开多少像素（Boss 只推 45%，推飞了就没法打）
+    stun: 0.34,           // 反震造成的硬直（e.stunT；Boss 取 70%）
+    vulnSec: 1.3,         // 「破绽」时长：这段时间里它挨打更疼
+    vulnMul: 1.35,        // 破绽期伤害倍率
+    chainWin: 1.5,        // 连反窗口：上一次成功后多久内再成功算连
+    chainMax: 5,          // 连反上限层数
+    chainDamage: 0.18,    // 每层连反的反震伤害加成
+    shaBack: 7,           // 每次弹反成功返还的煞气（不足一池，鼓励连着反）
+    sparkN: 10,           // 反震溅出的火星数量
+    hapticTap: [18, 22, 34],   // 触屏震动节奏：格开
+    hapticBoss: [24, 26, 46],  // 触屏震动节奏：把 Boss 打退
+  };
+
   // —— 10. 弹反载体（非衣物类防御法宝/符箓）——
   // tier: 'low'(法器) | 'talisman'(符箓) | 'high'(高阶法宝)
   // enabled: 是否接入本版逻辑（首版仅三档：玄铁飞天盾/白磷盾/金刚符）
@@ -229,6 +249,6 @@ window.PARRY = (function () {
 
   return {
     META, SKILL_ATTR, KEYWORDS, FX_ATTR, SPIRIT_BOSSES,
-    MATRIX, HOLD_DECAY, HOLD, TAP, TELE_BONUS, PENALTY, UI, COOP, CARRIERS,
+    MATRIX, HOLD_DECAY, HOLD, TAP, TELE_BONUS, PENALTY, UI, COOP, CARRIERS, JUICE,
   };
 })();

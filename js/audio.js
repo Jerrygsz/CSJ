@@ -55,6 +55,14 @@ window.Sfx = (function () {
     burst() { tone(220, 0.16, 'square', 0.05, 640); noise(0.1, 0.03, 1600); },
     // 闪身：一声短促上滑的风声，比受击音更「轻」，玩家才知道自己闪过去了
     dodge() { tone(520, 0.1, 'sine', 0.05, 1180); noise(0.07, 0.03, 2600); },
+    // 弹反「格开」：刃口一声金铁 + 胸口一记闷响。连反层数越高，尾音越亮（手感递进）
+    parry(chain) {
+      const c = Math.max(1, Math.min(5, chain || 1));
+      tone(1760 + c * 60, 0.05, 'square', 0.05, 2600);
+      noise(0.05, 0.05, 4200);
+      setTimeout(() => tone(120, 0.16, 'sine', 0.09, 60), 12);
+      if (c >= 2) setTimeout(() => tone(1320 + c * 80, 0.08, 'triangle', 0.045), 45);
+    },
 
     // 受击 / 死亡
     hurt() { tone(190, 0.18, 'sawtooth', 0.09, 90); noise(0.1, 0.05); },

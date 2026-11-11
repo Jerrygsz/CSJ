@@ -97,6 +97,44 @@ ok(/<div id="parryEdge">/.test(html), 'index.html 含 #parryEdge 节点');
 const css = fs.readFileSync(join(root, 'css', 'style.css'), 'utf8');
 ok(/#parryEdge\s*\{/.test(css) && /#parryEdge\.on/.test(css), 'css 为 #parryEdge / #parryEdge.on 定义边缘泛红');
 
+// ---------- 6. 20261111E：弹反键放大 / 自定义位置 / 命中反馈 ----------
+ok(/id="parryBtn"\s+class="qb qb-parry"/.test(html), 'index.html 有独立弹反键 #parryBtn（qb-parry）');
+const qbHtml = (html.match(/<div id="quickbar">([\s\S]*?)<\/div>/) || [])[1] || '';
+ok((qbHtml.match(/class="qb\s/g) || []).length === 2, '#quickbar 只剩 1/2 两格（第 3 格已拆成独立键）', (qbHtml.match(/class="qb\s/g) || []).length);
+const pBtnCss = (css.match(/#parryBtn\s*\{[\s\S]*?\}/) || [''])[0];
+const pW = +(pBtnCss.match(/width:\s*(\d+)px/) || [])[1];
+const qW = +((css.match(/^\.qb\s*\{[^\n]*?width:\s*(\d+)px/m) || [])[2] || 46);
+ok(pW >= 60 && pW > qW, 'css 把弹反键放大到 ≥60px 且大于 1/2 格的 ' + qW + 'px', pW);
+ok(/@media \(pointer: coarse\)[\s\S]{0,200}#parryBtn/.test(css), '触屏设备给弹反键再加一档尺寸');
+ok(/pointer-events:\s*auto/.test(pBtnCss), '弹反键自己打开 pointer-events（#hud 是 none）');
+ok(/id="parryPosEdit"/.test(html) && /id="parryPosReset"/.test(html), '暂停菜单含「调整位置 / 恢复默认」');
+ok(/id="parryDragBar"/.test(html) && /id="parryDragDone"/.test(html), '含拖动引导条与「完成」按钮');
+ok(/id="parryHit"/.test(html) && /#parryHit\.go/.test(css), '弹反成功金环 #parryHit + .go 动画');
+
+ok(/parryPos:\s*null/.test(game), 'defaultSave 带 parryPos:null（默认位）');
+ok(/parryPos:\s*\(s\.parryPos/.test(game), 'loadSave 校验并迁移 parryPos（脏数据回默认）');
+ok(/function applyParryBtnPos\s*\(\)/.test(game), 'game.js 定义 applyParryBtnPos()（按舞台比例落位）');
+ok(/function bindParryDrag\s*\(\)/.test(game) && /function openParryPosEdit\s*\(\)/.test(game), 'game.js 实现拖动定位（bindParryDrag / openParryPosEdit）');
+ok(/save\.parryPos\s*=\s*\{\s*x:/.test(game), '拖动松手把位置按比例写回 save.parryPos');
+ok(/parryPos\(\)\s*\{/.test(game) && /parryBtnRect\(\)\s*\{/.test(game), '__FR 暴露 parryPos / parryBtnRect 探针');
+ok(/arr\.push\(elParryBtn\)/.test(game), 'elQuickBtns[2] 指向独立弹反键（沿用原绘制逻辑）');
+
+// 命中反馈：「爽」的六个落点各有一条
+const J = P && P.JUICE;
+ok(!!J, 'parry.js 暴露 JUICE（可调手感数值）');
+ok(J && J.hitStop >= 0.06 && J.shakeTap >= 10, 'JUICE：顿帧 ≥0.06s、震屏 ≥10', J && { hitStop: J.hitStop, shake: J.shakeTap });
+ok(J && J.knock > 0 && J.stun > 0 && J.vulnMul > 1, 'JUICE：击退 / 硬直 / 破绽易伤', J && { knock: J.knock, stun: J.stun, vulnMul: J.vulnMul });
+ok(J && J.chainMax >= 3 && J.chainDamage > 0 && J.shaBack > 0, 'JUICE：连反链 + 煞气返还', J && { chainMax: J.chainMax, chainDamage: J.chainDamage, shaBack: J.shaBack });
+ok(J && Array.isArray(J.hapticTap) && J.hapticTap.length > 0, 'JUICE：触屏震动节奏 hapticTap / hapticBoss',
+  J && { tap: J.hapticTap, boss: J.hapticBoss });
+ok(/function parryJuice\s*\(/.test(game), 'game.js 定义 parryJuice()（顿帧/震动/音效/粒子/击退整包）');
+ok(/navigator\.vibrate/.test(game), '弹反成功调用触屏震动（navigator.vibrate）');
+const audio = fs.readFileSync(join(root, 'js', 'audio.js'), 'utf8');
+ok(/Sfx\.parry/.test(game) && /parry\(chain\)\s*\{/.test(audio), '专属音效 Sfx.parry（audio.js 已实现）');
+ok(/G\.parry\.vulnT > 0/.test(game) && /G\.parry\.vulnE === e/.test(game), '破绽易伤在 damageEnemy 生效（只认那一只）');
+ok(/pr\.chain = \(pr\.chain > 0 && pr\.chainT > 0\)/.test(game), '连反链按 chainWin 窗口累加（断连归 1）');
+ok(/if \(pr\.chainT > 0\) \{ pr\.chainT -= dt/.test(game), 'updateParry 每帧衰减连反窗口与破绽计时');
+
 // ---------- 汇总 ----------
 console.log('');
 if (fail === 0) {

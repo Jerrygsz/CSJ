@@ -228,6 +228,8 @@ body.fs #wrap { background: #000; }
 .panel { width: 100%; max-width: 460px; background: linear-gradient(180deg,var(--bg-panel-a),var(--bg-panel-b)); border: 1px solid var(--line-gold); border-radius: var(--r-lg); padding: var(--sp-5); box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
 .panel h2 { color: var(--accent); font-size: var(--fs-h1); margin-bottom: 8px; }
 #victory .panel, #gameover .panel { max-height: 92%; overflow-y: auto; }
+/* 暂停面板又多了一行（弹反键位置）：矮屏机型（逻辑视口 854）会顶出屏幕，这里给个兜底滚动 */
+#pause .panel { max-height: 92%; overflow-y: auto; }
 .panel p { color: var(--text-2); line-height: 1.6; margin: 4px 0; font-size: var(--fs-body); }
 /* ============ 标题页（首页） ============
    首页是玩家见到的第一屏，原先只有一个灰框加几行字，跟游戏里的国风质感脱节。
@@ -908,6 +910,35 @@ body.rot #ver { visibility: hidden; }
 
 .qb-picks { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: 4px; }
 
+/* ================= 弹反键（#parryBtn）=================
+   从快捷栏里拆出来单独浮着：这是战斗里最重要的防守动作，比 1/2 格更大更好点。
+   不加任何透明度改动（用户口径），只放大 + 独立定位；位置可在暂停菜单拖动自定义。 */
+#parryBtn {
+  position: absolute; right: 10px; top: calc(50% + 92px); transform: translateY(-50%);
+  width: 72px; height: 72px; font-size: 32px; /* 图标字号，非文字档 */
+  border-width: 2px; border-color: rgba(214,92,72,0.62);
+  box-shadow: 0 0 0 1px rgba(214,92,72,0.18), 0 4px 14px rgba(0,0,0,0.35);
+  display: none; z-index: var(--z-combat);
+  pointer-events: auto;   /* #hud 本身 pointer-events:none，按钮得自己打开 */
+}
+#parryBtn.on { display: flex; }
+#parryBtn::after { bottom: 6px; }
+/* 蓄势 / 护体：边框点亮 + 图标轻搏，一眼看出「现在挡得住」 */
+#parryBtn.parrying {
+  border-color: #ffb060;
+  box-shadow: 0 0 0 3px rgba(255,176,96,0.36), 0 0 22px rgba(255,150,60,0.55);
+}
+#parryBtn.parrying .qb-icon { animation: parryKeyPulse .5s ease-in-out infinite; }
+#parryBtn.cooling { border-color: rgba(120,124,132,0.5); }
+@keyframes parryKeyPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+/* 格开那一下：按钮自己亮一下（只动 filter，不动 transform —— 自定义位置用的是 inline left/top + transform:none） */
+#parryBtn.ok { animation: parryKeyHit .22s ease-out; }
+@keyframes parryKeyHit { 0% { filter: brightness(1.9) saturate(1.3); } 100% { filter: brightness(1); } }
+/* 触屏设备再加一档：拇指要按得住 */
+@media (pointer: coarse) {
+  #parryBtn { width: 84px; height: 84px; font-size: 38px; right: 8px; }
+}
+
 /* 战前运功面板：功法再多也只在面板内滚动，绝不顶出屏幕 */
 #pfBody {
   flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
@@ -1319,6 +1350,16 @@ body[data-skin="guigu"] .qb.pet {
   border-color: rgba(63,89,65,0.72);
   box-shadow: inset 0 0 0 3px #f4efe0, inset 0 0 0 4px rgba(63,89,65,0.38), 0 2px 5px rgba(40,36,28,0.22);
 }
+/* 弹反键：纸底墨框 + 朱砂边，比三联印再重一档（它是最重要的那颗） */
+body[data-skin="guigu"] #parryBtn {
+  border-color: rgba(168,58,42,0.72); color: #3a332a;
+  box-shadow: inset 0 0 0 3px #f4efe0, inset 0 0 0 4px rgba(168,58,42,0.34), 0 3px 8px rgba(40,36,28,0.24);
+}
+body[data-skin="guigu"] #parryBtn.parrying {
+  border-color: #a83a2a;
+  box-shadow: inset 0 0 0 3px #f4efe0, inset 0 0 0 5px rgba(200,80,50,0.55), 0 0 18px rgba(200,80,50,0.4);
+}
+body[data-skin="guigu"] #parryBtn.cooling { border-color: rgba(58,53,44,0.45); }
 /* 左下角功法等级小签：黑方块也翻纸签，等级数用朱砂 */
 body[data-skin="guigu"] .pip {
   background: rgba(244,239,224,0.9); border-color: rgba(58,53,44,0.45);
@@ -1413,6 +1454,49 @@ body[data-skin="guigu"] #critFlash.go { animation: critInk 0.32s ease-out; }
 @keyframes parryPulse {
   0%,100% { opacity: 0.55; }
   50%     { opacity: 1; }
+}
+
+/* ================= 弹反成功：金铁交击的一瞬冲击 =================
+   只在「格开」那一下闪一次（约 0.34s）。做成贴边细金环 + 内圈薄光，
+   不铺大面积渐变 —— 水墨皮是浅宣纸，大片暖色会把整屏洗成粉雾。 */
+#parryHit { position: absolute; inset: 0; pointer-events: none; opacity: 0; z-index: 48; }
+#parryHit.go { animation: parryHitFlash .34s ease-out; }
+@keyframes parryHitFlash {
+  0%   { opacity: 1; box-shadow: inset 0 0 0 4px rgba(255,228,152,0.95), inset 0 0 34px 6px rgba(255,206,112,0.50); }
+  45%  { opacity: .62; }
+  100% { opacity: 0; box-shadow: inset 0 0 0 4px rgba(255,228,152,0), inset 0 0 34px 6px rgba(255,206,112,0); }
+}
+body[data-skin="guigu"] #parryHit.go { animation: parryHitInk .34s ease-out; }
+@keyframes parryHitInk {
+  0%   { opacity: 1; box-shadow: inset 0 0 0 3px rgba(168,40,30,0.85), inset 0 0 30px 4px rgba(168,40,30,0.28); }
+  45%  { opacity: .55; }
+  100% { opacity: 0; box-shadow: inset 0 0 0 3px rgba(168,40,30,0), inset 0 0 30px 4px rgba(168,40,30,0); }
+}
+
+/* ================= 弹反键位置调整 =================
+   暂停菜单点「调整位置」→ 画面冻结、面板收起，只剩这颗键和一条说明。
+   拖动时描一圈绿光、禁掉页面滚动，松手即存（save.parryPos）。 */
+#parryDragBar {
+  display: none; position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%);
+  align-items: center; gap: var(--sp-3); padding: 8px 10px 8px 16px;
+  max-width: calc(100% - 24px); border-radius: 999px;
+  background: rgba(10,12,18,0.9); border: 1px solid rgba(201,162,74,0.5);
+  color: var(--text-1); font-size: var(--fs-cap); line-height: 1.3;
+  z-index: 74;
+}
+body.parry-drag #parryDragBar { display: flex; }
+/* 拖动时把横幅（战后强化提示之类）藏起来，否则会压住引导条 */
+body.parry-drag #banner { display: none; }
+body.parry-drag #parryBtn {
+  display: flex; z-index: 76;
+  box-shadow: 0 0 0 3px rgba(126,224,160,0.72), 0 6px 20px rgba(0,0,0,0.45);
+  cursor: grab; touch-action: none;
+}
+body.parry-drag #parryBtn:active { transform: none; }
+body.parry-drag #parryBtn.parrying { animation: none; }
+body.parry-drag #parryEdge { opacity: 0 !important; }
+body[data-skin="guigu"] #parryDragBar {
+  background: rgba(246,241,228,0.96); border-color: rgba(58,53,44,0.5); color: #3a332a;
 }
 
 /* ================= 水墨皮 · 进图仪式：展卷 =================
