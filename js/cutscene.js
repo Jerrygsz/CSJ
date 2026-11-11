@@ -15,7 +15,7 @@
 (function () {
   'use strict';
 
-  var CSS = "  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }\n  html, .csBody { margin: 0; min-height: 100%; background: #0d0f12; }\n  .csBody {\n    font-family: \"KaiTi\", \"STKaiti\", \"Kaiti SC\", \"Source Han Serif SC\", \"Noto Serif SC\", serif;\n    color: #f2e8d5; -webkit-user-select: none; user-select: none;\n  }\n  button { font-family: inherit; cursor: pointer; }\n\n  .csBody {\n    --gold: #c9a24a; --gold-soft: rgba(201,162,74,.30);\n    --panel: #191d25; --panel2: #222834; --line: rgba(201,162,74,.22);\n    --t1: #f2e8d5; --t2: #cfc6b2; --t3: #9a927f;\n    --ok: #6fe08a; --warn: #ffb060;\n  }\n  header {\n    display: flex; flex-wrap: wrap; align-items: center; gap: 10px;\n    padding: 12px 18px; border-bottom: 1px solid var(--line); background: #12151b;\n  }\n  header h1 { margin: 0; font-size: 16px; font-weight: normal; letter-spacing: 1px; color: #e8d4a8; }\n  header .tag { font-size: 11px; color: #0d0f12; background: var(--gold); border-radius: 4px; padding: 2px 7px; letter-spacing: .5px; }\n  header .spacer { flex: 1; }\n  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }\n  .seg button {\n    border: 0; background: transparent; color: var(--t3); font-size: 12px;\n    padding: 6px 11px; letter-spacing: .5px;\n  }\n  .seg button + button { border-left: 1px solid var(--line); }\n  .seg button.on { background: var(--gold); color: #201804; }\n\n  main { display: flex; gap: 22px; padding: 20px; align-items: flex-start; justify-content: center; flex-wrap: wrap; }\n  #stageWrap { width: 480px; height: 864px; position: relative; flex: 0 0 auto; }\n  #stage {\n    position: absolute; left: 0; top: 0; width: 480px; height: 864px;\n    transform-origin: top left; overflow: hidden; background: #11141a;\n    border: 1px solid var(--line); box-shadow: 0 18px 60px rgba(0,0,0,.6);\n  }\n  #scene { position: absolute; left: 0; top: 0; width: 480px; height: 864px; transform-origin: 50% 42%; will-change: transform; }\n  #grain { position: absolute; inset: 0; pointer-events: none; opacity: .16; mix-blend-mode: overlay; }\n  #vignette { position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 130px 40px rgba(0,0,0,.55); }\n  #dim { position: absolute; inset: 0; pointer-events: none; background: rgba(8,10,14,.0); transition: background .5s ease; }\n  #wipe {\n    position: absolute; inset: 0; pointer-events: none; opacity: 0;\n    background: #14161c; clip-path: circle(150% at 50% 44%);\n  }\n  #wipe.on { animation: inkOpen .58s cubic-bezier(.22,.7,.3,1) forwards; }\n  @keyframes inkOpen {\n    0%   { opacity: 1; clip-path: circle(150% at 50% 44%); }\n    100% { opacity: 1; clip-path: circle(0% at 50% 44%); }\n  }\n  #seal { position: absolute; right: 26px; top: 118px; width: 46px; height: 46px; border: 3px solid #a8402f;\n          color: #a8402f; font-size: 15px; line-height: 20px; text-align: center; padding: 2px;\n          letter-spacing: 1px; opacity: 0; transform: rotate(-8deg) scale(1.4); transition: all .5s ease; pointer-events: none; }\n  #seal.on { opacity: .88; transform: rotate(-8deg) scale(1); }\n\n  .actor { position: absolute; bottom: 214px; width: 190px; height: 320px; opacity: 0; pointer-events: none;\n           transition: opacity .62s ease, transform .72s cubic-bezier(.2,.8,.25,1); }\n  .actor canvas { width: 100%; height: 100%; display: block; }\n  #actorL { left: -8px; transform: translateX(-46px); }\n  #actorR { right: -8px; transform: translateX(46px); }\n  .actor.in { opacity: .96; transform: translateX(0); }\n  /* ID 选择器优先级高于 .actor.in，入画归位必须再显式压一次，否则人物会一直偏移被舞台裁掉 */\n  #actorL.in, #actorR.in { transform: translateX(0); }\n\n  #chapter { position: absolute; left: 0; right: 0; top: 300px; text-align: center; opacity: 0; pointer-events: none;\n             transition: opacity .7s ease; }\n  #chapter.on { opacity: 1; }\n  #chapter .ct { font-size: 34px; letter-spacing: 9px; color: #efe4cd; text-shadow: 0 3px 18px rgba(0,0,0,.8); }\n  #chapter .cs { margin-top: 14px; font-size: 15px; letter-spacing: 4px; color: #cfc6b2; }\n  #chapter .cr { margin: 22px auto 0; width: 96px; height: 1px; background: var(--gold); }\n\n  #subBox {\n    position: absolute; left: 0; right: 0; bottom: 0; height: 236px; padding: 30px 30px 26px;\n    background: linear-gradient(to bottom, rgba(10,12,16,0), rgba(10,12,16,.88) 26%, rgba(10,12,16,.97));\n    display: flex; flex-direction: column; justify-content: flex-end;\n  }\n  #spkRow { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; min-height: 34px; }\n  #face { width: 42px; height: 49px; image-rendering: pixelated; display: none; border: 1px solid var(--line); background: rgba(0,0,0,.25); }\n  #spk { font-size: 18px; color: #e0b24a; letter-spacing: 2px; }\n  #txt { font-size: 19px; line-height: 1.85; color: #f2e8d5; min-height: 105px; letter-spacing: .5px; }\n  #subBox.narration #spkRow { display: none; }\n  #subBox.narration #txt { color: #d8cfba; font-size: 18px; border-left: 2px solid var(--gold-soft); padding-left: 14px; }\n  #hint { text-align: right; font-size: 12px; color: #8f8878; margin-top: 10px; letter-spacing: 1px; }\n\n  #progress { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(255,255,255,.08); }\n  #progress i { display: block; height: 100%; width: 0; background: var(--gold); }\n  #shotNo { position: absolute; left: 18px; top: 16px; font-size: 12px; letter-spacing: 2px; color: rgba(242,232,213,.55); }\n\n  #battleMock { position: absolute; inset: 0; display: none; background: #22301f; }\n  #battleMock.on { display: block; }\n  #battleMock canvas { width: 100%; height: 100%; display: block; }\n  #bmNote { position: absolute; left: 26px; right: 26px; top: 92px; text-align: center; color: #f7ecd7;\n            font-size: 17px; letter-spacing: 2px; padding: 9px 6px; border-radius: 6px;\n            background: rgba(8,12,8,.62); text-shadow: 0 1px 4px #000; }\n  #bmSub { position: absolute; left: 26px; right: 26px; top: 138px; text-align: center; color: #cfc6b2;\n           font-size: 12.5px; letter-spacing: 1px; padding: 6px; background: rgba(8,12,8,.48); border-radius: 6px; }\n  #bmHud { position: absolute; left: 18px; top: 18px; font-size: 12px; color: #9fe0c0; letter-spacing: 1px;\n           background: rgba(8,12,8,.55); padding: 5px 9px; border-radius: 5px; }\n\n  .csBody[data-skin=\"paper\"] #stage { background: #efe4cd; }\n  .csBody[data-skin=\"paper\"] #vignette { box-shadow: inset 0 0 120px 30px rgba(90,74,48,.30); }\n  .csBody[data-skin=\"paper\"] #wipe { background: #efe4cd; }\n  .csBody[data-skin=\"paper\"] #subBox { background: linear-gradient(to bottom, rgba(239,228,205,0), rgba(239,228,205,.94) 26%, rgba(239,228,205,.99)); }\n  .csBody[data-skin=\"paper\"] #txt { color: #2a1c06; }\n  .csBody[data-skin=\"paper\"] #subBox.narration #txt { color: #4a3c22; border-left-color: rgba(154,116,38,.5); }\n  .csBody[data-skin=\"paper\"] #spk { color: #8a5e1c; }\n  .csBody[data-skin=\"paper\"] #hint { color: #7a6f58; }\n  .csBody[data-skin=\"paper\"] #chapter .ct { color: #2a1c06; text-shadow: none; }\n  .csBody[data-skin=\"paper\"] #chapter .cs { color: #5c5240; }\n  .csBody[data-skin=\"paper\"] #shotNo { color: rgba(42,28,6,.5); }\n\n  aside { width: 346px; flex: 0 0 346px; display: flex; flex-direction: column; gap: 12px; }\n  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 13px 14px; }\n  .card h2 { margin: 0 0 10px; font-size: 13px; font-weight: normal; letter-spacing: 1px; color: #e8d4a8; }\n  .row { display: flex; gap: 7px; flex-wrap: wrap; }\n  .btn { flex: 1; min-width: 66px; padding: 9px 6px; border: 1px solid var(--line); border-radius: 8px;\n         background: var(--panel2); color: var(--t2); font-size: 12px; letter-spacing: .5px; }\n  .btn:hover { border-color: var(--gold); color: #fff; }\n  .btn.primary { background: var(--gold); color: #201804; border-color: var(--gold); }\n  .btn.primary:hover { color: #201804; filter: brightness(1.08); }\n  .kv { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; color: var(--t3); }\n  .kv b { font-weight: normal; color: var(--t2); font-family: ui-monospace, Menlo, Consolas, monospace; }\n  .kv b.g { color: var(--ok); } .kv b.w { color: var(--warn); }\n  .shots { display: flex; flex-direction: column; gap: 3px; max-height: 210px; overflow-y: auto; }\n  .shots div { display: flex; gap: 8px; align-items: baseline; font-size: 11.5px; color: var(--t3);\n               padding: 5px 7px; border-radius: 6px; cursor: pointer; line-height: 1.4; }\n  .shots div:hover { background: rgba(201,162,74,.10); color: var(--t2); }\n  .shots div.on { background: rgba(201,162,74,.20); color: #f2e8d5; }\n  .shots div span { color: var(--gold); font-family: ui-monospace, Menlo, Consolas, monospace; flex: 0 0 34px; }\n  pre { margin: 0; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; line-height: 1.55;\n        color: #9fb0a6; white-space: pre-wrap; word-break: break-all; max-height: 150px; overflow-y: auto; }\n  .note { font-size: 11.5px; line-height: 1.75; color: var(--t3); }\n  .note em { color: var(--gold); font-style: normal; }\n  @media (max-width: 900px) {\n    main { gap: 14px; padding: 12px; }\n    aside { width: 100%; flex: 1 1 100%; max-width: 480px; }\n  }\n/* ---- 主游戏内嵌态：全屏铺满、隐藏测试面板 ---- */\n.csBody { position: fixed; inset: 0; width: 100%; height: 100%; overflow: hidden;\n          display: flex; align-items: center; justify-content: center; background: #0d0f12; }\n.csBody header, .csBody aside { display: none !important; }\n.csBody main { padding: 0; margin: 0; gap: 0; width: 100%; height: 100%;\n               align-items: center; justify-content: center; }\n#csSkipBtn { position: absolute; right: 18px; top: 18px; z-index: 30;\n             background: rgba(8,11,15,.74); color: #e9dfc8;\n             border: 1px solid rgba(201,162,74,.55); border-radius: 6px;\n             padding: 7px 14px; font-size: 13px; letter-spacing: 1px; font-family: inherit; }\n.csBody[data-skin=\"paper\"] #csSkipBtn { background: rgba(239,228,205,.86); color: #2a2418; border-color: rgba(154,116,38,.6); }\n";
+  var CSS = "  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }\n  html, .csBody { margin: 0; min-height: 100%; background: #0d0f12; }\n  .csBody {\n    font-family: \"KaiTi\", \"STKaiti\", \"Kaiti SC\", \"Source Han Serif SC\", \"Noto Serif SC\", serif;\n    color: #f2e8d5; -webkit-user-select: none; user-select: none;\n  }\n  button { font-family: inherit; cursor: pointer; }\n\n  .csBody {\n    --gold: #c9a24a; --gold-soft: rgba(201,162,74,.30);\n    --panel: #191d25; --panel2: #222834; --line: rgba(201,162,74,.22);\n    --t1: #f2e8d5; --t2: #cfc6b2; --t3: #9a927f;\n    --ok: #6fe08a; --warn: #ffb060;\n  }\n  header {\n    display: flex; flex-wrap: wrap; align-items: center; gap: 10px;\n    padding: 12px 18px; border-bottom: 1px solid var(--line); background: #12151b;\n  }\n  header h1 { margin: 0; font-size: 16px; font-weight: normal; letter-spacing: 1px; color: #e8d4a8; }\n  header .tag { font-size: 11px; color: #0d0f12; background: var(--gold); border-radius: 4px; padding: 2px 7px; letter-spacing: .5px; }\n  header .spacer { flex: 1; }\n  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }\n  .seg button {\n    border: 0; background: transparent; color: var(--t3); font-size: 12px;\n    padding: 6px 11px; letter-spacing: .5px;\n  }\n  .seg button + button { border-left: 1px solid var(--line); }\n  .seg button.on { background: var(--gold); color: #201804; }\n\n  main { display: flex; gap: 22px; padding: 20px; align-items: flex-start; justify-content: center; flex-wrap: wrap; }\n  #stageWrap { width: 480px; height: 864px; position: relative; flex: 0 0 auto; }\n  #stage {\n    position: absolute; left: 0; top: 0; width: 480px; height: 864px;\n    transform-origin: top left; overflow: hidden; background: #11141a;\n    border: 1px solid var(--line); box-shadow: 0 18px 60px rgba(0,0,0,.6);\n  }\n  #scene { position: absolute; left: 0; top: 0; width: 480px; height: 864px; transform-origin: 50% 42%; will-change: transform; }\n  #grain { position: absolute; inset: 0; pointer-events: none; opacity: .16; mix-blend-mode: overlay; }\n  #vignette { position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 130px 40px rgba(0,0,0,.55); }\n  #dim { position: absolute; inset: 0; pointer-events: none; background: rgba(8,10,14,.0); transition: background .5s ease; }\n  #wipe {\n    position: absolute; inset: 0; pointer-events: none; opacity: 0;\n    background: #14161c; clip-path: circle(150% at 50% 44%);\n  }\n  #wipe.on { animation: inkOpen .58s cubic-bezier(.22,.7,.3,1) forwards; }\n  @keyframes inkOpen {\n    0%   { opacity: 1; clip-path: circle(150% at 50% 44%); }\n    100% { opacity: 1; clip-path: circle(0% at 50% 44%); }\n  }\n  #seal { position: absolute; right: 24px; top: 112px; width: 58px; height: 50px; border: 3px solid #a8402f;\n          color: #a8402f; font-size: 15px; line-height: 44px; text-align: center; padding: 0;\n          letter-spacing: 0; white-space: nowrap; opacity: 0; transform: rotate(-8deg) scale(1.4); transition: all .5s ease; pointer-events: none; }\n  #seal.on { opacity: .88; transform: rotate(-8deg) scale(1); }\n\n  .actor { position: absolute; bottom: 214px; width: 190px; height: 320px; opacity: 0; pointer-events: none;\n           transition: opacity .62s ease, transform .72s cubic-bezier(.2,.8,.25,1); }\n  .actor canvas { width: 100%; height: 100%; display: block; }\n  #actorL { left: -8px; transform: translateX(-46px); }\n  #actorR { right: -8px; transform: translateX(46px); }\n  .actor.in { opacity: .96; transform: translateX(0); }\n  /* ID 选择器优先级高于 .actor.in，入画归位必须再显式压一次，否则人物会一直偏移被舞台裁掉 */\n  #actorL.in, #actorR.in { transform: translateX(0); }\n\n  #chapter { position: absolute; left: 0; right: 0; top: 300px; text-align: center; opacity: 0; pointer-events: none;\n             transition: opacity .7s ease; }\n  #chapter.on { opacity: 1; }\n  #chapter .ct { font-size: 34px; letter-spacing: 9px; color: #efe4cd; text-shadow: 0 3px 18px rgba(0,0,0,.8); }\n  #chapter .cs { margin-top: 14px; font-size: 15px; letter-spacing: 4px; color: #cfc6b2; }\n  #chapter .cr { margin: 22px auto 0; width: 96px; height: 1px; background: var(--gold); }\n\n  #subBox {\n    position: absolute; left: 0; right: 0; bottom: 0; height: 236px; padding: 30px 30px 26px;\n    background: linear-gradient(to bottom, rgba(10,12,16,0), rgba(10,12,16,.88) 26%, rgba(10,12,16,.97));\n    display: flex; flex-direction: column; justify-content: flex-end;\n  }\n  #spkRow { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; min-height: 34px; }\n  #face { width: 42px; height: 49px; image-rendering: pixelated; display: none; border: 1px solid var(--line); background: rgba(0,0,0,.25); }\n  #spk { font-size: 18px; color: #e0b24a; letter-spacing: 2px; }\n  #txt { font-size: 19px; line-height: 1.85; color: #f2e8d5; min-height: 105px; letter-spacing: .5px; }\n  #subBox.narration #spkRow { display: none; }\n  #subBox.narration #txt { color: #d8cfba; font-size: 18px; border-left: 2px solid var(--gold-soft); padding-left: 14px; }\n  #hint { text-align: right; font-size: 12px; color: #8f8878; margin-top: 10px; letter-spacing: 1px; }\n\n  #progress { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(255,255,255,.08); }\n  #progress i { display: block; height: 100%; width: 0; background: var(--gold); }\n  #shotNo { position: absolute; left: 18px; top: 16px; font-size: 12px; letter-spacing: 2px; color: rgba(242,232,213,.55); }\n\n  #battleMock { position: absolute; inset: 0; display: none; background: #22301f; }\n  #battleMock.on { display: block; }\n  #battleMock canvas { width: 100%; height: 100%; display: block; }\n  #bmNote { position: absolute; left: 26px; right: 26px; top: 92px; text-align: center; color: #f7ecd7;\n            font-size: 17px; letter-spacing: 2px; padding: 9px 6px; border-radius: 6px;\n            background: rgba(8,12,8,.62); text-shadow: 0 1px 4px #000; }\n  #bmSub { position: absolute; left: 26px; right: 26px; top: 138px; text-align: center; color: #cfc6b2;\n           font-size: 12.5px; letter-spacing: 1px; padding: 6px; background: rgba(8,12,8,.48); border-radius: 6px; }\n  #bmHud { position: absolute; left: 18px; top: 18px; font-size: 12px; color: #9fe0c0; letter-spacing: 1px;\n           background: rgba(8,12,8,.55); padding: 5px 9px; border-radius: 5px; }\n\n  .csBody[data-skin=\"paper\"] #stage { background: #efe4cd; }\n  .csBody[data-skin=\"paper\"] #vignette { box-shadow: inset 0 0 120px 30px rgba(90,74,48,.30); }\n  .csBody[data-skin=\"paper\"] #wipe { background: #efe4cd; }\n  .csBody[data-skin=\"paper\"] #subBox { background: linear-gradient(to bottom, rgba(239,228,205,0), rgba(239,228,205,.94) 26%, rgba(239,228,205,.99)); }\n  .csBody[data-skin=\"paper\"] #txt { color: #2a1c06; }\n  .csBody[data-skin=\"paper\"] #subBox.narration #txt { color: #4a3c22; border-left-color: rgba(154,116,38,.5); }\n  .csBody[data-skin=\"paper\"] #spk { color: #8a5e1c; }\n  .csBody[data-skin=\"paper\"] #hint { color: #7a6f58; }\n  .csBody[data-skin=\"paper\"] #chapter .ct { color: #2a1c06; text-shadow: none; }\n  .csBody[data-skin=\"paper\"] #chapter .cs { color: #5c5240; }\n  .csBody[data-skin=\"paper\"] #shotNo { color: rgba(42,28,6,.5); }\n\n  aside { width: 346px; flex: 0 0 346px; display: flex; flex-direction: column; gap: 12px; }\n  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 13px 14px; }\n  .card h2 { margin: 0 0 10px; font-size: 13px; font-weight: normal; letter-spacing: 1px; color: #e8d4a8; }\n  .row { display: flex; gap: 7px; flex-wrap: wrap; }\n  .btn { flex: 1; min-width: 66px; padding: 9px 6px; border: 1px solid var(--line); border-radius: 8px;\n         background: var(--panel2); color: var(--t2); font-size: 12px; letter-spacing: .5px; }\n  .btn:hover { border-color: var(--gold); color: #fff; }\n  .btn.primary { background: var(--gold); color: #201804; border-color: var(--gold); }\n  .btn.primary:hover { color: #201804; filter: brightness(1.08); }\n  .kv { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; color: var(--t3); }\n  .kv b { font-weight: normal; color: var(--t2); font-family: ui-monospace, Menlo, Consolas, monospace; }\n  .kv b.g { color: var(--ok); } .kv b.w { color: var(--warn); }\n  .shots { display: flex; flex-direction: column; gap: 3px; max-height: 210px; overflow-y: auto; }\n  .shots div { display: flex; gap: 8px; align-items: baseline; font-size: 11.5px; color: var(--t3);\n               padding: 5px 7px; border-radius: 6px; cursor: pointer; line-height: 1.4; }\n  .shots div:hover { background: rgba(201,162,74,.10); color: var(--t2); }\n  .shots div.on { background: rgba(201,162,74,.20); color: #f2e8d5; }\n  .shots div span { color: var(--gold); font-family: ui-monospace, Menlo, Consolas, monospace; flex: 0 0 34px; }\n  pre { margin: 0; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; line-height: 1.55;\n        color: #9fb0a6; white-space: pre-wrap; word-break: break-all; max-height: 150px; overflow-y: auto; }\n  .note { font-size: 11.5px; line-height: 1.75; color: var(--t3); }\n  .note em { color: var(--gold); font-style: normal; }\n  @media (max-width: 900px) {\n    main { gap: 14px; padding: 12px; }\n    aside { width: 100%; flex: 1 1 100%; max-width: 480px; }\n  }\n/* ---- 主游戏内嵌态：全屏铺满、隐藏测试面板 ---- */\n.csBody { position: fixed; inset: 0; width: 100%; height: 100%; overflow: hidden;\n          display: flex; align-items: center; justify-content: center; background: #0d0f12; }\n.csBody header, .csBody aside { display: none !important; }\n.csBody main { padding: 0; margin: 0; gap: 0; width: 100%; height: 100%;\n               align-items: center; justify-content: center; }\n#csSkipBtn { position: absolute; right: 18px; top: 18px; z-index: 30;\n             background: rgba(8,11,15,.74); color: #e9dfc8;\n             border: 1px solid rgba(201,162,74,.55); border-radius: 6px;\n             padding: 7px 14px; font-size: 13px; letter-spacing: 1px; font-family: inherit; }\n.csBody[data-skin=\"paper\"] #csSkipBtn { background: rgba(239,228,205,.86); color: #2a2418; border-color: rgba(154,116,38,.6); }\n";
   var BODY = "\n<header>\n  <h1>剧情动画原型 · 七玄门·山门</h1>\n  <span class=\"tag\">本地测试页 · 不上线</span>\n  <span class=\"spacer\"></span>\n  <div class=\"seg\" id=\"segMode\"><button data-v=\"solo\" class=\"on\">单机</button><button data-v=\"coop\">联机</button></div>\n  <div class=\"seg\" id=\"segSkin\"><button data-v=\"ink\" class=\"on\">水墨·夜</button><button data-v=\"paper\">诡谷·纸</button></div>\n  <div class=\"seg\" id=\"segRate\"><button data-v=\"1\" class=\"on\">1×</button><button data-v=\"1.5\">1.5×</button><button data-v=\"2\">2×</button></div>\n  <div class=\"seg\" id=\"segSfx\"><button data-v=\"on\" class=\"on\">音效</button><button data-v=\"off\">静音</button></div>\n</header>\n\n<main>\n  <div id=\"stageWrap\">\n    <div id=\"stage\">\n      <canvas id=\"scene\" width=\"480\" height=\"864\"></canvas>\n      <canvas id=\"grain\" width=\"480\" height=\"864\"></canvas>\n      <div id=\"vignette\"></div>\n      <div id=\"dim\"></div>\n      <div id=\"wipe\"></div>\n      <div id=\"seal\">七玄</div>\n      <div class=\"actor\" id=\"actorL\"><canvas width=\"190\" height=\"320\"></canvas></div>\n      <div class=\"actor\" id=\"actorR\"><canvas width=\"190\" height=\"320\"></canvas></div>\n      <div id=\"chapter\"><div class=\"ct\">卷一 · 七玄门</div><div class=\"cs\">越国 · 镜州 青牛山</div><div class=\"cr\"></div></div>\n      <div id=\"subBox\">\n        <div id=\"spkRow\"><canvas id=\"face\" width=\"12\" height=\"14\"></canvas><span id=\"spk\"></span></div>\n        <div id=\"txt\"></div>\n        <div id=\"hint\">点击画面推进一拍 ▸</div>\n      </div>\n      <div id=\"shotNo\"></div>\n      <div id=\"progress\"><i></i></div>\n      <button id=\"csSkipBtn\" type=\"button\">跳过 ▸▸</button>\n      <div id=\"battleMock\">\n        <canvas width=\"480\" height=\"864\"></canvas>\n        <div id=\"bmHud\">共斗中 · 房主</div>\n        <div id=\"bmNote\">已跳过全部剧情对白，直接开打</div>\n        <div id=\"bmSub\">qixuan 为剧情图：此处以战斗画面示意「不建过场层」</div>\n      </div>\n    </div>\n  </div>\n\n  <aside>\n    <div class=\"card\">\n      <h2>播放控制（剧场模式 · 可随时重看）</h2>\n      <div class=\"row\" style=\"margin-bottom:7px\">\n        <button class=\"btn primary\" id=\"bPlay\">▶ 播放</button>\n        <button class=\"btn\" id=\"bNext\">下一拍</button>\n        <button class=\"btn\" id=\"bSkip\">跳过全片</button>\n        <button class=\"btn\" id=\"bReplay\">↺ 重播</button>\n      </div>\n      <div class=\"row\">\n        <button class=\"btn\" id=\"bCoop\">模拟联机进图</button>\n      </div>\n    </div>\n\n    <div class=\"card\">\n      <h2>运行状态</h2>\n      <div class=\"kv\"><span>时间轴</span><b id=\"sTime\">0.0 / 28.4s</b></div>\n      <div class=\"kv\"><span>当前拍</span><b id=\"sShot\">—</b></div>\n      <div class=\"kv\"><span>帧率</span><b id=\"sFps\">—</b></div>\n      <div class=\"kv\"><span>每帧 canvas 重绘</span><b class=\"g\" id=\"sDraw\">0</b></div>\n      <div class=\"kv\"><span>save.seen（演完才写）</span><b id=\"sSeen\">未写</b></div>\n      <div class=\"kv\"><span>剧情奖励</span><b id=\"sReward\">—</b></div>\n      <div class=\"kv\"><span>回看入口</span><b id=\"sReplay\">0 段</b></div>\n    </div>\n\n    <div class=\"card\">\n      <h2>分镜时间轴（点任意拍跳转）</h2>\n      <div class=\"shots\" id=\"shotList\"></div>\n    </div>\n\n    <div class=\"card\">\n      <h2>当前拍数据 · CUTSCENES.qixuan</h2>\n      <pre id=\"shotJson\">—</pre>\n    </div>\n\n    <div class=\"card note\">\n      <h2>这一版验证什么</h2>\n      <em>独立过场层</em>：不进主循环、不复用 showLines，自带 rAF；场景烘焙一次，每帧只改 transform 与文字。<br>\n      <em>连续时间轴</em>：镜头推拉摇、人物入画、墨迹转场、逐字字幕，数据可批量铺到 171 图。<br>\n      <em>单机 / 联机分流</em>：联机不建层、不写 seen、补发奖励、留回看入口。<br>\n      <em>人物</em>：直接调用主游戏 <code>js/sprites.js</code> 的 <code>window.Sprites</code> 精灵表（韩立 / 墨大夫 / 张铁，与 <code>NPC_FACE</code> 同一套）；内置预览沙箱取不到该文件时，用同像素镜像兜底。<br>\n      <em>双皮</em>：水墨·夜 / 诡谷·纸 各一套配色；人物随游戏原生 <code>SKIN_INK</code> 切墨版 / 原色，场景按皮重烘焙。<br>\n      零新增图片素材，除精灵表外不加载主游戏任何脚本。\n    </div>\n  </aside>\n</main>\n";
   var host = document.createElement('div');
   host.id = 'csHost';
@@ -168,10 +168,13 @@
     }
     g.globalAlpha = 1;
   }
+  // 场景题跋印：原画在 (410,640)，既落进 #subBox（top=628）被字幕吃掉，又会被右侧人物立绘
+  // 挡掉半个字。挪到左上天空 (26,232) —— 人物区从 y=330 起、字幕区从 628 起，两处都避开。
+  // 字色也不能用 C.paper —— 墨皮下它是深墨，红底深字几乎不可读，改用双皮都亮的 C.light。
   function titleSeal(g, text) {
-    g.fillStyle = C.red; g.globalAlpha = .72; g.fillRect(410, 640, 34, 34); g.globalAlpha = 1;
-    g.fillStyle = C.paper; g.font = '15px KaiTi, serif'; g.textAlign = 'center';
-    g.fillText(text, 427, 663); g.textAlign = 'left';
+    g.fillStyle = C.red; g.globalAlpha = .72; g.fillRect(26, 232, 34, 34); g.globalAlpha = 1;
+    g.fillStyle = C.light; g.font = '15px KaiTi, serif'; g.textAlign = 'center';
+    g.fillText(text, 43, 255); g.textAlign = 'left';
   }
   // 天空留白：一轮淡月 + 云带，避免上半屏空掉
   function skyMark(g) {
@@ -230,13 +233,16 @@
     } else if (key === 'trial') {
       ridge(g, 344, 60, C.far, 13);
       g.fillStyle = C.mid; g.globalAlpha = .5; g.fillRect(0, 520, 480, 344); g.globalAlpha = 1;
-      // 石锁
+      // 石锁原画在 y=470/486，正好被两位人物立绘（y≈450-630）整块挡住；
+      // 上移到人物头顶上方，并按皮给高对比描边，墨皮下 C.wood 与地面同色的问题一并解决。
+      var stone = skin === 'paper' ? 'rgba(74,62,42,.72)' : 'rgba(206,216,206,.40)';
       function lock(x, y, s) {
         g.fillStyle = C.wood; g.fillRect(x - 34 * s, y, 68 * s, 46 * s);
-        g.strokeStyle = C.line; g.lineWidth = 4 * s; g.globalAlpha = .65;
+        g.strokeStyle = stone; g.lineWidth = 3 * s; g.globalAlpha = .85;
+        g.strokeRect(x - 34 * s, y, 68 * s, 46 * s);
         g.beginPath(); g.arc(x, y, 26 * s, Math.PI, 0); g.stroke(); g.globalAlpha = 1;
       }
-      lock(128, 470, 1.1); lock(330, 486, .82);
+      lock(120, 348, 1.0); lock(352, 352, .78);
       g.strokeStyle = C.line; g.globalAlpha = .2; g.lineWidth = 2;
       for (var k = 0; k < 5; k++) { g.beginPath(); g.moveTo(0, 580 + k * 46); g.lineTo(480, 566 + k * 46); g.stroke(); }
       g.globalAlpha = 1; mist(g, 300, 110, .35); titleSeal(g, '入門');
@@ -250,9 +256,17 @@
       var lg = g.createRadialGradient(240, 400, 10, 240, 400, 180);
       lg.addColorStop(0, C.gold); lg.addColorStop(1, 'rgba(0,0,0,0)');
       g.globalAlpha = .22; g.fillStyle = lg; g.fillRect(60, 220, 360, 400); g.globalAlpha = 1;
-      g.fillStyle = C.ink; g.globalAlpha = .16; g.fillRect(150, 330, 180, 220); g.globalAlpha = 1;
+      // 窗光：原来是一块 180x220 的纯色矩形，像个贴片/关着的门板；
+      // 改成半透明渐变 + 窗棂格线，让屋内层次透出来。
+      var wg = g.createLinearGradient(150, 330, 330, 550);
+      wg.addColorStop(0, skin === 'paper' ? 'rgba(255,250,232,.34)' : 'rgba(200,214,210,.12)');
+      wg.addColorStop(1, skin === 'paper' ? 'rgba(120,100,70,.20)' : 'rgba(10,14,20,.30)');
+      g.fillStyle = wg; g.fillRect(150, 330, 180, 220);
       g.strokeStyle = C.line; g.globalAlpha = .5; g.lineWidth = 3;
-      g.strokeRect(150, 330, 180, 220); g.beginPath(); g.moveTo(240, 330); g.lineTo(240, 550); g.stroke(); g.globalAlpha = 1;
+      g.strokeRect(150, 330, 180, 220);
+      g.globalAlpha = .34; g.lineWidth = 2;
+      g.beginPath(); g.moveTo(240, 330); g.lineTo(240, 550); g.moveTo(150, 440); g.lineTo(330, 440); g.stroke();
+      g.globalAlpha = 1;
       // 药架
       for (var sh = 0; sh < 3; sh++) { g.fillStyle = C.wood; g.fillRect(60, 400 + sh * 54, 72, 8); }
       g.fillStyle = C.red; g.globalAlpha = .5;
@@ -293,31 +307,45 @@
       for (var fi = 0; fi < 5; fi++) { g.beginPath(); g.moveTo(0, 620 + fi * 34); g.bezierCurveTo(150, 606 + fi * 34, 330, 636 + fi * 34, 480, 614 + fi * 34); g.stroke(); }
       g.globalAlpha = 1; mist(g, 280, 210, .55); mist(g, 500, 150, .35); titleSeal(g, '後山');
     } else if (key === 'fall') {
-      // 赤水峰瀑布：不规则岩壁夹一道亮水帘，落进潭里溅成雾。
-      // 水色不能取 C.paper（墨皮下是深色，会糊成一片），按皮另给一套半透明亮水。
+      // 赤水峰瀑布：岩壁按皮给对比色 + 分层皴笔，水帘上窄下宽带飞白。
+      // 潭 / 涟漪 / 水雾原本画在 y=690-720，全落进 #subBox（top=628）被字幕吃掉；
+      // 一律收进 y<610，并把「顶水冲练」的小剪影放进水帘，呼应本拍台词。
       ridge(g, 300, 96, C.far, 17);
-      g.fillStyle = C.near;
-      g.beginPath(); g.moveTo(0, 268); g.lineTo(150, 250); g.lineTo(176, 430); g.lineTo(158, 700); g.lineTo(0, 720); g.closePath(); g.fill();
-      g.beginPath(); g.moveTo(480, 254); g.lineTo(322, 244); g.lineTo(300, 430); g.lineTo(318, 704); g.lineTo(480, 724); g.closePath(); g.fill();
-      g.strokeStyle = C.line; g.globalAlpha = .22; g.lineWidth = 2;
-      for (var ri = 0; ri < 6; ri++) {
-        g.beginPath(); g.moveTo(8, 320 + ri * 62); g.lineTo(120 + (ri % 2) * 26, 300 + ri * 62); g.stroke();
-        g.beginPath(); g.moveTo(472, 306 + ri * 62); g.lineTo(360 - (ri % 2) * 22, 288 + ri * 62); g.stroke();
+      var cliff  = skin === 'paper' ? 'rgba(74,62,42,.78)' : 'rgba(28,34,42,.92)';
+      var cliff2 = skin === 'paper' ? 'rgba(120,104,76,.42)' : 'rgba(150,166,176,.16)';
+      g.fillStyle = cliff;
+      g.beginPath(); g.moveTo(0, 232); g.lineTo(158, 214); g.lineTo(180, 420); g.lineTo(162, 616); g.lineTo(0, 636); g.closePath(); g.fill();
+      g.beginPath(); g.moveTo(480, 220); g.lineTo(322, 208); g.lineTo(300, 420); g.lineTo(318, 616); g.lineTo(480, 632); g.closePath(); g.fill();
+      g.fillStyle = cliff2;
+      g.beginPath(); g.moveTo(0, 300); g.lineTo(150, 282); g.lineTo(168, 400); g.lineTo(0, 424); g.closePath(); g.fill();
+      g.beginPath(); g.moveTo(480, 292); g.lineTo(330, 276); g.lineTo(312, 400); g.lineTo(480, 418); g.closePath(); g.fill();
+      g.strokeStyle = C.line; g.globalAlpha = .30; g.lineWidth = 2;
+      for (var ri = 0; ri < 7; ri++) {
+        g.beginPath(); g.moveTo(8, 286 + ri * 48); g.lineTo(124 + (ri % 2) * 24, 268 + ri * 48); g.stroke();
+        g.beginPath(); g.moveTo(472, 278 + ri * 48); g.lineTo(356 - (ri % 2) * 22, 262 + ri * 48); g.stroke();
       }
       g.globalAlpha = 1;
-      var water  = skin === 'paper' ? 'rgba(255,253,244,.88)' : 'rgba(186,204,210,.54)';
-      var water2 = skin === 'paper' ? 'rgba(176,164,132,.32)' : 'rgba(90,106,116,.30)';
+      var water  = skin === 'paper' ? 'rgba(255,253,244,.90)' : 'rgba(190,208,214,.60)';
+      var water2 = skin === 'paper' ? 'rgba(176,164,132,.34)' : 'rgba(88,104,114,.34)';
       g.fillStyle = water;
-      g.beginPath(); g.moveTo(166, 248); g.lineTo(316, 244); g.lineTo(304, 690); g.lineTo(176, 694); g.closePath(); g.fill();
-      [[182,16],[214,7],[238,22],[272,9],[296,13]].forEach(function (f) {
-        g.fillStyle = water2; g.fillRect(f[0], 256, f[1], 434);
+      g.beginPath(); g.moveTo(168, 214); g.lineTo(312, 210); g.lineTo(326, 566); g.lineTo(154, 566); g.closePath(); g.fill();
+      [[184,15],[214,7],[238,22],[272,9],[296,14]].forEach(function (f) {
+        g.fillStyle = water2; g.fillRect(f[0], 222, f[1], 336);
       });
+      // 张铁顶水冲练：上举双臂的小剪影
+      var body = skin === 'paper' ? 'rgba(58,48,30,.62)' : 'rgba(16,22,28,.72)';
+      g.fillStyle = body;
+      g.beginPath(); g.ellipse(240, 436, 13, 15, 0, 0, Math.PI * 2); g.fill();
+      g.fillRect(230, 450, 20, 34);
+      g.strokeStyle = body; g.lineWidth = 6; g.lineCap = 'round';
+      g.beginPath(); g.moveTo(230, 456); g.lineTo(210, 428); g.moveTo(250, 456); g.lineTo(270, 428); g.stroke();
+      // 潭 + 涟漪 + 水雾：全部落在字幕框上方
       g.fillStyle = C.mid; g.globalAlpha = .85;
-      g.beginPath(); g.ellipse(240, 706, 132, 30, 0, 0, Math.PI * 2); g.fill(); g.globalAlpha = 1;
-      g.strokeStyle = water; g.globalAlpha = .55; g.lineWidth = 2;
-      for (var wi2 = 0; wi2 < 3; wi2++) { g.beginPath(); g.ellipse(240, 706, 42 + wi2 * 38, 9 + wi2 * 6, 0, 0, Math.PI * 2); g.stroke(); }
+      g.beginPath(); g.ellipse(240, 572, 128, 26, 0, 0, Math.PI * 2); g.fill(); g.globalAlpha = 1;
+      g.strokeStyle = water; g.globalAlpha = .60; g.lineWidth = 2;
+      for (var wi2 = 0; wi2 < 3; wi2++) { g.beginPath(); g.ellipse(240, 572, 40 + wi2 * 36, 8 + wi2 * 5, 0, 0, Math.PI * 2); g.stroke(); }
       g.globalAlpha = 1;
-      mist(g, 640, 150, .6); titleSeal(g, '赤水');
+      mist(g, 520, 110, .45); titleSeal(g, '赤水');
     } else if (key === 'herb') {
       // 神手谷药圃：田垄 + 药苗 + 亮色药架（墨皮下 C.wood 会没进背景，这里另给对比色）
       ridge(g, 340, 70, C.far, 29);
@@ -341,32 +369,39 @@
       house(g, 40, 430, 88, 60);
       mist(g, 260, 160, .4); titleSeal(g, '藥圃');
     } else if (key === 'cave') {
-      // 山涧石缝：两块实岩壁夹一线天光，缝底碎石 + 一点青绿（掌天瓶伏笔，瓶由 hs_clue 交代）
+      // 山涧石缝：岩壁分三层 + 皴笔，天光带上亮下渐隐（原来是一整条纯色矩形贯到 864）。
+      // 缝底碎石与那点青绿（掌天瓶伏笔，瓶由 hs_clue 交代）原在 y=660-742，全被字幕吃掉；上移到 540-600。
       ridge(g, 380, 80, C.far, 37);
-      var rock = skin === 'paper' ? 'rgba(74,62,42,.78)' : 'rgba(8,11,16,.80)';
-      var lit  = skin === 'paper' ? 'rgba(255,250,232,.66)' : 'rgba(196,210,214,.28)';
+      var rock  = skin === 'paper' ? 'rgba(74,62,42,.78)' : 'rgba(8,11,16,.88)';
+      var rock2 = skin === 'paper' ? 'rgba(120,104,76,.40)' : 'rgba(74,88,98,.22)';
+      var lit   = skin === 'paper' ? 'rgba(255,250,232,.70)' : 'rgba(196,210,214,.32)';
       g.fillStyle = rock;
-      g.beginPath(); g.moveTo(0, 210); g.lineTo(184, 176); g.lineTo(204, 430); g.lineTo(188, 864); g.lineTo(0, 864); g.closePath(); g.fill();
-      g.beginPath(); g.moveTo(480, 196); g.lineTo(296, 170); g.lineTo(282, 430); g.lineTo(296, 864); g.lineTo(480, 864); g.closePath(); g.fill();
-      g.fillStyle = lit;
-      g.beginPath(); g.moveTo(184, 176); g.lineTo(296, 170); g.lineTo(282, 864); g.lineTo(188, 864); g.closePath(); g.fill();
-      g.strokeStyle = C.ink; g.globalAlpha = .22; g.lineWidth = 2;
-      g.beginPath(); g.moveTo(184, 176); g.lineTo(204, 430); g.lineTo(188, 864); g.stroke();
-      g.beginPath(); g.moveTo(296, 170); g.lineTo(282, 430); g.lineTo(296, 864); g.stroke();
-      for (var ci = 0; ci < 7; ci++) {
-        g.beginPath(); g.moveTo(6, 268 + ci * 78); g.lineTo(140 - (ci % 3) * 22, 250 + ci * 78); g.stroke();
-        g.beginPath(); g.moveTo(474, 254 + ci * 78); g.lineTo(340 + (ci % 3) * 20, 240 + ci * 78); g.stroke();
+      g.beginPath(); g.moveTo(0, 196); g.lineTo(184, 166); g.lineTo(204, 400); g.lineTo(188, 620); g.lineTo(0, 636); g.closePath(); g.fill();
+      g.beginPath(); g.moveTo(480, 184); g.lineTo(296, 160); g.lineTo(282, 400); g.lineTo(296, 620); g.lineTo(480, 634); g.closePath(); g.fill();
+      g.fillStyle = rock2;
+      g.beginPath(); g.moveTo(0, 250); g.lineTo(170, 224); g.lineTo(192, 396); g.lineTo(0, 420); g.closePath(); g.fill();
+      g.beginPath(); g.moveTo(480, 242); g.lineTo(310, 218); g.lineTo(292, 396); g.lineTo(480, 414); g.closePath(); g.fill();
+      var sg = g.createLinearGradient(0, 166, 0, 616);
+      sg.addColorStop(0, lit); sg.addColorStop(.72, lit); sg.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = sg;
+      g.beginPath(); g.moveTo(184, 166); g.lineTo(296, 160); g.lineTo(286, 616); g.lineTo(192, 616); g.closePath(); g.fill();
+      g.strokeStyle = C.ink; g.globalAlpha = .26; g.lineWidth = 2;
+      g.beginPath(); g.moveTo(184, 166); g.lineTo(204, 400); g.lineTo(188, 616); g.stroke();
+      g.beginPath(); g.moveTo(296, 160); g.lineTo(282, 400); g.lineTo(296, 616); g.stroke();
+      for (var ci = 0; ci < 6; ci++) {
+        g.beginPath(); g.moveTo(6, 250 + ci * 62); g.lineTo(140 - (ci % 3) * 22, 234 + ci * 62); g.stroke();
+        g.beginPath(); g.moveTo(474, 240 + ci * 62); g.lineTo(340 + (ci % 3) * 20, 226 + ci * 62); g.stroke();
       }
       g.globalAlpha = 1;
       g.fillStyle = rock;
-      [[196,690,26],[268,716,20],[224,742,17],[286,676,14]].forEach(function (s) {
+      [[198,556,24],[270,578,19],[226,598,16],[284,544,13]].forEach(function (s) {
         g.beginPath(); g.ellipse(s[0], s[1], s[2], s[2] * .55, 0, 0, Math.PI * 2); g.fill();
       });
-      var jg = g.createRadialGradient(244, 660, 4, 244, 660, 92);
-      jg.addColorStop(0, skin === 'paper' ? 'rgba(72,150,96,.76)' : 'rgba(127,214,160,.70)');
+      var jg = g.createRadialGradient(244, 558, 4, 244, 558, 84);
+      jg.addColorStop(0, skin === 'paper' ? 'rgba(72,150,96,.80)' : 'rgba(127,214,160,.78)');
       jg.addColorStop(1, 'rgba(0,0,0,0)');
-      g.fillStyle = jg; g.fillRect(152, 568, 184, 184);
-      mist(g, 470, 180, .3); titleSeal(g, '山澗');
+      g.fillStyle = jg; g.fillRect(160, 474, 168, 168);
+      mist(g, 430, 150, .26); titleSeal(g, '山澗');
     }
     ground(g);
     paperGrain(g, key.length * 37 + 11);
@@ -825,8 +860,10 @@
   // ===================== 舞台自适应（同游戏 #stage 的 scale 口径） =====================
   function fit() {
     var wrap = $('stageWrap'), st = $('stage');
-    var w = window.innerWidth;
-    var s = Math.min(1, (w - 24) / 480);
+    // 舞台是 480x864 的定高竖屏：只按宽度缩放在矮窗口（1280x720 / 横屏 / 分屏）会把
+    // 864 高的舞台顶出屏幕，字幕框和跳过按钮被裁掉。高度也要一起参与取最小缩放。
+    var w = window.innerWidth, h = window.innerHeight;
+    var s = Math.min(1, (w - 24) / 480, (h - 24) / 864);
     wrap.style.width = (480 * s) + 'px'; wrap.style.height = (864 * s) + 'px';
     st.style.transform = 'scale(' + s + ')';
   }

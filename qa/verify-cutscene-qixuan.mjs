@@ -546,6 +546,61 @@ try {
   });
   ok('57 墨皮下剧情回顾列表仍完整、无横向溢出',
      out.reviewInk.rows === 2 && out.reviewInk.ink === true && out.reviewInk.overflow === false, out.reviewInk);
+
+  // ---- 逐拍审片回归（2026-11-10）：矮视口不裁、印章不裁、场景元素不落进字幕区 ----
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await fresh({ skin: 'guigu' });
+  await page.evaluate(() => { window.Cutscene.force = true; window.__FR.enterMap('qixuan'); });
+  await page.waitForTimeout(400);
+  out.fitLow = await page.evaluate(() => {
+    const r = document.getElementById('csHost').shadowRoot;
+    const st = r.querySelector('#stage').getBoundingClientRect();
+    const sub = r.querySelector('#subBox').getBoundingClientRect();
+    const seal = r.querySelector('#seal');
+    return { vh: window.innerHeight, stageTop: +st.top.toFixed(1), stageBottom: +st.bottom.toFixed(1),
+             subBottom: +sub.bottom.toFixed(1), sealText: seal.textContent,
+             sealClient: seal.clientWidth, sealScroll: seal.scrollWidth,
+             sealNowrap: getComputedStyle(seal).whiteSpace };
+  });
+  ok('58 矮视口 1280x720 舞台按高度缩放：舞台与字幕框完整落在屏内',
+     out.fitLow.stageTop >= 0 && out.fitLow.stageBottom <= out.fitLow.vh + 1
+     && out.fitLow.subBottom <= out.fitLow.vh + 1, out.fitLow);
+  ok('59 红色印章两字完整、nowrap 不裁字',
+     /^(七玄|採藥)$/.test(out.fitLow.sealText)
+     && out.fitLow.sealScroll <= out.fitLow.sealClient + 1
+     && out.fitLow.sealNowrap === 'nowrap', out.fitLow);
+
+  const csSrc = fs.readFileSync(path.join(ROOT, 'js/cutscene.js'), 'utf8');
+  const sm = csSrc.match(/fillRect\((\d+),\s*(\d+),\s*34,\s*34\)/) || [];
+  const sealX = +sm[1], sealY = +sm[2];
+  const subTop = 864 - 236;                       // #subBox: bottom 0 / height 236
+  const actorTop = 864 - 214 - 320;               // .actor: bottom 214 / height 320
+  ok('60 场景题跋印落在人物与字幕之外的天空区，且 fit() 按窗口高度取缩放',
+     sealX === 26 && sealY > 0 && sealY + 34 < 330 && sealY + 34 < subTop
+     && /var w = window\.innerWidth, h = window\.innerHeight/.test(csSrc)
+     && /\(h - 24\) \/ 864/.test(csSrc), { sealX, sealY, subTop, actorTop });
+
+  await page.evaluate(() => window.Cutscene.replay('houshan'));   // 瀑布/山涧属于后山分镜
+  await page.waitForTimeout(300);
+  out.scenePixels = await page.evaluate(() => {
+    const r = document.getElementById('csHost').shadowRoot;
+    const jump = (n) => r.querySelectorAll('#shotList div')[n].click();
+    const g = r.querySelector('#scene').getContext('2d');
+    const scan = (y0, y1, pred) => {
+      const d = g.getImageData(0, y0, 480, y1 - y0).data;
+      let n = 0;
+      for (let i = 0; i < d.length; i += 4) if (pred(d[i], d[i + 1], d[i + 2])) n++;
+      return n;
+    };
+    jump(5);
+    const fallBright = scan(555, 610, (R, G, B) => R > 90 && G > 95 && B > 100);  // 水潭/涟漪
+    jump(7);
+    const caveGreen = scan(520, 600, (R, G, B) => G > R + 18 && G > B + 8);       // 缝底青绿伏笔
+    return { fallBright, caveGreen };
+  });
+  ok('61 瀑布水潭与山涧青绿伏笔确实画在字幕框上方的可见区',
+     out.scenePixels.fallBright > 200 && out.scenePixels.caveGreen > 100, out.scenePixels);
+  await page.evaluate(() => document.getElementById('csHost').shadowRoot.getElementById('csSkipBtn').click());
 } catch (e) {
   out.fatal = String(e && e.stack || e).slice(0, 600);
   ok('运行未抛异常', false, out.fatal);

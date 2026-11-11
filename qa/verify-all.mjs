@@ -36,7 +36,7 @@ const ITEMS = [
   { key: 'ally-skills', file: 'verify-ally-skills.mjs', kind: 'gate',  desc: '同伴 / 灵宠技能：原著考据 + 覆盖 + 境界四档 + 六形态实机 + 水墨呈现 + 三类功法 + 自由行动 + 生死经济 + 遇险侧身（大衍挂机同口径、不站桩） + 双向反向注入' },
   { key: 'realm-single', file: 'repro-realm-single-source.mjs', kind: 'gate', desc: '境界唯一真源：夹逼图内外同口径（HUD/结算/道陨/通览/修行图/万灵榜/洞府/静修）+ 图内升级不暴涨 + 非夹逼图正常落盘' },
   { key: 'xianjie-order', file: 'repro-xianjie-break.mjs', kind: 'gate', desc: '仙界进阶次序：破境门按原著真仙→金仙→太乙→大罗→道祖升序 + 组头/默认展开/冲关入口都落在下一关' },
-  { key: 'cutscene-qixuan', file: 'verify-cutscene-qixuan.mjs', kind: 'gate', desc: '剧情动画（两张图 + 剧场入口 + 洞府剧情回顾）：各 9 拍台词逐字同源 MAP_STORIES、人物逐像素等于当前护甲 Sprites.hanli、剧场/回顾列表跨全图点播含无洞府的后山且不写 seen、分镜互不串台、联机不建层不写 seen、双皮只读 SKIN_INK、跳过/记账/回归兼容' },
+  { key: 'cutscene-qixuan', file: 'verify-cutscene-qixuan.mjs', kind: 'gate', desc: '剧情动画（两张图 18 拍 + 剧场入口 + 洞府剧情回顾 + 逐拍版式）：台词逐字同源 MAP_STORIES、人物逐像素等于当前护甲 Sprites.hanli、剧场/回顾列表跨全图点播含无洞府的后山且不写 seen、分镜互不串台、联机不建层不写 seen、双皮只读 SKIN_INK、矮视口不裁字幕、印章不裁字、场景元素避开字幕区、跳过/记账/回归兼容' },
 ];
 
 const argv = process.argv.slice(2);
