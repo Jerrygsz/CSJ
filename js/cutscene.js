@@ -332,19 +332,44 @@
       [[184,15],[214,7],[238,22],[272,9],[296,14]].forEach(function (f) {
         g.fillStyle = water2; g.fillRect(f[0], 222, f[1], 336);
       });
-      // 张铁顶水冲练：上举双臂的小剪影
-      var body = skin === 'paper' ? 'rgba(58,48,30,.62)' : 'rgba(16,22,28,.72)';
-      g.fillStyle = body;
-      g.beginPath(); g.ellipse(240, 436, 13, 15, 0, 0, Math.PI * 2); g.fill();
-      g.fillRect(230, 450, 20, 34);
-      g.strokeStyle = body; g.lineWidth = 6; g.lineCap = 'round';
-      g.beginPath(); g.moveTo(230, 456); g.lineTo(210, 428); g.moveTo(250, 456); g.lineTo(270, 428); g.stroke();
-      // 潭 + 涟漪 + 水雾：全部落在字幕框上方
+      // 张铁于瀑布底结跏趺坐、顶水冲练：坐姿剪影取代原先悬在水帘中段、上举双臂的 Y 形。
+      // 先铺潭面，再让人物坐在潭中磐石上；水帘自两侧落到潭里，头顶补散开的飞白与一圈静气光晕。
+      // 台词仍是原著「顶着水冲」，只改画面取境，不动 MAP_STORIES。
+      var body = skin === 'paper' ? 'rgba(58,48,30,.76)' : 'rgba(10,16,22,.84)';
+      var rim  = skin === 'paper' ? 'rgba(255,251,238,.72)' : 'rgba(196,214,220,.46)';
+      // 潭 + 涟漪：全部落在字幕框上方（y<610）
       g.fillStyle = C.mid; g.globalAlpha = .85;
       g.beginPath(); g.ellipse(240, 572, 128, 26, 0, 0, Math.PI * 2); g.fill(); g.globalAlpha = 1;
       g.strokeStyle = water; g.globalAlpha = .60; g.lineWidth = 2;
       for (var wi2 = 0; wi2 < 3; wi2++) { g.beginPath(); g.ellipse(240, 572, 40 + wi2 * 36, 8 + wi2 * 5, 0, 0, Math.PI * 2); g.stroke(); }
       g.globalAlpha = 1;
+      // 静气光晕：墨皮/纸皮各给对比色，避免同色糊进水帘
+      var hg = g.createRadialGradient(240, 528, 6, 240, 528, 78);
+      hg.addColorStop(0, skin === 'paper' ? 'rgba(255,252,238,.42)' : 'rgba(186,210,216,.24)');
+      hg.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = hg; g.fillRect(162, 450, 156, 156);
+      // 潭中磐石：给坐姿一个落点，不再悬空
+      g.fillStyle = body; g.globalAlpha = .72;
+      g.beginPath(); g.ellipse(240, 560, 44, 10, 0, 0, Math.PI * 2); g.fill(); g.globalAlpha = 1;
+      g.strokeStyle = rim; g.globalAlpha = .65; g.lineWidth = 1.5;
+      g.beginPath(); g.ellipse(240, 557, 44, 8, 0, Math.PI * 1.06, Math.PI * 1.94); g.stroke(); g.globalAlpha = 1;
+      // 结跏趺坐：道髻 + 头 + 上窄下宽的坐身 + 盘腿横椭圆 + 双手搭膝（无上举笔画）
+      g.fillStyle = body;
+      g.beginPath(); g.ellipse(240, 498, 4, 3, 0, 0, Math.PI * 2); g.fill();
+      g.beginPath(); g.ellipse(240, 508, 10, 11, 0, 0, Math.PI * 2); g.fill();
+      g.beginPath();
+      g.moveTo(231, 520); g.lineTo(249, 520);
+      g.quadraticCurveTo(254, 534, 256, 546); g.lineTo(224, 546);
+      g.quadraticCurveTo(226, 534, 231, 520); g.closePath(); g.fill();
+      g.beginPath(); g.ellipse(240, 550, 30, 10, 0, 0, Math.PI * 2); g.fill();
+      g.strokeStyle = body; g.lineWidth = 5; g.lineCap = 'round';
+      g.beginPath();
+      g.moveTo(231, 524); g.quadraticCurveTo(220, 536, 214, 548);
+      g.moveTo(249, 524); g.quadraticCurveTo(260, 536, 266, 548);
+      g.stroke(); g.lineCap = 'butt';
+      g.strokeStyle = rim; g.globalAlpha = .5; g.lineWidth = 1.5;
+      g.beginPath(); g.moveTo(224, 551); g.quadraticCurveTo(240, 558, 256, 551); g.stroke(); g.globalAlpha = 1;
+      // 水帘本身已直落到人物头顶，不再补散水笔画：对称斜线会读成举臂，短竖线像天线，都去掉。
       mist(g, 520, 110, .45); titleSeal(g, '赤水');
     } else if (key === 'herb') {
       // 神手谷药圃：田垄 + 药苗 + 亮色药架（墨皮下 C.wood 会没进背景，这里另给对比色）

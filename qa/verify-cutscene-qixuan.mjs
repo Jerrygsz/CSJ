@@ -586,20 +586,48 @@ try {
     const r = document.getElementById('csHost').shadowRoot;
     const jump = (n) => r.querySelectorAll('#shotList div')[n].click();
     const g = r.querySelector('#scene').getContext('2d');
-    const scan = (y0, y1, pred) => {
+    const scan = (y0, y1, pred, skipMid) => {
       const d = g.getImageData(0, y0, 480, y1 - y0).data;
       let n = 0;
-      for (let i = 0; i < d.length; i += 4) if (pred(d[i], d[i + 1], d[i + 2])) n++;
+      for (let y = 0; y < y1 - y0; y++) for (let x = 0; x < 480; x++) {
+        if (skipMid && x >= 200 && x <= 280) continue;   // 潭心坐着人，只数两翼的潭水/涟漪
+        const i = (y * 480 + x) * 4;
+        if (pred(d[i], d[i + 1], d[i + 2])) n++;
+      }
       return n;
     };
     jump(5);
-    const fallBright = scan(555, 610, (R, G, B) => R > 90 && G > 95 && B > 100);  // 水潭/涟漪
+    const fallBright = scan(555, 610, (R, G, B) => R > 90 && G > 95 && B > 100, true);  // 水潭/涟漪
     jump(7);
     const caveGreen = scan(520, 600, (R, G, B) => G > R + 18 && G > B + 8);       // 缝底青绿伏笔
     return { fallBright, caveGreen };
   });
   ok('61 瀑布水潭与山涧青绿伏笔确实画在字幕框上方的可见区',
      out.scenePixels.fallBright > 200 && out.scenePixels.caveGreen > 100, out.scenePixels);
+
+  // ---- 2026-11-11：瀑布里那个「上举双臂、悬在水帘中段」的 Y 形小人改成潭中打坐 ----
+  // 双保险：源码层锁坐姿几何 + 像素层锁「人落在潭面、水帘中段变空」。
+  await page.waitForTimeout(250);
+  out.fallFigure = await page.evaluate(() => {
+    const r = document.getElementById('csHost').shadowRoot;
+    r.querySelectorAll('#shotList div')[5].click();           // 切回 fall 分镜
+    const g = r.querySelector('#scene').getContext('2d');
+    const dark = (x0, y0, x1, y1) => {
+      const d = g.getImageData(x0, y0, x1 - x0, y1 - y0).data;
+      let n = 0;
+      for (let i = 0; i < d.length; i += 4) if (d[i] + d[i + 1] + d[i + 2] < 330) n++;
+      return n;
+    };
+    return {
+      sit: dark(205, 495, 275, 562),                        // 潭中石台 + 结跏趺坐剪影
+      old: dark(205, 420, 275, 475)                         // 原举臂小人悬空区，应清空
+    };
+  });
+  ok('62 瀑布人物改为潭面结跏趺坐：坐姿落在石台上，水帘中段不再有上举双臂的悬空剪影',
+     out.fallFigure.sit > 300 && out.fallFigure.old < 60
+     && !/lineTo\(210, 428\)/.test(csSrc) && !/lineTo\(270, 428\)/.test(csSrc)
+     && /ellipse\(240, 550, 30, 10/.test(csSrc) && /ellipse\(240, 560, 44, 10/.test(csSrc),
+     out.fallFigure);
   await page.evaluate(() => document.getElementById('csHost').shadowRoot.getElementById('csSkipBtn').click());
 } catch (e) {
   out.fatal = String(e && e.stack || e).slice(0, 600);
