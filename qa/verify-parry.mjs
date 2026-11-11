@@ -181,6 +181,56 @@ ok(/引气 \+/.test(game) && /煞气 \+/.test(game), '奖励飘字：煞气 / �
 ok(/data-chain/.test(game) && /#parryBtn\[data-chain\]::before/.test(css), '弹反键上方显示「连 ×N」');
 ok(/parryHitFlash \.46s/.test(css) && /inset 0 0 0 7px/.test(css), '#parryHit 金环加粗加长（7px / 0.46s）');
 
+// ---------- 8. 20261111G：大爆炸清场 + 无敌帧（连反叠加、封顶 2 秒）----------
+// 口径：弹反那一圈冲击波不只是好看 —— 半径内的杂兵 / 弹幕 / 地面持续区 / 真判定光柱一起扫掉；
+// 随后给 0.5s 无敌，连反可叠加但封顶 2s。三条边界必须同时守住：
+//   ① 不碰 Boss（Boss 只吃反震，否则一次按键就秒 Boss）；
+//   ② 精英不秒杀（按最大生命重创，"一键清精英"会把精英设计抹平）；
+//   ③ 预警圈 G.tells 不清（它和出招分开计时，删了只是把警告藏起来，招照样落下来）。
+ok(J && J.clearR >= 150 && J.clearR <= 260, '清场半径 clearR 与最外圈冲击波同口径（150~260px）', J && J.clearR);
+ok(J && J.clearElitePct > 0 && J.clearElitePct < 1, '精英不秒杀：按最大生命比例重创', J && J.clearElitePct);
+ok(J && J.invSec >= 0.4 && J.invSec <= 0.6, '每次弹反给 0.5s 左右的爆炸无敌', J && J.invSec);
+ok(J && J.invSecMax >= 1.5 && J.invSecMax <= 3 && J.invSecMax > J.invSec, '连反叠加的无敌封顶 2s（且大于单次）', J && J.invSecMax);
+
+const blastFn = (game.match(/function parryBlast\s*\(\)\s*\{[\s\S]*?\r?\n  \}\r?\n/) || [''])[0];
+ok(blastFn.length > 500, 'game.js 定义 parryBlast()（大爆炸清场）', blastFn.length);
+ok(/for \(let i = 0; i < G\.enemies\.length; i\+\+\)/.test(blastFn) && /e\.elite/.test(blastFn),
+    '清场扫小怪：杂兵抹掉、精英走 clearElitePct 重创');
+ok(/damageEnemy\(e, \(\(e\.hp \|\| 1\) \+ 1\) \/ gm/.test(blastFn),
+    '杂兵走正规伤害链路（掉落 / 连斩 / 煞气照给），不是直接从数组删掉');
+ok(/G\.ebullets\.splice\(i, 1\)/.test(blastFn), '清掉半径内飞来的敌方弹幕');
+ok(/G\.zones\.splice\(i, 1\)/.test(blastFn) && /G\.hazards\.splice\(i, 1\)/.test(blastFn),
+    '清掉地面持续区与真判定持续招（光柱 / 横扫 / 地刺）');
+ok(/h\.pts/.test(blastFn), '地刺按各点位判定是否落在爆炸半径内');
+ok(!/G\.boss/.test(blastFn), 'Boss 不参与清场（只吃反震 / 硬直 / 破绽）');
+ok(!/G\.tells\.splice/.test(blastFn), '预警圈 G.tells 不清（删圈只会把警告藏起来）');
+
+// 顺序：反震先结算来源，再清场，最后连反飘字 —— 反了的话反震印蜕会随来源一起消失
+const iCounter = game.indexOf("if (src && src.hp != null && !src._dead)");
+const iBlast = game.indexOf('const blast = parryBlast()');
+const iChainText = game.indexOf('// 9) 连反');
+ok(iCounter > 0 && iBlast > iCounter && iChainText > iBlast,
+    'parryJuice 顺序：反震 → 大爆炸清场 → 连反', { counter: iCounter, blast: iBlast, chain: iChainText });
+ok(/pr\.lastBlast = blast/.test(game), '本次清场结果写回 pr.lastBlast（QA 探针可读）');
+
+// 无敌帧：时长 = 基数 × 连反层数（封顶 invSecMax）；无敌期间只放行「正握着弹反」的判定
+ok(/ivGrant:\s*0/.test(game), 'resetRun 初始化 G.parry.ivGrant');
+ok(/pr\.ivGrant = Math\.max\(pr\.ivGrant \|\| 0, Math\.min\(ivMax, ivSec \* Math\.max\(1, pr\.chain \|\| 1\)\)\)/.test(game),
+    '无敌时长按连反层数递增并封顶 invSecMax');
+ok(/p\.iv = Math\.max\(p\.iv \|\| 0, pr\.ivGrant\)/.test(game), '叠加后的无敌落到 p.iv（hitPlayer 唯一免伤判据）');
+ok(/if \(pr\.ivGrant > 0\) \{ pr\.ivGrant -= dt/.test(game), 'updateParry 每帧衰减 ivGrant（与实际无敌同步）');
+// 关键：无敌不能把后续弹反一起吞掉，否则连反链永远涨不起来
+ok(/const wasIv = p\.iv > 0;/.test(game) && /const guarding = !!\(G\.parry && \(G\.parry\.state === 'arming'/.test(game),
+    'hitPlayer 区分「无敌中」与「正握着弹反」');
+ok(/if \(wasIv && !\(guarding && G\.coopRole !== 'client'\)\) return;/.test(game),
+    '无敌期间：非招架状态一律免伤');
+ok(/if \(wasIv\) taken = 0;/.test(game) && /if \(wasIv\) return;/.test(game),
+    '无敌期间判到的弹反：算格开但不掉血（连反照涨）');
+ok(/const ivg = \(G\.parry && G\.parry\.ivGrant\) \|\| 0/.test(game), '主角身上画无敌护罩（无敌要看得见）');
+ok(/maxr: J\.clearR \|\| 172/.test(game), '格开时画出清场边界环（玩家看得见炸得到哪）');
+ok(/parryClear\(\)\s*\{\s*return parryBlast\(\)/.test(game) && /parryIv\(\)\s*\{/.test(game),
+    '__FR 暴露 parryClear / parryIv 探针');
+
 // ---------- 汇总 ----------
 console.log('');
 if (fail === 0) {

@@ -1865,7 +1865,7 @@
     return (window.PARRY && window.PARRY.JUICE) || {
       hitStop: 0.18, hitStopChain: 0.03, shakeTap: 26, shakeCounter: 9, knock: 52, stun: 0.62,
       vulnSec: 2.4, vulnMul: 1.70, chainWin: 2.4, chainMax: 7, chainDamage: 0.25,
-      counterHpPct: 0.05, bossCounterMul: 1.5,
+      counterHpPct: 0.05, bossCounterMul: 1.5, clearR: 172, clearElitePct: 0.35, invSec: 0.5, invSecMax: 2,
       shaBack: 18, healPct: 0.02, sparkN: 26, hapticTap: [26, 34, 46], hapticBoss: [34, 42, 78]
     };
   }
@@ -1888,7 +1888,71 @@
       elParryHit.classList.add('go');
     } catch (e) {}
   }
-  // 一整套命中反馈：顿帧 → 震动 → 音效 → 金环 → 刀光冲击波 → 击退硬直破绽 → 连反
+  // 大爆炸清场（20261111G）：那圈冲击波不只是好看，它真的「炸」——
+  // 半径内的小怪、飞来的弹幕、地上的持续区与真判定光柱一起被扫掉。
+  // 三条边界：① 不碰 Boss（Boss 只吃反震 / 硬直 / 破绽，不然弹反就成了一次按键秒 Boss）；
+  //          ② 精英不秒杀，按最大生命重创（否则「一键清精英」会把精英的设计抹平）；
+  //          ③ 预警圈（G.tells）**不清** —— 它和实际出招是分开计时的，删掉圈只是把警告藏了，
+  //             招式照样落下来，等于用一次弹反换来一次看不见的偷袭。
+  // 返回 { kills, wiped, R }：kills = 清掉的杂兵数，wiped = 被震碎的弹幕/区域等，QA 与飘字用。
+  function parryBlast() {
+    const J = parryJ(), p = G.player;
+    if (!p) return { kills: 0, wiped: 0, R: 0 };
+    const R = J.clearR || 172;
+    const gm = Math.max(0.0001, dmgMul());
+    let kills = 0, wiped = 0;
+    const burst = (x, y, rr, col) => {
+      // 细环 + 短命：一开始用 5px 粗环，一堆小怪同时炸出来像撒了一地红圈按钮；
+      // 收细到 2.6px、22ms 内散尽，读起来才是「被打灭了」而不是「地上多了个标记」。
+      G.parts.push({ ring: true, hard: true, lw: 2.6, x: x, y: y, r: 2, maxr: Math.max(18, rr), life: 0.22, maxlife: 0.22, color: col || '#ffb060' });
+    };
+    // ① 小怪：杂兵直接抹掉 —— 但走正规伤害链路，掉落 / 连斩 / 煞气 / 精英判定一个不少。
+    //    血量给到「刚好够死」而不是天文数字：一屏飘满夸张伤害反而看不出清场，只看出一堆数字。
+    for (let i = 0; i < G.enemies.length; i++) {
+      const e = G.enemies[i];
+      if (!e || e._dead) continue;
+      if (U.dist(p.x, p.y, e.x, e.y) > R + (e.r || 10)) continue;
+      if (e.elite) {
+        damageEnemy(e, (e.maxhp || 1) * (J.clearElitePct || 0.35) / gm, { silentText: true, noVuln: true });
+        wiped++;
+      } else {
+        damageEnemy(e, ((e.hp || 1) + 1) / gm, { silentText: true });
+        kills++;
+      }
+      // 每一只都原地炸一小圈：要让「一片全清」看得见，而不是几只怪自己默默消失
+      burst(e.x, e.y, (e.r || 12) * 3);
+    }
+    // ② 弹幕：飞在半路的敌人攻击一并震碎（撒一簇火星，别让它凭空蒸发）
+    for (let i = G.ebullets.length - 1; i >= 0; i--) {
+      const b = G.ebullets[i];
+      if (U.dist(p.x, p.y, b.x, b.y) > R + (b.r || 6)) continue;
+      for (let k = 0; k < 3; k++) {
+        const a2 = Math.random() * 6.2832;
+        G.parts.push({ x: b.x, y: b.y, vx: Math.cos(a2) * U.rand(60, 150), vy: Math.sin(a2) * U.rand(60, 150), life: 0.24, maxlife: 0.24, size: 3, color: '#ffd88a' });
+      }
+      G.ebullets.splice(i, 1); wiped++;
+    }
+    // ③ 地面持续区（减速 / 漩涡）：只做视觉与拉扯、不结算伤害，扫掉不改难度，但「炸干净」的手感得有
+    for (let i = G.zones.length - 1; i >= 0; i--) {
+      const z = G.zones[i];
+      if (U.dist(p.x, p.y, z.x, z.y) > R) continue;
+      burst(z.x, z.y, (z.r || 30) * 0.8, '#ffb060');
+      G.zones.splice(i, 1); wiped++;
+    }
+    // ④ 真判定持续招（光柱 / 横扫 / 地刺）：这才是「敌对攻击」里最该被炸掉的那一层
+    for (let i = G.hazards.length - 1; i >= 0; i--) {
+      const h = G.hazards[i];
+      let near = U.dist(p.x, p.y, h.x || 0, h.y || 0) <= R;
+      if (!near && h.pts) for (const q of h.pts) { if (U.dist(p.x, p.y, q.x, q.y) <= R) { near = true; break; } }
+      if (!near) continue;
+      burst(h.x != null ? h.x : p.x, h.y != null ? h.y : p.y, 60, '#ffd88a');
+      G.hazards.splice(i, 1); wiped++;
+    }
+    return { kills: kills, wiped: wiped, R: R };
+  }
+
+
+  // 一整套命中反馈：顿帧 → 震动 → 音效 → 金环 → 刀光冲击波 → 击退硬直破绽 → 大爆炸清场 → 连反
   // 返回本次连反层数（1 = 断连后的第一下）
   function parryJuice(src, ang) {
     const J = parryJ(), p = G.player, pr = G.parry;
@@ -1928,6 +1992,9 @@
       G.parts.push({ ring: true, hard: true, lw: 13, x: p.x, y: p.y, r: 8, maxr: 156, life: 0.46, maxlife: 0.46, color: C_HOT });
       G.parts.push({ ring: true, hard: true, lw: 8, x: p.x, y: p.y, r: 6, maxr: 96, life: 0.34, maxlife: 0.34, color: C_CORE });
       G.parts.push({ ring: true, hard: true, lw: 5, x: p.x, y: p.y, r: 4, maxr: 52, life: 0.22, maxlife: 0.22, color: '#ffffff' });
+      // 清场边界环（20261111G）：最外圈这条细金环就是「炸得到哪」的分界线 ——
+      // 玩家得看得见这一圈，才会知道「站远了没用、站近了一键盘全清」。
+      G.parts.push({ ring: true, hard: true, lw: 3, x: p.x, y: p.y, r: 14, maxr: J.clearR || 172, life: 0.52, maxlife: 0.52, color: C_CORE });
       // 放射光芒：16 道长短不一的直线「炸」出去
       for (let i = 0; i < 16; i++) {
         const a3 = a0 + (i / 16) * 6.2832 + U.rand(-0.06, 0.06);
@@ -1962,7 +2029,25 @@
       spawnText(src.x, src.y - (src.r || 12) - 26, '破绽', '#ffb060', 20, { punch: true, stroke: true });
     }
 
-    // 7) 连反：把「接连格了几次」说清楚（伤害加成在 hitPlayer 里算）
+    // 7) 大爆炸清场（20261111G）：冲击波扫过的地方，杂兵 / 弹幕 / 持续区 / 光柱一起没了。
+    //    放在反震之后：先让「反震」那一记数字落到来源身上，再由爆炸收尾 —— 顺序反了，
+    //    来源会先被爆炸抹掉，反震的印蜕和破绽就都没了。
+    const blast = parryBlast();
+    pr.lastBlast = blast;    // QA 探针读它（parryState().lastBlast.kills / .wiped）
+    // 8) 无敌帧：格开之后的这半秒刀枪不入；连反往上叠，封顶 2 秒。
+    //    时长 = 0.5s × 连反层数（×1 半秒 / ×2 一秒 / ×4 两秒封顶），而不是「剩余时间 +0.5」——
+    //    弹反收招有 1s CD，剩余时间口径下永远叠不起来，这个功能就成了摆设。
+    //    用 max 保底：已经给出的无敌不会被一次断连反过来缩短。
+    const ivSec = J.invSec || 0.5, ivMax = J.invSecMax || 2;
+    pr.ivGrant = Math.max(pr.ivGrant || 0, Math.min(ivMax, ivSec * Math.max(1, pr.chain || 1)));
+    if (p) p.iv = Math.max(p.iv || 0, pr.ivGrant);
+    if (blast.kills + blast.wiped >= 2) {
+      // 只报一个总数：这一下真正「扫空一片」的时候才值得占一行字。
+      // 位置压到主角脚下 46px —— 原来在 +30，正好压在爆炸核心和「格开」中间，三个字糊成一团。
+      spawnText(p.x, p.y + p.r + 46, '荡清 ' + (blast.kills + blast.wiped), '#ffd88a', 17, { punch: true, stroke: true, life: 0.9 });
+    }
+
+    // 9) 连反：把「接连格了几次」说清楚（伤害加成在 hitPlayer 里算）
     //    越往上越大 —— ×2 到 ×7 是看得见的爬升，才有"再格一次"的冲动。
     if (p && pr.chain >= 2) {
       spawnText(p.x, p.y - p.r - 40, '连反 ×' + pr.chain, '#ffe6a8', 22 + Math.min(16, pr.chain * 2), { punch: true, stroke: true, life: 1.1 });
@@ -2038,6 +2123,8 @@
     // 连反窗口 / 破绽计时：与状态机无关，收招之后照样走
     if (pr.chainT > 0) { pr.chainT -= dt; if (pr.chainT <= 0) { pr.chainT = 0; pr.chain = 0; } }
     if (pr.vulnT > 0) { pr.vulnT -= dt; if (pr.vulnT <= 0) { pr.vulnT = 0; pr.vulnE = null; } }
+    // 爆炸无敌帧的授权额度也跟着时间走：它只负责「这一下给到多久」，真正免伤看 p.iv
+    if (pr.ivGrant > 0) { pr.ivGrant -= dt; if (pr.ivGrant < 0) pr.ivGrant = 0; }
     if (pr.state === 'arming') {
       if (c && c.tap && (G.time - pr.pressT) >= c.tap.window) { pr.state = 'hold'; pr.holdT = 0; pr.shaLow = false; }
     } else if (pr.state === 'hold') {
@@ -2080,14 +2167,22 @@
   }
 
   function hitPlayer(dmg, sk, src) {
-    const p = G.player; if (p.iv > 0 || G.god) return;
+    const p = G.player; if (!p || G.god) return;
     if (G.state === 'down') return;          // P6：已经躺着了，别再挨打（免得重复触发倒地）
+    // 无敌帧（含弹反后的 0.5~2s）：默认一律免伤。
+    // 但「正握着弹反」是唯一例外 —— 弹反成功会送自己无敌，如果无敌把后面所有来招都吞掉，
+    // 那连反链就永远涨不起来（奖励反过来堵死了奖励）。所以护着的时候仍然让弹反判一次：
+    // 判中了照常进连反 / 反震 / 续无敌，只是这一次不掉血（见下面的 taken = 0）。
+    const wasIv = p.iv > 0;
+    const guarding = !!(G.parry && (G.parry.state === 'arming' || G.parry.state === 'hold'));
+    if (wasIv && !(guarding && G.coopRole !== 'client')) return;
     // 弹反拦截：仅单人/房主本地结算；客机不结算敌人伤害（口径 5）
     if (G.coopRole !== 'client') {
       const pr = parryResolve(dmg, sk, src);
       if (pr && pr.handled) {
         let taken = dmg * (1 - pr.reduce);
         taken *= (1 - armorRate());           // 护甲仍叠加（两者独立减免）
+        if (wasIv) taken = 0;                 // 无敌帧里判到的这一下：算格开，但不掉血
         p.hp -= taken; p.iv = 0.4;
         if (pr.type === 'tap') {
           // 格开成功：不给红色受伤闪 + 不给受伤音（那是在告诉玩家「你挨打了」，
@@ -2165,6 +2260,8 @@
         return;
       }
     }
+    // 无敌帧：没判到弹反（没护着 / 招架不了）就直接免伤 —— 这才是「无敌」的本意
+    if (wasIv) return;
     const taken = dmg * (1 - armorRate());
     p.hp -= taken; p.iv = 0.55; p.hurtFlash = 0.2; G.shake = 8; G.flash = Math.max(G.flash, 0.45); Sfx.hurt();
     spawnText(p.x, p.y - p.r - 6, '-' + Math.round(taken), '#ff7676', 16);
@@ -8967,6 +9064,23 @@
         ctx.lineWidth = 1.5;
         ctx.beginPath(); ctx.arc(p.x, p.y, p.r + 8, 0, 6.28); ctx.stroke();
       }
+      // 弹反余威 · 无敌帧（20261111G）：格开之后的 0.5~2 秒刀枪不入，必须看得见 ——
+      // 贴身的暖金护罩 + 一圈呼吸的细环，越接近结束越淡。
+      // 浅宣纸上金线读不出来，换深棕（#8f4f2e，纸底对比 ~4:1，且不入「降彩」那一套）。
+      const ivg = (G.parry && G.parry.ivGrant) || 0;
+      if (ivg > 0) {
+        const ik = Math.min(1, ivg / 0.5);            // 最后 0.5 秒开始淡出
+        const breathe = 1 + 0.06 * Math.sin(G.time * 22);
+        ctx.save();
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = softRing ? 'rgba(143,79,46,' + (0.50 * ik).toFixed(3) + ')' : 'rgba(255,206,112,' + (0.74 * ik).toFixed(3) + ')';
+        ctx.lineWidth = softRing ? 1.6 : 2.6;
+        ctx.beginPath(); ctx.arc(p.x, p.y, (p.r + 11) * breathe, 0, 6.28); ctx.stroke();
+        // 内层薄雾：只给极小的一点暖光，别糊成红/金饼盖住人物
+        ctx.fillStyle = softRing ? 'rgba(143,79,46,' + (0.045 * ik).toFixed(3) + ')' : 'rgba(255,206,112,' + (0.075 * ik).toFixed(3) + ')';
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r + 9, 0, 6.28); ctx.fill();
+        ctx.restore();
+      }
     }
 
     // 持续型招式立起来那层：压在角色之上、粒子之下。
@@ -9170,10 +9284,10 @@
     if (window.Coop) window.Coop.reset();
     G.player = newPlayer();
     // 弹反状态（凡人味防御 · 20261111D）：每图复位，得重新按一次
-    // 弹反：状态机 + 连反链（chain/chainT）+ 破绽易伤（vulnE/vulnT）+ 最近一次成功的记录（QA 探针用）
+    // 弹反：状态机 + 连反链（chain/chainT）+ 破绽易伤（vulnE/vulnT）+ 爆炸无敌帧（ivGrant）+ 最近一次成功的记录（QA 探针用）
     G.parry = {
       state: 'idle', pressT: 0, holdT: 0, cd: 0, shaLow: false,
-      chain: 0, chainT: 0, vulnE: null, vulnT: 0, last: null
+      chain: 0, chainT: 0, vulnE: null, vulnT: 0, ivGrant: 0, last: null
     };
     G.etch = [];   // 蚀 DoT：{ e, t, acc, dmg }
     G.enemies = []; G.bullets = []; G.ebullets = []; G.gems = []; G.herbs = []; G.parts = []; G.texts = []; G.loot = []; G.tells = []; G.zones = []; G.hazards = [];
@@ -13704,12 +13818,16 @@
       return { left: elParryBtn.offsetLeft, top: elParryBtn.offsetTop, w: elParryBtn.offsetWidth, h: elParryBtn.offsetHeight, sw: st.clientWidth, sh: st.clientHeight };
     },
     parryVuln() { return G.parry ? { e: !!G.parry.vulnE, t: +(G.parry.vulnT || 0).toFixed(3), chain: G.parry.chain || 0 } : null; },
-    parryHitTest(dmg, srcIdx) {
+    // 20261111G：爆炸清场 + 无敌帧探针。不按键也能单独验证清场半径内的东西是否被扫掉。
+    parryClear() { return parryBlast(); },
+    parryIv() { return G.player ? { iv: +(G.player.iv || 0).toFixed(3), grant: +((G.parry && G.parry.ivGrant) || 0).toFixed(3) } : null; },
+    parryHitTest(dmg, srcIdx, keepIv) {
       // 造一个「刚刚格开」的场景：arming 态下给一次攻击，返回减伤 / 连反 / 手感数值
+      // keepIv=true：保留现有无敌帧（验证「无敌期间仍能弹反、且不掉血」这条链路）
       const c = parryCarrier(); if (!c || !c.tap) return { ok: false, reason: 'no-carrier' };
       const pr = G.parry; pr.state = 'arming'; pr.pressT = G.time;
-      if (G.player) G.player.iv = 0;
-      const src = (typeof srcIdx === 'number' && G.enemies) ? G.enemies[srcIdx] : null;
+      if (G.player && !keepIv) G.player.iv = 0;
+      const src = (typeof srcIdx === 'number') ? (srcIdx === -1 ? G.boss : G.enemies[srcIdx]) : null;
       const before = G.player ? G.player.hp : 0;
       const eb = src ? { x: src.x, y: src.y } : null;
       hitPlayer(dmg || 60, { n: 'test', fx: 'blade' }, src);
@@ -13721,6 +13839,9 @@
         shake: +(G.shake || 0).toFixed(1),
         vulnT: +(pr.vulnT || 0).toFixed(2),
         stun: src ? +(src.stunT || 0).toFixed(2) : null,
+        iv: G.player ? +(G.player.iv || 0).toFixed(2) : null,
+        ivGrant: +((pr.ivGrant) || 0).toFixed(2),
+        blast: pr.lastBlast ? { kills: pr.lastBlast.kills, wiped: pr.lastBlast.wiped, R: pr.lastBlast.R } : null,
         moved: src && eb ? { dx: +(src.x - eb.x).toFixed(1), dy: +(src.y - eb.y).toFixed(1) } : null
       };
     },
