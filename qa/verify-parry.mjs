@@ -42,7 +42,13 @@ const attrKeys = ['phys', 'fire', 'ice', 'poison', 'bind', 'spirit'];
 ok(attrKeys.every(k => MAT[k]), 'MATRIX 含六类属性 phys/fire/ice/poison/bind/spirit', Object.keys(MAT));
 ok(MAT.fire && MAT.ice && MAT.fire !== MAT.ice, '冰系单列（fire 与 ice 是不同行，未并入）');
 ok(MAT.poison && MAT.poison.tap && MAT.poison.tap.special === 'clearErosion1', 'poison 行自带 clearErosion1（蚀/解侵蚀）');
-ok(MAT.bind && MAT.bind.tap && MAT.bind.tap.special === 'free', 'bind 行自带 free（解控不反伤）');
+ok(MAT.bind && MAT.bind.tap && MAT.bind.tap.special === 'free', 'bind 行自带 free（解控，反伤低）');
+// 20261111F：反震抬成主打输出 —— 格开本身即一次重击（原来 phys 只有 0.4×载体 0.6 = 24%）
+ok(MAT.phys && MAT.phys.tap.counter >= 1.0, 'phys 单击反伤 ≥100% 来袭伤害（不再是零头）', MAT.phys && MAT.phys.tap.counter);
+ok(MAT.fire && MAT.fire.tap.counter >= 0.8 && MAT.ice && MAT.ice.tap.counter >= 0.5,
+    'fire / ice 反伤同步抬高（≥0.8 / ≥0.5）', { fire: MAT.fire && MAT.fire.tap.counter, ice: MAT.ice && MAT.ice.tap.counter });
+ok(MAT.poison && MAT.poison.tap.counter > 0 && MAT.bind && MAT.bind.tap.counter > 0 && MAT.spirit && MAT.spirit.tap.counter > 0,
+    'poison / bind / spirit 不再是 0 反伤', { poison: MAT.poison.tap.counter, bind: MAT.bind.tap.counter, spirit: MAT.spirit.tap.counter });
 
 // 长按衰减曲线（口径 2：非匀速 1.0/0.71/0.43）
 const decay = P ? P.HOLD_DECAY : [];
@@ -134,6 +140,46 @@ ok(/Sfx\.parry/.test(game) && /parry\(chain\)\s*\{/.test(audio), '专属音效 S
 ok(/G\.parry\.vulnT > 0/.test(game) && /G\.parry\.vulnE === e/.test(game), '破绽易伤在 damageEnemy 生效（只认那一只）');
 ok(/pr\.chain = \(pr\.chain > 0 && pr\.chainT > 0\)/.test(game), '连反链按 chainWin 窗口累加（断连归 1）');
 ok(/if \(pr\.chainT > 0\) \{ pr\.chainT -= dt/.test(game), 'updateParry 每帧衰减连反窗口与破绽计时');
+
+// ---------- 7. 20261111F：反震 / 美术 / 飘字 / 奖励整体加倍（以弹反为主打 Boss 技巧）----------
+ok(J && J.counterHpPct >= 0.04, '反震带「目标最大生命比例」保底（Boss 才算得动）', J && J.counterHpPct);
+ok(J && J.bossCounterMul >= 1.3, '对 Boss 的反震再乘 bossCounterMul（弹反是主打 Boss 的技巧）', J && J.bossCounterMul);
+ok(J && J.chainMax >= 7 && J.chainDamage >= 0.25, '连反链抬到 ≥7 层、每层 ≥+25%', J && { chainMax: J.chainMax, chainDamage: J.chainDamage });
+ok(J && J.vulnSec >= 2.2 && J.vulnMul >= 1.6, '破绽时长 ≥2.2s、易伤 ≥1.6 倍', J && { sec: J.vulnSec, mul: J.vulnMul });
+ok(J && J.shaBack >= 16 && J.healPct > 0, '奖励加倍：煞气返还 ≥16 + 卸力引气回血', J && { shaBack: J.shaBack, healPct: J.healPct });
+ok(J && J.hitStop >= 0.16 && J.shakeTap >= 22 && J.knock >= 45 && J.stun >= 0.55,
+    '顿帧 / 震屏 / 击退 / 硬直整体加倍', J && { hitStop: J.hitStop, shake: J.shakeTap, knock: J.knock, stun: J.stun });
+ok(J && J.sparkN >= 20 && J.hitStopChain > 0, '火星 ≥20 颗 + 连反叠顿帧', J && { sparkN: J.sparkN, hitStopChain: J.hitStopChain });
+
+// 反震伤害路径：max(来袭伤害 × 反伤比例, 目标最大生命 × 比例) × 连反倍率
+ok(/const byHp = \(pr\.src\.maxhp \|\| 0\) \*/.test(game) && /Math\.max\(byDmg, byHp\)/.test(game),
+    '反震伤害取 max(来袭伤害, 目标最大生命比例)');
+ok(/bossCounterMul \|\| 1\.5/.test(game), 'hitPlayer 里对 Boss 应用额外反震倍率');
+// 反震的「按生命比例」必须先除掉全局倍率，否则等级越高越离谱（实测 lv45 一记满链能打 260% 血）
+ok(/\(J\.counterHpPct \|\| 0\.05\)[\s\S]{0,120}\/ gm/.test(game) || /byHp[\s\S]{0,160}\/ gm/.test(game),
+    '按最大生命算的反震先除 dmgMul（否则随等级线性失控）');
+ok(/noVuln: true/.test(game) && /opts\.noVuln/.test(game), '反震本身不吃自己开的破绽（避免连反 × 破绽双重叠乘）');
+// Boss 硬直：原来 stunT 只在小怪循环结算，Boss 根本不吃硬直
+ok(/if \(b\.stunT > 0\) \{[\s\S]{0,240}?b\.stunT -= dt/.test(game), 'updateBoss 结算 Boss 硬直（反震能打断 Boss）');
+ok(/src\.stunT \|\| 0/.test(game), 'Boss 对象没有 stunT 字段也能被打出硬直（||0 兜底）');
+ok(/function fmtNum\s*\(/.test(game) && /'万'/.test(game), '大数字压成「万/亿」（印蜕排得下）');
+
+// 美术加倍：像素爆点 + 双目刀光 + 三层冲击波 + 放射光芒 + 更大的火星
+ok(/FX3\.spawn\('nova'/.test(game), '格开时炸像素爆点 nova（2.4 倍）');
+ok(/ray: true, hard: true/.test(game), '格开时放射光芒（ray 粒子，绕过浅宣纸降彩）');
+ok(/arc: 2\.5/.test(game) && /maxr: 156/.test(game) && /ang: a0 \+ Math\.PI/.test(game),
+    '刀光更大 + 双层弯月 + 冲击波按屏幕尺度放大（不随主角半径缩水）');
+
+// 飘字加倍：punch 弹出 + stroke 描边 + 大号
+ok(/punch: !!o\.punch/.test(game) && /stroke: !!o\.stroke/.test(game), 'spawnText 支持 punch / stroke');
+ok(/size \* \(age < 0\.16/.test(game), 'punch 飘字先放大再回落到原尺寸');
+ok(/spawnText\(p\.x, p\.y - p\.r - 52, label, col, 28/.test(game), '「格开」用 28px 大号飘字（抬到冲击波之上）');
+ok(/seal: true, punch: true, life: 1\.1/.test(game), '「反震 N」走大号朱砂印蜕');
+ok(/引气 \+/.test(game) && /煞气 \+/.test(game), '奖励飘字：煞气 / 引气 都有');
+
+// HUD：按钮上方「连 ×N」+ 金环加粗加长
+ok(/data-chain/.test(game) && /#parryBtn\[data-chain\]::before/.test(css), '弹反键上方显示「连 ×N」');
+ok(/parryHitFlash \.46s/.test(css) && /inset 0 0 0 7px/.test(css), '#parryHit 金环加粗加长（7px / 0.46s）');
 
 // ---------- 汇总 ----------
 console.log('');

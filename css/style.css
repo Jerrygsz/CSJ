@@ -931,9 +931,22 @@ body.rot #ver { visibility: hidden; }
 #parryBtn.parrying .qb-icon { animation: parryKeyPulse .5s ease-in-out infinite; }
 #parryBtn.cooling { border-color: rgba(120,124,132,0.5); }
 @keyframes parryKeyPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
-/* 格开那一下：按钮自己亮一下（只动 filter，不动 transform —— 自定义位置用的是 inline left/top + transform:none） */
-#parryBtn.ok { animation: parryKeyHit .22s ease-out; }
-@keyframes parryKeyHit { 0% { filter: brightness(1.9) saturate(1.3); } 100% { filter: brightness(1); } }
+/* 格开那一下：按钮自己亮一下（只动 filter / box-shadow，不动 transform —— 自定义位置用的是 inline left/top + transform） */
+#parryBtn.ok { animation: parryKeyHit .34s ease-out; }
+@keyframes parryKeyHit {
+  0%   { filter: brightness(2.6) saturate(1.6); box-shadow: 0 0 0 9px rgba(255,214,120,0.55), 0 0 36px rgba(255,180,90,0.9); }
+  100% { filter: brightness(1); }
+}
+/* 连反层数：挂在按钮上方（手在按钮上，眼睛也在按钮上）。.qb 默认 overflow:hidden 会裁掉，这里放开 */
+#parryBtn { overflow: visible; }
+#parryBtn[data-chain]::before {
+  content: '连 ×' attr(data-chain);
+  position: absolute; left: 50%; top: -18px; transform: translateX(-50%);
+  font-size: 13px; font-weight: 700; line-height: 1; white-space: nowrap;
+  color: #ffd88a; text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  pointer-events: none;
+}
+body[data-skin="guigu"] #parryBtn[data-chain]::before { color: #8f4f2e; text-shadow: 0 1px 2px rgba(255,255,255,0.7); }
 /* 触屏设备再加一档：拇指要按得住 */
 @media (pointer: coarse) {
   #parryBtn { width: 84px; height: 84px; font-size: 38px; right: 8px; }
@@ -1460,17 +1473,17 @@ body[data-skin="guigu"] #critFlash.go { animation: critInk 0.32s ease-out; }
    只在「格开」那一下闪一次（约 0.34s）。做成贴边细金环 + 内圈薄光，
    不铺大面积渐变 —— 水墨皮是浅宣纸，大片暖色会把整屏洗成粉雾。 */
 #parryHit { position: absolute; inset: 0; pointer-events: none; opacity: 0; z-index: 48; }
-#parryHit.go { animation: parryHitFlash .34s ease-out; }
+#parryHit.go { animation: parryHitFlash .46s ease-out; }
 @keyframes parryHitFlash {
-  0%   { opacity: 1; box-shadow: inset 0 0 0 4px rgba(255,228,152,0.95), inset 0 0 34px 6px rgba(255,206,112,0.50); }
-  45%  { opacity: .62; }
-  100% { opacity: 0; box-shadow: inset 0 0 0 4px rgba(255,228,152,0), inset 0 0 34px 6px rgba(255,206,112,0); }
+  0%   { opacity: 1; box-shadow: inset 0 0 0 7px rgba(255,228,152,0.98), inset 0 0 64px 14px rgba(255,206,112,0.62); }
+  38%  { opacity: .78; }
+  100% { opacity: 0; box-shadow: inset 0 0 0 7px rgba(255,228,152,0), inset 0 0 64px 14px rgba(255,206,112,0); }
 }
-body[data-skin="guigu"] #parryHit.go { animation: parryHitInk .34s ease-out; }
+body[data-skin="guigu"] #parryHit.go { animation: parryHitInk .46s ease-out; }
 @keyframes parryHitInk {
-  0%   { opacity: 1; box-shadow: inset 0 0 0 3px rgba(168,40,30,0.85), inset 0 0 30px 4px rgba(168,40,30,0.28); }
-  45%  { opacity: .55; }
-  100% { opacity: 0; box-shadow: inset 0 0 0 3px rgba(168,40,30,0), inset 0 0 30px 4px rgba(168,40,30,0); }
+  0%   { opacity: 1; box-shadow: inset 0 0 0 5px rgba(168,40,30,0.92), inset 0 0 52px 8px rgba(168,40,30,0.40); }
+  38%  { opacity: .70; }
+  100% { opacity: 0; box-shadow: inset 0 0 0 5px rgba(168,40,30,0), inset 0 0 52px 8px rgba(168,40,30,0); }
 }
 
 /* ================= 弹反键位置调整 =================

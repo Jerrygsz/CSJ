@@ -1543,12 +1543,14 @@
   }
 
   // ---------- 伤害 / 死亡 ----------
-  function damageEnemy(e, dmg) {
-    if (e._dead) return;
+  function damageEnemy(e, dmg, opts) {
+    if (e._dead) return 0;
     let d = dmg * dmgMul();
     // 弹反打出的「破绽」：这段时间里它挨打更疼。只对这一只生效，换目标不串。
+    // opts.noVuln：反震这一下本身不吃破绽 —— 否则「连反 ×N」和「破绽 ×1.7」叠在一起，
+    // 满链一记能打掉 Boss 三成血，几记就把 Boss 抹了。破绽留给随后的平A，才是奖励。
     const _pj = window.PARRY && window.PARRY.JUICE;
-    if (_pj && G.parry && G.parry.vulnT > 0 && G.parry.vulnE === e) d *= (_pj.vulnMul || 1.35);
+    if (!(opts && opts.noVuln) && _pj && G.parry && G.parry.vulnT > 0 && G.parry.vulnE === e) d *= (_pj.vulnMul || 1.35);
     const crit = Math.random() < critChance();
     if (crit) d *= 1.8;
     e.hp -= d; e.hitFlash = 0.12;
@@ -1565,9 +1567,11 @@
     // 飘字配色要分皮：白字在宣纸上等于隐形（纸底亮度 220+），墨皮下必须换成深墨。
     // 暴击走朱砂 —— 画布画笔那边还会把暖红统一映射成印泥朱（FX_INK），落笔就是真朱砂。
     const ink = save.skin === 'guigu';
-    spawnText(e.x, e.y - e.r - 4, Math.round(d),
-      crit ? (ink ? '#cf3a22' : '#ffd24a') : (ink ? '#3a332a' : '#fff'),
-      crit ? (ink ? 21 : 18) : 13);
+    if (!(opts && opts.silentText)) {
+      spawnText(e.x, e.y - e.r - 4, Math.round(d),
+        crit ? (ink ? '#cf3a22' : '#ffd24a') : (ink ? '#3a332a' : '#fff'),
+        crit ? (ink ? 21 : 18) : 13);
+    }
     if (G.coopRole === 'host' && window.Coop) window.Coop.queueDmg(e.x, e.y - e.r - 4, Math.round(d), crit);
     if (crit) {
       // 暴击：pixelfx 的 crit-hit 顶替原来的两圈印泥环 —— 一次性把「这一下很重」说清楚
@@ -1591,6 +1595,7 @@
     // Boss 二阶段触发
     if (e === G.boss && !e.phase2 && e.hp <= e.maxhp * 0.6 && e.hp > 0) startPhase2();
     if (e.hp <= 0) killEnemy(e);
+    return d;   // 实际落地伤害（已含全局倍率 / 破绽 / 暴击），弹反印蜕要用它显示真数字
   }
   function killEnemy(e) {
     if (e._dead) return; e._dead = true;
@@ -1858,9 +1863,10 @@
   // 数值全在 js/parry.js 的 JUICE；这里只负责把它落成顿帧 / 震动 / 音效 / 粒子 / 击退 / 破绽。
   function parryJ() {
     return (window.PARRY && window.PARRY.JUICE) || {
-      hitStop: 0.10, shakeTap: 14, shakeCounter: 4, knock: 26, stun: 0.34,
-      vulnSec: 1.3, vulnMul: 1.35, chainWin: 1.5, chainMax: 5, chainDamage: 0.18,
-      shaBack: 7, sparkN: 10, hapticTap: [18, 22, 34], hapticBoss: [24, 26, 46]
+      hitStop: 0.18, hitStopChain: 0.03, shakeTap: 26, shakeCounter: 9, knock: 52, stun: 0.62,
+      vulnSec: 2.4, vulnMul: 1.70, chainWin: 2.4, chainMax: 7, chainDamage: 0.25,
+      counterHpPct: 0.05, bossCounterMul: 1.5,
+      shaBack: 18, healPct: 0.02, sparkN: 26, hapticTap: [26, 34, 46], hapticBoss: [34, 42, 78]
     };
   }
   // 触屏震动：桌面浏览器没有 navigator.vibrate → 静默跳过（不报错、不提示）
@@ -1891,8 +1897,8 @@
     pr.chainT = J.chainWin;
 
     // 1) 世界停一拍 + 镜头震动。这一下必须"实"
-    G.hitStop = Math.max(G.hitStop, J.hitStop);
-    G.shake = Math.max(G.shake, J.shakeTap);
+    G.hitStop = Math.max(G.hitStop, J.hitStop + Math.min(0.12, (Math.max(1, pr.chain || 1) - 1) * (J.hitStopChain || 0.03)));
+    G.shake = Math.max(G.shake, J.shakeTap + (Math.max(1, pr.chain || 1) - 1) * 2);
 
     // 2) 手心里震一下（Boss 被打退时节奏更长）
     const isBoss = !!(src && (src.boss || src === G.boss));
@@ -1905,37 +1911,62 @@
     parryHitFlash();
     if (elParryBtn && elParryBtn.classList) { elParryBtn.classList.remove('ok'); void elParryBtn.offsetWidth; elParryBtn.classList.add('ok'); }
 
-    // 5) 主角身前一记弯月刀光 + 一圈冲击波（朝来袭方向）
-    //    水墨皮：刀光/冲击波改朱砂，并给 ring 打 hard 标记 —— 这是「一次性命中反馈」，
-    //    不该被浅宣纸的降彩规则(softRingFx)压成灰线，否则弹反在纸皮上毫无存在感。
+    // 5) 主角身上炸开一整套「格开」：三层同心冲击波 + 正反两道弯月刀光 + 一圈放射光芒 + 像素爆点。
+    //    水墨皮：刀光/冲击波改朱砂，并给一次性命中反馈打 hard 标记 ——
+    //    浅宣纸的降彩规则(softRingFx)会把它压成灰线，弹反在纸皮上就毫无存在感。
     const ink = !!(save && save.skin === 'guigu');
     const a0 = (typeof ang === 'number' && isFinite(ang)) ? ang : -Math.PI / 2;
+    const C_HOT = '#c0352a';     // 朱砂：浅宣纸和暗底都读得出来，也和水墨皮的印蜕同一套色
+    const C_CORE = '#ffb43c';    // 暖金芯
     if (p) {
-      G.parts.push({ slash: true, x: p.x, y: p.y, ang: a0, arc: 2.0, rad: p.r * 2.9, life: 0.26, maxlife: 0.26, color: ink ? '#c0352a' : '#ffe6a8' });
-      G.parts.push({ ring: true, hard: true, x: p.x, y: p.y, r: 4, maxr: p.r * 3.6, life: 0.30, maxlife: 0.30, color: ink ? '#a8281e' : '#fff3cf' });
+      // 尺寸一律用绝对值（而不是乘主角半径）：主角 r 只有 9px，按 r 缩放出来的「大爆炸」实际只有 50px，
+      // 在 Boss 面前根本不算事。这里直接按屏幕尺度给：主环 ~150px、光芒最远 ~170px。
+      // 像素爆点：金皮放大到 2.4 倍；水墨皮收一点（纸底上大团深红会糊成一块墨渍）
+      if (window.FX3) FX3.spawn('nova', p.x, p.y, { pal: ink ? 'xue' : 'jin', scale: ink ? 1.6 : 2.4 });
+      G.parts.push({ slash: true, hard: true, x: p.x, y: p.y, ang: a0, arc: 2.5, rad: 82, life: 0.34, maxlife: 0.34, color: C_HOT });
+      G.parts.push({ slash: true, hard: true, x: p.x, y: p.y, ang: a0 + Math.PI, arc: 1.7, rad: 58, life: 0.28, maxlife: 0.28, color: C_CORE });
+      G.parts.push({ ring: true, hard: true, lw: 13, x: p.x, y: p.y, r: 8, maxr: 156, life: 0.46, maxlife: 0.46, color: C_HOT });
+      G.parts.push({ ring: true, hard: true, lw: 8, x: p.x, y: p.y, r: 6, maxr: 96, life: 0.34, maxlife: 0.34, color: C_CORE });
+      G.parts.push({ ring: true, hard: true, lw: 5, x: p.x, y: p.y, r: 4, maxr: 52, life: 0.22, maxlife: 0.22, color: '#ffffff' });
+      // 放射光芒：16 道长短不一的直线「炸」出去
+      for (let i = 0; i < 16; i++) {
+        const a3 = a0 + (i / 16) * 6.2832 + U.rand(-0.06, 0.06);
+        G.parts.push({
+          ray: true, hard: true, x: p.x, y: p.y, ang: a3, len: U.rand(78, 168),
+          life: 0.26, maxlife: 0.26, color: i % 3 ? C_HOT : '#ffffff'
+        });
+      }
     }
 
     // 6) 反震真落到对方身上：击退 + 硬直 + 破绽 + 火星
     if (src && src.hp != null && !src._dead) {
-      const k = isBoss ? J.knock * 0.45 : J.knock;
+      const k = isBoss ? J.knock * 0.55 : J.knock;
       src.x += Math.cos(a0) * k; src.y += Math.sin(a0) * k;
-      src.hitFlash = Math.max(src.hitFlash || 0, 0.24);
-      if (src.stunT != null) src.stunT = Math.max(src.stunT, isBoss ? J.stun * 0.7 : J.stun);
-      if (window.FX3) FX3.spawn('crit', src.x, src.y - (src.r || 18) * 0.3, { pal: save.skin === 'guigu' ? 'xue' : 'jin', scale: 1.3 });
-      G.parts.push({ ring: true, hard: true, x: src.x, y: src.y, r: 6, maxr: (src.r || 20) * 3.2, life: 0.26, maxlife: 0.26, color: ink ? '#c0352a' : '#ffd88a' });
+      src.hitFlash = Math.max(src.hitFlash || 0, 0.32);
+      if (src.stunT != null || src.boss || src === G.boss) {
+        // 用 ||0 兜底：Boss 对象本身没有 stunT 字段，原来的 !=null 判断会让「反震 Boss 硬直」直接失效
+        src.stunT = Math.max(src.stunT || 0, isBoss ? J.stun * 0.75 : J.stun);
+      }
+      if (window.FX3) FX3.spawn('crit', src.x, src.y - (src.r || 18) * 0.3, { pal: ink ? 'xue' : 'jin', scale: 2.6 });
+      G.parts.push({ ring: true, hard: true, lw: 10, x: src.x, y: src.y, r: 10, maxr: Math.max(124, (src.r || 20) * 5), life: 0.34, maxlife: 0.34, color: '#c0352a' });
+      // 火星：数量翻倍、飞得更远（原来 10 颗 110–250，现在 26 颗 150–380）
       for (let i = 0; i < J.sparkN; i++) {
-        const a2 = a0 + U.rand(-1.1, 1.1);
+        const a2 = a0 + U.rand(-1.25, 1.25);
         G.parts.push({
-          x: src.x, y: src.y, vx: Math.cos(a2) * U.rand(110, 250), vy: Math.sin(a2) * U.rand(110, 250) - 30,
-          life: 0.32, maxlife: 0.32, size: ink ? 4 : 3, color: ink ? (i % 2 ? '#c0352a' : '#8c1f16') : (i % 2 ? '#ffe9a8' : '#ff9d5c')
+          x: src.x, y: src.y, vx: Math.cos(a2) * U.rand(150, 380), vy: Math.sin(a2) * U.rand(150, 380) - 40,
+          life: 0.42, maxlife: 0.42, size: ink ? 5 : 4, color: ink ? (i % 2 ? '#c0352a' : '#8c1f16') : (i % 2 ? '#ffe9a8' : '#ff9d5c')
         });
       }
       G.shake = Math.max(G.shake, J.shakeTap + J.shakeCounter);
-      spawnText(src.x, src.y - (src.r || 12) - 20, '破绽', '#ffb060', 13);
+      // 「破绽」改用大号带描边飘字：它是「接下来这段时间打它更疼」的提示，小字容易被忽略
+      spawnText(src.x, src.y - (src.r || 12) - 26, '破绽', '#ffb060', 20, { punch: true, stroke: true });
     }
 
     // 7) 连反：把「接连格了几次」说清楚（伤害加成在 hitPlayer 里算）
-    if (p && pr.chain >= 2) spawnText(p.x, p.y - p.r - 26, '连反 ×' + pr.chain, '#ffe6a8', 17);
+    //    越往上越大 —— ×2 到 ×7 是看得见的爬升，才有"再格一次"的冲动。
+    if (p && pr.chain >= 2) {
+      spawnText(p.x, p.y - p.r - 40, '连反 ×' + pr.chain, '#ffe6a8', 22 + Math.min(16, pr.chain * 2), { punch: true, stroke: true, life: 1.1 });
+    }
     return pr.chain;
   }
 
@@ -2072,31 +2103,58 @@
           : (pr.type === 'tap'
             ? (PARRY.UI.tapSuccess[(Math.random() * PARRY.UI.tapSuccess.length) | 0])
             : '护体');
-        spawnText(p.x, p.y - p.r - 6, label, col, 15);
+        // 「格开」是整套弹反最该被看见的两个字：大号 + 弹出 + 描边，且抬到冲击波之上，不被光芒盖住
+        if (pr.type === 'tap') spawnText(p.x, p.y - p.r - 52, label, col, 28, { punch: true, stroke: true, life: 1.05 });
+        else spawnText(p.x, p.y - p.r - 6, label, col, 16);
         G.parts.push({ ring: true, x: p.x, y: p.y, r: 6, maxr: p.r * 2.2, life: 0.28, maxlife: 0.28, color: col });
         if (pr.type === 'tap') {
           const J = parryJ();
+          const isBoss = !!(pr.src && (pr.src.boss || pr.src === G.boss));
           const ang = (pr.src && pr.src.x != null) ? Math.atan2(pr.src.y - p.y, pr.src.x - p.x) : -Math.PI / 2;
           // 命中反馈整包：顿帧 / 震动 / 音效 / 金环 / 刀光冲击波 / 击退硬直 / 连反链
           const chain = parryJuice(pr.src, ang);
+          // 破招：格开的是 Boss 的具名招式，就把招名喊出来 —— 「我用你的招名记住我挡下了什么」
+          const skName = (sk && (sk.n || sk.skN)) || '';
+          if (isBoss && skName) {
+            spawnText(p.x, p.y + p.r + 44, '破 · ' + skName, '#ffd88a', 18, { punch: true, stroke: true, life: 1.2 });
+          }
           if (pr.counter > 0 && pr.src && pr.src.hp != null && !pr.src._dead) {
-            // 连反越顺，反震越重（每层 +18%，上限 5 层）
-            const mul = 1 + (chain - 1) * (J.chainDamage || 0.18);
-            const cdmg = Math.max(1, Math.round(dmg * pr.counter * mul));
-            damageEnemy(pr.src, cdmg);
-            spawnText(pr.src.x, pr.src.y - (pr.src.r || 12) - 4, '反震 ' + cdmg, '#7fe0a0', chain >= 2 ? 17 : 14, { seal: true });
+            // 反震 = max(来袭伤害×反伤比例, 目标最大生命×比例) × 连反倍率
+            // 后半截是保底：Boss 血厚，只按「来袭伤害」算的话反震永远是零头，弹反就没资格当主打。
+            const mul = 1 + (chain - 1) * (J.chainDamage || 0.25);
+            const byDmg = dmg * pr.counter;
+            // 反震保底按「目标最大生命 × 比例」算。这里必须除以 dmgMul：
+            // damageEnemy 内部还会再乘一次全局倍率，不除的话等级越高越离谱
+            // （实测 lv45 一记满链能打掉 Boss 260% 血，一记秒 Boss）。
+            // 除完之后弹反伤害恒等于 Boss 最大生命的固定百分比 —— 无论多少级都「一记 ≈ 一刀多一点」。
+            const gm = Math.max(0.0001, dmgMul());
+            const byHp = (pr.src.maxhp || 0) * (J.counterHpPct || 0.05) * (isBoss ? (J.bossCounterMul || 1.5) : 1) / gm;
+            const cdmg = Math.max(1, Math.round(Math.max(byDmg, byHp) * mul));
+            // silentText：伤害数字交给下面那枚大印蜕显示，避免同一处叠两个数字
+            // noVuln：反震本身不吃自己刚开出的「破绽」，免得连反 × 破绽双重叠乘
+            const dealt = damageEnemy(pr.src, cdmg, { silentText: true, noVuln: true });
+            // 反震数字走朱砂印蜕：大、有底、带「反震」二字，一眼能认出这是弹反打出来的
+            spawnText(pr.src.x, pr.src.y - (pr.src.r || 12) - 22, '反震 ' + fmtNum(dealt || cdmg), '#ffd88a',
+                      chain >= 3 ? 26 : (chain >= 2 ? 22 : 19), { seal: true, punch: true, life: 1.1 });
             // 破绽：反震之后这一小段里它挨打更疼（只认这一只，换目标不串）
             // 注意写回 G.parry —— 这里的 pr 是 parryResolve 的返回值，不是状态对象
             if (G.parry) { G.parry.vulnE = pr.src; G.parry.vulnT = J.vulnSec; }
           }
           if (pr.special) applyParrySpecial(pr.special, pr.src);
-          // 奖励：返还一点煞气（不足一池，且连反越多回得越多），鼓励接着格
+          // 奖励 1：返还煞气（连反越多回得越多），长按护体才接得上
           if (G.sha) {
-            const back = Math.round((J.shaBack || 7) * (1 + (chain - 1) * 0.35));
+            const back = Math.round((J.shaBack || 18) * (1 + (chain - 1) * 0.5));
             const before = G.sha.v;
             G.sha.v = Math.min(G.sha.need, G.sha.v + back);
             const got = Math.round(G.sha.v - before);
-            if (got >= 3) spawnText(p.x + 16, p.y - p.r - 4, '煞气 +' + got, '#8fd6ff', 12);
+            if (got >= 3) spawnText(p.x + 34, p.y + p.r + 10, '煞气 +' + got, '#8fd6ff', 15, { punch: true, stroke: true });
+          }
+          // 奖励 2：卸力导引 —— 格开的一瞬把劲卸回自己身上，回一点气血
+          const healPct = J.healPct || 0;
+          if (healPct > 0 && p.hp > 0 && p.hp < p.maxhp) {
+            const heal = Math.max(1, Math.round(p.maxhp * healPct * (1 + (chain - 1) * 0.4)));
+            p.hp = Math.min(p.maxhp, p.hp + heal);
+            spawnText(p.x - 34, p.y + p.r + 10, '引气 +' + heal, '#a8e8b0', 14, { punch: true, stroke: true });
           }
           // 单击成功：转为长按态继续护体（若仍按住），否则收招（无 CD，鼓励连反）
           const c2 = parryCarrier();
@@ -2488,6 +2546,10 @@
     btn.classList.toggle('empty', !c);
     btn.classList.toggle('parrying', !!(pr && (pr.state === 'arming' || pr.state === 'hold')));
     btn.classList.toggle('cooling', !!(pr && pr.state === 'cd'));
+    // 连反层数挂在按钮上（CSS 用 ::before 读 attr 显示「连 ×N」）：手在按钮上，眼睛也在按钮上
+    const ch = (pr && pr.chain >= 2) ? String(pr.chain) : '';
+    if (ch) { if (btn.getAttribute('data-chain') !== ch) btn.setAttribute('data-chain', ch); }
+    else if (btn.getAttribute('data-chain') != null) btn.removeAttribute('data-chain');
     btn.title = c ? (c.name + ' · 按住护体（耗煞气、减速），单击格开反震　按 3 或点一下')
       : '护体法宝（洞府 · 护体槽装配，需 Lv' + ((c && c.req) || 8) + '）';
   }
@@ -4718,6 +4780,19 @@
     // 二阶段演出期间：定身、不攻击、不吃碰撞
     if (b.phaseT > 0) { b.phaseT -= dt; return; }
 
+    // 弹反反震打出的硬直：Boss 也会被打断。
+    // 原来 stunT 只在小怪循环里结算，Boss 根本没有这一路 —— 于是「反震让 Boss 硬直」是句空话，
+    // 玩家格开 Boss 大招后它照样抬手就还手。这里补上，并给一点抖动表示「被打懵了」。
+    if (b.stunT > 0) {
+      b.stunT -= dt;
+      b.hitFlash = Math.max(b.hitFlash || 0, 0.12);
+      if (Math.random() < 0.5) {
+        G.parts.push({ x: b.x + U.rand(-b.r, b.r), y: b.y - b.r * 0.4 + U.rand(-8, 8), vx: U.rand(-40, 40), vy: U.rand(-70, -20), life: 0.3, maxlife: 0.3, size: 3, color: '#ffd88a' });
+      }
+      if (b.stunT > 0) return;
+      b.stunT = 0;
+    }
+
     const phase2 = b.phase2;
     const enrage = b.hp < b.maxhp * 0.3;
     const mul = phase2 ? (enrage ? 1.75 : 1.5) : (enrage ? 1.4 : 1);
@@ -5448,8 +5523,25 @@
   }
   // 第117轮新增可选 opts.seal：技能名飘字改画成朱砂印蜕。不传则逐字节保持原样
   //（伤害数字、拾取提示、联机分成等 29 处都在用，不能一起改）。
+  // 大数字压成「万 / 亿」：弹反伤害抬上来之后，Boss 战里会出现五位六位数，
+  // 印蜕上排不下就会盖住整个屏幕。
+  function fmtNum(n) {
+    n = Math.round(n);
+    const a = Math.abs(n);
+    if (a >= 1e8) return (n / 1e8).toFixed(1).replace(/\.0$/, '') + '亿';
+    if (a >= 1e4) return (n / 1e4).toFixed(1).replace(/\.0$/, '') + '万';
+    return String(n);
+  }
   function spawnText(x, y, text, color, size, opts) {
-    G.texts.push({ x, y, vy: -30, life: 0.8, maxlife: 0.8, text: String(text), color, size, seal: !!(opts && opts.seal) });
+    const o = opts || {};
+    const life = o.life || 0.8;
+    G.texts.push({
+      x, y, vy: o.vy == null ? -30 : o.vy, life, maxlife: life,
+      text: String(text), color, size,
+      seal: !!o.seal,
+      punch: !!o.punch,     // 弹出：先放大再回落（大伤害 / 连反 / 破绽这类要抢眼的）
+      stroke: !!o.stroke,   // 描边：浅宣纸上大字不吃底，暗皮上也不糊
+    });
   }
   // 重击的「惊艳一刻」：纸面透一层朱砂晕，0.32 秒散尽。
   // 节流 300ms —— 攻速拉起来后几乎每刀都暴击，不节流就成了"一直泛红"，反而不惊艳。
@@ -8458,7 +8550,7 @@
     if (pt.ring) {
       // 半径可能是负的（收缩类特效算出来 -16 这种），arc 会直接抛错，钳一下
       const t = 1 - life; const r = Math.max(0, U.lerp(pt.r, pt.maxr, t));
-      ctx.strokeStyle = softRingFx ? inkFx : pt.color; ctx.lineWidth = 4 * life + 1; ctx.globalAlpha = life * kFx;
+      ctx.strokeStyle = softRingFx ? inkFx : pt.color; ctx.lineWidth = (pt.lw || 4) * life + 1; ctx.globalAlpha = life * kFx;
       ctx.beginPath(); ctx.arc(pt.x, pt.y, r, 0, 6.28); ctx.stroke(); ctx.globalAlpha = 1;
       return;
     }
@@ -8898,12 +8990,26 @@
     for (const pt of G.parts) if (!pt.rune) drawPart(pt);
     // 印蜕最后画：伤害数字也走 G.texts，先画它们，技能名才不会被压住读不清（第117轮实拍修正）。
     const drawOneText = (t) => {
-      ctx.globalAlpha = Math.max(0, t.life / t.maxlife);
-      ctx.font = 'bold ' + t.size + 'px sans-serif'; ctx.textAlign = 'center';
+      const kk = Math.max(0, t.life / t.maxlife);
+      ctx.globalAlpha = Math.min(1, kk * (t.punch ? 1.9 : 1));
+      // punch：先冲到 1.2 倍再落回 1 倍 —— 顿帧里第一个看见的就是它
+      let size = t.size;
+      if (t.punch) {
+        const age = 1 - kk;
+        size = t.size * (age < 0.16 ? 0.62 + (age / 0.16) * 0.58 : 1.20 - Math.min(0.20, (age - 0.16) * 0.7));
+      }
+      size = Math.max(8, Math.round(size));
+      ctx.font = 'bold ' + size + 'px sans-serif'; ctx.textAlign = 'center';
+      if (t.stroke) {
+        // 描边压一层暗边：大字在浅宣纸上才有「砸下去」的重量，暗皮上也不和背景糊在一起
+        ctx.lineWidth = Math.max(2.5, size * 0.20); ctx.lineJoin = 'round';
+        ctx.strokeStyle = 'rgba(24,18,12,0.62)';
+        ctx.strokeText(t.text, t.x, t.y);
+      }
       if (t.seal) {
         // 朱砂印蜕：方底 + 细印边 + 方角 + 纸白字，与顶栏增益小方印同一套语汇。
         // 色值照样过 inkify 拦截器，水墨皮自动归朱砂，鎏金皮也读得清。
-        const w = ctx.measureText(t.text).width + 14, h = t.size + 10;
+        const w = ctx.measureText(t.text).width + 14, h = size + 10;
         ctx.fillStyle = 'rgba(143,47,36,0.90)'; ctx.fillRect(t.x - w / 2, t.y - h + 4, w, h);
         ctx.strokeStyle = 'rgba(143,47,36,0.98)'; ctx.lineWidth = 1.2;
         ctx.strokeRect(t.x - w / 2 + 0.6, t.y - h + 4.6, w - 1.2, h - 1.2);
