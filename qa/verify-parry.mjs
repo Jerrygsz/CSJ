@@ -264,7 +264,9 @@ ok(/let _comboRaf = 0;/.test(hud) && /function paintCombo\(\)/.test(hud),
 
 // ④ 飘字 / 粒子有上限
 ok(/const MAX_TEXTS = 36/.test(hud) && /G\.texts\.length >= MAX_TEXTS/.test(hud), '飘字有上限（先淘汰普通字，保留印蜕/弹出）');
-ok(/const MAX_PARTS = 1200/.test(hud) && /over--/.test(hud), '粒子有上限（只淘汰普通碎屑，不动环形/光芒构图）');
+ok(/const MAX_PARTS = 900/.test(hud) && /over--/.test(hud), '粒子有软上限（先淘汰普通碎屑，不动环形/光芒构图）');
+ok(/if \(over > 0\) G\.parts\.splice\(0, over\)/.test(hud),
+    '粒子有硬上限（剩多少丢多少，不再豁免 ring/ray/slash —— 否则弹反几下就无上限堆叠）');
 
 // ⑤ 音频：同名节流 + 噪声缓存 + 播完断开
 ok(/function gate\(key, gap\)/.test(audio), '音频同名节流 gate()（清场不再连发十几个死亡音）');
@@ -279,10 +281,38 @@ ok(/const old = live\.shift\(\);[\s\S]{0,120}?slot\.push\(old\.slot\)/.test(fxpi
 // ⑦ 帧率守卫：掉帧时弹反美术降档
 ok(/let _frameAvg = 16\.7/.test(hud), '主循环维护滚动平均帧时间 _frameAvg');
 ok(/_frameAvg \+= \(Math\.min\(50, dt \* 1000\) - _frameAvg\) \* 0\.1/.test(hud), '每帧更新 _frameAvg');
-ok(/const heavy = _frameAvg > 34/.test(hud), 'parryJuice 按帧时间判定 heavy 档');
-ok(/const rayN = heavy \? 8 : 16/.test(hud) && /const sparkN = heavy \? 12 : J\.sparkN/.test(hud),
-    'heavy 时放射光芒与火星减半（骨架全保留）');
-ok(/if \(window\.FX3 && !heavy\) FX3\.spawn\('nova'/.test(hud), 'heavy 时省掉逐像素重建的 nova');
+ok(/let _frameReal = 16\.7/.test(hud) && /_frameReal \+= \(Math\.min\(400, rawDt\) - _frameReal\)/.test(hud),
+    '另记未 clamp 的真实帧间隔 _frameReal（手机上 180ms 的帧不会被记成 50）');
+ok(/const heavy = _frameReal > 34/.test(hud), 'heavy 档看真实帧间隔');
+ok(/const fatal = _frameReal > 70/.test(hud), 'fatal 档（~14fps 以下只留骨架）');
+ok(/const q = G\.safeMode \? 0 : 1/.test(hud), 'safeMode 时特效整体关掉（只跑逻辑）');
+ok(/const rayN = fatal \? 6 : \(heavy \? 8 : 16\)/.test(hud) && /const sparkN = fatal \? 6 : \(heavy \? 12 : J\.sparkN\)/.test(hud),
+    '光芒 / 火星按 heavy、fatal 两级递减（骨架全保留）');
+ok(/if \(window\.FX3 && !heavy && q\) FX3\.spawn\('nova'/.test(hud), 'heavy 时省掉逐像素重建的 nova');
+ok(/if \(!fatal\) parryHitFlash\(\)/.test(hud), 'fatal 时不再打全屏贴边金环（最大的一块 DOM 重绘）');
+
+// ⑧ 主循环自保：异常不许让整局停摆（20261111I 用户实测「网页卡死、按钮还在动」）
+ok(/function scheduleLoop\(\)/.test(hud) && /function tickFrame\(t\)/.test(hud),
+    '主循环拆成 loop(外壳) + tickFrame(本体)');
+ok(/try \{ tickFrame\(t\); \} catch \(e\) \{ onLoopError\(e\); \}/.test(hud),
+    'tickFrame 包 try/catch（一处异常只丢一帧，不再整局停摆）');
+ok(!/if \(window\.Chat\) window\.Chat\.setVisible\(CHAT_STATES\[G\.state\] === 1\);\s*requestAnimationFrame\(loop\);/.test(hud),
+    'rAF 不再挂在循环体末尾（末尾挂 = 一旦抛异常就永久停）');
+ok(/setInterval\(\(\) => \{[\s\S]{0,400}?_loopTickAt < 1500/.test(hud), '看门狗：1500ms 没推进就重新点火 rAF');
+ok(/if \(_loopErrN > 8\) G\.safeMode = true/.test(hud), '连错 8 次进 safeMode（先保住能玩）');
+ok(/lastError\(\) \{ return \{ err: G\.lastErr/.test(hud), '__FR.lastError() 暴露异常栈 / 次数 / 档位');
+
+// ⑨ 死循环护栏
+ok(/while \(st\.need > 0 && st\.v >= st\.need && guard\+\+ < 64\)/.test(hud), '煞气 while 有 need>0 + 次数护栏');
+ok(/while \(p\.xp >= p\.next && p\.next > 0 && guard\+\+ < 200\)/.test(hud), '升级 while 有 next>0 + 次数护栏');
+ok(/while \(a\.every > 0 && a\.t >= a\.every/.test(hud), '炼丹 while 有 every>0 护栏');
+
+// ⑩ 水墨皮的全屏阴影动画（手机上最大的一笔重绘）
+{
+  const inkAnim = (css.match(/@keyframes parryHitInk \{([\s\S]*?)\n\}/) || ['', ''])[1];
+  ok(inkAnim.length > 0 && !/box-shadow/.test(inkAnim), '水墨皮 parryHitInk 关键帧只动 opacity（不再过渡 box-shadow）');
+  ok(/body\[data-skin="guigu"\] #parryHit \{[\s\S]{0,200}?box-shadow/.test(css), '水墨皮的全屏阴影改成静态写在规则上');
+}
 
 // ---------- 汇总 ----------
 console.log('');

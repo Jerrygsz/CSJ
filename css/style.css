@@ -1463,7 +1463,7 @@ body[data-skin="guigu"] #critFlash.go { animation: critInk 0.32s ease-out; }
     inset 0 0 28px 3px rgba(196,54,42,0.42),
     inset 0 0 62px 0   rgba(196,54,42,0.10);
 }
-#parryEdge.on { opacity: 1; animation: parryPulse 1.1s ease-in-out infinite; }
+#parryEdge.on { opacity: 1; animation: parryPulse 1.1s ease-in-out infinite; will-change: opacity; }
 @keyframes parryPulse {
   0%,100% { opacity: 0.55; }
   50%     { opacity: 1; }
@@ -1485,11 +1485,18 @@ body[data-skin="guigu"] #critFlash.go { animation: critInk 0.32s ease-out; }
   38%  { opacity: .78; }
   100% { opacity: 0; }
 }
+/* 20261111I：水墨皮这条原来在 keyframes 里过渡 box-shadow —— 和 H 版修掉的金皮是同一个毛病。
+   box-shadow 不参与合成，改了就得把整屏（手机上 DPR3 是 340 万像素）带着 52px 模糊重新光栅化一遍，
+   一次弹反 0.46s / 约 27 帧全在重绘。屏幕一卡，玩家看到的就是「游戏死了、按钮还在动」。
+   改成：阴影静态写在规则上，动画只动 opacity（走合成层，几乎零成本）。末帧本来就是 opacity:0。 */
+body[data-skin="guigu"] #parryHit {
+  box-shadow: inset 0 0 0 5px rgba(168,40,30,0.92), inset 0 0 52px 8px rgba(168,40,30,0.40);
+}
 body[data-skin="guigu"] #parryHit.go { animation: parryHitInk .46s ease-out; }
 @keyframes parryHitInk {
-  0%   { opacity: 1; box-shadow: inset 0 0 0 5px rgba(168,40,30,0.92), inset 0 0 52px 8px rgba(168,40,30,0.40); }
+  0%   { opacity: 1; }
   38%  { opacity: .70; }
-  100% { opacity: 0; box-shadow: inset 0 0 0 5px rgba(168,40,30,0), inset 0 0 52px 8px rgba(168,40,30,0); }
+  100% { opacity: 0; }
 }
 
 /* ================= 弹反键位置调整 =================

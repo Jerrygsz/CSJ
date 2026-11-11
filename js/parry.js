@@ -21,7 +21,7 @@ window.PARRY = (function () {
 
   // —— 0. 元信息 ——
   const META = {
-    version: 'runtime-20261111H',
+    version: 'runtime-20261111I',
     status: '已接入 runtime（凡人味弹反 · 长按共用煞气池 + 单击卡点反伤）',
     note: '数值为初版，需配合平衡脚本验证“长按3s+CD1s 是否导致 Boss 战站桩”。接入版见 game.js 的 parry* 系列函数。'
   };

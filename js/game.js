@@ -34,6 +34,9 @@
   // 滚动平均帧时间（ms）：弹反那一帧按它决定美术档位（见 parryJuice 的 heavy 开关）。
   // 放在最前面而不是主循环旁边 —— parryJuice 定义得比 loop 早，别踩 TDZ。
   let _frameAvg = 16.7;
+  // 未 clamp 的真实帧间隔（ms）：手机上一次弹反真花了 180ms，_frameAvg 因为 dt 被 clamp 到 50
+  // 永远显示「还行」，档位就慢半拍。判断「要不要降档」必须看这个（见 parryJuice 的 heavy/fatal）。
+  let _frameReal = 16.7;
   function renderPR() {
     try {
       const q = new URLSearchParams(location.search).get('pr');
@@ -620,6 +623,9 @@
     spawnT: 0, nextEliteT: 100, eliteIdx: 0,
     boss: null, bossActive: false, bossSpawned: false, bossWarned: false,
     frostR: 0, shake: 0, flash: 0, god: false, ts: 1,
+    // 20261111I：主循环的「自保」状态。safeMode = 连错 8 次，把特效全关先保住能玩；
+    // lastErr 存最后一条异常栈 —— 手机上没有控制台，靠它才能事后定位（__FR.lastError()）。
+    safeMode: false, lastErr: '',
     bonus: {}, realm: { dmg: 0, atk: 0, spd: 0 }, realmIdx: 0, realmHp: 0, gear: {},
     combo: 0, comboT: 0, hitStop: 0, lastCombo: -1, comboTier: 0,
     dashCd: 0,                 // 闪身冷却（秒）
@@ -1211,7 +1217,10 @@
     const a = G.alch;
     if (!a || alchLeft() <= 0) return;
     a.t += dt;
-    while (a.t >= a.every && alchLeft() > 0) { a.t -= a.every; alchGrant(1); }
+    // every 万一算成 0，a.t -= 0 永不减少 → 死循环。护栏 + 强行收尾
+    let guard = 0;
+    while (a.every > 0 && a.t >= a.every && alchLeft() > 0 && guard++ < 200) { a.t -= a.every; alchGrant(1); }
+    if (!(a.every > 0)) a.t = 0;
   }
   function dropStone(x, y, n) {
     const d = curDiff();
@@ -1583,7 +1592,7 @@
       flashCritInk();
       // 水墨皮：朱砂爆点落在怪身上（不是只有全屏泛红 —— 那看着像自己挨打）。
       // 两圈印泥 + 几粒碎朱，颜色会被 FX_INK 统一映射成真朱砂。
-      if (ink) {
+      if (ink && !G.safeMode) {
         G.parts.push({ ring: true, x: e.x, y: e.y, r: 3, maxr: e.r * 3.4, life: 0.30, maxlife: 0.30, color: '#c0352a' });
         G.parts.push({ ring: true, x: e.x, y: e.y, r: 1.5, maxr: e.r * 1.7, life: 0.20, maxlife: 0.20, color: '#e0573a' });
         for (let i = 0; i < 6; i++) {
@@ -1927,6 +1936,7 @@
     const gm = Math.max(0.0001, dmgMul());
     let kills = 0, wiped = 0;
     const burst = (x, y, rr, col) => {
+      if (G.safeMode) return;        // 安全模式：清场照清，碎屑不画
       // 细环 + 短命：一开始用 5px 粗环，一堆小怪同时炸出来像撒了一地红圈按钮；
       // 收细到 2.6px、22ms 内散尽，读起来才是「被打灭了」而不是「地上多了个标记」。
       G.parts.push({ ring: true, hard: true, lw: 2.6, x: x, y: y, r: 2, maxr: Math.max(18, rr), life: 0.22, maxlife: 0.22, color: col || '#ffb060' });
@@ -1950,7 +1960,7 @@
     // ② 弹幕：飞在半路的敌人攻击一并震碎（撒一簇火星，别让它凭空蒸发）
     // 帧率已经吃紧时每颗只撒 1 粒（见 parryJuice 的 heavy）：八十颗弹幕 × 3 粒就是 240 个粒子，
     // 那点碎火星在卡成 20fps 的屏幕上根本看不清，却实打实压在每帧的绘制里。
-    const emberN = _frameAvg > 34 ? 1 : 3;
+    const emberN = G.safeMode ? 0 : (_frameReal > 34 ? 1 : 3);
     for (let i = G.ebullets.length - 1; i >= 0; i--) {
       const b = G.ebullets[i];
       if (U.dist(p.x, p.y, b.x, b.y) > R + (b.r || 6)) continue;
@@ -1984,6 +1994,13 @@
   // 返回本次连反层数（1 = 断连后的第一下）
   function parryJuice(src, ang) {
     const J = parryJ(), p = G.player, pr = G.parry;
+    // 美术档位（20261111H 建 / 20261111I 改看真实帧间隔）
+    // heavy：已经掉到 ~30fps 以下 —— 再来 16 道光芒 + 26 颗火星 + 逐像素爆点，只会把「卡一下」变成「卡死」
+    // fatal：掉到 ~14fps 以下 —— 只留骨架（冲击波 / 弯月 / 清场边界环 / 清场本身），其余全砍
+    // q=0：主循环连错 8 次（G.safeMode）—— 特效整个关掉，先保住「还能继续打」
+    const heavy = _frameReal > 34;
+    const fatal = _frameReal > 70;
+    const q = G.safeMode ? 0 : 1;
     // 连反链：上一次成功仍在窗口内 → 累加；否则重新从 1 起
     pr.chain = (pr.chain > 0 && pr.chainT > 0) ? Math.min(J.chainMax, pr.chain + 1) : 1;
     pr.chainT = J.chainWin;
@@ -2000,27 +2017,23 @@
     if (Sfx && Sfx.parry) Sfx.parry(pr.chain);
 
     // 4) 贴边金环一闪 + 按钮自己亮一下（按下去的手也得到回音）
-    parryHitFlash();
+    if (!fatal) parryHitFlash();          // 全屏贴边环：最吃力时先省它，按钮自身的小亮仍保留
     if (elParryBtn) restartAnim(elParryBtn, 'ok');
 
     // 5) 主角身上炸开一整套「格开」：三层同心冲击波 + 正反两道弯月刀光 + 一圈放射光芒 + 像素爆点。
     //    水墨皮：刀光/冲击波改朱砂，并给一次性命中反馈打 hard 标记 ——
     //    浅宣纸的降彩规则(softRingFx)会把它压成灰线，弹反在纸皮上就毫无存在感。
     const ink = !!(save && save.skin === 'guigu');
-    // 美术档位（20261111H）：帧时间已经超过 34ms（≈30fps 以下）就别再全量放，
-    // 否则「弹反这一下」自己就把主线程顶死。低端机上少一半光芒和火星，
-    // 大爆炸的骨架（冲击波 / 弯月 / 清场边界环 / 清场）一样不少。
-    const heavy = _frameAvg > 34;
     const a0 = (typeof ang === 'number' && isFinite(ang)) ? ang : -Math.PI / 2;
     const C_HOT = '#c0352a';     // 朱砂：浅宣纸和暗底都读得出来，也和水墨皮的印蜕同一套色
     const C_CORE = '#ffb43c';    // 暖金芯
-    if (p) {
+    if (p && q) {
       // 尺寸一律用绝对值（而不是乘主角半径）：主角 r 只有 9px，按 r 缩放出来的「大爆炸」实际只有 50px，
       // 在 Boss 面前根本不算事。这里直接按屏幕尺度给：主环 ~150px、光芒最远 ~170px。
       // 像素爆点：金皮放大到 2.4 倍；水墨皮收一点（纸底上大团深红会糊成一块墨渍）
       // 像素爆点是每帧重建整块缓冲的（pixelfx 逐像素合成），掉帧时先省它 —— 它只是加法装饰，
       // 冲击波和弯月才是这记弹反的骨架
-      if (window.FX3 && !heavy) FX3.spawn('nova', p.x, p.y, { pal: ink ? 'xue' : 'jin', scale: ink ? 1.6 : 2.4 });
+      if (window.FX3 && !heavy && q) FX3.spawn('nova', p.x, p.y, { pal: ink ? 'xue' : 'jin', scale: ink ? 1.6 : 2.4 });
       G.parts.push({ slash: true, hard: true, x: p.x, y: p.y, ang: a0, arc: 2.5, rad: 82, life: 0.34, maxlife: 0.34, color: C_HOT });
       G.parts.push({ slash: true, hard: true, x: p.x, y: p.y, ang: a0 + Math.PI, arc: 1.7, rad: 58, life: 0.28, maxlife: 0.28, color: C_CORE });
       G.parts.push({ ring: true, hard: true, lw: 13, x: p.x, y: p.y, r: 8, maxr: 156, life: 0.46, maxlife: 0.46, color: C_HOT });
@@ -2030,7 +2043,7 @@
       // 玩家得看得见这一圈，才会知道「站远了没用、站近了一键盘全清」。
       G.parts.push({ ring: true, hard: true, lw: 3, x: p.x, y: p.y, r: 14, maxr: J.clearR || 172, life: 0.52, maxlife: 0.52, color: C_CORE });
       // 放射光芒：16 道长短不一的直线「炸」出去（掉帧时对半砍，密度减半但观感仍是「炸出去」）
-      const rayN = heavy ? 8 : 16;
+      const rayN = fatal ? 6 : (heavy ? 8 : 16);
       for (let i = 0; i < rayN; i++) {
         const a3 = a0 + (i / rayN) * 6.2832 + U.rand(-0.06, 0.06);
         G.parts.push({
@@ -2049,10 +2062,10 @@
         // 用 ||0 兜底：Boss 对象本身没有 stunT 字段，原来的 !=null 判断会让「反震 Boss 硬直」直接失效
         src.stunT = Math.max(src.stunT || 0, isBoss ? J.stun * 0.75 : J.stun);
       }
-      if (window.FX3) FX3.spawn('crit', src.x, src.y - (src.r || 18) * 0.3, { pal: ink ? 'xue' : 'jin', scale: 2.6 });
+      if (window.FX3 && !heavy && q) FX3.spawn('crit', src.x, src.y - (src.r || 18) * 0.3, { pal: ink ? 'xue' : 'jin', scale: 2.6 });
       G.parts.push({ ring: true, hard: true, lw: 10, x: src.x, y: src.y, r: 10, maxr: Math.max(124, (src.r || 20) * 5), life: 0.34, maxlife: 0.34, color: '#c0352a' });
       // 火星：数量翻倍、飞得更远（原来 10 颗 110–250，现在 26 颗 150–380）；掉帧时减到 12
-      const sparkN = heavy ? 12 : J.sparkN;
+      const sparkN = fatal ? 6 : (heavy ? 12 : J.sparkN);
       for (let i = 0; i < sparkN; i++) {
         const a2 = a0 + U.rand(-1.25, 1.25);
         G.parts.push({
@@ -2182,7 +2195,8 @@
       for (let i = G.etch.length - 1; i >= 0; i--) {
         const e2 = G.etch[i]; e2.t -= dt; e2.acc += dt;
         if (e2.e && !e2.e._dead && e2.e.hp != null) {
-          while (e2.acc >= 0.5) { damageEnemy(e2.e, e2.dmg); e2.acc -= 0.5; }
+          let g2 = 0;
+          while (e2.acc >= 0.5 && g2++ < 40) { damageEnemy(e2.e, e2.dmg); e2.acc -= 0.5; }
         }
         if (e2.t <= 0) G.etch.splice(i, 1);
       }
@@ -2237,7 +2251,7 @@
         // 「格开」是整套弹反最该被看见的两个字：大号 + 弹出 + 描边，且抬到冲击波之上，不被光芒盖住
         if (pr.type === 'tap') spawnText(p.x, p.y - p.r - 52, label, col, 28, { punch: true, stroke: true, life: 1.05 });
         else spawnText(p.x, p.y - p.r - 6, label, col, 16);
-        G.parts.push({ ring: true, x: p.x, y: p.y, r: 6, maxr: p.r * 2.2, life: 0.28, maxlife: 0.28, color: col });
+        if (!G.safeMode) G.parts.push({ ring: true, x: p.x, y: p.y, r: 6, maxr: p.r * 2.2, life: 0.28, maxlife: 0.28, color: col });
         if (pr.type === 'tap') {
           const J = parryJ();
           const isBoss = !!(pr.src && (pr.src.boss || pr.src === G.boss));
@@ -5760,10 +5774,12 @@
   }
   function updateParts(dt) {
     if (window.FX3) FX3.update(dt);
-    // 粒子上限（20261111H）：弹反清场 + 连反叠起来能到 600+，再撞上 Boss 招式就过千。
-    // 只淘汰「普通碎屑」（带速度的方块粒子）—— ring / ray / slash / rune 是构图的一部分，
-    // 砍掉会看见特效凭空消失。碎屑本来也活不过 0.4 秒，丢最老的看不出差别。
-    const MAX_PARTS = 1200;
+    // 粒子上限（20261111H 建 / 20261111I 补硬上限）
+    // 第一遍只淘汰「普通碎屑」（带速度的方块粒子），保住环形/光芒/弯月这些构图；
+    // 但光有这一遍等于没有上限 —— 弹反每下都要撒 5 个环 + 8~16 道光芒 + 2 道弯月，
+    // 而它们全在豁免名单里，连反几次就能堆到上千，MAX_PARTS 一个都拦不住。
+    // 所以补第二遍：还不够就从**最老的**开始丢，不挑类型（最老的早已淡到看不见）。
+    const MAX_PARTS = 900;
     if (G.parts.length > MAX_PARTS) {
       let over = G.parts.length - MAX_PARTS;
       for (let i = 0; i < G.parts.length && over > 0; i++) {
@@ -5771,6 +5787,7 @@
         if (q.ring || q.ray || q.slash || q.rune || q.bolt || q.web || q.shatter || q.spark) continue;
         G.parts.splice(i, 1); i--; over--;
       }
+      if (over > 0) G.parts.splice(0, over);   // 硬上限：最老的先走，不挑类型
     }   // pixelfx 特效推进（顿帧里也跟着冻，手感才一致）
     // 第117轮：随行之人 / 灵宠的起手动作计时，和特效同一条时间轴（顿帧一起冻）。
     if (G.pet && G.pet.skCast > 0) G.pet.skCast = Math.max(0, G.pet.skCast - dt);
@@ -6401,7 +6418,9 @@
   // 收尾阶段静默升级（避免打断 Boss 战后的收取演出）
   function autoLevelUp() {
     const p = G.player;
-    while (p.xp >= p.next) {
+    // 同上：next 一旦算成 0/NaN 就是死循环。xpNeed 现在恒 ≥5，但这行护栏很便宜
+    let guard = 0;
+    while (p.xp >= p.next && p.next > 0 && guard++ < 200) {
       p.xp -= p.next; p.level++;
       p.next = xpNeed(p.level);
       checkRealm();
@@ -6953,7 +6972,10 @@
     const damp = (st.done || 0) >= 14 ? 0.35 : ((st.done || 0) >= 11 ? 0.65 : 1);
     const k = (1 + (G.bonus.shaGain || 0) + rp('shaGain')) * (st.x2T > 0 ? 2 : 1) * damp;
     st.v += n * k;
-    while (st.v >= st.need) { st.v -= st.need; st.pending = (st.pending || 0) + 1; }
+    // need <= 0 时 while 会永远成立 → 整个主线程焊死。加一道护栏，宁可这一次不给顿悟
+    let guard = 0;
+    while (st.need > 0 && st.v >= st.need && guard++ < 64) { st.v -= st.need; st.pending = (st.pending || 0) + 1; }
+    if (st.need > 0 && st.v >= st.need) st.v = st.need;   // 护栏兜底：攒着，下一帧继续
   }
   // 顿悟/祭炼对某门功法的加成（改的是这次出手用的那份配置，不动全局表）
   // 必须按「施法形态」分派字段，否则会抽到空转的卡：
@@ -13486,13 +13508,50 @@
   }, { passive: true });
 
   // ---------- 主循环 ----------
+  // 20261111I：异常免疫 + 看门狗。
+  // 原来 requestAnimationFrame(loop) 是循环体的最后一行 —— update/render/updateHUD 里只要抛出
+  // 一次未捕获异常，整条循环当场断掉：画面定格在那一帧，而按钮上的 CSS 动画跑在合成器线程，
+  // 照旧一下一下地动。Jerry 在 Mate 60 Pro / Edge 上看到的就是这个：游戏死了、按钮还在动。
+  // 现在：这一帧跑在 try/catch 里，异常被吞掉并记账，帧末的 scheduleLoop() 在 try 之外，
+  // 一定会执行 —— 最坏只丢一帧，不会整局报废。
   let last = performance.now();
   let _verShown = null;   // 版本水印：仅在标题首页显示，缓存避免每帧重复写
+  let _loopGen = 0, _loopTickAt = 0, _loopErrN = 0, _loopErrAt = 0;
+  // 用「代际」而不是布尔锁：每次调度都 +1，回调先比代际，被更新的一次取代就直接退出。
+  // 这样看门狗可以在「rAF 已经被掐掉、上一帧的调度却还挂着」时强行重新点火，
+  // 又绝不会跑出第二条循环（布尔锁在那种场景下会永远卡死，看门狗反而不起作用）。
+  function scheduleLoop() {
+    const g = ++_loopGen;
+    requestAnimationFrame(function (t) {
+      if (g !== _loopGen) return;
+      loop(t);
+    });
+  }
+  function onLoopError(e) {
+    _loopErrN++;
+    G.lastErr = String((e && (e.stack || e.message)) || e || '');
+    const now = Date.now();
+    if (now - _loopErrAt > 4000) {        // 别让一个每帧都错的 bug 把屏幕刷满
+      _loopErrAt = now;
+      try { console.error('[loop]', e); } catch (_) {}
+      try { banner('脚本出错 · 已跳过这一帧'); } catch (_) {}   // 看得见的提示，好过静悄悄定格
+    }
+    // 连着出错 = 这一屏某个特效有毒：进安全模式，只跑逻辑不画特效，先保住「能继续打」
+    if (_loopErrN > 8) G.safeMode = true;
+  }
   function loop(t) {
-    const dt = Math.min(0.05, (t - last) / 1000); last = t;
-    // 帧率守卫（20261111H）：滚动平均帧时间。弹反那一瞬要决定「美术开到哪一档」——
-    // 已经掉到 30fps 以下还全量放 16 道光芒 + 26 颗火星 + 像素爆点，只会把「卡一下」变成「卡死」。
-    // 用 clamp 过的 dt 就够：>50ms 的帧一律按 50 记，判断「是否已经吃力」不需要精确值。
+    try { tickFrame(t); } catch (e) { onLoopError(e); }
+    _loopTickAt = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    scheduleLoop();
+  }
+  function tickFrame(t) {
+    const rawDt = t - last;
+    const dt = Math.min(0.05, rawDt / 1000); last = t;
+    // 帧率守卫（20261111H/20261111I）：滚动平均帧时间。弹反那一瞬要决定「美术开到哪一档」。
+    // _frameAvg 吃的是 clamp 过的 dt（>50ms 按 50 记），只适合判断「吃不吃力」；
+    // _frameReal 记的是**未 clamp 的真实帧间隔** —— 手机上一次弹反真花了 180ms 时，
+    // 前者永远显示 50，档位判断就慢半拍。档位现在看 _frameReal。
+    _frameReal += (Math.min(400, rawDt) - _frameReal) * 0.12;
     _frameAvg += (Math.min(50, dt * 1000) - _frameAvg) * 0.1;
     if (G.state === 'play') update(dt * (G.ts || 1));
     else if (G.state === 'down') updateDown(dt * (G.ts || 1));   // P6 倒地观战：世界照转，自己不能动
@@ -13512,7 +13571,21 @@
     if (G.state === 'victory') updateSettle(dt * (G.ts || 1));
     // 飞鸽传书：战斗 / 暂停 / 选图（修行图）/ 对话时才给用，标题与结算收起来
     if (window.Chat) window.Chat.setVisible(CHAT_STATES[G.state] === 1);
-    requestAnimationFrame(loop);
+  }
+  // 看门狗：rAF 偶尔会被浏览器静默掐掉（切后台再回来、渲染器恢复、页面被系统降频）。
+  // 那种情况下什么异常都没有，就是永远不再回调 —— 看起来和「卡死」一模一样。
+  // 800ms 查一次，主循环超过 1.5s 没动过就重新点火；_loopPending 保证不会跑出第二条循环。
+  if (typeof setInterval === 'function') {
+    setInterval(() => {
+      try {
+        if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+        const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+        if (now - _loopTickAt < 1500) return;
+        _loopErrN++;
+        if (!G.lastErr) G.lastErr = 'watchdog: 主循环停摆 1.5s，已重新点火';
+        scheduleLoop();
+      } catch (_) {}
+    }, 800);
   }
   // 允许聊天的场景：进图打斗、倒地、暂停、看修行图、剧情对话、洞府/坊市之外都算「在图里」
   // victory 也开着：结算菜单已上移，下方留白正好让两人在图里聊两句、丢个表情再走
@@ -13939,6 +14012,9 @@
       return { left: elParryBtn.offsetLeft, top: elParryBtn.offsetTop, w: elParryBtn.offsetWidth, h: elParryBtn.offsetHeight, sw: st.clientWidth, sh: st.clientHeight };
     },
     parryVuln() { return G.parry ? { e: !!G.parry.vulnE, t: +(G.parry.vulnT || 0).toFixed(3), chain: G.parry.chain || 0 } : null; },
+    // 20261111I：主循环自保状态。lastError 是手机卡死后唯一能拿到的线索 ——
+    // 复现时先看它：有栈 = 某处抛异常（循环已自愈，只丢了一帧）；空 = 是死循环/停摆（看 watchdog）。
+    lastError() { return { err: G.lastErr || '', count: _loopErrN, safeMode: !!G.safeMode, frameReal: +_frameReal.toFixed(1), frameAvg: +_frameAvg.toFixed(1) }; },
     // 20261111G：爆炸清场 + 无敌帧探针。不按键也能单独验证清场半径内的东西是否被扫掉。
     parryClear() { return parryBlast(); },
     parryIv() { return G.player ? { iv: +(G.player.iv || 0).toFixed(3), grant: +((G.parry && G.parry.ivGrant) || 0).toFixed(3) } : null; },
@@ -14794,5 +14870,5 @@
     pendingHetiGift = false;
     setTimeout(function () { try { banner('旧账 · 补发万妙丹一枚（合体关已可再试）'); Sfx.buff(); } catch (e) {} }, 1700);
   }
-  requestAnimationFrame(loop);
+  scheduleLoop();   // 主循环点火（20261111I：走 scheduleLoop，和看门狗共用一套防重入）
 })();
