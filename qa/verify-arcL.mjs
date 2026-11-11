@@ -1,13 +1,14 @@
 // 真浏览器验收：灵界 V11/V12「大乘 → 飞升」（arc L）按原著重排
 //   ① 图链 24 张：三劫 → 大乘圣典 → 始印之地 → 灵族 → 小修罗界 → 青元宫 → 冥河青元子 → 赫连商盟
-//      → 天鼎宫 → 血天大陆 → 强者之战 → 小灵天 → 群强之陨 → 献祭 → 掌天瓶 → 斩仙 → 青元宫·第一大乘
-//      → 再回魔源 → 道果大会 → 人族之变 → 九劫 → 真仙之身 → 飞升之劫 → 飞升仙界
+//      → 天鼎宫 → 血天大陆 → 强者之战 → 小灵天 → 真仙之身（马良）→ 九劫现（轩九灵）→ 群强之陨
+//      → 献祭 → 掌天瓶 → 斩仙 → 青元宫·第一大乘 → 再回魔源 → 道果大会 → 人族之变 → 飞升之劫 → 飞升仙界
 //   ② 原著时序：2468 大乘 / 2469 大乘圣典+始印之地 / 2470 灵族+小修罗界+青元宫 / 2476 冥河+赫连商盟
 //      / 2477 天鼎宫+血天大陆 / 2479 强者之战 / 2480 小灵天 / 2482 围杀马良 / 2483 第一大乘 / 2487-88 道果 / 飞升
-//   ③ 四处纠错：小灵天不再紧跟大乘（原著 2480，在强者之战之后）；九劫是飞升前奏不是大乘后立即；
-//      真仙之身在九劫之后；「第一大乘」在斩仙之后（不是支线）
+//   ③ 时序：V12C2419–2423 马良复还真仙之身、轩九灵九劫灭灵大法都在群强之陨之前，
+//      两张图按原著挪到小灵天之后；人族之变之后直接接飞升之劫，不再重复「九道仙劫」。
+//      「第一大乘」仍在斩仙之后（不是支线）
 //   ④ 物品来路：螟虫之母晶核=始印之地 / 元魂灯+山海珠=小修罗界 / 三清雷霄符=灵族 / 镇魔锁=K 段
-//   ⑤ 破境：330 渡劫落在强者之战，420 真仙落在真仙之身
+//   ⑤ 破境：330 渡劫落在强者之战；420 真仙的前置仍是已了九劫现
 //   ⑥ 老档：已走到终局的存档，整段补成已了
 // 用法：node qa/verify-arcL.mjs
 import { createRequire } from 'node:module';
@@ -48,8 +49,8 @@ const KEY = 'fanren_save_v1';
   await page.waitForFunction(() => !!window.__FR);
 
   const ORDER = ['sanjie', 'dashengdian', 'shiyin', 'lingzu', 'xiaoxiuluo', 'qingyuangong', 'minghe2', 'helian',
-    'tiandinggong', 'xuetian', 'qiangzhe', 'xiaoling', 'qunqiang', 'xianshi', 'zhangtianping', 'zhanxian',
-    'diyi', 'huimoyuan', 'daoguo', 'renzu', 'jiujie', 'zhenxian', 'fsjie', 'xianjie'];
+    'tiandinggong', 'xuetian', 'qiangzhe', 'xiaoling', 'zhenxian', 'jiujie', 'qunqiang', 'xianshi', 'zhangtianping', 'zhanxian',
+    'diyi', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie'];
 
   const data = await page.evaluate((order) => {
     const M = id => window.MAPS.find(m => m.id === id) || {};
@@ -96,11 +97,11 @@ const KEY = 'fanren_save_v1';
     'sanjie@灵界·荒原 翻天台', 'dashengdian@灵界·天渊城', 'shiyin@魔界·始印之地', 'lingzu@灵界·灵族 圣城',
     'xiaoxiuluo@小修罗界·寒潭', 'qingyuangong@灵界·无涯海 元合岛', 'minghe2@灵界·冥河之地',
     'helian@灵界·雷鸣大陆 天云城', 'tiandinggong@血天大陆·天鼎宫', 'xuetian@血天大陆·血河',
-    'qiangzhe@血天大陆·浮空战场', 'xiaoling@灵界·小灵天', 'qunqiang@灵界·金色世界',
+    'qiangzhe@血天大陆·浮空战场', 'xiaoling@灵界·小灵天',
+    'zhenxian@灵界·荒原 雷光中', 'jiujie@灵界·荒原 劫云下', 'qunqiang@灵界·金色世界',
     'xianshi@灵界·鸣煞之地', 'zhangtianping@灵界·鸣煞之地 盆地', 'zhanxian@灵界·荒原 血河',
     'diyi@灵界·无涯海 青元宫', 'huimoyuan@魔界·魔源海 苦灵谷', 'daoguo@真龙之岛·禁制山林',
-    'renzu@真龙之岛', 'jiujie@灵界·荒原 劫云下', 'zhenxian@灵界·荒原 雷光中',
-    'fsjie@灵界·荒原 劫云下', 'xianjie@仙界·接引台'
+    'renzu@真龙之岛', 'fsjie@灵界·荒原 劫云下', 'xianjie@仙界·接引台'
   ].join('|'), '二十四张图的地点与原著地理一致', data.arc.map(x => x.id + '@' + x.pos));
   ok(data.arc.every((x, i) => i === 0 || x.startLevel >= data.arc[i - 1].startLevel),
     '等级单调递增（不会出现低级图排在高级图后面）', data.arc.map(x => x.id + ':' + x.startLevel));
@@ -136,10 +137,11 @@ const KEY = 'fanren_save_v1';
   const byId = id => data.arc.find(x => x.id === id);
   ok(byId('xiaoling').startLevel >= 330 && byId('xiaoling').unlock === 'qiangzhe',
     '小灵天挪到强者之战之后（原著 2480 岁，不是刚进阶大乘就去了）', { lv: byId('xiaoling').startLevel, unlock: byId('xiaoling').unlock });
-  ok(byId('jiujie').startLevel > byId('renzu').startLevel && byId('zhenxian').unlock === 'jiujie',
-    '九劫在道果与人族之变之后、真仙之身之前（飞升前奏）', { j: byId('jiujie').startLevel, z: byId('zhenxian').startLevel });
-  ok(byId('zhenxian').type === 'story' && byId('zhenxian').endLevel === 420 && byId('fsjie').unlock === 'zhenxian',
-    '真仙之身是 400→420 的过场，飞升之劫接在它后面', byId('zhenxian'));
+  ok(byId('zhenxian').unlock === 'xiaoling' && byId('jiujie').next === 'qunqiang' && byId('qunqiang').unlock === 'jiujie',
+    '真仙之身 / 九劫现按原著 V12C2419–2423 排在小灵天之后、群强之陨之前',
+    { z: byId('zhenxian').unlock, j: byId('jiujie').next, q: byId('qunqiang').unlock });
+  ok(byId('renzu').next === 'fsjie' && byId('fsjie').unlock === 'renzu',
+    '人族之变之后直接接飞升之劫，不再拿「九道仙劫」重复作前奏', { r: byId('renzu').next, f: byId('fsjie').unlock });
   ok(byId('diyi').unlock === 'zhanxian' && byId('diyi').next === 'huimoyuan' && byId('diyi').type === 'boss',
     '「第一大乘」在斩仙之后（2483），是主线战斗图不再是支线', { unlock: byId('diyi').unlock, next: byId('diyi').next });
   ok(byId('sanjie').clearTitle === '大乘已成' && byId('diyi').clearTitle === '第一大乘',
@@ -157,8 +159,8 @@ const KEY = 'fanren_save_v1';
 
   // ---------- ⑤ 破境落点 ----------
   ok(data.b330.story.id === 'qiangzhe', '330 渡劫落在强者之战（灵界已无对手）', data.b330.story);
-  ok(data.b420.story.id === 'jiujie' && data.b420.mats.indexOf('m_xuantianteng') >= 0,
-    '420 真仙要仙藤 + 真灵之血，且已过九劫', data.b420);
+  ok(data.b420.story.id === 'renzu' && data.b420.mats.indexOf('m_xuantianteng') >= 0,
+    '420 真仙要仙藤 + 真灵之血，且已了人族之变', data.b420);
 
   // ---------- ⑥ 真能走完 ----------
   const walk = await page.evaluate((order) => {

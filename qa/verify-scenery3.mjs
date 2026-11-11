@@ -583,6 +583,24 @@ if (fs.existsSync(truthPath)) {
   ok(!!htmlVer && htmlVer === swVer && verHits === 32,
      'index.html 32 处版本号与 sw.js BUILD 自洽（当前 ' + (htmlVer || '未找到') + '）',
      { html: verHits, sw: swVer });
+
+  // ---- 时间线守门（按 D:/Games/CSJ/raw 原著全文校对后的四处时序 + 两段台词归属） ----
+  // 真源 order 是考据账本，运行时 MAPS 数组与 unlock/next 是实际推进顺序；两边必须同步改。
+  const tlTruth = truth.maps.filter(m => !m.side).slice().sort((a, b) => a.order - b.order).map(m => m.id);
+  const tlRun = await page.evaluate(() => window.MAPS.filter(m => !m.side).map(m => m.id));
+  const tlDiff = tlTruth.map((id, i) => tlRun[i] === id ? null : i + ':' + id + '≠' + tlRun[i]).filter(Boolean);
+  ok(tlRun.length === tlTruth.length && tlDiff.length === 0,
+     '主线 ' + tlTruth.length + ' 张：考据真源 order 与游戏运行时链逐位一致',
+     { run: tlRun.length, truth: tlTruth.length, diff: tlDiff.slice(0, 8) });
+  const tlIdx = id => tlRun.indexOf(id);
+  ok(tlIdx('huangquan') < tlIdx('yitian') && tlIdx('yinyue') < tlIdx('sanjian') &&
+     tlIdx('muzu') < tlIdx('zhenchan') && tlIdx('zhenxian') < tlIdx('jiujie') && tlIdx('jiujie') < tlIdx('qunqiang'),
+     '原著四组时序：镇魔锁→倚天城 / 银月认主→三派试剑 / 木族→碧眼真蟾 / 真仙之身→九劫现→群强之陨',
+     ['huangquan', 'yitian', 'yinyue', 'sanjian', 'muzu', 'zhenchan', 'zhenxian', 'jiujie', 'qunqiang'].map(id => id + ':' + tlIdx(id)));
+  const tlLines = await page.evaluate(() => ['zhenxian', 'jiujie']
+    .map(k => (window.MAP_STORIES[k] || []).map(x => x[0] + '：' + x[1]).join('')).join('|'));
+  ok(!/九道仙劫|不再是凡胎/.test(tlLines) && /马良/.test(tlLines) && /轩九灵/.test(tlLines) && /九劫灭灵大法/.test(tlLines),
+     '真仙之身/九劫现台词按原著归属马良与轩九灵，不再写成韩立渡九道仙劫', tlLines.slice(0, 90));
 } else {
   console.log('   （仓库外唯一真源不可读，跳过 3 条交付口径断言；前 12 组不受影响）');
 }

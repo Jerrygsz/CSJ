@@ -455,9 +455,9 @@
   (function migrateArcL() {
     const cl = save.cleared || [], un = save.unlocked || [];
     const L_ALL = ['sanjie', 'dashengdian', 'shiyin', 'lingzu', 'xiaoxiuluo', 'qingyuangong', 'minghe2', 'helian',
-      'tiandinggong', 'xuetian', 'qiangzhe', 'xiaoling', 'qunqiang', 'xianshi', 'zhangtianping', 'zhanxian',
-      'diyi', 'huimoyuan', 'daoguo', 'renzu', 'jiujie', 'zhenxian', 'fsjie', 'xianjie'];
-    const DEEP = ['qunqiang', 'xianshi', 'zhangtianping', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'jiujie', 'fsjie', 'xianjie'];
+      'tiandinggong', 'xuetian', 'qiangzhe', 'xiaoling', 'zhenxian', 'jiujie', 'qunqiang', 'xianshi', 'zhangtianping', 'zhanxian',
+      'diyi', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie'];
+    const DEEP = ['zhenxian', 'jiujie', 'qunqiang', 'xianshi', 'zhangtianping', 'zhanxian', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie'];
     const hasDeep = DEEP.some(id => cl.indexOf(id) >= 0);
     if (!hasDeep) return;
     let changed = false;

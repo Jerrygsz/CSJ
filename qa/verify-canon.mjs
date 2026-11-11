@@ -232,7 +232,7 @@ const want6 = ['qixuan', 'houshan', 'mishi', 'yelang', 'jiayuan', 'tainan', 'hua
   'yanjia', 'jingu',
   'guchuan', 'kuixing', 'liulian', 'haian', 'tianxing', 'ningcui', 'jiedan', 'miaoyin', 'qingzhu', 'guxiu',
   'xutian', 'wuzhong', 'waihai', 'yuanyao', 'yinming',
-  'bianhai', 'luoyun', 'shixiao', 'sanjian', 'yinyue', 'jieying', 'jiaoyihui', 'cangkun', 'yanyue', 'huanglong',
+  'bianhai', 'luoyun', 'shixiao', 'yinyue', 'sanjian', 'jieying', 'jiaoyihui', 'cangkun', 'yanyue', 'huanglong',
   'bianjie', 'yinluo', 'jixi', 'zhuimo', 'lingmiao', 'mulan', 'dajin', 'kunwu', 'zhenmo', 'xiaoji',
   'xutian2', 'xinggong', 'kunpeng', 'luoyun2', 'tianlan', 'liudao', 'jiezi', 'feisheng',
   // 灵界篇（V8–V12）：飞升 → 炼虚 → 合体 → 大乘 → 渡劫 → 真仙 → 飞升仙界
@@ -241,8 +241,8 @@ const want6 = ['qixuan', 'houshan', 'mishi', 'yelang', 'jiayuan', 'tainan', 'hua
   'liangzu', 'jiuxian', 'heiyu', 'longjia', 'shengdao', 'zhenling', 'mojie', 'diyuan2',
   'moban', 'huangquan', 'yitian', 'tianzhan', 'xueya', 'huanxiao', 'moyuan', 'modajie', 'lanpu', 'muzu2',
   'sanjie', 'dashengdian', 'shiyin', 'lingzu', 'xiaoxiuluo', 'qingyuangong', 'minghe2', 'helian',
-  'tiandinggong', 'xuetian', 'qiangzhe', 'xiaoling', 'qunqiang', 'xianshi', 'zhangtianping', 'zhanxian',
-  'diyi', 'huimoyuan', 'daoguo', 'renzu', 'jiujie', 'zhenxian', 'fsjie', 'xianjie',
+  'tiandinggong', 'xuetian', 'qiangzhe', 'xiaoling', 'zhenxian', 'jiujie', 'qunqiang', 'xianshi', 'zhangtianping', 'zhanxian',
+  'diyi', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie',
   // 仙界篇（X1–X5）：风起灵寰 → 重回仙界 → 时空迷踪 → 大罗之争 → 大道归一 → 飞羽
   'linghuan', 'suxing', 'lingyan', 'xiaoping', 'tiangui', 'poxu', 'wumengdao', 'chulong', 'huijie', 'shijin', 'xianyun', 'shuiyan', 'xisha', 'taiyi',
   'dijiang', 'xingqi', 'dadi', 'xiedao', 'jingong', 'taisui', 'chongchao', 'suidian', 'daluo', 'wubao',

@@ -118,7 +118,7 @@ const RW = await page.evaluate(() => {
   const W = window;
   const get = id => W.MAPS.find(m => m.id === id) || {};
   const o = {};
-  for (const id of ['muzu', 'shengdao', 'xueya', 'huangquan', 'diyuan2', 'modajie', 'lanpu', 'baiguang', 'jiujie']) {
+  for (const id of ['muzu', 'shengdao', 'heiyu', 'xueya', 'huangquan', 'diyuan2', 'modajie', 'lanpu', 'baiguang', 'jiujie']) {
     const m = get(id);
     o[id] = {
       items: (m.reward && m.reward.items) || [],
@@ -134,7 +134,7 @@ const has = (arr, id) => arr.some(x => (Array.isArray(x) ? x[0] : x) === id);
 ok(has(RW.muzu.mats, 'm_zhilongguo'), '木族领地 reward.mats 含 芝龙果', RW.muzu.mats);
 ok(RW.muzu.clearDesc.indexOf('芝龙果') >= 0, '木族领地 clearDesc 提到 芝龙果', RW.muzu.clearDesc.slice(0, 16));
 
-ok(RW.shengdao.items.indexOf('t_qitianluo') >= 0, '圣岛 reward.items 含 齐天锣', RW.shengdao.items);
+ok(RW.heiyu.items.indexOf('t_qitianluo') >= 0, '黑域交换会 reward.items 含 齐天锣（V10C1788–1800，不在圣岛）', RW.heiyu.items);
 ok(has(RW.shengdao.mats, 'm_zhenlingpo'), '圣岛 reward.mats 含 真灵之魄', RW.shengdao.mats);
 
 ok(RW.xueya.items.indexOf('t_weimozhu') >= 0, '血鸦城 reward.items 含 伪魔珠（入魔界所必需）', RW.xueya.items);
@@ -171,14 +171,16 @@ const SIM = await page.evaluate(() => {
     return { cleared, itemsGot, petsGot, items: want.filter(id => !id.startsWith('p_')).map(id => bag[id] || 0), pets };
   };
   return {
-    shengdao: clearOne('shengdao', 210, false, ['t_qitianluo', 'm_zhenlingpo']),
+    shengdao: clearOne('shengdao', 210, false, ['m_zhenlingpo']),
+    heiyu: clearOne('heiyu', 205, false, ['t_qitianluo']),
     xueya: clearOne('xueya', 240, false, ['t_weimozhu', 'm_yimojin']),
     huangquan: clearOne('huangquan', 220, true, ['t_zhenmosuo']),
     modajie: clearOne('modajie', 245, true, ['t_jinglinglian', 'm_xilingchi', 'p_xiedaoren']),
     lanpu: clearOne('lanpu', 250, true, ['m_wuxingzhenguang', 'm_xueyami'])
   };
 });
-ok(SIM.shengdao.cleared && SIM.shengdao.itemsGot, '打通圣岛 → 齐天锣+真灵之魄进背包', SIM.shengdao);
+ok(SIM.shengdao.cleared && SIM.shengdao.itemsGot, '打通圣岛 → 真灵之魄进背包', SIM.shengdao);
+ok(SIM.heiyu.cleared && SIM.heiyu.itemsGot, '打通黑域交换会 → 齐天锣进背包', SIM.heiyu);
 ok(SIM.xueya.cleared && SIM.xueya.itemsGot, '打通血鸦城 → 伪魔珠+异魔金进账', SIM.xueya);
 ok(SIM.huangquan.cleared && SIM.huangquan.itemsGot, '打通镇魔锁 → 镇魔锁进背包', SIM.huangquan);
 ok(SIM.modajie.cleared && SIM.modajie.itemsGot && SIM.modajie.petsGot, '打通苦灵岛 → 净灵莲+洗灵池液+蟹道人进账', SIM.modajie);
@@ -186,7 +188,7 @@ ok(SIM.lanpu.cleared && SIM.lanpu.itemsGot, '打通蓝瀑城 → 阴阳大五行
 
 // ============ 5) 版本串 ============
 const VER = await page.evaluate(() => { const el = document.getElementById('ver'); return el ? el.textContent : null; });
-ok(/^v\d{8}[a-z]$/.test(VER), '页面版本串格式正确（v+日期+小版本字母）', VER);
+ok(/^v\d{8}[A-Za-z]$/.test(VER), '页面版本串格式正确（v+日期+小版本字母）', VER);
 
 ok(errors.length === 0, '页面无 JS 报错', errors);
 

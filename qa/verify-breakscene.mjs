@@ -50,8 +50,14 @@ let r1 = await E(`(() => (window.BREAKTHROUGH || []).map(x => ({ lv: x.lv, realm
 ok(r1.length >= 4, '四大境界门齐备', r1);
 ok(r1.every(x => x.n >= 4), '每门都有一段（≥4 句）剧情演出', r1);
 ok(r1.every(x => x.scene), '每门都挂了一处剧情地点', r1);
-let r1b = await E(`(() => (window.BREAKTHROUGH || []).map(g => ({ lv: g.lv, map: ((window.MAPS || []).find(m => m.endLevel === g.lv) || {}).id || null, name: ((window.MAPS || []).find(m => m.endLevel === g.lv) || {}).name || null })))()`);
-ok(r1b.every(x => x.map), '每道门都能反查到一张破境地图（endLevel 匹配）', r1b);
+// 20261111B：真仙之身 / 九劫现按原著挪回马良一段后，420 真仙门不再绑定 endLevel 破境图，
+// 改由 BREAKTHROUGH.story[0].id（人族之变）指定场景；enterBreakMap 本就有 story 回退。
+let r1b = await E(`(() => (window.BREAKTHROUGH || []).map(g => {
+  const ms = window.MAPS || [];
+  const m = ms.find(x => x.endLevel === g.lv) || ms.find(x => x.id === (g.story && g.story[0] && g.story[0].id));
+  return { lv: g.lv, map: m ? m.id : null, name: m ? m.name : null, viaEndLevel: ms.some(x => x.endLevel === g.lv) };
+}))()`);
+ok(r1b.every(x => x.map), '每道门都能反查到破境场景（endLevel 图或 story 指定图）', r1b);
 
 // ===== 2. 物料齐了，战斗里也不自动破 =====
 console.log('\n== 2. 料齐仍须回洞府 ==');

@@ -47,7 +47,7 @@ const reload = async () => { await page.reload(); await page.waitForTimeout(1100
 const ORDER = ['qixuan', 'houshan', 'mishi', 'yelang', 'jiayuan', 'tainan', 'huangfeng', 'yaoyuan', 'xuese', 'zhuji',
   'yanjia', 'jingu', 'guchuan', 'kuixing', 'liulian', 'haian', 'tianxing', 'ningcui', 'jiedan', 'miaoyin',
   'qingzhu', 'guxiu', 'xutian', 'wuzhong', 'waihai', 'yuanyao', 'yinming', 'bianhai', 'luoyun', 'shixiao',
-  'sanjian', 'yinyue', 'jieying', 'jiaoyihui', 'cangkun', 'yanyue', 'huanglong', 'bianjie', 'yinluo', 'jixi',
+  'yinyue', 'sanjian', 'jieying', 'jiaoyihui', 'cangkun', 'yanyue', 'huanglong', 'bianjie', 'yinluo', 'jixi',
   'zhuimo', 'lingmiao', 'mulan', 'dajin', 'kunwu', 'zhenmo', 'xiaoji', 'xutian2', 'xinggong', 'kunpeng',
   'luoyun2', 'tianlan', 'liudao', 'jiezi', 'feisheng'];
 

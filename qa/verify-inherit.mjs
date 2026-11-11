@@ -136,7 +136,9 @@ console.log('\n【② 白名单回归：提前出场(A) / 幽灵提及(B) 不得
 const ACCEPT_A = new Set([
   'tainan|筑基丹','huangfeng|筑基丹','yaopu|筑基丹','miaoyin|青竹蜂云剑','xinggong|元磁神光',
   'tianyuan|真灵之血','jiaoyihui|玄天仙藤','mojie|净灵莲','muzu2|忘情诀','xuetian|万灵血玺',
-  'tianmo|魔光','huimoyuan|广灵道果','taisui|岁月神灯'
+  'tianmo|魔光','huimoyuan|广灵道果','taisui|岁月神灯',
+  'zhenxian|两仪微尘阵'   // V12C2419–2420 明尊布阵困马良：图按原著挪回马良段后，
+                          // 这座阵作为「反派持有 / 场景」提前出现，战利品仍要到群强之陨才入袋
 ]);
 const ACCEPT_B = new Set([
   'yelang|火弹术','yaoyuan|白鹤芝','yaoyuan|化龙草','yaoyuan|黄球草','yaoyuan|望月草','yaoyuan|子夜花',

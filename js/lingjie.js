@@ -254,12 +254,14 @@
     {
       lv: 420, realm: '真仙', from: '渡劫期',
       canonCave: 'xlcave',
-      tip: '渡过九劫，铸成真仙之身。玄天仙藤三截、真灵之血五滴，缺一样都撑不到最后（V12C2419–2422）。',
+      tip: '飞升之劫前铸真仙之身。玄天仙藤三截、真灵之血五滴，缺一样都撑不到最后。',
       items: [],
       mats: [['m_xuantianteng', 3], ['m_zhenlingxue', 5]],
       stones: 180000,
       chance: { min: 1 },
-      story: [{ id: 'jiujie', name: '灵界·九劫现' }],
+      // 前置改为「已了人族之变」：九劫现已按原著挪回马良一段（V12C2422），
+      // 不再拿它当飞升前奏；破境场景也跟着落在人族之变，不落在那张旁观图上。
+      story: [{ id: 'renzu', name: '真龙之岛·人族之变' }],
       lines: [
         ['韩立', '（渡劫之后，是铸真仙之身。）'],
         ['旁白', '玄天仙藤三截尽数化开，真灵之血五滴入骨。韩立的影子在雷光里一寸寸变了形状。'],
@@ -982,10 +984,36 @@
       type: 'story', tag: '剧情',
       desc: '小灵天藏在界面的夹缝里。一方天，一口井，一炉火。天很低，低得能看见劫云在别处聚。',
       startLevel: 330, endLevel: 336, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'qiangzhe', next: 'qunqiang',
+      unlock: 'qiangzhe', next: 'zhenxian',
       reward: { stones: 120000, mats: [['m_zhenlingxue', 3]] },
       clearTitle: '重逢',
       clearDesc: '井边那个人回过头来。几百年的话，到嘴边只剩一句：我来接你了。'
+    },
+    {
+      // 原著 V12C2419–2420《真仙之身（上）（下）》：马良抖开金符、黑白二气翻涌，金霞与蓝焰层层
+      // 交叠，一步化作千余丈金色巨人，灵域压得两仪微尘阵几乎维持不住。这一身是马良复还真仙之身，
+      // 不是韩立；韩立在阵外看着，没动手。考据真源 order 124 本就排在「群强之陨」(126) 之前。
+      id: 'zhenxian', name: '真仙之身', pos: '灵界·荒原 雷光中', arc: 'L',
+      type: 'story', tag: '剧情',
+      desc: '血河上空的气息忽然一沉。那不是灵界该有的东西——阵外的人先停了手，一起往河里看。',
+      startLevel: 330, endLevel: 336, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'xiaoling', next: 'jiujie',
+      reward: { stones: 160000, mats: [['m_xuantianteng', 1]] },
+      clearTitle: '真仙之身',
+      clearDesc: '金霞凝住的一瞬，千余丈的金色巨人站了起来。两仪微尘阵被压得乱了一息——他把这一息记下了。'
+    },
+    {
+      // 原著 V12C2422《九劫现》/ C2423《群强之陨》：轩九灵化作灰袍男子贴到马良腰间，一条手臂
+      // 自爆，九色光焰裹住真仙；九种火属性真灵本命之火掺九种法则之力。「九劫」是他的九劫灭灵大法，
+      // 不是韩立渡的天劫；后面 fsjie 才是飞升之劫，这里不再重复。
+      id: 'jiujie', name: '九劫现', pos: '灵界·荒原 劫云下', arc: 'L',
+      type: 'story', tag: '剧情',
+      desc: '血玺压下来，几名大乘连声都没吭。一颗黑影避开血丝，欺到金色巨人身前。',
+      startLevel: 330, endLevel: 336, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      unlock: 'zhenxian', next: 'qunqiang',
+      reward: { stones: 120000, items: ['t_wanlingsan'], mats: [['m_xuantianteng', 1]] },
+      clearTitle: '九劫真焰',
+      clearDesc: '九色火把那副真仙身躯烧成一副骨架。隔得远，只看得清火是九种颜色。'
     },
     {
       // 原著（2482 岁，V12C2423《群强之陨》）：灵界强者与供奉真灵合力围杀马良，
@@ -995,7 +1023,7 @@
       type: 'story', tag: '剧情',
       desc: '他赶到的时候，仗已经打完了。金色世界塌了一半，坑底还立着一个金色巨人。',
       startLevel: 336, endLevel: 342, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'xiaoling', next: 'xianshi',
+      unlock: 'jiujie', next: 'xianshi',
       reward: { stones: 150000, items: ['t_yuanhejiwu', 't_liangyiwuchen'], mats: [['m_zhenlingxue', 3]] },
       clearTitle: '群强之陨',
       clearDesc: '赢是赢了，赢得一个都不剩。坑底只剩两样东西：元合五极山，和一座两仪微尘阵。'
@@ -1102,41 +1130,21 @@
       type: 'story', tag: '剧情',
       desc: '道果下肚，他抱拳告辞。他不知道的是，身后的龙族长者刚刚看穿了他体内那处裂痕。',
       startLevel: 386, endLevel: 392, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'daoguo', next: 'jiujie',
+      unlock: 'daoguo', next: 'fsjie',
       reward: { stones: 200000, mats: [['m_zhenlingxue', 2]] },
       clearTitle: '劫云已聚',
       clearDesc: '几百年一晃而过。出关那日，天上劫云在聚——飞升之劫，来了。'
     },
     {
-      // 原著（V12C2445 前后）：九道仙劫是飞升之劫的前奏；玄天仙藤护身、真灵之血续命。
-      id: 'jiujie', name: '九劫现', pos: '灵界·荒原 劫云下', arc: 'L',
-      type: 'story', tag: '剧情',
-      desc: '九道仙劫压顶。过得去，才谈得上飞升。',
-      startLevel: 392, endLevel: 400, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'renzu', next: 'zhenxian',
-      reward: { stones: 120000, items: ['t_wanlingsan'], mats: [['m_xuantianteng', 1]] },
-      clearTitle: '九劫已过',
-      clearDesc: '第九道劫雷落下又散去。撑劫的万灵伞收进袖里——天地间，再没有什么能压住他了。'
-    },
-    {
-      // 原著：九劫之后铸真仙之身。玄天仙藤化开、真灵之血入骨，一身不再是凡胎。
-      id: 'zhenxian', name: '真仙之身', pos: '灵界·荒原 雷光中', arc: 'L',
-      type: 'story', tag: '剧情',
-      desc: '九劫之后，雷光还没散尽。他要在这片雷光里，把这一身重铸一遍。',
-      startLevel: 400, endLevel: 420, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'jiujie', next: 'fsjie',
-      reward: { stones: 160000, mats: [['m_xuantianteng', 1]] },
-      clearTitle: '真仙',
-      clearDesc: '一身不再是凡胎。眉眼还是那眉眼，气息已不在此界。'
-    },
-    {
-      // 独立关卡（原著 V12C2445 前后）：九劫只是前奏，真正的飞升之劫在正午阳气最浓时落下。
+      // 「真仙之身」「九劫现」两张按原著 V12C2419–2423 已挪到小灵天之后、群强之陨之前：
+      // 前者是马良解封复还真仙之身，后者是轩九灵的九劫灭灵大法，都不是韩立的飞升前奏。
+      // 独立关卡（原著 V12C2445 前后）：真正的飞升之劫在正午阳气最浓时落下。
       // 天外魔君当年放过话——「你渡那飞升之劫之时，本座一定邀遍附近界面所有魔君前来阻你飞升」。
       id: 'fsjie', name: '飞升之劫', pos: '灵界·荒原 劫云下', arc: 'L',
       type: 'boss', tag: '终局',
       desc: '正午，阳气最浓的时候。劫云压到头顶百丈，云里还有别的东西在等。',
       startLevel: 420, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
-      unlock: 'zhenxian', next: 'xianjie',
+      unlock: 'renzu', next: 'xianjie',
       diff: 4.8, bossAt: 0, intro: 'fsjie', outro: 'fsjie_out',
       enemies: ['gui2', 'moxiu2', 'guixiu'],
       elites: ['魔君化影', '劫雷凝形'],
@@ -1879,12 +1887,15 @@
       ['韩立', '（几百年的话，到嘴边只剩一句。）'],
       ['韩立', '我来接你了。']
     ],
+    // 原著 V12C2422《九劫现》/ C2423《群强之陨》：九劫是轩九灵的九劫灭灵大法
+    // （九种火属性真灵本命之火 + 九种法则之力），不是韩立要渡的天劫；飞升之劫另在 fsjie。
     jiujie: [
-      ['旁白', '九道仙劫，一道比一道狠。第九道落下时，天是白的，地是白的，什么都看不见。'],
-      ['韩立', '（撑住。）'],
-      ['旁白', '白光里，他听见自己的骨头一寸寸碎，又一寸寸长回去。'],
-      ['韩立', '（再来。）'],
-      ['旁白', '第九道劫雷散尽。天地静得能听见血滴在石头上的声音。']
+      ['旁白', '血玺压下来，几名风元大陆有名有姓的强者，吭也没吭一声就化成了血雾。'],
+      ['旁白', '一颗黑影避开漫天血丝，欺到金色巨人身前，化作一名面容普通的灰袍男子。'],
+      ['轩九灵', '九劫灭灵大法！'],
+      ['旁白', '他一条手臂贴上去，转眼干瘪、自行爆裂。九色光焰涌出，把巨人大半身躯裹成一团火。'],
+      ['韩立', '（九种火属性真灵的本命之火，掺着九种法则之力。原来「九劫现」，现的是这个。）'],
+      ['旁白', '隔得远，只看得清那团火是九种颜色。']
     ],
     qunqiang: [
       ['旁白', '他赶到的时候，仗已经打完了。'],
@@ -1945,11 +1956,15 @@
       ['韩立', '（他要找的东西，就在我身上。这一战躲不过去了。）'],
       ['旁白', '盆地上空，两个人，一黑一青，谁都没有先动。']
     ],
+    // 原著 V12C2419–2420《真仙之身（上）（下）》：金符、黑白二气、金霞蓝焰交叠、
+    // 千余丈金色巨人、灵域压乱两仪微尘阵——复还真仙之身的是马良，韩立只在阵外看着。
     zhenxian: [
-      ['旁白', '玄天仙藤三截化开，真灵之血五滴入骨。雷光里，他的影子变了形状。'],
-      ['韩立', '（这一身，不再是凡胎。）'],
-      ['旁白', '雷光散尽，荒原上立着一个人。眉眼还是那眉眼，气息却已不在此界之中。'],
-      ['韩立', '（真仙。）']
+      ['旁白', '两仪微尘阵里，马良把那张金符抖开了。金虹绕身，黑白二气从袍底翻上来。'],
+      ['旁白', '一层金霞，一层蓝焰，在他身上交叠了不知多少重。近处几位大乘只看了一眼，就觉得头晕目眩。'],
+      ['韩立', '（不对。这气息不是灵界该有的。）'],
+      ['旁白', '金霞骤然凝成一种颜色。他往前一步，身躯暴涨成千余丈的金色巨人，肌肤上浮出一根根金色灵纹。'],
+      ['旁白', '另一股法则之力罩住整个天空，两仪微尘阵被冲得紊乱，几乎维持不住。'],
+      ['韩立', '（灵域。这才是真仙之身。）']
     ],
     zhanxian: [
       ['旁白', '血河从天上落下来。一落地，就成了八条五爪血龙。'],

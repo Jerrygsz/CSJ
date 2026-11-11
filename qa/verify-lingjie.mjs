@@ -39,8 +39,8 @@ const ALL_IDS = ['qinluo', 'anyuan', 'luori', 'shanku', 'tianyuan', 'lingdi', 'm
   'liangzu', 'jiuxian', 'heiyu', 'longjia', 'shengdao', 'zhenling', 'mojie', 'diyuan2',
   'moban', 'huangquan', 'yitian', 'tianzhan', 'xueya', 'huanxiao', 'moyuan', 'modajie', 'lanpu', 'muzu2',
   'sanjie', 'dashengdian', 'shiyin', 'lingzu', 'xiaoxiuluo', 'qingyuangong', 'minghe2', 'helian',
-  'tiandinggong', 'xuetian', 'qiangzhe', 'xiaoling', 'qunqiang', 'xianshi', 'zhangtianping', 'zhanxian',
-  'diyi', 'huimoyuan', 'daoguo', 'renzu', 'jiujie', 'zhenxian', 'fsjie', 'xianjie'];
+  'tiandinggong', 'xuetian', 'qiangzhe', 'xiaoling', 'zhenxian', 'jiujie', 'qunqiang', 'xianshi', 'zhangtianping', 'zhanxian',
+  'diyi', 'huimoyuan', 'daoguo', 'renzu', 'fsjie', 'xianjie'];
 const maps = await page.evaluate((ids) => window.MAPS.filter(m => ids.includes(m.id))
   .map(m => ({ id: m.id, type: m.type, unlock: m.unlock, next: m.next, startLevel: m.startLevel, endLevel: m.endLevel })), ALL_IDS);
 ok(maps.length === 59, '灵界五十九张主线图已注册', maps);
@@ -88,12 +88,13 @@ const LINKS = [
   ['sanjie', 'dashengdian', 260], ['dashengdian', 'shiyin', null], ['shiyin', 'lingzu', null],
   ['lingzu', 'xiaoxiuluo', null], ['xiaoxiuluo', 'qingyuangong', null], ['qingyuangong', 'minghe2', null],
   ['minghe2', 'helian', null], ['helian', 'tiandinggong', null], ['tiandinggong', 'xuetian', null],
-  ['xuetian', 'qiangzhe', null], ['qiangzhe', 'xiaoling', null], ['xiaoling', 'qunqiang', null],
+  ['xuetian', 'qiangzhe', null], ['qiangzhe', 'xiaoling', null],
+  ['xiaoling', 'zhenxian', null], ['zhenxian', 'jiujie', null], ['jiujie', 'qunqiang', null],
   ['qunqiang', 'xianshi', null], ['xianshi', 'zhangtianping', null],
   ['zhangtianping', 'zhanxian', null], ['zhanxian', 'diyi', null],
   ['diyi', 'huimoyuan', null],
-  ['huimoyuan', 'daoguo', null], ['daoguo', 'renzu', null], ['renzu', 'jiujie', null],
-  ['jiujie', 'zhenxian', null], ['zhenxian', 'fsjie', 420], ['fsjie', 'xianjie', null]
+  ['huimoyuan', 'daoguo', null], ['daoguo', 'renzu', null], ['renzu', 'fsjie', null],
+  ['fsjie', 'xianjie', null]
 ];
 for (const [from, to, endLv] of LINKS) {
   ok(chain[from] && chain[from].next === to, `${from} next=${to}`, chain[from]);
@@ -151,7 +152,7 @@ ok(high[2] && high[2].realm === '真仙', 'lv420 = 真仙', high[2]);
 ok(high[0] && high[0].mats.some(m => m[0] === 'm_wuxingzhenguang') && high[0].mats.some(m => m[0] === 'm_zhenlingxue'), '大乘关需阴阳大五行真光（第三座极山）+ 真灵之血', high[0]);
 ok(high[0] && high[0].story[0].id === 'sanjie', '大乘关落在翻天台（三劫）', high[0]);
 ok(high[1] && high[1].story[0].id === 'qiangzhe', '渡劫关需已通强者之战', high[1]);
-ok(high[2] && high[2].story[0].id === 'jiujie', '真仙关需已通九劫', high[2]);
+ok(high[2] && high[2].story[0].id === 'renzu', '真仙关需已了人族之变（九劫已挪回马良一段）', high[2]);
 ok(await page.evaluate(() => (window.BREAKTHROUGH || []).some(x => x.lv === 260) &&
   !(window.BREAKTHROUGH || []).some(x => ['dachengdan', 'dujiedan', 'lianxudan'].includes(x.items && x.items[0] && x.items[0][0]))),
   '无自造丹（大乘丹/渡劫丹/炼虚丹）');
@@ -198,10 +199,10 @@ ok(await page.evaluate(() => window.__FR.breakCan(330)) === true, '330 备齐（
 await run(`F.clearProgress();F.setLevel(329);F.addItem('m_xuantianteng',2);F.addItem('m_zhenlingxue',4);F.setStones(110000);`);
 ok(await page.evaluate(() => window.__FR.breakCan(330)) === false, '330 未通强者之战 → false');
 
-await run(`F.clearProgress();F.setLevel(419);F.god(true);F.clearMap('jiujie');F.addItem('m_xuantianteng',3);F.addItem('m_zhenlingxue',5);F.setStones(190000);`);
-ok(await page.evaluate(() => window.__FR.breakCan(420)) === true, '420 备齐（仙藤×3+真灵血×5+通九劫）→ true');
+await run(`F.clearProgress();F.setLevel(419);F.god(true);F.clearMap('renzu');F.addItem('m_xuantianteng',3);F.addItem('m_zhenlingxue',5);F.setStones(190000);`);
+ok(await page.evaluate(() => window.__FR.breakCan(420)) === true, '420 备齐（仙藤×3+真灵血×5+已了人族之变）→ true');
 await run(`F.clearProgress();F.setLevel(419);F.addItem('m_xuantianteng',3);F.addItem('m_zhenlingxue',5);F.setStones(190000);`);
-ok(await page.evaluate(() => window.__FR.breakCan(420)) === false, '420 未通九劫 → false');
+ok(await page.evaluate(() => window.__FR.breakCan(420)) === false, '420 未了人族之变 → false');
 
 // ---- 5) 地图可进入 ----
 await run(`F.clearProgress();F.setLevel(132);F.god(true);F.enterMap('anyuan');`);
@@ -381,8 +382,8 @@ const QQ = await page.evaluate(() => {
     floor, poolMin: pool.length ? Math.min(...pool) : null, poolMax: pool.length ? Math.max(...pool) : null
   };
 });
-ok(QQ.type === 'story' && QQ.lv === 336 && QQ.unlock === 'xiaoling' && QQ.next === 'xianshi',
-  '群强之陨串在小灵天与献祭之间（V12C2423，2482 岁）', QQ);
+ok(QQ.type === 'story' && QQ.lv === 336 && QQ.unlock === 'jiujie' && QQ.next === 'xianshi',
+  '群强之陨串在九劫现与献祭之间（V12C2423，2482 岁）', QQ);
 ok(/仗已经打完了/.test(QQ.text) && /明尊/.test(QQ.text) && /九劫真焰/.test(QQ.text) && /元合五极山/.test(QQ.text),
   '群强之陨是「赶到时仗已打完」（原著韩立不在现场），写的是明尊/九劫真焰/元合五极山', QQ.text.slice(0, 24));
 ok(QQ.spoils.every(s => s.n >= 1 && s.item), '群强之陨给出元合五极山与两仪微尘阵', QQ.spoils);
@@ -554,8 +555,8 @@ ok(END2.c2 && END2.o2, '打通道果大会 → 通关并开出人族之变', { c
 ok(END2.fruitAfterHui === 0 && END2.fruitAfterDao >= 1, '道果在道果大会拿到（不在再回魔源）',
   { hui: END2.fruitAfterHui, dao: END2.fruitAfterDao });
 ok(END2.daopai >= 1, '道果大会掉道牌（V12C2440）', END2.daopai);
-ok(END2.ren.type === 'story' && END2.ren.unlock === 'daoguo' && END2.ren.next === 'jiujie',
-  '人族之变接在道果大会之后、九劫之前（V12C2441）', END2.ren);
+ok(END2.ren.type === 'story' && END2.ren.unlock === 'daoguo' && END2.ren.next === 'fsjie',
+  '人族之变接在道果大会之后、飞升之劫之前（V12C2441）', END2.ren);
 ok(END2.ren.lines >= 14, '人族之变对白够一段', END2.ren.lines);
 ok(/神识|神念/.test(END2.renText) && /闭关/.test(END2.renText) && /劫云/.test(END2.renText),
   '人族之变把「神念隐患 → 闭关 → 劫云」这条线走完', END2.renText.slice(0, 24));
@@ -801,7 +802,7 @@ ok(br2 && br2.cult === 200, 'breakNow(200) 成功推进到合体（cultivate=200
 const HIGH = [
   { lv: 260, map: 'sanjie', lvBefore: 259, story: 'sanjie', mat: 'm_wuxingzhenguang', n: 1, xue: 3, stones: 65000 },
   { lv: 330, map: 'qiangzhe', lvBefore: 329, story: 'qiangzhe', mat: 'm_xuantianteng', n: 2, xue: 4, stones: 110000 },
-  { lv: 420, map: 'zhenxian', lvBefore: 419, story: 'jiujie', mat: 'm_xuantianteng', n: 3, xue: 5, stones: 190000 }
+  { lv: 420, map: 'renzu', lvBefore: 419, story: 'renzu', mat: 'm_xuantianteng', n: 3, xue: 5, stones: 190000 }
 ];
 for (const h of HIGH) {
   await run(`F.toTitle();F.clearProgress();F.setLevel(${h.lvBefore});F.god(true);F.clearMap('${h.story}');F.addItem('${h.mat}',${h.n});F.addItem('m_zhenlingxue',${h.xue});F.setStones(${h.stones});`);

@@ -228,7 +228,7 @@
       type: 'combat', tag: '战斗',
       desc: '药园左近一处禁地，青金石砌就的石室。那只雪云狐一路把他引到这里——石台上锁着一头被金符与银链镇住的尸魈。',
       startLevel: 80, startSkills: { sword: 6, fire: 5, orb: 4, nova: 4, frost: 4 },
-      unlock: 'luoyun', next: 'sanjian',
+      unlock: 'luoyun', next: 'yinyue',
       diff: 2.45, bossAt: 110,
       enemies: ['shixiao', 'ghoul', 'guiwu'],
       elites: ['百年尸魈'],
@@ -240,11 +240,23 @@
       clearDesc: '金符的符文落尽，绿烟散去。他没打算恋战——玉盒与灵眼之玉到手，土遁而出。'
     },
     {
+      // 原著第 615-616 章《银月狼族》《主仆与器灵》：白狐器灵现形、自取名「银月」、与韩立定主仆之约，
+      // 都发生在第 618 章《试剑大会》之前。此前把银月认主排在试剑之后，时序反了。
+      id: 'yinyue', name: '银月认主', pos: '天南·云梦山 洞府', arc: 'F',
+      type: 'story', tag: '剧情',
+      desc: '玉如意里的器灵，借那只四瞳灵狐的身子现了形。她给自己取名——银月。',
+      startLevel: 81, startSkills: { sword: 6, fire: 5, orb: 4, nova: 4, frost: 4 },
+      unlock: 'shixiao', next: 'sanjian',
+      reward: { stones: 400, pets: ['p_yinyue'], mats: [['m_yanghun', 1]] },
+      clearTitle: '银月相随',
+      clearDesc: '她说自己记不清从前的事，只记得是银月狼族的一员。银月这个名字，是她自己取的。'
+    },
+    {
       id: 'sanjian', name: '三派试剑', pos: '天南·云梦山 剑坪', arc: 'F',
       type: 'combat', tag: '战斗',
       desc: '云梦山三派——落云宗、古剑门、百巧院——为新进弟子办的试剑大会，实为瓜分灵眼之树醇液。他不动声色，只想进前十，取那洗目的明清灵水。',
       startLevel: 81, startSkills: { sword: 6, fire: 5, orb: 4, nova: 4, frost: 4 },
-      unlock: 'shixiao', next: 'yinyue',
+      unlock: 'yinyue', next: 'jieying',
       diff: 2.5, bossAt: 100,
       enemies: ['zhengdao', 'moxiu2', 'assassin'],
       elites: ['古剑门剑修', '百巧院弟子'],
@@ -256,21 +268,11 @@
       clearDesc: '他收着剑，停在第十。古剑门照旧夺冠，明清灵水的份例，却有一份落进他手里。'
     },
     {
-      id: 'yinyue', name: '银月认主', pos: '天南·云梦山 洞府', arc: 'F',
-      type: 'story', tag: '剧情',
-      desc: '玉如意里的器灵，借那只四瞳灵狐的身子现了形。她给自己取名——银月。',
-      startLevel: 81, startSkills: { sword: 6, fire: 5, orb: 4, nova: 4, frost: 4 },
-      unlock: 'sanjian', next: 'jieying',
-      reward: { stones: 400, pets: ['p_yinyue'], mats: [['m_yanghun', 1]] },
-      clearTitle: '银月相随',
-      clearDesc: '她说自己记不清从前的事，只记得是银月狼族的一员。银月这个名字，是她自己取的。'
-    },
-    {
       id: 'jieying', name: '云梦山·结婴', pos: '天南·云梦山 洞府', arc: 'F',
       type: 'story', tag: '剧情',
       desc: '灵脉、丹药、心境，三样都齐了。这一关过了，天南就再没人能随手捏死他。',
       startLevel: 81, endLevel: 82, startSkills: { sword: 6, fire: 5, orb: 4, nova: 4, frost: 4 },
-      unlock: 'yinyue', next: 'jiaoyihui',
+      unlock: 'sanjian', next: 'jiaoyihui',
       reward: { stones: 1200, mats: [['m_yusui', 5], ['m_yanghun', 2]] },
       clearTitle: '元婴已成',
       clearDesc: '二百一十七岁，元婴成型。丹田里那个小小的人睁开眼，和他对视了一瞬。',

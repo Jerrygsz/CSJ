@@ -48,7 +48,10 @@ const report = await page.evaluate(() => {
   const upper = [200, 260, 330, 420, 460, 520, 580, 640];
   const gates = upper.map(lv => {
     const b = gateBt[lv] || null;
-    const gm = MAPS.find(m => m.endLevel === lv) || null;
+    // 20261111B：420 真仙门按原著重排后不再绑定 endLevel 破境图，
+    // 场景改由 BREAKTHROUGH.story[0].id（人族之变）指定，enterBreakMap 有 story 回退。
+    const gm = MAPS.find(m => m.endLevel === lv)
+      || MAPS.find(m => m.id === (b && b.story && b.story[0] && b.story[0].id)) || null;
     const caveMax = gm ? (cum[gm.id] || 0) : 0;
     return {
       lv, realm: b ? b.realm : null, hasBreak: !!b, gateMap: gm ? gm.id : null,
