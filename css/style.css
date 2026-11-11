@@ -1471,13 +1471,19 @@ body[data-skin="guigu"] #critFlash.go { animation: critInk 0.32s ease-out; }
 
 /* ================= 弹反成功：金铁交击的一瞬冲击 =================
    只在「格开」那一下闪一次（约 0.34s）。做成贴边细金环 + 内圈薄光，
-   不铺大面积渐变 —— 水墨皮是浅宣纸，大片暖色会把整屏洗成粉雾。 */
-#parryHit { position: absolute; inset: 0; pointer-events: none; opacity: 0; z-index: 48; }
+   不铺大面积渐变 —— 水墨皮是浅宣纸，大片暖色会把整屏洗成粉雾。
+   20261111H：阴影改成静态、动画只动 opacity。原来 keyframes 里连 box-shadow 一起过渡，
+   而 box-shadow 不参与合成层 —— 等于每帧重绘一整屏，手机上（尤其低端安卓）这一下就是几十毫秒。
+   opacity 走合成层，几乎零成本；因为末帧本来就是 opacity:0，视觉上看不出区别。 */
+#parryHit {
+  position: absolute; inset: 0; pointer-events: none; opacity: 0; z-index: 48;
+  box-shadow: inset 0 0 0 7px rgba(255,228,152,0.98), inset 0 0 64px 14px rgba(255,206,112,0.62);
+}
 #parryHit.go { animation: parryHitFlash .46s ease-out; }
 @keyframes parryHitFlash {
-  0%   { opacity: 1; box-shadow: inset 0 0 0 7px rgba(255,228,152,0.98), inset 0 0 64px 14px rgba(255,206,112,0.62); }
+  0%   { opacity: 1; }
   38%  { opacity: .78; }
-  100% { opacity: 0; box-shadow: inset 0 0 0 7px rgba(255,228,152,0), inset 0 0 64px 14px rgba(255,206,112,0); }
+  100% { opacity: 0; }
 }
 body[data-skin="guigu"] #parryHit.go { animation: parryHitInk .46s ease-out; }
 @keyframes parryHitInk {

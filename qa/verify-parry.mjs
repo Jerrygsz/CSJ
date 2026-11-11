@@ -231,6 +231,59 @@ ok(/maxr: J\.clearR \|\| 172/.test(game), '格开时画出清场边界环（玩�
 ok(/parryClear\(\)\s*\{\s*return parryBlast\(\)/.test(game) && /parryIv\(\)\s*\{/.test(game),
     '__FR 暴露 parryClear / parryIv 探针');
 
+// ---------- 9. 20261111H：弹反卡死的性能约束 ----------
+// 这一节的每一条都对应一次真实卡顿，别为了「写得顺手」改回去。
+// 背景：弹反是唯一「一瞬间把屏幕上所有东西同时点着」的动作（36 个飘字 + 600 粒子 +
+// 像素特效 + 十几个音效），6x CPU 节流实测同步段一度到 55~70ms、单帧 80ms。
+const hud = game;                                     // 上面已读过 game.js，别重复声明
+const fxpix = fs.readFileSync(join(root, 'js', 'fxpix.js'), 'utf8');
+
+// ① HUD：不再每帧重建功法栏 / 全量写文本
+ok(/function hudText\(el, v\)/.test(hud) && /function hudStyle\(el, prop, v\)/.test(hud) && /function hudClass\(el, cls, on\)/.test(hud),
+    'HUD 写入走 hudText / hudStyle / hudClass（值没变就不碰 DOM）');
+ok(/_hudSkillSig/.test(hud) && /if \(sig !== _hudSkillSig\)/.test(hud),
+    '功法图标栏按等级签名重建（不再每帧 innerHTML 重建）');
+{
+  const iSig = hud.indexOf('if (sig !== _hudSkillSig)');
+  const iInner = hud.indexOf("elSkillrow.innerHTML = ''");
+  ok(iSig > 0 && iInner > iSig, '功法栏只有在等级签名变化时才重建（重建代码在 if 之内）', { iSig, iInner });
+}
+ok(/function bossBarTop\(\)/.test(hud) && /_bossTop = -1/.test(hud),
+    'Boss 血条顶位缓存（不每帧读 offsetHeight 强制同步布局）');
+
+// ② 重播动画不许同步强制重排
+ok(/function restartAnim\(el, cls\)/.test(hud), 'restartAnim 统一重播 CSS 动画');
+ok(/el\.getAnimations\(\)/.test(hud), '重播走 getAnimations 拨时间轴（不强制重排）');
+// 只盯弹反链路上那几处（别的面板偶发一次强制重排不算问题，弹反是每次成功都走）
+const voidReflow = (hud.match(/void (elParryBtn|elParryHit|elCombo|elCritFlash)\.offsetWidth/g) || []);
+ok(voidReflow.length === 0, '弹反链路不再用 void xxx.offsetWidth 强制重排', voidReflow);
+
+// ③ 连斩面板合并到下一帧
+ok(/let _comboRaf = 0;/.test(hud) && /function paintCombo\(\)/.test(hud),
+    '连斩面板 rAF 合并（清场连杀不逐次重建 DOM）');
+
+// ④ 飘字 / 粒子有上限
+ok(/const MAX_TEXTS = 36/.test(hud) && /G\.texts\.length >= MAX_TEXTS/.test(hud), '飘字有上限（先淘汰普通字，保留印蜕/弹出）');
+ok(/const MAX_PARTS = 1200/.test(hud) && /over--/.test(hud), '粒子有上限（只淘汰普通碎屑，不动环形/光芒构图）');
+
+// ⑤ 音频：同名节流 + 噪声缓存 + 播完断开
+ok(/function gate\(key, gap\)/.test(audio), '音频同名节流 gate()（清场不再连发十几个死亡音）');
+ok(/enemyDie\(\) \{ if \(gate\('die'/.test(audio), 'enemyDie 走节流');
+ok(/function noiseBuf\(len, sampleRate\)/.test(audio), '噪声 buffer 缓存（不再每次生成）');
+ok(/o\.onended = \(\) => \{ try \{ o\.disconnect\(\)/.test(audio) && /s\.onended = \(\) => \{ try \{ s\.disconnect\(\)/.test(audio),
+    '音源播完 disconnect（长局不攒死节点）');
+
+// ⑥ pixelfx 池回收
+ok(/const old = live\.shift\(\);[\s\S]{0,120}?slot\.push\(old\.slot\)/.test(fxpix), 'FX3 淘汰实例时画布回收进池（不反复 new canvas）');
+
+// ⑦ 帧率守卫：掉帧时弹反美术降档
+ok(/let _frameAvg = 16\.7/.test(hud), '主循环维护滚动平均帧时间 _frameAvg');
+ok(/_frameAvg \+= \(Math\.min\(50, dt \* 1000\) - _frameAvg\) \* 0\.1/.test(hud), '每帧更新 _frameAvg');
+ok(/const heavy = _frameAvg > 34/.test(hud), 'parryJuice 按帧时间判定 heavy 档');
+ok(/const rayN = heavy \? 8 : 16/.test(hud) && /const sparkN = heavy \? 12 : J\.sparkN/.test(hud),
+    'heavy 时放射光芒与火星减半（骨架全保留）');
+ok(/if \(window\.FX3 && !heavy\) FX3\.spawn\('nova'/.test(hud), 'heavy 时省掉逐像素重建的 nova');
+
 // ---------- 汇总 ----------
 console.log('');
 if (fail === 0) {

@@ -31,6 +31,9 @@
   //   1 = 历史行为（画布 480 宽，靠 CSS 放大上屏）；2/3 = 提高采样密度换清晰度。
   // 手机上 480 宽会被拉伸到 DPR 倍，墨线与像素特效都会糊，所以给一个可实测的开关。
   let PR = 1;
+  // 滚动平均帧时间（ms）：弹反那一帧按它决定美术档位（见 parryJuice 的 heavy 开关）。
+  // 放在最前面而不是主循环旁边 —— parryJuice 定义得比 loop 早，别踩 TDZ。
+  let _frameAvg = 16.7;
   function renderPR() {
     try {
       const q = new URLSearchParams(location.search).get('pr');
@@ -1678,12 +1681,21 @@
     }
     showCombo();
   }
+  // 连斩面板（20261111H）：清场一次杀 8~16 只时，addCombo 会被连着调十几次，
+  // 每次都 innerHTML 重建 + （跨档位时）强制同步重排 —— 一帧里做十几次，主线程直接堵住。
+  // 玩家一帧只可能看见一次，合并到下一帧统一画，视觉完全等价。
+  let _comboRaf = 0;
   function showCombo() {
+    if (!elCombo) return;
+    if (_comboRaf) return;
+    _comboRaf = requestAnimationFrame(() => { _comboRaf = 0; paintCombo(); });
+  }
+  function paintCombo() {
     if (!elCombo) return;
     const c = G.combo;
     if (c === G.lastCombo) return;
     G.lastCombo = c;
-    if (c < 3) { elCombo.style.display = 'none'; return; }
+    if (c < 3) { hudStyle(elCombo, 'display', 'none'); return; }
     const rank = comboRank(c);
     let tier = 0;
     for (const t of COMBO_TIERS) if (c >= t.n) tier++;
@@ -1691,14 +1703,13 @@
     // 只在跨过档位时重放动画，避免每杀一只都强制重排
     if (tier !== G.comboTier) {
       G.comboTier = tier;
-      elCombo.classList.remove('pop');
-      void elCombo.offsetWidth;
-      elCombo.classList.add('pop');
+      restartAnim(elCombo, 'pop');   // 不再同步强制重排：隔一帧戴类，动画照样从头播
     }
-    elCombo.style.display = 'block';
+    hudStyle(elCombo, 'display', 'block');
   }
   function resetCombo() {
     G.combo = 0; G.comboT = 0; G.lastCombo = -1; G.comboTier = 0;
+    if (_comboRaf) { cancelAnimationFrame(_comboRaf); _comboRaf = 0; }
     if (elCombo) elCombo.style.display = 'none';
   }
 
@@ -1875,6 +1886,24 @@
       if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') navigator.vibrate(pat);
     } catch (e) {}
   }
+  // 重播一段 CSS 动画的常规写法是「摘类 → 读一次 offsetWidth 强制重排 → 加类」。
+  // 那次同步重排要等浏览器把整棵文档重新算完；弹反一次会连续触发三处（贴边金环 / 按钮 /
+  // 连斩面板），在低端机上就是「一次弹反卡掉十几帧」的主因之一（6x 节流实测同步段 55~70ms）。
+  // 换成「摘类 → 下一帧加类」：中间那 16ms 正好是两段动画之间的空档，视觉上完全等价。
+  function restartAnim(el, cls) {
+    if (!el || !el.classList) return;
+    if (!el.classList.contains(cls)) { el.classList.add(cls); return; }   // 没在播：戴上类就会起播
+    // 已经在播：把动画时间拨回 0 —— 和「摘类 → 强制重排 → 加类」同一个效果，但一次布局都不用算。
+    const anims = (typeof el.getAnimations === 'function') ? el.getAnimations() : null;
+    if (anims && anims.length) {
+      for (const a of anims) { try { a.currentTime = 0; a.play(); } catch (e) {} }
+      return;
+    }
+    // 老浏览器兜底：隔一帧戴类（16ms 的空档在视觉上等于两段动画之间的间隔）
+    el.classList.remove(cls);
+    const add = () => { if (el.isConnected === false) return; el.classList.add(cls); };
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(add); else add();
+  }
   // 贴边金环一闪（DOM 层，不随镜头抖）。节流 90ms：连反也不会卡成常亮。
   let _parryHitAt = 0;
   function parryHitFlash() {
@@ -1882,11 +1911,7 @@
     const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
     if (now - _parryHitAt < 90) return;
     _parryHitAt = now;
-    try {
-      elParryHit.classList.remove('go');
-      void elParryHit.offsetWidth;   // 强制重排，同一段动画才能连着播
-      elParryHit.classList.add('go');
-    } catch (e) {}
+    try { restartAnim(elParryHit, 'go'); } catch (e) {}
   }
   // 大爆炸清场（20261111G）：那圈冲击波不只是好看，它真的「炸」——
   // 半径内的小怪、飞来的弹幕、地上的持续区与真判定光柱一起被扫掉。
@@ -1923,10 +1948,13 @@
       burst(e.x, e.y, (e.r || 12) * 3);
     }
     // ② 弹幕：飞在半路的敌人攻击一并震碎（撒一簇火星，别让它凭空蒸发）
+    // 帧率已经吃紧时每颗只撒 1 粒（见 parryJuice 的 heavy）：八十颗弹幕 × 3 粒就是 240 个粒子，
+    // 那点碎火星在卡成 20fps 的屏幕上根本看不清，却实打实压在每帧的绘制里。
+    const emberN = _frameAvg > 34 ? 1 : 3;
     for (let i = G.ebullets.length - 1; i >= 0; i--) {
       const b = G.ebullets[i];
       if (U.dist(p.x, p.y, b.x, b.y) > R + (b.r || 6)) continue;
-      for (let k = 0; k < 3; k++) {
+      for (let k = 0; k < emberN; k++) {
         const a2 = Math.random() * 6.2832;
         G.parts.push({ x: b.x, y: b.y, vx: Math.cos(a2) * U.rand(60, 150), vy: Math.sin(a2) * U.rand(60, 150), life: 0.24, maxlife: 0.24, size: 3, color: '#ffd88a' });
       }
@@ -1973,12 +2001,16 @@
 
     // 4) 贴边金环一闪 + 按钮自己亮一下（按下去的手也得到回音）
     parryHitFlash();
-    if (elParryBtn && elParryBtn.classList) { elParryBtn.classList.remove('ok'); void elParryBtn.offsetWidth; elParryBtn.classList.add('ok'); }
+    if (elParryBtn) restartAnim(elParryBtn, 'ok');
 
     // 5) 主角身上炸开一整套「格开」：三层同心冲击波 + 正反两道弯月刀光 + 一圈放射光芒 + 像素爆点。
     //    水墨皮：刀光/冲击波改朱砂，并给一次性命中反馈打 hard 标记 ——
     //    浅宣纸的降彩规则(softRingFx)会把它压成灰线，弹反在纸皮上就毫无存在感。
     const ink = !!(save && save.skin === 'guigu');
+    // 美术档位（20261111H）：帧时间已经超过 34ms（≈30fps 以下）就别再全量放，
+    // 否则「弹反这一下」自己就把主线程顶死。低端机上少一半光芒和火星，
+    // 大爆炸的骨架（冲击波 / 弯月 / 清场边界环 / 清场）一样不少。
+    const heavy = _frameAvg > 34;
     const a0 = (typeof ang === 'number' && isFinite(ang)) ? ang : -Math.PI / 2;
     const C_HOT = '#c0352a';     // 朱砂：浅宣纸和暗底都读得出来，也和水墨皮的印蜕同一套色
     const C_CORE = '#ffb43c';    // 暖金芯
@@ -1986,7 +2018,9 @@
       // 尺寸一律用绝对值（而不是乘主角半径）：主角 r 只有 9px，按 r 缩放出来的「大爆炸」实际只有 50px，
       // 在 Boss 面前根本不算事。这里直接按屏幕尺度给：主环 ~150px、光芒最远 ~170px。
       // 像素爆点：金皮放大到 2.4 倍；水墨皮收一点（纸底上大团深红会糊成一块墨渍）
-      if (window.FX3) FX3.spawn('nova', p.x, p.y, { pal: ink ? 'xue' : 'jin', scale: ink ? 1.6 : 2.4 });
+      // 像素爆点是每帧重建整块缓冲的（pixelfx 逐像素合成），掉帧时先省它 —— 它只是加法装饰，
+      // 冲击波和弯月才是这记弹反的骨架
+      if (window.FX3 && !heavy) FX3.spawn('nova', p.x, p.y, { pal: ink ? 'xue' : 'jin', scale: ink ? 1.6 : 2.4 });
       G.parts.push({ slash: true, hard: true, x: p.x, y: p.y, ang: a0, arc: 2.5, rad: 82, life: 0.34, maxlife: 0.34, color: C_HOT });
       G.parts.push({ slash: true, hard: true, x: p.x, y: p.y, ang: a0 + Math.PI, arc: 1.7, rad: 58, life: 0.28, maxlife: 0.28, color: C_CORE });
       G.parts.push({ ring: true, hard: true, lw: 13, x: p.x, y: p.y, r: 8, maxr: 156, life: 0.46, maxlife: 0.46, color: C_HOT });
@@ -1995,9 +2029,10 @@
       // 清场边界环（20261111G）：最外圈这条细金环就是「炸得到哪」的分界线 ——
       // 玩家得看得见这一圈，才会知道「站远了没用、站近了一键盘全清」。
       G.parts.push({ ring: true, hard: true, lw: 3, x: p.x, y: p.y, r: 14, maxr: J.clearR || 172, life: 0.52, maxlife: 0.52, color: C_CORE });
-      // 放射光芒：16 道长短不一的直线「炸」出去
-      for (let i = 0; i < 16; i++) {
-        const a3 = a0 + (i / 16) * 6.2832 + U.rand(-0.06, 0.06);
+      // 放射光芒：16 道长短不一的直线「炸」出去（掉帧时对半砍，密度减半但观感仍是「炸出去」）
+      const rayN = heavy ? 8 : 16;
+      for (let i = 0; i < rayN; i++) {
+        const a3 = a0 + (i / rayN) * 6.2832 + U.rand(-0.06, 0.06);
         G.parts.push({
           ray: true, hard: true, x: p.x, y: p.y, ang: a3, len: U.rand(78, 168),
           life: 0.26, maxlife: 0.26, color: i % 3 ? C_HOT : '#ffffff'
@@ -2016,8 +2051,9 @@
       }
       if (window.FX3) FX3.spawn('crit', src.x, src.y - (src.r || 18) * 0.3, { pal: ink ? 'xue' : 'jin', scale: 2.6 });
       G.parts.push({ ring: true, hard: true, lw: 10, x: src.x, y: src.y, r: 10, maxr: Math.max(124, (src.r || 20) * 5), life: 0.34, maxlife: 0.34, color: '#c0352a' });
-      // 火星：数量翻倍、飞得更远（原来 10 颗 110–250，现在 26 颗 150–380）
-      for (let i = 0; i < J.sparkN; i++) {
+      // 火星：数量翻倍、飞得更远（原来 10 颗 110–250，现在 26 颗 150–380）；掉帧时减到 12
+      const sparkN = heavy ? 12 : J.sparkN;
+      for (let i = 0; i < sparkN; i++) {
         const a2 = a0 + U.rand(-1.25, 1.25);
         G.parts.push({
           x: src.x, y: src.y, vx: Math.cos(a2) * U.rand(150, 380), vy: Math.sin(a2) * U.rand(150, 380) - 40,
@@ -2607,6 +2643,44 @@
     const it = Items.get(slot.id);
     return { icon: (it && it.icon) || '🍶', name: (it && it.name) || slot.id, kind: 'item', has: !!it, count: (save.inventory[slot.id] || 0) };
   }
+  // ---------- HUD 脏值缓存（20261111H · 性能） ----------
+  // updateHUD 是每帧都跑的（主循环里 render() 之后立刻一句 updateHUD()），但它每帧都在
+  // 重建功法图标栏（innerHTML='' + 逐个 createElement）、全量写文本与条宽、Boss 在场时还要读
+  // elTopbar.offsetHeight —— 一读一写就是一次强制同步布局。
+  // 6x CPU 节流（≈低端手机）实测：单次 updateHUD 10.4ms，已经吃掉大半帧预算；
+  // 弹反的清场再叠上来（连斩面板重建 + 上百个飘字）就渡过了「掉帧」进入「卡死」。
+  // 口径：视觉零变化 —— 值没变就一个字节都不碰 DOM；变了照旧立刻写，不做延迟刷新。
+  // 比较用「真实值」（el.style.x / classList.contains / textContent）而不是自己记一份：
+  // 这几处元素在别的地方（hideAllOverlays / 截图脚本 / 拖动）也会被直接改，记一份必然对不上。
+  // 读内联 style 与 classList 都不会触发布局，比写便宜两个数量级。
+  function hudText(el, v) {
+    if (!el) return;
+    const s = String(v);
+    if (el.textContent === s) return;
+    el.textContent = s;
+  }
+  function hudStyle(el, prop, v) {     // 写内联样式前先比一次（style 写入会标脏整棵子树）
+    if (!el) return;
+    if (el.style[prop] === v) return;
+    el.style[prop] = v;
+  }
+  function hudPct(el, ratio) {         // 条宽按 0.5% 取整：浮点尾巴每帧都变，等于每帧都在刷样式
+    if (!el) return;
+    const q = Math.round(U.clamp(ratio || 0, 0, 1) * 200) / 2;
+    hudStyle(el, 'width', q + '%');
+  }
+  function hudClass(el, cls, on) {
+    if (!el) return;
+    if (el.classList.contains(cls) === !!on) return;
+    el.classList.toggle(cls, !!on);
+  }
+  let _hudSkillSig = null;             // 功法栏签名：等级没变就不重建
+  let _hudSec = -1;                    // 计时只按整秒刷
+  let _bossTop = -1, _bossOn = false;  // Boss 血条的顶位（只有窗口/Boss 变化时重测）
+  function bossBarTop() {
+    if (_bossTop < 0) _bossTop = (elTopbar && elTopbar.offsetHeight > 40) ? (elTopbar.offsetHeight + 8) : 96;
+    return _bossTop;
+  }
   function renderQuickBar() {
     if (!elQuick) return;
     const fight = G.map && (G.map.type === 'combat' || G.map.type === 'boss' || G.map.type === 'chase');
@@ -2630,25 +2704,33 @@
     for (let i = 0; i < elQuickBtns.length; i++) { if (i === 2) continue; paintQuickCd(i); }
   }
   // 第 3 格 = 弹反：每帧同步图标 / 状态（arming=蓄势、hold=护体、cd=回气）/ 边缘泛红
+  // 20261111H：这个函数每帧都跑，原来每帧 querySelector + 写 textContent + 写 title。
+  // 三个都是「值没变也照样标脏 DOM」的写法，攒起来就是每帧一次样式重算。改成先比后写。
+  function parryIconEl(btn) {
+    let ic = btn._ic;
+    if (!ic || ic.parentNode !== btn) { ic = btn._ic = btn.querySelector('.qb-icon'); }
+    return ic;
+  }
   function paintParryHud() {
     const pr = G.parry; const btn = elQuickBtns && elQuickBtns[2];
-    if (elParryEdge) elParryEdge.classList.toggle('on', !!(pr && pr.state === 'hold'));
+    if (elParryEdge) hudClass(elParryEdge, 'on', !!(pr && pr.state === 'hold'));
     if (!btn) return;
     // 自己是独立元素，显隐不靠 #quickbar 的 .on —— 每帧按当前局面自己判（拖动时强制显示）
     const fight = G.map && (G.map.type === 'combat' || G.map.type === 'boss' || G.map.type === 'chase');
-    btn.classList.toggle('on', !!(parryDragActive() || (fight && (G.state === 'play' || G.state === 'dialog'))));
+    hudClass(btn, 'on', !!(parryDragActive() || (fight && (G.state === 'play' || G.state === 'dialog'))));
     const c = parryCarrier();
-    const ic = btn.querySelector('.qb-icon');
-    if (ic) ic.textContent = (c && c.icon) || '🛡';
-    btn.classList.toggle('empty', !c);
-    btn.classList.toggle('parrying', !!(pr && (pr.state === 'arming' || pr.state === 'hold')));
-    btn.classList.toggle('cooling', !!(pr && pr.state === 'cd'));
+    const ic = parryIconEl(btn);
+    if (ic) hudText(ic, (c && c.icon) || '🛡');
+    hudClass(btn, 'empty', !c);
+    hudClass(btn, 'parrying', !!(pr && (pr.state === 'arming' || pr.state === 'hold')));
+    hudClass(btn, 'cooling', !!(pr && pr.state === 'cd'));
     // 连反层数挂在按钮上（CSS 用 ::before 读 attr 显示「连 ×N」）：手在按钮上，眼睛也在按钮上
     const ch = (pr && pr.chain >= 2) ? String(pr.chain) : '';
     if (ch) { if (btn.getAttribute('data-chain') !== ch) btn.setAttribute('data-chain', ch); }
     else if (btn.getAttribute('data-chain') != null) btn.removeAttribute('data-chain');
-    btn.title = c ? (c.name + ' · 按住护体（耗煞气、减速），单击格开反震　按 3 或点一下')
+    const tip = c ? (c.name + ' · 按住护体（耗煞气、减速），单击格开反震　按 3 或点一下')
       : '护体法宝（洞府 · 护体槽装配，需 Lv' + ((c && c.req) || 8) + '）';
+    if (btn._tip !== tip) { btn._tip = tip; btn.title = tip; }   // 每帧写 title 也是 DOM 变更，先比
   }
   // ---------- 弹反键位置（save.parryPos：舞台比例 0..1，指按钮中心） ----------
   // 存比例不存像素：换手机、转横屏、窗口缩放都不会跑到屏幕外。
@@ -5629,9 +5711,19 @@
     if (a >= 1e4) return (n / 1e4).toFixed(1).replace(/\.0$/, '') + '万';
     return String(n);
   }
+  // 飘字上限（20261111H · 性能）：一次弹反自己就要 6~7 行字（格开 / 反震 / 破绽 / 连反 / 荡清 /
+  // 煞气 / 引气），清场再带一串，连反几轮能堆到 50 多个。每个飘字每帧都要 strokeText + fillText，
+  // 低端机上「字」比「粒子」贵得多（6x 节流实测 fillText 一项就占 1/4 帧）。
+  // 满了先淘汰最老的普通字；seal（印蜕）/ punch（弹出）这类「必须被看见」的留到最后。
+  const MAX_TEXTS = 36;
   function spawnText(x, y, text, color, size, opts) {
     const o = opts || {};
     const life = o.life || 0.8;
+    if (G.texts.length >= MAX_TEXTS) {
+      let idx = -1;
+      for (let i = 0; i < G.texts.length; i++) { const t = G.texts[i]; if (!t.seal && !t.punch) { idx = i; break; } }
+      G.texts.splice(idx >= 0 ? idx : 0, 1);
+    }
     G.texts.push({
       x, y, vy: o.vy == null ? -30 : o.vy, life, maxlife: life,
       text: String(text), color, size,
@@ -5649,11 +5741,8 @@
     const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
     if (now - _critFlashAt < 300) return;
     _critFlashAt = now;
-    try {
-      elCritFlash.classList.remove('go');
-      void elCritFlash.offsetWidth;   // 强制重排，同一段动画才能连着播
-      elCritFlash.classList.add('go');
-    } catch (e) {}
+    // 强制重排换成隔帧重播：清场一次打爆十几只怪时会连续暴击，同步重排叠起来同样堵主线程
+    try { restartAnim(elCritFlash, 'go'); } catch (e) {}
   }
   // 进图仪式：宣纸从上往下展开，铺满即化开（0.66s）。原来是硬切，没有"翻开一页"的感觉。
   const elScrollOpen = document.getElementById('scrollOpen');
@@ -5670,7 +5759,19 @@
     } catch (e) {}
   }
   function updateParts(dt) {
-    if (window.FX3) FX3.update(dt);   // pixelfx 特效推进（顿帧里也跟着冻，手感才一致）
+    if (window.FX3) FX3.update(dt);
+    // 粒子上限（20261111H）：弹反清场 + 连反叠起来能到 600+，再撞上 Boss 招式就过千。
+    // 只淘汰「普通碎屑」（带速度的方块粒子）—— ring / ray / slash / rune 是构图的一部分，
+    // 砍掉会看见特效凭空消失。碎屑本来也活不过 0.4 秒，丢最老的看不出差别。
+    const MAX_PARTS = 1200;
+    if (G.parts.length > MAX_PARTS) {
+      let over = G.parts.length - MAX_PARTS;
+      for (let i = 0; i < G.parts.length && over > 0; i++) {
+        const q = G.parts[i];
+        if (q.ring || q.ray || q.slash || q.rune || q.bolt || q.web || q.shatter || q.spark) continue;
+        G.parts.splice(i, 1); i--; over--;
+      }
+    }   // pixelfx 特效推进（顿帧里也跟着冻，手感才一致）
     // 第117轮：随行之人 / 灵宠的起手动作计时，和特效同一条时间轴（顿帧一起冻）。
     if (G.pet && G.pet.skCast > 0) G.pet.skCast = Math.max(0, G.pet.skCast - dt);
     if (G.mate && G.mate.skCast > 0) G.mate.skCast = Math.max(0, G.mate.skCast - dt);
@@ -9113,7 +9214,10 @@
         size = t.size * (age < 0.16 ? 0.62 + (age / 0.16) * 0.58 : 1.20 - Math.min(0.20, (age - 0.16) * 0.7));
       }
       size = Math.max(8, Math.round(size));
-      ctx.font = 'bold ' + size + 'px sans-serif'; ctx.textAlign = 'center';
+      // 只在这行真的变了才重设字体：每改一次 ctx.font 都要重建字体对象，是飘字里最隐形的开销
+      const f = 'bold ' + size + 'px sans-serif';
+      if (ctx.font !== f) ctx.font = f;
+      ctx.textAlign = 'center';
       if (t.stroke) {
         // 描边压一层暗边：大字在浅宣纸上才有「砸下去」的重量，暗皮上也不和背景糊在一起
         ctx.lineWidth = Math.max(2.5, size * 0.20); ctx.lineJoin = 'round';
@@ -9183,49 +9287,61 @@
     if (m > 0) return m + ' 分';
     return Math.floor(t) + ' 秒';
   }
+  // 每帧都跑（主循环里 render() 之后立刻一句 updateHUD()）。所有 DOM 写入都走 hudText /
+  // hudStyle / hudPct / hudClass：值没变就不碰 DOM，见文件上方「HUD 脏值缓存」那一段。
   function updateHUD() {
     const p = G.player; if (!p) return;
-    elHpfill.style.width = U.clamp(p.hp / p.maxhp, 0, 1) * 100 + '%';
+    hudPct(elHpfill, p.hp / p.maxhp);
     // 第二条是「煞气」：攒满就顿悟。修为本身不再用 Lv 数字露脸，只显示段位
     const sst = shaSt();
-    elXpfill.style.width = U.clamp(sst.v / sst.need, 0, 1) * 100 + '%';
+    hudPct(elXpfill, sst.v / sst.need);
     // 条上补「当前 / 上限」：只有比例看不出还差多少，也没法判断一颗丹够不够
-    if (elHpval) elHpval.textContent = Math.max(0, Math.ceil(p.hp)) + '/' + Math.ceil(p.maxhp);
-    if (elXpval) elXpval.textContent = Math.floor(sst.v) + '/' + Math.ceil(sst.need);
-    elLevel.textContent = curRealmLabel() + (sst.dmgT > 0 ? '　·　杀意' : '');
-    elTime.textContent = fmtTime(G.time);
-    elKills.textContent = '斩 ' + G.kills;
-    if (elBag) elBag.textContent = '袋 ' + (G.runLoot ? G.runLoot.length : 0);
-    if (elStones) elStones.textContent = '灵石 ' + Math.round(save.stones || 0);
+    if (elHpval) hudText(elHpval, Math.max(0, Math.ceil(p.hp)) + '/' + Math.ceil(p.maxhp));
+    if (elXpval) hudText(elXpval, Math.floor(sst.v) + '/' + Math.ceil(sst.need));
+    hudText(elLevel, curRealmLabel() + (sst.dmgT > 0 ? '　·　杀意' : ''));
+    const sec = Math.floor(G.time);     // 显示只到秒：整秒没变就不用重新格式化
+    if (sec !== _hudSec) { _hudSec = sec; hudText(elTime, fmtTime(G.time)); }
+    hudText(elKills, '斩 ' + G.kills);
+    if (elBag) hudText(elBag, '袋 ' + (G.runLoot ? G.runLoot.length : 0));
+    if (elStones) hudText(elStones, '灵石 ' + Math.round(save.stones || 0));
     if (elMapName) {
       const d = G.diff;
-      elMapName.textContent = (G.map ? G.map.name : '') + (d && d.id !== 'easy' ? '　·　' + d.name : '');
-      elMapName.style.color = d && d.id !== 'easy' ? d.color : '';
+      hudText(elMapName, (G.map ? G.map.name : '') + (d && d.id !== 'easy' ? '　·　' + d.name : ''));
+      hudStyle(elMapName, 'color', d && d.id !== 'easy' ? d.color : '');
     }
     // 快捷栏只在能打的图里露面（每帧同步，不依赖进图那一刻的状态）
     if (elQuick) {
       const fightMap = G.map && (G.map.type === 'combat' || G.map.type === 'boss' || G.map.type === 'chase');
-      elQuick.classList.toggle('on', !!fightMap && (G.state === 'play' || G.state === 'dialog'));
+      hudClass(elQuick, 'on', !!fightMap && (G.state === 'play' || G.state === 'dialog'));
       paintParryHud();
     }
-    elSkillrow.innerHTML = '';
-    for (const s of SKILLS) { const lv = skillLv(s.id); if (lv > 0) { const d = document.createElement('div'); d.className = 'pip'; d.innerHTML = '<span>' + s.icon + '</span><b>' + lv + '</b>'; elSkillrow.appendChild(d); } }
+    // 功法图标栏：只有等级变动才重建（原来每帧 innerHTML='' + 逐个 createElement，
+    // 手机上光这一步就是几毫秒；顺带让 .pip 的出现动画能真正播完，不再被下一帧清掉）
+    let sig = '';
+    for (const s of SKILLS) { const lv = skillLv(s.id); if (lv > 0) sig += s.id + lv + ','; }
+    if (sig !== _hudSkillSig) {
+      _hudSkillSig = sig;
+      elSkillrow.innerHTML = '';
+      for (const s of SKILLS) { const lv = skillLv(s.id); if (lv > 0) { const d = document.createElement('div'); d.className = 'pip'; d.innerHTML = '<span>' + s.icon + '</span><b>' + lv + '</b>'; elSkillrow.appendChild(d); } }
+    }
     if (G.boss) {
-      // 血条永远贴着顶栏下沿走：顶栏在窄屏会换行变高，写死 96px 会把 Boss 名压到地图名上（Jerry 实测）
-      const stackTop = (elTopbar && elTopbar.offsetHeight > 40) ? (elTopbar.offsetHeight + 8) : 96;
-      elBosswrap.style.top = stackTop + 'px';
-      elBosswrap.style.display = 'block'; elBossname.textContent = G.boss.name;
-      elBossfill.style.width = U.clamp(Math.max(0, G.boss.hp) / G.boss.maxhp, 0, 1) * 100 + '%';
+      // 顶栏高度只在「Boss 刚登场 / 窗口变化」时测一次：每帧读 offsetHeight 是强制同步布局，
+      // 而前面刚写过一堆样式，等于每帧都逼浏览器先算一次布局再继续（低端机上非常贵）。
+      if (!_bossOn) { _bossOn = true; _bossTop = -1; }
+      hudStyle(elBosswrap, 'top', bossBarTop() + 'px');
+      hudStyle(elBosswrap, 'display', 'block');
+      hudText(elBossname, G.boss.name);
+      hudPct(elBossfill, Math.max(0, G.boss.hp) / G.boss.maxhp);
       // 血条底色是每帧写内联的（阶段二还要变色），所以皮肤的配色得在这儿分叉 ——
       // 只改 CSS 会被这行内联盖掉（踩过一次：#bossfill 的墨条规则写了却从不生效）。
       // 水墨皮：一阶段浓墨一道，二阶段墨里透朱砂（红了 = 要拼命了）。
       const p2 = !!G.boss.phase2;
-      elBossfill.style.background = (save.skin === 'guigu')
+      hudStyle(elBossfill, 'background', (save.skin === 'guigu')
         ? (p2 ? 'linear-gradient(90deg,#241c14,#7a2f22)' : 'linear-gradient(90deg,#3a352a,#4a4438 58%,#6b6353)')
-        : (p2 ? 'linear-gradient(90deg,#ff1f1f,#ff9a4a)' : 'linear-gradient(90deg,#b03a3a,#ff5a4a)');
-      if (elBossbar) elBossbar.classList.toggle('p2', !!G.boss.phase2);
+        : (p2 ? 'linear-gradient(90deg,#ff1f1f,#ff9a4a)' : 'linear-gradient(90deg,#b03a3a,#ff5a4a)'));
+      if (elBossbar) hudClass(elBossbar, 'p2', !!G.boss.phase2);
     }
-    else elBosswrap.style.display = 'none';
+    else { _bossOn = false; hudStyle(elBosswrap, 'display', 'none'); }
     // 鬼谷水墨 · 异兽卷轴插画：boss 出场时"展卷"浮起，约 2.6 秒后自己退成背景淡痕
     // （一直保持高透明度会和屏上的像素怪抢主体，两者都不是主角了）。金皮由 CSS 兜底强隐。
     if (elBossArt) {
@@ -9249,15 +9365,15 @@
       } else if (!sealOn) elBossSeal.classList.remove('on');
     }
     const playing = G.state === 'play' || G.state === 'dialog' || G.state === 'levelup' || G.state === 'pause';
-    elHud.style.display = playing ? 'block' : 'none';
+    hudStyle(elHud, 'display', playing ? 'block' : 'none');
     // 暂停键用 flex 居中两根竖条（图标是 CSS 画的，不是字体字形）
-    elPauseBtn.style.display = G.state === 'play' ? 'flex' : 'none';
+    hudStyle(elPauseBtn, 'display', G.state === 'play' ? 'flex' : 'none');
     // 自动战斗只出现在能打的图里；对话 / 选卡 / 暂停时也留着，否则一进对白按钮就没了
     if (elAutoBtn) {
-      elAutoBtn.style.display = autoBtnAllowed() ? 'flex' : 'none';
-      elAutoBtn.classList.toggle('on', !!G.autoOn);
+      hudStyle(elAutoBtn, 'display', autoBtnAllowed() ? 'flex' : 'none');
+      hudClass(elAutoBtn, 'on', !!G.autoOn);
     }
-    if (elCombo && !playing) elCombo.style.display = 'none';
+    if (elCombo && !playing) hudStyle(elCombo, 'display', 'none');
   }
 
   // ---------- 地图流程 ----------
@@ -13223,6 +13339,7 @@
     // 用 ?pr=2 / ?pr=3 提高画布像素密度换清晰度，代价是填充率按平方涨 —— 由真机实测决定用哪档。
     PR = renderPR();
     const bw = Math.round(W * PR), bh = Math.round(wantH * PR);
+    _bossTop = -1;      // 顶栏高度可能随窗口宽度换行而变：Boss 血条的顶位要重测（见 bossBarTop）
     if (wantH !== H || cv.width !== bw || cv.height !== bh) {
       H = wantH;
       cv.width = bw; cv.height = bh;
@@ -13373,6 +13490,10 @@
   let _verShown = null;   // 版本水印：仅在标题首页显示，缓存避免每帧重复写
   function loop(t) {
     const dt = Math.min(0.05, (t - last) / 1000); last = t;
+    // 帧率守卫（20261111H）：滚动平均帧时间。弹反那一瞬要决定「美术开到哪一档」——
+    // 已经掉到 30fps 以下还全量放 16 道光芒 + 26 颗火星 + 像素爆点，只会把「卡一下」变成「卡死」。
+    // 用 clamp 过的 dt 就够：>50ms 的帧一律按 50 记，判断「是否已经吃力」不需要精确值。
+    _frameAvg += (Math.min(50, dt * 1000) - _frameAvg) * 0.1;
     if (G.state === 'play') update(dt * (G.ts || 1));
     else if (G.state === 'down') updateDown(dt * (G.ts || 1));   // P6 倒地观战：世界照转，自己不能动
     // 洞府 / 坊市 / 对话 / 暂停 / 看地图这些状态下也保持联机心跳，否则队友会误报失联

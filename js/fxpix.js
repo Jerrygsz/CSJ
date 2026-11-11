@@ -71,7 +71,14 @@
     o = o || {};
     const mod = REG[key];
     if (!mod) return null;
-    if (live.length >= MAX_LIVE) live.shift();     // 最老的直接丢弃（它的画布不放回池，交给 GC）
+    // 同屏上限：超了先砍最老的，避免一场 Boss 战叠出几十个离屏画布。
+    // 砍掉的实例要把画布收回池里 —— 原来直接丢，池子越用越空，
+    // 之后每发一次特效都要 new canvas + new ImageData（弹反这种连发场景尤其明显）。
+    if (live.length >= MAX_LIVE) {
+      const old = live.shift();
+      const slot = pool.get(old.key);
+      if (slot) slot.push(old.slot);
+    }
     const slot = borrow(key);
     const [w, h] = mod.meta.size;
     const fx = createFx(mod, {
