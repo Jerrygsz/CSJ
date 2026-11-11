@@ -37,6 +37,7 @@ const ITEMS = [
   { key: 'realm-single', file: 'repro-realm-single-source.mjs', kind: 'gate', desc: '境界唯一真源：夹逼图内外同口径（HUD/结算/道陨/通览/修行图/万灵榜/洞府/静修）+ 图内升级不暴涨 + 非夹逼图正常落盘' },
   { key: 'xianjie-order', file: 'repro-xianjie-break.mjs', kind: 'gate', desc: '仙界进阶次序：破境门按原著真仙→金仙→太乙→大罗→道祖升序 + 组头/默认展开/冲关入口都落在下一关' },
   { key: 'cutscene-qixuan', file: 'verify-cutscene-qixuan.mjs', kind: 'gate', desc: '剧情动画（两张图 18 拍 + 剧场入口 + 洞府剧情回顾 + 逐拍版式）：台词逐字同源 MAP_STORIES、人物逐像素等于当前护甲 Sprites.hanli、剧场/回顾列表跨全图点播含无洞府的后山且不写 seen、分镜互不串台、联机不建层不写 seen、双皮只读 SKIN_INK、矮视口不裁字幕、印章不裁字、场景元素避开字幕区、瀑布人物改为潭面打坐（无上举悬空剪影）、跳过/记账/回归兼容' },
+  { key: 'parry', file: 'verify-parry.mjs', kind: 'gate', desc: '弹反系统（凡人味防御）：数据层（3 件启用载体 / 六类属性矩阵 / 长按衰减 1.0·0.71·0.43 / 共用煞气池 / 联机仅房主）+ runtime 接入（parryResolve/hitPlayer 透传 sk·src / __FR 探针 / guard 槽与三件 g_* 载体 / index.html 引用与加载顺序 / #parryEdge 边缘泛红）' },
 ];
 
 const argv = process.argv.slice(2);

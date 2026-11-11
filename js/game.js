@@ -171,7 +171,8 @@
       woundedDone: false,
       // 生涯累计（跨局、跨图、跨轮回都不清零）：首页报的是这些，不是单局最高
       totalKills: 0, playTime: 0,
-      inventory: {}, bonuses: {}, totalItems: 0,
+      // 弹反载体（护体槽）：新档自带三件，旧档走 backfillGuardCarriers 一次性补发
+      inventory: { g_xt_ftd: 1, g_bl_dun: 1, g_jg_fu: 1 }, bonuses: {}, totalItems: 3,
       stones: 0, cleared: [], unlocked: ['qixuan'], mapId: 'qixuan',
       // 道陨代价：stoneBurned = 历次被天地收走的灵石总数（只增不减，永不退还）；
       // deathLost = {地图id: {items:{道具id:件数}}} —— 掉的道具挂在这里，把那张图再打穿一次就原物取回
@@ -181,8 +182,8 @@
       // 在洞府「研习」/ 化开法诀而习得的功法（手写册子、掉落所得都走 learnSkill）：
       // 一旦研习便永久在册，过图剪枝不清。与「地图临图功法（buildPlayerSkills 直写）」区分开。
       learnedManuals: {},
-      // 已装备的槽位（id 需仍在储物袋中）
-      equip: { weapon: null, armor: null, trinket: null, talisman: null },
+      // 已装备的槽位（id 需仍在储物袋中）护体槽装弹反载体（见 js/parry.js）
+      equip: { weapon: null, armor: null, trinket: null, talisman: null, guard: null },
       caves: [], diffClear: {}, lastDiff: 'easy',
       // 药圃：按地块各记一份（{地块id: 已长成次数}），在战斗图里待 1 秒每块各长 1 次，满 99 停；
       // gardenTick 是所有地块共用的、不足 1 秒的零头
@@ -212,6 +213,8 @@
       // 厉飞雨·双身份化名系统（P0-1）：韩立干脏活让「厉飞雨」背锅（黑），好事以「韩天尊」留名（白）
       repBlack: 0, repWhite: 0, identity: 'han', liUnlocked: false,
       ach: {}, greenLiquid: 0,
+      // 弹反载体补发标记：新档自带三件故直接置 true；旧档由 backfillGuardCarriers 补发后改写
+      gift_guard: true,
       // 炼丹炉数：原著「炼丹次数越多，成丹几率越大」——每开一炉 +0.4%，至多 +12%
       alchemy: { n: 0 },
       // 天人有五衰（后传 X2C327，24 次）：n = 还压在身上的衰有几层；
@@ -304,7 +307,7 @@
       const cultSkills = {};
       if (cult.skills && typeof cult.skills === 'object') for (const k in cult.skills) cultSkills[k] = cult.skills[k] | 0;
       if (!Object.keys(cultSkills).length) cultSkills.sword = 1;
-      const eq = Object.assign({ weapon: null, armor: null, trinket: null, talisman: null }, s.equip || {});
+      const eq = Object.assign({ weapon: null, armor: null, trinket: null, talisman: null, guard: null }, s.equip || {});
       for (const k in eq) { const it = eq[k] && Items.get(eq[k]); if (!it || !it.slot || it.slot !== k) eq[k] = null; }
       save = {
         version: 5,
@@ -355,6 +358,7 @@
         gift_tenglong: !!s.gift_tenglong,
         gift_zhilongguo: !!s.gift_zhilongguo,
         gift_heti: !!s.gift_heti,
+        gift_guard: !!s.gift_guard,
         // 外观皮肤：'jin' 鎏金古卷（默认）| 'guigu' 鬼谷水墨
         skin: (s.skin === 'guigu') ? 'guigu' : 'jin',
         // 移栽品种老存档：没有这个字段就补成空账
@@ -556,6 +560,21 @@
       if (cl.indexOf(m.next) >= 0 || un.indexOf(m.next) >= 0) { un.push(m.id); changed = true; }
     }
     if (changed) writeSave();
+  })();
+
+  // 老存档补发：弹反载体（护体槽三件 · 玄铁飞天盾 / 白磷盾 / 金刚符）。
+  // 凡人味防御系统随 20261111D 接入；旧档读档即补、只补一次（gift_guard）。
+  // 新档已在 defaultSave 自带（gift_guard 直接置 true），不会进这里。多给无害：储物袋可拆可卖。
+  (function backfillGuardCarriers() {
+    if (save.gift_guard) return;
+    save.gift_guard = true;
+    const ids = ['g_xt_ftd', 'g_bl_dun', 'g_jg_fu'];
+    let added = 0;
+    for (const id of ids) {
+      if ((save.inventory[id] || 0) <= 0) { save.inventory[id] = 1; added++; }
+    }
+    if (added) save.totalItems = (save.totalItems || 0) + added;
+    writeSave();
   })();
 
   // 老存档：在两张既有的图之间插了新图（青罗沙漠 / 落日之墓 / 山腹 / 灵地 / 木族 / 碧眼真蟾 / 天鹏圣地 / 冥河），
@@ -1809,9 +1828,162 @@
     };
   }
 
-  function hitPlayer(dmg) {
+  // ---------- 弹反系统（凡人味防御 · 20261111D） ----------
+  // 入口：hitPlayer(dmg, sk, src)。sk = 招式类对象（含 n/fx/boss）或弹体/地面区（含 skN/skFx/bossName）；
+  //      src = 攻击来源实体（Boss/敌人），用于反伤；无实体可传 null。
+  // 状态机：idle → arming（按住未超 tap.window）→ hold（超过窗口长按，衰减减伤 + 耗煞气）
+  //      → 松开/超时收招 → cd（HOLD.cdSec）。仅单人/房主结算（coopRole!=='client'）。
+  function parryCarrier() {
+    if (!window.PARRY) return null;
+    const id = save.equip && save.equip.guard;
+    if (!id) return null;
+    const it = Items.get(id);
+    if (!it || it.slot !== 'guard') return null;
+    for (const k in PARRY.CARRIERS) {
+      const c = PARRY.CARRIERS[k];
+      if (c.itemId === id && c.enabled) return c;
+    }
+    return null;
+  }
+  function parryAttr(skLike, srcLike) {
+    const P = window.PARRY; if (!P) return 'phys';
+    // 弹体渲染类 k → 招式 fx：fan/beam/ring/nova/rain/mist 与 FX_ATTR 同口径（shard=扇/blade=剑光等）
+    const KIND_FX = { shard: 'fan', orb: 'ring', blade: 'beam', drop: 'rain', heavy: 'nova', mist: 'mist' };
+    const name = (skLike && (skLike.n || skLike.skN || skLike.name)) || (srcLike && (srcLike.name || srcLike.n)) || '';
+    const fx = (skLike && (skLike.fx || skLike.skFx || KIND_FX[skLike.k])) || '';
+    if (P.SKILL_ATTR[name]) return P.SKILL_ATTR[name];
+    for (const attr in P.KEYWORDS) {
+      const kws = P.KEYWORDS[attr];
+      for (const kw of kws) if (name.indexOf(kw) >= 0) return attr;
+    }
+    if (fx && P.FX_ATTR[fx] != null) return P.FX_ATTR[fx];
+    const boss = (skLike && (skLike.boss || skLike.bossName)) || (srcLike && (srcLike.name || srcLike.bossName)) || '';
+    if (boss && P.SPIRIT_BOSSES.has(boss)) return 'spirit';
+    return 'phys';
+  }
+  function parryResolve(dmg, skLike, src) {
+    const c = parryCarrier();
+    if (!c || !c.enabled) return null;
+    const pr = G.parry; if (!pr) return null;
+    if (pr.state === 'idle' || pr.state === 'cd') return null;
+    const P = window.PARRY;
+    const attr = parryAttr(skLike, src);
+    const mat = P.MATRIX[attr] || P.MATRIX.phys;
+    if (pr.state === 'arming') {
+      const tap = c.tap; if (!tap) return null;   // 不支持单击的载体（金刚符）不应进入 arming
+      const reduce = mat.tap.reduce * (tap.reduceMul != null ? tap.reduceMul : 1);
+      const counter = mat.tap.counter * (tap.counterMul != null ? tap.counterMul : 1);
+      return { handled: true, type: 'tap', reduce: reduce, counter: counter, special: mat.tap.special, attr: attr, src: src, carrier: c };
+    }
+    if (pr.state === 'hold') {
+      const defAttr = (c.hold && c.hold.attr) ? c.hold.attr : attr;
+      const baseRow = P.MATRIX[defAttr] || mat;
+      const base = baseRow.hold.base;
+      let mul = 1;
+      for (const d of P.HOLD_DECAY) { if (pr.holdT < d.sec) { mul = d.mul; break; } }
+      let reduce = base * mul;
+      const lowSha = !!pr.shaLow;
+      if (lowSha) reduce = P.HOLD.lowShaFallback;
+      return { handled: true, type: 'hold', reduce: reduce, counter: 0, special: null, attr: attr, src: src, carrier: c, lowSha: lowSha };
+    }
+    return null;
+  }
+  function parryPress() {
+    if (G.state !== 'play') return;
+    const c = parryCarrier(); if (!c) return;
+    const pr = G.parry; if (!pr) return;
+    if (pr.state !== 'idle' || pr.cd > 0) return;
+    if (c.tap == null) { pr.state = 'hold'; pr.holdT = 0; pr.shaLow = false; }
+    else { pr.state = 'arming'; pr.pressT = G.time; }
+  }
+  function parryRelease() {
+    const pr = G.parry; if (!pr) return;
+    if (pr.state === 'arming') { pr.state = 'idle'; }   // 单击窗口内松手未触发弹反 = 收招（无惩罚）
+    else if (pr.state === 'hold') { endParry(true); }
+  }
+  function endParry(cd) {
+    const pr = G.parry; if (!pr) return;
+    pr.state = cd ? 'cd' : 'idle';
+    pr.cd = cd ? (window.PARRY.HOLD.cdSec) : 0;
+    pr.holdT = 0; pr.shaLow = false;
+  }
+  function updateParry(dt) {
+    const pr = G.parry; if (!pr) return;
+    const c = parryCarrier();
+    if (pr.state === 'arming') {
+      if (c && c.tap && (G.time - pr.pressT) >= c.tap.window) { pr.state = 'hold'; pr.holdT = 0; pr.shaLow = false; }
+    } else if (pr.state === 'hold') {
+      pr.holdT += dt;
+      const P = window.PARRY;
+      const defAttr = (c && c.hold && c.hold.attr) ? c.hold.attr : 'phys';
+      const m = P.MATRIX[defAttr] || P.MATRIX.phys;
+      let shaMul = 1, extra = 0;
+      if (m && m.hold) { if (m.hold.shaMul) shaMul *= m.hold.shaMul; if (m.hold.extraSha) extra += m.hold.extraSha; }
+      const need = (P.HOLD.costPerSec + extra) * (G.sha ? G.sha.need : 120) * dt * shaMul;
+      if (G.sha && G.sha.v >= need) { G.sha.v -= need; pr.shaLow = false; }
+      else { pr.shaLow = true; if (G.sha) G.sha.v = 0; }
+      if (pr.holdT >= P.HOLD.maxSec) endParry(true);
+    } else if (pr.state === 'cd') {
+      pr.cd -= dt; if (pr.cd <= 0) { pr.cd = 0; pr.state = 'idle'; }
+    }
+    // 蚀 DoT 结算（白磷盾弹反成功的持续伤害）
+    if (G.etch && G.etch.length) {
+      for (let i = G.etch.length - 1; i >= 0; i--) {
+        const e2 = G.etch[i]; e2.t -= dt; e2.acc += dt;
+        if (e2.e && !e2.e._dead && e2.e.hp != null) {
+          while (e2.acc >= 0.5) { damageEnemy(e2.e, e2.dmg); e2.acc -= 0.5; }
+        }
+        if (e2.t <= 0) G.etch.splice(i, 1);
+      }
+    }
+  }
+  function applyParrySpecial(kind, e) {
+    if (kind === 'etch' && e) {
+      const dmg = Math.max(2, Math.round((e.maxhp || 100) * 0.01));
+      let ex = null; for (const x of (G.etch || [])) if (x.e === e) { ex = x; break; }
+      if (ex) { ex.t = 3; ex.dmg = Math.max(ex.dmg, dmg); }
+      else { G.etch = G.etch || []; G.etch.push({ e: e, t: 3, acc: 0, dmg: dmg }); }
+      spawnText(e.x, e.y - (e.r || 10) - 6, '蚀', '#9ad88a', 12);
+    } else if (kind === 'clearErosion1') {
+      // poison 行自带：清除自身煞气侵蚀（当前无独立侵蚀层数，留接口）
+    } else if (kind === 'free') {
+      if (G.player) { G.player.rootT = 0; G.player.slowT = 0; }
+    }
+  }
+
+  function hitPlayer(dmg, sk, src) {
     const p = G.player; if (p.iv > 0 || G.god) return;
     if (G.state === 'down') return;          // P6：已经躺着了，别再挨打（免得重复触发倒地）
+    // 弹反拦截：仅单人/房主本地结算；客机不结算敌人伤害（口径 5）
+    if (G.coopRole !== 'client') {
+      const pr = parryResolve(dmg, sk, src);
+      if (pr && pr.handled) {
+        let taken = dmg * (1 - pr.reduce);
+        taken *= (1 - armorRate());           // 护甲仍叠加（两者独立减免）
+        p.hp -= taken; p.iv = 0.4; p.hurtFlash = 0.18; G.shake = 6; G.flash = Math.max(G.flash, 0.32); Sfx.hurt();
+        const col = pr.lowSha ? '#ffb060' : (pr.type === 'tap' ? '#7fe0a0' : '#9ad8ff');
+        const label = pr.lowSha ? '格挡'
+          : (pr.type === 'tap'
+            ? (PARRY.UI.tapSuccess[(Math.random() * PARRY.UI.tapSuccess.length) | 0])
+            : '护体');
+        spawnText(p.x, p.y - p.r - 6, label, col, 15);
+        G.parts.push({ ring: true, x: p.x, y: p.y, r: 6, maxr: p.r * 2.2, life: 0.28, maxlife: 0.28, color: col });
+        if (pr.type === 'tap') {
+          if (pr.counter > 0 && pr.src && pr.src.hp != null && !pr.src._dead) {
+            const cdmg = Math.max(1, Math.round(dmg * pr.counter));
+            damageEnemy(pr.src, cdmg);
+            spawnText(pr.src.x, pr.src.y - (pr.src.r || 12) - 4, '反震 ' + cdmg, '#7fe0a0', 13);
+          }
+          if (pr.special) applyParrySpecial(pr.special, pr.src);
+          // 单击成功：转为长按态继续护体（若仍按住），否则收招（无 CD，鼓励连反）
+          const c2 = parryCarrier();
+          const wt = (c2 && c2.tap && c2.tap.window) || window.PARRY.TAP.window;
+          pr.state = 'hold'; pr.holdT = wt; pr.shaLow = false;
+        }
+        if (p.hp <= 0) { p.hp = 0; coopDown(); }
+        return;
+      }
+    }
     const taken = dmg * (1 - armorRate());
     p.hp -= taken; p.iv = 0.55; p.hurtFlash = 0.2; G.shake = 8; G.flash = Math.max(G.flash, 0.45); Sfx.hurt();
     spawnText(p.x, p.y - p.r - 6, '-' + Math.round(taken), '#ff7676', 16);
@@ -1928,7 +2100,7 @@
     for (let i = G.ebullets.length - 1; i >= 0; i--) {
       const b = G.ebullets[i];
       b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt;
-      if (U.dist(p.x, p.y, b.x, b.y) < b.r + p.r) { hitPlayer(b.dmg); G.ebullets.splice(i, 1); continue; }
+      if (U.dist(p.x, p.y, b.x, b.y) < b.r + p.r) { hitPlayer(b.dmg, b, null); G.ebullets.splice(i, 1); continue; }
       // 第118轮：弹道擦到随行者，谁挨着谁吃；一发弹只打一个目标，等于替韩立挡了一下
       const ah = firstAllyHit(b.x, b.y, b.r);
       if (ah) { hurtAlly(ah, b.dmg); G.ebullets.splice(i, 1); continue; }
@@ -2163,6 +2335,7 @@
     const show = !!fight && (G.state === 'play' || G.state === 'dialog');
     elQuick.classList.toggle('on', !!show);
     for (let i = 0; i < elQuickBtns.length; i++) {
+      if (i === 2) continue;   // 第 3 格 = 弹反，由 paintParryHud 每帧绘制
       const b = elQuickBtns[i], slot = quickSlot(i), lab = quickLabel(slot);
       const ic = b.querySelector('.qb-icon');
       if (ic) ic.textContent = lab.icon;
@@ -2174,7 +2347,21 @@
         : lab.name + (slot.kind === 'item' ? '（余 ' + (lab.count || 0) + (gone ? ' · 已用尽' : '') + '）' : '')
           + '　按 ' + (i + 1) + ' 或点一下';
     }
-    for (let i = 0; i < elQuickBtns.length; i++) paintQuickCd(i);
+    for (let i = 0; i < elQuickBtns.length; i++) { if (i === 2) continue; paintQuickCd(i); }
+  }
+  // 第 3 格 = 弹反：每帧同步图标 / 状态（arming=蓄势、hold=护体、cd=回气）/ 边缘泛红
+  function paintParryHud() {
+    const pr = G.parry; const btn = elQuickBtns && elQuickBtns[2];
+    if (elParryEdge) elParryEdge.classList.toggle('on', !!(pr && pr.state === 'hold'));
+    if (!btn) return;
+    const c = parryCarrier();
+    const ic = btn.querySelector('.qb-icon');
+    if (ic) ic.textContent = (c && c.icon) || '🛡';
+    btn.classList.toggle('empty', !c);
+    btn.classList.toggle('parrying', !!(pr && (pr.state === 'arming' || pr.state === 'hold')));
+    btn.classList.toggle('cooling', !!(pr && pr.state === 'cd'));
+    btn.title = c ? (c.name + ' · 按住护体（耗煞气、减速），单击格开反震　按 3 或点一下')
+      : '护体法宝（洞府 · 护体槽装配，需 Lv' + ((c && c.req) || 8) + '）';
   }
   function paintQuickCd(i) {
     const b = elQuickBtns[i]; if (!b) return;
@@ -3459,7 +3646,7 @@
       }
       hurtAllyAt(e.x, e.y, e.r, e.dmg);   // 第118轮：小怪贴到谁，谁掉血
       if (U.dist(p.x, p.y, e.x, e.y) < e.r + p.r) {
-        hitPlayer(e.dmg);
+        hitPlayer(e.dmg, e, e);
         if (art && e._artCd <= 0) {
           artBurst(e.x, e.y, art, Math.atan2(p.y - e.y, p.x - e.x));
           e._artCd = 0.55;
@@ -3642,7 +3829,7 @@
           if (q.age < q.d) continue;
           const near = U.dist(p.x, p.y, q.x, q.y) < q.r + p.r * 0.4;
           const nearPt = pt && U.dist(pt.x, pt.y, q.x, q.y) < q.r + (pt.r || 9) * 0.4;
-          if (near) { q.hit = true; hitPlayer(h.dmg); }
+          if (near) { q.hit = true; hitPlayer(h.dmg, h, h.src); }
           hurtAllyAt(q.x, q.y, q.r * 0.7, h.dmg);   // 第118轮：地刺也扎随行者（各自的 iv 去重）
           if (nearPt && window.Coop) window.Coop.addPartnerHurt(h.dmg);
           if (q.hit || (q.age > q.d + 0.28 && !nearPt)) q.hit = true;   // 破土瞬间没踩上就作废
@@ -3662,7 +3849,7 @@
       if (!inside) { h.tickT = 0; continue; }   // 走出去就重置：再进来立刻挨一下，符合直觉
       h.tickT -= dt;
       if (h.tickT <= 0) {
-        h.tickT = h.tick; hitPlayer(h.dmg);
+        h.tickT = h.tick; hitPlayer(h.dmg, h, h.src);
         hurtAllyAt(h.x, h.y, h.r, h.dmg);   // 第118轮：光柱 / 横扫里的随行者一样掉血
         if (insidePt && window.Coop) window.Coop.addPartnerHurt(h.dmg);
       }
@@ -4161,7 +4348,8 @@
         const hFinal = Math.round(Math.min(320, hBase * hMul) / 5) * 5;
         addHazard({
           kind: 'pillar', x: tx, y: ty, r: rad, t: dur, dur: dur, dmg: dmg,
-          tick: sk.tick || 0.40, color: sk.c || '#ffe6a0', h: hFinal
+          tick: sk.tick || 0.40, color: sk.c || '#ffe6a0', h: hFinal,
+          skN: sk.n, skFx: sk.fx, bossName: b.name, src: b
         });
         G.parts.push({ ring: true, x: tx, y: ty, r: rad * 0.35, maxr: rad * 2.3, life: 0.40, maxlife: 0.40, color: '#ffe6a0' });
         G.parts.push({ ring: true, x: tx, y: ty, r: rad * 1.5, maxr: rad * 0.7, life: 0.30, maxlife: 0.30, color: '#fff4d0' });
@@ -4176,7 +4364,8 @@
         addHazard({
           kind: 'sweep', x: b.x, y: b.y, r: sk.r || 15, len: len,
           ang: a0, rate: (a1 - a0) / dur, t: dur, dur: dur, dmg: dmg,
-          tick: sk.tick || 0.45, color: sk.c || '#ffb060'
+          tick: sk.tick || 0.45, color: sk.c || '#ffb060',
+          skN: sk.n, skFx: sk.fx, bossName: b.name, src: b
         });
         Sfx.warn(); G.shake = Math.max(G.shake, 5); break;
       }
@@ -4194,7 +4383,7 @@
             r: sk.r || 26, d: k * (sk.step || 0.10), age: 0, hit: false
           });
         }
-        addHazard({ kind: 'spike', x: b.x, y: b.y, r: 0, t: (sk.dur || 1.3), dur: (sk.dur || 1.3), dmg: dmg, pts: pts, color: sk.c || '#e8c88a' });
+        addHazard({ kind: 'spike', x: b.x, y: b.y, r: 0, t: (sk.dur || 1.3), dur: (sk.dur || 1.3), dmg: dmg, pts: pts, color: sk.c || '#e8c88a', skN: sk.n, skFx: sk.fx, bossName: b.name, src: b });
         Sfx.warn(); break;
       }
       case 'dash':
@@ -4228,13 +4417,13 @@
       case 'trap':
         // 困阵：地上升起一圈阵纹，人站里面挪不动 —— 之前只扣血弹一行字，玩家完全看不出被打
         if (sk.dur) p.rootT = Math.max(p.rootT || 0, sk.dur);
-        hitPlayer(dmg);
+        hitPlayer(dmg, sk, b);
         hurtAlliesAll(dmg);   // 第118轮：困阵是全场招，随行者也吃
         addZone(p.x, p.y, sk.rad || 58, Math.max(1.2, (sk.dur || 1.2) + 0.5), 'bind', { slow: 0.34 });
         spawnText(p.x, p.y - 34, sk.n, '#ff7ab0', 13); Sfx.warn(); break;
       case 'chill':
         if (sk.dur) { p.slowT = Math.max(p.slowT || 0, sk.dur); p.slowK = sk.slow || 0.45; }
-        hitPlayer(dmg);
+        hitPlayer(dmg, sk, b);
         hurtAlliesAll(dmg);   // 第118轮：寒气罩全场
         addZone(p.x, p.y, sk.rad || 88, 2.4, 'ice', { slow: sk.slow || 0.45 });
         spawnText(p.x, p.y - 34, sk.n, '#8fd8ff', 13); Sfx.warn(); break;
@@ -4244,13 +4433,13 @@
         p.x += (b.x - p.x) / dd * mv; p.y += (b.y - p.y) / dd * mv;
         // 漩涡：画在「被拽向的地方」，看得见"有东西在吸我"
         addZone(b.x, b.y, sk.rad || 108, 1.15, 'vortex', { pull: 62 });
-        hitPlayer(dmg); hurtAlliesAll(dmg); G.shake = Math.max(G.shake, 5); Sfx.warn(); break;
+        hitPlayer(dmg, sk, b); hurtAlliesAll(dmg); G.shake = Math.max(G.shake, 5); Sfx.warn(); break;
       }
       case 'nova':
         // 爆发 = 重珠：珠子更大、带一圈脉动外环，撞上来有「这一下很重」的预感
         ringBurst(b.x, b.y, sk.num || 18, sk.spd || 190, dmg, 'heavy');
         G.parts.push({ ring: true, x: b.x, y: b.y, r: 10, maxr: (sk.rad || 150) * 0.9, life: 0.42, maxlife: 0.42, color: '#ff9a4a' });
-        if (U.dist(p.x, p.y, b.x, b.y) < (sk.rad || 150)) hitPlayer(Math.round(dmg * 1.4));
+        if (U.dist(p.x, p.y, b.x, b.y) < (sk.rad || 150)) hitPlayer(Math.round(dmg * 1.4), sk, b);
         hurtAllyAt(b.x, b.y, sk.rad || 150, Math.round(dmg * 1.4));   // 第118轮：爆发波及随行者
         G.shake = Math.max(G.shake, 10); Sfx.burst(); break;
       case 'heal': {
@@ -4424,7 +4613,7 @@
     }
 
     // 贴身碰撞与招式同档：突进扑到人身上也必须真疼，否则「躲突进」没有意义
-    if (U.dist(p.x, p.y, b.x, b.y) < b.r + p.r) hitPlayer(bShot(b, 1));
+    if (U.dist(p.x, p.y, b.x, b.y) < b.r + p.r) hitPlayer(bShot(b, 1), b, b);
     hurtAllyAt(b.x, b.y, b.r, bShot(b, 1));   // 第118轮：Boss 撞到随行者也算
     b._flip = p.x < b.x;
   }
@@ -6398,7 +6587,13 @@
     const len = Math.hypot(dx, dy) || 1;
     // 定身（夺舍 / 禁制 / 蛛丝）与冻缓（极寒之气）：Boss 招式里"控"的那一半
     const ctrlK = (p.rootT > 0) ? 0 : (p.slowT > 0 ? (p.slowK || 0.5) : 1);
-    const sp = p.spd * spdMul() * (1 + (G.bonus.spd || 0)) * ctrlK;
+    let sp = p.spd * spdMul() * (1 + (G.bonus.spd || 0)) * ctrlK;
+    // 弹反长按护体：移速衰减（金刚符自带更轻的 moveSlow，其余载体走 HOLD.moveSlow）
+    if (G.parry && G.parry.state === 'hold') {
+      const pc = parryCarrier();
+      const ms = (pc && pc.hold && pc.hold.moveSlow != null) ? pc.hold.moveSlow : (window.PARRY ? PARRY.HOLD.moveSlow : 0.6);
+      sp *= (1 - ms);
+    }
     p.x += (dx / len) * sp * dt; p.y += (dy / len) * sp * dt;
     if (dx !== 0) p.dir = dx > 0 ? 1 : -1;
     // 迈步相位只在真的走的时候推进：站着的时候腿不该还在摆
@@ -6465,6 +6660,7 @@
     updateMate(dt);
     tickAllyRevive(dt);   // 第118轮：十息自动复活 / 灵石不够就一直躺着
     tickQuickCd(dt);
+    updateParry(dt);   // 弹反状态机 + 蚀 DoT（凡人味防御 · 20261111D）
     tickPetFeed(dt);
     // 共斗时客机只渲染 Boss（走房主快照镜像），不替房主跑 Boss 的 AI 与出招
     if (G.bossActive && !(G.coopRole === 'client' && G.coopShared)) updateBoss(dt);
@@ -8576,6 +8772,7 @@
     if (elQuick) {
       const fightMap = G.map && (G.map.type === 'combat' || G.map.type === 'boss' || G.map.type === 'chase');
       elQuick.classList.toggle('on', !!fightMap && (G.state === 'play' || G.state === 'dialog'));
+      paintParryHud();
     }
     elSkillrow.innerHTML = '';
     for (const s of SKILLS) { const lv = skillLv(s.id); if (lv > 0) { const d = document.createElement('div'); d.className = 'pip'; d.innerHTML = '<span>' + s.icon + '</span><b>' + lv + '</b>'; elSkillrow.appendChild(d); } }
@@ -8652,6 +8849,9 @@
   function resetRun() {
     if (window.Coop) window.Coop.reset();
     G.player = newPlayer();
+    // 弹反状态（凡人味防御 · 20261111D）：每图复位，得重新按一次
+    G.parry = { state: 'idle', pressT: 0, holdT: 0, cd: 0, shaLow: false };
+    G.etch = [];   // 蚀 DoT：{ e, t, acc, dmg }
     G.enemies = []; G.bullets = []; G.ebullets = []; G.gems = []; G.herbs = []; G.parts = []; G.texts = []; G.loot = []; G.tells = []; G.zones = []; G.hazards = [];
     G.reclaimedLost = null;   // 上一张图"寻回失落"的结算提示不带到这张图
     G.time = 0; G.kills = 0; G.spawnT = 1; G.nextEliteT = 100; G.eliteIdx = 0; G.artSeen = {};
@@ -11612,9 +11812,13 @@
     else if (k === 'arrowright' || k === 'd') keys.right = true;
     else if (k === 'arrowup' || k === 'w') keys.up = true;
     else if (k === 'arrowdown' || k === 's') keys.down = true;
-    else if (k === '1' || k === '2' || k === '3') {
-      // 战斗快捷栏：按 1/2/3 用第 1/2/3 格（小键盘同键位）
+    else if (k === '1' || k === '2') {
+      // 战斗快捷栏：按 1/2 用第 1/2 格（小键盘同键位）
       if (G.state === 'play' || G.state === 'dialog') { e.preventDefault(); useQuick(+k - 1); }
+    }
+    else if (k === '3') {
+      // 第 3 格 = 弹反（按住护体 / 单击格开反震）：按下开始，松开收招
+      if (G.state === 'play') { e.preventDefault(); parryPress(); }
     }
     else if (k === ' ' || k === 'spacebar' || k === 'shift') {
       // 闪身：空格或 Shift，桌面端不用去点右下角那颗按钮
@@ -11628,6 +11832,7 @@
     else if (k === 'arrowright' || k === 'd') keys.right = false;
     else if (k === 'arrowup' || k === 'w') keys.up = false;
     else if (k === 'arrowdown' || k === 's') keys.down = false;
+    else if (k === '3') { parryRelease(); }   // 弹反：松开收招（仅 '3'，与按下配对）
   });
   cv.addEventListener('touchstart', e => {
     if (G.state !== 'play') return;
@@ -11662,16 +11867,30 @@
   const elBuffrow = document.getElementById('buffrow');
   const elQuick = document.getElementById('quickbar');
   const elQuickBtns = elQuick ? Array.prototype.slice.call(elQuick.querySelectorAll('.qb')) : [];
+  const elParryEdge = document.getElementById('parryEdge');   // 长按护体的边缘泛红（煞气外溢）
   // 战斗右侧三格：按下即放。之前这三颗按钮只画了图标，一个监听都没挂，
   // 所以丹药符箓摆上去点不出任何反应 —— 这里把「点」和「按 1/2/3」都接上。
+  // 第 3 格（i===2）是弹反：按下开始、松开收招，与 1/2 格的「按一下就用」不同。
   elQuickBtns.forEach((btn, i) => {
     btn.setAttribute('data-key', i + 1);   // 角上的键位号
-    btn.addEventListener('pointerdown', ev => {
-      ev.preventDefault(); ev.stopPropagation();
-      useQuick(i);
-    });
-    // 键盘 Enter / 读屏软件走这条；pointerdown 已经处理过的，这里不再重复触发
-    btn.addEventListener('click', ev => { ev.preventDefault(); ev.stopPropagation(); });
+    if (i === 2) {
+      btn.addEventListener('pointerdown', ev => {
+        ev.preventDefault(); ev.stopPropagation(); parryPress();
+      });
+      const rel = ev => { ev.preventDefault(); ev.stopPropagation(); parryRelease(); };
+      btn.addEventListener('pointerup', rel);
+      btn.addEventListener('pointercancel', rel);
+      btn.addEventListener('pointerleave', rel);
+      // 键盘 Enter / 读屏软件走这条；pointerdown 已经处理过的，这里不再重复触发
+      btn.addEventListener('click', ev => { ev.preventDefault(); ev.stopPropagation(); });
+    } else {
+      btn.addEventListener('pointerdown', ev => {
+        ev.preventDefault(); ev.stopPropagation();
+        useQuick(i);
+      });
+      // 键盘 Enter / 读屏软件走这条；pointerdown 已经处理过的，这里不再重复触发
+      btn.addEventListener('click', ev => { ev.preventDefault(); ev.stopPropagation(); });
+    }
   });
   const elPauseBtn = document.getElementById('pauseBtn');
   const elAutoBtn = document.getElementById('autoBtn');
@@ -13118,6 +13337,11 @@
     playerHp() { return G.player ? Math.round(G.player.hp) : null; },
     setGod(v) { G.god = !!v; return G.god; },
     hurtSelf(d) { hitPlayer(d); return G.player ? Math.round(G.player.hp) : null; },
+    // 弹反系统探针（verify-parry 用）
+    parryState() { return G.parry ? Object.assign({}, G.parry) : null; },
+    parryCarrier() { const c = parryCarrier(); return c ? { id: c.itemId, name: c.name, req: c.req, enabled: c.enabled, tier: c.tier } : null; },
+    parryEquip(id) { save.equip = save.equip || {}; save.equip.guard = id || null; return save.equip.guard; },
+    parryPress: parryPress, parryRelease: parryRelease,
     forcePartner(x, y) { const g = G; if (!g) return false; if (!g.partner) g.partner = { r: 9, name: 't', level: 1, hp: 1, maxhp: 1, map: null, last: 0, shown: false, tx: 0, ty: 0, x: 0, y: 0 }; g.partner.x = x; g.partner.y = y; g.partner.tx = x; g.partner.ty = y; g.partner.shown = true; g.partner.map = (g.mapId || (g.map && g.map.id)); g.partner.last = performance.now(); return true; },
     stepEnemies(dt) { if (G.coopRole === 'host') { updateEnemies(dt || 0.1); return G.enemies.length; } return -1; },
     // ---- 联机 P4 测试钩子（共享战斗结算）----

@@ -21,9 +21,9 @@ window.PARRY = (function () {
 
   // —— 0. 元信息 ——
   const META = {
-    version: 'data-only-20261111',
-    status: '未接入 runtime，不发布',
-    note: '数值为初版，需配合平衡脚本验证“长按3s+CD1s 是否导致 Boss 战站桩”。'
+    version: 'runtime-20261111D',
+    status: '已接入 runtime（凡人味弹反 · 长按共用煞气池 + 单击卡点反伤）',
+    note: '数值为初版，需配合平衡脚本验证“长按3s+CD1s 是否导致 Boss 战站桩”。接入版见 game.js 的 parry* 系列函数。'
   };
 
   // —— 1. Boss 招式 → 功法属性（attr）解析 ——
@@ -143,19 +143,19 @@ window.PARRY = (function () {
   const CARRIERS = {
     // —— 首版接入（enabled:true）——
     xt_ftd: {
-      name: '玄铁飞天盾', icon: '🛡', tier: 'low', req: 8, enabled: true, itemId: null,
+      name: '玄铁飞天盾', icon: '🛡', tier: 'low', req: 8, enabled: true, itemId: 'g_xt_ftd',
       desc: '玄阴玄铁炼制，绕身全方位防御。基础弹反盾：单击窗口宽，反伤偏低。',
-      tap: { window: 0.28, counterMul: 0.6 }, hold: {}, special: null,
+      tap: { window: 0.28, counterMul: 0.6 }, hold: { attr: 'phys' }, special: null,
     },
     bl_dun: {
-      name: '白磷盾', icon: '🛡', tier: 'low', req: 14, enabled: true, itemId: null,
+      name: '白磷盾', icon: '🛡', tier: 'low', req: 14, enabled: true, itemId: 'g_bl_dun',
       desc: '墨蛟白磷炼制，韩立筑基期主力防具。弹反成功附加“蚀”持续伤害。',
-      tap: { window: 0.26, counterMul: 1.0 }, hold: {}, special: 'etch',
+      tap: { window: 0.26, counterMul: 1.0 }, hold: { attr: 'poison' }, special: 'etch',
     },
     jg_fu: {
-      name: '金刚符', icon: '📜', tier: 'talisman', req: 18, enabled: true, itemId: null,
+      name: '金刚符', icon: '📜', tier: 'talisman', req: 18, enabled: true, itemId: 'g_jg_fu',
       desc: '金色光罩挡法器攻击，身法变慢。不支援单击弹反，长按专用。',
-      tap: null, hold: { moveSlow: 0.30 }, special: null,
+      tap: null, hold: { attr: 'phys', moveSlow: 0.30 }, special: null,
     },
 
     // —— 占位（enabled:false，数据就绪，逻辑暂跳过）——

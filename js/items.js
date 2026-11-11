@@ -17,7 +17,10 @@ window.SLOTS = [
   { id: 'weapon',   name: '兵器', icon: '⚔', hint: '飞剑、短兵、重器' },
   { id: 'armor',    name: '护甲', icon: '🛡', hint: '道袍、软甲、寒衣' },
   { id: 'trinket',  name: '佩饰', icon: '🔮', hint: '珠玉、木牌、雷珠' },
-  { id: 'talisman', name: '符宝', icon: '📜', hint: '贴身符宝，不损不耗' }
+  { id: 'talisman', name: '符宝', icon: '📜', hint: '贴身符宝，不损不耗' },
+  // 护体：弹反载体槽（见 js/parry.js 的 CARRIERS；凡人味防御——有代价、有门槛、有破绽）
+  // 与「同伴·护体」(ALLY_ART_KINDS) 不是一回事：那是随行修士的护体术，这是主角手里握着的弹反法宝。
+  { id: 'guard', name: '护体', icon: '🛡', hint: '弹反法宝' }
 ];
 
 // ---------- 材料（不进成品掉落池，按地图 mats 配置掉落，也可用于炼制） ----------
@@ -148,7 +151,19 @@ window.ITEMS = [
   { id: 'fb_huo',   name: '火球符宝',   rarity: 2, icon: '🔥', slot: 'talisman', req: 5,  desc: '伤害 +12%，重击 +3%。贴在袖里，出手就是一团火', effect: { dmg: 0.12, crit: 0.03 } },
   { id: 'fb_bing',  name: '冰锥符宝',   rarity: 2, icon: '❄', slot: 'talisman', req: 8,  desc: '伤害 +10%，移速 +3%。锥出成线，落地成霜', effect: { dmg: 0.10, spd: 0.03 } },
   { id: 'huyu',     name: '护身玉符',   rarity: 3, icon: '🛡', slot: 'talisman', req: 10, desc: '减伤 10%，上限 +25。三道灵纹，替他挨过一刀', effect: { armor: 0.10, maxhp: 25 } },
-  { id: 'fb_feng',  name: '风刃符宝',   rarity: 3, icon: '🌀', slot: 'talisman', req: 12, desc: '攻速 +14%，伤害 +8%。刃过之处风声先到', effect: { atkSpd: 0.14, dmg: 0.08 } }
+  { id: 'fb_feng',  name: '风刃符宝',   rarity: 3, icon: '🌀', slot: 'talisman', req: 12, desc: '攻速 +14%，伤害 +8%。刃过之处风声先到', effect: { atkSpd: 0.14, dmg: 0.08 } },
+
+  // ==== 护体（弹反载体，slot:'guard'；无 effect，不进属性加成，由 js/parry.js 的弹反系统单独消费）====
+  // 不随机掉落（noDrop），只走「读档补发 / 新档自带」。
+  // unique：世上只此一件 —— 拆了/卖了就再也拿不到第二件，等于永久失去弹反，所以走 unique 的
+  // 「只此一件」分支（不卖、不拆、不叠第二件），而不是留个「拆」按钮给人误点。
+  // itemId 与 PARRY.CARRIERS[*].itemId 一一对应，弹反系统据此认载体。
+  { id: 'g_xt_ftd', name: '玄铁飞天盾', rarity: 2, icon: '🛡', slot: 'guard', req: 8,  noDrop: true, unique: true,
+    desc: '玄阴玄铁炼制，绕身全方位防御。基础弹反盾：单击窗口宽，反伤偏低。' },
+  { id: 'g_bl_dun', name: '白磷盾',     rarity: 3, icon: '🛡', slot: 'guard', req: 14, noDrop: true, unique: true,
+    desc: '墨蛟白磷炼制，韩立筑基期主力防具。弹反成功附加“蚀”持续伤害。' },
+  { id: 'g_jg_fu',  name: '金刚符',     rarity: 3, icon: '📜', slot: 'guard', req: 18, noDrop: true, unique: true,
+    desc: '金色光罩挡法器攻击，身法变慢。不支援单击弹反，长按专用。' }
 ];
 
 // 索引：成品 + 材料
