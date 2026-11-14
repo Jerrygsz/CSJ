@@ -193,11 +193,16 @@ try {
   out.skip = await page.evaluate(() => {
     const s = JSON.parse(localStorage.getItem('fanren_save_v1') || '{}');
     return { active: window.Cutscene.active(), display: document.getElementById('csHost').style.display,
-             state: window.__FR.G.state, seen: (s.seen || []).indexOf('scene:qixuan') >= 0 };
+             state: window.__FR.G.state, seen: (s.seen || []).indexOf('scene:qixuan') >= 0,
+             trial: window.__FR.trialState() };
   });
   ok('20 点跳过即收层', out.skip.active === false && out.skip.display === 'none', out.skip);
   ok('21 演完才写 scene:qixuan', out.skip.seen === true, out.skip);
-  ok('22 跳过照常走结算后果', out.skip.state === 'victory', out.skip.state);
+  // 20261114B：口径变更 —— 开局剧情演完不再直接结算，就地打一场「山道」教学战（MAPS.qixuan.trial），
+  // 清完才由 updateTrial 调 finishMap 进 victory。原来这条断言「跳过即 victory」，
+  // 那种口径下新档 36 秒一场仗没打，而战斗是这游戏唯一的动词。
+  ok('22 跳过即进入开局教学战（结算在山兽清完之后）',
+     out.skip.state === 'play' && !!out.skip.trial && out.skip.trial.need > 0, out.skip);
 
   out.reenter = await page.evaluate(() => {
     window.__FR.enterMap('qixuan');
@@ -216,12 +221,14 @@ try {
     const s = JSON.parse(localStorage.getItem('fanren_save_v1') || '{}');
     return { before, after: window.Cutscene.active(),
              display: document.getElementById('csHost').style.display,
-             seen: (s.seen || []).indexOf('scene:qixuan') >= 0, state: F.G.state };
+             seen: (s.seen || []).indexOf('scene:qixuan') >= 0, state: F.G.state,
+             trial: F.trialState() };
   });
   ok('24 skipStory 同样能收层且不留残影',
      out.skipStory.before === true && out.skipStory.after === false && out.skipStory.display === 'none', out.skipStory);
-  ok('25 skipStory 也写 seen 并照走结算',
-     out.skipStory.seen === true && out.skipStory.state === 'victory', out.skipStory);
+  // 20261114B：同 22 —— 收层之后是教学战，不是直接结算
+  ok('25 skipStory 也写 seen 并进入开局教学战',
+     out.skipStory.seen === true && out.skipStory.state === 'play' && !!out.skipStory.trial, out.skipStory);
 
   // ---- D 联机：不建层、不写 seen、后果照走 ----
   await fresh({ armor: 'a_tiancan' });

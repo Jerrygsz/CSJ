@@ -129,6 +129,16 @@ body.fs #wrap { background: #000; }
 .barlabel { position: absolute; left: 9px; top: 0; line-height: 13px; font-size: var(--fs-micro); letter-spacing: 2px; color: var(--text-2); text-shadow: 0 1px 2px #000; }
 /* 血量 / 灵力数值：等宽数字，位数变化时不会左右抖 */
 .barval { position: absolute; right: 9px; top: 0; line-height: 13px; font-size: var(--fs-num); font-variant-numeric: tabular-nums; color: var(--text-2); text-shadow: 0 1px 2px #000; }
+/* 修为：第三条细条。比生命/煞气矮一截 —— 它是「进度」，不是「资源」，
+   平时只需要让人余光扫到「快满了」，不该和血条抢注意力。金色与大/小境界的题款同色。
+   高度必须给到 10px：9px 的字放 8px 的槽里会溢出下沿，压到下面那行境界名上。 */
+#cnwrap { position: relative; height: 10px; background: rgba(0,0,0,0.42); border: 1px solid var(--line-soft); border-radius: var(--r-pill); overflow: hidden; }
+#cnfill { height: 100%; width: 0%; background: linear-gradient(90deg,#7a5f24,#e0bf62); transition: width .18s linear; }
+#cnwrap .barlabel { line-height: 10px; font-size: 9px; letter-spacing: 1px; }
+/* 修为刚满、正等着回洞府破境：让这条细条轻轻呼吸一下，提示「该去进阶了」。
+   只动 opacity —— 它走合成器，不重绘；动 box-shadow / filter 就得每帧重画一遍。 */
+#cnwrap.capped #cnfill { animation: cnCapped 1.6s ease-in-out infinite; }
+@keyframes cnCapped { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
 /* 数值行：去底块，一行细字浮在幕上；等宽数字防跳位。右侧留出自动/暂停键的位置 */
 #stats { display: flex; flex-wrap: wrap; gap: 14px; padding-right: 104px; font-size: var(--fs-num); letter-spacing: 1px; font-variant-numeric: tabular-nums; color: var(--text-2); text-shadow: 0 1px 3px #000; }
 #stats span { white-space: nowrap; }
@@ -180,6 +190,40 @@ body.fs #wrap { background: #000; }
    （Jerry 实测），底部是地面/空场，压不到谁。限宽允许换行 —— 破境提示这类长文案
    曾经 nowrap 横着冲出两屏。 */
 #banner { position: absolute; bottom: 76px; left: 50%; transform: translateX(-50%); background: rgba(10,13,20,0.94); border: 1px solid rgba(201,162,74,0.5); box-shadow: 0 6px 20px rgba(0,0,0,0.6); color: var(--accent); padding: 6px 13px; border-radius: var(--r-md); font-size: 14px; display: none; text-shadow: 0 1px 3px #000; max-width: min(calc(100vw - 28px), 460px); white-space: normal; line-height: 1.45; text-align: center; z-index: var(--z-banner); pointer-events: none; }
+
+/* ---------- 破境演出 ----------
+   一块卷面：上下两道细金线，中间「破境」小字 + 大境界名 + 一句结语。
+   层级压在 banner 之上、面板之下 —— 它演的时候别的面板还没出来。
+   淡入淡出只动 opacity / transform（合成器），不碰 box-shadow。 */
+#breakOmen {
+  position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%);
+  display: none; pointer-events: none; z-index: var(--z-banner);
+  padding: 0 18px; text-align: center;
+}
+#breakOmen.on { display: block; animation: boIn 2.6s ease-out both; }
+#breakOmen .bo-frame { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+#breakOmen .bo-rule {
+  display: block; width: 132px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--line-gold), transparent);
+}
+#breakOmen .bo-k { font-size: var(--fs-micro); letter-spacing: 6px; color: var(--text-2); text-shadow: 0 1px 4px #000; }
+#breakOmen .bo-name { font-size: 30px; letter-spacing: 6px; color: var(--accent); text-shadow: 0 2px 10px rgba(0,0,0,0.85), 0 0 18px rgba(255,210,74,0.35); }
+#breakOmen .bo-sub { font-size: var(--fs-num); letter-spacing: 2px; color: var(--text-1); text-shadow: 0 1px 4px #000; }
+/* 失败：名号翻成灰墨，不给金边光晕 —— 「没成」这件事在画面上就该是暗的 */
+#breakOmen.fail .bo-name { color: #c8c0b0; text-shadow: 0 2px 10px rgba(0,0,0,0.85); }
+#breakOmen.fail .bo-rule { background: linear-gradient(90deg, transparent, rgba(200,192,176,0.55), transparent); }
+@keyframes boIn {
+  0%   { opacity: 0; transform: translate(-50%, -46%) scale(0.94); }
+  12%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  78%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -53%) scale(1.01); }
+}
+/* 水墨皮：金线在宣纸上几乎看不见，改印泥朱 + 深棕字 */
+body[data-skin="guigu"] #breakOmen .bo-name { color: #8f4f2e; text-shadow: 0 2px 14px rgba(246,241,226,0.9), 0 0 10px rgba(143,79,46,0.18); }
+body[data-skin="guigu"] #breakOmen .bo-k { color: rgba(58,53,44,0.72); text-shadow: 0 0 4px rgba(246,241,226,0.9); }
+body[data-skin="guigu"] #breakOmen .bo-sub { color: #3a332a; text-shadow: 0 0 4px rgba(246,241,226,0.9); }
+body[data-skin="guigu"] #breakOmen .bo-rule { background: linear-gradient(90deg, transparent, rgba(58,53,44,0.55), transparent); }
+body[data-skin="guigu"] #breakOmen.fail .bo-name { color: #6a6154; }
 
 /* ---------- 覆盖层 ---------- */
 /* 覆盖层：左右各留 16，面板一律吃满可用宽（上限 460）——切界面时左右不再跳 */
@@ -555,6 +599,50 @@ body.rot #ver { visibility: hidden; }
 #worldmap .wm-panel, #shop .wm-panel, #cave .wm-panel, #prefight .wm-panel {
   height: min(calc(100% - var(--sp-6)), 720px);
 }
+
+/* ---------- 主线指针「下一处」 ----------
+   wm-head 里的一条窄带：左边「下一处」是个小印，中间地名，右边一个「入山 →」。
+   不抢标题的字号，也不做成按钮块 —— 它是路标，不是工具栏。 */
+.wm-next {
+  display: flex; align-items: center; gap: var(--sp-2);
+  margin-top: var(--sp-1); padding: 5px var(--sp-2) 5px var(--sp-1);
+  border: 1px solid var(--line-gold); border-left: 3px solid var(--accent);
+  border-radius: var(--r-sm); cursor: pointer;
+  background: linear-gradient(90deg, rgba(255,210,74,0.10), rgba(255,210,74,0.02));
+  font-size: var(--fs-num); color: var(--text-1);
+  -webkit-tap-highlight-color: transparent;
+}
+.wm-next:active { filter: brightness(1.25); }
+.wm-next .wn-k {
+  flex: 0 0 auto; padding: 1px 5px; border-radius: 2px;
+  background: var(--accent); color: #1a1206;
+  font-size: var(--fs-micro); letter-spacing: 1px; font-weight: 700;
+}
+.wm-next .wn-name { font-size: var(--fs-h2); letter-spacing: 1px; color: var(--accent-soft); white-space: nowrap; }
+.wm-next .wn-pos { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-2); font-size: var(--fs-micro); }
+.wm-next .wn-go { flex: 0 0 auto; color: var(--accent); font-size: var(--fs-num); letter-spacing: 1px; }
+/* 主线走完、改成「可再走」时压暗一档：它不再是最该点的那一张 */
+.wm-next.sweep { border-left-color: var(--line-gold); opacity: .82; }
+/* 卡片上的同一处地方：一圈勾边 + 左侧朱砂短线，跟顶部那条带子是一个意思 */
+.mapcard.next { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 6px 22px rgba(0,0,0,0.45); }
+.mapcard.next .mc-mini.on { color: var(--accent); }
+.mapcard.next .mc-name { color: var(--accent-soft); }
+/* 水墨皮：亮金压不住宣纸（白底金线≈1.8:1，等于没有）。路标改赭石字 + 印泥小章，
+   跟「详 / 缘」这些已有的纸面墨线标签同一套语言。 */
+body[data-skin="guigu"] .wm-next {
+  border-color: rgba(90,84,74,0.55); border-left-color: #8f4f2e;
+  background: linear-gradient(90deg, rgba(143,79,46,0.10), rgba(143,79,46,0.02));
+  color: #3a332a;
+}
+body[data-skin="guigu"] .wm-next .wn-k { background: #8f4f2e; color: #f6f1e2; }
+body[data-skin="guigu"] .wm-next .wn-name { color: #8f4f2e; }
+body[data-skin="guigu"] .wm-next .wn-go { color: #8f4f2e; }
+body[data-skin="guigu"] .mapcard.next {
+  border-color: #8f4f2e;
+  box-shadow: 0 0 0 1px rgba(143,79,46,0.55), 0 4px 14px rgba(40,36,28,0.22);
+}
+body[data-skin="guigu"] .mapcard.next .mc-mini.on,
+body[data-skin="guigu"] .mapcard.next .mc-name { color: #8f4f2e; }
 .wm-head { flex: 0 0 auto; }
 .wm-head h2 { color: var(--accent); font-size: var(--fs-h1); letter-spacing: 2px; margin-bottom: 0; }
 .wm-sub { color: var(--text-3); font-size: var(--fs-cap); line-height: 1.6; }
@@ -1409,6 +1497,19 @@ body[data-skin="guigu"] #xpfill {
   -webkit-mask-image: linear-gradient(90deg, #000 88%, rgba(0,0,0,0.55) 97%, rgba(0,0,0,0.05) 100%);
   mask-image: linear-gradient(90deg, #000 88%, rgba(0,0,0,0.55) 97%, rgba(0,0,0,0.05) 100%);
 }
+/* 修为条：与生命/煞气同一套纸签墨框，但笔道走赭金 —— 修为是「累积」不是「存量」，
+   不该跟朱砂（血）与深墨（煞气）混成一条线。 */
+body[data-skin="guigu"] #cnwrap {
+  background: linear-gradient(180deg, #f4efe0, #e5dfcd);
+  border: 1px solid rgba(58,53,44,0.55); border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(40,36,28,0.24);
+}
+body[data-skin="guigu"] #cnfill {
+  border-radius: 1px;
+  background: linear-gradient(90deg, #8a6b28, #c9a04a 62%, #e0bf62);
+  -webkit-mask-image: linear-gradient(90deg, #000 86%, rgba(0,0,0,0.5) 96%, rgba(0,0,0,0.05) 100%);
+  mask-image: linear-gradient(90deg, #000 86%, rgba(0,0,0,0.5) 96%, rgba(0,0,0,0.05) 100%);
+}
 /* 敌血：浓墨一道——墨压在纸上，比红块更有压迫感，也最"国画"。
    注意 fill 的底色是 game.js 每帧写内联的（阶段二还要换色），这里只负责笔锋收尾的 mask。 */
 body[data-skin="guigu"] #bossbar {
@@ -1857,6 +1958,17 @@ body[data-skin="guigu"].sc3-paper .barlabel,
 body[data-skin="guigu"].sc3-paper .barval {
   color: rgba(36,31,22,0.90);
   text-shadow: 0 0 2px #f6f1e2, 0 0 2px #f6f1e2, 0 1px 1px rgba(246,241,226,0.95);
+}
+/* 修为条在 sc3 淡彩纸底上：槽走极淡墨框，笔道压成赭石（亮金在纸底上会糊成一片黄） */
+body[data-skin="guigu"].sc3-paper #cnwrap {
+  background: rgba(244,239,224,0.30);
+  border: 1px solid rgba(58,53,44,0.14); border-radius: 1px;
+  box-shadow: none;
+}
+body[data-skin="guigu"].sc3-paper #cnfill {
+  background: linear-gradient(90deg, rgba(122,95,36,0.72), rgba(158,121,48,0.92) 62%, rgba(140,108,44,0.50));
+  -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,0.35) 0%, #000 12%, #000 74%, rgba(0,0,0,0.04) 100%);
+  mask-image: linear-gradient(90deg, rgba(0,0,0,0.35) 0%, #000 12%, #000 74%, rgba(0,0,0,0.04) 100%);
 }
 body[data-skin="guigu"].sc3-paper #stats { color: rgba(51,47,40,0.56); }
 body[data-skin="guigu"].sc3-paper #mapName {

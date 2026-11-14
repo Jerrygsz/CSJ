@@ -9,7 +9,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <title>凡人·长生劫 — 炼气期 · 筑基 · 结丹 · 元婴 · 化神</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%23131821%22/%3E%3Ctext x=%2216%22 y=%2223%22 font-size=%2220%22 text-anchor=%22middle%22 fill=%22%23ffd24a%22%3E凡%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="css/style.css?v=20261114A">
+  <link rel="stylesheet" href="css/style.css?v=20261114B">
 </head>
 <body>
   <div id="wrap">
@@ -24,6 +24,10 @@
           <div id="topbar">
             <div id="hpwrap"><div id="hpfill"></div><span class="barlabel">生命</span></div>
             <div id="xpwrap"><div id="xpfill"></div><span class="barlabel">煞气</span></div>
+            <!-- 修为：第三条细条。HUD 原来只有生命与煞气两条，修为进度（还差多少、离下一层多远）
+                 只能靠猜 —— xpNeed() 一直都在，玩家却看不见。压成 8px 不抢画面，
+                 但「快到下一层了」这件事从此读得出来。 -->
+            <div id="cnwrap"><div id="cnfill"></div><span class="barlabel">修为</span></div>
             <div id="stats"><span id="level">炼气期一层</span><span id="time">00:00</span><span id="kills">斩 0</span><span id="bag">袋 0</span><span id="stones" title="点一下祭炼">灵石 0</span></div>
             <div id="mapName">七玄门·后山</div>
             <!-- 限时增益：服丹 / 催符之后在身的属性，到点自散。第115轮移进 topbar，
@@ -52,6 +56,18 @@
 
         <!-- 横幅提示 -->
         <div id="banner"></div>
+        <!-- 破境演出：一次性的题款卷面，约 2.6 秒自散。
+             破境是全书骨架上的事（炼气→筑基→结丹…），不该和「拾到一株草药」共用同一条横幅。
+             纯 DOM + CSS 动画，不进主循环，不阻塞操作。 -->
+        <div id="breakOmen">
+          <div class="bo-frame">
+            <i class="bo-rule"></i>
+            <div class="bo-k">破境</div>
+            <div class="bo-name"></div>
+            <div class="bo-sub"></div>
+            <i class="bo-rule"></i>
+          </div>
+        </div>
         <!-- 水墨皮 · 进图仪式：宣纸从上往下展开，铺满即散 -->
         <div id="scrollOpen"></div>
         <!-- 水墨皮 · 重击（暴击）时纸面透一层朱砂，一次性“惊艳一刻” -->
@@ -219,6 +235,9 @@
             <div class="wm-head">
               <h2>修行图</h2>
               <p class="wm-sub">从青牛山到五龙海，炼气期到化神，择一处前行。剧情、战斗、坊市、追逃，皆在此图。</p>
+              <!-- 主线指针：永远只指一处「下一张该走的图」。148 张卡里能点的只有一张，
+                   没有这条带子的时候，玩家唯一能做的判断是「哪张不是灰的」。 -->
+              <div id="wmNext" class="wm-next" role="button" tabindex="0"></div>
               <div class="wm-stats">
                 <span id="wmStones">灵石 0</span>
                 <span id="wmRealm">炼气期一层</span>
@@ -362,7 +381,7 @@
     </div>
   </div>
 
-  <div id="ver">v20261114A</div>
+  <div id="ver">v20261114B</div>
 
   <!-- 横屏提示：触摸设备（手机/平板）横过来时，竖版画面会被压成极窄一条。
        与其硬塞进去，不如直接请人转回来 —— 只在 body.rot 时出现，桌面不受影响。 -->
@@ -372,45 +391,45 @@
     <span>《凡人·长生劫》是一款竖屏游戏</span>
   </div>
 
-  <script src="js/utils.js?v=20261114A"></script>
-  <script src="js/audio.js?v=20261114A"></script>
-  <script src="js/sprites.js?v=20261114A"></script>
-  <script src="js/cutscene.js?v=20261114A"></script>
-  <script src="js/skills.js?v=20261114A"></script>
-  <script src="js/enemies.js?v=20261114A"></script>
-  <script src="js/story.js?v=20261114A"></script>
-  <script src="js/items.js?v=20261114A"></script>
-  <script src="js/maps.js?v=20261114A"></script>
-  <script src="js/recipes.js?v=20261114A"></script>
-  <script src="js/encounters.js?v=20261114A"></script>
-  <script src="js/late.js?v=20261114A"></script>
-  <script src="js/late2.js?v=20261114A"></script>
-  <script src="js/late3.js?v=20261114A"></script>
-  <script src="js/lingjie.js?v=20261114A"></script>
-  <script src="js/xianjie.js?v=20261114A"></script>
-  <script src="js/maps-order.js?v=20261114A"></script>
-  <script src="js/balance.js?v=20261114A"></script>
+  <script src="js/utils.js?v=20261114B"></script>
+  <script src="js/audio.js?v=20261114B"></script>
+  <script src="js/sprites.js?v=20261114B"></script>
+  <script src="js/cutscene.js?v=20261114B"></script>
+  <script src="js/skills.js?v=20261114B"></script>
+  <script src="js/enemies.js?v=20261114B"></script>
+  <script src="js/story.js?v=20261114B"></script>
+  <script src="js/items.js?v=20261114B"></script>
+  <script src="js/maps.js?v=20261114B"></script>
+  <script src="js/recipes.js?v=20261114B"></script>
+  <script src="js/encounters.js?v=20261114B"></script>
+  <script src="js/late.js?v=20261114B"></script>
+  <script src="js/late2.js?v=20261114B"></script>
+  <script src="js/late3.js?v=20261114B"></script>
+  <script src="js/lingjie.js?v=20261114B"></script>
+  <script src="js/xianjie.js?v=20261114B"></script>
+  <script src="js/maps-order.js?v=20261114B"></script>
+  <script src="js/balance.js?v=20261114B"></script>
   <!-- Boss 招式表：按原著战斗描写写死的招式（名 / 前摇 / 伤害系数），game.js 只负责执行 -->
-  <script src="js/bosskit.js?v=20261114A"></script>
+  <script src="js/bosskit.js?v=20261114B"></script>
   <!-- 弹反系统（凡人味防御）：纯数据层，runtime 逻辑在 game.js 的 parry* 系列 -->
-  <script src="js/parry.js?v=20261114A"></script>
-  <script src="js/arts.js?v=20261114A"></script>
-  <script src="js/sources.js?v=20261114A"></script>
-  <script src="js/value.js?v=20261114A"></script>
-  <script src="js/vendor/pixelfx.bundle.js?v=20261114A"></script>
-  <script src="js/fxpix.js?v=20261114A"></script>
-  <script src="js/mapCodex.js?v=20261114A"></script>
-  <script src="js/game.js?v=20261114A"></script>
-  <script src="js/debugapi.js?v=20261114A"></script>
-  <script src="js/net.js?v=20261114A"></script>
-  <script src="js/coop.js?v=20261114A"></script>
-  <script src="js/chat.js?v=20261114A"></script>
+  <script src="js/parry.js?v=20261114B"></script>
+  <script src="js/arts.js?v=20261114B"></script>
+  <script src="js/sources.js?v=20261114B"></script>
+  <script src="js/value.js?v=20261114B"></script>
+  <script src="js/vendor/pixelfx.bundle.js?v=20261114B"></script>
+  <script src="js/fxpix.js?v=20261114B"></script>
+  <script src="js/mapCodex.js?v=20261114B"></script>
+  <script src="js/game.js?v=20261114B"></script>
+  <script src="js/debugapi.js?v=20261114B"></script>
+  <script src="js/net.js?v=20261114B"></script>
+  <script src="js/coop.js?v=20261114B"></script>
+  <script src="js/chat.js?v=20261114B"></script>
 
   <script>
     // 注册 Service Worker：每次发版自动拉最新 index.html，绕开中间代理缓存
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function () {
-        navigator.serviceWorker.register('sw.js?v=20261114A').catch(function () {
+        navigator.serviceWorker.register('sw.js?v=20261114B').catch(function () {
           /* 注册失败不影响游戏本体 */
         });
       });

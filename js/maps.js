@@ -55,7 +55,12 @@ window.MAPS = [
     cave: 'qixuan',
     reward: { stones: 40, items: ['changchun', 'gupu'], mats: [['m_chijing', 3], ['m_huangjing', 2]] },
     clearTitle: '入门已毕',
-    clearDesc: '自此便是七玄门的人了。药庐的差事，从明日起。'
+    clearDesc: '自此便是七玄门的人了。药庐的差事，从明日起。',
+    // 开局教学战（game.js 的 startTrial）：入门这段演完不当场结算，就地放几只山兽。
+    // 实测新档从开局到出洞府 36 秒没打过一场 —— 而战斗是这游戏唯一的动词。
+    // 山道遇狼是原著常态（韩立自五里沟走山路上七玄门），不新编敌人，只借已有的四种山兽。
+    // packMax 用不上（教学战全程关掉刷怪调度），need 就是这一场要清几只。
+    trial: { need: 4, enemies: ['wolf', 'wolf', 'snake', 'bat'] }
   },
   {
     id: 'houshan', order: 2, name: '七玄门·后山', pos: '青牛山北麓',

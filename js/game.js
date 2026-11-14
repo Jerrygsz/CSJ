@@ -1323,6 +1323,18 @@
   const DASH_CD = 2.5;      // 冷却（秒）
   const DASH_DIST = 200;    // 位移距离
   const DASH_IV = 0.30;     // 无敌帧：够穿过一圈怪，但不够硬吃 Boss 连招
+  // 锋芒：闪身 / 格开之后这一小段里出手更重。
+  // 为什么要有它：实测「手动 213 次输入 30 杀 vs 挂机 0 输入 33 杀且零掉血」——
+  // 自动开火是无条件触发的，手动多按的每一键都不换任何输出。而自动开火本身必须留着
+  // （单手拿手机时它是唯一的打怪方式），所以收益不能从「开不开火」里找，只能从
+  // 「主动闪身 / 格开」这两个动作里找：挂机 AI 走的是 allyDodgeDir 平滑侧身，从不调
+  // dashPlayer，也从不弹反，于是这个窗口天然只有手动能吃到 —— 不削挂机，也不逼玩家双持。
+  // 数值口径：窗口 1.4s / 冷却 2.5s = 56% 覆盖，×1.45 → 持续输出 +25%（就是报告里的验收线）。
+  // 不要为了「更爽」把窗口拉到贴着冷却跑 —— 一直亮着的加成不叫奖励。
+  // 反面实测（_scratch/aiplay/probe-edge-ab.mjs）：每冷却就闪反而少打三成 ——
+  // 200px 的落点离怪太远，身位成本比 1.45 倍贵。闪身是「被贴身时脱身 + 顺势一击」，不是输出循环。
+  const DASH_EDGE_SEC = 1.4;   // 窗口时长（秒）：够打完一轮出手，不够覆盖整场
+  const DASH_EDGE_MUL = 1.45;  // 窗口内伤害倍率
   // dir 可选：双击屏幕时传入（已归一化的方向），优先用；否则走方向键/摇杆/背对敌人
   function dashPlayer(dir) {
     const p = G.player;
@@ -1375,6 +1387,17 @@
       FX3.spawn('poof', p.x, p.y, { pal: 'qi', seed: (Math.random() * 997) | 0 });
     }
     spawnText(p.x, p.y - 30, '闪', '#cfefff', 16);
+    // 锋芒窗口在这里开：闪成（撞 Boss 原地闪也算闪了）就有，不用再按第二个键 ——
+    // 单手玩的时候「闪」已经在右半屏，多一个键就又变成两只手。
+    // 字挂高一点（-58）：FX3 的 poof 正好压在 -30~-48 那一带，挂低了看不见。
+    G.edgeT = DASH_EDGE_SEC;
+    p.edgeOn = true;
+    // 顺势出手：闪完这一刻，各门功法的出手间隔直接清零 —— 落脚就是一轮。
+    // 只加时间窗口的话，实测「每冷却就闪」反而比不闪少打三成：闪的落点离怪 200px，
+    // 身位成本比 1.45 倍贵（见 _scratch/aiplay/probe-edge-ab.mjs）。
+    // 补上这一句，「闪身」才真的是一次「抢位 + 顺势一击」，而不是白挪一段路。
+    for (const e of equippedActives()) p['t_' + e.id] = 0;
+    spawnText(p.x, p.y - 58, '锋芒', save.skin === 'guigu' ? '#a8281e' : '#ffd24a', 14);
     Sfx.dodge();
     return true;
   }
@@ -1577,6 +1600,10 @@
     // 满链一记能打掉 Boss 三成血，几记就把 Boss 抹了。破绽留给随后的平A，才是奖励。
     const _pj = window.PARRY && window.PARRY.JUICE;
     if (!(opts && opts.noVuln) && _pj && G.parry && G.parry.vulnT > 0 && G.parry.vulnE === e) d *= (_pj.vulnMul || 1.35);
+    // 锋芒（闪身后的窗口）：主动闪身换输出。跟破绽一样，反震那一下本身不吃 ——
+    // 弹反的数值链是重新算过平衡的（见「反震伤害」那段注释），往里再塞一个倍率会失控。
+    const edge = !(opts && opts.noVuln) && (G.edgeT || 0) > 0;
+    if (edge) d *= DASH_EDGE_MUL;
     const crit = Math.random() < critChance();
     if (crit) d *= 1.8;
     e.hp -= d; e.hitFlash = 0.12;
@@ -1595,8 +1622,8 @@
     const ink = save.skin === 'guigu';
     if (!(opts && opts.silentText)) {
       spawnText(e.x, e.y - e.r - 4, Math.round(d),
-        crit ? (ink ? '#cf3a22' : '#ffd24a') : (ink ? '#3a332a' : '#fff'),
-        crit ? (ink ? 21 : 18) : 13);
+        crit ? (ink ? '#cf3a22' : '#ffd24a') : edge ? (ink ? '#c0352a' : '#ffb066') : (ink ? '#3a332a' : '#fff'),
+        crit ? (ink ? 21 : 18) : edge ? 16 : 13);
     }
     if (G.coopRole === 'host' && window.Coop) window.Coop.queueDmg(e.x, e.y - e.r - 4, Math.round(d), crit);
     if (crit) {
@@ -2313,6 +2340,10 @@
             if (G.parry) { G.parry.vulnE = pr.src; G.parry.vulnT = J.vulnSec; }
           }
           if (pr.special) applyParrySpecial(pr.special, pr.src);
+          // 奖励 3：格开之后顺势出手更重（锋芒）。
+          // 挂机（大衍）从头到尾不会弹反 —— 这一口只有手动吃得到，
+          // 也是「手动优于挂机」里唯一不依赖身位的那一份收益（见 dashPlayer 的注释）。
+          if ((G.edgeT || 0) < DASH_EDGE_SEC) G.edgeT = DASH_EDGE_SEC;
           // 奖励 1：返还煞气（连反越多回得越多），长按护体才接得上
           if (G.sha) {
             const back = Math.round((J.shaBack || 18) * (1 + (chain - 1) * 0.5));
@@ -2757,7 +2788,9 @@
     if (elParryEdge) hudClass(elParryEdge, 'on', !!(pr && pr.state === 'hold'));
     if (!btn) return;
     // 自己是独立元素，显隐不靠 #quickbar 的 .on —— 每帧按当前局面自己判（拖动时强制显示）
-    const fight = G.map && (G.map.type === 'combat' || G.map.type === 'boss' || G.map.type === 'chase');
+    // G.trial：开局教学战挂在一张 story 图上，但那一刻确实是战斗 —— 键得露面，
+    // 否则「第一场仗」里护体键是隐藏的，等于又把它对新玩家关了一次。
+    const fight = G.map && (G.map.type === 'combat' || G.map.type === 'boss' || G.map.type === 'chase' || !!G.trial);
     hudClass(btn, 'on', !!(parryDragActive() || (fight && (G.state === 'play' || G.state === 'dialog'))));
     const c = parryCarrier();
     const ic = parryIconEl(btn);
@@ -5184,6 +5217,9 @@
   }
   function spawnDirector(dt) {
     if (G.spawnOff) return;   // 回归专用：冻结刷怪，便于隔离测量单只敌人的索敌 / 风筝
+    // 开局教学战（qixuan.trial）：只放脚本点名的那几只，刷怪调度整段不许插手 ——
+    // 第一场仗要被刷怪淹掉，新手就没机会先看清「怎么打」。
+    if (G.trial) return;
     G.spawnT -= dt;
     if (G.spawnT <= 0) {
       if (G.enemies.length < 140) { const b = budget(); for (let i = 0; i < b.batch; i++) spawnEnemy(pickType()); }
@@ -6526,6 +6562,8 @@
     G.insight = { skills: {}, n: 0, refine: 0 };
     G.summon = null;
     G.dashCd = 0;
+    G.edgeT = 0;      // 闪身后的「锋芒」窗口，每图清零（见 dashPlayer）
+    G.trial = null;   // 开局教学战（只有 qixuan 会挂，见 startTrial）
   }
   // 每顿悟一次，下一次门槛抬 6%：抬太多的话清怪慢的图一局撑不到 9 次
   // （120 → 127 → 135 → 143 → 151…，第 9 次约需 1380 点，一局正好在 9~13 次之间）
@@ -7198,6 +7236,11 @@
     if (p.slowT > 0) p.slowT -= dt;
     if (p.dashFx > 0) p.dashFx -= dt;
     if (G.dashCd > 0) G.dashCd -= dt;
+    // 锋芒窗口：闪身之后这一小段里出手更重（见 dashPlayer / damageEnemy）
+    if (G.edgeT > 0) {
+      G.edgeT = Math.max(0, G.edgeT - dt);
+      if (G.edgeT <= 0 && p) p.edgeOn = false;
+    }
     if (p.hurtFlash > 0) p.hurtFlash -= dt;
     if (p.atkAnim > 0) p.atkAnim -= dt;
     if (p.atkCd > 0) p.atkCd -= dt;
@@ -7279,6 +7322,7 @@
     }
 
     if (!G.bossActive && G.vacuumT <= 0 && !G.bossSpawned && !(G.coopRole === 'client' && G.coopShared)) spawnDirector(dt);
+    if (G.trial) updateTrial(dt);   // 开局教学战：场上清空即结算
     // Boss 战后收取战利品（演出 + 自动入袋）
     if (G.vacuumT > 0) {
       G.vacuumT -= dt;
@@ -9387,7 +9431,18 @@
     // 条上补「当前 / 上限」：只有比例看不出还差多少，也没法判断一颗丹够不够
     if (elHpval) hudText(elHpval, Math.max(0, Math.ceil(p.hp)) + '/' + Math.ceil(p.maxhp));
     if (elXpval) hudText(elXpval, Math.floor(sst.v) + '/' + Math.ceil(sst.need));
+    // 第三条：修为。p.next 是这一层的门槛（xpNeed），满了就该回洞府进阶。
+    // 大境界卡门时（breakReqFor 命中）经验会被压在 next-0.5，条子就一直是满的 ——
+    // 那正好，让它呼吸（.capped）就是在说「别再刷了，去进阶」。
+    if (elCnfill) {
+      const cap = p.next || 1;
+      hudPct(elCnfill, Math.max(0, Math.min(1, (p.xp || 0) / cap)));
+      if (elCnwrap) hudClass(elCnwrap, 'capped', (p.xp || 0) >= cap - 1);
+    }
     hudText(elLevel, curRealmLabel() + (sst.dmgT > 0 ? '　·　杀意' : ''));
+    // 锋芒窗口不往这行里塞字（#stats 是 flex-wrap，多两个字就可能折行，整块顶栏跳一下），
+    // 只换境界名的颜色：闪完这一息里它是朱砂/暖橙，闪完自己变回去。
+    hudStyle(elLevel, 'color', (G.edgeT || 0) > 0 ? (save.skin === 'guigu' ? '#a8281e' : '#ffb066') : '');
     const sec = Math.floor(G.time);     // 显示只到秒：整秒没变就不用重新格式化
     if (sec !== _hudSec) { _hudSec = sec; hudText(elTime, fmtTime(G.time)); }
     hudText(elKills, '斩 ' + G.kills);
@@ -9400,7 +9455,8 @@
     }
     // 快捷栏只在能打的图里露面（每帧同步，不依赖进图那一刻的状态）
     if (elQuick) {
-      const fightMap = G.map && (G.map.type === 'combat' || G.map.type === 'boss' || G.map.type === 'chase');
+      // G.trial：开局教学战虽挂在 story 图上，但玩家正被山兽围着 —— 快捷栏要在
+      const fightMap = G.map && (G.map.type === 'combat' || G.map.type === 'boss' || G.map.type === 'chase' || !!G.trial);
       hudClass(elQuick, 'on', !!fightMap && (G.state === 'play' || G.state === 'dialog'));
       paintParryHud();
     }
@@ -9862,7 +9918,42 @@
   }
 
   function onStoryMapDone(m) {
+    // 开局第一场（见 MAPS.qixuan.trial）：剧情演完不当场结算，先给一场山道小战。
+    // 实测新档「map 0.27s → 8 句对白 6.21s → victory 0.81s → 洞府空转 28s」，
+    // 36 秒一场仗没打 —— 战斗是这游戏唯一的动词，得先让人碰到它。
+    // 只在本图还没通过、非联机、且确实没打过时挂一次；重进已通过的老档不会再被拦。
+    if (m && m.trial && !G.coopRole && save.cleared.indexOf(m.id) < 0 && startTrial(m)) return;
     finishMap(m);
+  }
+  // ---------- 开局教学战 ----------
+  // 不是新系统：敌人、掉落、连斩、煞气全走常路，只是把「刷怪调度」整段关掉，
+  // 换成脚本点名的几只。清完就地结算，图上的奖励与解锁照旧由 finishMap 给。
+  function startTrial(m) {
+    const t = m.trial || {};
+    const list = (t.enemies && t.enemies.length) ? t.enemies : ['wolf'];
+    const n = Math.max(1, t.need || list.length);
+    G.trial = { need: n, doneT: 0, hinted: 0 };
+    G.state = 'play'; last = performance.now();
+    for (let i = 0; i < n; i++) spawnEnemy(list[i % list.length]);
+    banner('山道 · ' + n + ' 只山兽挡路 · 清完便可下山');
+    // 第一场就要把两件事说清楚，否则等于让新手猜：
+    // ① 打怪不用按键（自动出手，单手也玩得动）；② 闪身之后一息之内出手更重。
+    setTimeout(function () {
+      if (G.state === 'play' && G.trial) banner('不必按键 · 功法自会出手　·　闪身之后一息之内，出手更重');
+    }, 2200);
+    return true;
+  }
+  // 教学战的收尾：场上清空后留一小口气（让最后一击的碎屑落完），再进结算
+  function updateTrial(dt) {
+    const tr = G.trial; if (!tr) return;
+    if (G.state !== 'play') return;
+    if (G.enemies.length > 0) return;
+    tr.doneT += dt;
+    if (tr.doneT > 1.0) {
+      const m = G.map;
+      G.trial = null;
+      if (m && save.cleared.indexOf(m.id) < 0) finishMap(m);
+    }
   }
   // 破境剧情图的开场台词：备齐了演正剧（jiedan），没备齐演「点检行囊、石门不落」（jiedan_lock）。
   // 判定口径与破境门完全一致（修为 + 丹药 + 主药 + 灵石），不另立一套标准。
@@ -10402,7 +10493,24 @@
     hideAllOverlays();
     renderWorldMap();
     if (elWorldmap) elWorldmap.style.display = 'flex';
+    // 指针指到的那张卡常常在屏幕外（新档在第一卷最上面，回刷时又在很下面）——
+    // 打开就把那张滚到中间，不然「下一处」还在，人还是要自己翻。
+    if (elWmList) {
+      const nx = elWmList.querySelector('.mapcard.next');
+      if (nx && nx.scrollIntoView) { try { nx.scrollIntoView({ block: 'center' }); } catch (e) { nx.scrollIntoView(); } }
+    }
     refreshTitle();
+  }
+  // 从修行图进一张图：卡片点击与顶部「下一处」共用这一段。
+  // 只做「进得去吗 → 去哪」的判定，不掺卡片的展开/收起（那是点卡片自己的事）。
+  function goMapFromList(id) {
+    const m = MAPS.find(x => x.id === id);
+    if (!m) return false;
+    if (save.unlocked.indexOf(id) < 0) { notify('前图未了，此路不通'); Sfx.warn(); return false; }
+    if (m.cave && save.caves.indexOf(m.cave) >= 0) { openCave(m.cave); return true; }
+    if (m.type === 'combat' || m.type === 'boss') { openDiffPick(id); return true; }
+    startMap(id);
+    return true;
   }
 
   // ---------- 混沌万灵榜（图鉴 / 收藏系统） ----------
@@ -10468,6 +10576,9 @@
     let state = unlocked ? (done ? '已了' : '可入') : '未至';
     if (isCave) state = '可静修 · 可炼制';
     else if (m.id === save.mapId) state = '当前所在';
+    // 主线指针指到的那一张：加一圈勾边（.next），和顶部「下一处」是同一处地方，
+    // 扫一眼卡片就知道该点哪个 —— 148 张卡里只许有一个 .next。
+    if (G._nextHintId === m.id) { cls.push('next'); state = '下一处'; }
     // 行脚折：默认只露两行（名/地点/状态），点「详」章才展开全文 ——
     // 一屏能看七八处地名，才有「从青牛山一路走到五龙海」的大地图感。
     const open = !!(G.wmOpen && G.wmOpen[m.id]);
@@ -10565,12 +10676,52 @@
       '</div>';
   }
 
+  // ---------- 主线指针「下一处」 ----------
+  // 为什么要有：修行图 148 张卡里，新档只有 1 张是亮的，其余全是「未至」。
+  // 实测新档在修行图上 `hasNextHint === false`，玩家唯一能做的判断是「哪张不是灰的」——
+  // 而灰卡有 147 张。指针只解决一个问题：**下一步去哪**，且永远只指一处。
+  // 口径：沿主线顺序（MAPS 的 order，非支线）找第一张「已解锁且未通关」的；
+  // 全都通关了再退一步指最近一张「已通关但没打过的难度」，最后都没有就不显示。
+  function nextHintMap() {
+    const mains = MAPS.filter(m => !m.side && m.order).sort((a, b) => (a.order || 0) - (b.order || 0));
+    const pending = mains.filter(m => {
+      if (save.unlocked.indexOf(m.id) < 0) return false;
+      if (save.cleared.indexOf(m.id) >= 0) return false;
+      // 破境图（地火之屋 / 闭府结丹…）：层次已经过了就说明那一关已经走过 ——
+      // 存档里未必记着 cleared（破境是就地结算），别让指针一辈子钉在这里。
+      if (m.endLevel && (save.cultivate.level || 1) >= m.endLevel) return false;
+      return true;
+    });
+    if (pending.length) return { m: pending[0], why: '未了' };
+    // 主线走完：指最后一张已解锁的主线图（回刷 / 扫荡）
+    const ul = mains.filter(m => save.unlocked.indexOf(m.id) >= 0);
+    if (ul.length) return { m: ul[ul.length - 1], why: '回刷' };
+    return null;
+  }
+  function renderNextHint() {
+    G._nextHintId = null;      // 先清：卡片那边读它加 .next，别让上一次的残值指错卡
+    if (!elWmNext) return;
+    const h = nextHintMap();
+    if (!h) { elWmNext.style.display = 'none'; elWmNext.removeAttribute('data-goto'); return; }
+    const m = h.m;
+    G._nextHintId = m.id;      // 必须先于卡片渲染赋值（renderWorldMap 里先调这里）
+    const isCave = !!(m.cave && save.caves.indexOf(m.cave) >= 0);
+    elWmNext.style.display = '';
+    elWmNext.setAttribute('data-goto', m.id);
+    elWmNext.className = 'wm-next' + (h.why === '回刷' ? ' sweep' : '');
+    elWmNext.innerHTML = '<span class="wn-k">' + (h.why === '回刷' ? '可再走' : '下一处') + '</span>' +
+      '<b class="wn-name">' + m.name + '</b>' +
+      '<span class="wn-pos">' + (m.pos || '') + '</span>' +
+      '<span class="wn-go">' + (isCave ? '入洞' : (h.why === '回刷' ? '再入' : '入山')) + ' →</span>';
+  }
+
   function renderWorldMap() {
     if (!elWmList) return;
     if (elWmStones) elWmStones.textContent = '灵石 ' + (save.stones || 0);
     if (elWmRealm) elWmRealm.textContent = curRealmLabel();
     if (elWlRealm) elWlRealm.textContent = curRealmLabel();   // 万灵榜页头境界与修行图保持同一口径（避免开关面板才刷新）
     if (elWmBag) elWmBag.textContent = '储物袋 ' + (save.totalItems || 0) + ' 件';
+    renderNextHint();
     const mains = MAPS.filter(m => !m.side);
     const sides = MAPS.filter(m => m.side && save.unlocked.indexOf(m.id) >= 0).sort((a, b) => (a.sorder || 0) - (b.sorder || 0));
     // 按篇章分组：越往后越靠下，一眼看得出走到哪一步了
@@ -11649,8 +11800,24 @@
   }
   // 进阶剧情演出：按原著演一段，演完押上这一炉丹搏一把 —— 成则破境，败则丹药散尽、可再来。
   // onDone(gate, ok)
-  function breakSceneThen(gate, onDone) {
-    if (!gate) { if (onDone) onDone(null, true); return; }
+  // ---------- 破境演出 ----------
+  // 破境是全书骨架上的事（炼气→筑基→结丹→元婴→化神…），原来只和「拾到一株草药」共用
+  // 同一条 banner —— 两秒后在同一处淡出，分量完全一样。这里给一块只属于破境的卷面：
+  // 上下两道细线、一个境界名、一句结语，2.6 秒自己散，不拦操作。
+  // 故意不做「点掉」：破境失败时玩家最不想做的就是再点一下。
+  function breakOmen(ok, realm, note) {
+    if (!elBreakOmen) return;
+    const nm = elBreakOmen.querySelector('.bo-name');
+    const sb = elBreakOmen.querySelector('.bo-sub');
+    elBreakOmen.classList.toggle('fail', !ok);
+    if (nm) nm.textContent = realm || '';
+    if (sb) sb.textContent = note || '';
+    restartAnim(elBreakOmen, 'on');
+    // 动画 fill 是 both，2.6 秒后停在 opacity:0；摘类让 display 回 none（不挡住别的东西）
+    clearTimeout(elBreakOmen._t);
+    elBreakOmen._t = setTimeout(function () { elBreakOmen.classList.remove('on'); }, 2600);
+  }
+  function breakSceneThen(gate, onDone) {    if (!gate) { if (onDone) onDone(null, true); return; }
     G.breakCur = gate;
     const scene = (gate.story && gate.story[0] && gate.story[0].name) || '洞府';
     const lines = [['　' + scene + '　', (gate.from || '') + ' → ' + gate.realm]];
@@ -11749,6 +11916,9 @@
       if (applyShaDan(gate)) { if (onDone) onDone(gate, true); return; }
       G.breakPending = gate;
       writeSave();
+      // 失败也单独演一次：原来这一句和其它四十条提示共用同一条 banner。
+      // 「丹尽，道基未稳」是原著口气里最像的一句 —— 没成不是运气差，是底子还没到。
+      breakOmen(false, gate.realm || '', '丹尽，道基未稳');
       banner('冲关失败 · 丹药散尽，另备丹药再来');
       Sfx.warn();
       if (onDone) onDone(gate, false);
@@ -11771,12 +11941,14 @@
       const tail = [['旁白', '境界是上去了。可天上那几道还没走完。'],
         ['旁白', '（这一炉扛了 ' + take + ' 道衰，压在身上：气血、出手、遁速都削一截。每打通一张图消一层。）']];
       showLines((extra || []).concat(tail), function () {
+        breakOmen(true, realmName(newLv), '丹成 · 扛衰 ' + take + ' 道');
         banner('破境 · ' + gate.realm + ' · 扛衰 ' + take + ' 道');
         Sfx.levelup();
         if (onDone) onDone(gate, true);
       }, 'break:wu:ok:' + gate.lv);
       return;
     }
+    breakOmen(true, realmName(newLv), '丹成 · 道基已固');
     if (onDone) onDone(gate, true);
   }
   // 洞府「进阶」按钮：物事齐了 → 进这张门对应的破境地图，走完剧情/打完，就地在剧情里破境
@@ -11835,12 +12007,14 @@
       if (applyShaDan(b)) { renderCave(); refreshTitle(); return true; }
       if (keep) for (const [id, had] of keep) { const it = Items.get(id); if (it && had > 0) for (let i = 0; i < had; i++) addToBag(it, { silent: true }); }
       G.breakPending = b;
+      breakOmen(false, b.realm || '', '丹尽，道基未稳');
       banner(b.keepOnFail ? '冲关失败 · 灵压反噬，丹药退回，再备料重来' : '冲关失败 · 丹药散尽，另备丹药再来'); Sfx.warn();
       writeSave(); renderCave(); refreshTitle();
       return false;
     }
     const take = isWu ? settleWushuai(b, true, k) : 0;
     G.breakPending = null;
+    breakOmen(true, b.realm || '', isWu ? ('丹成 · 扛衰 ' + take + ' 道') : '丹成 · 道基已固');
     banner(isWu ? ('冲关 · ' + b.realm + ' · 扛衰 ' + take + ' 道') : ('冲关 · ' + b.realm)); Sfx.levelup();
     if (G.player && (G.state === 'play' || G.state === 'down')) {
       const p = G.player;
@@ -12501,6 +12675,10 @@
   const elHud = document.getElementById('hud');
   const elHpfill = document.getElementById('hpfill');
   const elXpfill = document.getElementById('xpfill');
+  const elCnfill = document.getElementById('cnfill');
+  const elCnwrap = document.getElementById('cnwrap');
+  const elWmNext = document.getElementById('wmNext');
+  const elBreakOmen = document.getElementById('breakOmen');
   const elHpval = document.getElementById('hpval');
   const elXpval = document.getElementById('xpval');
   const elLevel = document.getElementById('level');
@@ -13040,6 +13218,10 @@
   if (fswBtn1) fswBtn1.addEventListener('click', toggleFullscreen);
   if (fswBtn2) fswBtn2.addEventListener('click', toggleFullscreen);
 
+  if (elWmNext) elWmNext.addEventListener('click', () => {
+    const id = elWmNext.getAttribute('data-goto'); if (!id) return;
+    goMapFromList(id);
+  });
   if (elWmList) elWmList.addEventListener('click', e => {
     // 「详」章：展开 / 收起这张卡的详情（不改变进入逻辑 —— 点卡片其余位置照旧直接进）
     const inf = e.target.closest('[data-info]');
@@ -13083,8 +13265,7 @@
     // 战斗图：先择难度
     if (m.type === 'combat' || m.type === 'boss') { openDiffPick(id); return; }
     startMap(id);
-  });
-  if (elDiffList) elDiffList.addEventListener('click', e => {
+  });  if (elDiffList) elDiffList.addEventListener('click', e => {
     // 扫荡按钮：先接住，别让它冒到 diffcard 上变成「入山」
     const sw = e.target.closest('[data-sweep]');
     if (sw) {
@@ -14532,6 +14713,70 @@
     startBreak(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); if (!b) return 'no req'; enterBreakMap(b); return { map: (G.state === 'prefight' && G.pf) ? G.pf.id : (G.mapId || (G.pf && G.pf.id) || null), state: G.state }; },
     breakScene(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); if (!b) return 'no req'; breakSceneThen(b, () => { G.state = 'cave'; if (elCave) elCave.style.display = 'flex'; renderCave(); }); return { scene: G.breakScene, dialog: G.state === 'dialog', lines: G.dialogLines ? G.dialogLines.length : 0 }; },
     finishMapNow() { if (!G.map) return 'no map'; const m = G.map; finishMap(m); return { state: G.state, level: save.cultivate.level, cleared: save.cleared.slice(), unlocked: save.unlocked.slice(), caves: save.caves.slice() }; },
+    // 主线指针 / 缺口验收用：报告里的验收口径是 hasNextHint === true
+    nextHint() { const h = nextHintMap(); return h ? { id: h.m.id, name: h.m.name, why: h.why } : null; },
+    hasNextHint() { return !!nextHintMap(); },
+    // 开局教学战 / 锋芒窗口的探针
+    trialState() { return G.trial ? { need: G.trial.need, doneT: +G.trial.doneT.toFixed(2), enemies: G.enemies.length } : null; },
+    edgeState() { return { t: +(G.edgeT || 0).toFixed(3), mul: DASH_EDGE_MUL, sec: DASH_EDGE_SEC }; },
+    // 锋芒窗口的伤害验收：同一记伤害、窗口关 / 开各打一遍，成对采样再比。
+    // 必须成对：damageEnemy 里有暴击（×1.8）随机，单次比值会被暴击污染；
+    // 成对求总和之后两边的暴击期望相同，比值才干净。
+    dmgProbe(pairs) {
+      if (!G.player) return null;
+      const n = Math.max(1, pairs || 120);
+      const saved = G.edgeT || 0;
+      G.enemies.length = 0;
+      spawnEnemy('wolf');
+      const e = G.enemies[G.enemies.length - 1];
+      e.hp = e.maxhp = 1e12;
+      let off = 0, on = 0;
+      for (let i = 0; i < n; i++) {
+        G.edgeT = 0; off += damageEnemy(e, 100, { silentText: true });
+        G.edgeT = 1; on += damageEnemy(e, 100, { silentText: true });
+      }
+      G.edgeT = saved; G.enemies.length = 0;
+      return { pairs: n, off: +off.toFixed(1), on: +on.toFixed(1), ratio: +(on / off).toFixed(3) };
+    },
+    breakOmen(ok, realm, note) {
+      breakOmen(ok !== false, realm || '', note || '');
+      const el = elBreakOmen;
+      return el ? { on: el.classList.contains('on'), fail: el.classList.contains('fail'), name: (el.querySelector('.bo-name') || {}).textContent, sub: (el.querySelector('.bo-sub') || {}).textContent } : null;
+    },
+    // 持续输出测量（锋芒窗口值不值，只能用「打了多少血」量，不能用击杀数）：
+    // 击杀数在这游戏里是**刷怪速率**的函数 —— PACK 目标只 8 只、调度按缺口补，
+    // lv30 在 houshan 上本来就是一发一只，伤害再加倍击杀数也不会变（实测 always 与 auto 同为 39 杀）。
+    // 所以钉一根 1e12 血的木桩、关掉刷怪调度、按不同占空比推 10 秒，直接读掉血量。
+    dpsProbe(sec, mode) {
+      if (!G.player || G.state !== 'play') return null;
+      const saveOff = G.spawnOff;
+      G.spawnOff = true;
+      G.enemies.length = 0;
+      // 木桩必须放在主角近旁（110px）：spawnEnemy 落在屏幕外沿，若射程盒刚好够不着，
+      // 结果会一直是 0 输出 —— 那不是「没加成」，是「根本没打到」。
+      const e = makeEnemy('wolf', G.player.x + 110, G.player.y, hpMulBase(), dmgMulBase());
+      e.hp = e.maxhp = 1e12; e.spd = 0; e.dmg = 0;   // 木桩：不动、不打人
+      G.enemies.push(e);
+      const hp0 = e.hp, dt = 1 / 60, N = Math.round((sec || 10) * 60);
+      let edgeFrames = 0, dashN = 0;
+      const saveEdge = G.edgeT || 0;
+      for (let i = 0; i < N; i++) {
+        if (mode === 'on') G.edgeT = 99;
+        else if (mode === 'duty') G.edgeT = (G.time % (DASH_CD)) < DASH_EDGE_SEC ? 1 : 0;
+        else if (mode === 'dash') { if ((G.dashCd || 0) <= 0) { dashPlayer({ dx: 1, dy: 0 }); dashN++; } }
+        else G.edgeT = 0;
+        if (G.edgeT > 0) edgeFrames++;
+        update(dt);
+      }
+      const dealt = hp0 - e.hp;
+      G.edgeT = saveEdge;
+      G.enemies.length = 0;
+      G.spawnOff = saveOff;
+      return {
+        mode, sec: +(N / 60).toFixed(1), dealt: Math.round(dealt),
+        dps: Math.round(dealt / (N / 60)), edgePct: +(edgeFrames / N * 100).toFixed(1), dashN,
+      };
+    },
     breakOpen(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); openBreak(b); return !!(elBreak && elBreak.style.display === 'flex'); },
     breakShown() { return !!(elBreak && elBreak.style.display === 'flex'); },
     breakClose() { closeBreak(); return !!(elBreak && elBreak.style.display === 'flex'); },
