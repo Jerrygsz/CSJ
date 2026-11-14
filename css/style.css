@@ -1,0 +1,2046 @@
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body {
+  width: 100%; height: 100%; overflow: hidden; background: var(--bg-base);
+  /* 楷体优先；缺字时落到思源宋体，而不是系统宋体（SimSun 字形差异更大） */
+  font-family: "KaiTi", "STKaiti", "Kaiti SC", "Source Han Serif SC", "Noto Serif SC", "Noto Serif CJK SC", serif;
+  color: var(--text-1); font-size: var(--fs-body); user-select: none; -webkit-user-select: none;
+}
+/* 安全区（刘海 / 底部横条）——--fr-safe-* 可由部署预览页覆盖，用于模拟真机 */
+:root {
+  --fr-safe-top: env(safe-area-inset-top, 0px);
+  --fr-safe-right: env(safe-area-inset-right, 0px);
+  --fr-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --fr-safe-left: env(safe-area-inset-left, 0px);
+
+  /* ---------- 字号阶梯：6 档（规格 §2.4） ---------- */
+  --fs-display: 32px;   /* 游戏标题、连斩数字 */
+  --fs-h1: 24px;        /* 面板标题 */
+  --fs-h2: 17px;        /* 区块标题、卡片名、说话人 */
+  --fs-body: 15px;      /* 正文、对话、主按钮 */
+  --fs-cap: 13px;       /* 次要说明、列表描述、页签、次按钮 */
+  --fs-micro: 11px;     /* 标签、角标、难度章、键位号 */
+  --fs-num: 12px;       /* 例外：HUD 数值（等宽，防跳动） */
+
+  /* ---------- 间距：基准 4px，6 档（规格 §2.2） ---------- */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px;
+  --sp-4: 16px; --sp-5: 24px; --sp-6: 32px;
+
+  /* ---------- 圆角：4 档（规格 §2.8） ---------- */
+  --r-sm: 6px;   /* 标签、徽章 */
+  --r-md: 10px;  /* 按钮、列表行、输入框 */
+  --r-lg: 14px;  /* 卡片、面板、对话框 */
+  --r-pill: 999px;
+
+  /* ---------- 交互状态：按下幅度 / 禁用透明度（规格 §2.10） ----------
+     按下分三档，按元素大小定，不是为统一而统一：
+     小圆钮缩得多一点才有手感，整行卡片缩一点点就够，缩多了会像在晃 */
+  --press-sm: 0.94;   /* 圆形小钮：快捷栏 / 飞鸽 / 表情 */
+  --press: 0.97;      /* 一般按钮、列表行、装备格 */
+  --press-lg: 0.99;   /* 大卡片：地图卡 / 难度卡 */
+  --op-disabled: 0.45;
+
+  /* ---------- 层级：8 层（规格 §2.6） ----------
+     z-combat 必须独立成层：战斗里弹剧情时，快捷栏/飘字仍要压过对话遮罩
+     z-banner 必须压过 panel：坊市、洞府里的操作反馈（灵石不足/买到了）原先被面板盖住，
+     玩家只觉得「点了没反应」。横幅是纯文字反馈，pointer-events 一律 none。 */
+  --z-world: 0;
+  --z-hud: 10;
+  --z-toast: 20;
+  --z-panel: 30;
+  --z-dialog: 40;
+  --z-combat: 45;
+  --z-banner: 55;
+  --z-modal: 60;
+
+  /* ---------- 颜色：语义 token（规格 §2.7） ----------
+     这里必须是字面值，不能写 var()：token 定义自身引用自身会形成循环，整块失效 */
+  --bg-base: #0d0f14;
+  --bg-panel-a: #1d2230;
+  --bg-panel-b: #141823;
+  --bg-card-a: #232a3b;
+  --bg-card-b: #171c27;
+  --bg-scrim: rgba(8,10,14,0.82);
+  --line-gold: #c9a24a;
+  --line-soft: rgba(201,162,74,0.28);
+  --text-1: #f2e8d5;   /* 主文字 13.9:1 */
+  --text-2: #cfc6b2;   /* 正文 9.4:1 */
+  --text-3: #9a927f;   /* 次要 5.9:1 */
+  --text-4: #8f8878;   /* 禁用 / 弱提示 5.21:1（原 #7c7768 仅 4.11，不达 AA） */
+  --accent: #ffd24a;   /* 强调金 */
+  /* 稀有度字色：HTML 里不再写死 #hex，一律走这组变量（见 game.js 的 rarize）。
+     这里放的是深色皮用的亮色；水墨皮在文件末尾整组换成深墨色。 */
+  --rar-0: #cfd6e2;    /* 凡品 */
+  --rar-1: #6fe08a;    /* 良品 */
+  --rar-2: #6db6ff;    /* 上品 */
+  --rar-3: #c48cff;    /* 珍品 */
+  --rar-4: #ffd24a;    /* 至宝 */
+  --rar-5: #8ff0e0;    /* 仙品 */
+  --accent-lite: #e0b24a;
+  --accent-deep: #c9912f;
+  --accent-soft: #c9b27a;
+  --accent-shadow: #8a5e1c;
+  --ok: #6fe08a;
+  --ok-soft: #cfe6c0;
+  --danger: #ff9a9a;
+  --danger-deep: #b03a3a;
+  --hp-a: #e23b3b; --hp-b: #ff7a6a;
+  --mp-a: #2fb6c8; --mp-b: #7fe6f0;
+  --paper: #f2e8d5;    /* 对话框纸底 */
+  --ink: #2a1c06;      /* 金底上的墨色字 */
+  /* 仅状态色：只用于标签描边，不进文字体系 */
+  --tag-blue: #7fd8ff;
+  --tag-purple: #c48cff;
+  --tag-orange: #ff9a6a;
+}
+#wrap {
+  position: fixed; inset: 0; overflow: hidden;
+  padding: var(--fr-safe-top) var(--fr-safe-right) var(--fr-safe-bottom) var(--fr-safe-left);
+  background: radial-gradient(circle at 50% 42%, #171b23 0%, #0a0c10 78%);
+}
+/* 舞台外层：定位容器。不再用 flex 居中 —— 舞台尺寸可能大于容器，
+   flex 的负剩余空间会让内容在某些浏览器里偏向一侧；绝对定位 + translate 永远正中对齐。 */
+#fit { position: relative; width: 100%; height: 100%; }
+/* 舞台：始终按「逻辑坐标」布局（宽 480，高由 JS 按机型比例给出），
+   再由 JS 在外层整体 scale。这样画布、HUD、弹窗、字号共用同一套坐标，
+   换机型只是整体放大缩小 —— 不会出现「画布缩了、按钮没缩」的错位与挤压。 */
+#stage {
+  position: absolute; left: 50%; top: 50%;
+  width: 480px; height: 864px;
+  transform-origin: center center;
+  transform: translate(-50%, -50%) scale(1);
+  will-change: transform;
+}
+#game {
+  display: block; width: 100%; height: 100%;
+  background: #36532f; image-rendering: pixelated; image-rendering: crisp-edges;
+  touch-action: none; box-shadow: 0 0 40px rgba(0,0,0,0.6);
+}
+
+/* 浏览器全屏时铺满 */
+body.fs #wrap { background: #000; }
+
+/* ---------- HUD ---------- */
+#hud { position: absolute; inset: 0; pointer-events: none; display: none; }
+/* 顶栏不再逐项垫底色块——整条压一层由深到透的暮色，字浮在幕上，画面干净 */
+#topbar { position: absolute; top: 0; left: 0; right: 0; padding: 8px 12px 12px; display: flex; flex-direction: column; gap: var(--sp-1); background: linear-gradient(180deg, rgba(5,7,10,0.66) 0%, rgba(5,7,10,0.38) 62%, rgba(5,7,10,0) 100%); }
+#hpwrap, #xpwrap { position: relative; height: 13px; background: rgba(0,0,0,0.52); border: 1px solid var(--line-soft); border-radius: var(--r-pill); overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.45); }
+#hpfill { height: 100%; width: 100%; background: linear-gradient(90deg,var(--hp-a),var(--hp-b)); transition: width .12s linear; }
+#xpfill { height: 100%; width: 0%; background: linear-gradient(90deg,var(--mp-a),var(--mp-b)); transition: width .12s linear; }
+.barlabel { position: absolute; left: 9px; top: 0; line-height: 13px; font-size: var(--fs-micro); letter-spacing: 2px; color: var(--text-2); text-shadow: 0 1px 2px #000; }
+/* 血量 / 灵力数值：等宽数字，位数变化时不会左右抖 */
+.barval { position: absolute; right: 9px; top: 0; line-height: 13px; font-size: var(--fs-num); font-variant-numeric: tabular-nums; color: var(--text-2); text-shadow: 0 1px 2px #000; }
+/* 修为：第三条细条。比生命/煞气矮一截 —— 它是「进度」，不是「资源」，
+   平时只需要让人余光扫到「快满了」，不该和血条抢注意力。金色与大/小境界的题款同色。
+   高度必须给到 10px：9px 的字放 8px 的槽里会溢出下沿，压到下面那行境界名上。 */
+#cnwrap { position: relative; height: 10px; background: rgba(0,0,0,0.42); border: 1px solid var(--line-soft); border-radius: var(--r-pill); overflow: hidden; }
+#cnfill { height: 100%; width: 0%; background: linear-gradient(90deg,#7a5f24,#e0bf62); transition: width .18s linear; }
+#cnwrap .barlabel { line-height: 10px; font-size: 9px; letter-spacing: 1px; }
+/* 修为刚满、正等着回洞府破境：让这条细条轻轻呼吸一下，提示「该去进阶了」。
+   只动 opacity —— 它走合成器，不重绘；动 box-shadow / filter 就得每帧重画一遍。 */
+#cnwrap.capped #cnfill { animation: cnCapped 1.6s ease-in-out infinite; }
+@keyframes cnCapped { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+/* 数值行：去底块，一行细字浮在幕上；等宽数字防跳位。右侧留出自动/暂停键的位置 */
+#stats { display: flex; flex-wrap: wrap; gap: 14px; padding-right: 104px; font-size: var(--fs-num); letter-spacing: 1px; font-variant-numeric: tabular-nums; color: var(--text-2); text-shadow: 0 1px 3px #000; }
+#stats span { white-space: nowrap; }
+#level { color: var(--accent-soft); letter-spacing: 2px; }
+#time { color: var(--text-3); }
+#stones { color: var(--accent); }
+#mapName { align-self: flex-start; font-size: var(--fs-micro); letter-spacing: 3px; color: var(--text-3); border-left: 2px solid var(--line-gold); padding-left: 7px; text-shadow: 0 1px 2px #000; }
+/* 禁制（暂停）键：与「大衍」同为细长素签。热区保持 ≥44×44（点得中），
+   「看得见的那颗」是 32px 高的金线胶囊：圆签用 ::before 画，文字套 span 浮在其上 */
+#pauseBtn { position: absolute; right: 12px; top: 52px; min-width: 44px; height: 44px; border: none; background: transparent; color: var(--text-2); pointer-events: auto; display: flex; align-items: center; justify-content: center; padding: 0 12px; }
+#pauseBtn::before { content: ''; position: absolute; inset: 6px 0; border: 1px solid rgba(201,162,74,0.5); border-radius: var(--r-pill); background: rgba(10,13,18,0.58); box-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+#pauseBtn span { position: relative; font-size: var(--fs-micro); letter-spacing: 3px; text-indent: 3px; color: var(--text-2); }
+#pauseBtn:active::before { background: rgba(8,10,14,0.7); }
+#pauseBtn:active { transform: scale(var(--press-sm)); }
+/* 大衍（自动战斗）：并排在禁制键左边，同为细长素签。开着时字口转金、微微透光，一眼看得出「现在是它替我打」 */
+#autoBtn { position: absolute; right: 74px; top: 58px; height: 32px; padding: 0 12px; border: 1px solid rgba(201,162,74,0.5); border-radius: var(--r-pill); background: rgba(10,13,18,0.58); color: var(--text-2); font-size: var(--fs-micro); letter-spacing: 4px; text-indent: 2px; pointer-events: auto; display: none; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+#autoBtn:active { background: rgba(8,10,14,0.7); transform: scale(var(--press)); }
+#autoBtn.on { border-color: var(--accent-deep); color: var(--accent); background: rgba(24,18,6,0.66); text-shadow: 0 0 8px rgba(255,210,74,0.45); }
+#autoBtn.on::after { content: ''; width: 5px; height: 5px; margin-left: 2px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px rgba(255,210,74,0.8); animation: autoDot 1.1s ease-in-out infinite; }
+@keyframes autoDot { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
+/* Boss 名牌：金线从两侧渐隐收拢，名字鎏金，血条鎏金描边带顶部高光 —— 修仙应该有的那点体面 */
+#bosswrap { position: absolute; top: 96px; left: 14px; right: 14px; display: none; }
+#bossname { display: flex; align-items: center; justify-content: center; gap: 10px;
+  font-size: var(--fs-body); font-weight: 600; letter-spacing: 5px; text-indent: 5px;
+  background: linear-gradient(180deg, #ffe9b0 20%, var(--accent) 85%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.85)); margin-bottom: 5px; }
+#bossname::before, #bossname::after { content: ''; flex: 1; height: 1px; }
+#bossname::before { background: linear-gradient(90deg, rgba(201,162,74,0), rgba(201,162,74,0.7)); }
+#bossname::after  { background: linear-gradient(270deg, rgba(201,162,74,0), rgba(201,162,74,0.7)); }
+#bossbar { position: relative; height: 12px; background: rgba(0,0,0,0.62);
+  border: 1px solid rgba(201,162,74,0.55); border-radius: var(--r-pill); overflow: hidden;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.55), inset 0 1px 3px rgba(0,0,0,0.85); }
+#bossbar::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0) 46%); }
+#bossfill { height: 100%; width: 100%; background: linear-gradient(90deg,var(--danger-deep),#ff5a4a); transition: width .15s linear; }
+/* 二阶段：血条泛红光，脉一下停一下，不吵但看得见 */
+#bossbar.p2 { border-color: rgba(255,90,74,0.8); animation: bossP2 1.6s ease-in-out infinite; }
+@keyframes bossP2 { 0%, 100% { box-shadow: 0 1px 6px rgba(0,0,0,0.55), 0 0 4px rgba(255,60,40,0.25); } 50% { box-shadow: 0 1px 6px rgba(0,0,0,0.55), 0 0 12px rgba(255,60,40,0.65); } }
+#skillrow { position: absolute; left: 12px; bottom: 12px; display: flex; flex-wrap: wrap; gap: var(--sp-1); max-width: 70%; }
+.pip { width: 26px; height: 26px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); border-radius: var(--r-sm); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: var(--fs-cap); line-height: 1; }
+.pip b { font-size: var(--fs-micro); color: var(--accent); }
+
+/* ---------- 横幅 ---------- */
+/* z-banner 压过面板层：否则坊市/洞府里的「灵石不足」全被面板盖住，等于没提示。
+   pointer-events:none —— 它是飘过去的字，不能挡住底下按钮的点击。
+   背景必须做实：半透明压在半屏文字上会透出底下的字，看着像糊了一层。
+   落点钉在底部技能行上方居中：boss 与玩家都占屏幕中部，横幅悬中间容易糊住 boss 外观
+   （Jerry 实测），底部是地面/空场，压不到谁。限宽允许换行 —— 破境提示这类长文案
+   曾经 nowrap 横着冲出两屏。 */
+#banner { position: absolute; bottom: 76px; left: 50%; transform: translateX(-50%); background: rgba(10,13,20,0.94); border: 1px solid rgba(201,162,74,0.5); box-shadow: 0 6px 20px rgba(0,0,0,0.6); color: var(--accent); padding: 6px 13px; border-radius: var(--r-md); font-size: 14px; display: none; text-shadow: 0 1px 3px #000; max-width: min(calc(100vw - 28px), 460px); white-space: normal; line-height: 1.45; text-align: center; z-index: var(--z-banner); pointer-events: none; }
+
+/* ---------- 破境演出 ----------
+   一块卷面：上下两道细金线，中间「破境」小字 + 大境界名 + 一句结语。
+   层级压在 banner 之上、面板之下 —— 它演的时候别的面板还没出来。
+   淡入淡出只动 opacity / transform（合成器），不碰 box-shadow。 */
+#breakOmen {
+  position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%);
+  display: none; pointer-events: none; z-index: var(--z-banner);
+  padding: 0 18px; text-align: center;
+}
+#breakOmen.on { display: block; animation: boIn 2.6s ease-out both; }
+#breakOmen .bo-frame { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+#breakOmen .bo-rule {
+  display: block; width: 132px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--line-gold), transparent);
+}
+#breakOmen .bo-k { font-size: var(--fs-micro); letter-spacing: 6px; color: var(--text-2); text-shadow: 0 1px 4px #000; }
+#breakOmen .bo-name { font-size: 30px; letter-spacing: 6px; color: var(--accent); text-shadow: 0 2px 10px rgba(0,0,0,0.85), 0 0 18px rgba(255,210,74,0.35); }
+#breakOmen .bo-sub { font-size: var(--fs-num); letter-spacing: 2px; color: var(--text-1); text-shadow: 0 1px 4px #000; }
+/* 失败：名号翻成灰墨，不给金边光晕 —— 「没成」这件事在画面上就该是暗的 */
+#breakOmen.fail .bo-name { color: #c8c0b0; text-shadow: 0 2px 10px rgba(0,0,0,0.85); }
+#breakOmen.fail .bo-rule { background: linear-gradient(90deg, transparent, rgba(200,192,176,0.55), transparent); }
+@keyframes boIn {
+  0%   { opacity: 0; transform: translate(-50%, -46%) scale(0.94); }
+  12%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  78%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -53%) scale(1.01); }
+}
+/* 水墨皮：金线在宣纸上几乎看不见，改印泥朱 + 深棕字 */
+body[data-skin="guigu"] #breakOmen .bo-name { color: #8f4f2e; text-shadow: 0 2px 14px rgba(246,241,226,0.9), 0 0 10px rgba(143,79,46,0.18); }
+body[data-skin="guigu"] #breakOmen .bo-k { color: rgba(58,53,44,0.72); text-shadow: 0 0 4px rgba(246,241,226,0.9); }
+body[data-skin="guigu"] #breakOmen .bo-sub { color: #3a332a; text-shadow: 0 0 4px rgba(246,241,226,0.9); }
+body[data-skin="guigu"] #breakOmen .bo-rule { background: linear-gradient(90deg, transparent, rgba(58,53,44,0.55), transparent); }
+body[data-skin="guigu"] #breakOmen.fail .bo-name { color: #6a6154; }
+
+/* ---------- 覆盖层 ---------- */
+/* 覆盖层：左右各留 16，面板一律吃满可用宽（上限 460）——切界面时左右不再跳 */
+.overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-4); background: var(--bg-scrim); padding: var(--sp-4); text-align: center; z-index: var(--z-panel); }
+/* 层级按规格 §2.6 命名，不再靠 z-index 硬补：
+   panel(30) < dialog(40) < combat(45) < modal(60) —— z-combat 必须压过对话 */
+#dialog { z-index: var(--z-dialog); }
+#pause, #victory, #gameover, #levelup { z-index: var(--z-modal); }
+/* 覆盖层默认 display:flex，凡是「不该一进页面就露出」的都要列进这里 */
+#dialog, #levelup, #pause, #gameover, #victory, #worldmap, #shop, #difficulty, #cave, #prefight, #coop, #break, #wanling, #sweep { display: none; }
+
+/* 突破清单：一样一行，齐了打勾 */
+.brk-list { display: flex; flex-direction: column; gap: var(--sp-2); margin: 8px 0 4px; }
+.brk-row {
+  display: flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-cap); color: var(--text-2);
+  background: rgba(0,0,0,0.26); border: 1px solid rgba(201,162,74,0.2);
+  border-radius: var(--r-md); padding: 8px 8px;
+}
+.brk-row i {
+  font-style: normal; font-size: var(--fs-micro); color: var(--ink); background: var(--line-gold);
+  border-radius: var(--r-sm); padding: 0 4px; flex: none;
+}
+.brk-row span { flex: 1; min-width: 0; }
+.brk-row b { flex: none; font-size: var(--fs-cap); color: var(--danger); }
+.brk-row.ok { border-color: rgba(111,224,138,0.4); }
+.brk-row.ok i { background: var(--ok); }
+.brk-row.ok b { color: var(--ok); }
+/* 可点击的道具行：点一下看「去哪取」（不挂问号，字底一道虚线当暗记） */
+.brk-row.click { cursor: pointer; transition: border-color .12s, background .12s; }
+.brk-row.click:hover { border-color: rgba(201,162,74,0.55); background: rgba(201,162,74,0.10); }
+.brk-row.click span { text-decoration: underline dotted rgba(201,162,74,0.4); text-underline-offset: 3px; }
+.brk-hint { color: rgba(201,162,74,0.8); font-size: var(--fs-micro); margin: 2px 0 0; }
+/* 道具「去哪取」提示卡：进阶清单与炼丹材料共用 */
+.item-tip { background: rgba(18,14,9,0.97); border: 1px solid rgba(201,162,74,0.5);
+  border-radius: var(--r-md); padding: 8px 12px; font-size: var(--fs-cap);
+  line-height: 1.55; pointer-events: none; }
+.item-tip b { display: block; color: var(--accent); margin-bottom: 3px; letter-spacing: .5px; }
+.item-tip span { color: var(--text-2); }
+/* 就地展开：贴在点过的那一行下面，不遮列表也不盖按钮 */
+.item-tip.inline { margin: 0 0 6px; border-left: 2px solid var(--accent); }
+/* 兜底：没有落点就浮在底部 */
+.item-tip.float { position: fixed; left: 50%; bottom: 9%; transform: translateX(-50%);
+  width: max-content; max-width: min(460px, 88vw); box-shadow: 0 8px 26px rgba(0,0,0,0.55); z-index: 60; }
+.cave-sec2 { margin: 8px 0; padding-top: 8px; border-top: 1px dashed rgba(201,162,74,0.22); }
+/* 内容型面板（标题 / 暂停 / 道陨 / 通关 / 升级）：高度贴合内容，垂直居中 */
+.panel { width: 100%; max-width: 460px; background: linear-gradient(180deg,var(--bg-panel-a),var(--bg-panel-b)); border: 1px solid var(--line-gold); border-radius: var(--r-lg); padding: var(--sp-5); box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
+.panel h2 { color: var(--accent); font-size: var(--fs-h1); margin-bottom: 8px; }
+#victory .panel, #gameover .panel { max-height: 92%; overflow-y: auto; }
+/* 暂停面板又多了一行（弹反键位置）：矮屏机型（逻辑视口 854）会顶出屏幕，这里给个兜底滚动 */
+#pause .panel { max-height: 92%; overflow-y: auto; }
+.panel p { color: var(--text-2); line-height: 1.6; margin: 4px 0; font-size: var(--fs-body); }
+/* ============ 标题页（首页） ============
+   首页是玩家见到的第一屏，原先只有一个灰框加几行字，跟游戏里的国风质感脱节。
+   这里给它一套「印章 + 细线 + 题字 + 落款」的骨架，两套皮肤各配一套颜色：
+     默认皮「鎏金古卷」：夜色为底、金线为骨，标题走金色渐变。
+     鬼谷皮「水墨卷轴」：宣纸为底、墨线为骨，朱砂印章压角落。
+   装饰全部用 CSS 与伪元素，不引图片 —— 首页不该为几道装饰多拉一次请求。 */
+.title-overlay {
+  background:
+    radial-gradient(120% 62% at 50% 0%, rgba(201,162,74,0.16) 0%, rgba(201,162,74,0) 62%),
+    radial-gradient(90% 55% at 50% 100%, rgba(120,90,30,0.14) 0%, rgba(0,0,0,0) 72%),
+    var(--bg-scrim);
+}
+.title-panel {
+  position: relative;
+  padding: 24px 22px 16px;
+  border-radius: var(--r-sm);
+  /* 内缩一圈细线：像裱好的画心，比加粗描边更轻 */
+  outline: 1px solid rgba(201,162,74,0.20); outline-offset: -7px;
+  box-shadow: 0 18px 60px rgba(0,0,0,0.66), inset 0 0 90px rgba(201,162,74,0.05);
+  max-height: 96%; overflow-y: auto; overscroll-behavior: contain;
+}
+/* 顶部一道金光：视线从上方落下 */
+.title-panel::before {
+  content: ''; position: absolute; left: 0; right: 0; top: 0; height: 2px;
+  background: linear-gradient(90deg, rgba(201,162,74,0) 0%, rgba(255,210,74,0.92) 50%, rgba(201,162,74,0) 100%);
+}
+.t-head { display: block; text-align: center; }
+/* 印章：方形、微斜、单字。位置在标题之上，像书页的起首章 */
+.t-seal {
+  width: 44px; height: 44px; margin: 0 auto 12px;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid rgba(201,162,74,0.85); border-radius: 3px;
+  background: rgba(255,210,74,0.06);
+  box-shadow: 0 0 18px rgba(255,210,74,0.20), inset 0 0 12px rgba(255,210,74,0.10);
+  transform: rotate(-3deg);
+}
+.t-seal b { font-size: 23px; font-weight: normal; line-height: 1; color: var(--accent); }
+.title-panel h1 {
+  font-size: 33px; letter-spacing: 6px; margin-bottom: 6px;
+  color: var(--accent); text-shadow: 0 2px 10px rgba(0,0,0,0.75);
+}
+/* 金色渐变字：老浏览器没有 background-clip:text 时会退化成上面的纯金色，不会变透明 */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .title-panel h1 {
+    background: linear-gradient(180deg, #ffeeb4 0%, #ffd24a 48%, #c9912f 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none; filter: drop-shadow(0 2px 10px rgba(255,180,60,0.32));
+  }
+}
+/* 题字下的分隔：两侧细线，中间两个字，模仿卷首的界栏 */
+.t-rule { display: flex; align-items: center; gap: 10px; margin: 12px 0 14px; }
+.t-rule i { flex: 1; height: 1px; background: linear-gradient(90deg, rgba(201,162,74,0), rgba(201,162,74,0.52), rgba(201,162,74,0)); }
+.t-rule b { flex: none; font-weight: normal; font-size: 11px; letter-spacing: 6px; color: rgba(201,162,74,0.72); }
+.title-panel .cite {
+  text-align: left; padding-left: 11px;
+  border-left: 2px solid rgba(201,162,74,0.34);
+  line-height: 1.75; margin: 2px 0 16px;
+}
+.title-panel .t-start {
+  min-width: 216px; letter-spacing: 3px;
+  box-shadow: 0 4px 0 var(--accent-shadow), 0 0 26px rgba(255,190,70,0.26);
+}
+/* 常态呼吸光晕；按下时交给 :active，免得两套 box-shadow 打架 */
+.title-panel .t-start:not(:active) { animation: tStartGlow 3.6s ease-in-out infinite; }
+@keyframes tStartGlow {
+  0%, 100% { box-shadow: 0 4px 0 var(--accent-shadow), 0 0 18px rgba(255,190,70,0.18); }
+  50% { box-shadow: 0 4px 0 var(--accent-shadow), 0 0 34px rgba(255,190,70,0.44); }
+}
+.t-foot {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-top: 14px; padding-top: 8px;
+  border-top: 1px dotted rgba(201,162,74,0.16);
+  font-size: 10px; letter-spacing: 2px; color: var(--text-4);
+}
+/* ---- 鬼谷水墨：同一套骨架，换纸墨朱砂 ---- */
+body[data-skin="guigu"] .title-overlay {
+  background:
+    radial-gradient(120% 62% at 50% 0%, rgba(255,255,255,0.80) 0%, rgba(255,255,255,0) 60%),
+    radial-gradient(90% 55% at 50% 100%, rgba(150,140,110,0.20) 0%, rgba(255,255,255,0) 72%),
+    rgba(226,220,204,0.94);
+}
+body[data-skin="guigu"] .title-panel {
+  background: linear-gradient(180deg, #f7f3e8 0%, #ece6d4 100%);
+  border-color: rgba(74,68,56,0.62);
+  /* 鬼谷皮已经有「上下轴头」这套卷轴语言，首页沿用，不再叠一圈内缩线 */
+  outline: none;
+  box-shadow:
+    inset 0 5px 0 -2.5px rgba(60,56,48,0.50),
+    inset 0 -5px 0 -2.5px rgba(60,56,48,0.50),
+    inset 0 0 0 1px rgba(60,56,48,0.12),
+    0 18px 50px rgba(60,54,44,0.30);
+}
+/* 轴头已经压住上沿，朱砂细线再叠一道就脏了 —— 让它退场 */
+body[data-skin="guigu"] .title-panel::before { display: none; }
+body[data-skin="guigu"] .t-seal {
+  border-color: rgba(150,42,32,0.85); background: rgba(168,58,42,0.05);
+  box-shadow: 0 0 16px rgba(168,58,42,0.14), inset 0 0 10px rgba(168,58,42,0.07);
+}
+body[data-skin="guigu"] .t-seal b { color: #a83a2a; }
+body[data-skin="guigu"] .title-panel h1 { color: #2f2a20; text-shadow: 0 1px 0 rgba(255,255,255,0.6); }
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  body[data-skin="guigu"] .title-panel h1 {
+    background: linear-gradient(180deg, #4a4438 0%, #2b261d 58%, #7a5f2e 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; text-shadow: none;
+    filter: drop-shadow(0 1px 0 rgba(255,255,255,0.5));
+  }
+}
+body[data-skin="guigu"] .t-rule i { background: linear-gradient(90deg, rgba(74,68,56,0), rgba(74,68,56,0.42), rgba(74,68,56,0)); }
+body[data-skin="guigu"] .t-rule b { color: rgba(90,80,60,0.70); }
+body[data-skin="guigu"] .title-panel .cite { border-left-color: rgba(168,58,42,0.42); }
+body[data-skin="guigu"] .title-panel .t-start { box-shadow: 0 4px 0 #4a4438, 0 0 22px rgba(150,80,40,0.18); }
+body[data-skin="guigu"] .title-panel .t-start:not(:active) { animation-name: tStartGlowInk; }
+@keyframes tStartGlowInk {
+  0%, 100% { box-shadow: 0 4px 0 #4a4438, 0 0 14px rgba(150,80,40,0.12); }
+  50% { box-shadow: 0 4px 0 #4a4438, 0 0 26px rgba(150,80,40,0.30); }
+}
+body[data-skin="guigu"] .t-foot { border-top-color: rgba(74,68,56,0.18); color: rgba(90,84,70,0.68); }
+
+/* ---- 矮屏档（16:9 老机型 / 小窗口）：首页内容顶出去时整体收紧一档 ----
+   只压间距与小装饰，不删信息、不缩正文字号 —— 该读的字一个不少，
+   只是别让「转世重修」掉到屏幕外面去。 */
+body.short .title-panel { padding: 16px 18px 12px; }
+body.short .t-seal { width: 34px; height: 34px; margin-bottom: 8px; }
+body.short .t-seal b { font-size: 18px; }
+body.short .title-panel h1 { font-size: 28px; letter-spacing: 5px; margin-bottom: 4px; }
+body.short .title-panel .sub { margin-bottom: 8px; }
+body.short .t-rule { margin: 8px 0 10px; }
+body.short .title-panel .desc { font-size: 14px; line-height: 1.62; margin-bottom: 10px; }
+body.short .title-panel .cite { margin: 0 0 10px; line-height: 1.6; }
+body.short #best { margin-top: 10px; }
+body.short .ts-row { line-height: 1.62; }
+body.short .title-panel .hint { margin-top: 8px; font-size: 11px; line-height: 1.62; }
+body.short .title-panel .btnrow { margin-top: 2px; }
+body.short .title-panel .btn.small { min-height: 38px; padding: 9px 12px; }
+body.short .t-foot { margin-top: 8px; }
+
+/* ============ 横屏提示 ============ */
+/* 触摸设备横屏时竖版画面只剩一条，与其硬塞不如请人转回来。
+   桌面浏览器窗口拉宽不受影响（判定在 JS 里看 pointer:coarse）。 */
+#rotateHint { display: none; }
+body.rot #rotateHint {
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  background: radial-gradient(circle at 50% 42%, var(--bg-panel-a) 0%, var(--bg-base) 78%);
+  color: var(--text-2); text-align: center; padding: 24px;
+}
+body.rot #wrap { visibility: hidden; }
+body.rot #ver { visibility: hidden; }
+#rotateHint p { font-size: var(--fs-h2); color: var(--accent); letter-spacing: 3px; }
+#rotateHint span { font-size: var(--fs-cap); color: var(--text-3); letter-spacing: 1px; }
+/* 手机轮廓从横到竖地转，动作本身就是说明 */
+.rh-phone {
+  width: 40px; height: 66px; border: 2px solid var(--line-gold); border-radius: 8px;
+  position: relative; animation: rhTilt 2.6s ease-in-out infinite;
+  box-shadow: 0 0 20px rgba(201,162,74,0.20);
+}
+.rh-phone::after {
+  content: ''; position: absolute; left: 50%; bottom: 5px; width: 11px; height: 2px;
+  margin-left: -5.5px; background: var(--line-gold); border-radius: 1px;
+}
+@keyframes rhTilt {
+  0%, 38% { transform: rotate(90deg); }
+  58%, 100% { transform: rotate(0deg); }
+}
+
+.sub { color: var(--accent-soft); font-size: var(--fs-body); margin-bottom: var(--sp-3); letter-spacing: 1px; }
+.desc { color: var(--text-2); font-size: var(--fs-body); line-height: 1.7; margin-bottom: 16px; }
+/* 百药园园门题字：两行，落款压一行，别抢标题 */
+.cite { color: var(--accent-soft); font-size: var(--fs-cap); line-height: 1.9; letter-spacing: 2px; margin: 2px 0 14px; opacity: .82; }
+.cite i { display: block; font-style: normal; color: var(--text-3); font-size: var(--fs-cap); letter-spacing: 1px; margin-top: 2px; }
+.hint { color: var(--text-3); font-size: var(--fs-cap); line-height: 1.7; margin-top: 12px; }
+.btn { background: linear-gradient(180deg,var(--accent-lite),var(--accent-deep)); color: var(--ink); border: none; border-radius: var(--r-md); padding: 12px 24px; min-height: 48px; font-size: var(--fs-body); font-family: inherit; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 var(--accent-shadow); margin-top: 4px; }
+.btn:not(.small) { min-width: 160px; }
+.btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--accent-shadow); }
+.btn:disabled, .btn[disabled] { opacity: var(--op-disabled); cursor: not-allowed; box-shadow: 0 4px 0 var(--accent-shadow); }
+.btn:disabled:active, .btn[disabled]:active { transform: none; }
+.btn.small { font-size: var(--fs-cap); padding: 12px 16px; min-height: 44px; background: rgba(255,255,255,0.1); color: var(--text-1); box-shadow: none; border: 1px solid rgba(255,255,255,0.25); }
+.btn.small:active { transform: translateY(2px); }
+/* 转世重修：删档类危险按钮，用暗红强调，跟金色主按钮区分开 */
+.btn.danger { background: linear-gradient(180deg,#ff8a8a,var(--danger-deep)); color: #fff; box-shadow: 0 4px 0 #7a1f1f; }
+.btn.small.danger { background: rgba(255,90,90,0.08); color: var(--danger); border-color: rgba(255,154,154,0.5); box-shadow: none; }
+/* 标题页统计：两列 key-value（替代原来用「·」串成的长流水句） */
+#best { margin-top: var(--sp-4); }
+.ts-hd { text-align: left; color: var(--text-4); font-size: var(--fs-micro); letter-spacing: 2px; margin-bottom: var(--sp-1); }
+.ts-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--sp-4); text-align: left; }
+.ts-row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-2); font-size: var(--fs-micro); line-height: 1.9; border-bottom: 1px dotted rgba(201,162,74,0.14); }
+.ts-row i { font-style: normal; color: var(--text-3); }
+.ts-row b { color: var(--accent); font-variant-numeric: tabular-nums; }
+.ts-row.wide { grid-column: 1 / -1; }
+.stats2 { display: flex; gap: var(--sp-4); justify-content: center; margin: 12px 0; color: var(--text-2); font-size: var(--fs-body); }
+.stats2 b { color: var(--accent); font-size: var(--fs-h2); display: block; }
+
+/* 道陨代价：灵石折半（不退）＋ 道具折半（可打回来）。用暗红细框，读起来像账，不像报错。 */
+.toll {
+  margin: 10px 0 14px; padding: 9px 12px; text-align: left;
+  border: 1px solid rgba(168, 58, 42, 0.5); border-radius: 6px;
+  background: rgba(168, 58, 42, 0.08);
+  color: var(--text-2); font-size: var(--fs-cap); line-height: 1.7;
+}
+.toll b { color: #e8735c; font-size: var(--fs-body); }
+.toll .toll-h { display: block; color: #c25a48; font-size: var(--fs-cap); letter-spacing: .14em; margin-bottom: 2px; }
+.toll:empty { display: none; }
+
+/* ---------- 对话 ---------- */
+/* 对白遮罩：只在对话框身后压一层薄暗，上半屏留给主画布。
+   原先整屏 rgba(8,10,14,.35) 会把战斗地图压成灰雾，剧情镜头与地形都看不清；
+   #dialogbox 自带不透明纸底，放宽遮罩不影响对白文字对比度。
+   破境演出 #dialog.break-scene 有独立的整屏暗场，选择器优先级更高，不受此处影响。 */
+#dialog {
+  background: linear-gradient(180deg,
+    rgba(8,10,14,0) 0%, rgba(8,10,14,0) 40%,
+    rgba(8,10,14,0.08) 62%, rgba(8,10,14,0.26) 100%);
+  justify-content: flex-end; padding-bottom: 8%;
+}
+#dialogbox { position: relative; width: 92%; max-width: 460px; background: var(--paper); color: var(--ink); border: 2px solid var(--line-gold); border-radius: var(--r-lg); padding: var(--sp-4); text-align: left; box-shadow: 0 8px 30px rgba(0,0,0,0.6); cursor: pointer; }
+/* 纸底按下去只压一点亮度：整框缩放会让对话文字跟着抖 */
+#dialogbox:active { filter: brightness(0.955); }
+/* 对话头像：说话人小像。像素精灵原尺寸画进 canvas，靠 CSS 放大 —— 放大倍数越高越糊，
+   所以只放大到 4 倍上下（44~52px），保留像素颗粒，正好是「书页小插图」的尺寸。 */
+#dialogFace {
+  position: absolute; left: 10px; top: 10px;
+  width: 56px; height: 64px; display: none;
+  align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.28); border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 4px; overflow: hidden;
+}
+#dialogbox.has-face #dialogFace { display: flex; }
+/* 头像占左侧一条，整个内容区右移让位（只给名字让位不够：正文照样从框边起排，会被压住） */
+#dialogbox.has-face { padding-left: 78px; }
+#dialogFace canvas { height: 52px; width: auto; image-rendering: pixelated; image-rendering: crisp-edges; }
+#dialogSpeaker { color: var(--danger-deep); font-weight: bold; font-size: var(--fs-h2); margin-bottom: 8px; }
+#dialogText { font-size: var(--fs-h2); line-height: 1.7; min-height: 54px; }
+#dialogHint { text-align: right; color: var(--text-3); font-size: var(--fs-cap); margin-top: 4px; }
+/* 突破剧情演出：整屏暗场 + 暖金底光，对话幕布居中放大，像戏台上一幕 */
+#dialog.break-scene { background: radial-gradient(130% 85% at 50% 28%, #2b2118 0%, #140f0a 58%, #080605 100%); justify-content: center; padding-bottom: 0; }
+#dialog.break-scene #dialogbox { border-color: rgba(255,206,110,0.6); box-shadow: 0 0 46px rgba(255,170,70,0.20), inset 0 0 60px rgba(255,150,50,0.07); }
+#dialog.break-scene #dialogSpeaker { color: #d9a94a; letter-spacing: 4px; }
+#dialog.break-scene #dialogText { line-height: 1.9; }
+
+/* ---------- 升级 ---------- */
+#levelup { background: rgba(8,10,14,0.85); }
+.lu-title { color: var(--accent); font-size: var(--fs-h1); margin-bottom: 4px; text-shadow: 0 2px 6px #000; }
+#cards { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; max-width: 460px; }
+.card { width: 118px; min-height: 150px; background: linear-gradient(180deg,var(--bg-card-a),var(--bg-card-b)); border: 1px solid var(--line-gold); border-radius: var(--r-lg); padding: 12px 8px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); transition: transform .1s, border-color .1s; }
+.card:active { transform: scale(var(--press)); }
+.card:hover { border-color: var(--accent); }
+.cicon { font-size: var(--fs-display); }
+.cname { color: var(--accent); font-size: var(--fs-h2); font-weight: bold; }
+.cdesc { color: var(--text-2); font-size: var(--fs-cap); line-height: 1.5; }
+
+/* ---------- 储物袋 / 道具 ---------- */
+#titleBag { margin-top: var(--sp-3); }
+#bag { color: var(--ok); }
+
+/* 拾取提示：贴左侧、同名合并、最多三条 —— 连续捡一堆也不会糊住半个屏
+   落点镜像右侧快捷栏（#quickbar right:12px / top:50% 垂直居中）：
+   左 12px 同一垂直中轴，两条一左一右对称整齐，也不挡 boss 气血与技能行。 */
+#itemToast {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  width: 38%; max-width: 160px; max-height: 130px; overflow: hidden;
+  display: flex; flex-direction: column; gap: 4px; align-items: flex-start;
+  pointer-events: none; z-index: var(--z-combat); /* 拾取飘字：战斗反馈，压过对话遮罩 */
+}
+.itoast {
+  background: rgba(10,13,19,0.80); border: 1px solid var(--line-gold); border-radius: var(--r-md);
+  padding: 3px 7px; font-size: 10px; line-height: 1.3; max-width: 100%;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.45); animation: toastIn .16s ease-out;
+}
+.itoast b { display: block; font-size: 11px; font-weight: 600; letter-spacing: .3px; }
+.itoast b i { font-style: normal; color: var(--accent-soft); margin-left: 4px; font-size: 10px; }
+.itoast.more { color: var(--text-3); font-size: 10px; border-color: rgba(201,162,74,0.35); }
+@keyframes toastIn { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
+
+/* ---------- 存档设置 ---------- */
+.settings { margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(201,162,74,0.28); display: flex; flex-direction: column; gap: var(--sp-2); align-items: center; }
+.setrow { display: flex; align-items: center; gap: var(--sp-2); min-height: 44px; font-size: var(--fs-body); color: var(--text-2); cursor: pointer; }
+.setrow input { width: 16px; height: 16px; accent-color: var(--accent-deep); cursor: pointer; }
+#saveHint, .savesub { font-size: var(--fs-micro); color: var(--text-4); line-height: 1.5; }
+#saveNowBtn { margin-top: 0; }
+
+/* ---------- 战利品清单 ---------- */
+#victoryLoot { width: 100%; max-height: 196px; overflow-y: auto; background: rgba(0,0,0,0.3); border: 1px solid rgba(201,162,74,0.3); border-radius: var(--r-md); padding: 8px 8px; text-align: left; margin: 4px 0 0; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); }
+#victoryNext { width: 100%; text-align: left; }
+#victoryNext .loottotal { margin-top: 0; border-top: none; }
+#victoryNext .newmap { color: var(--accent); font-size: var(--fs-cap); padding: 4px 0 0; }
+.loottitle { color: var(--accent); font-size: var(--fs-cap); margin-bottom: 4px; }
+.lootrow { display: flex; justify-content: space-between; gap: var(--sp-2); font-size: var(--fs-cap); line-height: 1.55; }
+.lootrow span { color: var(--text-3); }
+.lootrow.muted { color: var(--text-4); }
+.lootrow.reward b { color: var(--accent); }
+.loottotal { margin-top: 4px; padding-top: var(--sp-2); border-top: 1px dashed rgba(201,162,74,0.25); font-size: var(--fs-micro); color: var(--ok); }
+.loottotal.newmap { border-top: none; color: var(--accent); font-size: var(--fs-cap); margin-top: 4px; }
+
+/* ---------- 连斩 ---------- */
+#combo {
+  position: absolute; top: 194px; left: 16px;
+  display: none; pointer-events: none; text-align: left; z-index: var(--z-toast);
+  text-shadow: 0 2px 6px #000, 0 0 14px rgba(255,180,60,0.55);
+}
+#combo b { display: block; font-size: var(--fs-display); line-height: 1; color: var(--accent); letter-spacing: 1px; }
+#combo span { display: block; font-size: var(--fs-cap); color: var(--accent-soft); margin-top: 0; letter-spacing: 1px; }
+#combo.pop { animation: comboPop .26s ease-out; }
+@keyframes comboPop {
+  0% { transform: scale(1.5); opacity: .25; }
+  55% { transform: scale(0.96); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+/* ---------- 修行图 ---------- */
+/* 列表型面板：三段式（头 / 滚动体 / 底），高度定死不随内容跳 */
+.wm-panel {
+  width: 100%; max-width: 460px; max-height: 92%;
+  background: linear-gradient(180deg,var(--bg-panel-a),var(--bg-panel-b));
+  border: 1px solid var(--line-gold); border-radius: var(--r-lg);
+  padding: var(--sp-4); box-shadow: 0 10px 40px rgba(0,0,0,0.65);
+  display: flex; flex-direction: column; gap: var(--sp-3); text-align: left;
+}
+/* 这五个是「换页签换内容的列表」，高度必须固定：否则内容一多一少，面板就上下跳。
+   难度选择不进这组 —— 它只有三五张卡，定高只留下一片空。 */
+#worldmap .wm-panel, #shop .wm-panel, #cave .wm-panel, #prefight .wm-panel {
+  height: min(calc(100% - var(--sp-6)), 720px);
+}
+
+/* ---------- 主线指针「下一处」 ----------
+   wm-head 里的一条窄带：左边「下一处」是个小印，中间地名，右边一个「入山 →」。
+   不抢标题的字号，也不做成按钮块 —— 它是路标，不是工具栏。 */
+.wm-next {
+  display: flex; align-items: center; gap: var(--sp-2);
+  margin-top: var(--sp-1); padding: 5px var(--sp-2) 5px var(--sp-1);
+  border: 1px solid var(--line-gold); border-left: 3px solid var(--accent);
+  border-radius: var(--r-sm); cursor: pointer;
+  background: linear-gradient(90deg, rgba(255,210,74,0.10), rgba(255,210,74,0.02));
+  font-size: var(--fs-num); color: var(--text-1);
+  -webkit-tap-highlight-color: transparent;
+}
+.wm-next:active { filter: brightness(1.25); }
+.wm-next .wn-k {
+  flex: 0 0 auto; padding: 1px 5px; border-radius: 2px;
+  background: var(--accent); color: #1a1206;
+  font-size: var(--fs-micro); letter-spacing: 1px; font-weight: 700;
+}
+.wm-next .wn-name { font-size: var(--fs-h2); letter-spacing: 1px; color: var(--accent-soft); white-space: nowrap; }
+.wm-next .wn-pos { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-2); font-size: var(--fs-micro); }
+.wm-next .wn-go { flex: 0 0 auto; color: var(--accent); font-size: var(--fs-num); letter-spacing: 1px; }
+/* 主线走完、改成「可再走」时压暗一档：它不再是最该点的那一张 */
+.wm-next.sweep { border-left-color: var(--line-gold); opacity: .82; }
+/* 卡片上的同一处地方：一圈勾边 + 左侧朱砂短线，跟顶部那条带子是一个意思 */
+.mapcard.next { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 6px 22px rgba(0,0,0,0.45); }
+.mapcard.next .mc-mini.on { color: var(--accent); }
+.mapcard.next .mc-name { color: var(--accent-soft); }
+/* 水墨皮：亮金压不住宣纸（白底金线≈1.8:1，等于没有）。路标改赭石字 + 印泥小章，
+   跟「详 / 缘」这些已有的纸面墨线标签同一套语言。 */
+body[data-skin="guigu"] .wm-next {
+  border-color: rgba(90,84,74,0.55); border-left-color: #8f4f2e;
+  background: linear-gradient(90deg, rgba(143,79,46,0.10), rgba(143,79,46,0.02));
+  color: #3a332a;
+}
+body[data-skin="guigu"] .wm-next .wn-k { background: #8f4f2e; color: #f6f1e2; }
+body[data-skin="guigu"] .wm-next .wn-name { color: #8f4f2e; }
+body[data-skin="guigu"] .wm-next .wn-go { color: #8f4f2e; }
+body[data-skin="guigu"] .mapcard.next {
+  border-color: #8f4f2e;
+  box-shadow: 0 0 0 1px rgba(143,79,46,0.55), 0 4px 14px rgba(40,36,28,0.22);
+}
+body[data-skin="guigu"] .mapcard.next .mc-mini.on,
+body[data-skin="guigu"] .mapcard.next .mc-name { color: #8f4f2e; }
+.wm-head { flex: 0 0 auto; }
+.wm-head h2 { color: var(--accent); font-size: var(--fs-h1); letter-spacing: 2px; margin-bottom: 0; }
+.wm-sub { color: var(--text-3); font-size: var(--fs-cap); line-height: 1.6; }
+.wm-stats { display: flex; gap: var(--sp-2); margin-top: 8px; flex-wrap: wrap; }
+.wm-stats span { font-size: var(--fs-micro); color: var(--ok-soft); background: rgba(0,0,0,0.4); border: 1px solid rgba(201,162,74,0.25); border-radius: var(--r-sm); padding: 0 8px; }
+#wmList { flex: 1 1 auto; overflow-y: auto; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); display: flex; flex-direction: column; gap: var(--sp-2); padding-bottom: var(--sp-2); -webkit-overflow-scrolling: touch; }
+
+.mapcard {
+  border: 1px solid rgba(201,162,74,0.35); border-radius: var(--r-lg); padding: 8px 8px;
+  background: linear-gradient(180deg, var(--bg-card-a), var(--bg-card-b));
+  cursor: pointer; transition: border-color .12s, transform .1s;
+  position: relative;
+}
+/* ---- 行脚折：行程线 + 折叠节点（大地图感：一屏看七八处地名） ---- */
+.wm-route { position: relative; padding-left: 15px; display: flex; flex-direction: column; gap: var(--sp-2); }
+.wm-route::before { content: ''; position: absolute; left: 4px; top: 14px; bottom: 14px;
+  border-left: 1px dashed rgba(201,162,74,0.30); }
+.wm-route .mapcard { position: relative; }
+.wm-route .mapcard::before { content: ''; position: absolute; left: -15px; top: 50%; margin-top: -5px;
+  width: 9px; height: 9px; border-radius: 50%; box-sizing: border-box;
+  background: rgba(201,162,74,0.18); border: 1.5px solid rgba(201,162,74,0.55); z-index: 1; }
+.wm-route .mapcard.done::before { background: var(--line-gold); border-color: var(--line-gold); box-shadow: 0 0 6px rgba(255,210,74,0.45); }
+.wm-route .mapcard.current::before { background: rgba(111,224,138,0.9); border-color: rgba(111,224,138,0.9);
+  box-shadow: 0 0 8px rgba(111,224,138,0.7); }
+.wm-route .mapcard.locked::before { background: rgba(70,74,86,0.9); border-color: rgba(120,126,140,0.5); box-shadow: none; }
+.mapcard.fold .mc-body { display: none; }
+.mapcard.open .mc-mini { visibility: hidden; }   /* 展开后底部已有状态字，右上那枚藏着 */
+.mapcard.fold { padding: 7px 8px; }
+.mc-row2 { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-2); margin-top: 3px; }
+.mc-mini { font-size: var(--fs-micro); flex: none; }
+.mc-mini.on { color: var(--ok); }
+.mc-mini.off { color: var(--text-4); }
+.mc-info { flex: none; font-size: var(--fs-micro); line-height: 1.5; padding: 0 6px;
+  border: 1px solid rgba(201,162,74,0.45); border-radius: var(--r-sm); color: var(--accent-soft); cursor: pointer; }
+.mc-info:hover { color: var(--accent); border-color: var(--accent); }
+.mapcard.open .mc-info { border-color: rgba(201,162,74,0.25); color: var(--text-3); }
+.mc-pos { color: var(--text-3); font-size: var(--fs-micro); letter-spacing: .5px; flex: 1 1 auto; min-width: 0; }
+.mapcard:active { transform: scale(var(--press-lg)); }
+.mapcard:hover { border-color: var(--accent); }
+.mapcard.current { border-color: rgba(111,224,138,0.55); box-shadow: inset 0 0 0 1px rgba(111,224,138,0.15); }
+.mapcard.locked { opacity: var(--op-disabled); filter: grayscale(0.5); cursor: not-allowed; }
+.mapcard.locked:hover { border-color: rgba(201,162,74,0.35); }
+.mc-top { display: flex; align-items: center; gap: var(--sp-2); }
+.mc-num { color: var(--line-gold); font-size: var(--fs-cap); background: rgba(201,162,74,0.14); border-radius: var(--r-sm); padding: 0 4px; }
+.mc-name { color: var(--text-1); font-size: var(--fs-body); font-weight: bold; flex: 1; }
+/* 篇章印记（P0-5）：单字闲章，紧贴地图编号之后，不占额外行高 */
+.mc-seal {
+  flex: none; display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; font-size: 11px; line-height: 1; font-weight: normal;
+  color: var(--accent); border: 1px solid currentColor; border-radius: 2px;
+  background: rgba(255,210,74,0.06); transform: rotate(-4deg); opacity: .62;
+  font-family: var(--font-title, serif); pointer-events: none;
+}
+.mc-tag { font-size: var(--fs-micro); padding: 0 var(--sp-2); line-height: 1.6; border-radius: var(--r-sm); border: 1px solid; }
+.mc-tag.story { color: var(--accent-soft); border-color: rgba(201,178,122,0.55); }
+.mc-tag.fight { color: var(--tag-orange); border-color: rgba(255,154,106,0.5); }
+.mc-tag.bossfight { color: var(--danger); border-color: rgba(255,122,122,0.55); }
+.mc-tag.market { color: var(--tag-blue); border-color: rgba(127,216,255,0.5); }
+
+.mc-desc { color: var(--text-2); font-size: var(--fs-cap); line-height: 1.55; margin-top: 4px; }
+.mc-meta { color: var(--text-3); font-size: var(--fs-micro); line-height: 1.5; margin-top: 4px; }
+.mc-boss { color: var(--danger); font-size: var(--fs-micro); margin-top: 4px; }
+.mc-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: var(--sp-2); border-top: 1px dashed rgba(201,162,74,0.2); }
+.mc-state { font-size: var(--fs-micro); }
+.mc-state.on { color: var(--ok); }
+.mc-state.off { color: var(--text-4); }
+.mc-go { font-size: var(--fs-cap); color: var(--accent); }
+.mc-lock { font-size: var(--fs-micro); color: var(--text-4); }
+
+/* ---------- 坊市 ---------- */
+#shopTabs { display: flex; gap: var(--sp-2); flex: 0 0 auto; }
+/* 页签：视觉高 40，命中区用 ::after 补到 44（规格 §2.5） */
+.tab {
+  position: relative; flex: 1; padding: 8px 0; min-height: 40px;
+  font-size: var(--fs-cap); font-family: inherit; cursor: pointer;
+  background: rgba(255,255,255,0.06); color: var(--text-3);
+  border: 1px solid rgba(201,162,74,0.3); border-radius: var(--r-md);
+}
+.tab::after { content: ''; position: absolute; inset: -2px 0; }
+/* 已选中的页签按下去不该闪回灰底 —— 状态叠加要排除自身 */
+.tab:active:not(.active) { background: rgba(255,255,255,0.12); }
+.tab:disabled { opacity: var(--op-disabled); cursor: not-allowed; }
+.tab.active { background: linear-gradient(180deg,var(--accent-lite),var(--accent-deep)); color: var(--ink); font-weight: bold; border-color: var(--accent); }
+#shopList { flex: 1 1 auto; overflow-y: auto; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); display: flex; flex-direction: column; gap: var(--sp-2); -webkit-overflow-scrolling: touch; padding-bottom: var(--sp-2); }
+.shoprow { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(201,162,74,0.2); border-radius: var(--r-md); }
+/* 晶龙阁拍卖会标题条（天南交易会限定） */
+.shopauc { display: flex; flex-direction: column; gap: 2px; margin: 2px 0 6px; padding: 8px 10px; background: linear-gradient(90deg, rgba(201,162,74,0.22), rgba(201,162,74,0.06)); border: 1px solid rgba(201,162,74,0.45); border-radius: var(--r-md); color: #f0d79a; font-size: var(--fs-cap); letter-spacing: 0.5px; }
+.shopauc span { color: var(--text-3); font-size: var(--fs-micro); letter-spacing: 0; }
+.shoprow.poor { opacity: .55; }
+/* 一键卖出材料：与常规卖行区分，强调是「批量」入口 */
+.shoprow.sellall-mat { background: linear-gradient(90deg, rgba(112,197,112,0.16), rgba(112,197,112,0.04)); border-color: rgba(112,197,112,0.5); margin: 4px 0; }
+.sr-main { flex: 1; min-width: 0; }
+.sr-main b { font-size: var(--fs-cap); display: block; }
+.sr-main i { display: block; font-style: normal; color: var(--text-3); font-size: var(--fs-micro); line-height: 1.45; margin-top: 0; }
+.sr-right { display: flex; align-items: center; gap: var(--sp-2); flex: 0 0 auto; }
+.shoprow .sr-right { flex-direction: column; align-items: flex-end; gap: var(--sp-1); }
+
+/* 混沌万灵榜（图鉴 / 收藏） */
+#wanlingList { flex: 1 1 auto; overflow-y: auto; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); display: flex; flex-direction: column; gap: var(--sp-2); -webkit-overflow-scrolling: touch; padding-bottom: var(--sp-2); }
+.wl-row { display: grid; grid-template-columns: 30px 26px 1fr auto; gap: 8px; align-items: center; text-align: left; background: rgba(0,0,0,0.32); border: 1px solid rgba(201,162,74,0.18); border-radius: var(--r-sm); padding: 8px 10px; }
+.wl-row.got { border-color: rgba(201,162,74,0.55); background: rgba(40,32,16,0.5); }
+.wl-rank { font-weight: bold; color: var(--accent-soft); font-size: var(--fs-cap); text-align: center; }
+.wl-icon { font-size: 20px; text-align: center; }
+.wl-main { min-width: 0; }
+.wl-name { font-size: var(--fs-cap); color: var(--ink); font-weight: 600; }
+.wl-name .wl-lock { color: var(--text-4); font-weight: 400; font-size: var(--fs-micro); margin-left: 4px; }
+.wl-note { font-size: var(--fs-micro); color: var(--text-4); margin-top: 2px; line-height: 1.4; }
+.wl-meta { text-align: right; display: flex; flex-direction: column; gap: 2px; flex: 0 0 auto; }
+.wl-req { font-size: var(--fs-micro); color: var(--ok-soft); }
+.wl-status { font-size: var(--fs-micro); color: var(--accent-soft); }
+.wl-row:not(.got) .wl-status { color: var(--text-4); }
+.wl-empty { margin: auto 0; padding: 0; color: var(--text-4); font-size: var(--fs-micro); }
+.sr-own { color: var(--text-3); font-size: var(--fs-micro); }
+/* 列表内按钮：视觉 36，命中补到 44。
+   取 -6 而不是理论值 -4：边界像素有取整，实测 -4 只能扩出 3/2px（合计 41），够不到 44。
+   代价是同一组里换行的两排会互相侵入 —— 所以 .sr-btns 的行间距必须 ≥12，见下方。 */
+.sr-btn {
+  position: relative; min-height: 36px; padding: 8px 12px;
+  font-family: inherit; font-size: var(--fs-cap); border-radius: var(--r-sm); cursor: pointer;
+  background: rgba(255,255,255,0.08); color: var(--text-1); border: 1px solid rgba(255,255,255,0.22);
+}
+.sr-btn::after { content: ''; position: absolute; inset: -6px 0; }
+/* 按下用提亮而不是换底色：金底买入 / 灰底卖出同一套，且不打断渐变 */
+.sr-btn:active { filter: brightness(1.18); }
+.sr-btn.buy { background: linear-gradient(180deg,var(--accent-lite),var(--accent-deep)); color: var(--ink); font-weight: bold; border-color: var(--accent); }
+.sr-btn.buy:active { filter: brightness(1.3); }
+.sr-btn:disabled { opacity: var(--op-disabled); cursor: not-allowed; }
+.sr-btn:disabled:active { filter: none; }
+/* 买不起 / 境界不够的货：只提示「不能买」，不吞点击。
+   disabled 会让浏览器不发事件，连「差多少灵石」都问不出来 —— 所以这里只管样子。
+   （不用 aria-disabled：那是「控件不可操作」的语义，与「点了要能解释」自相矛盾） */
+.sr-btn[data-cant] { cursor: not-allowed; }
+.sr-btn[data-cant]:active { filter: brightness(1.1); }
+.shopempty { color: var(--text-4); font-size: var(--fs-cap); text-align: center; padding: var(--sp-6) 0; line-height: 1.8; }
+/* 整柜空着时，说明文字放到面板正中 —— 定高面板里贴顶会显得像没加载出来 */
+#shopList > .shopempty:only-child, #wmList > .shopempty:only-child { margin: auto 0; padding: 0; }
+
+/* ---------- 修行图：洞府 / 难度徽记 ---------- */
+.mapcard.home { border-color: rgba(127,216,255,0.55); background: linear-gradient(180deg,#1e2b33,#151d24); }
+.mc-tag.home { color: var(--tag-blue); border-color: rgba(127,216,255,0.6); }
+.mc-go.home { color: var(--tag-blue); }
+.mc-cave { color: #8fd8c8; font-size: var(--fs-micro); margin-top: 4px; }
+.mc-diffs { display: flex; gap: var(--sp-1); margin-top: 4px; }
+.dchip {
+  font-size: var(--fs-micro); padding: 0 4px; border-radius: var(--r-sm); color: var(--text-4);
+  border: 1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.25);
+}
+.dchip.on { color: var(--dc); border-color: var(--dc); background: rgba(255,255,255,0.06); }
+
+/* ---------- 难度选择 ---------- */
+#diffList { flex: 1 1 auto; overflow-y: auto; display: flex; flex-direction: column; gap: var(--sp-2); padding-bottom: var(--sp-2); -webkit-overflow-scrolling: touch; }
+.diffcard {
+  position: relative; cursor: pointer; padding: 8px 12px; border-radius: var(--r-lg);
+  border: 1px solid rgba(201,162,74,0.3); background: linear-gradient(180deg,var(--bg-card-a),var(--bg-card-b));
+  transition: border-color .12s, transform .1s;
+}
+.diffcard:hover { border-color: var(--dc); }
+.diffcard:active { transform: scale(var(--press-lg)); }
+.dc-top { display: flex; align-items: center; gap: var(--sp-2); }
+.dc-top b { font-size: var(--fs-h2); color: var(--dc); letter-spacing: 1px; }
+.dc-tag { font-size: var(--fs-micro); color: var(--text-3); border: 1px solid rgba(255,255,255,0.2); border-radius: var(--r-sm); padding: 0 4px; }
+.dc-done { margin-left: auto; font-size: var(--fs-micro); color: var(--ok); border: 1px solid rgba(111,224,138,0.5); border-radius: var(--r-sm); padding: 0 4px; }
+.dc-desc { color: var(--text-2); font-size: var(--fs-cap); line-height: 1.55; margin-top: 4px; }
+.dc-mul { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-2); margin-top: 4px; }
+.dc-mul span { font-size: var(--fs-micro); color: var(--text-3); }
+.dc-go { text-align: right; color: var(--dc); font-size: var(--fs-cap); margin-top: 4px; }
+.dc-foot { display: flex; align-items: center; justify-content: flex-end; gap: var(--sp-2); margin-top: 4px; }
+.dc-foot .dc-go { margin-top: 0; }
+/* 扫荡：已破之境才给的快手，价钱直接写在按钮上，点之前就看得见 */
+.dc-sweep {
+  cursor: pointer; display: inline-flex; align-items: baseline; gap: 4px;
+  font-size: var(--fs-cap); color: var(--accent); padding: 2px 8px;
+  border: 1px solid rgba(201,162,74,0.55); border-radius: var(--r-sm);
+  background: rgba(201,162,74,0.08); transition: background .12s, border-color .12s;
+}
+.dc-sweep:hover { background: rgba(201,162,74,0.18); border-color: var(--accent); }
+.dc-sweep:active { transform: scale(var(--press-sm, 0.97)); }
+.dc-sweep b { font-weight: 400; font-size: var(--fs-micro); color: var(--text-3); }
+.sw-desc { color: var(--text-2); font-size: var(--fs-cap); margin-bottom: 8px; }
+.sw-bonus { color: var(--accent-soft); }
+.lootrow.cost b { color: var(--danger, #ff8080); }
+
+/* ---------- 洞府 ---------- */
+.cave-quote { color: var(--accent-soft); font-size: var(--fs-cap); font-style: italic; line-height: 1.6; margin-top: 4px; }
+#caveTabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-2); flex: 0 0 auto; }
+#caveTabs .tab { padding: 4px 0; font-size: var(--fs-cap); }
+#caveBody { flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: var(--sp-3); padding-bottom: var(--sp-2); }
+.cave-foot { display: flex; gap: var(--sp-2); justify-content: flex-end; flex: 0 0 auto; }
+.cave-sec { display: flex; flex-direction: column; gap: var(--sp-2); }
+.cs-title { color: var(--accent); font-size: var(--fs-cap); letter-spacing: 1px; border-left: 2px solid rgba(201,162,74,0.6); padding-left: var(--sp-2); }
+.cs-note { color: var(--text-3); font-size: var(--fs-micro); line-height: 1.55; }
+/* 空态：面板定高之后，一行小字挂在顶上会让下面整片发空，居中给出一个重心 */
+.cs-empty { color: var(--text-4); font-size: var(--fs-cap); text-align: center; padding: var(--sp-6) 0; }
+.cave-sec.empty { flex: 1; justify-content: center; }
+.cave-sec.empty .cs-empty { padding: 0; }
+/* 剧情回顾：一段一行，复用突破清单的行底，右端挂「回看」按钮 */
+.cs-row > span { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.cs-row .cs-nm { color: var(--accent); font-size: var(--fs-cap); letter-spacing: .5px; }
+.cs-row .cs-meta { color: var(--text-3); font-size: var(--fs-micro); line-height: 1.5; }
+.cs-row .btn { flex: none; }
+.statgrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-1); }
+.statcell { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-2); background: rgba(255,255,255,0.04); border: 1px solid rgba(201,162,74,0.16); border-radius: var(--r-md); padding: 4px 8px; }
+.statcell i { font-style: normal; color: var(--text-3); font-size: var(--fs-micro); }
+.statcell b { color: var(--text-1); font-size: var(--fs-cap); }
+.skipills { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-1); }
+/* 功法格：opacity 低是「未运起」，不是禁用 —— 别拿它当 disabled 用 */
+.skipill { display: flex; align-items: center; gap: var(--sp-1); background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--r-md); padding: 4px 8px; opacity: .55; }
+.skipill.on { opacity: 1; border-color: rgba(201,162,74,0.3); }
+.skipill span { font-size: var(--fs-cap); }
+.skipill b { font-size: var(--fs-micro); color: var(--text-2); font-weight: normal; flex: 1; }
+.skipill i { font-style: normal; font-size: var(--fs-micro); color: var(--accent); }
+
+.equipgrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-2); }
+.eqslot { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 8px; border-radius: var(--r-md); border: 1px dashed rgba(201,162,74,0.3); background: rgba(255,255,255,0.03); cursor: pointer; transition: background .1s; }
+.eqslot:active { transform: scale(var(--press)); background: rgba(255,255,255,0.08); }
+.eqslot.filled { border-style: solid; border-color: rgba(109,182,255,0.45); background: rgba(109,182,255,0.07); }
+.es-ico { font-size: var(--fs-h2); }
+.es-body { flex: 1; min-width: 0; }
+.es-body b { display: block; font-size: var(--fs-micro); color: var(--text-3); font-weight: normal; }
+.es-body i { display: block; font-style: normal; font-size: var(--fs-cap); margin-top: 0; }
+.es-off { font-size: var(--fs-micro); color: var(--danger); border: 1px solid rgba(255,154,154,0.4); border-radius: var(--r-sm); padding: 0 4px; }
+
+.gearlist { display: flex; flex-direction: column; gap: var(--sp-2); }
+.gearrow { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 8px; border-radius: var(--r-md); border: 1px solid rgba(201,162,74,0.2); background: rgba(255,255,255,0.04); cursor: pointer; transition: background .1s; }
+.gearrow:active { transform: scale(var(--press)); background: rgba(255,255,255,0.09); }
+.gearrow.equipped { border-color: rgba(111,224,138,0.5); background: rgba(111,224,138,0.07); }
+.gearrow.locked { opacity: var(--op-disabled); cursor: not-allowed; }
+.gearrow.locked:active { transform: none; background: rgba(255,255,255,0.04); }
+.gr-main { flex: 1; min-width: 0; }
+.gr-main b { font-size: var(--fs-cap); display: block; }
+.gr-main i { display: block; font-style: normal; color: var(--text-3); font-size: var(--fs-micro); line-height: 1.45; margin-top: 0; }
+.gr-right { display: flex; align-items: center; gap: var(--sp-2); flex: 0 0 auto; }
+.gr-need { font-size: var(--fs-micro); color: var(--danger); }
+.gr-on { font-size: var(--fs-micro); color: var(--ok); }
+
+/* 储物袋 · 其他（丹药 / 符箓 / 灵物 / 丹方 / 材料） */
+.baggrp { display: flex; flex-direction: column; gap: var(--sp-2); margin-top: 2px; }
+.cs-sub { color: var(--accent-soft); font-size: var(--fs-cap); letter-spacing: 1px; border-left: 2px solid rgba(201,162,74,0.35); padding-left: var(--sp-2); margin-top: 2px; }
+.baglist { display: flex; flex-direction: column; gap: var(--sp-2); }
+.bagrow { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 8px; border-radius: var(--r-md); border: 1px solid rgba(201,162,74,0.18); background: rgba(255,255,255,0.03); cursor: pointer; transition: background .1s; }
+.bagrow:active { transform: scale(var(--press)); background: rgba(255,255,255,0.08); }
+
+.recrow { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 8px; border-radius: var(--r-md); border: 1px solid rgba(201,162,74,0.18); background: rgba(255,255,255,0.03); }
+.recrow.can { border-color: rgba(111,224,138,0.35); background: rgba(111,224,138,0.05); }
+.rr-main { flex: 1; min-width: 0; }
+.rr-main b { font-size: var(--fs-cap); display: block; }
+.rr-rate { display: inline-block; margin-top: 0; font-size: var(--fs-micro); letter-spacing: .02em; color: var(--accent-soft); }
+.recrow.can .rr-rate { color: var(--ok); }
+.rr-main em { display: block; font-style: normal; color: var(--text-4); font-size: var(--fs-micro); line-height: 1.45; margin-top: 4px; }
+.rr-mats { display: flex; flex-wrap: wrap; gap: var(--sp-1); margin-top: 4px; }
+.mat { font-size: var(--fs-micro); color: var(--danger); border: 1px solid rgba(255,120,120,0.28); border-radius: var(--r-sm); padding: 0 4px; }
+.mat.ok { color: var(--ok); border-color: rgba(159,224,192,0.45); }
+.mat.stone { color: var(--accent); border-color: rgba(255,210,74,0.3); }
+.mat.stone.ok { color: var(--accent); border-color: rgba(255,210,74,0.6); }
+/* 可点的料名：点一下写它去哪儿取 */
+.mat.clk { cursor: pointer; transition: border-color .12s, background .12s; }
+.mat.clk:hover { background: rgba(201,162,74,0.16); border-color: rgba(201,162,74,0.6); }
+.rr-right { flex: 0 0 auto; }
+
+.restbox { display: flex; flex-direction: column; gap: var(--sp-2); }
+.resttip { color: var(--ok-soft); font-size: var(--fs-cap); line-height: 1.6; }
+.resttip.warn { color: var(--danger); }
+.restbtns { display: flex; gap: var(--sp-2); }
+.restbtns .btn { flex: 1; }
+/* 打坐按钮的禁用只管透明度，其余交给 .btn:disabled 统一处理 */
+.restbtns .btn:disabled { opacity: var(--op-disabled); }
+
+/* ---------- 坊市分类 / 标签 ---------- */
+#shopCats { display: flex; gap: var(--sp-2); flex: 0 0 auto; }
+/* 分类页签更矮，命中区扩到 44 */
+.tab.mini { flex: 1; padding: 8px 0; min-height: 32px; font-size: var(--fs-cap); }
+.tab.mini::after { inset: -6px 0; }
+.sr-gear, .sr-mat { font-style: normal; font-size: var(--fs-micro); margin-left: 4px; padding: 0 4px; border-radius: var(--r-sm); vertical-align: middle; }
+.sr-gear { color: var(--tag-blue); border: 1px solid rgba(127,216,255,0.45); }
+.sr-mat { color: var(--ok); border: 1px solid rgba(159,224,192,0.4); }
+.dl-tag { font-size: var(--fs-micro); }
+
+/* ---------- 按钮排 / 全屏 ---------- */
+.btnrow { display: flex; gap: var(--sp-2); justify-content: center; flex-wrap: wrap; }
+#pause .btn { width: 100%; }
+#pause .btn.small { width: auto; flex: 1; }
+#pause .btnrow { width: 100%; }
+#title .btnrow { margin-top: 4px; }
+
+#fsHint {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  background: rgba(0,0,0,0.72); color: var(--accent); border: 1px solid rgba(201,162,74,0.5);
+  border-radius: var(--r-md); padding: 8px 16px; font-size: var(--fs-cap); letter-spacing: 1px;
+  opacity: 0; pointer-events: none; transition: opacity .3s; z-index: var(--z-modal); white-space: nowrap;
+}
+#fsHint.show { opacity: 1; }
+
+/* ---------- 角落版本水印：便于核对是否加载了最新构建 ---------- */
+#ver {
+  position: fixed; right: 6px; bottom: 5px;
+  font: 10px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: .5px;
+  color: rgba(201,162,74,0.55);
+  text-shadow: 0 1px 2px rgba(0,0,0,.85);
+  pointer-events: none; user-select: none; z-index: 9999;
+}
+
+/* ---------- 支线：地图卡片与分组 ---------- */
+.wm-sec {
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-2);
+  margin: 8px 0 0; padding-top: 8px;
+  border-top: 1px dashed rgba(201,162,74,0.26);
+  color: var(--accent-soft); font-size: var(--fs-cap); letter-spacing: .5px;
+}
+.wm-sec b { color: var(--accent-soft); font-size: var(--fs-cap); letter-spacing: 2px; }
+.wm-sec b::first-letter { color: var(--accent); }
+.wm-sec span { color: var(--text-4); font-size: var(--fs-micro); }
+.wm-sec:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+.wm-sec.empty {
+  display: block; border-top: 1px dashed rgba(201,162,74,0.16);
+  color: var(--text-3); font-size: var(--fs-micro); line-height: 1.6; letter-spacing: 0;
+}
+.mapcard.side {
+  border-color: rgba(196,140,255,0.42);
+  background: linear-gradient(180deg,#241d33,#171422);
+  box-shadow: inset 3px 0 0 rgba(196,140,255,0.45);
+}
+.mapcard.side:hover { border-color: var(--tag-purple); }
+.mapcard.side .mc-num { color: #d9c2ff; background: rgba(196,140,255,0.16); }
+.mc-tag.side { color: var(--tag-purple); border-color: rgba(196,140,255,0.55); }
+.mapcard.side.done { opacity: .78; }
+
+/* 坊市：卖 / 拆 按钮组 —— 相邻可点元素水平间距 ≥8，避免「卖」误点成「买」；
+   行间距 12：命中区上下各扩 6，两排之间必须留够 12，否则上排的下缘会被下排吃掉 */
+.sr-btns { display: flex; flex-wrap: wrap; gap: var(--sp-3) var(--sp-2); justify-content: flex-end; max-width: 152px; }
+.sr-btn.ghost {
+  background: transparent; border: 1px solid rgba(255,255,255,0.2);
+  color: var(--text-2); padding: 8px; font-size: var(--fs-cap);
+}
+.sr-btn.ghost:hover { border-color: var(--tag-purple); color: #e6d9ff; }
+.sr-eq { color: var(--ok); font-size: var(--fs-micro); font-style: normal; margin-left: 4px; }
+.shopempty.tip { padding: 4px 0 8px; font-size: var(--fs-micro); line-height: 1.5; text-align: left; color: var(--text-3); }
+
+/* 右侧快捷栏：三格，灵宠 / 消耗道具，各自有回气时间
+   z-index 压过对话/横幅这一层 —— 战斗里弹出际遇对话时，玩家仍要点得到这三格 */
+#quickbar { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); display: none; flex-direction: column; gap: var(--sp-3); pointer-events: auto; z-index: var(--z-combat); }
+#quickbar.on { display: flex; }
+.qb { position: relative; width: 46px; height: 46px; padding: 0; border-radius: 50%; border: 1px solid rgba(201,162,74,0.5); background: rgba(10,12,18,0.74); color: var(--text-1); font-size: 20px; /* 图标字号，非文字档 */ line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.qb .qb-icon { font-style: normal; }
+/* 角落的键位号：告诉玩家这三格也能按 1 / 2 / 3（压在下沿，圆角裁不到） */
+.qb::after { content: attr(data-key); position: absolute; left: 0; right: 0; bottom: 2px; text-align: center; font-size: var(--fs-micro); line-height: 1; color: var(--line-gold); opacity: .7; pointer-events: none; z-index: 2; }
+.qb.empty::after { opacity: .3; }
+.qb.empty { opacity: .4; }
+.qb .qb-cd { position: absolute; inset: 0; border-radius: 50%; background: rgba(0,0,0,0.62); display: none; align-items: center; justify-content: center; font-style: normal; font-size: var(--fs-cap); color: var(--accent); }
+.qb.cooling .qb-cd { display: flex; }
+.qb.pet { border-color: rgba(140,220,255,0.55); }
+.qb:active { transform: scale(var(--press-sm)); }
+
+.qb-picks { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: 4px; }
+
+/* ================= 弹反键（#parryBtn）=================
+   从快捷栏里拆出来单独浮着：这是战斗里最重要的防守动作，比 1/2 格更大更好点。
+   不加任何透明度改动（用户口径），只放大 + 独立定位；位置可在暂停菜单拖动自定义。 */
+#parryBtn {
+  position: absolute; right: 10px; top: calc(50% + 92px); transform: translateY(-50%);
+  width: 72px; height: 72px; font-size: 32px; /* 图标字号，非文字档 */
+  border-width: 2px; border-color: rgba(214,92,72,0.62);
+  box-shadow: 0 0 0 1px rgba(214,92,72,0.18), 0 4px 14px rgba(0,0,0,0.35);
+  display: none; z-index: var(--z-combat);
+  pointer-events: auto;   /* #hud 本身 pointer-events:none，按钮得自己打开 */
+}
+#parryBtn.on { display: flex; }
+#parryBtn::after { bottom: 6px; }
+/* 蓄势 / 护体：边框点亮 + 图标轻搏，一眼看出「现在挡得住」 */
+#parryBtn.parrying {
+  border-color: #ffb060;
+  box-shadow: 0 0 0 3px rgba(255,176,96,0.36), 0 0 22px rgba(255,150,60,0.55);
+}
+#parryBtn.parrying .qb-icon { animation: parryKeyPulse .5s ease-in-out infinite; }
+#parryBtn.cooling { border-color: rgba(120,124,132,0.5); }
+@keyframes parryKeyPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+/* 格开那一下：按钮自己亮一下（只动 filter / box-shadow，不动 transform —— 自定义位置用的是 inline left/top + transform） */
+#parryBtn.ok { animation: parryKeyHit .34s ease-out; }
+@keyframes parryKeyHit {
+  0%   { filter: brightness(2.6) saturate(1.6); box-shadow: 0 0 0 9px rgba(255,214,120,0.55), 0 0 36px rgba(255,180,90,0.9); }
+  100% { filter: brightness(1); }
+}
+/* 连反层数：挂在按钮上方（手在按钮上，眼睛也在按钮上）。.qb 默认 overflow:hidden 会裁掉，这里放开 */
+#parryBtn { overflow: visible; }
+/* 未佩护体法宝时按下去亮一下再暗回去：告诉玩家「这颗键现在没通电」，不是坏了。
+   不动 transform —— 默认位与自定义位用的是两套 transform（translateY(-50%) / none），
+   动它会让按钮跳位；filter 只重绘这 72px 的圆钮本身。 */
+#parryBtn.nudge { animation: parryKeyNudge .3s ease-out; }
+@keyframes parryKeyNudge {
+  0%, 100% { filter: brightness(1); }
+  30%      { filter: brightness(1.75) saturate(1.5); }
+  65%      { filter: brightness(0.82); }
+}
+#parryBtn[data-chain]::before {
+  content: '连 ×' attr(data-chain);
+  position: absolute; left: 50%; top: -18px; transform: translateX(-50%);
+  font-size: 13px; font-weight: 700; line-height: 1; white-space: nowrap;
+  color: #ffd88a; text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  pointer-events: none;
+}
+body[data-skin="guigu"] #parryBtn[data-chain]::before { color: #8f4f2e; text-shadow: 0 1px 2px rgba(255,255,255,0.7); }
+/* 触屏设备再加一档：拇指要按得住 */
+@media (pointer: coarse) {
+  #parryBtn { width: 84px; height: 84px; font-size: 38px; right: 8px; }
+}
+
+/* 战前运功面板：功法再多也只在面板内滚动，绝不顶出屏幕 */
+#pfBody {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  display: flex; flex-direction: column; gap: var(--sp-2); padding-bottom: var(--sp-2);
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent);
+}
+
+/* ---------- 战前运功：功法按大境界分组收纳，点击展开 ---------- */
+/* flex:0 0 auto 很关键：#pfBody 是 flex 列，档位块一旦可收缩就会被压扁（内容被裁掉），
+   必须保持自身高度，让它撑出滚动条，而不是被挤没 */
+.pf-tier { flex: 0 0 auto; margin: 8px 0; border: 1px solid rgba(201,178,122,0.26); border-radius: var(--r-md); overflow: hidden; }
+.pf-tier-hd { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 12px; cursor: pointer; background: rgba(201,178,122,0.08); font-weight: 700; -webkit-user-select: none; user-select: none; transition: background .1s; }
+.pf-tier-hd:hover { background: rgba(201,178,122,0.14); }
+.pf-tier-hd:active { background: rgba(201,178,122,0.2); }
+.pf-tier-hd .caret { display: inline-block; transition: transform .18s; opacity: .85; }
+.pf-tier.open .pf-tier-hd .caret { transform: rotate(90deg); }
+.pf-tier .pf-list { display: none; padding: 4px 8px 8px; }
+.pf-tier.open .pf-list { display: block; }
+.pf-tier.cur > .pf-tier-hd { background: rgba(255,210,74,0.15); }
+.pf-count { font-size: var(--fs-micro); font-weight: 400; opacity: .72; }
+.pf-note { flex: 0 0 auto; font-size: var(--fs-micro); opacity: .7; padding: 4px 0 8px; }
+
+/* ---------- 修行图：支线像叠牌挂在主线卡后 ---------- */
+.mapdeck { position: relative; margin: 8px 0; }
+.mapdeck .deck-side { margin: 8px 0 0 16px; padding-left: 12px; border-left: 2px dashed rgba(201,178,122,0.35); }
+.mapdeck:not(.open) .deck-side { display: none; }
+/* 支线展开条：视觉一行字，命中区上下各扩 8（规格 §2.5） */
+.deck-toggle { position: relative; display: inline-flex; align-items: center; gap: var(--sp-2); margin: 4px 0 0; font-size: var(--fs-cap); color: var(--accent-soft); cursor: pointer; -webkit-user-select: none; user-select: none; }
+.deck-toggle::after { content: ''; position: absolute; inset: -8px 0; }
+.deck-toggle:hover { color: var(--accent); }
+.deck-toggle:active { color: var(--accent); transform: translateY(1px); }
+.deck-peek { display: flex; gap: var(--sp-1); }
+.deck-peek i { display: block; width: 22px; height: 7px; border-radius: var(--r-sm); background: rgba(201,178,122,0.28); border: 1px solid rgba(201,178,122,0.45); }
+
+/* ---------- 限时增益条：服丹 / 催符后在身的属性 ---------- */
+/* 第115轮：#buffrow 原是 #hud 里唯一的 static 子元素，从 y=0 起排，而 #topbar 是
+   absolute top:0 —— 增益胶囊正好盖住 y=7–18 的 #hpwrap 生命条。现移进 #topbar 末尾，
+   随 flex 排在地名下方；padding-right 给右侧「大衍 / 禁制」让位。 */
+#buffrow { display: none; gap: var(--sp-2); flex-wrap: wrap; margin-top: 4px; padding-right: 104px; }
+/* 第115轮：单字签做成一排淡朱砂小方印，紧凑挨着；沿用地图卡图号印（.mc-num）
+   的朱砂色与 2px 方角，整行不再加框，align-self 让印按内容宽收拢、不撞右侧按钮。 */
+body[data-skin="guigu"] #buffrow {
+  gap: 2px; align-self: flex-start; padding-right: 0; max-width: calc(100% - 104px);
+  background: none; border: none; border-radius: 0; overflow: visible;
+}
+.bpip { display: flex; align-items: center; gap: var(--sp-1); padding: 0 8px; border-radius: var(--r-pill); background: rgba(10,12,18,0.76); border: 1px solid rgba(255,210,74,0.45); font-size: var(--fs-micro); color: var(--accent-soft); }
+.bpip span { font-style: normal; }
+.bpip b { font-weight: 700; font-variant-numeric: tabular-nums; }
+/* 半透明朱砂印蜕：淡朱砂底 + 细朱砂印边 + 方角 2px + 朱砂单字，无投影、无图标、无数字 */
+body[data-skin="guigu"] .bpip {
+  background: rgba(143,47,36,0.10); border: 1px solid rgba(143,47,36,0.42);
+  border-radius: 2px; box-shadow: none; color: #8f2f24;
+  justify-content: center; min-width: 22px; padding: 0 4px;
+}
+body[data-skin="guigu"] .bpip b { color: inherit; font-weight: 400; }
+
+/* ---------- 双人联机面板 ---------- */
+.coop-body { display: flex; flex-direction: column; gap: var(--sp-3); }
+.coop-line { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-cap); color: var(--ok-soft); }
+.coop-line input { flex: 1; min-width: 0; padding: 8px 8px; border-radius: var(--r-md); border: 1px solid rgba(201,162,74,0.35); background: rgba(0,0,0,0.35); color: var(--text-1); font-size: var(--fs-cap); }
+.coop-status { padding: 8px 8px; border-radius: var(--r-md); font-size: var(--fs-cap); border: 1px solid rgba(201,162,74,0.3); background: rgba(0,0,0,0.3); }
+.coop-status.ok { color: var(--ok); border-color: rgba(111,224,138,0.45); }
+.coop-status.bad { color: var(--danger); border-color: rgba(255,120,120,0.45); }
+.coop-status.warn { color: var(--accent); border-color: rgba(255,210,74,0.45); }
+.coop-status.info { color: var(--ok-soft); }
+/* 联机两句话教程：进门前先把话说明白 */
+.coop-tip {
+  font-size: var(--fs-cap); line-height: 1.85; color: var(--text-2);
+  background: rgba(201,162,74,0.09);
+  border: 1px dashed rgba(201,162,74,0.38);
+  border-radius: var(--r-md); padding: 8px 12px;
+}
+.coop-tip b { color: var(--line-gold); margin-right: 4px; }
+.coop-peers { font-size: var(--fs-cap); color: var(--text-3); }
+.coop-log { max-height: 150px; overflow-y: auto; font-size: var(--fs-cap); line-height: 1.7; color: var(--text-3); background: rgba(0,0,0,0.28); border-radius: var(--r-md); padding: 8px; }
+
+/* ================= 飞鸽传书：联机聊天 ================= */
+/* 左下角鸽子按钮；点开后横条输入框从按钮处向左延展，聊天记录陆续向上延展。
+   记录框背景刻意压到 10% 半透明，只为衬出聊天内容本身。 */
+.chat-wrap {
+  position: absolute; right: 12px; bottom: 12px; z-index: var(--z-modal);   /* 右下角：技能栏在左下，正好让开 */
+  display: flex; flex-direction: column; align-items: flex-end;
+  pointer-events: none;                 /* 容器不吃点击，只有控件吃 */
+}
+.chat-wrap .chat-bar { display: flex; flex-direction: row; align-items: center; gap: var(--sp-2); pointer-events: auto; }
+.chat-dove {
+  width: 44px; height: 44px; border-radius: 50%; flex: 0 0 auto; padding: 0;
+  background: rgba(28, 24, 18, 0.72); border: 1px solid rgba(201, 162, 74, 0.5);
+  cursor: pointer; color: var(--text-1);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+/* 鸽子用游戏自己的像素精灵：放大时保持硬边，不糊 */
+.chat-dove canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
+.chat-dove:active { transform: scale(var(--press-sm)); }
+.chat-wrap #chatInput {
+  width: 0; padding: 0; border: none; opacity: 0;
+  height: 34px; border-radius: var(--r-lg); background: rgba(20, 17, 12, 0.86);
+  border: 1px solid rgba(201, 162, 74, 0.34); color: var(--text-1); font-size: var(--fs-cap);
+  outline: none; transition: width .22s ease, opacity .22s ease, padding .22s ease;
+  font-family: inherit;
+}
+.chat-wrap.open #chatInput { width: 190px; padding: 0 12px; opacity: 1; }
+.chat-wrap #chatInput::placeholder { color: var(--text-3); }
+/* 聊天记录：向上延展，最多 5 行，超出滚动 */
+.chat-log {
+  width: 236px; max-height: 118px; overflow-y: auto; margin-bottom: 8px;
+  display: none; flex-direction: column; justify-content: flex-end; gap: var(--sp-1);
+  background: rgba(0, 0, 0, 0.10);      /* 10% 半透明，突出聊天内容 */
+  border-radius: var(--r-md); padding: 8px 8px; pointer-events: auto;
+  -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+}
+.chat-log.show { display: flex; }
+.chat-line { font-size: var(--fs-cap); line-height: 1.5; color: var(--text-1); word-break: break-all; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
+.chat-line.me { color: var(--accent-soft); }
+.chat-line .who { color: var(--line-gold); margin-right: 4px; font-size: var(--fs-cap); }
+.chat-line.sys { color: var(--tag-blue); font-size: var(--fs-cap); font-style: italic; }
+
+/* ================= 结算菜单上移：留出下方空间好说话 ================= */
+/* 打完 Boss 不该一整屏糊住：面板上移，下方可透出地图，
+   右下角飞鸽照常能用 —— 两人就地聊两句、丢个表情，想走再自己点「离开地图」。 */
+#victory {
+  justify-content: flex-start;
+  padding: 16px 16px 0;
+  /* 上方压暗保证面板可读，下方渐透让地图露出来 */
+  background: linear-gradient(to bottom,
+    rgba(8,10,14,0.88) 0%, rgba(8,10,14,0.82) 40%,
+    rgba(8,10,14,0.45) 62%, rgba(8,10,14,0) 78%);
+  pointer-events: none;              /* 只有面板自己吃点击，别挡住下方 */
+}
+#victory .panel { pointer-events: auto; max-height: 60%; }
+
+/* 表情包：一排小按钮，点一下放出去。
+   row-gap 必须 ≥12：命中区靠 ::after 上下各扩 6，两行间距不足 12 就会重叠，
+   重叠意味着点上一行可能发出下一行的表情。column-gap 保持紧凑，一行才排得下。 */
+.chat-emoji {
+  display: none; gap: var(--sp-3) var(--sp-1); margin-top: 8px; flex-wrap: wrap; width: 236px;
+  pointer-events: auto;
+}
+.chat-wrap.open .chat-emoji { display: flex; }
+/* 表情按钮：视觉 32 保持一排 8 个不撑爆，命中区上下扩到 44 */
+.chat-emoji button {
+  position: relative; width: 32px; height: 32px; border-radius: var(--r-md); font-size: var(--fs-h2); line-height: 1;
+  background: rgba(20, 17, 12, 0.86); border: 1px solid rgba(201, 162, 74, 0.28);
+  cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center;
+}
+.chat-emoji button::after { content: ''; position: absolute; inset: -6px 0; }
+.chat-emoji button:active { transform: scale(var(--press-sm)); }
+.chat-emoji button:disabled { opacity: var(--op-disabled); cursor: not-allowed; }
+/* 表情消息放大显示，一眼看见对方的反应 */
+.chat-line.big { font-size: var(--fs-h1); line-height: 1.35; }
+
+/* ---------- 皮肤系统：鎏金古卷（默认）/ 鬼谷水墨（可选，存档记忆） ----------
+   鬼谷风 Style Bible：淡彩水墨卷轴——灰调泼墨打底，青灰/竹青/赭石/淡粉渗色，
+   宣纸肌理 + 卷轴 UI；70% 墨灰白、20% 淡彩、10% 点彩（朱砂/赤金）。
+   落法：全部走语义 token 覆盖（UI 一键翻皮）+ 画布水墨滤镜（像素画去饱和成墨调）
+   + 场景底色去饱和（JS 端 skinBg 同步翻）+ 宣纸噪点覆层。 */
+body[data-skin="guigu"] {
+  --bg-base: #efeadb;
+  --bg-panel-a: #f4f1e8; --bg-panel-b: #eae5d5;
+  --bg-card-a: #f4f1e8; --bg-card-b: #e7e2d1;
+  --bg-scrim: rgba(28,28,28,0.55);
+  --line-gold: #5a544a; --line-soft: rgba(60,56,48,0.30);
+  --text-1: #161512; --text-2: #332f28; --text-3: #524d43; --text-4: #5a5142;   /* 4 级弱提示也压到 7:1，宣纸上 #6b665a 只有 4.6 */
+  --accent: #b5714b;        /* 赭石为主强调（朱砂留给危险/点彩） */
+  --accent-lite: #c98a5e; --accent-deep: #8f4f2e; --accent-soft: #6e7b7a; --accent-shadow: #4a4438;
+  --ok: #5f7f61; --ok-soft: #cfd8c8;              /* 竹青 */
+  --danger: #c0392b; --danger-deep: #8f2f24;      /* 朱砂 */
+  --hp-a: #c0392b; --hp-b: #d97b62;
+  --mp-a: #6e7b7a; --mp-b: #9fb3ac;               /* 青灰 */
+  --paper: #f4f1e8; --ink: #1c1c1c;
+  --tag-blue: #8fa3ad; --tag-purple: #a09aae; --tag-orange: #b5714b;
+}
+/* 世界底：宣白远山，不再深色夜空 */
+body[data-skin="guigu"] #wrap { background: radial-gradient(circle at 50% 40%, #f6f2e6 0%, #ded8c6 70%, #cbc5b3 100%); }
+/* 画布：精灵自己已经墨阶重绘过了（sprites.js 的 inkSprite），这里只做「入纸」——
+   一点点暖调、一点点对比托住轮廓。之前 grayscale(0.28) 是把没墨化的彩色像素往回拉，
+   现在再压一次等于把墨化后的矿物色也洗没了，整屏发土。 */
+body[data-skin="guigu"] #game {
+  background: #e2ddcb;
+  filter: grayscale(0.06) sepia(0.06) saturate(1.02) brightness(1.02) contrast(1.05);
+}
+/* 宣纸肌理覆层：极轻噪点（过重会显斑驳），盖在所有内容之上但不接事件 */
+body[data-skin="guigu"]::after {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 999; opacity: 0.026;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23p)'/%3E%3C/svg%3E");
+}
+/* 次按钮的白系虚线/浅底在宣白上会隐身 → 翻成墨线 */
+body[data-skin="guigu"] .btn.small { background: rgba(28,28,28,0.05); border: 1px solid rgba(60,56,48,0.38); }
+/* 面板换卷轴气质：墨线边 + 纸影 */
+body[data-skin="guigu"] .panel { border: 1px solid #4a4438; box-shadow: 0 10px 40px rgba(40,36,28,0.35), inset 0 0 0 1px rgba(60,56,48,0.12); }
+/* 皮肤选择钮：选中态用强调色勾边 */
+.skin-btn.on { border-color: var(--accent) !important; color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+/* 水墨皮：顶栏/boss 名与血条的深色底是写死的，翻成纸色墨线 */
+body[data-skin="guigu"] #topbar { background: linear-gradient(180deg, rgba(244,241,232,0.92) 0%, rgba(244,241,232,0.55) 62%, rgba(244,241,232,0) 100%); }
+body[data-skin="guigu"] #hpwrap, body[data-skin="guigu"] #xpwrap { background: rgba(28,28,28,0.14); box-shadow: 0 1px 4px rgba(40,36,28,0.25); }
+body[data-skin="guigu"] #bossname { background: linear-gradient(180deg, #6e7b7a 20%, #4a4438 85%); -webkit-background-clip: text; background-clip: text; }
+body[data-skin="guigu"] #bossname::before { background: linear-gradient(90deg, rgba(74,68,56,0), rgba(74,68,56,0.7)); }
+body[data-skin="guigu"] #bossname::after { background: linear-gradient(270deg, rgba(74,68,56,0), rgba(74,68,56,0.7)); }
+body[data-skin="guigu"] #bossbar { background: rgba(28,28,28,0.22); border-color: rgba(74,68,56,0.6); box-shadow: 0 1px 6px rgba(40,36,28,0.3), inset 0 1px 3px rgba(28,28,28,0.35); }
+/* 水墨皮：横幅/拾取提示/对话speaker 也翻成纸底墨字 */
+body[data-skin="guigu"] #banner { background: rgba(244,241,232,0.95); border-color: rgba(74,68,56,0.55); color: #8f4f2e; box-shadow: 0 6px 20px rgba(40,36,28,0.3); text-shadow: none; }
+body[data-skin="guigu"] .itoast { background: rgba(244,241,232,0.92); box-shadow: 0 2px 10px rgba(40,36,28,0.25); }
+/* 水墨皮：大衍（自动战斗）圆钮同步翻纸底 */
+body[data-skin="guigu"] #autoBtn { border-color: rgba(74,68,56,0.5); background: rgba(244,241,232,0.85); box-shadow: 0 1px 4px rgba(40,36,28,0.25); color: #6e7b7a; }
+body[data-skin="guigu"] #autoBtn.on { color: #8f4f2e; border-color: rgba(143,79,46,0.7); }
+/* 水墨皮：禁制（暂停）圆钮同步翻纸底 */
+body[data-skin="guigu"] #pauseBtn::before { border-color: rgba(74,68,56,0.5); background: rgba(244,241,232,0.85); box-shadow: 0 1px 4px rgba(40,36,28,0.25); }
+body[data-skin="guigu"] #pauseBtn:active::before { background: rgba(234,229,213,0.95); }
+/* 水墨皮 · 卷轴式地图标注：行程线变墨线、路线节点变印章、地图卡变卷轴纸 */
+/* 行程线：淡墨虚线（不再是鎏金） */
+body[data-skin="guigu"] .wm-route::before { border-left-color: rgba(60,56,48,0.38); }
+/* 路线节点：圆点 → 方形墨印（印泥感）；已过 = 朱砂印 / 当前 = 竹青印 / 未开 = 淡墨印 */
+body[data-skin="guigu"] .wm-route .mapcard::before {
+  border-radius: 2px; width: 10px; height: 10px;
+  background: rgba(238,233,219,0.9); border: 1.5px solid rgba(60,56,48,0.55); box-shadow: none;
+}
+body[data-skin="guigu"] .wm-route .mapcard.done::before {
+  background: rgba(192,57,43,0.88); border-color: rgba(143,47,36,0.9);   /* 朱砂印 */
+  box-shadow: inset 0 0 0 1px rgba(244,241,232,0.55);
+}
+body[data-skin="guigu"] .wm-route .mapcard.current::before {
+  background: rgba(95,127,97,0.9); border-color: rgba(63,89,65,0.95);    /* 竹青印 */
+  box-shadow: 0 0 6px rgba(95,127,97,0.45), inset 0 0 0 1px rgba(244,241,232,0.55);
+}
+body[data-skin="guigu"] .wm-route .mapcard.locked::before {
+  background: rgba(180,175,160,0.7); border-color: rgba(120,116,104,0.5); box-shadow: none;
+}
+/* 地图卡：卷轴纸底——上下各一道深墨「轴头」，纸面微黄 */
+body[data-skin="guigu"] .mapcard {
+  border: 1px solid rgba(60,56,48,0.45); border-radius: 2px;
+  background:
+    linear-gradient(180deg, rgba(60,56,48,0.85) 0%, rgba(60,56,48,0.55) 3px, rgba(60,56,48,0) 7px),
+    linear-gradient(0deg, rgba(60,56,48,0.85) 0%, rgba(60,56,48,0.55) 3px, rgba(60,56,48,0) 7px),
+    linear-gradient(180deg, #f7f2e3, #eee8d6);
+  /* 卷轴是贴平在案子上的，浮起来的投影是"卡片 UI"的语言，不是纸 */
+  box-shadow: 0 1px 3px rgba(40,36,28,0.10);
+}
+body[data-skin="guigu"] .mapcard.current {
+  border-color: rgba(95,127,97,0.75);
+  box-shadow: 0 2px 10px rgba(40,36,28,0.22), inset 0 0 0 1px rgba(95,127,97,0.35);
+}
+/* 图号：鎏金圆角 → 朱砂小方印 */
+body[data-skin="guigu"] .mc-num {
+  color: #8f2f24; background: rgba(192,57,43,0.10);
+  border: 1px solid rgba(143,47,36,0.55); border-radius: 2px; padding: 0 3px;
+}
+/* 篇章印记：墨皮走朱砂，不引入彩色 */
+body[data-skin="guigu"] .mc-seal {
+  color: #a8322a; border-color: #a8322a; background: rgba(168,50,42,0.07); opacity: .7;
+}
+/* 地名：淡墨笔意下划（毛笔扫过的横痕） */
+body[data-skin="guigu"] .mc-name {
+  background: linear-gradient(90deg, rgba(60,56,48,0.42) 0%, rgba(60,56,48,0.10) 92%, rgba(60,56,48,0) 100%) no-repeat left bottom / 100% 2px;
+  padding-bottom: 2px;
+}
+/* 侧线卡墨印翻淡紫墨 */
+body[data-skin="guigu"] .mapcard.side .mc-num { color: #5d5570; background: rgba(160,154,174,0.16); border-color: rgba(93,85,112,0.55); }
+/* ===== 国风质感优化（楷体 + 疏排 + 卷轴轴头 + 手卷横幅） ===== */
+/* 全局楷体：国风的「字」就是半个界面 */
+body[data-skin="guigu"] {
+  font-family: "Kaiti SC", "STKaiti", "KaiTi", "FZKai-Z03S", "SimKai", serif;
+}
+/* 标题疏排：国画题字讲究字距，密排是现代 UI 的习惯 */
+body[data-skin="guigu"] h2, body[data-skin="guigu"] h3,
+body[data-skin="guigu"] .mc-name, body[data-skin="guigu"] #mapName {
+  letter-spacing: 3px;
+}
+/* 面板变卷轴：上下各一道深墨「轴头」压边，纸面居中 */
+body[data-skin="guigu"] .panel {
+  border-radius: 3px;
+  box-shadow:
+    inset 0 5px 0 -2.5px rgba(60,56,48,0.5),
+    inset 0 -5px 0 -2.5px rgba(60,56,48,0.5),
+    inset 0 0 0 1px rgba(60,56,48,0.12),
+    0 10px 40px rgba(40,36,28,0.35);
+}
+/* 横幅变手卷：纸条左右各露一段卷轴轴头 */
+body[data-skin="guigu"] #banner { border-radius: 2px; overflow: visible; }
+body[data-skin="guigu"] #banner::before,
+body[data-skin="guigu"] #banner::after {
+  content: ''; position: absolute; top: -5px; bottom: -5px; width: 9px;
+  border-radius: 5px;
+  background: linear-gradient(90deg, #6b665a, #8b867a 45%, #524d43);
+  box-shadow: 0 2px 6px rgba(40,36,28,0.4), inset 0 0 0 1px rgba(244,241,232,0.25);
+  z-index: 1;
+}
+body[data-skin="guigu"] #banner::before { left: -7px; }
+body[data-skin="guigu"] #banner::after { right: -7px; }
+
+/* 水墨皮 · 盖印：boss 名旁朱砂印，出场时「咚」一下盖落 */
+#bossSeal { display: none; }
+body[data-skin="guigu"] #bossSeal {
+  display: none;   /* 无 boss 时隐藏，.on 才盖 */
+}
+body[data-skin="guigu"] #bossSeal.on {
+  display: flex; align-items: center; justify-content: center;
+  position: absolute; right: 2px; top: -4px;
+  width: 26px; height: 26px; border-radius: 4px;
+  background: #b93325; color: #f4f1e8;
+  font-size: 15px; font-weight: bold; font-family: "KaiTi", "STKaiti", serif;
+  box-shadow: inset 0 0 0 1.5px rgba(244,241,232,0.45), 0 1px 4px rgba(40,36,28,0.35);
+  animation: stampIn 0.5s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+  pointer-events: none;
+}
+@keyframes stampIn {
+  0%   { transform: scale(2.4) rotate(-18deg); opacity: 0; }
+  55%  { opacity: 1; }
+  100% { transform: scale(1) rotate(-6deg); opacity: 0.92; }
+}
+/* 大地图标题旁落一方小印：竖排白文「凡人」 */
+body[data-skin="guigu"] .wm-head h2::after {
+  content: '凡人'; display: inline-block; vertical-align: 8px; margin-left: 10px;
+  padding: 5px 2px; writing-mode: vertical-rl; letter-spacing: 3px;
+  font-size: 11px; line-height: 1; font-weight: normal; font-family: "KaiTi", "STKaiti", serif;
+  color: #f4f1e8; background: #b93325; border-radius: 3px;
+  box-shadow: inset 0 0 0 1px rgba(244,241,232,0.4);
+  transform: rotate(-4deg);
+}
+
+/* 水墨皮 · 异兽卷轴插画层：平时不显示，boss 战浮现（水墨淡染，不挡战斗） */
+#bossArt {
+  display: none; position: absolute; pointer-events: none;
+  left: 50%; bottom: 18%; width: 86%; max-width: 420px; aspect-ratio: 1024 / 1451;
+  transform: translateX(-50%);
+  background-position: center bottom; background-size: contain; background-repeat: no-repeat;
+  z-index: 3; opacity: 0; transition: opacity 1.2s ease;
+  -webkit-mask-image: radial-gradient(ellipse 70% 62% at 50% 58%, #000 30%, transparent 78%);
+  mask-image: radial-gradient(ellipse 70% 62% at 50% 58%, #000 30%, transparent 78%);
+}
+body[data-skin="guigu"] #bossArt.on {
+  display: block; opacity: 0.34;
+  background-image: url("../assets/guigu/beast-lang.png");
+  mix-blend-mode: multiply;
+  filter: sepia(0.10) contrast(0.96);
+}
+/* 卷首退场：一张插画和屏上的像素怪同时抢眼，两者互相打架。
+   所以只在 boss 出场那一刻「展卷」——浮起约 2.6 秒后退成一层极淡的墨痕，
+   当背景用，不与像素怪争主体。 */
+body[data-skin="guigu"] #bossArt.on.fade { opacity: 0.09; transition: opacity 2.4s ease; }
+/* 金皮强行兜底：即使类名残留也不显示 */
+body:not([data-skin="guigu"]) #bossArt { display: none !important; }
+
+/* 水墨皮 · 竖排对话框：右起左行的竖排正文 + 竖排名帖，宣纸底墨线框 */
+/* 让位快捷栏：底部抬高过物品栏、右侧让开技能钮（结印场景居中排版不受此限） */
+body[data-skin="guigu"] #dialog:not(.break-scene) {
+  padding-bottom: 118px;
+  padding-right: 86px;
+}
+body[data-skin="guigu"] #dialogbox {
+  display: flex; flex-direction: row-reverse; gap: 12px; align-items: stretch;
+  /* 固定框高：竖排文本量多变高会「时高时低」，统一 46vh，文本内部滚动 */
+  height: 46vh; min-height: 0; max-height: none; position: relative;
+  background: linear-gradient(180deg, #f1ecdd, #e9e3d2);
+  border: 1px solid rgba(60,56,48,0.55); border-radius: 3px;
+  box-shadow: 0 8px 30px rgba(40,36,28,0.4);
+}
+/* 名帖：说话人名字竖排贴右，如卷轴题签（只占顶部一段，不拉通全框） */
+body[data-skin="guigu"] #dialogSpeaker {
+  writing-mode: vertical-rl; text-orientation: upright; letter-spacing: 6px;
+  flex: none; align-self: flex-start; max-height: 62%; overflow: hidden;
+  margin: 0; padding: 6px 3px;
+  border-left: 1px solid rgba(60,56,48,0.18); border-radius: 2px;
+  background: rgba(192,57,43,0.07); color: #8f2f24; font-size: var(--fs-body);
+}
+/* 正文：竖排右起，行（列）间用 line-height 拉开墨距。
+   楷体笔画本来就细，17px 在纸上偏"虚"——放大一档并压实墨色，读起来才有纸上的分量。 */
+body[data-skin="guigu"] #dialogText {
+  writing-mode: vertical-rl; text-orientation: mixed; letter-spacing: 3px;
+  line-height: 2.15; flex: 1 1 auto; min-height: 0; height: auto;
+  max-height: 100%; overflow: auto; padding: 2px 4px;
+  font-size: 18px; color: #241f16;
+}
+/* 落款：框右下角一方淡朱砂小印，补掉竖排短句后的大片空，像画上题跋 */
+body[data-skin="guigu"] #dialogbox::after {
+  content: '凡人'; position: absolute; right: 9px; bottom: 8px;
+  writing-mode: vertical-rl; text-orientation: upright;
+  font-size: 10px; line-height: 1; letter-spacing: 2px;
+  color: rgba(168,58,42,0.55); border: 1px solid rgba(168,58,42,0.42);
+  border-radius: 2px; padding: 3px 2px; pointer-events: none;
+}
+/* 继续提示：竖排版式里移到左下角（阅读终点） */
+body[data-skin="guigu"] #dialogHint {
+  position: absolute; left: 10px; bottom: 6px; margin: 0;
+  writing-mode: horizontal-tb; text-align: left;
+}
+
+/* ================= 水墨皮 · 快捷栏：黑圆盘 → 宣纸墨圈「三联印」 =================
+   原来那三个黑圆盘是整屏最出戏的一块：深色玻璃拟物 + 全圆角，跟宣纸墨线是两套语言。
+   改成"双重墨框小方印"——外粗内细两道线，纸底，键位号用朱砂小字，像一方连着一方的闲章。 */
+body[data-skin="guigu"] .qb {
+  border-radius: 3px;
+  background: linear-gradient(180deg, #f4efe0, #e6dfcc);
+  border: 1px solid rgba(58,53,44,0.66);
+  color: #3a342a;
+  box-shadow: inset 0 0 0 3px #f4efe0, inset 0 0 0 4px rgba(58,53,44,0.28), 0 2px 5px rgba(40,36,28,0.22);
+}
+/* 按下去像盖了一下章 */
+body[data-skin="guigu"] .qb:active { background: linear-gradient(180deg, #e8e1cd, #d9d2bc); transform: scale(0.94); }
+/* 键位号 1/2/3：朱砂小字，落在右下角 */
+body[data-skin="guigu"] .qb::after { color: #a83a2a; opacity: .6; bottom: 1px; }
+body[data-skin="guigu"] .qb.empty::after { opacity: .32; }
+body[data-skin="guigu"] .qb.empty { opacity: .55; }
+/* 冷却遮罩：墨色半掩 + 纸白数字 */
+body[data-skin="guigu"] .qb .qb-cd { border-radius: 2px; background: rgba(52,48,40,0.62); color: #f2ecda; }
+/* 灵宠格：竹青双边，和朱砂格分开 */
+body[data-skin="guigu"] .qb.pet {
+  border-color: rgba(63,89,65,0.72);
+  box-shadow: inset 0 0 0 3px #f4efe0, inset 0 0 0 4px rgba(63,89,65,0.38), 0 2px 5px rgba(40,36,28,0.22);
+}
+/* 弹反键：纸底墨框 + 朱砂边，比三联印再重一档（它是最重要的那颗） */
+body[data-skin="guigu"] #parryBtn {
+  border-color: rgba(168,58,42,0.72); color: #3a332a;
+  box-shadow: inset 0 0 0 3px #f4efe0, inset 0 0 0 4px rgba(168,58,42,0.34), 0 3px 8px rgba(40,36,28,0.24);
+}
+body[data-skin="guigu"] #parryBtn.parrying {
+  border-color: #a83a2a;
+  box-shadow: inset 0 0 0 3px #f4efe0, inset 0 0 0 5px rgba(200,80,50,0.55), 0 0 18px rgba(200,80,50,0.4);
+}
+body[data-skin="guigu"] #parryBtn.cooling { border-color: rgba(58,53,44,0.45); }
+/* 左下角功法等级小签：黑方块也翻纸签，等级数用朱砂 */
+body[data-skin="guigu"] .pip {
+  background: rgba(244,239,224,0.9); border-color: rgba(58,53,44,0.45);
+  border-radius: 2px; color: #3a342a; box-shadow: 0 1px 3px rgba(40,36,28,0.2);
+}
+body[data-skin="guigu"] .pip b { color: #a83a2a; }
+
+/* ================= 水墨皮 · 气血/灵力/敌血：色块 → 纸签墨条 =================
+   原来是一条 iOS 胶囊色块。改成"纸签 + 墨框 + 朱砂笔道"，
+   fill 末端加一道 mask 渐隐模拟笔锋提离纸面（飞白收笔）——血量越少，收笔越靠前。 */
+body[data-skin="guigu"] #hpwrap, body[data-skin="guigu"] #xpwrap {
+  background: linear-gradient(180deg, #f4efe0, #e5dfcd);
+  border: 1px solid rgba(58,53,44,0.6); border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(40,36,28,0.28), inset 0 1px 0 rgba(255,255,255,0.5);
+}
+body[data-skin="guigu"] #hpfill {
+  border-radius: 1px;
+  background: linear-gradient(90deg, #7d3f2c, #b23a2c 62%, #c2563f);
+  -webkit-mask-image: linear-gradient(90deg, #000 88%, rgba(0,0,0,0.55) 97%, rgba(0,0,0,0.05) 100%);
+  mask-image: linear-gradient(90deg, #000 88%, rgba(0,0,0,0.55) 97%, rgba(0,0,0,0.05) 100%);
+}
+body[data-skin="guigu"] #xpfill {
+  border-radius: 1px;
+  background: linear-gradient(90deg, #3f5f74, #46687d 62%, #5b8095);
+  -webkit-mask-image: linear-gradient(90deg, #000 88%, rgba(0,0,0,0.55) 97%, rgba(0,0,0,0.05) 100%);
+  mask-image: linear-gradient(90deg, #000 88%, rgba(0,0,0,0.55) 97%, rgba(0,0,0,0.05) 100%);
+}
+/* 修为条：与生命/煞气同一套纸签墨框，但笔道走赭金 —— 修为是「累积」不是「存量」，
+   不该跟朱砂（血）与深墨（煞气）混成一条线。 */
+body[data-skin="guigu"] #cnwrap {
+  background: linear-gradient(180deg, #f4efe0, #e5dfcd);
+  border: 1px solid rgba(58,53,44,0.55); border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(40,36,28,0.24);
+}
+body[data-skin="guigu"] #cnfill {
+  border-radius: 1px;
+  background: linear-gradient(90deg, #8a6b28, #c9a04a 62%, #e0bf62);
+  -webkit-mask-image: linear-gradient(90deg, #000 86%, rgba(0,0,0,0.5) 96%, rgba(0,0,0,0.05) 100%);
+  mask-image: linear-gradient(90deg, #000 86%, rgba(0,0,0,0.5) 96%, rgba(0,0,0,0.05) 100%);
+}
+/* 敌血：浓墨一道——墨压在纸上，比红块更有压迫感，也最"国画"。
+   注意 fill 的底色是 game.js 每帧写内联的（阶段二还要换色），这里只负责笔锋收尾的 mask。 */
+body[data-skin="guigu"] #bossbar {
+  background: linear-gradient(180deg, #f2eddd, #e2dbc8);
+  border: 1px solid rgba(58,53,44,0.62); border-radius: 2px;
+  box-shadow: 0 1px 4px rgba(40,36,28,0.3), inset 0 1px 0 rgba(255,255,255,0.45);
+}
+body[data-skin="guigu"] #bossbar::after { background: none; }   /* 去掉玻璃高光 */
+body[data-skin="guigu"] #bossfill {
+  border-radius: 1px;
+  /* 两头都收：左端起笔淡入、右端收笔飞白，一整条浓墨横在那里会压掉整幅画 */
+  -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,0.86) 0%, #000 8%, #000 86%, rgba(0,0,0,0.16) 100%);
+  mask-image: linear-gradient(90deg, rgba(0,0,0,0.86) 0%, #000 8%, #000 86%, rgba(0,0,0,0.16) 100%);
+}
+/* Boss 名：中灰渐变在纸上读不出。这里不能再走 background-clip 那套（覆盖 background
+   会把 background-clip 重置回 border-box，字就整个隐了）—— 直接给实心墨字最稳。 */
+body[data-skin="guigu"] #bossname {
+  background: none;
+  color: #2a251d; -webkit-text-fill-color: #2a251d;
+  filter: none;
+}
+/* 纸底上黑投影会糊成脏边，一律去掉 */
+body[data-skin="guigu"] #stats, body[data-skin="guigu"] #mapName { text-shadow: none; }
+/* 血条上的「生命 / 1234」压在朱砂条上会读不出 —— 深墨字 + 一圈纸白晕，
+   不管字落在朱砂条上还是纸底上都立得住（比换色可靠，血量长短不会让字忽隐忽现） */
+body[data-skin="guigu"] .barlabel, body[data-skin="guigu"] .barval {
+  color: #241f16;
+  text-shadow: 0 0 2px #f6f1e2, 0 0 2px #f6f1e2, 0 1px 1px rgba(246,241,226,0.9);
+}
+/* 图标（emoji）在纸底上太跳：压成灰褐剪影，像印上去的图样，形状仍可辨 */
+body[data-skin="guigu"] .qb-icon,
+body[data-skin="guigu"] .pip span,
+body[data-skin="guigu"] #skillrow .pip span {
+  filter: grayscale(1) sepia(0.22) contrast(0.92);
+  opacity: .85;
+}
+
+/* ================= 水墨皮 · 重击的「惊艳一刻」 =================
+   暴击原来是金色大字 + 顿帧，在墨色画面里没有分量。改成朱砂：
+   数字用印泥红，纸面同时透一层朱砂晕（像一滴朱砂落在宣纸上化开），0.3 秒散尽。
+   金皮下这条不启用（那个皮有自己的金色爆点）。 */
+#critFlash {
+  position: absolute; inset: 0; pointer-events: none; opacity: 0; z-index: 46;
+  background: radial-gradient(ellipse 85% 62% at 50% 46%, rgba(178,58,44,0) 45%, rgba(178,58,44,0.24) 100%);
+}
+body[data-skin="guigu"] #critFlash.go { animation: critInk 0.32s ease-out; }
+@keyframes critInk {
+  0%   { opacity: 1; transform: scale(1.03); }
+  60%  { opacity: 0.45; }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+/* ================= 弹反长按护体：画面边缘泛红（煞气外溢） =================
+   game.js 每帧在按住护体（G.parry.state==='hold'）时给 #parryEdge toggle .on。
+   双皮通用：暗红边缘 + 轻微脉冲，提示「正在以煞气护体、身法受限」。 */
+#parryEdge {
+  position: absolute; inset: 0; pointer-events: none; opacity: 0; z-index: 47;
+  transition: opacity .12s ease-out;
+  /* 贴边内阴影为主：只染四边，不糊中间（水墨皮是浅底，大片渐变会把整屏洗成粉雾） */
+  box-shadow:
+    inset 0 0 28px 3px rgba(196,54,42,0.42),
+    inset 0 0 62px 0   rgba(196,54,42,0.10);
+}
+#parryEdge.on { opacity: 1; animation: parryPulse 1.1s ease-in-out infinite; will-change: opacity; }
+@keyframes parryPulse {
+  0%,100% { opacity: 0.55; }
+  50%     { opacity: 1; }
+}
+
+/* ================= 弹反成功：金铁交击的一瞬冲击 =================
+   只在「格开」那一下闪一次（约 0.34s）。做成贴边细金环 + 内圈薄光，
+   不铺大面积渐变 —— 水墨皮是浅宣纸，大片暖色会把整屏洗成粉雾。
+   20261111H：阴影改成静态、动画只动 opacity。原来 keyframes 里连 box-shadow 一起过渡，
+   而 box-shadow 不参与合成层 —— 等于每帧重绘一整屏，手机上（尤其低端安卓）这一下就是几十毫秒。
+   opacity 走合成层，几乎零成本；因为末帧本来就是 opacity:0，视觉上看不出区别。 */
+#parryHit {
+  position: absolute; inset: 0; pointer-events: none; opacity: 0; z-index: 48;
+  box-shadow: inset 0 0 0 7px rgba(255,228,152,0.98), inset 0 0 64px 14px rgba(255,206,112,0.62);
+}
+#parryHit.go { animation: parryHitFlash .46s ease-out; }
+@keyframes parryHitFlash {
+  0%   { opacity: 1; }
+  38%  { opacity: .78; }
+  100% { opacity: 0; }
+}
+/* 20261111I：水墨皮这条原来在 keyframes 里过渡 box-shadow —— 和 H 版修掉的金皮是同一个毛病。
+   box-shadow 不参与合成，改了就得把整屏（手机上 DPR3 是 340 万像素）带着 52px 模糊重新光栅化一遍，
+   一次弹反 0.46s / 约 27 帧全在重绘。屏幕一卡，玩家看到的就是「游戏死了、按钮还在动」。
+   改成：阴影静态写在规则上，动画只动 opacity（走合成层，几乎零成本）。末帧本来就是 opacity:0。 */
+body[data-skin="guigu"] #parryHit {
+  box-shadow: inset 0 0 0 5px rgba(168,40,30,0.92), inset 0 0 52px 8px rgba(168,40,30,0.40);
+}
+body[data-skin="guigu"] #parryHit.go { animation: parryHitInk .46s ease-out; }
+@keyframes parryHitInk {
+  0%   { opacity: 1; }
+  38%  { opacity: .70; }
+  100% { opacity: 0; }
+}
+
+/* ================= 弹反键位置调整 =================
+   暂停菜单点「调整位置」→ 画面冻结、面板收起，只剩这颗键和一条说明。
+   拖动时描一圈绿光、禁掉页面滚动，松手即存（save.parryPos）。 */
+#parryDragBar {
+  display: none; position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%);
+  align-items: center; gap: var(--sp-3); padding: 8px 10px 8px 16px;
+  max-width: calc(100% - 24px); border-radius: 999px;
+  background: rgba(10,12,18,0.9); border: 1px solid rgba(201,162,74,0.5);
+  color: var(--text-1); font-size: var(--fs-cap); line-height: 1.3;
+  z-index: 74;
+}
+body.parry-drag #parryDragBar { display: flex; }
+/* 拖动时把横幅（战后强化提示之类）藏起来，否则会压住引导条 */
+body.parry-drag #banner { display: none; }
+body.parry-drag #parryBtn {
+  display: flex; z-index: 76;
+  box-shadow: 0 0 0 3px rgba(126,224,160,0.72), 0 6px 20px rgba(0,0,0,0.45);
+  cursor: grab; touch-action: none;
+}
+body.parry-drag #parryBtn:active { transform: none; }
+body.parry-drag #parryBtn.parrying { animation: none; }
+body.parry-drag #parryEdge { opacity: 0 !important; }
+body[data-skin="guigu"] #parryDragBar {
+  background: rgba(246,241,228,0.96); border-color: rgba(58,53,44,0.5); color: #3a332a;
+}
+
+/* ================= 水墨皮 · 进图仪式：展卷 =================
+   原来是硬切：上一帧还在选图，下一帧人已经站在野地里，没有"翻开一页"的过渡。
+   加一张纸从顶部向下展开（transform-origin: top，纸的上下各有一道深墨轴头），
+   铺满全屏后立刻化开 —— 0.66 秒，不挡操作。 */
+#scrollOpen { display: none; position: absolute; inset: 0; pointer-events: none; z-index: 58;
+  transform-origin: top center; opacity: 0;
+  background:
+    linear-gradient(180deg, rgba(58,53,44,0.92) 0, rgba(58,53,44,0.55) 3px, rgba(58,53,44,0) 7px),
+    linear-gradient(0deg, rgba(58,53,44,0.92) 0, rgba(58,53,44,0.55) 3px, rgba(58,53,44,0) 7px),
+    linear-gradient(180deg, #f3eddb, #ddd6c3);
+}
+body[data-skin="guigu"] #scrollOpen.play { display: block; animation: scrollUnroll .66s cubic-bezier(.2,.85,.3,1) forwards; }
+@keyframes scrollUnroll {
+  0%   { transform: scaleY(0.03); opacity: 1; }
+  58%  { transform: scaleY(1);    opacity: 1; }
+  100% { transform: scaleY(1);    opacity: 0; }
+}
+
+/* ================= 鎏金皮 · 进图仪式：暗金暗角封印（与墨皮展卷对等，不纸化） =================
+   暗部皮不照搬水墨：用暗角 + 暗金细框把四边压暗、中央留白，0.6s 内浮起又化开，替代硬切。 */
+body:not([data-skin="guigu"]) #scrollOpen {
+  background:
+    radial-gradient(ellipse at center, rgba(0,0,0,0) 36%, rgba(14,9,3,0.6) 100%);
+  box-shadow: inset 0 0 0 2px rgba(201,162,74,0.55), inset 0 0 70px rgba(14,9,3,0.55);
+}
+body:not([data-skin="guigu"]) #scrollOpen.play { display: block; animation: jinSeal .6s cubic-bezier(.2,.85,.3,1) forwards; }
+@keyframes jinSeal {
+  0%   { opacity: 0; transform: scale(1.05); }
+  42%  { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+/* ================= 水墨皮 · 地图卡：把信息层级拉开 =================
+   原来卡名、地点、状态、标签四层几乎同一种灰度，一眼扫过去分不出主次。
+   重排：名浓（墨）、地淡（淡墨）、标签改墨线小签（不用彩色浅底）、
+   状态用竹青（当前）/ 淡墨（未至），已过的图不压成死灰。 */
+body[data-skin="guigu"] .mc-name { color: #1f1b13; font-size: 16px; letter-spacing: 2px; }
+body[data-skin="guigu"] .mc-pos,
+body[data-skin="guigu"] .mc-desc,
+body[data-skin="guigu"] .mc-meta,
+body[data-skin="guigu"] .mc-mini { color: #6a6354; letter-spacing: .5px; }
+/* 标签：彩色描边浅底 → 墨线小签（字色只分四档：墨 / 赭石 / 朱砂 / 花青） */
+body[data-skin="guigu"] .mc-tag {
+  border-radius: 2px; background: transparent; line-height: 1.5;
+  border-color: rgba(58,53,44,0.40); color: #5a5346;
+}
+body[data-skin="guigu"] .mc-tag.story { color: #6a6354; border-color: rgba(58,53,44,0.40); }
+body[data-skin="guigu"] .mc-tag.fight { color: #9c5a2c; border-color: rgba(156,90,44,0.48); }
+body[data-skin="guigu"] .mc-tag.bossfight { color: #a8331f; border-color: rgba(168,51,31,0.55); }
+body[data-skin="guigu"] .mc-tag.market,
+body[data-skin="guigu"] .mc-tag.side { color: #3f5f74; border-color: rgba(63,95,116,0.48); }
+/* 状态：当前所在竹青、未至淡墨（不用系统绿，绿在纸上像屏幕漏光） */
+body[data-skin="guigu"] .mc-state.on, body[data-skin="guigu"] .mc-mini.on { color: #3f7350; }
+body[data-skin="guigu"] .mc-state.off { color: #4a453a; }
+body[data-skin="guigu"] .mc-go { color: #8f4f2e; }
+/* 未解锁的图：压得太灰会把整卷纸弄脏，只压到六成 */
+body[data-skin="guigu"] .mapcard.locked { opacity: .62; filter: grayscale(0.7); }
+/* 洞府 / 支线卡：原本是深蓝底和深紫底，在纸上像两块墨渍 —— 一并翻卷轴纸 */
+body[data-skin="guigu"] .mapcard.home,
+body[data-skin="guigu"] .mapcard.side {
+  background:
+    linear-gradient(180deg, rgba(60,56,48,0.82) 0%, rgba(60,56,48,0.5) 3px, rgba(60,56,48,0) 7px),
+    linear-gradient(0deg, rgba(60,56,48,0.82) 0%, rgba(60,56,48,0.5) 3px, rgba(60,56,48,0) 7px),
+    linear-gradient(180deg, #f7f2e3, #eee8d6);
+  border-color: rgba(60,56,48,0.45);
+  box-shadow: inset 3px 0 0 rgba(63,95,116,0.30), 0 1px 3px rgba(40,36,28,0.10);
+}
+body[data-skin="guigu"] .mapcard.side { box-shadow: inset 3px 0 0 rgba(108,92,120,0.32), 0 1px 3px rgba(40,36,28,0.10); }
+
+/* 大地图底：深黑蒙版在纸上就是"泼了一砚墨"，整张图都发灰。
+   换成一层纸雾——背后战场淡淡透出来，像纸背后有画。 */
+body[data-skin="guigu"] #worldmap { background: rgba(238,232,216,0.88); }
+/* 当前图卡：旧规则还挂着 10px 大浮影，卡片因此显"塑料"；这里只留 1px 竹青内描边 */
+body[data-skin="guigu"] .mapcard.current {
+  box-shadow: inset 0 0 0 1px rgba(95,127,97,0.42), 0 1px 3px rgba(40,36,28,0.10);
+}
+
+/* 水墨皮 · 对话头像：卷首小像（宣纸底 + 墨线框，贴在右起竖排名帖的左侧） */
+body[data-skin="guigu"] #dialogFace {
+  position: static; order: 2; flex: none; align-self: flex-start;
+  width: auto; height: auto; padding: 5px;
+  background: linear-gradient(180deg, #f7f2e3, #e9e3d2);
+  border: 1px solid rgba(60,56,48,0.45); border-radius: 2px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5);
+  overflow: visible;
+}
+/* 水墨皮下头像是 flex 项（不是浮层），不需要那 78px 的左内边距 */
+body[data-skin="guigu"] #dialogbox.has-face { padding-left: var(--sp-4); }
+body[data-skin="guigu"] #dialogFace canvas { height: 72px; }
+
+/* ============================================================================
+   水墨皮 · 对比度校正（第93轮）
+   ----------------------------------------------------------------------------
+   宣纸底（#efeadb / #f4f1e8）上，为深色皮设计的亮色全部失效：
+   至宝金 #ffd24a 只有 1.22:1、仙品青 #8ff0e0 只有 1.13:1、凡品灰 #cfd6e2 只有
+   1.20:1 —— 不是"偏淡"，是肉眼基本看不见。另外一批卡片的底色写的是
+   rgba(0,0,0,0.26) 这类黑蒙版，在纸上变成一块墨渍，而字又是墨色，同样叠死。
+
+   这里统一按「深墨 + 矿物色」重排：字色一律压到 4.5:1 以上，
+   底色一律从黑蒙版改成淡墨（rgba(74,68,56,·)）。
+   所有数值都用 qa/audit-contrast.mjs 实测过，不是估的。
+   ============================================================================ */
+
+body[data-skin="guigu"] {
+  /* 稀有度：亮色 → 深墨矿物色（on #efebdf 实测 7.5 / 5.4 / 6.9 / 6.4 / 5.0 / 5.3） */
+  --rar-0: #4a4a44;   /* 凡品 · 淡墨 */
+  --rar-1: #2f6b3d;   /* 良品 · 竹青 */
+  --rar-2: #1f4f8a;   /* 上品 · 花青 */
+  --rar-3: #6a3f96;   /* 珍品 · 紫 */
+  --rar-4: #8a5a12;   /* 至宝 · 赭金 */
+  --rar-5: #0f6b62;   /* 仙品 · 松石 */
+}
+
+/* 区块标题 / 小节标题：#b5714b 在纸上只有 3.24:1 */
+body[data-skin="guigu"] .cs-title { color: #8f4f2e; border-left-color: rgba(143,79,46,0.55); }
+body[data-skin="guigu"] .cs-sub { color: #5a5142; border-left-color: rgba(60,56,48,0.32); }
+/* 剧情回顾行名沿用标题的深棕：默认 var(--accent) 在纸上仅 2.98:1 */
+body[data-skin="guigu"] .cs-nm { color: #8f4f2e; }
+
+/* 成算 / 稀缺提示：青灰 3.71:1 → 5.1:1 */
+body[data-skin="guigu"] .rr-rate,
+body[data-skin="guigu"] .recrow .rr-rate { color: #4e5a58; }
+body[data-skin="guigu"] .recrow.can .rr-rate { color: #37543b; }
+body[data-skin="guigu"] .brk-hint { color: #8f4f2e; }
+
+/* 材料 / 灵石小签 */
+body[data-skin="guigu"] .mat { color: #8f2f24; border-color: rgba(143,47,36,0.38); }
+body[data-skin="guigu"] .mat.ok { color: #3f5c42; border-color: rgba(63,92,66,0.42); }
+body[data-skin="guigu"] .mat.stone,
+body[data-skin="guigu"] .mat.stone.ok { color: #8f4f2e; border-color: rgba(143,79,46,0.42); }
+body[data-skin="guigu"] .mat.clk:hover { background: rgba(74,68,56,0.07); border-color: rgba(60,56,48,0.5); }
+
+/* 主行动按钮：墨字压在平均 #ac6d46 的赭石渐变上只有 4.06:1。
+   底提亮一档到 #cf9a70（6.9:1），仍是赭石，只是没那么闷。 */
+body[data-skin="guigu"] .sr-btn.buy {
+  background: linear-gradient(180deg, #d6a67e, #c88f63);
+  border-color: rgba(122,63,34,0.55); color: #1c1c1c;
+}
+body[data-skin="guigu"] .sr-btn.buy:active { filter: brightness(1.08); }
+
+/* 进阶 / 材料行：底是 rgba(0,0,0,0.26)，在纸上是一块墨渍，字也是墨 —— 2.0:1。
+   改成淡墨底 + 墨线，徽章改成小签（不再是深底墨字）。 */
+body[data-skin="guigu"] .brk-row { background: rgba(74,68,56,0.055); border-color: rgba(60,56,48,0.22); color: #332f28; }
+body[data-skin="guigu"] .brk-row i { background: rgba(60,56,48,0.14); color: #3a352c; border: 1px solid rgba(60,56,48,0.26); }
+body[data-skin="guigu"] .brk-row b { color: #8f2f24; }
+body[data-skin="guigu"] .brk-row.click:hover { background: rgba(143,79,46,0.08); border-color: rgba(143,79,46,0.45); }
+body[data-skin="guigu"] .brk-row.click span { text-decoration-color: rgba(143,79,46,0.5); }
+body[data-skin="guigu"] .brk-row.ok { border-color: rgba(95,127,97,0.42); }
+body[data-skin="guigu"] .brk-row.ok i { background: rgba(95,127,97,0.18); color: #2f4a33; border-color: rgba(95,127,97,0.4); }
+body[data-skin="guigu"] .brk-row.ok b { color: #37543b; }
+
+/* 世界地图 · 统计条：黑底亮字 → 淡墨底墨字（2.26:1 → 8:1） */
+body[data-skin="guigu"] .wm-stats span { background: rgba(74,68,56,0.06); border-color: rgba(60,56,48,0.24); color: #3a352c; }
+/* 「详」小钮 & 未至状态：3.1~3.8:1 → 5:1 以上 */
+body[data-skin="guigu"] .mc-info { color: #3a352c; border-color: rgba(60,56,48,0.32); }
+body[data-skin="guigu"] .mapcard.open .mc-info { color: #3a352c; border-color: rgba(60,56,48,0.32); }
+body[data-skin="guigu"] .mc-num { color: #8f2f24; }
+body[data-skin="guigu"] .mc-tag.fight { color: #8a4a1e; }
+body[data-skin="guigu"] .mc-tag.market,
+body[data-skin="guigu"] .mc-tag.side { color: #33505f; }
+
+/* 装备格里的「未佩」等弱提示 */
+body[data-skin="guigu"] .es-body i { color: #5a5142; }
+body[data-skin="guigu"] .gr-need { color: #8f2f24; }
+
+/* ============================================================================
+   洞府 · 分组折叠（手风琴）
+   ----------------------------------------------------------------------------
+   列表一长，翻找就变成"往下滚"。按类收起来，一次只开一组：
+   组头一行就是索引，点哪组开哪组，其余自动收起。
+   ============================================================================ */
+.fold { display: flex; flex-direction: column; }
+.fold-h {
+  width: 100%; display: flex; align-items: center; gap: 8px;
+  padding: 7px 8px; margin-top: 2px;
+  background: transparent; border: 0; border-bottom: 1px solid var(--line-soft);
+  color: var(--text-2); font-family: inherit; font-size: var(--fs-cap);
+  letter-spacing: 1px; text-align: left; cursor: pointer;
+  position: relative;
+}
+.fold-h::after { content: ''; position: absolute; inset: -4px 0; }   /* 放大点击区 */
+.fold-h .fh-n { color: var(--text-4); font-size: var(--fs-micro); letter-spacing: 0; }
+.fold-h .fh-ar { margin-left: auto; font-size: 10px; color: var(--text-4); transition: transform .16s; }
+.fold.open .fold-h .fh-ar { transform: rotate(180deg); }
+.fold.open .fold-h { color: var(--accent); border-bottom-color: rgba(201,162,74,0.5); }
+.fold-b { display: none; flex-direction: column; gap: 6px; padding: 6px 0 2px; }
+.fold.open .fold-b { display: flex; }
+/* 分组内的行去掉顶层的分隔感，靠组头分隔 */
+.fold .bagrow, .fold .gearrow, .fold .recrow, .fold .brk-row { margin: 0; }
+
+body[data-skin="guigu"] .fold-h { color: #3a352c; border-bottom-color: rgba(60,56,48,0.22); }
+body[data-skin="guigu"] .fold-h .fh-n, body[data-skin="guigu"] .fold-h .fh-ar { color: #6a6354; }
+body[data-skin="guigu"] .fold.open .fold-h { color: #8f4f2e; border-bottom-color: rgba(143,79,46,0.5); }
+
+/* ---- 禁用 / 未解锁项的压暗幅度 ----
+   opacity 是连字一起变淡的：.45 会把 5:1 的字压到 2:1，等于看不清。
+   这些东西玩家仍然需要读（这件是什么、缺哪一味、还差哪个境界），
+   所以只压到"看得出是次要"为止，不压到"读不出来"。 */
+body[data-skin="guigu"] .gearrow.locked { opacity: .78; border-style: dashed; }
+body[data-skin="guigu"] .mapcard.locked { opacity: .88; }
+body[data-skin="guigu"] .skipill { opacity: .82; }
+body[data-skin="guigu"] .btn.small.off,
+body[data-skin="guigu"] .sr-btn:disabled { opacity: .62; }
+
+/* 属性页功法小格：进度字原本跟着强调色走，3.26:1 */
+body[data-skin="guigu"] .skipill i { color: #8f4f2e; }
+body[data-skin="guigu"] .skipill b { color: #332f28; }
+body[data-skin="guigu"] .skipill span { color: #5a5142; }
+/* 世界地图 · 行迹段头：青灰 3.69:1 */
+body[data-skin="guigu"] .wm-sec b { color: #5a5142; }
+body[data-skin="guigu"] .wm-sec b::first-letter { color: #8f4f2e; }
+body[data-skin="guigu"] .wm-sec span { color: #5a5142; }
+
+/* 再收一档：压暗之后仍要过 4.5:1，所以底色字本身再加深一级 */
+body[data-skin="guigu"] .gearrow.locked { opacity: .94; }
+body[data-skin="guigu"] .btn:disabled,
+body[data-skin="guigu"] .sr-btn:disabled { opacity: .74; }
+body[data-skin="guigu"] .mc-pos,
+body[data-skin="guigu"] .mc-desc,
+body[data-skin="guigu"] .mc-meta,
+body[data-skin="guigu"] .mc-mini,
+body[data-skin="guigu"] .mc-tag.story { color: #4a453a; }
+body[data-skin="guigu"] .skipill i { color: #6d3b20; }
+body[data-skin="guigu"] .skipill span { color: #3a352c; }
+
+body[data-skin="guigu"] .mc-mini.off { color: #4a453a; }
+
+/* 选中页签：同一块赭石渐变，同样提亮一档（4.06:1 → 6.9:1） */
+body[data-skin="guigu"] .tab.active {
+  background: linear-gradient(180deg, #d6a67e, #c88f63);
+  border-color: rgba(122,63,34,0.55); color: #1c1c1c;
+}
+
+/* ============================================================================
+   水墨皮 · 交互浮层补漏（第94轮）
+   ----------------------------------------------------------------------------
+   第93轮审计只扫了几个固定容器，且跳过 display:none —— 「点料名才出现」的
+   「去哪取」卡片挂在 body 上、初始 hidden，整张漏检。它沿用深色皮的近黑底
+   rgba(18,14,9,.97)，字色却已被换成墨色，于是黑底墨字只有 1.37:1。
+   这里把交互态浮层、以及固定容器之外的几处文本一并收口。
+   ============================================================================ */
+
+/* 去哪取提示卡：近黑底 → 淡墨纸底，墨线勾边 */
+body[data-skin="guigu"] .item-tip {
+  background: rgba(74,68,56,0.07);
+  border-color: rgba(60,56,48,0.30);
+}
+body[data-skin="guigu"] .item-tip.inline { border-left-color: #8f4f2e; }
+body[data-skin="guigu"] .item-tip.float { box-shadow: 0 8px 26px rgba(74,68,56,0.22); }
+body[data-skin="guigu"] .item-tip b { color: #8f4f2e; }
+body[data-skin="guigu"] .item-tip span { color: #332f28; }
+
+/* 固定容器之外：洞府卷首题字 / 角落版本水印 / 横屏提示 */
+body[data-skin="guigu"] .cave-quote { color: #4a453a; }
+body[data-skin="guigu"] #ver { color: #5a5142; text-shadow: none; }
+body[data-skin="guigu"] #rotateHint p { color: #8f4f2e; }
+
+/* 同类深蒙版一律换淡墨：深色皮里是黑底亮字，翻到宣纸上就成了一块墨渍 */
+body[data-skin="guigu"] .chat-wrap #chatInput,
+body[data-skin="guigu"] .chat-emoji button {
+  background: rgba(74,68,56,0.08); border-color: rgba(60,56,48,0.30); color: #161512;
+}
+body[data-skin="guigu"] .wl-row,
+body[data-skin="guigu"] .wl-row.got,
+body[data-skin="guigu"] #victoryLoot,
+body[data-skin="guigu"] .dchip {
+  background: rgba(74,68,56,0.06); border-color: rgba(60,56,48,0.24);
+}
+body[data-skin="guigu"] .dchip { color: #3a352c; }
+body[data-skin="guigu"] #fsHint {
+  background: rgba(244,241,232,0.97); border-color: rgba(60,56,48,0.35); color: #8f4f2e;
+}
+body[data-skin="guigu"] #dialogFace {
+  background: rgba(74,68,56,0.08); border-color: rgba(60,56,48,0.24);
+}
+/* 拍卖会标题条：淡金底上原先写的是亮金 #f0d79a，几乎隐形 */
+body[data-skin="guigu"] .shopauc {
+  background: linear-gradient(90deg, rgba(143,79,46,0.12), rgba(143,79,46,0.03));
+  border-color: rgba(143,79,46,0.40); color: #5a4118;
+}
+
+/* ================= 第102轮 · 浅宣纸上的 HUD 柔化 =================
+   Jerry 拍板：右侧三格快捷钮、顶部血条、底部技能栏、圆形提示圈在浅纸上比深底
+   更显眼，与「高级简约」冲突，本轮做 UI 柔化。
+   作用域只挂在 body.sc3-paper（由 game.js 在「收录图 + 水墨皮」时挂上）：
+     · 未收录的 153 张深底图：不挂 class，原 UI 逐字节不变、可读性不降；
+     · 鎏金皮：选择器已限定 data-skin="guigu"，不受影响。
+   手法只有两个字：退。去硬边 / 去双重墨框 / 去投影 / 去饱和 / 压 alpha，
+   不删任何元素、不改尺寸与定位、不动点击热区 —— 玩法信息仍在，只是不再抢画。 */
+body[data-skin="guigu"].sc3-paper #topbar {
+  background: linear-gradient(180deg, rgba(244,241,232,0.48) 0%, rgba(244,241,232,0.20) 52%, rgba(244,241,232,0) 82%);
+}
+
+/* 气血 / 煞气：纸签墨框 → 一道两端飞白的淡墨细条 */
+body[data-skin="guigu"].sc3-paper #hpwrap,
+body[data-skin="guigu"].sc3-paper #xpwrap {
+  background: rgba(244,239,224,0.28);
+  border: 1px solid rgba(58,53,44,0.14); border-radius: 1px;
+  box-shadow: none;
+}
+body[data-skin="guigu"].sc3-paper #hpfill {
+  /* 第115轮：淡墨暖灰读不出血色，回到朱砂（但仍是半透明 + 两端飞白，不回 iOS 胶囊色块） */
+  background: linear-gradient(90deg, rgba(146,52,42,0.72), rgba(178,58,44,0.92) 62%, rgba(160,56,44,0.62));
+  -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,0.35) 0%, #000 12%, #000 74%, rgba(0,0,0,0.04) 100%);
+  mask-image: linear-gradient(90deg, rgba(0,0,0,0.35) 0%, #000 12%, #000 74%, rgba(0,0,0,0.04) 100%);
+}
+body[data-skin="guigu"].sc3-paper #xpfill {
+  /* 第115轮：去绿相、压明度、提不透明度，煞气沉成一道深墨 */
+  background: linear-gradient(90deg, rgba(52,50,47,0.62), rgba(38,37,35,0.86) 62%, rgba(58,55,52,0.52));
+  -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,0.35) 0%, #000 12%, #000 74%, rgba(0,0,0,0.04) 100%);
+  mask-image: linear-gradient(90deg, rgba(0,0,0,0.35) 0%, #000 12%, #000 74%, rgba(0,0,0,0.04) 100%);
+}
+/* 煞气槽单独压成淡墨纸签：只改填充色的话，煞气低时整条仍是浅到看不见的纸底。
+   血条槽保持浅纸底不动 —— 血少了要留白才看得出缺口。 */
+body[data-skin="guigu"].sc3-paper #xpwrap {
+  background: rgba(44,42,38,0.24); border-color: rgba(58,53,44,0.30);
+}
+/* 第115轮：血条翻朱砂、煞气翻深墨之后，半透明深墨字会糊在深底上。
+   沿用第97轮已验证的解法——深墨字 + 一圈纸白晕，字落在深条上或浅纸底上都立得住。 */
+body[data-skin="guigu"].sc3-paper .barlabel,
+body[data-skin="guigu"].sc3-paper .barval {
+  color: rgba(36,31,22,0.90);
+  text-shadow: 0 0 2px #f6f1e2, 0 0 2px #f6f1e2, 0 1px 1px rgba(246,241,226,0.95);
+}
+/* 修为条在 sc3 淡彩纸底上：槽走极淡墨框，笔道压成赭石（亮金在纸底上会糊成一片黄） */
+body[data-skin="guigu"].sc3-paper #cnwrap {
+  background: rgba(244,239,224,0.30);
+  border: 1px solid rgba(58,53,44,0.14); border-radius: 1px;
+  box-shadow: none;
+}
+body[data-skin="guigu"].sc3-paper #cnfill {
+  background: linear-gradient(90deg, rgba(122,95,36,0.72), rgba(158,121,48,0.92) 62%, rgba(140,108,44,0.50));
+  -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,0.35) 0%, #000 12%, #000 74%, rgba(0,0,0,0.04) 100%);
+  mask-image: linear-gradient(90deg, rgba(0,0,0,0.35) 0%, #000 12%, #000 74%, rgba(0,0,0,0.04) 100%);
+}
+body[data-skin="guigu"].sc3-paper #stats { color: rgba(51,47,40,0.56); }
+body[data-skin="guigu"].sc3-paper #mapName {
+  color: rgba(82,77,67,0.60); border-left-color: rgba(74,68,56,0.26);
+}
+
+/* 右侧三格「硬边方印」：去掉内外双描边与投影，柔角、半透纸底，退成三枚淡印 */
+body[data-skin="guigu"].sc3-paper .qb {
+  border-radius: 10px;
+  background: rgba(244,239,224,0.30);
+  border: 1px solid rgba(58,53,44,0.18);
+  box-shadow: none;
+}
+body[data-skin="guigu"].sc3-paper .qb.empty { opacity: .34; }
+body[data-skin="guigu"].sc3-paper .qb:not(.empty) { opacity: .76; }
+body[data-skin="guigu"].sc3-paper .qb:active {
+  background: rgba(230,223,204,0.52); box-shadow: none; transform: scale(0.96);
+}
+body[data-skin="guigu"].sc3-paper .qb::after { color: rgba(120,70,54,0.52); opacity: .42; }
+body[data-skin="guigu"].sc3-paper .qb.pet {
+  border-color: rgba(63,89,65,0.28); box-shadow: none;
+}
+body[data-skin="guigu"].sc3-paper .qb .qb-cd {
+  border-radius: 10px; background: rgba(52,48,40,0.30); color: rgba(246,241,226,0.88);
+}
+
+/* 底部技能栏纸签：同款退法，图标压到近乎纸上的印痕 */
+body[data-skin="guigu"].sc3-paper #skillrow .pip {
+  background: rgba(244,239,224,0.32); border-color: rgba(58,53,44,0.16);
+  border-radius: 6px; box-shadow: none;
+}
+body[data-skin="guigu"].sc3-paper #skillrow .pip b { color: rgba(120,70,54,0.50); }
+body[data-skin="guigu"].sc3-paper .qb-icon,
+body[data-skin="guigu"].sc3-paper #skillrow .pip span { opacity: .48; }
+
+/* 右上「大衍 / 禁制」两枚胶囊顺带同调：实纸胶囊 → 淡墨细圈 */
+body[data-skin="guigu"].sc3-paper #autoBtn {
+  background: rgba(244,241,232,0.34); border-color: rgba(74,68,56,0.20);
+  box-shadow: none; color: rgba(80,76,66,0.72);
+}
+body[data-skin="guigu"].sc3-paper #autoBtn.on {
+  color: rgba(143,79,46,0.82); border-color: rgba(143,79,46,0.34); background: rgba(244,241,232,0.46);
+}
+body[data-skin="guigu"].sc3-paper #pauseBtn::before {
+  background: rgba(244,241,232,0.34); border-color: rgba(74,68,56,0.20); box-shadow: none;
+}
+body[data-skin="guigu"].sc3-paper #pauseBtn span { color: rgba(51,47,40,0.64); }
+body[data-skin="guigu"].sc3-paper #pauseBtn:active::before { background: rgba(234,229,213,0.62); }
+
+/* ================= 第103轮 · 玩法层临时 UI 也退到纸后 =================
+   第102轮如实标注里未动的两处：底部白色剧情横幅（#banner）、右下深色圆钮（.chat-dove，
+   飞鸽传书入口）。同样只在「收录图 + 水墨皮」的 body.sc3-paper 作用域生效；
+   只改外观，不删元素、不改尺寸定位、不改点击热区（44×44 与 pointer-events 原样）。 */
+body[data-skin="guigu"].sc3-paper #banner {
+  background: rgba(244,239,224,0.72);
+  border: 1px solid rgba(58,53,44,0.14);
+  border-radius: 10px;
+  box-shadow: none;
+  color: rgba(58,53,44,0.78);
+  text-shadow: none;
+}
+/* 卷轴两端轴头不删，只淡成纸上印痕 */
+body[data-skin="guigu"].sc3-paper #banner::before,
+body[data-skin="guigu"].sc3-paper #banner::after { opacity: .28; }
+body[data-skin="guigu"].sc3-paper .chat-dove {
+  background: rgba(244,239,224,0.34);
+  border: 1px solid rgba(58,53,44,0.16);
+  box-shadow: none;
+}
+body[data-skin="guigu"].sc3-paper .chat-dove canvas { opacity: .52; }
+body[data-skin="guigu"].sc3-paper .chat-wrap #chatInput {
+  background: rgba(244,239,224,0.70);
+  border-color: rgba(58,53,44,0.14);
+  color: rgba(51,47,40,0.82);
+}
