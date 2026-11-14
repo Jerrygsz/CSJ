@@ -158,8 +158,10 @@ window.ITEMS = [
   // unique：世上只此一件 —— 拆了/卖了就再也拿不到第二件，等于永久失去弹反，所以走 unique 的
   // 「只此一件」分支（不卖、不拆、不叠第二件），而不是留个「拆」按钮给人误点。
   // itemId 与 PARRY.CARRIERS[*].itemId 一一对应，弹反系统据此认载体。
-  { id: 'g_xt_ftd', name: '玄铁飞天盾', rarity: 2, icon: '🛡', slot: 'guard', req: 8,  noDrop: true, unique: true,
-    desc: '玄阴玄铁炼制，绕身全方位防御。基础弹反盾：单击窗口宽，反伤偏低。' },
+  // req 由 8 收到 1：这是入门弟子随身之物，韩立初入七玄门就带在身上。
+  // 原来的 Lv8 门槛让「新档默认装备」变成越级佩戴，战斗里弹反键能按、装备页却写着「需炼气八层」。
+  { id: 'g_xt_ftd', name: '玄铁飞天盾', rarity: 2, icon: '🛡', slot: 'guard', req: 1,  noDrop: true, unique: true,
+    desc: '玄阴玄铁炼制，绕身全方位防御。入门随身之物。基础弹反盾：单击窗口宽，反伤偏低。' },
   { id: 'g_bl_dun', name: '白磷盾',     rarity: 3, icon: '🛡', slot: 'guard', req: 14, noDrop: true, unique: true,
     desc: '墨蛟白磷炼制，韩立筑基期主力防具。弹反成功附加“蚀”持续伤害。' },
   { id: 'g_jg_fu',  name: '金刚符',     rarity: 3, icon: '📜', slot: 'guard', req: 18, noDrop: true, unique: true,

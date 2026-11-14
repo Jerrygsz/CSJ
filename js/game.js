@@ -189,7 +189,10 @@
       // 一旦研习便永久在册，过图剪枝不清。与「地图临图功法（buildPlayerSkills 直写）」区分开。
       learnedManuals: {},
       // 已装备的槽位（id 需仍在储物袋中）护体槽装弹反载体（见 js/parry.js）
-      equip: { weapon: null, armor: null, trinket: null, talisman: null, guard: null },
+      // guard 默认装玄铁飞天盾：弹反是战斗里唯一有深度的主动操作，
+      // 若不默认佩上，新玩家第一场仗按下去毫无反应（parryPress 静默 return），
+      // 六个版本打磨的系统等于对新档关闭。护体法宝仍可在洞府卸下换更强的。
+      equip: { weapon: null, armor: null, trinket: null, talisman: null, guard: 'g_xt_ftd' },
       caves: [], diffClear: {}, lastDiff: 'easy',
       // 药圃：按地块各记一份（{地块id: 已长成次数}），在战斗图里待 1 秒每块各长 1 次，满 99 停；
       // gardenTick 是所有地块共用的、不足 1 秒的零头
@@ -578,7 +581,15 @@
   // 凡人味防御系统随 20261111D 接入；旧档读档即补、只补一次（gift_guard）。
   // 新档已在 defaultSave 自带（gift_guard 直接置 true），不会进这里。多给无害：储物袋可拆可卖。
   (function backfillGuardCarriers() {
-    if (save.gift_guard) return;
+    if (save.gift_guard) {
+      // 20261112J：老档此前只补进背包、没佩上，弹反键在战斗里是哑的。
+      // 护体槽空着就替玩家佩上玄铁飞天盾（有更强的已佩则不动）。
+      if (save.equip && !save.equip.guard && (save.inventory.g_xt_ftd || 0) > 0) {
+        save.equip.guard = 'g_xt_ftd';
+        writeSave();
+      }
+      return;
+    }
     save.gift_guard = true;
     const ids = ['g_xt_ftd', 'g_bl_dun', 'g_jg_fu'];
     let added = 0;
@@ -586,6 +597,9 @@
       if ((save.inventory[id] || 0) <= 0) { save.inventory[id] = 1; added++; }
     }
     if (added) save.totalItems = (save.totalItems || 0) + added;
+    // 补发的同时直接佩上：不然键在、按不动
+    save.equip = save.equip || {};
+    if (!save.equip.guard) save.equip.guard = 'g_xt_ftd';
     writeSave();
   })();
 
@@ -2149,7 +2163,20 @@
   }
   function parryPress() {
     if (G.state !== 'play') return;
-    const c = parryCarrier(); if (!c) return;
+    const c = parryCarrier();
+    if (!c) {
+      // 无载体不能静默 return：玩家按的是战斗里最重要的那颗键，
+      // 什么都不发生等于在告诉他「这系统不存在」。给提示 + 按钮抖一下，三秒不重复刷屏。
+      const now = G.time || 0;
+      if (now - (G._parryNoCarrier || -99) > 3) {
+        G._parryNoCarrier = now;
+        banner('未佩护体法宝 · 洞府装备页可装配');
+        if (Sfx && Sfx.warn) Sfx.warn();
+      }
+      const btn = elQuickBtns && elQuickBtns[2];
+      if (btn) restartAnim(btn, 'nudge');
+      return;
+    }
     const pr = G.parry; if (!pr) return;
     if (pr.state !== 'idle' || pr.cd > 0) return;
     if (c.tap == null) { pr.state = 'hold'; pr.holdT = 0; pr.shaLow = false; }
@@ -2743,7 +2770,7 @@
     if (ch) { if (btn.getAttribute('data-chain') !== ch) btn.setAttribute('data-chain', ch); }
     else if (btn.getAttribute('data-chain') != null) btn.removeAttribute('data-chain');
     const tip = c ? (c.name + ' · 按住护体（耗煞气、减速），单击格开反震　按 3 或点一下')
-      : '护体法宝（洞府 · 护体槽装配，需 Lv' + ((c && c.req) || 8) + '）';
+      : '未佩护体法宝 · 洞府 · 装备页 · 护体槽佩上一件（玄铁飞天盾已在袋中）';
     if (btn._tip !== tip) { btn._tip = tip; btn.title = tip; }   // 每帧写 title 也是 DOM 变更，先比
   }
   // ---------- 弹反键位置（save.parryPos：舞台比例 0..1，指按钮中心） ----------
@@ -6486,7 +6513,7 @@
   function curRealmLabel() { return stageLabel({ level: curRealmLevel() }); }
 
   function shaSt() {
-    if (!G.sha) G.sha = { v: 0, need: SHA_NEED, dmgT: 0, x2T: 0, sayT: 26 };
+    if (!G.sha) G.sha = { v: 0, need: SHA_NEED, dmgT: 0, x2T: 0, sayT: 26, cool: 0, pending: 0, done: 0 };
     return G.sha;
   }
   function insSt() {
@@ -6495,7 +6522,7 @@
   }
   // 每局开始时把上一局的顿悟与祭炼清干净
   function resetRunBuffs() {
-    G.sha = { v: 0, need: SHA_NEED, dmgT: 0, x2T: 0, sayT: 24 + Math.random() * 12 };
+    G.sha = { v: 0, need: SHA_NEED, dmgT: 0, x2T: 0, sayT: 24 + Math.random() * 12, cool: 0, pending: 0, done: 0 };
     G.insight = { skills: {}, n: 0, refine: 0 };
     G.summon = null;
     G.dashCd = 0;
@@ -6503,6 +6530,10 @@
   // 每顿悟一次，下一次门槛抬 6%：抬太多的话清怪慢的图一局撑不到 9 次
   // （120 → 127 → 135 → 143 → 151…，第 9 次约需 1380 点，一局正好在 9~13 次之间）
   const SHA_GROW = 1.06;
+  // 两次顿悟之间的硬间隔（秒）。顿悟面板会 G.state='levelup'、整局冻结，
+  // 之前 Boss 战 24 秒弹 5 次、最长一段连续战斗只有 5.04 秒 —— 战斗被切成了回合制。
+  // 25 秒 ≈ 一局普通图 3~4 次、Boss 单挑 1~2 次；煞气不会浪费，pending 满了就攒着。
+  const INSIGHT_COOL = 25;
   // 灵气自然汇聚：站着也在攒（每秒 5 点）。这一条是「每张战图至少 9 次顿悟」的保底 ——
   // 只靠击杀的话，清怪慢的图会卡在 5~6 次
   const SHA_DRIP = 5;
@@ -6517,19 +6548,21 @@
   // 旧配比是 40/25/20/10/5，但实测截到的卡里近一半是「灵石 +30」「移速 +10%」这类
   // 与「打得更狠」无关的东西 —— 玩家停下来选一张，选完屏幕上什么都没变。
   // 现在把 A 提到 45%、灵石压到 8%，并且 A 内部按「看得见程度」加权（见 w）。
+  // 牌名走原著语汇、数值退到副行：同一套 UI 里一半在讲「移速 +10%」、一半在讲「御风诀」，
+  // 前一半会把后一半的高级感一次性拉平。名字压到 4 字（卡片只有 118px 宽，超了就折三行）。
   const SKILL_MODS = [
-    { k: 'count', v: 1, name: '多打一发', w: 3 },     // 唯一一眼看得见的成长：出手变多
-    { k: 'dmg', v: 0.30, name: '伤害 +30%', w: 3 },   // 飘字变大，也算看得见
-    { k: 'cd', v: 0.25, name: '攻速 +25%', w: 2 },    // 出手术肉眼可感
-    { k: 'range', v: 0.30, name: '范围 +30%', w: 1 }, // 锁敌变远，画面上不明显，降权
-    { k: 'dur', v: 0.50, name: '持续 +50%', w: 0.5 }  // 弹道多飞一会儿，最不可感，压到最低
+    { k: 'count', v: 1, name: '一击化二', short: '再添一道', w: 3 },
+    { k: 'dmg', v: 0.30, name: '法力更凝', short: '伤害 +30%', w: 3 },
+    { k: 'cd', v: 0.25, name: '出手更疾', short: '施法间隔 −25%', w: 2 },
+    { k: 'range', v: 0.30, name: '神识更远', short: '范围 +30%', w: 1 },
+    { k: 'dur', v: 0.50, name: '余韵更久', short: '持续 +50%', w: 0.5 }
   ];
   const PASSIVE_MODS = [
-    { k: 'spd', v: 0.10, cap: 0.6, name: '移速 +10%' },
-    { k: 'leech', v: 0.04, cap: 0.2, name: '吸血 +4%' },
-    { k: 'armor', v: 0.08, cap: 0.35, name: '减伤 +8%' },
-    { k: 'maxhp', v: 15, cap: 300, name: '气血上限 +15' },
-    { k: 'shaGain', v: 0.15, cap: 1.2, name: '煞气 +15%' }
+    { k: 'spd', v: 0.10, cap: 0.6, name: '身法更轻', short: '移速 +10%' },
+    { k: 'leech', v: 0.04, cap: 0.2, name: '血气反哺', short: '吸血 +4%' },
+    { k: 'armor', v: 0.08, cap: 0.35, name: '护体更坚', short: '减伤 +8%' },
+    { k: 'maxhp', v: 15, cap: 300, name: '根基更厚', short: '元气 +15' },
+    { k: 'shaGain', v: 0.15, cap: 1.2, name: '心念更定', short: '煞气 +15%' }
   ];
   // 加权抽：w 越大概率越高。拾取范围那张卡已经删了 —— 它归装备管，占一次顿悟纯属浪费
   function pickWeighted(arr) {
@@ -6555,7 +6588,7 @@
     const own = ownSkills().filter(s => s.atk); if (!own.length) return optNewSkill();
     const s = U.pick(own), m = pickWeighted(skillModsFor(s));
     return { key: 'A' + s.id + m.k, kind: 'A', id: s.id, icon: s.icon || '⚔', mod: m,
-      name: s.name + ' · ' + m.name, desc: '本局内永久生效' };
+      name: m.name, desc: s.name + ' · ' + (m.short || '') + ' · 本局' };
   }
   function optNewSkill() {
     // 顿悟能「悟」出的新神通，只能是：① 原著明言可不凭典籍自行参悟的功法；
@@ -6573,29 +6606,38 @@
     const pool = PASSIVE_MODS.filter(p => !(p.k === 'pickup' && pickupFull()));
     const p = U.pick(pool.length ? pool : PASSIVE_MODS);
     return { key: 'C' + p.k, kind: 'C', icon: '🌀', mod: p, name: p.name,
-      desc: p.cap == null ? '本局被动 · 叠加无上限' : '本局被动，可叠加' };
+      desc: (p.short || '') + (p.cap == null ? ' · 可叠不封顶' : ' · 可叠') };
   }
   function optStone() {
     const pick = U.pick([
-      { v: 30, name: '灵石 +30', desc: '立刻揣进袋里，能马上祭炼' },
-      { v: 60, name: '灵石 +60', desc: '一大把，够祭炼两次' },
-      { v: 0.2, name: '煞气门槛 −20%', desc: '此后每次顿悟都来得更快' }
+      { v: 30, name: '得灵石三十', desc: '揣进袋里，够祭炼一回' },
+      { v: 60, name: '得灵石六十', desc: '一大把，够祭炼两回' },
+      { v: 0.2, name: '门槛降两成', desc: '此后每次顿悟都来得更快' }
     ]);
     return { key: 'D' + pick.name, kind: 'D', icon: '💎', pick: pick, name: pick.name, desc: pick.desc };
   }
   function optSpecial() {
     const pick = U.pick([
-      { k: 'x2sha', name: '煞气翻倍 · 10 秒', desc: '趁现在多杀几只' },
-      { k: 'x2dmg', name: '伤害翻倍 · 15 秒', desc: '这一口气够狠' },
-      { k: 'heal', name: '气血全满', desc: '一口气吊回来' },
-      { k: 'summon', name: '召灵宠助战 · 30 秒', desc: '跟在另一侧，替你打半分钟' },
-      { k: 'clear', name: '清场 · 屏内小怪尽灭', desc: '屏内小怪一并抹去（这一下不计煞气）' }
+      { k: 'x2sha', name: '煞气如潮', desc: '十息之内，煞气翻倍' },
+      { k: 'x2dmg', name: '法力暴涨', desc: '十五息之内，伤害翻倍' },
+      { k: 'heal', name: '元气尽复', desc: '伤势一夕全消' },
+      { k: 'summon', name: '灵宠助战', desc: '三十息内，替你打半阵' },
+      { k: 'clear', name: '一念清场', desc: '屏内小妖尽灭（不计煞气）' }
     ]);
     return { key: 'E' + pick.k, kind: 'E', icon: '⚡', pick: pick, name: pick.name, desc: pick.desc };
   }
   function rollInsight() {
-    const out = [], seen = {};
-    const push = c => { if (!c || seen[c.key]) return; seen[c.key] = 1; out.push(c); };
+    const out = [], seen = {}, seenSkill = {};
+    const push = c => {
+      if (!c || seen[c.key]) return;
+      // 同一门功法只占一张牌：「火弹术 · 多打一发」与「火弹术 · 出手更疾」并排时，
+      // 玩家看到的是两张一样的卡，而不是两个选择 —— 实玩勾到的「重复项」就是这一处。
+      if (c.id && (c.kind === 'A' || c.kind === 'B')) {
+        if (seenSkill[c.id]) return;
+        seenSkill[c.id] = 1;
+      }
+      seen[c.key] = 1; out.push(c);
+    };
     let guard = 0;
     while (out.length < 3 && guard++ < 80) {
       const r = Math.random() * 100;
@@ -6605,7 +6647,13 @@
       else if (r < 93) push(optStone());
       else push(optSpecial());
     }
-    while (out.length < 3) push(optStone());
+    // 兜底：抽不满三张时补灵石卡，不许重复；连灵石卡都被去重掉时给一张保底
+    let fg = 0;
+    while (out.length < 3 && fg++ < 24) push(optStone());
+    while (out.length < 3) {
+      out.push({ key: 'Z' + out.length, kind: 'D', icon: '💎', pick: { v: 30 },
+        name: '得灵石三十', desc: '揣进袋里，够祭炼一回' });
+    }
     return out;
   }
   // 通用的三选一面板（顿悟 / 祭炼共用，也是升级选卡那套 UI）
@@ -6864,6 +6912,9 @@
     // 这一次顿悟用掉的门槛，用掉之后抬一档
     st.need = Math.max(SHA_NEED, Math.round(st.need * SHA_GROW));
     st.done = (st.done || 0) + 1;
+    // 硬间隔：顿悟面板会冻结主循环，之前 Boss 战被它切成 24 秒 5 段、最长一段只 5 秒。
+    // 单挑没有小怪，SHA_BOSS_DUEL 让煞气涨得极快，所以 Boss 战再拉长一档。
+    st.cool = (G.map && G.map.type === 'boss') ? INSIGHT_COOL * 1.4 : INSIGHT_COOL;
     showCards('煞气顿悟 · 择一', rollInsight());
     Sfx.levelup();
   }
@@ -6957,8 +7008,9 @@
     }
     if (st.x2T > 0) st.x2T = Math.max(0, st.x2T - dt);
     if (st.dmgT > 0) st.dmgT = Math.max(0, st.dmgT - dt);
-    // 攒满的顿悟等回到 play 再弹（击杀/清场途中不打断结算）
-    if (st.pending > 0 && G.state === 'play' && !G.pendingEnding && G.vacuumT <= 0) { st.pending--; openInsight(); return; }
+    // 攒满的顿悟等回到 play 再弹（击杀/清场途中不打断结算），且离上一次至少 INSIGHT_COOL 秒
+    if (st.cool > 0) st.cool = Math.max(0, st.cool - dt);
+    if (st.pending > 0 && st.cool <= 0 && G.state === 'play' && !G.pendingEnding && G.vacuumT <= 0) { st.pending--; openInsight(); return; }
     st.sayT -= dt;
     if (st.sayT <= 0) {
       st.sayT = 30 + Math.random() * 10;
@@ -6974,7 +7026,11 @@
     st.v += n * k;
     // need <= 0 时 while 会永远成立 → 整个主线程焊死。加一道护栏，宁可这一次不给顿悟
     let guard = 0;
-    while (st.need > 0 && st.v >= st.need && guard++ < 64) { st.v -= st.need; st.pending = (st.pending || 0) + 1; }
+    while (st.need > 0 && st.v >= st.need && guard++ < 64) {
+      // 一次只挂一张待弹的顿悟：挂三四张会在硬间隔结束后连着弹四次，把 Boss 战切成一串面板
+      if ((st.pending || 0) >= 1) { st.v = st.need; break; }
+      st.v -= st.need; st.pending = 1;
+    }
     if (st.need > 0 && st.v >= st.need) st.v = st.need;   // 护栏兜底：攒着，下一帧继续
   }
   // 顿悟/祭炼对某门功法的加成（改的是这次出手用的那份配置，不动全局表）
@@ -7026,11 +7082,17 @@
       { kind: 'rain', name: '灵石雨', icon: '💎', desc: '散落一把灵石与修为' },
       { kind: 'fortune', name: '福缘', icon: '🍀', desc: '随机功法+1级' }
     ];
-    while (picks.length < 3) picks.push(U.pick(fillers));
+    // 兜底卡不许重复：原来 U.pick 可能连抽两张「福缘」，实玩里被当成重复项记了一笔
+    const usedKind = new Set(picks.map(c => c.kind));
+    for (const f of fillers) {
+      if (picks.length >= 3) break;
+      if (usedKind.has(f.kind)) continue;
+      usedKind.add(f.kind); picks.push(f);
+    }
     return picks;
   }
   function buildChoicesAndShow() {
-    const t = document.querySelector('#levelup .lu-title'); if (t) t.textContent = '进阶 · 择一功法';
+    const t = document.querySelector('#levelup .lu-title'); if (t) t.textContent = '进阶 · 三次机缘，择其一';
     const choices = buildChoices();
     elCards.innerHTML = '';
     for (const c of choices) {
@@ -7054,7 +7116,12 @@
       const capNow = (s) => window.skillCapById ? window.skillCapById(s.id, G.player.level) : s.max;
       const own = SKILLS.filter(s => (!s.minLv || G.player.level >= s.minLv) && (G.player.skills[s.id] || 0) > 0 && (G.player.skills[s.id] || 0) < capNow(s));
       if (own.length) { const s = U.pick(own); G.player.skills[s.id]++; if (s.id === 'sword') bumpSwordPick(true); }
-      else { const ns = SKILLS.find(s => !(G.player.skills[s.id])); if (ns) { G.player.skills[ns.id] = 1; if (ns.id === 'sword') bumpSwordPick(true); } }
+      else {
+        // 只看境界够得着的：原来没筛 minLv，可能给一本这个境界根本练不了的功法
+        const ns = SKILLS.find(s => !(G.player.skills[s.id]) && (!s.minLv || G.player.level >= s.minLv));
+        if (ns) { G.player.skills[ns.id] = 1; if (ns.id === 'sword') bumpSwordPick(true); }
+        else { dropStone(G.player.x, G.player.y, 6); banner('功法已在册 · 化灵石一捧'); }
+      }
       recalcMaxhp(); syncCultivate();
     }
     elLevelup.style.display = 'none';
@@ -13596,10 +13663,13 @@
   // 表面清档，实则以九九归一轮回之法，把本世超出凡胎的部分（境界 + 功法）
   // 各取 1/81 炼作「余荫」，叠加到新生角色的初始属性上，代代累积。
   function resetAllProgress() {
-    save.inventory = {}; save.bonuses = {}; save.totalItems = 0; save.stones = 0;
+    // 护体法宝要跟着重开回来：清档 / 转世之后若库里没有载体，弹反键又变成按下去没反应。
+    // 这三件是 unique（不可卖不可拆），本就不该因重开而消失。
+    save.inventory = { g_xt_ftd: 1, g_bl_dun: 1, g_jg_fu: 1 }; save.bonuses = {}; save.totalItems = 3; save.stones = 0;
     save.cleared = []; save.unlocked = ['qixuan']; save.mapId = 'qixuan';
     save.cultivate = { level: 1, skills: { sword: 1 } };
-    save.equip = { weapon: null, armor: null, trinket: null, talisman: null };
+    save.equip = { weapon: null, armor: null, trinket: null, talisman: null, guard: 'g_xt_ftd' };
+    save.gift_guard = true;
     save.caves = []; save.diffClear = {}; save.lastDiff = 'easy'; save.met = [];
     save.best = { time: 0, kills: 0, level: 1 }; save.wins = 0;
     save.pets = []; save.pet = null; save.sealed = null;

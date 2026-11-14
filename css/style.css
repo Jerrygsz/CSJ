@@ -939,6 +939,15 @@ body.rot #ver { visibility: hidden; }
 }
 /* 连反层数：挂在按钮上方（手在按钮上，眼睛也在按钮上）。.qb 默认 overflow:hidden 会裁掉，这里放开 */
 #parryBtn { overflow: visible; }
+/* 未佩护体法宝时按下去亮一下再暗回去：告诉玩家「这颗键现在没通电」，不是坏了。
+   不动 transform —— 默认位与自定义位用的是两套 transform（translateY(-50%) / none），
+   动它会让按钮跳位；filter 只重绘这 72px 的圆钮本身。 */
+#parryBtn.nudge { animation: parryKeyNudge .3s ease-out; }
+@keyframes parryKeyNudge {
+  0%, 100% { filter: brightness(1); }
+  30%      { filter: brightness(1.75) saturate(1.5); }
+  65%      { filter: brightness(0.82); }
+}
 #parryBtn[data-chain]::before {
   content: '连 ×' attr(data-chain);
   position: absolute; left: 50%; top: -18px; transform: translateX(-50%);

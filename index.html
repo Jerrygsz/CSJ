@@ -9,7 +9,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <title>凡人·长生劫 — 炼气期 · 筑基 · 结丹 · 元婴 · 化神</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%23131821%22/%3E%3Ctext x=%2216%22 y=%2223%22 font-size=%2220%22 text-anchor=%22middle%22 fill=%22%23ffd24a%22%3E凡%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="css/style.css?v=20261111I">
+  <link rel="stylesheet" href="css/style.css?v=20261114A">
 </head>
 <body>
   <div id="wrap">
@@ -31,8 +31,8 @@
             <div id="buffrow"></div>
           </div>
           <button id="pauseBtn" title="禁制（暂停）" aria-label="暂停"><span>禁制</span></button>
-          <!-- 自动战斗（大衍）：站桩挂机。逢对话自动点、煞气满自动选卡，直到结算 -->
-          <button id="autoBtn" title="大衍（自动战斗：站桩挂机，遇弹幕侧身让开，到结算为止）">大衍</button>
+          <!-- 自动战斗（大衍）：入定后由神念代驭。逢对话自动点、煞气满自动选卡，直到结算 -->
+          <button id="autoBtn" title="大衍 · 神念自行御敌（入定之后由神念代驭，遇弹幕自行侧身，至结算方止）">大衍</button>
           <div id="bosswrap">
             <div id="bossname">墨大夫</div>
             <span id="bossSeal">妖</span>
@@ -140,7 +140,7 @@
 
         <!-- 升级三选一 -->
         <div id="levelup" class="overlay">
-          <h2 class="lu-title">进阶 · 择一功法</h2>
+          <h2 class="lu-title">进阶 · 三次机缘，择其一</h2>
           <div id="cards"></div>
         </div>
 
@@ -362,7 +362,7 @@
     </div>
   </div>
 
-  <div id="ver">v20261111I</div>
+  <div id="ver">v20261114A</div>
 
   <!-- 横屏提示：触摸设备（手机/平板）横过来时，竖版画面会被压成极窄一条。
        与其硬塞进去，不如直接请人转回来 —— 只在 body.rot 时出现，桌面不受影响。 -->
@@ -372,45 +372,45 @@
     <span>《凡人·长生劫》是一款竖屏游戏</span>
   </div>
 
-  <script src="js/utils.js?v=20261111I"></script>
-  <script src="js/audio.js?v=20261111I"></script>
-  <script src="js/sprites.js?v=20261111I"></script>
-  <script src="js/cutscene.js?v=20261111I"></script>
-  <script src="js/skills.js?v=20261111I"></script>
-  <script src="js/enemies.js?v=20261111I"></script>
-  <script src="js/story.js?v=20261111I"></script>
-  <script src="js/items.js?v=20261111I"></script>
-  <script src="js/maps.js?v=20261111I"></script>
-  <script src="js/recipes.js?v=20261111I"></script>
-  <script src="js/encounters.js?v=20261111I"></script>
-  <script src="js/late.js?v=20261111I"></script>
-  <script src="js/late2.js?v=20261111I"></script>
-  <script src="js/late3.js?v=20261111I"></script>
-  <script src="js/lingjie.js?v=20261111I"></script>
-  <script src="js/xianjie.js?v=20261111I"></script>
-  <script src="js/maps-order.js?v=20261111I"></script>
-  <script src="js/balance.js?v=20261111I"></script>
+  <script src="js/utils.js?v=20261114A"></script>
+  <script src="js/audio.js?v=20261114A"></script>
+  <script src="js/sprites.js?v=20261114A"></script>
+  <script src="js/cutscene.js?v=20261114A"></script>
+  <script src="js/skills.js?v=20261114A"></script>
+  <script src="js/enemies.js?v=20261114A"></script>
+  <script src="js/story.js?v=20261114A"></script>
+  <script src="js/items.js?v=20261114A"></script>
+  <script src="js/maps.js?v=20261114A"></script>
+  <script src="js/recipes.js?v=20261114A"></script>
+  <script src="js/encounters.js?v=20261114A"></script>
+  <script src="js/late.js?v=20261114A"></script>
+  <script src="js/late2.js?v=20261114A"></script>
+  <script src="js/late3.js?v=20261114A"></script>
+  <script src="js/lingjie.js?v=20261114A"></script>
+  <script src="js/xianjie.js?v=20261114A"></script>
+  <script src="js/maps-order.js?v=20261114A"></script>
+  <script src="js/balance.js?v=20261114A"></script>
   <!-- Boss 招式表：按原著战斗描写写死的招式（名 / 前摇 / 伤害系数），game.js 只负责执行 -->
-  <script src="js/bosskit.js?v=20261111I"></script>
+  <script src="js/bosskit.js?v=20261114A"></script>
   <!-- 弹反系统（凡人味防御）：纯数据层，runtime 逻辑在 game.js 的 parry* 系列 -->
-  <script src="js/parry.js?v=20261111I"></script>
-  <script src="js/arts.js?v=20261111I"></script>
-  <script src="js/sources.js?v=20261111I"></script>
-  <script src="js/value.js?v=20261111I"></script>
-  <script src="js/vendor/pixelfx.bundle.js?v=20261111I"></script>
-  <script src="js/fxpix.js?v=20261111I"></script>
-  <script src="js/mapCodex.js?v=20261111I"></script>
-  <script src="js/game.js?v=20261111I"></script>
-  <script src="js/debugapi.js?v=20261111I"></script>
-  <script src="js/net.js?v=20261111I"></script>
-  <script src="js/coop.js?v=20261111I"></script>
-  <script src="js/chat.js?v=20261111I"></script>
+  <script src="js/parry.js?v=20261114A"></script>
+  <script src="js/arts.js?v=20261114A"></script>
+  <script src="js/sources.js?v=20261114A"></script>
+  <script src="js/value.js?v=20261114A"></script>
+  <script src="js/vendor/pixelfx.bundle.js?v=20261114A"></script>
+  <script src="js/fxpix.js?v=20261114A"></script>
+  <script src="js/mapCodex.js?v=20261114A"></script>
+  <script src="js/game.js?v=20261114A"></script>
+  <script src="js/debugapi.js?v=20261114A"></script>
+  <script src="js/net.js?v=20261114A"></script>
+  <script src="js/coop.js?v=20261114A"></script>
+  <script src="js/chat.js?v=20261114A"></script>
 
   <script>
     // 注册 Service Worker：每次发版自动拉最新 index.html，绕开中间代理缓存
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function () {
-        navigator.serviceWorker.register('sw.js?v=20261111I').catch(function () {
+        navigator.serviceWorker.register('sw.js?v=20261114A').catch(function () {
           /* 注册失败不影响游戏本体 */
         });
       });
