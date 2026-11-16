@@ -614,6 +614,10 @@ F.setLevel(35);
 // 冲关有成败：十三枚筑基丹 = 十成把握（每枚 +8%），此处押满，避免随机失败打挂回归
 F.addItem('zhuji', 13);
 for (const id of ['m_yusuizhi', 'm_zihua', 'm_tianling']) F.addItem(id, 3);
+// 20261114C：筑基门多了一味「千年灵药」——辅药三十一味要在数百年以上火候，
+// 园里长不到，只能靠掌天瓶把一畦催成千年养出来（P1-1 经营闭环）。
+// 这里直接发一株：本段验的是破境流程，不是药圃（药圃另有 _scratch/aiplay/verify-batch3.mjs 专测）。
+F.addItem('m_qianlingyao', 1);
 F.setStones(5000);
 // 筑基闭关打通 → 燕家堡解锁
 F.breakLuck(true);   // 冲关成败固定为「成」，回归不吃随机

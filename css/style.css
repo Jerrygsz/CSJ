@@ -225,6 +225,81 @@ body[data-skin="guigu"] #breakOmen .bo-sub { color: #3a332a; text-shadow: 0 0 4p
 body[data-skin="guigu"] #breakOmen .bo-rule { background: linear-gradient(90deg, transparent, rgba(58,53,44,0.55), transparent); }
 body[data-skin="guigu"] #breakOmen.fail .bo-name { color: #6a6154; }
 
+/* ---------- 高光纪年卡（js/chronicle.js）----------
+   一块竖卷：上下两道木轴，中间三屏题款（事由 / 岁月 / 结果），右上角一方朱印。
+   全是字，没有插画 —— 分量靠留白、金线与印面撑住。
+   整层是 inset:0 的全屏层：入场动画只许动 opacity / transform，
+   绝不在这里过渡 box-shadow（不参与合成＝每帧重绘整屏，见性能铁律）。 */
+#chronicle {
+  position: absolute; inset: 0; display: none;
+  align-items: center; justify-content: center;
+  background: rgba(6,5,4,0.66);
+  z-index: calc(var(--z-modal) + 5);
+  padding: 24px 26px;
+}
+#chronicle.on { display: flex; }
+#chronicle .ch-scroll { position: relative; width: 100%; max-width: 330px; }
+#chronicle .ch-scroll.in { animation: chIn 0.5s ease-out both; }
+#chronicle .ch-rod {
+  display: block; height: 7px; border-radius: 4px;
+  background: linear-gradient(180deg, #d8b96a, #8a6a2a 55%, #4a3413);
+}
+#chronicle .ch-body {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 26px 22px 24px; text-align: center;
+  background: linear-gradient(180deg, rgba(24,21,16,0.97), rgba(17,15,11,0.97));
+  border-left: 1px solid rgba(201,162,74,0.34);
+  border-right: 1px solid rgba(201,162,74,0.34);
+}
+#chronicle .ch-k { font-size: var(--fs-micro); letter-spacing: 8px; color: var(--text-2); }
+#chronicle .ch-big { font-size: 26px; letter-spacing: 4px; line-height: 1.34; color: var(--accent); }
+#chronicle .ch-rule {
+  display: block; width: 96px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--line-gold), transparent);
+}
+#chronicle .ch-sub { font-size: var(--fs-cap); line-height: 1.95; color: var(--text-1); }
+/* 朱印：竖排两字，略斜，压在卷面右上 */
+#chronicle .ch-seal {
+  position: absolute; right: 12px; top: 24px;
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border: 1.5px solid rgba(192,53,42,0.9);
+  color: #e0553f; font-size: 11px; line-height: 1.15;
+  writing-mode: vertical-rl; text-orientation: upright;
+  transform: rotate(-4deg); opacity: 0.92;
+}
+#chronicle .ch-hint {
+  position: absolute; left: 0; right: 0; bottom: 34px;
+  text-align: center; font-size: var(--fs-micro); letter-spacing: 3px;
+  color: rgba(233,224,203,0.55);
+}
+#chronicle .ch-skip {
+  position: absolute; right: 16px; top: 16px;
+  padding: 5px 10px; font-size: var(--fs-micro); letter-spacing: 1px;
+  color: var(--text-2); background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(201,162,74,0.28); border-radius: 3px;
+}
+@keyframes chIn {
+  0%   { opacity: 0; transform: translateY(14px) scale(0.97); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+/* 水墨皮：金线在宣纸上几乎看不见 —— 卷面翻成米黄纸底，字走深棕，印面用印泥红。
+   注意：#chronicle 的底衬要比金皮更暗一档，否则米黄纸卡压在米黄纸面板上分不开；
+   而 .ch-hint / .ch-skip 在纸卡之外（压在暗底上），颜色必须继续走浅色 —— 它们不在此处覆盖。 */
+body[data-skin="guigu"] #chronicle { background: rgba(20,17,13,0.74); }
+body[data-skin="guigu"] #chronicle .ch-body {
+  background: linear-gradient(180deg, rgba(247,242,228,0.98), rgba(240,233,215,0.98));
+  border-left-color: rgba(58,53,44,0.42); border-right-color: rgba(58,53,44,0.42);
+}
+body[data-skin="guigu"] #chronicle .ch-rod {
+  background: linear-gradient(180deg, #b99a58, #8a6a2a 55%, #4a3413);
+}
+body[data-skin="guigu"] #chronicle .ch-k { color: rgba(58,53,44,0.72); }
+body[data-skin="guigu"] #chronicle .ch-big { color: #8f4f2e; }
+body[data-skin="guigu"] #chronicle .ch-rule {
+  background: linear-gradient(90deg, transparent, rgba(58,53,44,0.5), transparent);
+}
+body[data-skin="guigu"] #chronicle .ch-sub { color: #3a332a; }
+
 /* ---------- 覆盖层 ---------- */
 /* 覆盖层：左右各留 16，面板一律吃满可用宽（上限 460）——切界面时左右不再跳 */
 .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-4); background: var(--bg-scrim); padding: var(--sp-4); text-align: center; z-index: var(--z-panel); }

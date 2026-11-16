@@ -583,10 +583,10 @@ if (fs.existsSync(truthPath)) {
   const htmlVer = (html.match(/sw\.js\?v=(20\d{6}[A-Z])/) || [])[1];
   const swVer = (swSrc.match(/const BUILD = '([^']+)'/) || [])[1];
   const verHits = htmlVer ? (html.match(new RegExp(htmlVer, 'g')) || []).length : 0;
-  // 34 = 33 处（原有 31 个 ?v= 脚本 + css + #ver + sw 注册 + cutscene + maps-order） + 新增 js/parry.js 一条 ?v= 引用。
+  // 35 = 34 处（原有 33 个 ?v= 脚本 + css + #ver + sw 注册） + 新增 js/chronicle.js 一条 ?v= 引用。
   // 以后每新增一条带 ?v= 的脚本引用，此处同步 +1。
-  ok(!!htmlVer && htmlVer === swVer && verHits === 34,
-     'index.html 34 处版本号与 sw.js BUILD 自洽（当前 ' + (htmlVer || '未找到') + '）',
+  ok(!!htmlVer && htmlVer === swVer && verHits === 35,
+     'index.html 35 处版本号与 sw.js BUILD 自洽（当前 ' + (htmlVer || '未找到') + '）',
      { html: verHits, sw: swVer });
 
   // ---- 时间线守门（按 D:/Games/CSJ/raw 原著全文校对后的四处时序 + 两段台词归属） ----

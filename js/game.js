@@ -200,6 +200,10 @@
       // 移栽品种：{地块id: [材料id]} —— 原著里韩立拿绿液把灵药移进药园、此后定期采收；
       // 基础品种仍写在 CAVES[].gardens[].pool，这里只记「玩家自己移栽进来的」那几味
       gardenSeed: {},
+      // 掌天瓶催熟：{地块id: 1} 记「这一畦滴过绿液、正催千年」；{地块id: 秒} 记已催多久。
+      // 普通地长一百年就到头（gardenCharge 走「次」），只有滴过液的那一畦能上千 ——
+      // 原著里园里的草「味味都要数百年的火候」，长不到的，只能靠瓶里的绿液催。
+      gardenYear: {}, gardenQianT: {},
       // 已遇过的际遇（一世只遇一次）；可重复的小事不入此列
       met: [],
       // 灵宠：拥有的（养在灵兽袋里）与出战的
@@ -378,6 +382,9 @@
         skin: (s.skin === 'guigu') ? 'guigu' : 'jin',
         // 移栽品种老存档：没有这个字段就补成空账
         gardenSeed: (s.gardenSeed && typeof s.gardenSeed === 'object') ? s.gardenSeed : {},
+        // 掌天瓶催千年老存档：同样补空账（旧档没催过，各畦都是百年）
+        gardenYear: (s.gardenYear && typeof s.gardenYear === 'object') ? s.gardenYear : {},
+        gardenQianT: (s.gardenQianT && typeof s.gardenQianT === 'object') ? s.gardenQianT : {},
         wounded: (s.wounded && typeof s.wounded === 'object') ? s.wounded : null,
         // 古传送阵只跌一次：旧档按「已通关 guchuan」认账，免得老玩家再跌一遍
         woundedDone: !!s.woundedDone || (Array.isArray(s.cleared) && s.cleared.indexOf('guchuan') >= 0),
@@ -6194,6 +6201,20 @@
     if (!Array.isArray(save.seen)) save.seen = [];
     if (save.seen.indexOf(key) < 0) { save.seen.push(key); writeSave(); }
   }
+  // 高光纪年卡（js/chronicle.js）：结丹 / 结婴 / 飞升灵界 / 道天大劫。
+  // 它与剧情段落的区别在记账时机：纪年卡是「事后题款」，一开演就算看过（跳过≠白看）；
+  // 剧情段落是经历，只在真演完时记账（跳过 = 还没发生）。
+  // 一开始就记账还有个实际用处：破境图会先走 settleBreakScene、再走 showVictory，
+  // 两处都想演同一张卡，先记上账第二处自然就不演了。
+  function chroniclePlay(id, after) {
+    if (!id || !window.Chronicle) { if (after) after(); return false; }
+    if (storySeen('chron:' + id)) { if (after) after(); return false; }
+    const started = window.Chronicle.play(id, function () { if (after) after(); });
+    if (started) storyMarkSeen('chron:' + id);
+    return started;
+  }
+  // 哪些破境门对应哪张卡（洞府直冲、没有对应剧情图时走这条）
+  const CHRONICLE_LV = { 56: 'jiedan', 82: 'jieying' };
 
   // ---------- 战斗内定时剧情 ----------
   function checkStory() {
@@ -10295,6 +10316,12 @@
     if (elVictoryStats) elVictoryStats.style.display = (m.type === 'story' || m.type === 'market') ? 'none' : 'flex';
     elVTime.textContent = fmtTime(G.time); elVKills.textContent = G.kills; elVLevel.textContent = curRealmLabel();
     renderVictoryLoot(gained, newly, cave, newDiff);
+    // 高光纪年卡：结丹 / 结婴 / 飞升灵界 / 道天大劫 —— 原著里最重的四笔，
+    // 落到界面上原来只有一段对白加这块结算面板。这里补一场卷轴题款，压在结算之上演，
+    // 演完或收起点掉才看战果（它 pointer-events 全吞，不会误触底下的按钮）。
+    // 破境图只在真成了时才演：冲关未成还铺一张「结丹」的题款，等于骗人。
+    const chronOk = !m.endLevel || !!realmUp || !breakReqFor(m.endLevel);
+    if (chronOk && window.Chronicle && window.Chronicle.ids().indexOf(m.id) >= 0) chroniclePlay(m.id);
     elVictory.style.display = 'flex';
     refreshTitle();
   }
@@ -11556,6 +11583,7 @@
     const openStep = foldOpenOf('break', stepKeys, pending ? String(pending.lv) : (stepKeys[stepKeys.length - 1] || ''));
     for (const { b, done, miss } of steps) {
       let body = '<div class="cs-note">' + (b.tip || '') + '</div>';
+      body += gardenBreakNote(b);
       // 物事齐了：「闭门冲关」按钮顶在最上面，不用往下翻就能点
       if (!done && !miss.length) {
         const bm = MAPS.find(x => x.endLevel === b.lv);
@@ -11650,6 +11678,27 @@
     return '<div class="brk-row' + (ok ? ' ok' : '') + (itemId ? ' click' : '') + '"' + click + '>' +
       '<i>' + tag + '</i><span>' + text + '</span><b>' + (ok ? '齐' : '缺') + '</b></div>';
   }
+  // 进阶面板里那一行「药圃」：破境要的那株千年灵药只能自家催出来，
+  // 所以把三件事一次摆明白 —— 已收几株、掌天瓶还剩几滴、几畦在催。
+  // 只在「这一关真要千年灵药」时出现，别的关卡不添噪音。
+  function gardenBreakNote(b) {
+    const need = ((b && b.mats) || []).some(m => m[0] === 'm_qianlingyao');
+    if (!need) return '';
+    const have = save.inventory['m_qianlingyao'] || 0;
+    const gl = save.greenLiquid || 0;
+    let nPlots = 0, nQian = 0, nReady = 0;
+    for (const x of gardenList()) {
+      if ((save.caves || []).indexOf(x.cave.id) < 0) continue;   // 洞府还没到手的地不算
+      nPlots++;
+      if (gardenQianOf(x.g)) { nQian++; if (gardenQianReady(x.g)) nReady++; }
+    }
+    if (!nPlots) {
+      return '<div class="cs-note">千年灵药须自药圃催出来 · 眼下还没有药圃（黄枫谷·百药园那一趟之后才有）。</div>';
+    }
+    return '<div class="cs-note">千年灵药 <b>' + have + '</b> 株 · 掌天瓶余 <b>' + gl + '</b> 滴 · 药圃 ' + nPlots + ' 畦' +
+      '（在催 ' + nQian + ' 畦' + (nReady ? '，已长成 ' + nReady + ' 畦' : '') + '）' +
+      (have > 0 ? '' : '　·　往洞府「药圃」页滴一滴绿液，一畦催成千年，再打满 ' + QIAN_SEC + ' 秒回来收') + '</div>';
+  }
   function renderBreakBody(b) {
     if (!b) return '<div class="cs-empty">眼前没有要破的关。<br>修为满了，自然会来。</div>';
     let html = '<div class="cs-title">' + (b.from || '') + ' → ' + b.realm + '</div>' +
@@ -11660,6 +11709,7 @@
         '余下 <b>' + wuTake(b, 0) + '</b> 道只能扛 —— 押' + wuName(b) + '越多，把握越高，可避开的衰越少。</div>';
     }
     html += '<div class="cs-note brk-hint">缺哪一样，点那一行就写它去哪儿取。</div>';
+    html += gardenBreakNote(b);
     html += '<div class="brk-list">' + breakLevelRow(b);
     for (const it of (b.items || [])) {
       const have = save.inventory[it[0]] || 0;
@@ -12016,6 +12066,8 @@
     G.breakPending = null;
     breakOmen(true, b.realm || '', isWu ? ('丹成 · 扛衰 ' + take + ' 道') : '丹成 · 道基已固');
     banner(isWu ? ('冲关 · ' + b.realm + ' · 扛衰 ' + take + ' 道') : ('冲关 · ' + b.realm)); Sfx.levelup();
+    // 洞府里直冲（没有对应剧情图 / 调试口）：高光照样补一张纪年卡
+    if (CHRONICLE_LV[b.lv]) chroniclePlay(CHRONICLE_LV[b.lv]);
     if (G.player && (G.state === 'play' || G.state === 'down')) {
       const p = G.player;
       p.xp = Math.max(p.xp, p.next);
@@ -12043,6 +12095,12 @@
   // 规则：在战斗地图里每待 1 秒，每块地各长 1 次；每块地各自封顶 99；采收按地块分开，收哪块清哪块。
   // 所以打一局能把几块地一起攒满，回来一趟全收 —— 这是「爽感」的来源。
   const GARDEN_CAP = 99;
+  // 掌天瓶催熟的千年一株要多久：与 gardenCharge 同一把尺子 —— 战斗里真在打的秒数。
+  // 20 秒约等于一场普通图的三分之一：打两三轮回来正好收一株，既不让人干等，也不会满仓。
+  const QIAN_SEC = 20;
+  function gardenQianOf(g) { return !!(g && (save.gardenYear || {})[g.id]); }
+  function gardenQianT(g) { return gardenQianOf(g) ? Math.min(QIAN_SEC, ((save.gardenQianT || {})[g.id]) || 0) : 0; }
+  function gardenQianReady(g) { return gardenQianOf(g) && gardenQianT(g) >= QIAN_SEC - 1e-6; }
   function gardenList() {
     const out = [];
     for (const k in CAVES) {
@@ -12104,18 +12162,50 @@
     // 尚未移栽的空圃不累计（否则「已长成」白涨，收出来却什么都没有）
     const list = gardenList().filter(x => gardenPoolOf(x.g).length > 0);
     if (!list.length) { save.gardenTick = 0; return; }
+    // 催过千年的那一畦不按「次」算：改按秒养一株（QIAN_SEC 秒成株），满了就停，不会越攒越多。
+    // 这一支必须走在「全都长满就 return」之前 —— 否则普通畦满了，千年那一畦就永远长不成。
+    save.gardenQianT = save.gardenQianT || {};
+    for (const x of list) {
+      if (!gardenQianOf(x.g)) continue;
+      const cur = save.gardenQianT[x.g.id] || 0;
+      if (cur < QIAN_SEC) save.gardenQianT[x.g.id] = Math.min(QIAN_SEC, cur + dt);
+    }
+    const normal = list.filter(x => !gardenQianOf(x.g));
+    if (!normal.length) { save.gardenTick = 0; return; }
     // 全部地块都长满了就不必再累计零头
-    if (list.every(x => gardenChargeOf(x.g) >= gardenCapOf(x.g))) { save.gardenTick = 0; return; }
+    if (normal.every(x => gardenChargeOf(x.g) >= gardenCapOf(x.g))) { save.gardenTick = 0; return; }
     save.gardenCharge = save.gardenCharge || {};
     save.gardenTick = (save.gardenTick || 0) + dt;
     while (save.gardenTick >= 1) {
       save.gardenTick -= 1;
-      for (const x of list) {
+      for (const x of normal) {
         const id = x.g.id, cap = gardenCapOf(x.g), cur = save.gardenCharge[id] || 0;
         if (cur < cap) save.gardenCharge[id] = cur + 1;
       }
     }
     if (save.gardenTick > 1) save.gardenTick = 0;
+  }
+  // 滴绿液：把这一畦从百年催到千年。
+  // 原著（人界·百药园）里绿液就是这个用法 —— 普通地长一百年就到头，只有滴过液的那一畦能上千；
+  // 筑基丹缺的那「数百年火候」，只能这样一株一株凑。所以这一滴不是加 buff，是改这一畦的性质。
+  function dropGreen(caveId, gid) {
+    const c = CAVES[caveId]; if (!c || !c.gardens) return false;
+    const g = c.gardens.find(x => x.id === gid); if (!g) return false;
+    if (!((save.greenLiquid || 0) > 0)) {
+      notify('掌天瓶里没有绿液 · 回洞府闭关一夜，瓶底自会积一滴'); Sfx.warn(); return false;
+    }
+    if (!gardenPoolOf(g).length) { notify('这一畦还空着 · 得先移栽灵药进来'); Sfx.warn(); return false; }
+    if (gardenQianOf(g)) { notify('这一畦已在催千年了'); Sfx.warn(); return false; }
+    save.greenLiquid--;
+    save.gardenYear = save.gardenYear || {}; save.gardenQianT = save.gardenQianT || {};
+    save.gardenYear[g.id] = 1; save.gardenQianT[g.id] = 0;
+    // 催千年是重头长一株，普通按「次」攒的零头一并清掉（否则收千年时那堆次数白攒）
+    save.gardenCharge = save.gardenCharge || {}; save.gardenCharge[g.id] = 0;
+    writeSave();
+    notify(g.name + ' 滴入绿液 · 自此按千年养，一株要 ' + QIAN_SEC + ' 秒');
+    Sfx.buff();
+    renderCave();
+    return true;
   }
   // 按稀有度给权重：常见药多，越稀有越少 —— 99 次不至于全落在贵重货上
   function gardenWeight(m) {
@@ -12129,6 +12219,22 @@
     const g = c.gardens.find(x => x.id === gid) || c.gardens[0];
     const ids = gardenPoolOf(g);
     if (!ids.length) { notify('这块地还空着 · 得灵药后会自动移栽进来'); Sfx.warn(); return; }
+    // 催过千年的那一畦：一次只收一株千年灵药，收完复归百年 —— 不与普通「按次采收」混算
+    if (gardenQianOf(g)) {
+      if (!gardenQianReady(g)) {
+        notify('千年还没养足 · 再打 ' + Math.ceil(QIAN_SEC - gardenQianT(g)) + ' 秒');
+        Sfx.warn(); return;
+      }
+      save.inventory['m_qianlingyao'] = (save.inventory['m_qianlingyao'] || 0) + 1;
+      save.totalItems = (save.totalItems || 0) + 1;
+      try { delete ITEM_HINT_CACHE['m_qianlingyao']; } catch (e) {}
+      save.gardenYear[g.id] = 0; save.gardenQianT[g.id] = 0;
+      writeSave();
+      notify(g.name + ' 收得千年灵药 ×1 · 这一畦复归百年');
+      Sfx.gem();
+      renderCave();
+      return;
+    }
     const n = gardenChargeOf(g);
     if (n <= 0) { notify('这块地还空着 · 先去图里打一场'); Sfx.warn(); return; }
     const pool = ids.map(id => (window.MATERIALS || []).find(x => x.id === id)).filter(Boolean);
@@ -12152,22 +12258,39 @@
     renderCave();
   }
   function renderCaveGarden(c) {
+    const gl = save.greenLiquid || 0;
     return c.gardens.map(g => {
       const n = gardenChargeOf(g), cap = gardenCapOf(g), full = n >= cap;
       const ids = gardenPoolOf(g);
+      const qian = gardenQianOf(g), qt = gardenQianT(g), qready = gardenQianReady(g);
       const names = ids.map(id => { const m = (window.MATERIALS || []).find(x => x.id === id); return m ? (m.icon || '🌿') + m.name : ''; }).filter(Boolean).join('　') || '（尚无移栽灵药）';
       const emptyNote = (g.transplant && !ids.length)
         ? '<div class="cs-note">灵界灵药到手后，会自动留一株作种移入此地，此后定期可采。</div>' : '';
+      // 一畦一态，两格说清：百年按「次」攒（99 次满），催成千年那一畦改按秒养一株（QIAN_SEC 秒）。
+      // 品种数并进「园里」那一行 —— 三格两行会把按钮顶出面板，药圃页本来就不长，别浪费一行。
+      const cell1 = qian
+        ? '<div class="statcell"><i>千年一株</i><b>' + (qready ? '已长成' : Math.floor(qt) + ' / ' + QIAN_SEC + ' 秒') + '</b></div>'
+        : '<div class="statcell"><i>已长成</i><b>' + n + ' / ' + cap + (full && ids.length ? '（满）' : '') + '</b></div>';
+      const cell2 = '<div class="statcell"><i>年份</i><b>' + (qian ? '千年' : '百年') + '</b></div>';
+      // 只在「还没催」时提示能催；催了就说进度，别重复劝
+      const yearNote = qian
+        ? '<div class="cs-note">这一畦滴过绿液，按千年养 · ' + (qready ? '已长成一株，收完复归百年' : '在战斗图里再待 ' + Math.ceil(QIAN_SEC - qt) + ' 秒') + '。</div>'
+        : '<div class="cs-note">园里最老的只是一百年火候 —— 滴一滴绿液可催至千年，那一口火候正是筑基缺的。掌天瓶余 <b>' + gl + '</b> 滴。</div>';
+      const pickTxt = qian ? (qready ? '收千年灵药' : '千年未成') : (ids.length ? (n > 0 ? '采收 ' + n + ' 株' : '这块地空着') : '待移栽');
+      const pickOff = qian ? !qready : !(n > 0 && ids.length);
+      // 按钮只写动作，余量挪到上面那句注里 —— 两列按钮里塞「（余 4 滴）」会被挤成两行
+      const dropTxt = qian ? '已在催千年' : '滴绿液 · 催千年';
+      const dropOff = qian || !ids.length || gl <= 0;
       return '<div class="cave-sec"><div class="cs-title">' + g.name + '</div>' +
         '<div class="cs-note">' + g.tip + '</div>' +
-        '<div class="restbox"><div class="statgrid">' +
-        '<div class="statcell"><i>已长成</i><b>' + n + ' / ' + cap + '</b></div>' +
-        '<div class="statcell"><i>长势</i><b>' + (ids.length ? (full ? '已长满' : '每秒 +1') : '待移栽') + '</b></div>' +
-        '<div class="statcell"><i>园中品种</i><b>' + ids.length + ' 味</b></div>' +
-        '</div>' +
-        '<div class="cs-note">园里：' + names + '</div>' + emptyNote +
-        '<div class="restbtns"><button class="btn small" data-pickg="' + c.id + '|' + g.id + '"' + (n > 0 && ids.length ? '' : ' disabled') + '>' +
-          (ids.length ? (n > 0 ? '采收 ' + n + ' 株' : '这块地空着') : '待移栽') + '</button></div>' +
+        '<div class="restbox"><div class="statgrid">' + cell1 + cell2 + '</div>' +
+        '<div class="cs-note">园里 ' + ids.length + ' 味：' + names +
+          (qian ? '' : '　·　' + (ids.length ? (full ? '已长满' : '每战斗 1 秒长 1 次') : '待移栽')) + '</div>' +
+        yearNote + emptyNote +
+        '<div class="restbtns"><button class="btn small" data-pickg="' + c.id + '|' + g.id + '"' + (pickOff ? ' disabled' : '') + '>' +
+          pickTxt + '</button>' +
+        '<button class="btn small' + (dropOff ? ' off' : '') + '" data-dropg="' + c.id + '|' + g.id + '"' + (dropOff ? ' disabled' : '') + '>' +
+          dropTxt + '</button></div>' +
         '</div></div>';
     }).join('');
   }
@@ -12582,9 +12705,11 @@
       n++;
       // 撞上大境界门：修为顶在门口，再坐也是白烧灵石 —— 立刻停下，催他去「进阶」页
       if ((save.cultivate.level || 1) === lv && (save.cultivate.xp || 0) >= xpNeed(lv) - 1) { gated = true; break; }
-      // 筑基后掌天瓶日产绿液 —— 前提是瓶子在手上（七玄门那一趟就该拿到了）
+      // 掌天瓶日产绿液 —— 只要瓶子在手上（七玄门那一趟就该拿到了）。
+      // 不再卡「筑基之后」：原著里绿液是瓶底夜里自己凝的，韩立自小就攒；
+      // 而筑基那一关现在要一株千年灵药（园里催出来的），绿液若锁在筑基之后，这一关永远过不去。
       const hasBottle = (save.inventory['gupu'] || 0) > 0 || (save.inventory['zhangtian'] || 0) > 0;
-      if (lv >= 36 && hasBottle) save.greenLiquid = (save.greenLiquid || 0) + 1;
+      if (hasBottle) save.greenLiquid = (save.greenLiquid || 0) + 1;
     }
     if (n) { writeSave(); }
     if (gated) {
@@ -13405,6 +13530,13 @@
       pickGarden(CAVES[parts[0]], parts[1]);
       return;
     }
+    // 掌天瓶：给这一畦滴一滴绿液，把百年催成千年（经营闭环的第一环）
+    const dg = e.target.closest('button[data-dropg]');
+    if (dg) {
+      const parts = String(dg.getAttribute('data-dropg')).split('|');
+      dropGreen(parts[0], parts[1]);
+      return;
+    }
     // 整行类只认点在行体上的点击，行内按钮一律不穿透（第二道防线，防以后新增按钮再踩同一个坑）
     const eq = e.target.closest('[data-equip]');
     if (eq && !e.target.closest('button')) { equipGear(eq.getAttribute('data-equip')); return; }
@@ -13864,6 +13996,8 @@
     save.gift_tenglong = false;
     save.gift_zhilongguo = false;
     save.gardenSeed = {};     // 洞府重开：移栽的品种一并清掉（基础品种写在数据里，会随洞府重开回来）
+    // 催千年的状态也要清：否则重开后某畦还挂着「在催」，绿液却已归零，那一畦永远长不成
+    save.gardenYear = {}; save.gardenQianT = {}; save.gardenCharge = {};
     save.repBlack = 0; save.repWhite = 0; save.identity = 'han'; save.liUnlocked = false;
     if (G.player) { resetRunBonus(); G.gear = {}; G.runLoot = []; }
   }
@@ -14492,6 +14626,45 @@
     greenLiquid() { return save.greenLiquid || 0; },
     setGreen(v) { save.greenLiquid = v || 0; return save.greenLiquid; },
     cul() { const r = (save.greenLiquid || 0) > 0 && save.pet ? (save.greenLiquid--, petGainXp(save.pet, 120), true) : false; return r; },
+    // ---- 药圃 · 掌天瓶催千年（P1-1 经营闭环）----
+    gardenPlots() {
+      return gardenList().map(x => ({
+        cave: x.cave.id, plot: x.g.id, name: x.g.name,
+        owned: (save.caves || []).indexOf(x.cave.id) >= 0,
+        pool: gardenPoolOf(x.g).length,
+        charge: gardenChargeOf(x.g), cap: gardenCapOf(x.g),
+        qian: gardenQianOf(x.g), qianT: +gardenQianT(x.g).toFixed(2), ready: gardenQianReady(x.g)
+      }));
+    },
+    dropGreen(caveId, gid) { return dropGreen(caveId, gid); },
+    pickGarden(caveId, gid) { pickGarden(CAVES[caveId], gid); return { qian: save.inventory['m_qianlingyao'] || 0 }; },
+    // 把某畦的千年计时直接推到差一点 / 到位（省掉真打 20 秒的墙钟）
+    setQianT(gid, sec) { save.gardenQianT = save.gardenQianT || {}; save.gardenQianT[gid] = Math.max(0, +sec || 0); return gardenQianT({ id: gid }); },
+    qianSec() { return QIAN_SEC; },
+    herbQian() { return save.inventory['m_qianlingyao'] || 0; },
+    setHerbQian(n) { save.inventory['m_qianlingyao'] = Math.max(0, n | 0); if (!save.inventory['m_qianlingyao']) delete save.inventory['m_qianlingyao']; return this.herbQian(); },
+    // ---- 高光纪年卡（P1-3）----
+    chronicleIds() { return window.Chronicle ? window.Chronicle.ids() : []; },
+    chronicleSeen(id) { return storySeen('chron:' + id); },
+    chronicleState() { return window.Chronicle ? { active: window.Chronicle.active(), shot: window.Chronicle.shot() } : null; },
+    chronicleStep() { return window.Chronicle ? window.Chronicle.step() : false; },
+    chronicleStop() { if (window.Chronicle) window.Chronicle.stop(); return !!window.Chronicle; },
+    // 走真实入口（含 seen 闸门与记账）：第二次调用同一张应返回 false
+    chronicleFire(id) {
+      const was = window.__CSJ_CHRONICLE_FORCE__;
+      window.__CSJ_CHRONICLE_FORCE__ = true;
+      const r = chroniclePlay(id);
+      window.__CSJ_CHRONICLE_FORCE__ = was;
+      return r;
+    },
+    // 跳过 available() 的前置判定，直接把某张卡拉出来演（QA 用）
+    chronicleOpen(id) {
+      if (!window.Chronicle) return { played: false };
+      window.__CSJ_CHRONICLE_FORCE__ = true;
+      const played = window.Chronicle.play(id, null);
+      window.__CSJ_CHRONICLE_FORCE__ = false;
+      return { played: played, shot: window.Chronicle.shot() };
+    },
     // ---- 境界突破 ----
     // 测试用：把一张图标成已通关（等价于打完写档），突破的剧情条件就认它
     clearMap(id) {
