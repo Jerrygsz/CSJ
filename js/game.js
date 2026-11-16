@@ -237,7 +237,11 @@
       alchemy: { n: 0 },
       // 天人有五衰（后传 X2C327，24 次）：n = 还压在身上的衰有几层；
       // log[境界] = { early: 衰提前降临过几次, taken: 累计扛过几道 }
-      wushuai: { n: 0, log: {} }
+      wushuai: { n: 0, log: {} },
+      // 共斗默契（P2-3）：tie = 与队友合击的总次数（决定默契三档，见 js/coop.js 的 TIERS）、
+      // win = 共斗通关场数（只作纪念，不参与数值）。必须落存档：默契是「一起打了多少仗」这件事，
+      // 断线、换图、关掉再开都不该清零 —— 它不是单局的临时状态。
+      coop: { tie: 0, win: 0 }
     };
   }
   // 厉飞雨·双身份化名系统（P0-1）辅助函数
@@ -396,7 +400,13 @@
         // 天人有五衰：老存档没有这个字段，读进来补成空账（压在身上的衰为 0）
         wushuai: (s.wushuai && typeof s.wushuai === 'object')
           ? { n: Math.max(0, (s.wushuai.n || 0) | 0), log: (s.wushuai.log && typeof s.wushuai.log === 'object') ? s.wushuai.log : {} }
-          : { n: 0, log: {} }
+          : { n: 0, log: {} },
+        // 共斗默契：老存档（打过独狼的）从来没有这个字段，补成零账 —— 零账就是「初会」档，
+        // 与没联过机的人一样，不因为老档就白送档位。
+        coop: {
+          tie: Math.max(0, ((s.coop && s.coop.tie) || 0) | 0),
+          win: Math.max(0, ((s.coop && s.coop.win) || 0) | 0)
+        }
       };
       // 老存档：已通关的剧情图自动补成洞府
       for (const id of save.cleared) { const m = MAPS.find(x => x.id === id); if (m && m.cave && save.caves.indexOf(m.cave) < 0) save.caves.push(m.cave); }
@@ -1716,6 +1726,35 @@
   const WARD_SEC = 6;
   // 破境丹一类的硬伤害不吃克制（那是丹，不是法术）；弹反反震也不吃，见上。
 
+  // ---------- 共斗默契（P2-3）：与队友合击一次就记一次 ----------
+  // 记在 save.coop.tie，跨图 / 跨会话累积 —— 默契是「一起打了多少仗」，不是单局状态。
+  // 档位表在 js/coop.js（那是联机规则），这里只管计数与升档那一声。
+  // 合击次数跨档那一刻喊一句：玩家得知道自己刚才攒的东西是有用的。
+  const COOP_TIE_TIERS = [0, 6, 20];   // 初会 / 默契 / 同心，与 coop.js 的 TIERS 一一对应
+  const COOP_TIE_NAMES = ['初会', '默契', '同心'];
+  function coopTieIdx(n) {
+    let k = 0;
+    for (let i = 0; i < COOP_TIE_TIERS.length; i++) if ((n | 0) >= COOP_TIE_TIERS[i]) k = i;
+    return k;
+  }
+  function addCoopTie() {
+    save.coop = save.coop || { tie: 0, win: 0 };
+    const before = coopTieIdx(save.coop.tie);
+    save.coop.tie = (save.coop.tie | 0) + 1;
+    const after = coopTieIdx(save.coop.tie);
+    if (after > before) {
+      // 升档只报这一次，别每局都喊
+      banner('共斗默契 · ' + COOP_TIE_NAMES[after] + '　（合击 ' + save.coop.tie + ' 次）');
+      Sfx.levelup();
+    }
+    writeSave();
+  }
+  function addCoopWin() {
+    save.coop = save.coop || { tie: 0, win: 0 };
+    save.coop.win = (save.coop.win | 0) + 1;
+    writeSave();
+  }
+
   // ---------- 伤害 / 死亡 ----------
   function damageEnemy(e, dmg, opts) {
     if (e._dead) return 0;
@@ -1737,12 +1776,18 @@
     if (edge) d *= DASH_EDGE_MUL;
     const crit = Math.random() < critChance();
     if (crit) d *= 1.8;
+    // 联机·夹击（P2-3）：两人在同一窗口内都对这只出过手 → 护体灵光撑不住、本体也更好打。
+    // 单人永远走不到成立分支（G.coopRole 为空直接跳过），对单机零影响、也零开销。
+    // 反震（noVuln）不吃这一层，理由同破绽与锋芒：弹反那条数值链不再叠倍率。
+    const xm = (G.coopRole && !(opts && opts.noVuln) && window.Coop && window.Coop.crossMul) ? window.Coop.crossMul(e) : null;
+    if (xm) d *= xm.dmg;
     // 护体灵光：先扣罩。罩还在，落在本体上的只有六成；罩一破，六秒内吃满伤还多三成五。
     // 「破罩」是个事件，不是渐变：它要有一声、一圈、两个字 —— 玩家才知道自己刚才那几下没白打。
     let wardBroke = false;
     if (!(opts && opts.noVuln) && e.wardMax > 0) {
       if (e.ward > 0) {
-        e.ward = Math.max(0, e.ward - d * ((opts && opts.wardK) || 1));
+        // 夹击时罩扣得更快：两面受敌，护得住一边护不住另一边
+        e.ward = Math.max(0, e.ward - d * ((opts && opts.wardK) || 1) * (xm ? xm.ward : 1));
         d *= WARD_KEEP;
         if (e.ward <= 0) {
           wardBroke = true;
@@ -1763,6 +1808,9 @@
       }
     }
     e.hp -= d; e.hitFlash = 0.12;
+    // 记一笔「这一下是谁打的」：夹击与合击的判定全靠它。
+    // 只有联机时（G.coopRole 非空）才记 —— 单人连这个对象都不创建，主循环里不多一次分配。
+    if (G.coopRole && window.Coop && window.Coop.markHit) window.Coop.markHit(e, (opts && opts.src) === 'partner');
     // 单挑型剧情战：煞气靠「打掉的血」给，不靠小怪
     if (e === G.boss && G.map && G.map.type === 'boss' && e.maxhp > 0) {
       gainSha(d / e.maxhp * SHA_BOSS_DUEL);
@@ -10733,6 +10781,8 @@
     settleInit();   // 结算小舞台：两人可以在左下角这块自由走动
     // 双人联机：房主通关 = 共享胜利，把战果（击杀/时长）广播给客机，让双方结算界面一致
     if (G.coopRole === 'host' && window.Coop && !G._endSent) { G._endSent = true; window.Coop.sendEnd('win'); }
+    // 共斗通关记一场（两边各记各的）：默契里那行「并肩 N 场」就是它，只作纪念不参与数值
+    if (G.coopShared) addCoopWin();
     Sfx.win();
     // 破境图有三种结局（石门未闭 / 冲关未成 / 成了），标题与描述按实际结果走，不搞一律「已成」
     const vTitle = G.victoryTitle || m.clearTitle || (m.name + ' · 已了');
@@ -14856,6 +14906,8 @@
     save.repBlack = 0; save.repWhite = 0; save.identity = 'han'; save.liUnlocked = false;
     // 赌局台账也清：转世之后挡过的那三道雷不算数了（人都不一样了）
     save.stakeLog = {};
+    // 共斗默契（save.coop）有意**不清**：它是「跟队友一起打了多少仗」，与这一世修到哪一境无关，
+    // 转世回来还是他 —— 与 totalKills / playTime 同属生涯累计。清档只清修为与掉落侧的东西。
     if (G.player) { resetRunBonus(); G.gear = {}; G.runLoot = []; }
   }
 
@@ -15259,7 +15311,7 @@
     enemyHp(id) { const e = G.enemies.find(x => x._id === id) || (G.boss && G.boss._id === id ? G.boss : null); return e ? Math.round(e.hp) : null; },
     setEnemyHp(id, hp) { const e = G.enemies.find(x => x._id === id) || (G.boss && G.boss._id === id ? G.boss : null); if (e) { e.hp = hp; return Math.round(e.hp); } return null; },
     enemyMeta(id) { const e = G.enemies.find(x => x._id === id) || (G.boss && G.boss._id === id ? G.boss : null); return e ? { type: e.type, hp: Math.round(e.hp), maxhp: Math.round(e.maxhp), remote: !!e._remote, x: Math.round(e.x), y: Math.round(e.y) } : null; },
-    damageEnemyById(id, d) { const e = G.enemies.find(x => x._id === id) || (G.boss && G.boss._id === id ? G.boss : null); if (e) { damageEnemy(e, d); return Math.round(e.hp); } return null; },
+    damageEnemyById(id, d, o) { const e = G.enemies.find(x => x._id === id) || (G.boss && G.boss._id === id ? G.boss : null); if (e) { damageEnemy(e, d, o || undefined); return Math.round(e.hp); } return null; },
     reportHit(id, d) { if (window.Coop) window.Coop.reportHit(id, d); return true; },
     simPartnerHurt(d) { if (window.Coop) window.Coop.addPartnerHurt(d); return true; },
     playerHp() { return G.player ? Math.round(G.player.hp) : null; },
@@ -15372,6 +15424,42 @@
     // ---- 联机 P5 测试钩子（打磨：延迟 / 重连提示 / 战利品分成）----
     coopBanner(t) { G._lastBanner = String(t); banner(G._lastBanner); return G._lastBanner; },
     lastBanner() { return G._lastBanner || null; },
+    // ---- 联机 P2-3 测试钩子（夹击 / 合击 / 共斗默契）----
+    coopTieN() { return (save.coop && save.coop.tie) || 0; },
+    coopWinN() { return (save.coop && save.coop.win) || 0; },
+    addCoopTie() { addCoopTie(); return (save.coop && save.coop.tie) || 0; },
+    addCoopWin() { addCoopWin(); return (save.coop && save.coop.win) || 0; },
+    setCoopTie(n) {
+      save.coop = save.coop || { tie: 0, win: 0 };
+      save.coop.tie = Math.max(0, n | 0); writeSave();
+      return save.coop.tie;
+    },
+    // 手动标一次命中：测夹击不用真连网 —— 判定本身是纯逻辑，跟谁发的包没关系
+    coopMark(id, partner) {
+      const e = G.enemies.find(x => x._id === id) || (G.boss && G.boss._id === id ? G.boss : null);
+      if (!e) return null;
+      damageEnemy(e, 1, { src: partner ? 'partner' : undefined, silentText: true });
+      return { hp: Math.round(e.hp), cross: Math.round((e._cross || 0) - G.time), mark: e._hitMark || null };
+    },
+    crossOf(id) {
+      const e = G.enemies.find(x => x._id === id) || (G.boss && G.boss._id === id ? G.boss : null);
+      if (!e) return null;
+      return { cross: Math.round(((e._cross || 0) - G.time) * 100) / 100, mark: e._hitMark || null, ward: Math.round(e.ward || 0), hp: Math.round(e.hp), maxhp: Math.round(e.maxhp), elite: !!e.elite, boss: !!e.boss };
+    },
+    // 给某只怪挂一层护体灵光（测「夹击破罩更快」需要一只带罩的靶子）
+    setWard(id, frac) {
+      const e = G.enemies.find(x => x._id === id) || (G.boss && G.boss._id === id ? G.boss : null);
+      if (!e) return null;
+      e.wardMax = Math.max(1, (e.maxhp || 1) * (frac || 0.14)); e.ward = e.wardMax; e.wardT = 0;
+      return { ward: Math.round(e.ward), wardMax: Math.round(e.wardMax) };
+    },
+    // 直接触发一次合击（不走「交替命中 4 次」那条路，单测合击效果与冷却）
+    tieFire(id) { return (window.Coop && window.Coop.fireTieById) ? window.Coop.fireTieById(id) : null; },
+    tieState() { return (window.Coop && window.Coop.tieState) ? window.Coop.tieState() : null; },
+    // 联机模块（coop.js）画合击那一下要用的两件飘字入口 / 屏震。
+    // 当前皮肤不在这里另开一个 skin 钩子 —— 别处已有 __FR.skin(name)，重复定义会互相盖掉。
+    spawnText(x, y, t, c, s, o) { spawnText(x, y, t, c, s, o); return true; },
+    shake(v) { G.shake = Math.max(G.shake, v || 4); return G.shake; },
     latency() { return window.Coop ? window.Coop.latency() : 0; },
     link() { return window.Coop ? window.Coop.link() : null; },
     partnerInfo() {

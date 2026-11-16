@@ -24,6 +24,8 @@
 //   { t:'down' }                       P6 我倒下了 → 对方立刻把队友标记为倒地（不等下一次状态包）
 //   { t:'revive' }                     P6 队友站到我身边救援 → 把我拉起来
 //   { t:'revived' }                    P6 我站起来了 → 对方清除倒地标记（防止救援被重复触发）
+//   { t:'tie', x, y, r, d }            P2-3 合击：房主把这一次合击的位置与真伤发给客机，
+//                                      客机只镜像特效（血由房主扣，快照随后带到）
 // ============================================================================
 
 (function () {
@@ -309,6 +311,7 @@
     if (data.t === 'down') { onDown(); return; }
     if (data.t === 'revive') { onRevive(); return; }
     if (data.t === 'revived') { onRevived(); return; }
+    if (data.t === 'tie') { onTie(data); return; }
     if (data.t === 'ack') { pend.delete(data.s); return; }
   }
 
@@ -564,6 +567,131 @@
     g._coopDmgs.push({ x: Math.round(x), y: Math.round(y), d: d, crit: !!crit });
   }
 
+  // ==========================================================================
+  // P2-3 夹击 / 合击（双人合击）
+  //
+  // 两个人打同一只怪，才有「配合」这件事。原先是各打各的 —— 场上怪是共享的，
+  // 但「一起打」和「两个人分别打」在体感上没有任何差别。这里补的是那个差别：
+  //   · 夹击：两秒内两人都对这只出过手 → 护体灵光撑不住（扣得更快）、本体也更好打
+  //   · 合击：夹击之中、更紧的窗口内交替命中累计够数 → 一次真伤 + 一圈朱砂 + 一声
+  //
+  // 判定不读联网状态，只读「这一下是不是队友打的」（damageEnemy 的 opts.src）。
+  // 所以它是一条纯逻辑，不连网也能单独验（__FR.coopMark 可以替队友标一笔）。
+  // 单人时 src 永远是 me，两条判定都不可能成立 —— 对单机零影响。
+  //
+  // 客机只镜像合击的特效：血由房主扣，下一帧快照就把血条带过去了。
+  // ==========================================================================
+  const CROSS_WIN = 2.0;      // 夹击窗口：两人出手的间隔上限
+  const CROSS_KEEP = 1.5;     // 夹击状态持续多久
+  const CROSS_DMG = 1.12;     // 夹击时本体承伤
+  const TIE_NEED = 4;         // 合击：窗口内交替命中累计到这个数
+  const TIE_BREAK = 2.5;      // 断了这么久就重新数
+  // 三档默契（协作解锁）：初会 → 默契 → 同心。次数记在存档 save.coop.tie，跨会话累积。
+  // 档位只放大「配合」的效率，不给单机加任何东西 —— 所以不联机的人不会被它惩罚。
+  const TIERS = [
+    { name: '初会', need: 0,  cd: 9.0, pct: 0.012, ward: 1.8, win: 0.9 },
+    { name: '默契', need: 6,  cd: 7.0, pct: 0.020, ward: 2.2, win: 0.9 },
+    { name: '同心', need: 20, cd: 5.0, pct: 0.020, ward: 2.2, win: 1.2 }
+  ];
+  let streak = 0, streakT = -99;   // 本轮的交替命中数与最后一次时间
+
+  function tieCount() { return (window.__FR && window.__FR.coopTieN) ? (window.__FR.coopTieN() | 0) : 0; }
+  function winCount() { return (window.__FR && window.__FR.coopWinN) ? (window.__FR.coopWinN() | 0) : 0; }
+  function tierOf(n) {
+    let k = 0;
+    for (let i = 0; i < TIERS.length; i++) if ((n | 0) >= TIERS[i].need) k = i;
+    return { idx: k, t: TIERS[k], next: TIERS[k + 1] || null };
+  }
+  function fr(fn) {
+    const f = (window.__FR && window.__FR[fn]);
+    if (typeof f !== 'function') return null;
+    return f.apply(window.__FR, Array.prototype.slice.call(arguments, 1));
+  }
+
+  // damageEnemy 每次开打都问一次：绝大多数情况 e._cross 是 0，立刻返回 null（不必担心开销）
+  function crossMul(e) {
+    if (!e || !(e._cross > 0)) return null;
+    const g = G(); if (!g || g.time > e._cross) return null;
+    return { dmg: CROSS_DMG, ward: tierOf(tieCount()).t.ward };
+  }
+
+  // 一次命中落下：记是谁打的，然后看夹击成不成立、合击该不该出手
+  function markHit(e, isPartner) {
+    if (!e) return;
+    const g = G(); if (!g || !g.coopRole) return;
+    const now = g.time;
+    const m = e._hitMark || (e._hitMark = { me: -99, pt: -99 });
+    if (isPartner) m.pt = now; else m.me = now;
+    const both = (now - m.me) <= CROSS_WIN && (now - m.pt) <= CROSS_WIN;
+    if (!both) return;
+    // 第一次成夹击才喊一声：_cross 还在未来说明一直夹着，不该每一刀都喊。
+    // 字号 16 与「罩破」同档 —— 13 号汉字加描边会糊成一团（实拍验过），两皮都读不出来。
+    // 颜色取「罩破」同一个朱砂（#e0573a）：淡金在浅宣纸上等于没写。
+    if (!(e._cross > 0) && (e.elite || e === g.boss)) {
+      fr('spawnText', e.x, e.y - e.r - 30, '夹击', '#e0573a', 18, { stroke: true, punch: true });
+    }
+    e._cross = now + CROSS_KEEP;
+    // 合击只在精英与首领上累计：小怪堆里刷合击等于没有合击
+    if (!(e.elite || e === g.boss)) return;
+    const t = tierOf(tieCount()).t;
+    if ((now - m.me) > t.win || (now - m.pt) > t.win) return;
+    if (now - streakT > TIE_BREAK) streak = 0;
+    streakT = now; streak++;
+    if (streak >= TIE_NEED) { streak = 0; fireTie(e); }
+  }
+
+  function fireTie(e) {
+    const g = G(); if (!g || !e || e._dead) return null;
+    const tr = tierOf(tieCount());
+    if (g.time < (g._tieCd || -99)) {
+      return { blocked: 'cd', cdLeft: Math.round(((g._tieCd || 0) - g.time) * 10) / 10 };
+    }
+    g._tieCd = g.time + tr.t.cd;
+    const dmg = Math.max(120, (e.maxhp || 1) * tr.t.pct);
+    const before = e.hp;
+    fr('damageEnemyById', e._id, dmg, { silentText: true });
+    const real = Math.max(0, Math.round(before - e.hp));
+    paintTie(e.x, e.y - (e.r || 12) - 34, real, e.r || 12);
+    // 记一次默契：房主与客机各记各的 —— 这是「我跟他」的账，不是房主的账
+    fr('addCoopTie');
+    if (connected()) window.Net.sendGame({ t: 'tie', x: Math.round(e.x), y: Math.round(e.y), r: e.r || 12, d: real });
+    return { dmg: real, cd: tr.t.cd, tier: tr.idx };
+  }
+
+  // 合击的画面与声音：两个入口共用（房主本地 / 客机镜像），免得两边看起来不一样
+  function paintTie(x, y, d, r) {
+    fr('spawnText', x, y, '合击 ' + d, '#e0573a', 18, { stroke: true, punch: true });
+    const skin = fr('skin');
+    if (window.FX3) window.FX3.spawn('crit', x, y + 30, { pal: skin === 'guigu' ? 'xue' : 'jin' });
+    fr('shake', 5);
+    if (window.Sfx && window.Sfx.burst) window.Sfx.burst();
+  }
+  function onTie(data) {
+    const g = G(); if (!g) return;
+    if (!sharesMap(g)) return;
+    paintTie(data.x, data.y, data.d || 0, data.r || 12);
+    fr('addCoopTie');    // 自己这边也记一次默契
+  }
+  function fireTieById(id) {
+    const g = G(); if (!g) return null;
+    const e = (g.enemies || []).find(x => x._id === id) || (g.boss && g.boss._id === id ? g.boss : null);
+    return e ? fireTie(e) : null;
+  }
+  // 给联机面板与闸门看的全貌
+  function tieState() {
+    const n = tieCount();
+    const tr = tierOf(n);
+    const g = G();
+    return {
+      n: n, win: winCount(), tier: tr.idx, name: tr.t.name,
+      cd: tr.t.cd, pct: tr.t.pct, ward: tr.t.ward, tieWin: tr.t.win,
+      next: tr.next ? { name: tr.next.name, need: tr.next.need, left: Math.max(0, tr.next.need - n) } : null,
+      ready: !g || g.time >= (g._tieCd || -99),
+      cdLeft: g ? Math.max(0, Math.round(((g._tieCd || 0) - g.time) * 10) / 10) : 0,
+      streak: streak
+    };
+  }
+
   // ---------- 每帧插值（P2）----------
   // 插值速度也随延迟走：延迟越高，追得越"缓"，看起来是顺的，而不是一格一格蹦
   function smoothK() { return Math.max(5, Math.min(14, 14 - rtt / 400)); }
@@ -696,9 +824,10 @@
 
   // ---------- 清理 ----------
   function reset() {
-    const g = G(); if (g) g.partner = null;
+    const g = G(); if (g) { g.partner = null; g._tieCd = -99; }
     acc = SEND_MS; lastMap = null; enemyAcc = 0; partnerHurtAcc = 0;
     lost = false;
+    streak = 0; streakT = -99;
   }
   function clearPartner() {
     const g = G(); if (g) g.partner = null;
@@ -714,6 +843,11 @@
     reportHit, addPartnerHurt, queueDmg, reportTaken, sendEnd, sendReward,
     latency, link, sendDown, sendRevive, sendRevived,
     queueFx, onFx,   // 攻击特效互见（纯视觉；测试也用这两个）
-    sendDlg, sendPause, sendEncShare, sendStage   // 对话同步 / 暂停同步 / 际遇分成 / 结算舞台
+    sendDlg, sendPause, sendEncShare, sendStage,   // 对话同步 / 暂停同步 / 际遇分成 / 结算舞台
+    // P2-3 夹击 / 合击 / 共斗默契：damageEnemy 只认 markHit 与 crossMul 两个入口，
+    // 其余（tieState / fireTieById / TIERS）是给联机面板与回归闸门用的
+    markHit, crossMul, tieState, fireTieById,
+    TIERS: TIERS, TIE_NEED: TIE_NEED, CROSS_WIN: CROSS_WIN,
+    tierOf: tierOf, tieCount: tieCount
   };
 })();

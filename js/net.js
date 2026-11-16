@@ -408,6 +408,30 @@ window.Net = (function () {
   const elRoom = $('coopRoom'), elJoin = $('coopJoin'), elLeave = $('coopLeave'), elClose = $('coopClose');
   const elStatus = $('coopStatus'), elPeers = $('coopPeers'), elLog = $('coopLog');
   const elPlay = $('coopPlay');
+  const elTie = $('coopTie');
+
+  // 共斗默契（P2-3）：按合击次数分三档，档位改了合击的轻重与频率。
+  // 只在打开面板时刷一次 —— 它不是每帧变的东西，没必要挂 rAF。
+  function paintTie() {
+    if (!elTie) return;
+    const t = (window.__FR && window.__FR.tieState) ? window.__FR.tieState() : null;
+    if (!t) { elTie.textContent = ''; return; }
+    const tiers = (window.Coop && window.Coop.TIERS) || [];
+    const cur = (tiers[t.tier] && tiers[t.tier].need) || 0;
+    const nxt = t.next ? t.next.need : Math.max(cur + 1, t.n);
+    const pct = t.next ? Math.max(0, Math.min(100, Math.round((t.n - cur) / Math.max(1, nxt - cur) * 100))) : 100;
+    const nx = t.next
+      ? ('再合击 <b>' + t.next.left + '</b> 次到「' + t.next.name + '」')
+      : '已至同心，再无更高';
+    const dmgTxt = Math.round(t.pct * 1000) / 10;
+    elTie.innerHTML =
+      '<div class="ct-head"><b>共斗默契 · ' + t.name + '</b>' +
+      '<span>合击 ' + t.n + ' 次 · 并肩 ' + t.win + ' 场</span></div>' +
+      '<div class="ct-bar"><i style="width:' + pct + '%"></i></div>' +
+      '<div class="ct-note">' + nx + '</div>' +
+      '<div class="ct-note dim">一记合击吃掉 <b>' + dmgTxt + '%</b> 气血，冷却 ' + t.cd + ' 秒；'
+      + '夹击时护体灵光按 <b>×' + t.ward + '</b> 扣。</div>';
+  }
 
   function show(v) { if (panel) panel.style.display = v ? 'flex' : 'none'; }
   function paint(txt, tone) {
@@ -426,6 +450,7 @@ window.Net = (function () {
   if (btnOpen) btnOpen.addEventListener('click', () => {
     const t = $('title'); if (t) t.style.display = 'none';
     show(true);
+    paintTie();
     paint(window.Net && window.Net.appId ? '未连接' : '未连接（App ID 未配置）', 'info');
   });
   if (elPlay) elPlay.addEventListener('click', () => {

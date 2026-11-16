@@ -1,4 +1,4 @@
-// 一键回归：把常驻验收脚本一次跑完（当前十六个），谁红谁绿一眼看全。
+// 一键回归：把常驻验收脚本一次跑完（当前十七个），谁红谁绿一眼看全。
 //
 // 动机（第110轮）：八批下来只有 verify-scenery3 / smoke / verify-ver 是每轮必跑的，
 // 其余五个全凭记忆挑着跑，结果 verify-ink-sprite 的两条断言在第102轮 UI 柔化时就已作废、
@@ -40,6 +40,7 @@ const ITEMS = [
   { key: 'parry', file: 'verify-parry.mjs', kind: 'gate', desc: '弹反系统（凡人味防御）：数据层（3 件启用载体 / 六类属性矩阵 / 长按衰减 1.0·0.71·0.43 / 共用煞气池 / 联机仅房主）+ runtime 接入（parryResolve/hitPlayer 透传 sk·src / __FR 探针 / guard 槽与三件 g_* 载体 / index.html 引用与加载顺序 / #parryEdge 边缘泛红）' },
   { key: 'batch5', file: 'verify-batch5.mjs', kind: 'gate', desc: '行脚札记（考据可见层）：懒加载 / 171 图分卷 / 未至·到过·已清三档 / 与真源一致 / 发布清单收录 / 双皮站对边 + 境界压制：三档倍率与封顶 / 大境界阶梯现推 / 小怪遁速实测 / 图名尾巴与战前提示' },
   { key: 'batch6', file: 'verify-batch6.mjs', kind: 'gate', desc: '岁月纪（闭关纪年）：入道年数由境界现推（207 年结婴对得上原著）/ 大境界跨度现量 / 不落存档 / 静修页两栏 / 岁月纪只记已过的关 / 打坐真推年数 / 双皮站对边 + 性子：14 条全覆 / 四类齐全 / 洞府可见 / 补型贴身 / 守型护主' },
+  { key: 'batch7', file: 'verify-batch7.mjs', kind: 'gate', desc: '联机闭环（双人合击 + 协作解锁）：夹击两秒窗口 / 超窗不续 / 夹击破罩更快 / 只对精英报字 / 合击只打硬仗 / 真伤兜底 / CD 真挡 / 单人零泄漏 + 默契三档边界与数值 / 存档落盘与老档补零账 / 面板档位与进度' },
 ];
 
 const argv = process.argv.slice(2);

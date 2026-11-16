@@ -1330,6 +1330,27 @@ body[data-skin="guigu"] .bpip b { color: inherit; font-weight: 400; }
 .coop-tip b { color: var(--line-gold); margin-right: 4px; }
 .coop-peers { font-size: var(--fs-cap); color: var(--text-3); }
 .coop-log { max-height: 150px; overflow-y: auto; font-size: var(--fs-cap); line-height: 1.7; color: var(--text-3); background: rgba(0,0,0,0.28); border-radius: var(--r-md); padding: 8px; }
+/* 共斗默契（P2-3）：档位 + 进度条 + 一句效果注解。
+   底与字一律走 token（--bg-card-* / --text-* / --line-gold）——
+   金皮是暗底浅字、墨皮是宣底墨字，写死一个底色就必然有一边看不清。 */
+.coop-tie {
+  display: flex; flex-direction: column; gap: 5px;
+  padding: 8px 10px; border-radius: var(--r-md);
+  border: 1px solid var(--line-gold);
+  background: linear-gradient(180deg, var(--bg-card-a), var(--bg-card-b));
+  font-size: var(--fs-cap); color: var(--text-2);
+}
+.coop-tie:empty { display: none; }
+.coop-tie .ct-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-2); }
+.coop-tie .ct-head b { color: var(--accent); font-weight: 600; }
+.coop-tie .ct-head span { font-size: var(--fs-micro); color: var(--text-3); }
+/* 进度条底色走 --line-soft 而不是写死 rgba(0,0,0,·)：金皮是暗底亮金条，墨皮是宣底浅灰条，
+   两种皮都要与 --accent 拉开明度差才看得见 —— 写死一个深色，在宣纸上就糊成一条灰线。 */
+.coop-tie .ct-bar { height: 6px; border-radius: 999px; background: var(--line-soft); overflow: hidden; }
+.coop-tie .ct-bar i { display: block; height: 100%; border-radius: 999px; background: var(--accent); transition: width .3s ease; }
+.coop-tie .ct-note { font-size: var(--fs-micro); line-height: 1.6; color: var(--text-2); }
+.coop-tie .ct-note b { color: var(--accent); font-weight: 600; }
+.coop-tie .ct-note.dim { color: var(--text-3); }
 
 /* ================= 飞鸽传书：联机聊天 ================= */
 /* 左下角鸽子按钮；点开后横条输入框从按钮处向左延展，聊天记录陆续向上延展。
