@@ -331,7 +331,10 @@ const gsrc = fs.readFileSync(join(ROOT, 'js', 'game.js'), 'utf8');
 const tickInPet = /function updatePet\(dt\)[\s\S]{0,900}?tickAllySkill\(pt, def\.id, dt\)/.test(gsrc);
 const tickInMate = /function updateMate\(dt\)[\s\S]{0,900}?tickAllySkill\(mt, def\.id, dt\)/.test(gsrc);
 ok(tickInPet && tickInMate, 'updatePet / updateMate 各接了一次独立冷却');
-ok(/ent\.skCd = sk\.cd \|\| 8/.test(gsrc), '释放后冷却被重置为数据表 cd');
+// 批次 8 起这一行还要乘同行纪的羁绊乘数（同一个人带得越久，本命绝学来得越快）：
+// ent.skCd = (sk.cd || 8) * bondCdMul(ownerId);
+ok(/ent\.skCd = \(sk\.cd \|\| 8\) \* bondCdMul\(ownerId\)/.test(gsrc),
+  '释放后冷却被重置为数据表 cd（再乘同行纪的羁绊乘数）');
 ok(/if \(G\.state !== 'play'\) return;[\s\S]{0,160}?tickAllySkill\(/.test(gsrc), '技能只在战斗中跑，且不受普攻 early return 影响');
 ok(/function allyDamage[\s\S]{0,400}?reportHit/.test(gsrc), '联机客机的直接伤害走房主上报，不本地扣权威怪');
 

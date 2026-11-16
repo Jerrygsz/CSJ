@@ -222,6 +222,9 @@
       // 第118轮：欠费台账 { 实体id: true }。十息到点灵石不够就记一笔，此后哪怕打怪攒够了钱
       // 也不再自动起身 —— 必须打完图出去、回洞府点「交钱复活」。落 save 才能跨地图 / 跨会话保留。
       allyOwe: {},
+      // 同行纪（批次 8）：{ 实体id: { n 同行场数, down 殒落次数, map 最后一仗, year 那一年 } }。
+      // 只给「带出门的那一个」记，灵兽袋里躺着的不算同行。
+      together: {},
       // 战斗右侧快捷栏：三格，每格 { kind:'pet'|'item', id }
       quick: [null, null, null],
       // 修为被封印（五鬼锁魂这类）：{ name, dmg, hp, note }
@@ -406,7 +409,22 @@
         coop: {
           tie: Math.max(0, ((s.coop && s.coop.tie) || 0) | 0),
           win: Math.max(0, ((s.coop && s.coop.win) || 0) | 0)
-        }
+        },
+        // 同行纪：老存档没这本账，补成空账 —— 空账就是「初识」，不因为老档白送档位。
+        // 逐行洗一遍脏数据（脏字段会让 bondCdMul 读到字符串再比大小，静默出错）。
+        together: (function () {
+          const o = {};
+          const src = (s.together && typeof s.together === 'object') ? s.together : {};
+          for (const id in src) {
+            const r = src[id];
+            if (!r || typeof r !== 'object') continue;
+            o[id] = {
+              n: Math.max(0, r.n | 0), down: Math.max(0, r.down | 0),
+              map: typeof r.map === 'string' ? r.map : '', year: Math.max(0, r.year | 0)
+            };
+          }
+          return o;
+        })()
       };
       // 老存档：已通关的剧情图自动补成洞府
       for (const id of save.cleared) { const m = MAPS.find(x => x.id === id); if (m && m.cave && save.caves.indexOf(m.cave) < 0) save.caves.push(m.cave); }
@@ -2029,6 +2047,9 @@
     spawnText(a.x, a.y - 30, '殒', save.skin === 'guigu' ? '#6b2a20' : '#ff7676', 13, { seal: true });
     if (!save.allyDead) save.allyDead = {};
     save.allyDead[a.id] = Date.now();
+    // 同行纪：殒落也记一笔。这是「有过往」的那一半 —— 只记一起走过多少场，
+    // 记不出「他替你死过几回」。（转世清档时随 along 一起清，人都不一样了）
+    togetherOf(a.id).down = ((togetherOf(a.id).down | 0) + 1);
     if (save.allyOwe) delete save.allyOwe[a.id];   // 新一次殒落重新计时，不继承旧欠费
     writeSave();
     Sfx.hurt();
@@ -2907,6 +2928,102 @@
     if (hasBottle) save.greenLiquid = (save.greenLiquid || 0) + 1;
     return '百年一瞬 · 入道 ' + (b * 100) + ' 年' + (hasBottle ? '　瓶底夜凝一滴绿液' : '');
   }
+
+  // ==========================================================================
+  // 同行纪（批次 8）—— 随行者的往来账
+  // --------------------------------------------------------------------------
+  // 岁月纪记「关」（破境、硬仗），这一本记「人」：谁跟你走过多少整图、殒过几回、
+  // 最后一仗落在哪张图。场数只增不减，且只给「带出门的那一个」记 —— 灵兽袋里躺着的
+  // 不算同行，所以换宠有隐性成本（新宠从「初识」重走），但没有硬惩罚。
+  //
+  // 这一条是有意这么定的：容量 2/4/6 一直只有「数值可比」这个理由，加一笔换宠手续费
+  // 只会让单手挂机的玩家烦；改成一个「越带越熟」的账，容量才有意义（每只都养得出交情）。
+  // ==========================================================================
+  const BOND_TIERS = [
+    { n: 0,  label: '初识', cd: 1.00, back: false },
+    { n: 8,  label: '相熟', cd: 0.88, back: false },
+    { n: 25, label: '生死之交', cd: 0.78, back: true }
+  ];
+  // 取账本行（没有就当场补一行空账）。只在 UI / 结算这种低频处调用，别放进每帧循环。
+  function togetherOf(id) {
+    if (!save.together || typeof save.together !== 'object') save.together = {};
+    let r = save.together[id];
+    if (!r || typeof r !== 'object') { r = { n: 0, down: 0, map: '', year: 0 }; save.together[id] = r; }
+    return r;
+  }
+  // 每帧会调的那个口子：不分配对象、只读整数，别改成返回新对象
+  function bondCdMul(id) {
+    if (!id || !save.together) return 1;
+    const r = save.together[id];
+    if (!r || typeof r !== 'object') return 1;
+    const n = r.n | 0;
+    if (n >= BOND_TIERS[2].n) return BOND_TIERS[2].cd;
+    if (n >= BOND_TIERS[1].n) return BOND_TIERS[1].cd;
+    return BOND_TIERS[0].cd;
+  }
+  function bondOf(id) {
+    const r = togetherOf(id);
+    const n = Math.max(0, r.n | 0);
+    let i = 0;
+    for (let k = 0; k < BOND_TIERS.length; k++) if (n >= BOND_TIERS[k].n) i = k;
+    const t = BOND_TIERS[i], nx = BOND_TIERS[i + 1] || null;
+    return {
+      n: n, down: Math.max(0, r.down | 0), map: r.map || '', year: Math.max(0, r.year | 0),
+      tier: i, label: t.label, cd: t.cd, back: !!t.back,
+      next: nx ? { label: nx.label, need: nx.n, left: Math.max(0, nx.n - n) } : null
+    };
+  }
+  function allyNameOf(id) {
+    const d = (window.PETS || []).find(p => p.id === id) || (window.MATES || []).find(m => m.id === id);
+    return d ? d.name : id;
+  }
+  // 打完一张图：把带出门的那两个各记一场。破境图「关没闭成」不算 —— 那时候人还在图里耗着，
+  // 谈不上走过一遭（与 save.wins 的口径分开：胜场照记，同行不记）。
+  function bumpTogether(m) {
+    const ids = [];
+    if (save.pet) ids.push(save.pet);
+    if (save.mate && save.mate !== save.pet) ids.push(save.mate);
+    if (!ids.length) return;
+    const y = Math.floor(curYear());
+    for (const id of ids) {
+      const r = togetherOf(id);
+      r.n = (r.n | 0) + 1;
+      r.map = m.id;
+      r.year = y;
+    }
+    bondBackOnClear(ids);
+  }
+  // 生死之交：他替你死过，你把这一图带着他的名分走完了 —— 他就自个儿回来了。
+  // 只对「真走到了那一档」的人生效；欠费台账一并清（人回来了，就没有欠的那一笔）。
+  function bondBackOnClear(ids) {
+    if (!save.allyDead) return;
+    const back = [];
+    for (const id of ids) {
+      if (!save.allyDead[id]) continue;
+      if (!bondOf(id).back) continue;
+      delete save.allyDead[id];
+      if (save.allyOwe) delete save.allyOwe[id];
+      const a = (G.pet && G.pet.id === id) ? G.pet : (G.mate && G.mate.id === id) ? G.mate : null;
+      if (a) { a.dead = false; a.deadT = 0; a.starveNoted = 0; a.hp = a.maxhp; a.guardT = 0; }
+      back.push(allyNameOf(id));
+    }
+    if (back.length) {
+      notify(back.join('、') + ' 自个儿回来了 · 这一趟带着他走完了');
+      Sfx.buff();
+    }
+  }
+  // 洞府「同行」一节：只列真走过图的，按场数降序 —— 空格不占地方
+  function togetherRows() {
+    if (!save.together || typeof save.together !== 'object') return [];
+    const out = [];
+    for (const id in save.together) {
+      const b = bondOf(id);
+      if (b.n <= 0) continue;
+      out.push({ id: id, name: allyNameOf(id), b: b });
+    }
+    out.sort((a, b) => (b.b.n - a.b.n) || (a.name < b.name ? -1 : 1));
+    return out;
+  }
   function hpMulBase() {
     const d = curDiff();
     const B = window.BALANCE;
@@ -3608,12 +3725,12 @@
   function tickAllySkill(ent, ownerId, dt) {
     const sk = allySkillOf(ownerId);
     if (!sk) return;
-    if (ent.skCd == null) ent.skCd = (sk.cd || 8) * 0.5;   // 进图先蓄半程，别一开打就齐放
+    if (ent.skCd == null) ent.skCd = (sk.cd || 8) * 0.5 * bondCdMul(ownerId);   // 进图先蓄半程，别一开打就齐放
     ent.skCd -= dt;
     if (ent.skCd > 0) return;
     if (!nearestEnemyFrom(ent.x, ent.y, 520)) { ent.skCd = 0.3; return; }
     castAllySkill(ent, ownerId, sk);
-    ent.skCd = sk.cd || 8;
+    ent.skCd = (sk.cd || 8) * bondCdMul(ownerId);
   }
 
   // ==========================================================================
@@ -10718,6 +10835,9 @@
     const breakReady = isGate ? missGate.length === 0 : true;
     const blocked = !!(isGate && !breakReady);
     save.wins++;
+    // 同行纪：这一图算不算「一起走过」。关没闭成（物事未齐）不算 —— 人还在图里耗着。
+    // 放在 save.wins 之后、showVictory 之前：那时随行者台账（save.pet / save.mate）还是本图的。
+    if (!blocked) bumpTogether(m);
     // 打完一张图：只留三门最精的功法带去下一张，余者散去（剧情传世功法除外）
     G.lastPrune = pruneSkillsTop3();
     if (isGate) {
@@ -12066,6 +12186,7 @@
       '各有三门本事（护体 / 近身 / 远击）轮着使，出手快慢跟着你当前境界的功法走 —— 眼下 ' + cdTxt + '；<br>' +
       '本命绝学 <b>' + ti.label + '</b>（威势 ×' + ti.mul.toFixed(2) + '）隔一阵来一下。' + ti.note + '<br>' +
       '性子各有不同，带谁出门看这一条：<b>攻</b> 自己找最近的打；<b>困</b> 先按住最靠近你的那只；<b>补</b> 贴着你走，专打近身的；<b>守</b> 你血薄时插到你和敌人之间。<br>' +
+      '带出门打完一整图才算一场同行，袋子躺着的不算。<b>相熟</b>（8 场）之后本命绝学来得快些；<b>生死之交</b>（25 场）殒了也自个儿回来 —— 你带着他的名分把那一图走完，他就回来了。<br>' +
       '也会真挨打：血量是你满血的一半（不显血条）；殒了十息，灵石够就自动扣 10000 灵石复生；当时不够就欠着不复生，出去攒够钱，回洞府交钱才能起身。</div>';
     for (const e of owned) {
       const id = e.id;
@@ -12087,14 +12208,20 @@
       const dead = !!(save.allyDead && save.allyDead[id]);
       const canPay = (save.stones || 0) >= ALLY_REVIVE_COST;
       const owe = !!(save.allyOwe && save.allyOwe[id]);
+      // 同行纪：这本账只记「带出门的那一个」，所以这里的数字就是这一只的往来
+      const bd = bondOf(id);
+      const effCd = ask ? (Math.round(ask.cd * bondCdMul(id) * 10) / 10) : 0;
       html += '<div class="recrow' + (on && !dead ? ' can' : '') + '">' +
         '<div class="rr-main"><b>' + ico(p.icon || '🐾') + p.name + '　第 ' + (e.lv || 1) + ' 阶' +
         (dead ? ' · <span style="color:#8f2f24">已殒</span>' : (on ? ' · 随行' : '')) +
         '　<span class="ally-role" data-role="' + rl.role + '">' + rl.role + '</span>' +
-        '　<span class="pet-cat">' + catLabel + '</span></b>' +
-        '<em>' + p.desc + '　（' + p.from + '）　威势 +' + dmgUp + '%　修为 ' + Math.floor(e.xp || 0) + ' / ' + need + '</em>' +
+        '　<span class="bond" data-bond="' + bd.tier + '">' + bd.label + '</span></b>' +
+        '<em>' + (catLabel !== '灵宠' ? '<span class="pet-cat">' + catLabel + '</span>　' : '') +
+        p.desc + '　（' + p.from + '）　威势 +' + dmgUp + '%　修为 ' + Math.floor(e.xp || 0) + ' / ' + need + '</em>' +
         (rl.note ? '<em class="ally-note">' + rl.note + '</em>' : '') +
-        (ask ? '<em>【' + ask.name + ' · ' + ask.cd + '秒】' + ask.desc + '</em>' : '') +
+        '<em class="bond-line">同行 ' + bd.n + ' 场' + (bd.down ? ' · 殒过 ' + bd.down + ' 回' : '') +
+        (bd.next ? '　再 ' + bd.next.left + ' 场到「' + bd.next.label + '」' : '　已是最深一档') + '</em>' +
+        (ask ? '<em>【' + ask.name + ' · ' + effCd + '秒】' + ask.desc + '</em>' : '') +
         (artTxt ? '<em style="white-space:nowrap">三功：' + artTxt + '</em>' : '') +
         (dead ? '<em style="color:#8f2f24">殒落中 · 复活需 ' + ALLY_REVIVE_COST + ' 灵石，现有 ' + Math.round(save.stones || 0) + '</em>' : '') +
         (owe ? '<em style="color:#8f2f24">欠费待交 · 不会自动复生，出去攒够钱回洞府交钱</em>' : '') + '</div>' +
@@ -12119,6 +12246,7 @@
       '护体 / 近身 / 远击三门轮着使，快慢跟着你当前境界 —— 眼下 ' + cdTxt + '；<br>' +
       '本命绝学仍隔一阵来一下，眼下 <b>' + ti.label + '</b>（威势 ×' + ti.mul.toFixed(2) + '）。<br>' +
       '性子各有不同，带谁出门看这一条：<b>攻</b> 自己找最近的打；<b>困</b> 先按住最靠近你的那只；<b>补</b> 贴着你走，专打近身的；<b>守</b> 你血薄时插到你和敌人之间。<br>' +
+      '带出门打完一整图才算一场同行。<b>相熟</b>（8 场）之后本命绝学来得快些；<b>生死之交</b>（25 场）殒了也自个儿回来 —— 你带着他的名分把那一图走完，他就回来了。<br>' +
       '同伴也会挨打、会殒落：血量是你满血的一半（不显血条），十息后灵石够才扣 10000 灵石复生；当时不够就欠着，出去攒够钱回洞府交钱，不会自己起身。</div>';
     // 厉飞雨·双身份化名系统（P0-1）：七玄门篇章后解锁，不进队伍、不参战
     if (save.liUnlocked) {
@@ -12152,13 +12280,18 @@
       const dead = !!(save.allyDead && save.allyDead[id]);
       const canPay = (save.stones || 0) >= ALLY_REVIVE_COST;
       const owe = !!(save.allyOwe && save.allyOwe[id]);
+      const bd = bondOf(id);
+      const effCd = msk ? (Math.round(msk.cd * bondCdMul(id) * 10) / 10) : 0;
       html += '<div class="recrow' + (on && !dead ? ' can' : '') + '">' +
         '<div class="rr-main"><b>' + ico(m.icon || '🙂') + m.name +
         (dead ? ' · <span style="color:#8f2f24">已殒</span>' : (on ? ' · 同行' : '')) +
-        '　<span class="ally-role" data-role="' + rl.role + '">' + rl.role + '</span></b>' +
+        '　<span class="ally-role" data-role="' + rl.role + '">' + rl.role + '</span>' +
+        '　<span class="bond" data-bond="' + bd.tier + '">' + bd.label + '</span></b>' +
         '<em>' + m.desc + (perk ? '　【' + perk + '】' : '') + '　（' + m.from + '）</em>' +
         (rl.note ? '<em class="ally-note">' + rl.note + '</em>' : '') +
-        (msk ? '<em>【' + msk.name + ' · ' + msk.cd + '秒】' + msk.desc + '</em>' : '') +
+        '<em class="bond-line">同行 ' + bd.n + ' 场' + (bd.down ? ' · 殒过 ' + bd.down + ' 回' : '') +
+        (bd.next ? '　再 ' + bd.next.left + ' 场到「' + bd.next.label + '」' : '　已是最深一档') + '</em>' +
+        (msk ? '<em>【' + msk.name + ' · ' + effCd + '秒】' + msk.desc + '</em>' : '') +
         (artTxt ? '<em style="white-space:nowrap">三功：' + artTxt + '</em>' : '') +
         (dead ? '<em style="color:#8f2f24">殒落中 · 复活需 ' + ALLY_REVIVE_COST + ' 灵石，现有 ' + Math.round(save.stones || 0) + '</em>' : '') +
         (owe ? '<em style="color:#8f2f24">欠费待交 · 不会自动复生，出去攒够钱回洞府交钱</em>' : '') + '</div>' +
@@ -13193,6 +13326,22 @@
           '<i>' + (y === 0 ? '开元' : '入道 ' + y + ' 年') + '</i>' +
           '<b>' + e.t + '</b><em>' + (e.s || '') + '</em></div>';
       }).join('') + '</div></div>') : '';
+    // 同行纪（批次 8）：岁月纪只记「关」，这一节记「人」—— 谁跟你走过多少路。
+    // 只算带出门打完的整图；换人之后新的一本从头记，所以这条账决定「带谁」而不只是「谁强」。
+    const tRows = togetherRows();
+    const togetherHtml = '<div class="cave-sec"><div class="cs-title">同行</div>' +
+      '<div class="cs-note">只算带出门打完的整图，灵兽袋里躺着的不算。一日同路是一日，一场同路是一场。</div>' +
+      (tRows.length
+        ? ('<div class="jz-list">' + tRows.map(r => {
+            const mm = MAPS.find(x => x.id === r.b.map);
+            const when = r.b.map ? ((mm ? mm.name : r.b.map) + ' · ' + (r.b.year > 0 ? '入道 ' + r.b.year + ' 年' : '开元')) : '';
+            return '<div class="jz-row' + (r.b.tier >= 2 ? ' start' : '') + '">' +
+              '<i>' + r.b.n + ' 场</i>' +
+              '<b>' + r.name + ' · ' + r.b.label + '</b>' +
+              '<em>' + (r.b.down ? ('殒过 ' + r.b.down + ' 回　') : '') + (when ? ('最后一仗 ' + when) : '') + '</em></div>';
+          }).join('') + '</div>')
+        : '<div class="cs-empty">还没有人跟你走过一整图。</div>') +
+      '</div>';
     return (encBtn ? '<div class="cave-sec">' + encBtn + '</div>' : '') +
       '<div class="cave-sec"><div class="cs-title">闭关静修</div>' +
       '<div class="cs-note">' + c.restTip + '</div>' +
@@ -13211,7 +13360,7 @@
       '<div class="restbtns">' +
       '<button class="btn small" data-rest="1"' + (capped || atGate ? ' disabled' : '') + '>闭关一次</button>' +
       '<button class="btn small" data-rest="5"' + (capped || atGate ? ' disabled' : '') + '>闭关五次</button>' +
-      '</div></div></div>' + gateBox + chronHtml;
+      '</div></div></div>' + gateBox + chronHtml + togetherHtml;
   }
 
   // ---------- 太南小会 ----------
@@ -14892,6 +15041,8 @@
     save.best = { time: 0, kills: 0, level: 1 }; save.wins = 0;
     save.pets = []; save.pet = null; save.sealed = null;
     save.mates = []; save.mate = null;
+    // 同行纪也清：转世之后是另一世的人，账从头记（共斗默契 save.coop 不清，那是跟队友的账）
+    save.together = {};
     save.quick = [null, null, null];
     save.petFeed = { on: false, t: 0 };
     save.greenLiquid = 0; save.ach = {};
@@ -15456,6 +15607,51 @@
     // 直接触发一次合击（不走「交替命中 4 次」那条路，单测合击效果与冷却）
     tieFire(id) { return (window.Coop && window.Coop.fireTieById) ? window.Coop.fireTieById(id) : null; },
     tieState() { return (window.Coop && window.Coop.tieState) ? window.Coop.tieState() : null; },
+    // 批次 8 · 同行纪探针：账本一行 / 档位 / 每帧那个 CD 乘数 / 本命绝学当前冷却 / 生死台账
+    bond(id) { return bondOf(id); },
+    bondCd(id) { return bondCdMul(id); },
+    bondTiers() { return BOND_TIERS.map(t => ({ n: t.n, label: t.label, cd: t.cd, back: t.back })); },
+    togetherRows() {
+      return togetherRows().map(r => ({
+        id: r.id, name: r.name, n: r.b.n, down: r.b.down, label: r.b.label,
+        tier: r.b.tier, map: r.b.map, year: r.b.year
+      }));
+    },
+    setTogether(id, n, down, map) {
+      const r = togetherOf(id);
+      r.n = Math.max(0, n | 0);
+      if (down != null) r.down = Math.max(0, down | 0);
+      if (map != null) { r.map = String(map); r.year = Math.floor(curYear()); }
+      writeSave();
+      return bondOf(id);
+    },
+    allySkCd() {
+      return {
+        pet: (G.pet && G.pet.skCd != null) ? +G.pet.skCd.toFixed(3) : null,
+        mate: (G.mate && G.mate.skCd != null) ? +G.mate.skCd.toFixed(3) : null
+      };
+    },
+    allyDeadMap() { return Object.assign({}, save.allyDead || {}); },
+    setAllyDead(id) {
+      if (!save.allyDead) save.allyDead = {};
+      save.allyDead[id] = Date.now();
+      if (save.allyOwe) delete save.allyOwe[id];
+      writeSave();
+      return true;
+    },
+    giveMate(id) {
+      if (!Array.isArray(save.mates)) save.mates = [];
+      if (save.mates.indexOf(id) < 0) save.mates.push(id);
+      save.mate = id; writeSave(); return save.mate;
+    },
+    // 不带随行者：setPet 是开关式的，闸门里要明确「场上没有随行」这一步
+    clearAlly() { save.pet = null; save.mate = null; G.pet = null; G.mate = null; writeSave(); return true; },
+    // 让随行者真挨一下（走 hurtAlly 这条唯一入口，殒落台账与 killAlly 全都会走）
+    hitAlly(dmg) {
+      if (G.pet) hurtAlly(G.pet, dmg);
+      if (G.mate) hurtAlly(G.mate, dmg);
+      return { petDead: !!(G.pet && G.pet.dead), mateDead: !!(G.mate && G.mate.dead) };
+    },
     // 联机模块（coop.js）画合击那一下要用的两件飘字入口 / 屏震。
     // 当前皮肤不在这里另开一个 skin 钩子 —— 别处已有 __FR.skin(name)，重复定义会互相盖掉。
     spawnText(x, y, t, c, s, o) { spawnText(x, y, t, c, s, o); return true; },
@@ -15945,7 +16141,7 @@
     breakRate(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); return b ? { pills: breakGatePills(b), rate: breakSuccessRate(b) } : null; },
     startBreak(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); if (!b) return 'no req'; enterBreakMap(b); return { map: (G.state === 'prefight' && G.pf) ? G.pf.id : (G.mapId || (G.pf && G.pf.id) || null), state: G.state }; },
     breakScene(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === lv); if (!b) return 'no req'; breakSceneThen(b, () => { G.state = 'cave'; if (elCave) elCave.style.display = 'flex'; renderCave(); }); return { scene: G.breakScene, dialog: G.state === 'dialog', lines: G.dialogLines ? G.dialogLines.length : 0 }; },
-    finishMapNow() { if (!G.map) return 'no map'; const m = G.map; finishMap(m); return { state: G.state, level: save.cultivate.level, cleared: save.cleared.slice(), unlocked: save.unlocked.slice(), caves: save.caves.slice() }; },
+    finishMapNow() { if (!G.map) return 'no map'; const m = G.map; finishMap(m); return { state: G.state, level: save.cultivate.level, cleared: save.cleared.slice(), unlocked: save.unlocked.slice(), caves: save.caves.slice(), note: G.victoryNote || '', pending: !!G.breakPending }; },
     // 主线指针 / 缺口验收用：报告里的验收口径是 hasNextHint === true
     nextHint() { const h = nextHintMap(); return h ? { id: h.m.id, name: h.m.name, why: h.why } : null; },
     hasNextHint() { return !!nextHintMap(); },
@@ -16066,7 +16262,7 @@
     quick() { return JSON.parse(JSON.stringify(save.quick || [null, null, null])); },
     setQuick(i, kind, id) { setQuick(i, kind, id); return JSON.parse(JSON.stringify(save.quick)); },
     useQuick(i) { const sl = quickSlot(i); useQuick(i); return { cd: (G.quickCd || []).slice(), slot: sl }; },
-    givePet(id) { if ((save.pets || []).indexOf(id) < 0) (save.pets = save.pets || []).push(id); save.pet = id; writeSave(); return save.pet; },
+    givePet(id) { normalizePets(); if (!petEntry(id)) save.pets.push({ id: id, lv: 1, xp: 0 }); save.pet = id; writeSave(); return save.pet; },
     heroSkin() { return Object.assign({}, heroLook()); },
     equipTo(id) { equipGear(id); return Object.assign({}, save.equip); },
     grant(stones) { save.stones = Math.round((save.stones || 0) + (stones || 0)); writeSave(); return save.stones; },
@@ -16445,7 +16641,8 @@
     save: {
       read: () => localStorage.getItem(SAVE_KEY),
       clear: () => { localStorage.removeItem(SAVE_KEY); return '已清除存档'; },
-      wins: (v) => { save.wins = v; writeSave(); return '通关次数=' + v; }
+      wins: (v) => { save.wins = v; writeSave(); return '通关次数=' + v; },
+      stones: (v) => { save.stones = Math.max(0, Math.round(v || 0)); writeSave(); return save.stones; }
     },
     // 修为（存档里的那一档，进阶门的门槛认它，不认本局 G.player.level）
     cultLevel(n) {

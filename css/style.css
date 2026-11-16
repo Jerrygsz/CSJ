@@ -369,6 +369,20 @@ body[data-skin="guigu"] #chronicle .ch-sub { color: #3a332a; }
 .ally-role[data-role="补"] { border-color: rgba(111,224,138,0.42); color: var(--ok); background: rgba(111,224,138,0.13); }
 .ally-role[data-role="守"] { border-color: rgba(201,162,74,0.56); color: #e8cf86; background: rgba(201,162,74,0.18); }
 .rr-main em.ally-note { color: rgba(201,162,74,0.82); }
+/* 同行纪 · 羁绊（批次 8）：三档只加深金与边框，不换色系 ——
+   朱砂在这游戏里是「受伤 / 殒落」的语义（破罩、殒字都用它），别让交情的标签抢过去。
+   初识要淡到几乎不显（那是默认状态，不该抢眼），越走越深才显出来。 */
+.bond {
+  display: inline-block; font-size: var(--fs-micro); line-height: 1.5; font-weight: 400;
+  padding: 0 5px; border-radius: var(--r-sm); white-space: nowrap;
+  border: 1px solid rgba(201,162,74,0.20); color: rgba(201,162,74,0.56); background: transparent;
+}
+.bond[data-bond="1"] { border-color: rgba(201,162,74,0.40); color: rgba(201,162,74,0.88); background: rgba(201,162,74,0.10); }
+.bond[data-bond="2"] { border-color: rgba(201,162,74,0.72); color: var(--accent); background: rgba(201,162,74,0.20); font-weight: 600; }
+.rr-main em.bond-line { color: var(--text-3); }
+/* 「灵宠 / 傀儡 / 器灵 / 化身」那一格：两个汉字不许在行尾拆成「灵」「宠」两行
+   （实拍里六翼霜蚣那行字最长，第二个标签正好被挤到行尾拆开） */
+.pet-cat { white-space: nowrap; }
 /* 道具「去哪取」提示卡：进阶清单与炼丹材料共用 */
 .item-tip { background: rgba(18,14,9,0.97); border: 1px solid rgba(201,162,74,0.5);
   border-radius: var(--r-md); padding: 8px 12px; font-size: var(--fs-cap);
@@ -1106,6 +1120,9 @@ body[data-skin="guigu"] .jn-row.full .jn-st { color: #8f4f2e; }
 .restbox { display: flex; flex-direction: column; gap: var(--sp-2); }
 .resttip { color: var(--ok-soft); font-size: var(--fs-cap); line-height: 1.6; }
 .resttip.warn { color: var(--danger); }
+/* 墨皮：#cfd8c8（--ok-soft）是**当底色用**的淡竹青，拿它当字写在宣纸上等于没写 ——
+   静修页那句「按现下灵石，可坐 N 次」实拍里整行消失。改成压深的竹青。 */
+body[data-skin="guigu"] .resttip { color: #46654a; }
 .restbtns { display: flex; gap: var(--sp-2); }
 .restbtns .btn { flex: 1; }
 /* 打坐按钮的禁用只管透明度，其余交给 .btn:disabled 统一处理 */
@@ -2018,6 +2035,9 @@ body[data-skin="guigu"] .ally-role { border-color: rgba(60,56,48,0.28); color: #
 body[data-skin="guigu"] .ally-role[data-role="困"] { color: #3f5a6b; border-color: rgba(63,90,107,0.34); }
 body[data-skin="guigu"] .ally-role[data-role="补"] { color: #3f6b4a; border-color: rgba(63,107,74,0.34); }
 body[data-skin="guigu"] .ally-role[data-role="守"] { color: #8a6a2a; border-color: rgba(138,106,42,0.40); }
+body[data-skin="guigu"] .bond { border-color: rgba(60,56,48,0.20); color: #6b6252; background: transparent; }
+body[data-skin="guigu"] .bond[data-bond="1"] { border-color: rgba(143,79,46,0.34); color: #7a5a3a; background: rgba(143,79,46,0.06); }
+body[data-skin="guigu"] .bond[data-bond="2"] { border-color: rgba(143,79,46,0.58); color: #8f4f2e; background: rgba(143,79,46,0.10); font-weight: 600; }
 body[data-skin="guigu"] .rr-main em.ally-note { color: #8a6a2a; }
 body[data-skin="guigu"] .brk-row.click span { text-decoration-color: rgba(143,79,46,0.5); }
 body[data-skin="guigu"] .brk-row.ok { border-color: rgba(95,127,97,0.42); }
