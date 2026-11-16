@@ -88,8 +88,12 @@ const ui = await page.evaluate(() => {
   const k = Object.keys(window.CAVES || {})[0];
   F.G.caveTab = 'pet'; F.cave(k);
   const body = document.getElementById('caveBody');
-  const tag = body.querySelector('.bond');
-  const line = body.querySelector('.bond-line');
+  // 场上有几只宠是不确定的（这一趟可能顺手孵出一只云翅鸟）—— 得按名字找到啼魂兽那一条，
+  // 不能抓第一个 .bond（第一只不一定是它）。
+  const row = [...body.querySelectorAll('.recrow')].find(r =>
+    ((r.querySelector('.rr-main b') || {}).textContent || '').indexOf('啼魂兽') >= 0);
+  const tag = row ? row.querySelector('.bond') : null;
+  const line = row ? row.querySelector('.bond-line') : null;
   const pet = { bond: tag ? tag.textContent : null, data: tag ? tag.getAttribute('data-bond') : null, line: line ? line.textContent : null };
   F.G.caveTab = 'rest'; F.cave(k);
   const secs = [...document.querySelectorAll('#caveBody .cave-sec')];
