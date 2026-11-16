@@ -345,6 +345,30 @@ body[data-skin="guigu"] #chronicle .ch-sub { color: #3a332a; }
 .brk-row.click:hover { border-color: rgba(201,162,74,0.55); background: rgba(201,162,74,0.10); }
 .brk-row.click span { text-decoration: underline dotted rgba(201,162,74,0.4); text-underline-offset: 3px; }
 .brk-hint { color: rgba(201,162,74,0.8); font-size: var(--fs-micro); margin: 2px 0 0; }
+/* 岁月纪（P2-2）：一行一条 —— 年数在左，事在中，注在事下面。
+   左侧那道竖线是「时间轴」，不是装饰：整块读下来要有「一年一年往下走」的感觉。 */
+.jz-list { display: flex; flex-direction: column; gap: 7px; margin: 8px 0 2px; }
+.jz-row {
+  display: grid; grid-template-columns: 88px 1fr; gap: 1px var(--sp-2);
+  font-size: var(--fs-cap); color: var(--text-2);
+  border-left: 2px solid rgba(201,162,74,0.4); padding: 3px 0 3px 9px;
+}
+.jz-row i { font-style: normal; font-size: var(--fs-micro); color: var(--accent); white-space: nowrap; }
+.jz-row b { font-weight: 600; color: var(--text-1); }
+.jz-row em { grid-column: 2; font-style: normal; font-size: var(--fs-micro); color: var(--text-3); line-height: 1.5; }
+.jz-row.start { border-left-color: rgba(201,162,74,0.85); }
+.jz-row.start b { color: var(--accent); }
+/* 同伴 / 灵宠的「性子」（P2-5）：一个字的路数，不是数值 —— 带谁出门先看这个。
+   色只用浅底淡描，别做成四块彩色小标签：那在纸皮上比什么都跳。 */
+.ally-role {
+  display: inline-block; font-size: var(--fs-micro); line-height: 1.5; font-weight: 400;
+  padding: 0 5px; border-radius: var(--r-sm);
+  border: 1px solid rgba(201,162,74,0.46); color: var(--accent); background: rgba(201,162,74,0.15);
+}
+.ally-role[data-role="困"] { border-color: rgba(150,190,220,0.46); color: #a8d0e8; background: rgba(150,190,220,0.14); }
+.ally-role[data-role="补"] { border-color: rgba(111,224,138,0.42); color: var(--ok); background: rgba(111,224,138,0.13); }
+.ally-role[data-role="守"] { border-color: rgba(201,162,74,0.56); color: #e8cf86; background: rgba(201,162,74,0.18); }
+.rr-main em.ally-note { color: rgba(201,162,74,0.82); }
 /* 道具「去哪取」提示卡：进阶清单与炼丹材料共用 */
 .item-tip { background: rgba(18,14,9,0.97); border: 1px solid rgba(201,162,74,0.5);
   border-radius: var(--r-md); padding: 8px 12px; font-size: var(--fs-cap);
@@ -1962,6 +1986,18 @@ body[data-skin="guigu"] .brk-row { background: rgba(74,68,56,0.055); border-colo
 body[data-skin="guigu"] .brk-row i { background: rgba(60,56,48,0.14); color: #3a352c; border: 1px solid rgba(60,56,48,0.26); }
 body[data-skin="guigu"] .brk-row b { color: #8f2f24; }
 body[data-skin="guigu"] .brk-row.click:hover { background: rgba(143,79,46,0.08); border-color: rgba(143,79,46,0.45); }
+/* 水墨皮：洞府里是纸底墨字，年表与性子标签一律走深色，别留金皮的浅色字。 */
+body[data-skin="guigu"] .jz-row { color: #3a352c; border-left-color: rgba(60,56,48,0.32); }
+body[data-skin="guigu"] .jz-row i { color: #8a6a2a; }
+body[data-skin="guigu"] .jz-row b { color: #241f16; }
+body[data-skin="guigu"] .jz-row em { color: #5a5142; }
+body[data-skin="guigu"] .jz-row.start { border-left-color: rgba(143,79,46,0.72); }
+body[data-skin="guigu"] .jz-row.start b { color: #8f4f2e; }
+body[data-skin="guigu"] .ally-role { border-color: rgba(60,56,48,0.28); color: #5a5142; background: rgba(60,56,48,0.05); }
+body[data-skin="guigu"] .ally-role[data-role="困"] { color: #3f5a6b; border-color: rgba(63,90,107,0.34); }
+body[data-skin="guigu"] .ally-role[data-role="补"] { color: #3f6b4a; border-color: rgba(63,107,74,0.34); }
+body[data-skin="guigu"] .ally-role[data-role="守"] { color: #8a6a2a; border-color: rgba(138,106,42,0.40); }
+body[data-skin="guigu"] .rr-main em.ally-note { color: #8a6a2a; }
 body[data-skin="guigu"] .brk-row.click span { text-decoration-color: rgba(143,79,46,0.5); }
 body[data-skin="guigu"] .brk-row.ok { border-color: rgba(95,127,97,0.42); }
 body[data-skin="guigu"] .brk-row.ok i { background: rgba(95,127,97,0.18); color: #2f4a33; border-color: rgba(95,127,97,0.4); }

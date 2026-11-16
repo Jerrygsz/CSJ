@@ -2763,6 +2763,102 @@
     G._press = pressureOf(pLv, mLv);
     return G._press;
   }
+  // ---------- 岁月纪（P2-2）：把「闭关二百余年」变成看得见的年数 ----------
+  // 年数**不落存档**，由境界现推。这是刻意的：若把它当计数器累加（打一次坐加几年、
+  // 打一张图加几年），玩家刷上几百场就是几万年，而原著一辈子才两千余年。
+  // 境界是「他修到哪儿」的唯一真源，年数挂在境界上，永远自洽 ——
+  // 顺带老存档一读进来就有年数可看，不必写迁移。
+  //
+  // 数值按原著锚点校准（见 canon/progression.md）：
+  //   炼气 15 年（十岁入道、二十五筑基）→ 筑基 75 年 → 结丹 117 年
+  //   三档相加 = 207 年，正是「二百一十七岁结婴」（十岁入道，故入道 207 年）
+  //   化神 500 / 炼虚 800 → 飞升灵界落在入道一千余年，与原著量级一致
+  // 灵界之后寿元数以万计，年数给得再大也不违和，但不必真给到几万 —— 道祖一万三千年足够。
+  const MAJOR_YEARS = {
+    炼气: 15, 筑基: 75, 结丹: 117, 元婴: 300, 化神: 500,
+    炼虚: 800, 合体: 1000, 大乘: 1200, 渡劫: 600,
+    真仙: 800, 金仙: 1200, 太乙: 1600, 大罗: 2000, 道祖: 3000
+  };
+  // 寿元（canon/progression.md 第二节）。0 = 近乎无量，只作一句闲话，不当死亡线用 ——
+  // 「闭关坐过了寿元就老死」是硬核惩罚，与这套单手挂机的节奏不合。
+  const LIFESPAN = {
+    炼气: 100, 筑基: 200, 结丹: 550, 元婴: 1000, 化神: 2000,
+    炼虚: 0, 合体: 0, 大乘: 0, 渡劫: 0, 真仙: 0
+  };
+  // 大境界在 REALM_LAYERS 里占哪一段 lv。层数不齐（炼气十三层、筑基三层、渡劫一层），
+  // 所以不能按「每境界几层」硬算，只能去真源里量实际跨度。
+  function majorLvRange(mj) {
+    const L = window.REALM_LAYERS || [];
+    let a = null, b = null;
+    for (let i = 0; i < L.length; i++) {
+      const m = realmMajorName(L[i].name);
+      if (a == null) { if (m === mj) a = L[i].lv; continue; }
+      if (m !== mj) { b = L[i].lv; break; }
+    }
+    if (a == null) return { a: 1, b: 2 };
+    // 末段（道祖）后面没有下一境界可量，按 40 级兜底，别让一级摊到几千年
+    return { a: a, b: a + Math.max(4, (b == null ? 40 : (b - a))) };
+  }
+  function yearsPerLevel(lv) {
+    const mj = realmMajorName(realmName(lv || 1));
+    const y = MAJOR_YEARS[mj];
+    const r = majorLvRange(mj);
+    return (y == null ? 60 : y) / Math.max(1, r.b - r.a);
+  }
+  let _yearArr = null, _yearArrN = 0;
+  function yearArr() {
+    const L = window.REALM_LAYERS || [];
+    if (_yearArr && _yearArrN === L.length) return _yearArr;
+    const arr = new Array(641);
+    arr[1] = 0;
+    for (let i = 1; i < 640; i++) arr[i + 1] = arr[i] + yearsPerLevel(i);
+    _yearArr = arr; _yearArrN = L.length;
+    return arr;
+  }
+  function yearAt(lv) {
+    const a = yearArr();
+    return a[Math.max(1, Math.min(640, Math.floor(lv || 1)))] || 0;
+  }
+  // 入道年数 = 该境界的整年 + 本年修为的零头。零头也要算 —— 否则「闭关 5 次」看不出时间在走。
+  function curYear() {
+    const c = save.cultivate || {};
+    const lv = Math.max(1, c.level || 1);
+    const need = xpNeed(lv) || 1;
+    const part = Math.min(1, Math.max(0, (c.xp || 0) / need));
+    return yearAt(lv) + part * yearsPerLevel(lv);
+  }
+  function curMajor() { return realmMajorName(realmName((save.cultivate && save.cultivate.level) || 1)); }
+  // 岁月纪：一部只有「关」的年表。不逐条记闭关，只记**改变了什么**的那几件 ——
+  // 破境、走过的大战。全是已发生的事实，不编造任何历史上的事。
+  // 每卷开头那张图排进来没有意义，只取卷内 type 为 boss 的（一场真硬仗）。
+  function chronicleEntries() {
+    const lv = (save.cultivate && save.cultivate.level) || 1;
+    const out = [{ k: 'start', y: 0, t: '入七玄门', s: '十岁。第一次听见「灵根」二字。' }];
+    for (const b of (window.BREAKTHROUGH || [])) {
+      if (!b || (b.lv || 0) > lv) continue;
+      out.push({ k: 'break', y: yearAt(b.lv), t: '破入 ' + (b.realm || ''), s: (b.from || '') + ' → ' + (b.realm || '') });
+    }
+    const bosses = [];
+    for (const m of (window.MAPS || [])) {
+      if (!m || m.side) continue;
+      if (m.type !== 'boss') continue;
+      if ((save.cleared || []).indexOf(m.id) < 0) continue;
+      bosses.push({ k: 'fight', y: yearAt(m.startLevel || lv), t: m.name, s: m.clearTitle || '一场硬仗' });
+    }
+    bosses.sort((a, b) => a.y - b.y);
+    for (const b of bosses.slice(-8)) out.push(b);
+    out.sort((a, b) => (a.y - b.y) || (a.k === 'start' ? -1 : 1));
+    return out;
+  }
+  // 「百年一瞬」：跨过一个整百年就报一声。年数由境界推，所以这声报得再多也有上限，
+  // 报的时候顺带把瓶底那一滴夜凝的绿液收进来（有瓶才给）。
+  function centuryLine(y0, y1) {
+    const a = Math.floor(y0 / 100), b = Math.floor(y1 / 100);
+    if (b <= a) return null;
+    const hasBottle = (save.inventory['gupu'] || 0) > 0 || (save.inventory['zhangtian'] || 0) > 0;
+    if (hasBottle) save.greenLiquid = (save.greenLiquid || 0) + 1;
+    return '百年一瞬 · 入道 ' + (b * 100) + ' 年' + (hasBottle ? '　瓶底夜凝一滴绿液' : '');
+  }
   function hpMulBase() {
     const d = curDiff();
     const B = window.BALANCE;
@@ -3596,11 +3692,38 @@
     }
     return best;
   }
+  // 性子（P2-5）：困 / 补 这两类要「护着韩立」而不是「自己打自己的」，
+  // 所以挑目标的尺子不一样 —— 量的是**离韩立多近**，不是离自己多近。
+  // 攻 照旧用 allyTarget（最近的那只）；找不到就退回同一把尺子，别让它站着不动。
+  function allyRoleOf(id) { return (window.allyRoleOf ? window.allyRoleOf(id).role : '攻'); }
+  function allyTargetForPlayer(e, maxd) {
+    if (!G.player) return allyTarget(e, maxd);
+    const px = G.player.x, py = G.player.y;
+    let best = null, bd = 1e9;
+    for (const en of allEnemies()) {
+      if (en._dead) continue;
+      if (U.dist(e.x, e.y, en.x, en.y) > maxd) continue;
+      const d = U.dist2(px, py, en.x, en.y);
+      if (d < bd) { bd = d; best = en; }
+    }
+    return best || allyTarget(e, maxd);
+  }
+  // 守：韩立血不满一半、且有东西贴到他三百步内 —— 插到两者中间。
+  // 只有「守」走这条，且是有条件触发，所以常态走位一点没变（闸门逐帧比过）。
+  function allyGuardSpot(e) {
+    if (!G.player || G.player.hp > G.player.maxhp * 0.55) return null;
+    const t = nearestEnemyFrom(G.player.x, G.player.y, 300);
+    if (!t) return null;
+    const a = Math.atan2(t.y - G.player.y, t.x - G.player.x);
+    if (U.dist(e.x, e.y, G.player.x, G.player.y) > 240) return null;   // 离太远就先赶路，别瞬移
+    return { x: G.player.x + Math.cos(a) * 46, y: G.player.y + Math.sin(a) * 46, t: t };
+  }
   // 自主移动：近身型追到贴脸，拉开型保持一段距离；没敌人时在视野里绕着游走。
   // 第119轮：遇攻击 / 碰撞先侧身让半步 —— 用韩立开大衍挂机那套「预测三个时间点、
   // 试十二个方向、挑最不疼的一条」，但没有 autoAnchor：让开之后立刻回到下面的自由 AI，
   // 所以依旧不站桩、不绕着韩立、不出可视范围，三类功法也照常各自走 CD。
-  function allyMove(e, dt, mode) {
+  function allyMove(e, dt, mode, ownerId) {
+    const role = allyRoleOf(ownerId);
     if (e.dodgeFx > 0) e.dodgeFx = Math.max(0, e.dodgeFx - dt);
 
     // 第121轮·C档性能：威胁评估（扫描弹幕+评分）节流到 ~30Hz（每 ALLY_EVAL_EVERY 帧算一次），
@@ -3637,9 +3760,16 @@
       mv = spd * dt;
       e.dir = ux >= 0 ? 1 : -1;
     } else {
-      const t = allyTarget(e, 460);
+      // 守：主人血薄且有人贴上来 —— 先插过去，这一帧不按「打最近那只」走。
+      const gs = (role === '守') ? allyGuardSpot(e) : null;
+      // 困 / 补：挑**离韩立最近**的那只（解围），不是离自己最近的。
+      const t = gs ? gs.t : ((role === '困' || role === '补') ? allyTargetForPlayer(e, 460) : allyTarget(e, 460));
       let tx, ty;
-      if (t) {
+      if (gs) {
+        e.kiting = false;
+        tx = gs.x; ty = gs.y;
+        e.dir = (gs.t.x >= e.x) ? 1 : -1;
+      } else if (t) {
         const d = U.dist(e.x, e.y, t.x, t.y) || 1;
         const ang = Math.atan2(t.y - e.y, t.x - e.x);
         // 第120轮：目标是 Boss 或精英怪时，绝不贴脸 —— 拉到「能打到的最远间距」慢慢磨，
@@ -3665,8 +3795,11 @@
       } else {
         e.kiting = false;
         e.roam = (e.roam || 0) + dt * 0.6;
-        tx = G.player.x + Math.cos(e.roam) * 130;
-        ty = G.player.y + Math.sin(e.roam * 0.8) * 100;
+        // 补 / 守 本来就该贴着人走：没怪时绕的圈小一半，一有动静够得着。
+        // 攻 仍是原来那一圈（130 × 100），一点没动。
+        const near = (role === '补' || role === '守');
+        tx = G.player.x + Math.cos(e.roam) * (near ? 62 : 130);
+        ty = G.player.y + Math.sin(e.roam * 0.8) * (near ? 48 : 100);
       }
       const dx = tx - e.x, dy = ty - e.y, dd = Math.hypot(dx, dy) || 1;
       ux = dx / dd; uy = dy / dd;
@@ -3715,7 +3848,7 @@
     if (pt.dead) return;                        // 第118轮：殒了就不动、不出手，等复活
     // 第118轮：可视范围内自己找怪，不再围着韩立。本命是范围类的偏贴身，弹道类的偏拉开。
     const mode = (window.allyArtOf(def.id, 'melee') || {}).mode || 'ranged';
-    allyMove(pt, dt, mode);
+    allyMove(pt, dt, mode, def.id);
     if (G.state !== 'play') return;
     tickAllySkill(pt, def.id, dt);   // 第116轮：本命绝学独立冷却
     tickAllyArts(pt, def.id, dt);    // 第118轮：护体 / 近身 / 远击三条独立冷却
@@ -3874,7 +4007,7 @@
     mt.bob = (mt.bob || 0) + dt;
     if (mt.dead) return;                        // 第118轮：与灵宠同一套殒落 / 复活
     const mode = (window.allyArtOf(def.id, 'melee') || {}).mode || 'ranged';
-    allyMove(mt, dt, mode);
+    allyMove(mt, dt, mode, def.id);
     if (G.state !== 'play') return;
     tickAllySkill(mt, def.id, dt);   // 第116轮：同伴与灵宠同一套技能冷却
     tickAllyArts(mt, def.id, dt);    // 第118轮：三类功法
@@ -11882,6 +12015,7 @@
       '见了 Boss 或精英怪则远远拉开距离慢慢磨，不往跟前凑。<br>' +
       '各有三门本事（护体 / 近身 / 远击）轮着使，出手快慢跟着你当前境界的功法走 —— 眼下 ' + cdTxt + '；<br>' +
       '本命绝学 <b>' + ti.label + '</b>（威势 ×' + ti.mul.toFixed(2) + '）隔一阵来一下。' + ti.note + '<br>' +
+      '性子各有不同，带谁出门看这一条：<b>攻</b> 自己找最近的打；<b>困</b> 先按住最靠近你的那只；<b>补</b> 贴着你走，专打近身的；<b>守</b> 你血薄时插到你和敌人之间。<br>' +
       '也会真挨打：血量是你满血的一半（不显血条）；殒了十息，灵石够就自动扣 10000 灵石复生；当时不够就欠着不复生，出去攒够钱，回洞府交钱才能起身。</div>';
     for (const e of owned) {
       const id = e.id;
@@ -11899,13 +12033,17 @@
         const a = window.allyArtOf(id, k);
         return a ? a.name : '';
       }).filter(Boolean).join(' · ');
+      const rl = (window.allyRoleOf ? window.allyRoleOf(id) : { role: '攻', note: '' });
       const dead = !!(save.allyDead && save.allyDead[id]);
       const canPay = (save.stones || 0) >= ALLY_REVIVE_COST;
       const owe = !!(save.allyOwe && save.allyOwe[id]);
       html += '<div class="recrow' + (on && !dead ? ' can' : '') + '">' +
         '<div class="rr-main"><b>' + ico(p.icon || '🐾') + p.name + '　第 ' + (e.lv || 1) + ' 阶' +
-        (dead ? ' · <span style="color:#8f2f24">已殒</span>' : (on ? ' · 随行' : '')) + '　<span class="pet-cat">' + catLabel + '</span></b>' +
+        (dead ? ' · <span style="color:#8f2f24">已殒</span>' : (on ? ' · 随行' : '')) +
+        '　<span class="ally-role" data-role="' + rl.role + '">' + rl.role + '</span>' +
+        '　<span class="pet-cat">' + catLabel + '</span></b>' +
         '<em>' + p.desc + '　（' + p.from + '）　威势 +' + dmgUp + '%　修为 ' + Math.floor(e.xp || 0) + ' / ' + need + '</em>' +
+        (rl.note ? '<em class="ally-note">' + rl.note + '</em>' : '') +
         (ask ? '<em>【' + ask.name + ' · ' + ask.cd + '秒】' + ask.desc + '</em>' : '') +
         (artTxt ? '<em style="white-space:nowrap">三功：' + artTxt + '</em>' : '') +
         (dead ? '<em style="color:#8f2f24">殒落中 · 复活需 ' + ALLY_REVIVE_COST + ' 灵石，现有 ' + Math.round(save.stones || 0) + '</em>' : '') +
@@ -11930,6 +12068,7 @@
       '见了 Boss 或精英怪则远远拉开距离慢慢磨，不往跟前凑。<br>' +
       '护体 / 近身 / 远击三门轮着使，快慢跟着你当前境界 —— 眼下 ' + cdTxt + '；<br>' +
       '本命绝学仍隔一阵来一下，眼下 <b>' + ti.label + '</b>（威势 ×' + ti.mul.toFixed(2) + '）。<br>' +
+      '性子各有不同，带谁出门看这一条：<b>攻</b> 自己找最近的打；<b>困</b> 先按住最靠近你的那只；<b>补</b> 贴着你走，专打近身的；<b>守</b> 你血薄时插到你和敌人之间。<br>' +
       '同伴也会挨打、会殒落：血量是你满血的一半（不显血条），十息后灵石够才扣 10000 灵石复生；当时不够就欠着，出去攒够钱回洞府交钱，不会自己起身。</div>';
     // 厉飞雨·双身份化名系统（P0-1）：七玄门篇章后解锁，不进队伍、不参战
     if (save.liUnlocked) {
@@ -11959,13 +12098,16 @@
         const a = window.allyArtOf(id, k);
         return a ? a.name : '';
       }).filter(Boolean).join(' · ');
+      const rl = (window.allyRoleOf ? window.allyRoleOf(id) : { role: '攻', note: '' });
       const dead = !!(save.allyDead && save.allyDead[id]);
       const canPay = (save.stones || 0) >= ALLY_REVIVE_COST;
       const owe = !!(save.allyOwe && save.allyOwe[id]);
       html += '<div class="recrow' + (on && !dead ? ' can' : '') + '">' +
         '<div class="rr-main"><b>' + ico(m.icon || '🙂') + m.name +
-        (dead ? ' · <span style="color:#8f2f24">已殒</span>' : (on ? ' · 同行' : '')) + '</b>' +
+        (dead ? ' · <span style="color:#8f2f24">已殒</span>' : (on ? ' · 同行' : '')) +
+        '　<span class="ally-role" data-role="' + rl.role + '">' + rl.role + '</span></b>' +
         '<em>' + m.desc + (perk ? '　【' + perk + '】' : '') + '　（' + m.from + '）</em>' +
+        (rl.note ? '<em class="ally-note">' + rl.note + '</em>' : '') +
         (msk ? '<em>【' + msk.name + ' · ' + msk.cd + '秒】' + msk.desc + '</em>' : '') +
         (artTxt ? '<em style="white-space:nowrap">三功：' + artTxt + '</em>' : '') +
         (dead ? '<em style="color:#8f2f24">殒落中 · 复活需 ' + ALLY_REVIVE_COST + ' 灵石，现有 ' + Math.round(save.stones || 0) + '</em>' : '') +
@@ -12723,7 +12865,8 @@
     const take = isWu ? settleWushuai(b, true, k) : 0;
     G.breakPending = null;
     breakOmen(true, b.realm || '', isWu ? ('丹成 · 扛衰 ' + take + ' 道') : '丹成 · 道基已固');
-    banner(isWu ? ('冲关 · ' + b.realm + ' · 扛衰 ' + take + ' 道') : ('冲关 · ' + b.realm)); Sfx.levelup();
+    banner((isWu ? ('冲关 · ' + b.realm + ' · 扛衰 ' + take + ' 道') : ('冲关 · ' + b.realm))
+      + '　入道 ' + Math.floor(yearAt(b.lv)) + ' 年'); Sfx.levelup();
     // 洞府里直冲（没有对应剧情图 / 调试口）：高光照样补一张纪年卡
     if (CHRONICLE_LV[b.lv]) chroniclePlay(CHRONICLE_LV[b.lv]);
     if (G.player && (G.state === 'play' || G.state === 'down')) {
@@ -12986,12 +13129,28 @@
       : (capped
         ? '<div class="resttip warn">此地灵气已尽，再坐也是空耗。须往更远处去。</div>'
         : '<div class="resttip">按现下灵石，可坐 ' + Math.floor((save.stones || 0) / c.restStone) + ' 次。</div>');
+    // 岁月纪（P2-2）：入道年数由境界现推，不落存档（见 MAJOR_YEARS 那段注释）。
+    // 年表只记「关」：破境与硬仗 —— 全是已发生的事实，不编历史上的事。
+    const yrs = Math.floor(curYear());
+    const life = LIFESPAN[curMajor()];
+    const lifeTxt = life ? ('约 ' + life + ' 年') : '近乎无量';
+    const entries = chronicleEntries();
+    const chronHtml = entries.length ? ('<div class="cave-sec"><div class="cs-title">岁月纪</div>' +
+      '<div class="cs-note">只记「关」——破关那一年、以及走过的那几场硬仗。闭关的寻常年月不在册上。</div>' +
+      '<div class="jz-list">' + entries.map(e => {
+        const y = Math.floor(e.y);
+        return '<div class="jz-row' + (e.k === 'start' ? ' start' : '') + '">' +
+          '<i>' + (y === 0 ? '开元' : '入道 ' + y + ' 年') + '</i>' +
+          '<b>' + e.t + '</b><em>' + (e.s || '') + '</em></div>';
+      }).join('') + '</div></div>') : '';
     return (encBtn ? '<div class="cave-sec">' + encBtn + '</div>' : '') +
       '<div class="cave-sec"><div class="cs-title">闭关静修</div>' +
       '<div class="cs-note">' + c.restTip + '</div>' +
       '<div class="restbox">' +
       '<div class="statgrid">' +
       '<div class="statcell"><i>当前境界</i><b>' + curRealmLabel() + '</b></div>' +
+      '<div class="statcell"><i>入道年数</i><b>' + yrs + ' 年</b></div>' +
+      '<div class="statcell"><i>此境寿元</i><b>' + lifeTxt + '</b></div>' +
       '<div class="statcell"><i>此地可修至</i><b>' + realmName(c.capLevel) + '</b></div>' +
       '<div class="statcell"><i>修为积累</i><b>' + xp + ' / ' + need + '</b></div>' +
       '<div class="statcell"><i>每次所得</i><b>' + Math.round(need * c.restXp) + ' 修为</b></div>' +
@@ -13002,7 +13161,7 @@
       '<div class="restbtns">' +
       '<button class="btn small" data-rest="1"' + (capped || atGate ? ' disabled' : '') + '>闭关一次</button>' +
       '<button class="btn small" data-rest="5"' + (capped || atGate ? ' disabled' : '') + '>闭关五次</button>' +
-      '</div></div></div>' + gateBox;
+      '</div></div></div>' + gateBox + chronHtml;
   }
 
   // ---------- 太南小会 ----------
@@ -13354,6 +13513,7 @@
   function doRest(times) {
     const c = CAVES[G.caveId]; if (!c) return;
     let n = 0, gated = false;
+    const y0 = curYear();
     for (let i = 0; i < times; i++) {
       const lv = save.cultivate.level || 1;
       if (lv >= c.capLevel) break;
@@ -13393,7 +13553,13 @@
       Sfx.warn();
     } else {
       Sfx.levelup();
-      notify('闭关 ' + n + ' 次　今在 ' + realmName(save.cultivate.level));
+      notify('闭关 ' + n + ' 次 · 入道 ' + Math.floor(curYear()) + ' 年　今在 ' + realmName(save.cultivate.level));
+    }
+    // 跨过整百年：报一声。放在最后，且只在这一次真坐出年数时算 ——
+    // 打坐给的是修为，年数由境界推，所以连坐十次也未必跨年，跨了才有这一声。
+    if (n) {
+      const line = centuryLine(y0, curYear());
+      if (line) { banner(line); writeSave(); }
     }
     renderCave();
     refreshTitle();
@@ -15896,6 +16062,42 @@
     craft(rid) { craftRecipe(rid); return 'ok'; },
     hintOf(id) { return itemHintOf(id); },
     rest(n) { doRest(n || 1); return save.cultivate.level; },
+    // 岁月纪（P2-2）调试口：年数由境界现推，所以只有「查」没有「设」
+    yearNow() { return +curYear().toFixed(2); },
+    yearAt(lv) { return +yearAt(lv).toFixed(2); },
+    yearTable() {
+      return { major: MAJOR_YEARS, life: LIFESPAN, majorNow: curMajor(), perLevel: +yearsPerLevel(save.cultivate.level || 1).toFixed(3) };
+    },
+    chronicle() { return chronicleEntries().map(e => ({ k: e.k, y: Math.floor(e.y), t: e.t, s: e.s })); },
+    // 性子（P2-5）调试口：查表 + 查随行者的路数与它的贴人半径是否跟角色对得上
+    allyRole(id) { const r = (window.allyRoleOf ? window.allyRoleOf(id) : null); return r ? { role: r.role, note: r.note } : null; },
+    allyRoles() {
+      const o = {};
+      for (const k in (window.ALLY_ROLES || {})) o[k] = window.ALLY_ROLES[k].role;
+      return o;
+    },
+    allyPos() {
+      const out = {};
+      if (G.pet) out.pet = { id: save.pet, x: +G.pet.x.toFixed(1), y: +G.pet.y.toFixed(1), role: allyRoleOf(save.pet) };
+      if (G.mate) out.mate = { id: save.mate, x: +G.mate.x.toFixed(1), y: +G.mate.y.toFixed(1), role: allyRoleOf(save.mate) };
+      if (G.player) out.player = { x: +G.player.x.toFixed(1), y: +G.player.y.toFixed(1), hp: Math.round(G.player.hp), maxhp: Math.round(G.player.maxhp) };
+      return out;
+    },
+    // 守型摆局的诊断口：直接看它这一帧会不会「插到前面」，以及为什么
+    allyGuardSpot() {
+      const e = G.pet || G.mate;
+      if (!e || !G.player) return null;
+      const role = allyRoleOf((G.pet ? save.pet : save.mate));
+      const spot = (role === '守') ? allyGuardSpot(e) : null;
+      const near = nearestEnemyFrom(G.player.x, G.player.y, 300);
+      return {
+        role: role, hpPct: +(G.player.hp / G.player.maxhp).toFixed(2),
+        distToPlayer: +U.dist(e.x, e.y, G.player.x, G.player.y).toFixed(1),
+        near: near ? +U.dist(near.x, near.y, G.player.x, G.player.y).toFixed(1) : null,
+        spot: spot ? { x: +spot.x.toFixed(1), y: +spot.y.toFixed(1) } : null,
+        dodging: !!e.dodging, dead: !!e.dead
+      };
+    },
     addMat(id, n) { const it = Items.get(id); if (!it) return 'no item'; save.inventory[id] = (save.inventory[id] || 0) + (n || 1); save.totalItems = (save.totalItems || 0) + (n || 1); writeSave(); if (G.state === 'cave') renderCave(); return save.inventory[id]; },
     addMats(n) { const pool = (G.map && G.map.mats) || ['m_chijing', 'm_jingtie', 'm_fuzhi', 'm_lingmo']; for (const id of pool) { save.inventory[id] = (save.inventory[id] || 0) + (n || 3); save.totalItems = (save.totalItems || 0) + (n || 3); } writeSave(); if (G.state === 'cave') renderCave(); return pool.length; },
     mats() { const o = {}; for (const k in save.inventory) if (Items.mat(k)) o[k] = save.inventory[k]; return o; },
@@ -16032,6 +16234,13 @@
     },
     heal() { if (G.player) G.player.hp = G.player.maxhp; },
     god(on) { G.god = !!on; },
+    // 血量摆局（验「守」型护主用）：按比例设气血，顺手清掉无敌帧，否则下一帧就回满了
+    setHp(pct) {
+      if (!G.player) return null;
+      G.player.iv = 0;
+      G.player.hp = Math.max(1, G.player.maxhp * Math.max(0, Math.min(1, pct)));
+      return Math.round(G.player.hp);
+    },
     timeScale(v) { G.ts = v; },
     setTime(t) { G.time = t; },
     clear() { G.enemies.length = 0; G.ebullets.length = 0; G.gems.length = 0; G.herbs.length = 0; G.tells.length = 0; G.zones.length = 0; G.hazards.length = 0; },

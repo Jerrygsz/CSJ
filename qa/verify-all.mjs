@@ -1,4 +1,4 @@
-// 一键回归：把常驻验收脚本一次跑完（当前十五个），谁红谁绿一眼看全。
+// 一键回归：把常驻验收脚本一次跑完（当前十六个），谁红谁绿一眼看全。
 //
 // 动机（第110轮）：八批下来只有 verify-scenery3 / smoke / verify-ver 是每轮必跑的，
 // 其余五个全凭记忆挑着跑，结果 verify-ink-sprite 的两条断言在第102轮 UI 柔化时就已作废、
@@ -39,6 +39,7 @@ const ITEMS = [
   { key: 'cutscene-qixuan', file: 'verify-cutscene-qixuan.mjs', kind: 'gate', desc: '剧情动画（两张图 18 拍 + 剧场入口 + 洞府剧情回顾 + 逐拍版式）：台词逐字同源 MAP_STORIES、人物逐像素等于当前护甲 Sprites.hanli、剧场/回顾列表跨全图点播含无洞府的后山且不写 seen、分镜互不串台、联机不建层不写 seen、双皮只读 SKIN_INK、矮视口不裁字幕、印章不裁字、场景元素避开字幕区、瀑布人物改为潭面打坐（无上举悬空剪影）、跳过/记账/回归兼容' },
   { key: 'parry', file: 'verify-parry.mjs', kind: 'gate', desc: '弹反系统（凡人味防御）：数据层（3 件启用载体 / 六类属性矩阵 / 长按衰减 1.0·0.71·0.43 / 共用煞气池 / 联机仅房主）+ runtime 接入（parryResolve/hitPlayer 透传 sk·src / __FR 探针 / guard 槽与三件 g_* 载体 / index.html 引用与加载顺序 / #parryEdge 边缘泛红）' },
   { key: 'batch5', file: 'verify-batch5.mjs', kind: 'gate', desc: '行脚札记（考据可见层）：懒加载 / 171 图分卷 / 未至·到过·已清三档 / 与真源一致 / 发布清单收录 / 双皮站对边 + 境界压制：三档倍率与封顶 / 大境界阶梯现推 / 小怪遁速实测 / 图名尾巴与战前提示' },
+  { key: 'batch6', file: 'verify-batch6.mjs', kind: 'gate', desc: '岁月纪（闭关纪年）：入道年数由境界现推（207 年结婴对得上原著）/ 大境界跨度现量 / 不落存档 / 静修页两栏 / 岁月纪只记已过的关 / 打坐真推年数 / 双皮站对边 + 性子：14 条全覆 / 四类齐全 / 洞府可见 / 补型贴身 / 守型护主' },
 ];
 
 const argv = process.argv.slice(2);

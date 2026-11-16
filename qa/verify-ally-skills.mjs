@@ -533,8 +533,8 @@ ok(move && !move.everOutside, '连续 60 帧自主移动，一次都没跑出可
 ok(move && move.d1 < move.d0 - 30, '真的自己朝敌人追过去了（不是围着韩立转）',
   move && { d0: move.d0, d1: move.d1 });
 ok(move && move.maxFromPlayer > 60, '离韩立最远超过 60px，确实不再贴身跟随', move && move.maxFromPlayer);
-ok(/allyMove\(pt, dt, mode\)/.test(gsrc) && /allyMove\(mt, dt, mode\)/.test(gsrc),
-  'updatePet / updateMate 都接了自主移动');
+ok(/allyMove\(pt, dt, mode(, def\.id)?\)/.test(gsrc) && /allyMove\(mt, dt, mode(, def\.id)?\)/.test(gsrc),
+  'updatePet / updateMate 都接了自主移动（并把自己的 id 传进去，用于「性子」的分道）');
 ok(/tickAllyArts\(pt, def\.id, dt\)/.test(gsrc) && /tickAllyArts\(mt, def\.id, dt\)/.test(gsrc),
   '两个 update 都挂了三类功法独立冷却');
 ok(/function allyClampView[\s\S]{0,300}?G\.cam\.x \+ W - ALLY_VIEW_EDGE/.test(gsrc),
