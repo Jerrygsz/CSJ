@@ -2708,6 +2708,61 @@
   // 原先只有 mapDiff（每图手写的 1.0~7.0），它跟等级正相关，却远跟不上玩家输出——
   // 结果 640 级的小怪还是 lv80 的硬度。现在由 js/balance.js 的 ANCHOR 表统一给。
   function mapLv() { return (G.map && G.map.startLevel) || (G.player && G.player.level) || 1; }
+
+  // ---------- 境界压制（P2-1）：把「境界」从数字变成规则 ----------
+  // 原样：境界高 = 血更厚、打更痛，纯数值。可原著里境界压人的方式是**快慢**——
+  // 高阶修士遁光一纵，低阶的还没看清，掐诀也慢半拍。所以这条规则只动「遁速」与
+  // 「施法间隔」，不动伤害：伤害已经由 levelScale / BALANCE 锚过，再叠一层，
+  // 越级就不是难，是不可玩。
+  //
+  // 只做「我高你低」这一个方向：「我低你高」这半边游戏早就用另一套办法处理了 ——
+  // startMap 会把玩家战斗等级夹到地图下限之上（G.runClampGap），进图本身就是"被抬上来的"。
+  // 再补一条反向压制等于对同一件事双重惩罚。这里刻意留白，并在 prefight 说清缘由。
+  //
+  // 触发点有两处，都是自然发生的：回刷旧图；或在图内破境（跨过 BANDS 那道线）之后。
+  const PRESSURE = { spd: 0.12, spdFloor: 0.70, cast: 0.20, castCap: 1.60 };
+  // 大境界阶梯从 REALM_LAYERS 现推，不另写一张表 —— 境界的真源只能有一处，
+  // 迟些再加「灵界/仙界」的层也不用回来改这里。
+  // 命名不齐（炼气期一层 / 筑基初期 / 大乘期 / 道祖），所以统一剥掉尾部的小境界再比。
+  function realmMajorName(n) {
+    return String(n || '')
+      .replace(/(初期|中期|后期|圆满|大圆满)$/, '')
+      .replace(/([一二三四五六七八九十]+)层$/, '')
+      .replace(/期$/, '');
+  }
+  function realmLadder() {
+    const L = window.REALM_LAYERS || [];
+    if (window.__realmLadder && window.__realmLadderN === L.length) return window.__realmLadder;
+    const out = [];
+    for (const r of L) { const mj = realmMajorName(r.name); if (out.indexOf(mj) < 0) out.push(mj); }
+    window.__realmLadder = out; window.__realmLadderN = L.length;
+    return out;
+  }
+  function realmMajorIdx(lv) {
+    const i = realmLadder().indexOf(realmMajorName(realmName(lv || 1)));
+    return i < 0 ? 0 : i;
+  }
+  function pressureOf(pLv, mLv) {
+    const gap = realmMajorIdx(pLv) - realmMajorIdx(mLv);
+    const out = { gap: gap, on: false, spd: 1, cast: 1, tag: '', hint: '', pMajor: realmMajorName(realmName(pLv || 1)), mMajor: realmMajorName(realmName(mLv || 1)) };
+    if (gap < 1) return out;
+    out.on = true;
+    out.spd = Math.max(PRESSURE.spdFloor, 1 - PRESSURE.spd * gap);
+    out.cast = Math.min(PRESSURE.castCap, 1 + PRESSURE.cast * gap);
+    out.tag = '境界压制';
+    out.hint = '此间之敌低你 ' + gap + ' 个大境界 —— 遁光自生威压。';
+    return out;
+  }
+  // 图内现算（升级会改 gap，不能缓存到进图那一刻）；同一等级重复取走缓存，别每只怪算一遍。
+  function pressureInfo() {
+    const pLv = (G.player && G.player.level) || mapLv();
+    const mLv = mapLv();
+    const key = pLv + ':' + mLv;
+    if (G._pressKey === key && G._press) return G._press;
+    G._pressKey = key;
+    G._press = pressureOf(pLv, mLv);
+    return G._press;
+  }
   function hpMulBase() {
     const d = curDiff();
     const B = window.BALANCE;
@@ -2814,7 +2869,7 @@
     const e = {
       _id: ++enemySeq,
       type, x, y, hp: ENEMY_BASE_HP * hpMul * rel, maxhp: ENEMY_BASE_HP * hpMul * rel,
-      spd: chaseSpd(type, def) * (curDiff().spd || 1), dmg: ENEMY_BASE_DMG * dmgMul * relDmg,
+      spd: chaseSpd(type, def) * (curDiff().spd || 1) * pressureInfo().spd, dmg: ENEMY_BASE_DMG * dmgMul * relDmg,
       r: def.r, xpVal: def.xp, spr: def.spr, wob: def.wob, charge: def.charge, dash: def.dash,
       hitFlash: 0, t: 0, dashT: U.rand(1, 3), _orbCd: {},
       // 属性（P1-2）：小怪按种类定（见 ENEMY_ATTR），词缀「魔气侵体」会让一部分染煞
@@ -4279,6 +4334,16 @@
 
   function updateEnemies(dt) {
     const p = G.player;
+    // 境界压制：被你压着的低阶之敌，掐诀也慢半拍（只拉长「出手间隔」，不动伤害与移速之外的数值）
+    const PR = pressureInfo();
+    // 图内破境（跨过大境界那条线）会让威压当场亮起来 —— 那一瞬得说一句，
+    // 否则只是怪忽然变慢，玩家不知道发生了什么。进图那一刻也一样报一次：
+    // 图名尾巴上只有一个「境界压制」四个字，不说清它是「妖物遁速与施法都慢半拍」，
+    // 那四个字就只是一个漂亮的标签。
+    if (PR.on && G._pressShown !== G._pressKey) {
+      G._pressShown = G._pressKey;
+      notify('境界压制 · 此间妖物遁速与施法皆慢半拍');
+    }
     // P6：队友躺着就别再追他、别再撞他（倒地的人不再吃伤）
     const pt = (G.coopRole === 'host' && G.partner && G.partner.shown && !G.partner.down) ? G.partner : null;
     for (let i = G.enemies.length - 1; i >= 0; i--) {
@@ -4319,7 +4384,7 @@
         else if (d > 200) { e.x += px * spd * 0.6 * sm * dt; e.y += py * spd * 0.6 * sm * dt; }
         e.shootT -= dt;
         if (e.shootT <= 0) {
-          e.shootT = 2.1;
+          e.shootT = 2.1 * PR.cast;
           const base = Math.atan2(p.y - e.y, p.x - e.x);
           for (let k = -1; k <= 1; k++) { const a = base + k * 0.25; G.ebullets.push({ x: e.x, y: e.y, vx: Math.cos(a) * 180, vy: Math.sin(a) * 180, r: 6, dmg: e.dmg, life: 4 }); }
         }
@@ -4330,10 +4395,10 @@
       if (e._artCd > 0) e._artCd -= dt;
       const art = e.art;
       if (art && art.t === 'cast') {
-        if (e.castT == null) e.castT = U.rand(1.6, 4.2);
+        if (e.castT == null) e.castT = U.rand(1.6, 4.2) * PR.cast;
         e.castT -= dt;
         if (e.castT <= 0) {
-          e.castT = (art.cd || 6) * U.rand(0.85, 1.25);
+          e.castT = (art.cd || 6) * U.rand(0.85, 1.25) * PR.cast;
           const base = Math.atan2(p.y - e.y, p.x - e.x);
           G.ebullets.push({
             x: e.x, y: e.y, vx: Math.cos(base) * 210, vy: Math.sin(base) * 210, r: 6,
@@ -6746,7 +6811,7 @@
   //（真实修为 Lv240 在图里被抬到 Lv252），那截只是战斗平衡、不是韩立真修到的层数。
   // 若 HUD 读 p.level、修行图读存档，就会出现「合体后期·第13/20层 vs 第1/20层」这类分叉。
   // 故进图时记下夹逼偏移 G.runClampGap，取境界时扣掉它；局外一律只读永久修为存档。
-  const OUT_OF_RUN = { title: 1, map: 1, wanling: 1, diff: 1, cave: 1, sweep: 1, prefight: 1 };
+  const OUT_OF_RUN = { title: 1, map: 1, wanling: 1, journal: 1, diff: 1, cave: 1, sweep: 1, prefight: 1 };
   function curRealmLevel() {
     const c = (save.cultivate && save.cultivate.level) || 1;
     const p = G.player;
@@ -6989,7 +7054,7 @@
   // 这些状态一出现就说明这一趟结束了（或人不在战场上），自动收工
   const AUTO_OFF_STATES = {
     victory: 1, gameover: 1, title: 1, map: 1, cave: 1, shop: 1,
-    wanling: 1, diff: 1, sweep: 1, prefight: 1
+    wanling: 1, journal: 1, diff: 1, sweep: 1, prefight: 1
   };
 
   // 按钮该不该露面：只在能打的图上，且人还在这一趟里（对话 / 选卡 / 暂停时也得留着）
@@ -9661,7 +9726,11 @@
     if (elStones) hudText(elStones, '灵石 ' + Math.round(save.stones || 0));
     if (elMapName) {
       const d = G.diff;
-      hudText(elMapName, (G.map ? G.map.name : '') + (d && d.id !== 'easy' ? '　·　' + d.name : ''));
+      // 境界压制挂在图名这行尾巴上（不另起一块）：它是「此地对你而言是什么处境」，
+      // 与「这是哪张图 / 哪一档难度」本就是同一句话的三段。
+      const pr = G.player ? pressureInfo() : null;
+      hudText(elMapName, (G.map ? G.map.name : '') + (d && d.id !== 'easy' ? '　·　' + d.name : '')
+        + (pr && pr.on ? '　·　' + pr.tag : ''));
       hudStyle(elMapName, 'color', d && d.id !== 'easy' ? d.color : '');
     }
     // 快捷栏只在能打的图里露面（每帧同步，不依赖进图那一刻的状态）
@@ -9769,6 +9838,7 @@
     if (elPf) elPf.style.display = 'none';
     if (elRebirth) elRebirth.style.display = 'none';
     if (elWanling) elWanling.style.display = 'none';
+    if (elJournal) elJournal.style.display = 'none';
     if (elSweep) elSweep.style.display = 'none';
     hideItemTip();
   }
@@ -9796,6 +9866,8 @@
     G.alch = null; G.alchWet = false;   // 破境药材配额，进图时按图重算
     G.breakHinted = false;   // 瓶颈弹幕每图只提一次
     G._keT = 0;              // 「克」字节流按本图时间算，换图要归零（否则上一张图的时间戳会把它一直压着）
+    // 境界压制：缓存按等级对算，换图要清；「已经说过一次」的也清（每张图各报一次）
+    G._press = null; G._pressKey = ''; G._pressShown = '';
     G.minorHint = 0;         // 小境界关口弹幕也每图只提一次
     G.victoryNote = '';
     G.victoryTitle = '';     // 结局标题/描述的临时覆盖（破境图分三种结局：石门未闭 / 冲关失败 / 成了）
@@ -9884,7 +9956,10 @@
     if (elPfName && m) elPfName.textContent = m.name;
     if (elPfSub && m) elPfSub.textContent = (m.pos || '') + '　·　择定身上要运的功法，再入山。'
       + (affixIntroText(pend.diff) ? '　·　' + affixIntroText(pend.diff) : '')
-      + (mapAttrHint(m) ? '　·　' + mapAttrHint(m) : '');
+      + (mapAttrHint(m) ? '　·　' + mapAttrHint(m) : '')
+      // 境界压制要在「挑功法」这一刻就知道：这一趟是去打仗，还是去立威
+      + (pressureOf(curRealmLevel(), m.startLevel || curRealmLevel()).on
+        ? '　·　' + pressureOf(curRealmLevel(), m.startLevel || curRealmLevel()).tag : '');
     if (elPfRealm) elPfRealm.textContent = curRealmLabel();
     renderPreFight();
     if (elPf) elPf.style.display = 'flex';
@@ -10802,6 +10877,132 @@
     renderWanling();
     if (elWanling) elWanling.style.display = 'flex';
     if (Sfx && Sfx.buff) Sfx.buff();
+  }
+
+  // ---------- 行脚札记（P2-4）：把考据从「驱动背景的数据」变成「玩家能读的书」 ----------
+  // 590 KB 的 mapCodex 过去只拿来生成背景：每张图的场景、原著出处、章回摘句，
+  // 玩家一个字段都看不见。这里把它摊开成一本书，按行迹分三档解锁 ——
+  //   未至：只有名字（修行图上本来就看得到，不必故弄玄虚）
+  //   到过：补上位置与「所见之景」，但原著考据仍空着
+  //   清了：才把那段考据、章回摘句、以及「游戏与原著不同处」一并抄上去
+  // 数据只读 MAP_CODEX，不另建第二份真源；没有考据的图照旧列名，只是内容短一截。
+  function jnState(id) {
+    if ((save.unlocked || []).indexOf(id) < 0) return 'locked';
+    if ((save.cleared || []).indexOf(id) >= 0) return 'full';
+    return 'seen';
+  }
+  function jnCodex(id) {
+    const D = window.JOURNAL_DATA;
+    return (D && typeof D === 'object' && D[id]) || null;
+  }
+  // 札记正文（约 290 KB）不在主包里：玩家第一次翻开札记时才去取。
+  // 版本串从页面上已有的 ?v= 现读，不再维护第二个 BUILD 常量（那种常量一定会忘）。
+  let _jnWaiters = null;
+  function buildVer() {
+    const el = document.querySelector('script[src*=".js?v="]') || document.querySelector('link[href*=".css?v="]');
+    const m = el && String(el.src || el.href).match(/[?&]v=([0-9A-Za-z.]+)/);
+    return m ? m[1] : '0';
+  }
+  function ensureJournal(cb) {
+    if (window.JOURNAL_DATA) { if (cb) cb(true); return; }
+    if (_jnWaiters) { if (cb) _jnWaiters.push(cb); return; }
+    _jnWaiters = cb ? [cb] : [];
+    const s = document.createElement('script');
+    s.src = 'js/journal-data.js?v=' + buildVer();
+    s.async = true;
+    const done = (ok) => {
+      const q = _jnWaiters || []; _jnWaiters = null;
+      for (const f of q) { try { f(ok); } catch (e) { /* 一条回调炸了不该拖死其他人 */ } }
+    };
+    s.onload = () => done(!!window.JOURNAL_DATA);
+    s.onerror = () => done(false);
+    document.head.appendChild(s);
+  }
+  // 出处口径（与 codex 的 sourceKinds 同义，写短一点塞进一枚小签）
+  const JN_SRC = { '原著原文': '原著原文', '游戏增补': '游戏增补', '混合': '半据原著' };
+  function jnBodyHtml(m) {
+    const c = jnCodex(m.id);
+    const st = jnState(m.id);
+    if (st === 'locked') return '';
+    const seenOnly = '<p class="jn-blank">曾在此处落脚，未及细访。此图清过之后，书上的字才补得全。</p>';
+    if (!c) {
+      return '<p class="jn-blank">此地产物志未录 —— 原著无此处，是游戏另开的一段路。</p>' + (st === 'full' ? '' : '');
+    }
+    const scene = c.scene || {};
+    const sight = ['terrain', 'sky', 'architecture', 'flora', 'atmosphere']
+      .map(k => (scene[k] ? '<span class="jn-sight"><b>' + ({ terrain: '地势', sky: '天光', architecture: '建筑', flora: '草木', atmosphere: '气象' })[k] + '</b>' + scene[k] + '</span>' : ''))
+      .join('');
+    let h = '';
+    if (st === 'seen') {
+      h += '<div class="jn-sights">' + sight + '</div>' + seenOnly;
+      return h;
+    }
+    // 清了：考据正文 + 摘句 + 异文
+    h += '<div class="jn-src"><span class="jn-src-tag">' + (JN_SRC[c.source] || c.source || '原著原文') + '</span>'
+      + '<span class="jn-pos2">' + (c.pos || m.pos || '') + '</span></div>';
+    if (sight) h += '<div class="jn-sights">' + sight + '</div>';
+    if (c.canon) h += '<p class="jn-canon">' + c.canon + '</p>';
+    const qs = (c.quotes || []).filter(q => q && q.text);
+    if (qs.length) {
+      h += '<div class="jn-quotes">' + qs.map(q =>
+        '<div class="jn-quote"><p class="jn-qtext">' + q.text + '</p>' +
+        '<span class="jn-qref">' + (q.ref || '') + '</span></div>').join('') + '</div>';
+    }
+    const diffs = (c.diff || []).filter(Boolean);
+    if (diffs.length) {
+      h += '<div class="jn-diff"><b>与原著不同处</b>' + diffs.map(d => '<span>' + d + '</span>').join('') + '</div>';
+    }
+    return h;
+  }
+  function renderJournal() {
+    if (!elJnList) return;
+    const all = MAPS.filter(m => m && m.id);
+    const seen = all.filter(m => jnState(m.id) !== 'locked').length;
+    const full = all.filter(m => jnState(m.id) === 'full').length;
+    if (elJnCount) elJnCount.textContent = '行迹 ' + seen + ' · 详录 ' + full + ' / ' + all.length;
+    // 按篇章分组：与修行图同一枚闲章，读起来像同一本书的不同卷
+    const arcs = (window.MAP_ARCS || []).map(a => a.id);
+    const groups = {};
+    for (const m of all) { const a = m.arc || 'X'; (groups[a] = groups[a] || []).push(m); }
+    const order = arcs.filter(a => groups[a]).concat(Object.keys(groups).filter(a => arcs.indexOf(a) < 0));
+    if (elJnVols) elJnVols.textContent = '共 ' + order.length + ' 卷';
+    let html = '';
+    for (const a of order) {
+      const meta = (window.MAP_ARCS || []).find(x => x.id === a);
+      const st = groups[a].map(m => jnState(m.id));
+      const got = st.filter(s => s !== 'locked').length;
+      html += '<div class="jn-arc"><div class="jn-arc-hd">'
+        + '<span class="jn-seal">' + (ARC_SEAL[a] || '·') + '</span>'
+        + '<span class="jn-arc-name">' + (meta ? meta.name : a) + '</span>'
+        + '<span class="jn-arc-n">' + got + ' / ' + groups[a].length + '</span></div>';
+      html += groups[a].map(m => {
+        const s = jnState(m.id);
+        const c = jnCodex(m.id);
+        const src = (s === 'full' && c && c.source) ? (JN_SRC[c.source] || c.source) : '';
+        return '<div class="jn-row' + (s === 'locked' ? ' locked' : '') + (s === 'full' ? ' full' : '') + '" data-jn="' + m.id + '">'
+          + '<div class="jn-hd"><span class="jn-name">' + m.name + '</span>'
+          + (src ? '<span class="jn-tag">' + src + '</span>' : '')
+          + '<span class="jn-st">' + (s === 'full' ? '详录' : s === 'seen' ? '到过' : '未至') + '</span>'
+          + '<span class="jn-caret">▸</span></div>'
+          + '<div class="jn-body"></div></div>';
+      }).join('');
+      html += '</div>';
+    }
+    elJnList.innerHTML = html || '<div class="wl-empty">札记尚空。</div>';
+  }
+  function openJournal() {
+    G.state = 'journal';
+    hideAllOverlays();
+    renderJournal();
+    if (elJournal) elJournal.style.display = 'flex';
+    if (Sfx && Sfx.page) Sfx.page(); else if (Sfx && Sfx.buff) Sfx.buff();
+    // 先出目录（名字与行迹不必等下载），正文到齐了再补一遍
+    ensureJournal((ok) => {
+      if (ok) { if (G.state === 'journal') renderJournal(); }
+      else if (elJnList && !elJnList.querySelector('.jn-row.full')) {
+        elJnList.insertAdjacentHTML('beforeend', '<div class="jn-blank">书未带在身上 —— 正文没取到，改日再翻。</div>');
+      }
+    });
   }
   // 篇章印记（P0-5）：每张地图卡按所属 arc 盖一枚单字闲章，一眼分辨属于哪一卷。
   // 单色（金皮走 accent、墨皮走朱砂），不引入彩色；14 个 arc 各一字，互不重复。
@@ -13501,6 +13702,12 @@
   const elWlCollected = document.getElementById('wlCollected');
   const elWlRealm = document.getElementById('wlRealm');
   const elWanlingClose = document.getElementById('wanlingClose');
+  const elJournal = document.getElementById('journal');
+  const elJnList = document.getElementById('jnList');
+  const elJnCount = document.getElementById('jnCount');
+  const elJnVols = document.getElementById('jnVols');
+  const elJnClose = document.getElementById('jnClose');
+  const elWmJournal = document.getElementById('wmJournal');
   const elWmStones = document.getElementById('wmStones');
   const elWmRealm = document.getElementById('wmRealm');
   const elWmBag = document.getElementById('wmBag');
@@ -13710,6 +13917,29 @@
   document.getElementById('wmClose').addEventListener('click', () => { hideAllOverlays(); G.state = 'title'; elTitle.style.display = 'flex'; refreshTitle(); });
   if (elWmCodex) elWmCodex.addEventListener('click', openWanling);
   if (elWanlingClose) elWanlingClose.addEventListener('click', openWorldMap);
+  if (elWmJournal) elWmJournal.addEventListener('click', openJournal);
+  if (elJnClose) elJnClose.addEventListener('click', openWorldMap);
+  // 札记：点条目展开。正文是展开那一刻才拼的 —— 171 张图的考据一次性写进 DOM 太重，
+  // 而且绝大多数条目玩家不会翻。
+  const fillJnBody = (row) => {
+    if (!row) return;
+    const body = row.querySelector('.jn-body');
+    if (!body) return;
+    const m = MAPS.find(x => x.id === row.getAttribute('data-jn'));
+    if (!m) return;
+    if (jnCodex(m.id)) { body.innerHTML = jnBodyHtml(m); return; }
+    if (jnState(m.id) === 'locked') { body.innerHTML = ''; return; }
+    body.innerHTML = '<p class="jn-blank">翻书中……</p>';
+    ensureJournal(() => { if (body) body.innerHTML = jnBodyHtml(m); });
+  };
+  if (elJnList) elJnList.addEventListener('click', (ev) => {
+    const hd = ev.target.closest ? ev.target.closest('.jn-hd') : null;
+    if (!hd) return;
+    const row = hd.parentNode;
+    if (!row || row.classList.contains('locked')) { notify('未至其地，无字可记'); return; }
+    const open = row.classList.toggle('open');
+    if (open) fillJnBody(row);
+  });
   document.getElementById('shopClose').addEventListener('click', () => {
     const m = G.map;
     hideAllOverlays();
@@ -15040,6 +15270,46 @@
         nextEliteT: G.nextEliteT
       };
     },
+    // 境界压制（P2-1）：给闸门读「这一局到底有没有压起来、压了多少」
+    pressure() {
+      const pr = pressureInfo();
+      const pLv = (G.player && G.player.level) || 1;
+      return {
+        on: pr.on, gap: pr.gap,
+        eSpd: +pr.spd.toFixed(3), eCast: +pr.cast.toFixed(3),
+        pLv: pLv, mapLv: mapLv(),
+        pMajor: pr.pMajor, mMajor: pr.mMajor,
+        pIdx: realmMajorIdx(pLv), mIdx: realmMajorIdx(mapLv()),
+        tag: pr.tag,
+        hudTag: (elMapName && elMapName.textContent) || ''
+      };
+    },
+    pressureOf(pLv, mLv) { const p = pressureOf(pLv, mLv); return { on: p.on, gap: p.gap, eSpd: +p.spd.toFixed(3), eCast: +p.cast.toFixed(3), tag: p.tag, pMajor: p.pMajor, mMajor: p.mMajor }; },
+    realmLadder() { return realmLadder().slice(); },
+    // 行脚札记（P2-4）
+    openJournal() { openJournal(); return G.state; },
+    journal() {
+      const all = MAPS.filter(m => m && m.id);
+      const st = all.map(m => ({ id: m.id, name: m.name, arc: m.arc || 'X', state: jnState(m.id), hasCodex: !!jnCodex(m.id) }));
+      return {
+        n: all.length,
+        seen: st.filter(x => x.state !== 'locked').length,
+        full: st.filter(x => x.state === 'full').length,
+        arcs: (window.MAP_ARCS || []).length,
+        rows: st
+      };
+    },
+    journalBody(id) { const m = MAPS.find(x => x.id === id); return m ? jnBodyHtml(m) : null; },
+    journalLoaded() { return !!window.JOURNAL_DATA; },
+    journalLoad() { ensureJournal(() => {}); return !!window.JOURNAL_DATA; },
+    jnToggle(id) {
+      const row = elJnList && elJnList.querySelector('[data-jn="' + id + '"]');
+      if (!row) return null;
+      row.classList.add('open');
+      fillJnBody(row);
+      const body = row.querySelector('.jn-body');
+      return { open: row.classList.contains('open'), len: body ? body.innerHTML.length : 0, locked: row.classList.contains('locked') };
+    },
     diffWords(id) { return (diffById(id) || {}).words || null; },
     // ---- 属性 / 克制 / 护体灵光（P1-2） ----
     attrCn(a) { return ATTR_CN[a] || a; },
@@ -15070,6 +15340,8 @@
       return { dealt: +(before - e.hp).toFixed(3), ward: e.ward == null ? null : +e.ward.toFixed(3), wardMax: e.wardMax || 0, wardT: e.wardT || 0 };
     },
     clearDummy() { G.enemies = G.enemies.filter(e => !e._dummy); return G.enemies.length; },
+    // 清场：闸门要量「同一只怪在压制前后差多少」，得先把随机刷出来的那批清掉，只留自己放的那只
+    clearEnemies() { G.enemies = []; return 0; },
     bossWard() {
       const b = G.boss;
       return b ? { name: b.name, kind: b.kind, attr: attrOf(b), ward: Math.round(b.ward || 0), wardMax: Math.round(b.wardMax || 0), brokeAt: b.wardT || 0 } : null;
@@ -15823,7 +16095,9 @@
     enemies() {
       const attrs = {};
       for (const e of G.enemies) { const a = attrOf(e); attrs[a] = (attrs[a] || 0) + 1; }
-      return { n: G.enemies.length, elites: G.enemies.filter(e => e.elite).length, attrs: attrs };
+      // sample 给「境界压制」用：同图同种怪的 spd 应当随压制倍率一起变
+      const sample = G.enemies.slice(0, 4).map(e => ({ type: e.type, spd: +(e.spd || 0).toFixed(2), castT: e.castT == null ? null : +e.castT.toFixed(2) }));
+      return { n: G.enemies.length, elites: G.enemies.filter(e => e.elite).length, attrs: attrs, sample: sample };
     },
     killBoss() { let n = 0; while (G.boss && n++ < 12) damageEnemy(G.boss, G.boss.hp); },
     phase2() { if (G.boss && !G.boss.phase2) startPhase2(); },

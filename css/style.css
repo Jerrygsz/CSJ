@@ -322,7 +322,7 @@ body[data-skin="guigu"] #chronicle .ch-sub { color: #3a332a; }
 #dialog { z-index: var(--z-dialog); }
 #pause, #victory, #gameover, #levelup { z-index: var(--z-modal); }
 /* 覆盖层默认 display:flex，凡是「不该一进页面就露出」的都要列进这里 */
-#dialog, #levelup, #pause, #gameover, #victory, #worldmap, #shop, #difficulty, #cave, #prefight, #coop, #break, #wanling, #sweep { display: none; }
+#dialog, #levelup, #pause, #gameover, #victory, #worldmap, #shop, #difficulty, #cave, #prefight, #coop, #break, #wanling, #sweep, #journal { display: none; }
 
 /* 突破清单：一样一行，齐了打勾 */
 .brk-list { display: flex; flex-direction: column; gap: var(--sp-2); margin: 8px 0 4px; }
@@ -861,6 +861,65 @@ body[data-skin="guigu"] .mapcard.next .mc-name { color: #8f4f2e; }
 .wl-status { font-size: var(--fs-micro); color: var(--accent-soft); }
 .wl-row:not(.got) .wl-status { color: var(--text-4); }
 .wl-empty { margin: auto 0; padding: 0; color: var(--text-4); font-size: var(--fs-micro); }
+
+/* ---------- 行脚札记（P2-4） ----------
+   万灵榜录「物」，札记录「地」。两者同一套版式语言：一枚闲章起卷、一条一条列下去。
+   正文按「折叠才拼」处理 —— 171 张图的考据一次性写进 DOM 太重，玩家多半也只翻几条。 */
+#jnList { flex: 1 1 auto; overflow-y: auto; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); -webkit-overflow-scrolling: touch; padding-bottom: var(--sp-2); }
+.jn-arc { margin-bottom: 10px; }
+.jn-arc-hd { display: flex; align-items: center; gap: 7px; padding: 0 2px 5px; margin-bottom: 6px; border-bottom: 1px solid var(--line-soft); }
+.jn-seal { flex: 0 0 auto; width: 18px; height: 18px; line-height: 17px; text-align: center; font-size: 11px;
+  border-radius: var(--r-sm); color: var(--accent); border: 1px solid rgba(201,162,74,0.45); }
+.jn-arc-name { flex: 1 1 auto; font-size: var(--fs-cap); letter-spacing: 2px; color: var(--text-2); }
+.jn-arc-n { font-size: var(--fs-micro); color: var(--text-4); font-variant-numeric: tabular-nums; }
+.jn-row { background: rgba(0,0,0,0.32); border: 1px solid rgba(201,162,74,0.18); border-radius: var(--r-sm); margin-bottom: 5px; }
+.jn-row.full { border-color: rgba(201,162,74,0.42); }
+/* 「未至」不用整体降透明度：整行压暗会连名字一起糊掉，而那正是这一行唯一该读的字。
+   改成名字降一档色、状态字降一档色，行本身不动。 */
+.jn-row.locked { border-style: dashed; border-color: rgba(201,162,74,0.14); background: rgba(0,0,0,0.18); }
+.jn-row.locked .jn-name { color: var(--text-4); font-weight: 400; }
+.jn-hd { display: flex; align-items: center; gap: 7px; padding: 9px 10px; cursor: pointer; }
+.jn-name { flex: 1 1 auto; min-width: 0; font-size: var(--fs-cap); color: var(--text-1); font-weight: 600; }
+.jn-tag { flex: 0 0 auto; font-size: 9px; padding: 0 4px; border-radius: var(--r-sm);
+  color: var(--accent); border: 1px solid rgba(201,162,74,0.4); }
+.jn-st { flex: 0 0 auto; font-size: var(--fs-micro); color: var(--text-4); }
+.jn-row.full .jn-st { color: var(--accent); }
+.jn-caret { flex: 0 0 auto; font-size: 10px; color: var(--text-4); transition: transform .18s; }
+.jn-row.open .jn-caret { transform: rotate(90deg); }
+.jn-body { display: none; padding: 0 10px 10px; }
+.jn-row.open .jn-body { display: block; }
+.jn-src { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.jn-src-tag { font-size: 9px; padding: 0 5px; border-radius: var(--r-sm);
+  color: var(--accent); border: 1px solid rgba(201,162,74,0.4); }
+.jn-pos2 { font-size: var(--fs-micro); color: var(--text-3); }
+.jn-sights { display: flex; flex-direction: column; gap: 2px; margin-bottom: 8px; }
+.jn-sight { font-size: var(--fs-micro); color: var(--text-3); line-height: 1.5; }
+.jn-sight b { color: var(--text-2); font-weight: 600; margin-right: 6px; }
+/* 考据正文：这是全篇唯一「要读」的文字，行高给到 1.85，别挤成一行行密网 */
+.jn-canon { font-size: var(--fs-cap); line-height: 1.85; color: var(--text-2); text-align: justify; margin: 0 0 8px; }
+.jn-quotes { display: flex; flex-direction: column; gap: 7px; }
+.jn-quote { padding-left: 8px; border-left: 2px solid rgba(201,162,74,0.42); }
+.jn-qtext { font-size: var(--fs-micro); line-height: 1.75; color: var(--text-2); margin: 0; }
+.jn-qref { display: block; font-size: 9px; color: var(--text-4); margin-top: 2px; letter-spacing: 1px; }
+.jn-diff { margin-top: 8px; padding: 6px 8px; border: 1px dashed rgba(201,162,74,0.32); border-radius: var(--r-sm); }
+.jn-diff b { display: block; font-size: 9px; color: var(--accent); letter-spacing: 1px; margin-bottom: 3px; }
+.jn-diff span { display: block; font-size: var(--fs-micro); line-height: 1.6; color: var(--text-3); }
+.jn-blank { font-size: var(--fs-micro); line-height: 1.7; color: var(--text-4); margin: 0; }
+/* 水墨皮：深蒙版一律换淡墨，朱砂类小签换印泥色（与万灵榜同款处理） */
+body[data-skin="guigu"] .jn-row, body[data-skin="guigu"] .jn-row.full {
+  background: rgba(74,68,56,0.06); border-color: rgba(60,56,48,0.24); }
+body[data-skin="guigu"] .jn-row.full { border-color: rgba(60,56,48,0.42); }
+body[data-skin="guigu"] .jn-name { color: #241f16; }
+body[data-skin="guigu"] .jn-row.locked { background: rgba(74,68,56,0.03); border-color: rgba(60,56,48,0.16); }
+body[data-skin="guigu"] .jn-row.locked .jn-name { color: rgba(60,56,48,0.55); }
+body[data-skin="guigu"] .jn-seal, body[data-skin="guigu"] .jn-src-tag, body[data-skin="guigu"] .jn-tag {
+  color: #8f4f2e; border-color: rgba(143,79,46,0.45); }
+body[data-skin="guigu"] .jn-canon, body[data-skin="guigu"] .jn-qtext { color: #2f2b23; }
+body[data-skin="guigu"] .jn-quote { border-left-color: rgba(143,79,46,0.42); }
+body[data-skin="guigu"] .jn-diff { border-color: rgba(143,79,46,0.3); }
+body[data-skin="guigu"] .jn-diff b { color: #8f4f2e; }
+/* 水墨皮：「详录」原来是淡绿（金皮的 ok-soft），印在宣纸上几乎看不见 —— 换印泥色 */
+body[data-skin="guigu"] .jn-row.full .jn-st { color: #8f4f2e; }
 .sr-own { color: var(--text-3); font-size: var(--fs-micro); }
 /* 列表内按钮：视觉 36，命中补到 44。
    取 -6 而不是理论值 -4：边界像素有取整，实测 -4 只能扩出 3/2px（合计 41），够不到 44。

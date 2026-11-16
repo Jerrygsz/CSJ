@@ -64,9 +64,30 @@ function cssRefs(cssRel) {
   return refs;
 }
 
+// 1b) 运行时按需加载的本地脚本（如行脚札记的 js/journal-data.js）：
+// 它们不在 index.html 的 src 里 —— 是 JS 到用的时候才 createElement('script') 塞进去的。
+// 不扫这一遍，线上就是一个 404：单人游戏不会报错，只是那一页永远空白，最难查。
+// 只认「js/ 目录下的 .js 字符串字面量」这一种形态，别的一概不管，免得把开发资产卷进来。
+function runtimeRefs(rel) {
+  if (!fs.existsSync(path.join(ROOT, rel)) || !rel.endsWith('.js')) return [];
+  const js = read(rel);
+  const out = [];
+  const re = /["']((?:\.\/)?js\/[A-Za-z0-9_.\-\/]+\.js)(?:\?[^"']*)?["']/g;
+  let m;
+  while ((m = re.exec(js))) out.push(norm(m[1]));
+  return out;
+}
+
 const refs = new Set(htmlRefs());
 for (const r of [...refs]) {
   if (r.endsWith('.css')) for (const c of cssRefs(r)) refs.add(c);
+}
+// 扫两遍：第一遍从 index.html 引到的 JS 出发，第二遍再补上第一遍新发现的 JS 里提到的
+for (let pass = 0; pass < 2; pass++) {
+  for (const r of [...refs]) {
+    if (!r.endsWith('.js')) continue;
+    for (const c of runtimeRefs(r)) refs.add(c);
+  }
 }
 const list = [...refs].sort();
 
