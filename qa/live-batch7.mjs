@@ -1,4 +1,5 @@
 // 线上核验：批次 7（P2-3 联机闭环）在 GitHub Pages 上真的生效
+// 注意：下面两处版本串每轮发版后要跟着改（验的就是「这一个版本」在线上）
 import { createRequire } from 'node:module';
 const req = createRequire('C:/Users/92997/.workbuddy/binaries/node/workspace/');
 const { chromium } = req('playwright');
@@ -20,9 +21,9 @@ await page.goto(LIVE, { waitUntil: 'load', timeout: 60000 });
 await page.waitForFunction(() => !!window.__FR && !!window.Coop, { timeout: 30000 });
 
 const ver = await page.evaluate(() => (document.getElementById('ver') || {}).textContent || '');
-ok(/v?20261116C/.test(ver), '线上版本串 20261116C', ver);
-ok(/20261116C/.test(await page.evaluate(() => (document.querySelector('script[src*="game.js"]') || {}).src || '')),
-  'game.js 的 ?v= 也是 20261116C');
+ok(/v?20261116D/.test(ver), '线上版本串 20261116D', ver);
+ok(/20261116D/.test(await page.evaluate(() => (document.querySelector('script[src*="game.js"]') || {}).src || '')),
+  'game.js 的 ?v= 也是 20261116D');
 
 const api = await page.evaluate(() => ({
   markHit: typeof window.Coop.markHit, crossMul: typeof window.Coop.crossMul,
