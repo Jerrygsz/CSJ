@@ -206,6 +206,9 @@
       gardenYear: {}, gardenQianT: {},
       // 已遇过的际遇（一世只遇一次）；可重复的小事不入此列
       met: [],
+      // 赌局台账（P1-4）：{抉择id: 时间戳} 记「做过」，与 seen（记「看过」）分开。
+      // 挡雷那种一辈子只该有一次的抉择靠它；竞拍 / 以物易物是每进一次可来一次，不写这里。
+      stakeLog: {},
       // 灵宠：拥有的（养在灵兽袋里）与出战的
       pets: [], pet: null,
       // 灵兽袋挂机喂养：{ on, t }
@@ -385,6 +388,8 @@
         // 掌天瓶催千年老存档：同样补空账（旧档没催过，各畦都是百年）
         gardenYear: (s.gardenYear && typeof s.gardenYear === 'object') ? s.gardenYear : {},
         gardenQianT: (s.gardenQianT && typeof s.gardenQianT === 'object') ? s.gardenQianT : {},
+        // 赌局台账老存档：补空账（旧档没做过任何一桩赌局）
+        stakeLog: (s.stakeLog && typeof s.stakeLog === 'object') ? s.stakeLog : {},
         wounded: (s.wounded && typeof s.wounded === 'object') ? s.wounded : null,
         // 古传送阵只跌一次：旧档按「已通关 guchuan」认账，免得老玩家再跌一遍
         woundedDone: !!s.woundedDone || (Array.isArray(s.cleared) && s.cleared.indexOf('guchuan') >= 0),
@@ -986,6 +991,37 @@
     }).join('');
   }
   function curDiff() { return G.diff || DIFFICULTIES[0]; }
+  // ---------- 难度词缀（P1-5） ----------
+  // 三档难度原来只是「同样的玩法、不同的倍率」。词缀把它变成规则：同样是死境，
+  // 进去之前就得知道妖物染了煞、人人都带罩 —— 该换雷系还是该带血灵钻，是进图前想的事。
+  // 汇总成 G.affix 一份，各处只读它，不再各自去翻 DIFFICULTIES 数组。
+  function applyAffixes(d) {
+    const list = ((d && d.affixes) || []).map(a => window.affixById ? window.affixById(a) : null).filter(Boolean);
+    const A = { list: list, ids: (d && d.affixes) || [] };
+    for (const a of list) {
+      if (a.packMul) A.packMul = (A.packMul || 1) * a.packMul;
+      if (a.shaGain) A.shaGain = (A.shaGain || 1) * a.shaGain;
+      if (a.eliteAt) A.eliteAt = Math.min(A.eliteAt == null ? 1e9 : A.eliteAt, a.eliteAt);
+      if (a.elitePair) A.elitePair = true;
+      if (a.wardFrac) A.wardFrac = Math.max(A.wardFrac || 0, a.wardFrac);
+      if (a.wardAll) A.wardAll = true;
+      if (a.attrBias) A.attrBias = a.attrBias;
+    }
+    G.affix = A;
+    return A;
+  }
+  function affixTag() { return (G.affix && G.affix.list.length) ? G.affix.list : []; }
+  // 词缀的一句话说明（给战前择功法那一屏用）。
+  // 为什么不做成进图 banner：banner 是单通道的，进门那一瞬已经有「境界 · 筑基中期」在讲，
+  // 两条挤在一起必有一条被顶掉；而战前面板本来就是「这一趟带什么功法」的决策点，
+  // 词缀放在那儿，跟属性提示挨着看，正好是一句话。
+  function affixIntroText(diffId) {
+    // 战前面板出现在 G.diff 落定之前（beginMap → openPreFight → startMap），
+    // 所以不能读 G.affix：那是上一张图的。按「玩家刚选的那一档」现算。
+    const d = diffById(diffId || save.lastDiff || 'easy');
+    const l = ((d && d.affixes) || []).map(a => window.affixById ? window.affixById(a) : null).filter(Boolean);
+    return l.length ? ('此境 · ' + l.map(a => a.name).join(' · ')) : '';
+  }
   // 当前修为（战斗中取角色等级，否则取存档长期修为）
   function curLevel() { return G.player ? G.player.level : (save.cultivate.level || 1); }
   // req 存的是等级值，对外显示成境界。判定也按「那一层的起始等级」算，
@@ -1423,6 +1459,7 @@
       if (p[key] > 0) continue;
       // 本局顿悟/祭炼对本门功法的加成，只改这一次出手用的配置
       const a2 = insightAtk(e.id, a);
+      a2.attr = e.s.attr || 'wu';   // 属性跟着功法走：insightAtk 复制出来的那份也要带
       // 射程按「玩家境界 + 本门功法层数」现算，满进度正好内切屏幕四边
       const ax2 = RM.axes(e.lv, e.s.max, ri, hw, hh, a2.rangeK || 1);
       a2._ax = ax2.ax; a2._ay = ax2.ay;
@@ -1435,6 +1472,10 @@
   }
   // 玩家攻击入口：入本地弹幕的同时，把「我在出手」广播给队友（只走 DataChannel，纯视觉）
   function pushBullet(o) {
+    // 属性由 fireActive 在出手那一刻挂上，这里统一带给弹体：
+    // 弹道有 beam / homing / spread 七八个分支，每个分支各写一遍 attr 迟早漏一处。
+    if (o.attr == null) o.attr = G._atkAttr || 'wu';
+    if (o.wardK == null) o.wardK = G._atkWardK || 1;
     G.bullets.push(o);
     if (window.Coop && typeof window.Coop.queueFx === 'function') window.Coop.queueFx(o);
   }
@@ -1449,6 +1490,9 @@
   }
   function fireActive(s, a, lv, tgt) {
     const p = G.player;
+    // 本次出手的属性：pushBullet 取它写进每一发弹体（见 pushBullet 的注释）
+    G._atkAttr = a.attr || (s && s.attr) || 'wu';
+    G._atkWardK = a.wardK || 1;
     const dmg = window.skillAtk.dmg(a, lv);
     const cnt = window.skillAtk.count(a, lv);
     const pierce = window.skillAtk.pierce(a, lv);
@@ -1487,7 +1531,7 @@
     } else if (a.kind === 'burst') {
       // 中心爆发：定神符的金光一炸 / 其它以己身为心的爆发
       if (struck) spawnRune(p.x, p.y, 30, VFX_HIT_COLOR[a.vfx || 'gold']);
-      novaBlast(p.x, p.y, window.skillAtk.rad(a, lv), dmg, a.vfx || 'gold');
+      novaBlast(p.x, p.y, window.skillAtk.rad(a, lv), dmg, a.vfx || 'gold', a.attr || 'wu');
     } else if (a.kind === 'thunder') {
       // 天落雷：辟邪神雷劈当面数敌，每一道都要看得见是从天上打下来的
       // 天雷只在射程椭圆内落雷：看得见的地方才劈得到
@@ -1522,9 +1566,11 @@
     for (let i = 0; i < 10; i++) G.parts.push({ x: x + U.rand(-8, 8), y: y + U.rand(-8, 8), vx: U.rand(-170, 170), vy: U.rand(-180, 50), life: 0.34, maxlife: 0.34, size: 3, color: i % 2 ? core : glow });
     spawnHit(x, y - 10, '#ffe98a');
     spawnWeb(x, y, evil ? 40 : 26, '#ffe9a8', evil);
-    if (target) damageEnemy(target, evil ? dmg * 1.6 : dmg);
+    // 克制不再在这里另乘一道 1.6：雷对魔/煞/阴/血 的 1.5 倍统一由 COUNTER 表结算。
+    // 两处各乘一次是 2.4 倍 —— 那会让「带辟邪神雷」变成唯一解，其它功法都成了摆设。
+    if (target) damageEnemy(target, dmg, { attr: 'lei' });
   }
-  function novaBlast(x, y, rad, dmg, vfx) {
+  function novaBlast(x, y, rad, dmg, vfx, attr) {
     G.parts.push({ ring: true, x, y, r: 10, maxr: rad, life: 0.4, maxlife: 0.4,
       color: vfx === 'qingmang' ? '#9df0d0' : vfx === 'corpsefire' ? '#5fe08a'
         : vfx === 'soul' ? '#c9a6ff' : vfx === 'shasha' ? '#4a3252' : '#ffe98a' });
@@ -1544,7 +1590,7 @@
         G.parts.push({ ray: true, x, y, ang, len: rad * 0.88, life: 0.45, maxlife: 0.45, color: i % 2 ? '#2e2038' : '#7a1626' });
       }
     }
-    for (const e of allEnemies()) if (U.dist(x, y, e.x, e.y) < rad + e.r) damageEnemy(e, dmg);
+    for (const e of allEnemies()) if (U.dist(x, y, e.x, e.y) < rad + e.r) damageEnemy(e, dmg, { attr: attr || 'wu' });
     Sfx.nova();
   }
   // 近身领域 / 环绕护体：贴身才生效 —— 这才是真近战
@@ -1554,6 +1600,7 @@
     let fieldRune = null;   // 本帧是否有领域类功法在开（决定脚下要不要常驻法阵）
     for (const e of equippedActives()) {
       const a = insightAtk(e.id, e.s.atk);
+      a.attr = e.s.attr || 'wu';    // 近身环绕 / 领域也吃克制（煞妖诀、冰冻术各有各的属性）
       if (a.kind === 'orbit') {
         p.orbAng = (p.orbAng || 0) + dt * 2.4;
         const rad = window.skillAtk.rad(a, e.lv);
@@ -1567,7 +1614,7 @@
           for (const en of allEnemies()) {
             if (!en._orbCd) en._orbCd = {};
             if ((en._orbCd[e.id] || 0) > 0) continue;
-            if (U.dist(ox, oy, en.x, en.y) < 8 + en.r) { damageEnemy(en, dmg); en._orbCd[e.id] = a.cdHit || 0.4; spawnHit(en.x, en.y, VFX_HIT_COLOR[a.vfx] || '#bfe'); }
+            if (U.dist(ox, oy, en.x, en.y) < 8 + en.r) { damageEnemy(en, dmg, { attr: a.attr, wardK: a.wardK || 1 }); en._orbCd[e.id] = a.cdHit || 0.4; spawnHit(en.x, en.y, VFX_HIT_COLOR[a.vfx] || '#bfe'); }
           }
         }
       } else if (a.kind === 'field') {
@@ -1581,7 +1628,7 @@
         for (const en of allEnemies()) {
           if (U.dist(p.x, p.y, en.x, en.y) < rad + en.r) {
             if (!en._fieldCd) en._fieldCd = {};
-            if ((en._fieldCd[e.id] || 0) <= 0) { damageEnemy(en, dmg); en._fieldCd[e.id] = a.cdHit || 0.5; spawnHit(en.x, en.y, VFX_HIT_COLOR[a.vfx] || '#9ad8ff'); }
+            if ((en._fieldCd[e.id] || 0) <= 0) { damageEnemy(en, dmg, { attr: a.attr }); en._fieldCd[e.id] = a.cdHit || 0.5; spawnHit(en.x, en.y, VFX_HIT_COLOR[a.vfx] || '#9ad8ff'); }
           }
         }
       }
@@ -1598,10 +1645,87 @@
     }
   }
 
+  // ---------- 属性 · 克制 · 护体灵光（P1-2） ----------
+  // 原来 185 条 Boss 招、48 条小怪招名在屏幕上分不出来，是因为「打什么都一样」：
+  // 伤害只有一个数字，功法只有 DPS 高低的差别。这一层给功法与敌人各挂一个属性，
+  // 对上了就吃倍率 —— 于是「带哪几门功法进这一趟」才成为一件要想的事。
+  //
+  // 只给**原著有明说**的功法挂属性；其余一律 'wu'。无属性既不吃加成也不吃亏，
+  // 将来新加功法忘了标也不会打歪，只是没有那 1.5 倍。
+  const ATTR_CN = {
+    lei: '雷', huo: '火', bing: '冰', jian: '剑', sha: '煞', xue: '血', shen: '神识', guang: '金光', fu: '符',
+    wu: '无', mo: '魔', yin: '阴', shou: '兽', ling: '灵', ren: '人'
+  };
+  // 出手属性 → { 挨打的属性: 倍率 }
+  const COUNTER = {
+    // 辟邪神雷：原著里韩立立身的那一手，专克魔道鬼道。四类全吃 1.5 —— 这一条要够狠，
+    // 「为了打这一关换功法」才值得。
+    lei:   { mo: 1.5, sha: 1.5, yin: 1.5, xue: 1.5 },
+    huo:   { shou: 1.3, yin: 1.2 },     // 阳火克毛兽、克阴煞尸傀
+    bing:  { shou: 1.15 },              // 寒气压妖物血行
+    jian:  { ren: 1.2 },                // 飞剑对修士（人）
+    shen:  { ling: 1.3 },               // 神识克灵体（虫群 / 虫母一类）
+    guang: { yin: 1.25 },               // 金光罩是护体神通，压阴物
+    xue:   { ren: 1.25 }                // 血炼神光夺精血，对人最利
+  };
+  // 小怪属性：全库就这十种（js/enemies.js），一张小表说清，不去猜关键字。
+  const ENEMY_ATTR = {
+    wolf: 'shou', snake: 'shou', bat: 'shou', boar: 'shou',
+    bandit: 'ren', assassin: 'ren', disciple: 'ren',
+    ghoul: 'yin', shigui: 'wu', wolfking: 'shou', blacklord: 'mo'
+  };
+  function bossAttr(kind) {
+    return kind === 'beast' ? 'shou' : kind === 'blood' ? 'xue' : kind === 'swarm' ? 'ling' : 'mo';
+  }
+  function attrOf(e) {
+    if (!e) return 'wu';
+    return e.attr || ENEMY_ATTR[e.type] || (e.kind ? bossAttr(e.kind) : 'wu');
+  }
+  function counterMul(atkAttr, e) {
+    const row = COUNTER[atkAttr];
+    return (row && row[attrOf(e)]) || 1;
+  }
+  // 反过来问：要打这种属性，带哪一门最划算？—— 战前面板那句话就是它算出来的。
+  // 不写「建议带 X」这种没有依据的提示，只报事实：此间之敌是什么属，哪一属克得最狠。
+  function bestCounterAgainst(defAttr) {
+    let best = null, bm = 1;
+    for (const k in COUNTER) { const v = COUNTER[k][defAttr] || 1; if (v > bm) { bm = v; best = k; } }
+    return best ? { attr: best, mul: bm } : null;
+  }
+  // 一张图里最有代表性的属性：小怪按数目算，Boss 算三重（它才是这一趟真正要过的关）
+  function mapAttrMix(m) {
+    const c = {};
+    for (const t of ((m && m.enemies) || [])) { const a = ENEMY_ATTR[t] || 'wu'; if (a !== 'wu') c[a] = (c[a] || 0) + 1; }
+    if (m && m.boss) { const a = m.boss.attr || bossAttr(m.boss.kind); c[a] = (c[a] || 0) + 3; }
+    let top = null, n = 0;
+    for (const k in c) if (c[k] > n) { n = c[k]; top = k; }
+    return top;
+  }
+  function mapAttrHint(m) {
+    const a = mapAttrMix(m);
+    if (!a) return '';
+    const bc = bestCounterAgainst(a);
+    const self = ATTR_CN[a] || a;
+    // 短一点：这一行已经挤了「地点 · 择功法 · 词缀 · 敌属」四段，再长就折成两行。
+    return '此间多「' + self + '」' + (bc ? ' · ' + (ATTR_CN[bc.attr] || bc.attr) + '系克之 ×' + (bc.mul === 1.5 ? '1.5' : bc.mul.toFixed(2).replace(/0$/, '')) : '');
+  }
+  // 护体灵光：罩在时落在本体的只一半，罩自己照吃全额；罩一破给六秒「破罩」窗口。
+  // 反震（opts.noVuln）不吃这套 —— 那是打在破绽上的，罩挡不住，否则弹反对带罩 Boss 直接作废。
+  const WARD_KEEP = 0.6;     // 罩在时本体只吃六成
+  const WARD_VULN = 1.35;    // 破罩后六秒的易伤
+  const WARD_SEC = 6;
+  // 破境丹一类的硬伤害不吃克制（那是丹，不是法术）；弹反反震也不吃，见上。
+
   // ---------- 伤害 / 死亡 ----------
   function damageEnemy(e, dmg, opts) {
     if (e._dead) return 0;
     let d = dmg * dmgMul();
+    // 克制：属性对上了吃倍率。飘字旁边另给一个「克」字（见下），
+    // 否则玩家只会觉得「这一下怎么跳了个大数字」，不知道是自己换对了功法。
+    const atkAttr = (opts && opts.attr) || 'wu';
+    const cm = counterMul(atkAttr, e);
+    const countered = cm > 1;
+    if (countered) d *= cm;
     // 弹反打出的「破绽」：这段时间里它挨打更疼。只对这一只生效，换目标不串。
     // opts.noVuln：反震这一下本身不吃破绽 —— 否则「连反 ×N」和「破绽 ×1.7」叠在一起，
     // 满链一记能打掉 Boss 三成血，几记就把 Boss 抹了。破绽留给随后的平A，才是奖励。
@@ -1613,6 +1737,31 @@
     if (edge) d *= DASH_EDGE_MUL;
     const crit = Math.random() < critChance();
     if (crit) d *= 1.8;
+    // 护体灵光：先扣罩。罩还在，落在本体上的只有六成；罩一破，六秒内吃满伤还多三成五。
+    // 「破罩」是个事件，不是渐变：它要有一声、一圈、两个字 —— 玩家才知道自己刚才那几下没白打。
+    let wardBroke = false;
+    if (!(opts && opts.noVuln) && e.wardMax > 0) {
+      if (e.ward > 0) {
+        e.ward = Math.max(0, e.ward - d * ((opts && opts.wardK) || 1));
+        d *= WARD_KEEP;
+        if (e.ward <= 0) {
+          wardBroke = true;
+          e.wardT = G.time + WARD_SEC;
+          const _ink = save.skin === 'guigu';
+          // 「罩破」只给精英和首领：死境里人人带罩，小怪也每个喊一嗓子的话，
+          // 一屏二十六只同时破罩就是满屏飘字 —— 那个反馈等于没有反馈。
+          if (e.elite || e === G.boss) {
+            spawnText(e.x, e.y - e.r - 26, '罩破', '#e0573a', 16, { stroke: true });
+            G.shake = Math.max(G.shake, 4);
+            if (window.FX3) FX3.spawn('crit', e.x, e.y - e.r * 0.3, { pal: _ink ? 'xue' : 'jin' });
+            if (e === G.boss) { banner('护体灵光已破 · ' + WARD_SEC + ' 秒内吃满伤'); Sfx.buff(); }
+            else Sfx.burst();
+          }
+        }
+      } else if (G.time < (e.wardT || 0)) {
+        d *= WARD_VULN;
+      }
+    }
     e.hp -= d; e.hitFlash = 0.12;
     // 单挑型剧情战：煞气靠「打掉的血」给，不靠小怪
     if (e === G.boss && G.map && G.map.type === 'boss' && e.maxhp > 0) {
@@ -1631,6 +1780,13 @@
       spawnText(e.x, e.y - e.r - 4, Math.round(d),
         crit ? (ink ? '#cf3a22' : '#ffd24a') : edge ? (ink ? '#c0352a' : '#ffb066') : (ink ? '#3a332a' : '#fff'),
         crit ? (ink ? 21 : 18) : edge ? 16 : 13);
+      // 「克」字：打对了属性才有。节流 0.4 秒一个 —— 连发五六道雷时不节流会糊成一片，
+      // 糊成一片就等于没有反馈。位置偏左上、带暗描边：地图底色深浅不一（浅宣纸到墨底都有），
+      // 淡金在浅纸上等于隐形（弹反那一版踩过一次），所以一律朱砂 + 描边。
+      if (countered && G.time >= (G._keT || 0)) {
+        G._keT = G.time + 0.4;
+        spawnText(e.x - 24, e.y - e.r - 18, '克', '#e0573a', 14, { stroke: true });
+      }
     }
     if (G.coopRole === 'host' && window.Coop) window.Coop.queueDmg(e.x, e.y - e.r - 4, Math.round(d), crit);
     if (crit) {
@@ -2473,7 +2629,7 @@
             if (window.Coop) window.Coop.reportHit(e._id, b.dmg);
             b.hit.add(e); spawnHit(b.x, b.y); b.life = 0; continue;
           }
-          damageEnemy(e, b.dmg); b.hit.add(e);
+          damageEnemy(e, b.dmg, { attr: b.attr, wardK: b.wardK }); b.hit.add(e);
           if (b.stun) e.stunT = Math.max(e.stunT || 0, b.stun);   // 失神刺：硬直
           // 血炼神光：血光吞了对方的精血，按伤害的定比回补己身（原著「伤人亦自补」）
           if (b.leech && G.player && G.player.hp > 0) G.player.hp = Math.min(G.player.maxhp, G.player.hp + b.dmg * b.leech);
@@ -2661,9 +2817,16 @@
       spd: chaseSpd(type, def) * (curDiff().spd || 1), dmg: ENEMY_BASE_DMG * dmgMul * relDmg,
       r: def.r, xpVal: def.xp, spr: def.spr, wob: def.wob, charge: def.charge, dash: def.dash,
       hitFlash: 0, t: 0, dashT: U.rand(1, 3), _orbCd: {},
+      // 属性（P1-2）：小怪按种类定（见 ENEMY_ATTR），词缀「魔气侵体」会让一部分染煞
+      attr: ENEMY_ATTR[type] || 'wu',
       // 功法（js/arts.js）：每种小怪一门手法，贴身命中时按形体显形
       art: (window.TRASH_ARTS || {})[type] || null, _artCd: 0
     };
+    // 词缀：一部分小怪染煞（只改属性，血不涨 —— 这才是「换功法」而不是「更难打」）
+    const AF = G.affix;
+    if (AF && AF.attrBias && Math.random() < AF.attrBias[1]) e.attr = AF.attrBias[0];
+    // 词缀「铁壁」：人人一层薄罩（首领另有一层更厚的，见 spawnBossFrom）
+    if (AF && AF.wardAll) { e.wardMax = e.maxhp * (AF.wardFrac || 0.14); e.ward = e.wardMax; }
     return e;
   }
   function spawnEnemy(type) {
@@ -4223,8 +4386,17 @@
       // 妖兽系 boss 召哪种小怪：图里没写就还是狼；写空串表示这一只不召群
       summon: cfg.summon === undefined ? 'wolf' : cfg.summon,
       noSummon: !!cfg.noSummon,   // 显式关掉召群（仅教学关用；不影响其它 Boss 的既有召群）
-      phase2: false, phaseT: 0
+      phase2: false, phaseT: 0,
+      // 属性 + 护体灵光（P1-2）：魔道 / 血道之敌都有护身的那一层，
+      // 罩在时打上去只落六成，破了才吃满伤 —— 于是「带什么」比「练到几层」更要紧。
+      attr: cfg.attr || bossAttr(cfg.kind)
     };
+    {
+      const base = { mo: 0.10, blood: 0.12, beast: 0.06, swarm: 0.08 }[G.boss.kind] || 0.08;
+      const add = (G.affix && G.affix.wardAll) ? (G.affix.wardFrac || 0.14) * 0.5 : 0;
+      G.boss.wardMax = bhp * (base + add);
+      G.boss.ward = G.boss.wardMax;
+    }
     // 招式表：先按 Boss 名找原著专属招式（js/bosskit.js），找不到就按同族通用招式。
     // 都没有（理论上不会）则退回下面 updateBoss 里的旧四系打法，保证任何配置不空转。
     const kindKits = window.BOSS_KIT_KIND || null;
@@ -5211,7 +5383,9 @@
     // 教学关可单独压低同屏上限（map.packMax）：首关不靠数量堆压力，先让新手站得住
     const cap = (G.map && G.map.packMax) || PACK_MAX;
     const want = Math.min(PACK_HARD, Math.min(cap, PACK_MIN + t * PACK_GROW) * cnt);
-    const gap = want - G.enemies.length;
+    // 词缀「妖潮」把同屏目标抬一档（×1.12，四舍五入以后基本感觉不到，但一直存在）
+    const w = (G.affix && G.affix.packMul) ? Math.min(PACK_HARD, Math.round(want * G.affix.packMul)) : want;
+    const gap = w - G.enemies.length;
     // 只补缺口的一半、单拍最多 6 只：一次灌满会把画面瞬间糊住
     const batch = Math.max(0, Math.min(6, Math.round(gap * 0.5)));
     return { interval, batch };
@@ -5232,7 +5406,12 @@
       if (G.enemies.length < 140) { const b = budget(); for (let i = 0; i < b.batch; i++) spawnEnemy(pickType()); }
       G.spawnT = budget().interval;
     }
-    if (G.time >= G.nextEliteT) { spawnElite(G.eliteIdx); G.eliteIdx++; G.nextEliteT = G.time + 105; }
+    // 妖潮：第一只精英成对出 —— 「一对头狼同时到场」是真的要跑位的，不是数值厚一点。
+    if (G.time >= G.nextEliteT) {
+      spawnElite(G.eliteIdx); G.eliteIdx++;
+      if (G.affix && G.affix.elitePair) { spawnElite(G.eliteIdx); G.eliteIdx++; }
+      G.nextEliteT = G.time + 105;
+    }
   }
 
   // ---------- 拾取 ----------
@@ -6090,7 +6269,16 @@
       row.id = 'dialogChoices';
       elDialog.appendChild(row);
     }
-    row.style.cssText = 'margin-top:14px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap';
+    row.style.cssText = 'margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap';
+    // 三档以上的抉择（押注 / 竞拍 / 以物易物都是 0~3 档）一律排成两列等宽：
+    // 原来按内容宽度自由折行，长标签会一人一行，把下面几张拖到快捷栏上。
+    row.className = 'dlg-choices' + (options.length >= 3 ? ' many' : '');
+    // 按钮挂在 #dialog 上、纸框**外面**：水墨皮的对话框是竖排（writing-mode: vertical-rl），
+    // 塞进纸框里会让按钮跟着竖过来（实拍见过一次，四块窄条挤在左边）。
+    // 所以它自己就是一张纸卡（见 css 的 .dlg-choices），靠 #dialog.has-choices 把整摞往上抬。
+    const host = elDialog;
+    if (row.parentNode !== host) host.appendChild(row);
+    if (elDialog) elDialog.classList.add('has-choices');
     row.innerHTML = '';
     for (const o of options) {
       const b = document.createElement('button');
@@ -6108,6 +6296,7 @@
     G.dialogIsChoice = false; G.dialogChoiceCb = null; G.dialogChoiceOpts = null;
     const row = document.getElementById('dialogChoices');
     if (row && row.parentNode) row.parentNode.removeChild(row);
+    if (elDialog) elDialog.classList.remove('has-choices');
     if (elDialog) elDialog.style.display = 'none';
     cb(v);
     return true;
@@ -7081,7 +7270,8 @@
     const st = shaSt();
     // 已经吃过 11 / 14 次之后，煞气来得慢一点：高密度图不至于变成十几次连弹
     const damp = (st.done || 0) >= 14 ? 0.35 : ((st.done || 0) >= 11 ? 0.65 : 1);
-    const k = (1 + (G.bonus.shaGain || 0) + rp('shaGain')) * (st.x2T > 0 ? 2 : 1) * damp;
+    const k = (1 + (G.bonus.shaGain || 0) + rp('shaGain')) * (st.x2T > 0 ? 2 : 1) * damp
+      * ((G.affix && G.affix.shaGain) || 1);   // 词缀「魔气侵体」：煞气聚得慢
     st.v += n * k;
     // need <= 0 时 while 会永远成立 → 整个主线程焊死。加一道护栏，宁可这一次不给顿悟
     let guard = 0;
@@ -9506,6 +9696,26 @@
         ? (p2 ? 'linear-gradient(90deg,#241c14,#7a2f22)' : 'linear-gradient(90deg,#3a352a,#4a4438 58%,#6b6353)')
         : (p2 ? 'linear-gradient(90deg,#ff1f1f,#ff9a4a)' : 'linear-gradient(90deg,#b03a3a,#ff5a4a)'));
       if (elBossbar) hudClass(elBossbar, 'p2', !!G.boss.phase2);
+      // 护体灵光：罩在就亮一道金线，罩破了金线改朱砂、按秒退完 —— 那正是「这六秒吃满伤」还剩多久。
+      // 没有罩的 Boss（凡境妖兽之类）整条都不出：空条会被读成「还剩 0」。
+      if (elBossward) {
+        const hasW = (G.boss.wardMax || 0) > 0;
+        const up = (G.boss.ward || 0) > 0;
+        hudClass(elBossward, 'on', hasW);
+        hudClass(elBossward, 'broke', hasW && !up);
+        if (hasW) {
+          hudPct(elBosswardfill, up ? G.boss.ward / G.boss.wardMax
+            : Math.max(0, ((G.boss.wardT || 0) - G.time) / WARD_SEC));
+        // 水墨皮整屏压了一层纸纹（叠色后金子会被洗成沙色），金线得压深两档才认得出；
+        // 朱砂血条那道是深墨，洗不動，所以两边用各自的金。
+        const _gw = (save.skin === 'guigu');
+        hudStyle(elBosswardfill, 'background', up
+          ? (_gw ? 'linear-gradient(90deg, #5d3d05, #8f6013 55%, #c99a34)'
+                 : 'linear-gradient(90deg, #b07d1c, #f5c94e 55%, #ffe9a8)')
+          : (_gw ? 'linear-gradient(90deg, #241c14, #5a5142)'
+                 : 'linear-gradient(90deg, #3a332a, #7d7057)'));
+        }
+      }
     }
     else { _bossOn = false; hudStyle(elBosswrap, 'display', 'none'); }
     // 鬼谷水墨 · 异兽卷轴插画：boss 出场时"展卷"浮起，约 2.6 秒后自己退成背景淡痕
@@ -9574,7 +9784,9 @@
     G.etch = [];   // 蚀 DoT：{ e, t, acc, dmg }
     G.enemies = []; G.bullets = []; G.ebullets = []; G.gems = []; G.herbs = []; G.parts = []; G.texts = []; G.loot = []; G.tells = []; G.zones = []; G.hazards = [];
     G.reclaimedLost = null;   // 上一张图"寻回失落"的结算提示不带到这张图
-    G.time = 0; G.kills = 0; G.spawnT = 1; G.nextEliteT = 100; G.eliteIdx = 0; G.artSeen = {};
+    G.time = 0; G.kills = 0; G.spawnT = 1; G.eliteIdx = 0; G.artSeen = {};
+    // 妖潮：精英提前现身（词缀挂在难度上，没词缀就是原来的 100 秒）
+    G.nextEliteT = (G.affix && G.affix.eliteAt) || 100;
     G.pickPulseAt = 0;   // 进图头 1.2 秒展示一次神念拾取圈
     G.fxBullets.length = 0; G.coopFrozen = false; G.dialogSynced = false;
     G.boss = null; G.bossActive = false; G.bossSpawned = false; G.bossWarned = false; G.extraIdx = 0;
@@ -9583,6 +9795,7 @@
     G.vacuumT = 0; G.pendingEnding = false; G.runLoot = []; G.matGain = 0; G.lastAutoSave = 0; G.pickLeft = 0;
     G.alch = null; G.alchWet = false;   // 破境药材配额，进图时按图重算
     G.breakHinted = false;   // 瓶颈弹幕每图只提一次
+    G._keT = 0;              // 「克」字节流按本图时间算，换图要归零（否则上一张图的时间戳会把它一直压着）
     G.minorHint = 0;         // 小境界关口弹幕也每图只提一次
     G.victoryNote = '';
     G.victoryTitle = '';     // 结局标题/描述的临时覆盖（破境图分三种结局：石门未闭 / 冲关失败 / 成了）
@@ -9669,7 +9882,9 @@
     G.state = 'prefight';
     hideAllOverlays();
     if (elPfName && m) elPfName.textContent = m.name;
-    if (elPfSub && m) elPfSub.textContent = (m.pos || '') + '　·　择定身上要运的功法，再入山。';
+    if (elPfSub && m) elPfSub.textContent = (m.pos || '') + '　·　择定身上要运的功法，再入山。'
+      + (affixIntroText(pend.diff) ? '　·　' + affixIntroText(pend.diff) : '')
+      + (mapAttrHint(m) ? '　·　' + mapAttrHint(m) : '');
     if (elPfRealm) elPfRealm.textContent = curRealmLabel();
     renderPreFight();
     if (elPf) elPf.style.display = 'flex';
@@ -9686,6 +9901,8 @@
       const on = eq.indexOf(s.id) >= 0;
       h += '<div class="recrow' + (on ? ' can' : '') + '">' +
         '<div class="rr-main"><b>' + ico(s.icon) + s.name + '　' + lv2 + ' 重' +
+        // 属性签：进图前挑功法时，这一格比「几重」更要紧 —— 带错属性，练满也白练
+        (s.attr ? '<span class="pf-attr">' + (ATTR_CN[s.attr] || s.attr) + '</span>' : '') +
         (it.tier.id === G.pfCurTier ? '' : '　<span class="pf-count">' + it.tier.name + '</span>') +
         '　[' + skillTypeLabel(s) + ']</b><em>' + s.desc + '</em></div>' +
         '<div class="rr-right"><button class="sr-btn' + (on ? ' ghost' : ' buy') + '" data-pfskill="' + s.id + '">' +
@@ -9753,6 +9970,8 @@
     G._hunterType = undefined;  // 本图的猎手要重新指定（见 hunterOfMap）
     G.diff = diffById(diffId || save.lastDiff || 'easy');
     if (diffId) save.lastDiff = G.diff.id;
+    // 词缀必须在 resetRun 之前定下来：resetRun 里第一只精英的时间要按它算
+    applyAffixes(G.diff);
     save.mapId = id;
     openScroll();       // 墨皮才有：宣纸展开一页，替代硬切
     resetRun();
@@ -9876,10 +10095,10 @@
         const pending = encListOnMap().filter(encCondOk).filter(e => !e.repeat)[0];
         if (pending) {
           G.state = 'dialog';
-          showLines(pending.lines, () => { meetEncounter(pending); openShop(); }, 'enc:' + pending.id);
+          showLines(pending.lines, () => { meetEncounter(pending); marketStake(m, openShop); }, 'enc:' + pending.id);
           return;
         }
-        openShop();
+        marketStake(m, openShop);
       };
       // 坊市也有它自己的开场白（太南小会：金光上人的升仙令、万小山）
       // 只讲一次 —— 坊市可以反复进出；原先按「是否通关」判断，没通关时每进一次就把整段开场重念一遍。
@@ -9939,6 +10158,13 @@
   }
 
   function onStoryMapDone(m) {
+    // 天澜圣山：剧情演完不当场结算，先把「挡几道雷」这一问摆在面前（P1-4）。
+    // 一辈子只此一回 —— save.stakeLog 记的是「做过」，与 seen（记「看过」）分开。
+    // 自动化回归下不自动弹（与 Cutscene / Chronicle 同一条约定），走探针显式触发。
+    if (m && m.id === 'tianlan' && !stakeDone('tianlan') && stakeAutoOk()) {
+      stakeTianlan(function () { finishMap(m); });
+      return;
+    }
     // 开局第一场（见 MAPS.qixuan.trial）：剧情演完不当场结算，先给一场山道小战。
     // 实测新档「map 0.27s → 8 句对白 6.21s → victory 0.81s → 洞府空转 28s」，
     // 36 秒一场仗没打 —— 战斗是这游戏唯一的动词，得先让人碰到它。
@@ -10806,18 +11032,28 @@
     const dc = save.diffClear[m.id] || {};
     elDiffList.innerHTML = DIFFICULTIES.map(d => {
       const cleared = !!dc[d.id];
+      const ws = d.words || {};
+      const af = (d.affixes || []).map(a => (window.affixById ? window.affixById(a) : null)).filter(Boolean);
+      // 难度卡不再列 ×1.75。那是给调参的人看的，不是给要进山的人看的。
+      // 换成「敌血厚一层 / 落物厚两分」这种原文语汇 + 词缀名：一眼知道这一趟是什么光景，
+      // 至于具体倍数，爱算的人自己心里有数就够了。
+      const affixHtml = af.length
+        ? '<div class="dc-affix">' + af.map(a =>
+            '<span class="dc-afx" style="--dc:' + a.color + '"><b>' + a.name + '</b>' + a.desc + '</span>').join('') + '</div>'
+        : '<div class="dc-affix"><span class="dc-afx none"><b>无词缀</b>山野如常，没什么可提防的。</span></div>';
+      const wordHtml = '<div class="dc-word">' +
+        '<span>敌血 <b>' + (ws.hp || '如常') + '</b></span>' +
+        '<span>敌伤 <b>' + (ws.dmg || '如常') + '</b></span>' +
+        '<span>来者 <b>' + (ws.cnt || '稀疏') + '</b></span>' +
+        '<span>落物 <b>' + (ws.drop || '平常') + '</b></span>' +
+        '<span>灵石 <b>' + (ws.stone || '平淡') + '</b></span>' +
+        '<span>修为 <b>' + (ws.xp || '如常') + '</b></span>' +
+        '</div>';
       return '<div class="diffcard" data-diff="' + d.id + '" style="--dc:' + d.color + '">' +
         '<div class="dc-top"><b>' + d.name + '</b><span class="dc-tag">' + d.tag + '</span>' +
         (cleared ? '<span class="dc-done">已破</span>' : '') + '</div>' +
         '<div class="dc-desc">' + d.desc + '</div>' +
-        '<div class="dc-mul">' +
-        '<span>敌血 ×' + d.hp.toFixed(2) + '</span>' +
-        '<span>敌伤 ×' + d.dmg.toFixed(2) + '</span>' +
-        '<span>数量 ×' + d.cnt.toFixed(2) + '</span>' +
-        '<span>掉落 ×' + d.drop.toFixed(1) + '</span>' +
-        '<span>灵石 ×' + d.stone.toFixed(1) + '</span>' +
-        '<span>修为 ×' + d.xp.toFixed(1) + '</span>' +
-        '</div>' +
+        affixHtml + wordHtml +
         '<div class="dc-foot">' +
         (cleared ? '<span class="dc-sweep" data-sweep="' + d.id + '" title="连走 ' + SWEEP_N +
           ' 趟，费用按身上总灵石的 9% 抽，保底 ' + SWEEP_FLOOR + '">扫荡 ×' + SWEEP_N +
@@ -11903,35 +12139,256 @@
       settleBreakScene(gate, onDone, null);
     }, 'break:' + gate.lv);
   }
+  // ==========================================================================
+  // 押一档（P1-4 赌局组件）
+  //
+  // 五衰那处「押几档 → 把握 / 代价」是一道好题：押出去的是真东西，按下去之前两头的数
+  // 都摆在眼前。可它原来焊死在破境流程里，只有天人有五衰那几关能用。
+  // 抽出来以后，凡「要不要押、押多少」都走这一套 —— 替圣兽挡雷、竞拍叫价、以物易物，
+  // 用的是同一个面板、同一种句式（押 N · 把握 X% · 代价 Y）。玩家第二次遇到就认得。
+  //
+  // cfg:
+  //   id       记账用（showLines 的 key），可不给
+  //   prompt   问的那句话
+  //   max      最多押几档
+  //   have     手上现有多少（与 costOf 同单位）；不够的档位直接不列出来
+  //   unit     单位名（枚 / 灵石 / 件）
+  //   costOf(k) 押 k 档要付多少
+  //   labelOf(k) 第 k 档按钮上的字（整句由调用方给 —— 各处的取舍形状不一样）
+  //   onPick(k) 选定之后做什么。返回「旁白行数组」由组件接着播；返回 null 就当场收场
+  //   onDone(k) 全流程走完（含播完台词）
+  // 付账由 onPick 自己做：组件只负责把「押多少」问清楚，钱在谁手里谁去扣。
+  function askStake(cfg, onDone) {
+    const max = Math.max(0, cfg.max | 0);
+    const have = cfg.have == null ? 1e18 : cfg.have;
+    const opts = [];
+    for (let k = 0; k <= max; k++) {
+      const cost = cfg.costOf ? cfg.costOf(k) : 0;
+      if (k > 0 && cost > have) continue;       // 押不起的档不列：列出来只能点出一句「不够」
+      opts.push({ v: String(k), t: cfg.labelOf ? cfg.labelOf(k) : (k === 0 ? '不押' : ('押 ' + cost + ' ' + (cfg.unit || ''))) });
+    }
+    if (opts.length < 2) {
+      // 一档都押不起。多数场合这不算死路（「不押」本身就是一条路），照常问；
+      // 只有调用方明确说「这一问必须押」时才提前收场 —— 否则五衰那种关会连冲关一起跳过。
+      if (cfg.needPick) {
+        notify(cfg.poorNote || '手上不够，押不起');
+        if (onDone) onDone(0);
+        return false;
+      }
+    }
+    showChoice(cfg.prompt, opts, function (v) {
+      let k = Math.max(0, Math.min(max, parseInt(v, 10) || 0));
+      // 押不起的档在列表里已经被滤掉了，这里再兜一道：外头（探针 / 自动化）传进来的
+      // 值不一定真在选项里，落在这个函数里就得自己保证「押的档付得起」。
+      let guard = 0;
+      while (k > 0 && cfg.costOf && cfg.costOf(k) > have && guard++ < 16) k--;
+      const out = cfg.onPick ? cfg.onPick(k) : null;
+      if (!out || (Array.isArray(out) && !out.length)) { if (onDone) onDone(k); return; }
+      showLines(Array.isArray(out) ? out : [['旁白', out]], function () {
+        if (onDone) onDone(k);
+      }, 'stake:' + (cfg.id || 'x'));
+    });
+    return true;
+  }
+  // 赌局记账：一次性 / 有条件的抉择靠它记（与 save.seen 分开 —— seen 记的是「看过」，这里记的是「做过」）
+  function stakeDone(id) { return !!(save.stakeLog && save.stakeLog[id]); }
+  function stakeMark(id) {
+    if (!save.stakeLog || typeof save.stakeLog !== 'object') save.stakeLog = {};
+    save.stakeLog[id] = Date.now();
+    writeSave();
+  }
+
+  // ---------- 三处赌局（P1-4）：都走 askStake ----------
+  // 押出去的东西是真的、结果当场兑现 —— 这是「抉择」与「点一下领奖励」的分界。
+  // 换来的药材按本图物产挑；坊市自己不出料，就按境界就近取一味破境用得上的。
+  function stakeMatPool(m) {
+    const own = ((m && m.mats) || []).filter(id => { const it = Items.get(id); return it && !it.unique; });
+    if (own.length) return own.map(id => Items.get(id)).filter(Boolean);
+    const lv = save.cultivate.level || 1;
+    const pool = (window.MATERIALS || []).filter(it => (it.rarity || 0) >= 3 && (it.req || 1) <= lv + 30);
+    return pool.length ? pool : (window.MATERIALS || []).slice(-4);
+  }
+  function grantItems(it, n) {
+    if (!it) return 0;
+    let got = 0;
+    for (let i = 0; i < n; i++) if (addToBag(it, { silent: true })) got++;
+    return got;
+  }
+
+  // ① 天澜圣山 · 替圣兽挡三道化形雷（一辈子只此一回）
+  // 原著这一段的账是这么算的：雷是真的，骨头也是真的（「骨头又断了两根。值。」）。
+  // 所以代价不写玄的 —— 折修为，折的是自己一步一步修来的那一截。
+  function stakeTianlan(next) {
+    // 一辈子只此一回：挡过的雷不会再压下来（探针也从这道门走，免得绕过去多算一次）
+    if (stakeDone('tianlan')) { if (next) next(); return false; }
+    const cur = save.cultivate || (save.cultivate = { level: 1, xp: 0, skills: {} });
+    const xpNow = Math.max(0, cur.xp || 0);
+    const per = Math.max(1, Math.round(xpNow * 0.08));       // 每挡一道折 8% 修为
+    const shi = Items.get('m_xianyuanshi') || null;
+    const shiName = shi ? shi.name : '仙元石';
+    askStake({
+      id: 'tianlan',
+      prompt: '三道化形雷已经压到云底。'
+        + '「替我挡三道，我化形之后就跟你。」它说得客气，可雷是真的。'
+        + '挡得越多，它欠你越多 —— 折的是你自己的修为。眼下修为 ' + xpNow + '，这一炉挡几道？',
+      max: 3, have: xpNow, unit: '道',
+      costOf: k => per * k,
+      labelOf: k => (k === 0 ? '不挡 · 退到一边'
+        : ('挡 ' + k + ' 道 · 折修为 ' + (per * k) + ' · 得 ' + (k + (k >= 3 ? 2 : 0)) + ' 枚' + shiName)),
+      onPick: function (k) {
+        if (k <= 0) {
+          return [['旁白', '他往后退了一步，看着雷落下来。'],
+            ['旁白', '山石碎了一半。圣兽没说什么。'],
+            ['韩立', '（这一份人情，我担不起。）']];
+        }
+        const burn = Math.min(xpNow, per * k);
+        cur.xp = Math.max(0, xpNow - burn);      // 修为只减经验，不掉境界（只增不减是硬线）
+        const got = k + (k >= 3 ? 2 : 0);
+        const real = grantItems(shi, got);
+        writeSave();
+        Sfx.buff();
+        const lines = [['旁白', '第一道雷落下来，山石碎了一半。']];
+        if (k >= 2) lines.push(['旁白', '第二道。骨头响了一声，没断。']);
+        if (k >= 3) lines.push(['旁白', '第三道。他站住了，雷光在身前散成一片碎金。']);
+        lines.push(['天澜圣兽', '……化形之后，我记着你这一份。']);
+        lines.push(['旁白', '（折去修为 ' + burn + '，得' + shiName + ' ' + real + ' 枚。）']);
+        return lines;
+      }
+    }, function () { stakeMark('tianlan'); if (next) next(); });
+  }
+
+  // ② 坊市 · 竞拍叫价（每进一次坊市可叫一回：出图再进就是另一场）
+  // 叫价是有风险的：叫得高，跟的人少、到手的机会大；叫得低，多半被人抬走。
+  // 落空退一半 —— 不是全输，但也不白玩。
+  function stakeAuction(m, next) {
+    const stones = save.stones || 0;
+    const per = Math.max(200, Math.round(stones * 0.08));
+    const pool = stakeMatPool(m);
+    const good = pool.length ? U.pick(pool) : null;
+    const goodName = good ? good.name : '一炉成药';
+    const odds = k => 0.30 + 0.18 * k;
+    askStake({
+      id: 'auction',
+      prompt: '（' + ((m && m.name) || '坊市') + '的偏厅里，一只玉匣正在叫价 —— ' + goodName + '。'
+        + '场中还有几个不露脸的，谁也没先开口。叫一次价 ' + per + ' 灵石起，叫得越高，跟的人越少。）',
+      max: 3, have: stones, unit: '灵石',
+      costOf: k => per * k,
+      labelOf: k => (k === 0 ? '不叫价 · 站着看'
+        : ('叫 ' + (per * k) + ' 灵石 · 把握 ' + pctCheng(odds(k) * 100) + ' · 落空退半')),
+      onPick: function (k) {
+        if (k <= 0) return [['旁白', '玉匣被人抬走了。他站在廊下，看了一会儿。']];
+        const cost = per * k;
+        save.stones = Math.max(0, stones - cost);
+        if (Math.random() >= odds(k)) {
+          const back = Math.round(cost / 2);
+          save.stones += back;
+          writeSave();
+          return [['旁白', '价被抬到了天上去。他把牌子放下 —— 落空，退回 ' + back + ' 灵石。'],
+            ['韩立', '（钱是小事。这一匣东西，本来也不该是我的。）']];
+        }
+        grantItems(good, 1);
+        writeSave(); Sfx.buff();
+        return [['旁白', '落槌。' + goodName + ' 归他。'],
+          ['旁白', '（花去 ' + cost + ' 灵石。）']];
+      }
+    }, next);
+  }
+
+  // ③ 坊市 · 以物易物：拿多余的法器换破境药材
+  // economy.md 里「以物易物」一直标着未实装。这里补上：押的是实打实的法器，
+  // 换的是实打实的药材 —— 不是「钱货两清」的商店，是一门要掂量的交换。
+  function stakeBarter(m, next) {
+    const worn = Object.keys(save.equip || {}).map(k => save.equip[k]).filter(Boolean);
+    const cands = (window.ITEMS || []).filter(it => it.slot && !it.unique && !it.noDrop
+      && (save.inventory[it.id] || 0) > 0 && worn.indexOf(it.id) < 0)
+      .sort((a, b) => (b.rarity || 0) - (a.rarity || 0)).slice(0, 3);
+    if (!cands.length) { if (next) next(); return false; }     // 身上没有多余的法器：这一趟不谈
+    const pool = stakeMatPool(m);
+    const rep = (save.repWhite || 0) + (save.repBlack || 0);
+    const bonus = rep >= 15 ? 1 : 0;                            // 名声在外，多饶一味
+    askStake({
+      id: 'barter',
+      prompt: '（偏摊上一个老道摆开几张油纸，纸上都是药材。他不收灵石，只抬头看人身上的东西：'
+        + '「器换药，一件换一味。你身上那几件，搁着也是搁着。」' + (bonus ? '　—— 他认出了你。' : '') + '）',
+      max: cands.length, have: cands.length, unit: '件',
+      costOf: k => k,
+      labelOf: k => (k === 0 ? '不换 · 收摊'
+        : ('押 ' + k + ' 件 · ' + (k + bonus) + ' 味药材（' + cands.slice(0, k).map(it => it.name).join('、') + '）')),
+      onPick: function (k) {
+        if (k <= 0) return [['旁白', '老道把油纸收了，没多话。']];
+        const take = cands.slice(0, k);
+        const got = [];
+        for (const it of take) {
+          save.inventory[it.id] = (save.inventory[it.id] || 0) - 1;
+          if (save.inventory[it.id] <= 0) delete save.inventory[it.id];
+          save.totalItems = Math.max(0, (save.totalItems || 1) - 1);
+        }
+        for (let i = 0; i < k + bonus; i++) {
+          const g = pool.length ? U.pick(pool) : null;
+          if (g && grantItems(g, 1)) got.push(g.name);
+        }
+        writeSave(); Sfx.buff();
+        return [['旁白', '（' + take.map(it => it.name).join('、') + ' 递了过去，换回 ' + (got.join('、') || '一味药材') + '。）'],
+          ['老道', '器是好器。药也是好药。']];
+      }
+    }, next);
+  }
+  // 哪张坊市谈哪一门：拍卖会走叫价，小会走以物易物。一张图只谈一门，
+  // 免得一进门连弹两个抉择面板。
+  const AUCTION_MAPS = { tianxing: 1, jiaoyihui: 1 };
+  const BARTER_MAPS = { tainan: 1, jinglong: 1 };
+  // 自动化回归 / 联机下不自动弹抉择面板：闸门脚本要能干净地进出坊市与剧情图。
+  // 与 Cutscene.available()、Chronicle.available() 同一条约定；验的时候把开关打开即可。
+  function stakeAutoOk() {
+    if (window.__CSJ_STAKE_FORCE__) return true;
+    if (window.__CSJ_QA__) return false;
+    // 无 navigator = 无头桩（qa/smoke 那种纯逻辑冒烟）；webdriver = 真截图/闸门用的浏览器。
+    // 两种都算「自动化」，都不许自动弹抉择面板。
+    if (typeof navigator === 'undefined') return false;
+    if (navigator.webdriver) return false;
+    return true;
+  }
+  function marketStake(m, next) {
+    if (!m || !stakeAutoOk()) { if (next) next(); return false; }
+    if (AUCTION_MAPS[m.id]) return stakeAuction(m, next);
+    if (BARTER_MAPS[m.id]) return stakeBarter(m, next);
+    if (next) next();
+    return false;
+  }
+
   // 天人有五衰：破境前先问押几档。
   // 押得越多 → 仙窍越稳（把握越高），**能避开的衰却越少**——力气都用在稳住上了。
   // 五道衰里前两道与修行时间有关，天生躲不掉（X2C328），所以最多只能避三道。
   function askWushuai(gate, onDone) {
     const maxK = wuMaxStake(gate);
     const nm = wuName(gate), have = wuHave(gate);
-    const opts = [];
-    for (let k = 0; k <= maxK; k++) {
-      const cost = wuStakeCost(gate, k);
-      const t = (k === 0 ? '不押' : ('押 ' + cost + ' 枚'))
-        + ' · 把握 ' + pctCheng(wuRate(gate, k) * 100)
-        + ' / 扛 ' + wuTake(gate, k) + ' 衰'
-        + (cost > have ? '（' + nm + '不够）' : '');
-      opts.push({ v: String(k), t: t });
-    }
     const avoid = wuCanAvoid(gate);
-    const prompt = '天人有五衰（X2C327《天人有五衰》，24 次）：五道衰里，前两道与修行时间有关，躲不掉，只能扛。'
-      + '押得越多，仙窍越稳，能避开的衰就越少。此刻可避开 ' + avoid + ' 道，手上有' + nm + ' ' + have + ' 枚 —— 这一炉押几档？';
-    showChoice(prompt, opts, function (v) {
-      const k = Math.max(0, Math.min(maxK, parseInt(v, 10) || 0));
-      G.wuStake = k;
-      const paid = payWuStake(gate, k);          // 押注：仙元石当场烧掉，不够就烧到见底
-      const rate = wuRate(gate, k), take = wuTake(gate, k);
-      const lines2 = [
-        ['旁白', '（' + (k === 0 ? '不押 —— 仙窍由它自己稳。' : ('押' + nm + ' ' + paid + ' 枚，压住' + (k * 1) + '重仙窍。'))
-          + '冲关把握 ' + pctCheng(rate * 100) + '，可避开的衰还剩 ' + Math.max(0, avoid - k) + ' 道 —— 这一趟要扛 ' + take + ' 道。）'],
-        ['旁白', '（躲不掉的那两道，跟修行时间有关。修得越久，来得越早。）']
-      ];
-      settleBreakScene(gate, onDone, lines2);
+    // 押几档这件事交给通用组件（askStake）。这里的取舍形状原样保留：
+    // 押得越多把握越高、能避开的衰越少，两个数都摆在按钮上。
+    askStake({
+      id: 'wu:' + gate.lv,
+      prompt: '天人有五衰（X2C327《天人有五衰》，24 次）：五道衰里，前两道与修行时间有关，躲不掉，只能扛。'
+        + '押得越多，仙窍越稳，能避开的衰就越少。此刻可避开 ' + avoid + ' 道，手上有' + nm + ' ' + have + ' 枚 —— 这一炉押几档？',
+      max: maxK,
+      have: have,
+      unit: '枚',
+      costOf: k => wuStakeCost(gate, k),
+      labelOf: k => (k === 0 ? '不押' : ('押 ' + wuStakeCost(gate, k) + ' 枚'))
+        + ' · 把握 ' + pctCheng(wuRate(gate, k) * 100)
+        + ' / 扛 ' + wuTake(gate, k) + ' 衰',
+      onPick: function (k) {
+        G.wuStake = k;
+        const paid = payWuStake(gate, k);          // 押注：仙元石当场烧掉，不够就烧到见底
+        const rate = wuRate(gate, k), take = wuTake(gate, k);
+        if (!paid && k > 0) notify(nm + '不够 · 这一炉等于没押');
+        settleBreakScene(gate, onDone, [
+          ['旁白', '（' + (k === 0 ? '不押 —— 仙窍由它自己稳。' : ('押' + nm + ' ' + paid + ' 枚，压住' + (k * 1) + '重仙窍。'))
+            + '冲关把握 ' + pctCheng(rate * 100) + '，可避开的衰还剩 ' + Math.max(0, avoid - k) + ' 道 —— 这一趟要扛 ' + take + ' 道。）'],
+          ['旁白', '（躲不掉的那两道，跟修行时间有关。修得越久，来得越早。）']
+        ]);
+        // settleBreakScene 自己占着对话通道（它要接着演戏），组件这边不再播第二段台词
+        return null;
+      }
     });
   }
   // 破境结算：押丹（押注已在前一步付过）→ 掷一次 → 成则抬境界，败则衰提前降临
@@ -12858,6 +13315,8 @@
   const elBosswrap = document.getElementById('bosswrap');
   const elBossname = document.getElementById('bossname');
   const elBossfill = document.getElementById('bossfill');
+  const elBossward = document.getElementById('bossward');
+  const elBosswardfill = document.getElementById('bosswardfill');
   const elBossbar = document.getElementById('bossbar');
   const elBanner = document.getElementById('banner');
   const elDialog = document.getElementById('dialog');
@@ -13999,6 +14458,8 @@
     // 催千年的状态也要清：否则重开后某畦还挂着「在催」，绿液却已归零，那一畦永远长不成
     save.gardenYear = {}; save.gardenQianT = {}; save.gardenCharge = {};
     save.repBlack = 0; save.repWhite = 0; save.identity = 'han'; save.liUnlocked = false;
+    // 赌局台账也清：转世之后挡过的那三道雷不算数了（人都不一样了）
+    save.stakeLog = {};
     if (G.player) { resetRunBonus(); G.gear = {}; G.runLoot = []; }
   }
 
@@ -14345,6 +14806,11 @@
     muteStory(on) { G.storyMute = !!on; if (on) this.skipStory(); return !!G.storyMute; },
     storyMuted() { return !!G.storyMute; },
     enterMap(id, diff) { if (!save.unlocked.includes(id)) save.unlocked.push(id); startMap(id, diff); return G.mapId; },
+    // 只开战前面板（不进图）：验「属性签 + 此间之敌多属…」那一屏
+    prefight(id, diff) { if (!save.unlocked.includes(id)) save.unlocked.push(id); beginMap(id, diff); return G.state; },
+    time() { return +(G.time || 0).toFixed(2); },
+    // 直接摆局时：验「45 秒第一波精英」这类到点事件，靠 ticks 攒时间会被对话/升级打断
+    setTime(t) { G.time = Math.max(0, +t || 0); return G.time; },
     teleport(x, y) { if (G.player) { G.player.x = x; G.player.y = y; return { x: G.player.x, y: G.player.y }; } return null; },
     coop() { return G.partner ? { x: Math.round(G.partner.x), y: Math.round(G.partner.y), tx: Math.round(G.partner.tx), ty: Math.round(G.partner.ty), shown: !!G.partner.shown, map: G.partner.map, myMap: (G.mapId || (G.map && G.map.id)) || null, name: G.partner.name, level: G.partner.level } : null; },
     coopSend() { if (window.Coop) window.Coop.sendState(); return true; },
@@ -14362,6 +14828,26 @@
     showLines(lines, onEnd, id) { showLines(lines, onEnd || null, id || null); return G.dialogIdx; },
     advanceDialog() { advanceDialog(); return G.dialogIdx; },
     pickChoice(v) { return pickChoice(v); },
+    // ---- 赌局（P1-4）----
+    stakeForce(on) { window.__CSJ_STAKE_FORCE__ = !!on; return !!window.__CSJ_STAKE_FORCE__; },
+    // 修为经验：赌局「折修为」要能验，得有个能摆数的口子（只动经验，不动境界）
+    setXp(n) { const c = save.cultivate || (save.cultivate = { level: 1, xp: 0, skills: {} }); c.xp = Math.max(0, n | 0); writeSave(); return c.xp; },
+    saveXp() { return (save.cultivate && save.cultivate.xp) || 0; },
+    bagCount(id) { return save.inventory[id] || 0; },
+    stakeLog() { return Object.keys(save.stakeLog || {}); },
+    stakeClear() { save.stakeLog = {}; writeSave(); return this.stakeLog(); },
+    stakeTianlan() { return stakeTianlan(null) === false ? false : true; },
+    stakeAuction(mapId) {
+      const m = MAPS.find(x => x.id === mapId) || { name: '坊市', mats: [] };
+      return stakeAuction(m, null) === false ? false : true;
+    },
+    stakeBarter(mapId) {
+      const m = MAPS.find(x => x.id === mapId) || { name: '坊市', mats: [] };
+      return stakeBarter(m, null) === false ? false : true;
+    },
+    stakeMarket(mapId) { const m = MAPS.find(x => x.id === mapId); return marketStake(m, null); },
+    auctionMaps() { return Object.keys(AUCTION_MAPS); },
+    barterMaps() { return Object.keys(BARTER_MAPS); },
     dialogState() { return { state: G.state, idx: G.dialogIdx, n: G.dialogLines ? G.dialogLines.length : 0, synced: !!G.dialogSynced, choice: !!G.dialogIsChoice, choiceOpts: G.dialogChoiceOpts ? G.dialogChoiceOpts.map(o => o.t) : null }; },
     settleBubble: settleBubble, settleMate: settleMate,
     settle() { return G.settle ? { x: G.settle.x, y: G.settle.y, mx: G.settle.mx, my: G.settle.my, shown: G.settle.mShown, myBub: G.settle.myBub.length, mateBub: G.settle.mateBub.length } : null; },
@@ -14542,6 +15028,54 @@
     pickDiff(mapId) { openDiffPick(mapId); return G.diffPick; },
     takeDiff(id) { const m = G.diffPick; if (!m) return 'no map'; startMap(m, id); return id; },
     diffs() { return DIFFICULTIES.map(d => d.id); },
+    // ---- 难度词缀（P1-5）：验「这一档挂的是哪几条、效果有没有真的落到运行时」 ----
+    affix() {
+      const A = G.affix || { list: [] };
+      return {
+        ids: A.ids || [], names: (A.list || []).map(a => a.name),
+        packMul: A.packMul || 1, shaGain: A.shaGain || 1,
+        eliteAt: A.eliteAt || null, elitePair: !!A.elitePair,
+        wardAll: !!A.wardAll, wardFrac: A.wardFrac || 0,
+        attrBias: A.attrBias || null,
+        nextEliteT: G.nextEliteT
+      };
+    },
+    diffWords(id) { return (diffById(id) || {}).words || null; },
+    // ---- 属性 / 克制 / 护体灵光（P1-2） ----
+    attrCn(a) { return ATTR_CN[a] || a; },
+    enemyAttr(typeOrKind) {
+      if (ENEMY_ATTR[typeOrKind]) return ENEMY_ATTR[typeOrKind];
+      return bossAttr(typeOrKind);
+    },
+    counter(atkAttr, defAttr) { return (COUNTER[atkAttr] || {})[defAttr] || 1; },
+    skillAttr(id) { const s = window.skillById ? window.skillById(id) : null; return s ? (s.attr || 'wu') : null; },
+    skillAttrTable() { return (window.SKILLS || []).map(s => ({ id: s.id, name: s.name, attr: s.attr || 'wu' })); },
+    // 钉血木桩：造一只指定属性 / 有无罩的怪，打一下看落多少（只测倍率，不测刷怪速率）
+    dummy(opts) {
+      const o = opts || {};
+      const hp = o.hp || 1e9;
+      const e = {
+        _id: ++enemySeq, type: o.type || 'wolf', x: (G.player ? G.player.x : 0) + 60, y: G.player ? G.player.y : 0,
+        hp, maxhp: hp, spd: 0, dmg: 0, r: 9, xpVal: 0, spr: 'wolf', hitFlash: 0, t: 0, _orbCd: {},
+        attr: o.attr || null
+      };
+      if (o.ward) { e.wardMax = hp * o.ward; e.ward = e.wardMax; }
+      G.enemies.push(e);
+      return e._id;
+    },
+    hitDummy(id, dmg, opts) {
+      const e = G.enemies.find(x => x._id === id); if (!e) return null;
+      const before = e.hp;
+      damageEnemy(e, dmg, Object.assign({ silentText: true }, opts || {}));
+      return { dealt: +(before - e.hp).toFixed(3), ward: e.ward == null ? null : +e.ward.toFixed(3), wardMax: e.wardMax || 0, wardT: e.wardT || 0 };
+    },
+    clearDummy() { G.enemies = G.enemies.filter(e => !e._dummy); return G.enemies.length; },
+    bossWard() {
+      const b = G.boss;
+      return b ? { name: b.name, kind: b.kind, attr: attrOf(b), ward: Math.round(b.ward || 0), wardMax: Math.round(b.wardMax || 0), brokeAt: b.wardT || 0 } : null;
+    },
+    // 洞府直冲 / 调试口：把 Boss 的罩清零（验「破罩后吃满伤」用）
+    stripWard() { if (G.boss) { G.boss.ward = 0; G.boss.wardT = G.time + WARD_SEC; } return this.bossWard(); },
     // ---- 扫荡 / 掉落增幅（qa/verify-alchdrop 用来核产量与扣费） ----
     openDiff(mapId) { openDiffPick(mapId); return G.state; },
     sweepChipText() { const el = document.querySelector('.dc-sweep'); return el ? el.innerText.replace(/\n/g, ' ') : null; },
@@ -15265,6 +15799,32 @@
       spawnBoss(); return G.boss ? G.boss.name : 'fail';
     },
     bossDamage(pct) { if (G.boss) damageEnemy(G.boss, G.boss.maxhp * (pct || 0.25)); },
+    // 验护体灵光/克制用：给 Boss 打一下，回「落在本体多少 / 扣了罩多少 / 破了没」
+    // 把 Boss 的血与罩同比例放大：验「罩在 / 罩破」两态时不能几下就把它打死
+    padBoss(k) {
+      const b = G.boss; if (!b) return null;
+      const kk = k || 1000;
+      b.hp *= kk; b.maxhp *= kk;
+      b.wardMax = (b.wardMax || 0) * kk; b.ward = (b.ward || 0) * kk;
+      return { hp: Math.round(b.maxhp), ward: Math.round(b.ward || 0) };
+    },
+    hitBoss(dmg, opts) {
+      const b = G.boss; if (!b) return null;
+      const before = b.hp, w0 = b.ward || 0;
+      damageEnemy(b, dmg, Object.assign({ silentText: true }, opts || {}));
+      return {
+        dealt: +(before - b.hp).toFixed(1), wardUsed: +(w0 - (b.ward || 0)).toFixed(1),
+        wardLeft: +(b.ward || 0).toFixed(1), broke: w0 > 0 && (b.ward || 0) <= 0, wardT: +(b.wardT || 0).toFixed(2)
+      };
+    },
+    // 飘字池快照：验「克」字反馈有没有真的落到画面上
+    texts() { return (G.texts || []).map(t => t && t.text != null ? String(t.text) : ''); },
+    // 场上敌情快照：验词缀（精英成对 / 染煞比例）与刷怪上限
+    enemies() {
+      const attrs = {};
+      for (const e of G.enemies) { const a = attrOf(e); attrs[a] = (attrs[a] || 0) + 1; }
+      return { n: G.enemies.length, elites: G.enemies.filter(e => e.elite).length, attrs: attrs };
+    },
     killBoss() { let n = 0; while (G.boss && n++ < 12) damageEnemy(G.boss, G.boss.hp); },
     phase2() { if (G.boss && !G.boss.phase2) startPhase2(); },
     story(id) {

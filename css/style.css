@@ -178,6 +178,20 @@ body.fs #wrap { background: #000; }
 /* 二阶段：血条泛红光，脉一下停一下，不吵但看得见 */
 #bossbar.p2 { border-color: rgba(255,90,74,0.8); animation: bossP2 1.6s ease-in-out infinite; }
 @keyframes bossP2 { 0%, 100% { box-shadow: 0 1px 6px rgba(0,0,0,0.55), 0 0 4px rgba(255,60,40,0.25); } 50% { box-shadow: 0 1px 6px rgba(0,0,0,0.55), 0 0 12px rgba(255,60,40,0.65); } }
+/* 护体灵光（P1-2）：血条上面一道细金线。它跟血条是两回事 —— 血是「还剩多少」，罩是「打不打得动」。
+   高度只给 3px：它是一条状态线，不是第二条血条，抢了血条的分量反而误读。 */
+#bossward { position: relative; height: 5px; margin-bottom: 3px; border-radius: var(--r-pill); overflow: hidden;
+  background: rgba(46,40,32,0.62); border: 1px solid rgba(60,52,40,0.5); display: none; }
+#bossward.on { display: block; }
+/* 填充必须是实金：浅纸底上 0.55 半透明的金叠在深槽里只剩一条灰绿，4 倍放大也读不出「这是罩」。
+   实测落屏 RGB ≈ (190,140,40) → (250,222,146)，才一眼认得出是金线。 */
+#bosswardfill { height: 100%; width: 100%;
+  background: linear-gradient(90deg, #b07d1c, #f5c94e 55%, #ffe9a8);
+  transition: width .15s linear; }
+/* 罩破了：金线换成一条墨线按秒退完，外面箍一圈朱砂细框。
+   这里刻意不用朱砂填充 —— 正下方就是朱砂血条，两条同色叠在一起，一眼看过去会读成
+   「血条上多了一道描边」，反而分不清哪个是哪个。墨线 = 罩没了，朱砂框 = 这六秒吃满伤。 */
+#bossward.broke { border-color: rgba(224,87,58,0.8); }
 #skillrow { position: absolute; left: 12px; bottom: 12px; display: flex; flex-wrap: wrap; gap: var(--sp-1); max-width: 70%; }
 .pip { width: 26px; height: 26px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); border-radius: var(--r-sm); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: var(--fs-cap); line-height: 1; }
 .pip b { font-size: var(--fs-micro); color: var(--accent); }
@@ -569,6 +583,23 @@ body.rot #ver { visibility: hidden; }
 #dialogbox { position: relative; width: 92%; max-width: 460px; background: var(--paper); color: var(--ink); border: 2px solid var(--line-gold); border-radius: var(--r-lg); padding: var(--sp-4); text-align: left; box-shadow: 0 8px 30px rgba(0,0,0,0.6); cursor: pointer; }
 /* 纸底按下去只压一点亮度：整框缩放会让对话文字跟着抖 */
 #dialogbox:active { filter: brightness(0.955); }
+/* 抉择按钮（showChoice）：自己是一张纸卡，跟在对话框下面。
+   不能塞进纸框：水墨皮的对话框是竖排，塞进去按钮会跟着竖过来。
+   也不能按内容宽度自由折行：长标签一人一行会把整摞拖到右侧快捷栏上。
+   所以——独立纸卡 + 三档以上排两列等宽 + 有抉择时整摞上抬。 */
+#dialog.has-choices { padding-bottom: 15%; }
+.dlg-choices { width: 92%; max-width: 460px; margin: 10px auto 0; padding: 10px 12px;
+  display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+  writing-mode: horizontal-tb;
+  background: var(--paper); border: 2px solid var(--line-gold); border-radius: var(--r-lg);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6); }
+.dlg-choices.many .btn { flex: 1 1 44%; font-size: var(--fs-micro); padding: 7px 6px; line-height: 1.45; }
+/* 纸卡上的按钮不能沿用 .btn.small 的浅色字（那是给暗面板用的）：浅字压在米黄纸上等于没有字。 */
+.dlg-choices .btn.small {
+  background: rgba(58,53,44,0.05); color: var(--ink);
+  border: 1px solid rgba(74,68,56,0.42); margin-top: 0;
+}
+.dlg-choices .btn.small:active { background: rgba(143,47,36,0.12); }
 /* 对话头像：说话人小像。像素精灵原尺寸画进 canvas，靠 CSS 放大 —— 放大倍数越高越糊，
    所以只放大到 4 倍上下（44~52px），保留像素颗粒，正好是「书页小插图」的尺寸。 */
 #dialogFace {
@@ -883,6 +914,18 @@ body[data-skin="guigu"] .mapcard.next .mc-name { color: #8f4f2e; }
 .dc-desc { color: var(--text-2); font-size: var(--fs-cap); line-height: 1.55; margin-top: 4px; }
 .dc-mul { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-2); margin-top: 4px; }
 .dc-mul span { font-size: var(--fs-micro); color: var(--text-3); }
+/* 词缀（P1-5）：难度卡上最要紧的一行 —— 它决定这一趟该带什么功法。
+   每条词缀一小块，左边一道 --dc 色的竖线当签；没有词缀的档也占一格，写「无词缀」，
+   免得玩家以为「这档没写就是没做」。 */
+.dc-affix { display: flex; flex-direction: column; gap: 3px; margin-top: 5px; }
+.dc-afx { font-size: var(--fs-micro); color: var(--text-3); line-height: 1.5;
+  padding-left: 6px; border-left: 2px solid var(--dc, var(--line)); }
+.dc-afx b { color: var(--dc, var(--text)); font-weight: 600; margin-right: 6px; letter-spacing: 1px; }
+.dc-afx.none { border-left-color: var(--line); opacity: 0.7; }
+/* 原文语汇那一行：替代 ×1.75。数字仍然在数据里（扫荡 / 药材配额要读），只是不摆在脸上。 */
+.dc-word { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-2); margin-top: 5px; }
+.dc-word span { font-size: var(--fs-micro); color: var(--text-3); }
+.dc-word b { color: var(--text-2); font-weight: 600; }
 .dc-go { text-align: right; color: var(--dc); font-size: var(--fs-cap); margin-top: 4px; }
 .dc-foot { display: flex; align-items: center; justify-content: flex-end; gap: var(--sp-2); margin-top: 4px; }
 .dc-foot .dc-go { margin-top: 0; }
@@ -1145,6 +1188,10 @@ body[data-skin="guigu"] #parryBtn[data-chain]::before { color: #8f4f2e; text-sha
 .pf-tier.open .pf-list { display: block; }
 .pf-tier.cur > .pf-tier-hd { background: rgba(255,210,74,0.15); }
 .pf-count { font-size: var(--fs-micro); font-weight: 400; opacity: .72; }
+/* 属性签（P1-2）：战前挑功法时最要紧的一格 —— 带错属性，练满也白练。 */
+.pf-attr { display: inline-block; margin-left: 6px; padding: 0 4px; font-size: var(--fs-micro);
+  font-weight: 600; letter-spacing: 1px; border-radius: var(--r-sm);
+  color: var(--accent); border: 1px solid rgba(201,162,74,0.45); background: rgba(201,162,74,0.10); }
 .pf-note { flex: 0 0 auto; font-size: var(--fs-micro); opacity: .7; padding: 4px 0 8px; }
 
 /* ---------- 修行图：支线像叠牌挂在主线卡后 ---------- */

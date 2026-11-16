@@ -18,26 +18,66 @@ window.REALM_LAYERS = [
   { lv: 35, name: '炼气期十三层', hp: 48, dmg: 0.13, atk: 0.10, spd: 0.05, skill: 'frost', note: '得授冰冻术' }
 ];
 
+// 难度词缀：三档难度不再只是「同样的玩法、不同的倍率」。
+// 每档挂 1~2 条词缀，词缀是**能感到的规则**，不是数值：精英来得早、煞气聚得慢、
+// 人人身上有护体灵光。玩家换档时换的是打法，不只是耐打程度。
+//
+// 字段口径（全部可选，缺省即无效果）：
+//   packMul  同屏目标数量的乘数（值在 budget() 里乘到 want 上）
+//   shaGain  煞气获得的乘数（顿悟来得快慢）
+//   eliteAt  第一只精英什么时候来（秒）；elitePair 首只成对出
+//   attrBias 小怪的属性偏向 [属性, 概率] —— 决定这一档里哪门功法吃香（见 game.js 的 attrOf）
+window.AFFIXES = {
+  yaochao: {
+    id: 'yaochao', name: '妖潮', tag: '凶', color: '#ffb060',
+    desc: '妖物挤成堆来 —— 精英早早现身，而且成对。',
+    eliteAt: 45, elitePair: true, packMul: 1.12,
+    note: '精英提前到 45 秒，且第一对同时出；同屏妖物略密。'
+  },
+  moqi: {
+    id: 'moqi', name: '魔气侵体', tag: '厉', color: '#ff6a6a',
+    desc: '腥甜的一层薄雾贴在地上 —— 妖物染了煞气，煞气聚得也慢。',
+    shaGain: 0.7, attrBias: ['sha', 0.45],
+    note: '近半小怪染煞（雷系克之）；煞气只得七成，顿悟来得迟。'
+  },
+  tiebi: {
+    id: 'tiebi', name: '铁壁', tag: '守', color: '#c9a24a',
+    desc: '此间之敌皆有一层护体灵光 —— 罩未破时，打上去只落六成。',
+    wardFrac: 0.14, wardAll: true,
+    note: '人人带一层薄罩；首领的罩更厚。破罩六秒内吃满伤，血灵钻专破此物。'
+  }
+};
+window.affixById = function (id) { return AFFIXES[id] || null; };
+
 // 三档难度：怪更强、掉落更厚、灵石与修为更多
 // levelScale：回刷低级图时，按「超出该图推荐等级」的差值再放大怪物强度，避免高境界碾压
+//
+// words：难度卡上给玩家看的话。**不写 ×1.75**（那是给调参用的，不是给修仙的人看的），
+// 一律用原文语汇说清「这一档是什么光景」。数值字段照旧留着，扫荡 / 药材配额还要读它。
 window.DIFFICULTIES = [
   {
     id: 'easy', name: '凡境', tag: '寻常', color: '#9fe0c0',
     hp: 1.0, dmg: 1.0, spd: 1.0, cnt: 1.0, levelScale: 0, bossHp: 1.0, bossDmg: 1.0,
     drop: 1.0, rarity: 0, stone: 1.0, xp: 1.0,
-    desc: '山兽如常，正合练手。'
+    affixes: [],
+    desc: '山兽如常，正合练手。',
+    words: { hp: '如常', dmg: '如常', cnt: '稀疏', drop: '平常', stone: '平淡', xp: '如常' }
   },
   {
     id: 'hard', name: '险境', tag: '凶险', color: '#ffb060',
     hp: 1.75, dmg: 1.5, spd: 1.08, cnt: 1.25, levelScale: 0.02, bossHp: 1.5, bossDmg: 1.15,
     drop: 1.7, rarity: 1, stone: 1.8, xp: 1.5,
-    desc: '妖物壮了两分，落物也厚了两分。'
+    affixes: ['yaochao'],
+    desc: '妖物壮了两分，落物也厚了两分。',
+    words: { hp: '厚一层', dmg: '重两分', cnt: '稍密', drop: '厚两分', stone: '厚两分', xp: '快三分' }
   },
   {
     id: 'nightmare', name: '死境', tag: '九死', color: '#ff6a6a',
     hp: 3.1, dmg: 2.2, spd: 1.18, cnt: 1.6, levelScale: 0.05, bossHp: 2.0, bossDmg: 1.3,
     drop: 2.6, rarity: 2, stone: 3.0, xp: 2.2,
-    desc: '血雾漫天，敢入者少。'
+    affixes: ['moqi', 'tiebi'],
+    desc: '血雾漫天，敢入者少。',
+    words: { hp: '厚两层', dmg: '重三分', cnt: '挤', drop: '厚三分', stone: '丰', xp: '快六分' }
   }
 ];
 window.diffById = function (id) {

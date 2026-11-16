@@ -183,7 +183,10 @@ const G7 = await page.evaluate(() => {
 });
 ok(G7.preCleared, '前置剧情图「岁月殿」已通（大罗关的硬门槛）', G7.preCleared);
 ok(!!G7.choice && G7.choice.n === 4, '大罗破境图弹出「押几档」的四档抉择', G7.choice);
-ok(!!G7.choice && G7.choice.texts.every(t => /把握\s*\d+%/.test(t) && /扛\s*\d+\s*衰/.test(t)),
+// 把握写成「五成多 / 七成 / 十成」是刻意的（原著语汇，不摆百分号），
+// 所以这里不能只认 %。这条断言从写下那天起就红着 —— 因为它当时只认 /把握\s*\d+%/，
+// 而 pctCheng() 从来就没吐过 %。本轮（批次 4）把它改对着界面实际长什么样。
+ok(!!G7.choice && G7.choice.texts.every(t => /把握\s*(?:\d+%|[零一二三四五六七八九十]+成)/.test(t) && /扛\s*\d+\s*衰/.test(t)),
   '每一档都把「把握」和「要扛几道衰」摆出来（取舍看得见）', G7.choice && G7.choice.texts);
 ok(!!G7.choice && /不押/.test(G7.choice.texts[0]) && G7.choice.texts[3].indexOf('押') === 0,
   '第一档是「不押」，最后一档押得最重', G7.choice && G7.choice.texts);

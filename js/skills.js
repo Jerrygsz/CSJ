@@ -160,6 +160,45 @@ window.SKILLS = [
     desc: '玲珑所留的飞升之凭，空间之力加身。握着它，才知道什么叫界外还有界' }
 ];
 
+// ---------- 属性（P1-2 神通克制） ----------
+// 为什么单列一张表，而不是往每门功法的 atk 里塞一个 attr：
+// ① 这张表一眼能读完「哪门克哪路」，改平衡时不用在两百行里翻；
+// ② 没登记的功法就是无属性（不吃加成也不吃亏）—— 将来加新功法忘了登记，不会算错。
+// 只给**原著有明说**的功法挂属性。克制倍率表在 game.js 的 COUNTER。
+window.SKILL_ATTR = {
+  // 剑：驱物术、青元剑诀一路的飞剑，对修士最利
+  sword: 'jian', jianfen: 'jian', dageng: 'jian', jzhen: 'jian',
+  // 火 / 冰：长春功所含的基础法术
+  fire: 'huo', sanyan: 'huo', frost: 'bing',
+  // 金光罩 / 洞漩金光 / 元磁神光：护体类神通，压得住阴物
+  orb: 'guang', tongbao: 'guang', yuanci: 'guang',
+  // 符：定神符一抖，金色符光炸开
+  nova: 'fu',
+  // 阴 / 煞：玄阴经一脉。天都尸火焚的是魂，故归阴
+  shayao: 'sha', heisha: 'sha', tiandu: 'yin',
+  // 血：血炼神光夺精血，对人最利
+  xuelian: 'xue',
+  // 血灵钻：原著「专破护体灵光」—— 除了血属性，另给一道破罩加成（wardK）
+  xueling: { attr: 'xue', wardK: 2.5 },
+  // 神识：惊神刺一脉，克灵体
+  qinxian: 'shen', shishen: 'shen', jinshen: 'shen', lihun: 'shen', mengyin: 'shen',
+  // 辟邪神雷：韩立专修克制魔功的神雷。雷对魔/煞/阴/血 1.5 倍，是这套系统的头一条
+  leishen: 'lei'
+};
+(function stampSkillAttr() {
+  const T = window.SKILL_ATTR || {};
+  for (const s of window.SKILLS) {
+    const v = T[s.id];
+    if (!v) continue;
+    const attr = typeof v === 'string' ? v : v.attr;
+    s.attr = attr;
+    if (s.atk) {
+      s.atk.attr = attr;
+      if (typeof v === 'object' && v.wardK) s.atk.wardK = v.wardK;
+    }
+  }
+})();
+
 // 境界封顶：一门功法能练到第几层，看人在哪一层
 window.realmSkillCap = function (lv) {
   if (lv >= 580) return 13;  // 大罗（仙界篇）
@@ -198,8 +237,7 @@ window.skillSlots = function (lv) {
   if (lv >= 36) return 2;    // 筑基
   return 1;                  // 炼气：只运得动一门
 };
-window.skillById = function (id) { return window.SKILLS.find(x => x.id === id) || null; };
-window.isPassiveSkill = function (id) {
+window.skillById = function (id) { return window.SKILLS.find(x => x.id === id) || null; };window.isPassiveSkill = function (id) {
   const s = window.skillById(id);
   return !!(s && s.type === 'passive');
 };

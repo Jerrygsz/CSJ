@@ -147,6 +147,10 @@ const localStorageMock = {
 
 const sandbox = {
   console,
+  // 这里是「无 DOM 桩的纯逻辑冒烟」，不是人在玩。打上 QA 标记，
+  // 方能让只该在真人面前出现的演出层（剧情动画 / 纪年卡 / 赌局抉择）自动让开 ——
+  // 它们都认 __CSJ_QA__，不认「有没有 DOM」这种间接信号。
+  __CSJ_QA__: true,
   document: documentMock,
   localStorage: localStorageMock,
   performance: { now: () => vnow },
