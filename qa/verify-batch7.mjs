@@ -142,6 +142,26 @@ ok(A.wardPlain > 0 && A.wardCross / A.wardPlain > 1.7,
 ok(A.mobCross === true && A.mobTexts === 0, '小怪也吃夹击加成，但不喊字（一屏二十六只同时喊等于没喊）', A);
 ok(A.eliteTexts === 1, '精英夹击时报一声「夹击」', A);
 
+// A6 真实联机链路：客机的命中上报（t:'hit'）必须被标成「队友打的」。
+// 这一条是整套机制的地基 —— 少了 src:'partner'，真实对局里夹击永远不会成立，
+// 而用 coopMark(id, true) 直接标一笔的测试又会全绿，问题被完美掩盖。
+const A6 = await page.evaluate(() => {
+  const g = window.__FR.G;
+  g.enemies.length = 0;
+  window.__FR.spawnNear(200, 100, 'wolf', true, 5000);
+  const e = g.enemies[g.enemies.length - 1];
+  g.coopRole = 'host'; g.time = 80;
+  e._hitMark = { me: -99, pt: -99 }; e._cross = 0;
+  const hp0 = e.hp;
+  window.Coop.onData('peer-x', { t: 'hit', id: e._id, dmg: 50 });
+  const m1 = e._hitMark;
+  // 队友那一笔落下后，我方再补一手，夹击应当成立
+  window.__FR.coopMark(e._id, false);
+  return { ptSet: m1.pt > 0, meSet: m1.me, hpDropped: e.hp < hp0, cross: window.__FR.crossOf(e._id).cross };
+});
+ok(A6.ptSet && A6.hpDropped, '队友的命中上报（t:hit）真的落在权威怪身上，并记成「队友打的」', A6);
+ok(A6.cross > 0, '真实上报链路下夹击能成立（不只是测试用的 coopMark 能）', A6);
+
 // ---------- B 组：合击 ----------
 const B = await page.evaluate(() => {
   const g = window.__FR.G;

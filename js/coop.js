@@ -541,9 +541,11 @@
   }
 
   // HOST 收到上报 → 在权威敌人上扣血（damageEnemy 内部会再广播飘字）
+  // src:'partner' 是夹击 / 合击判定的唯一依据 —— 少传这一个字段，
+  // 真实联机里队友的伤害就会被当成「自己打的」，两条判定永远不会成立。
   function onHit(data) {
     if (!data || data.id == null) return;
-    if (window.__FR && window.__FR.damageEnemyById) window.__FR.damageEnemyById(data.id, data.dmg);
+    if (window.__FR && window.__FR.damageEnemyById) window.__FR.damageEnemyById(data.id, data.dmg, { src: 'partner' });
   }
 
   // HOST 侧累计队友（partner）被怪/弹幕撞到的致伤，随周期下发
@@ -654,7 +656,9 @@
     paintTie(e.x, e.y - (e.r || 12) - 34, real, e.r || 12);
     // 记一次默契：房主与客机各记各的 —— 这是「我跟他」的账，不是房主的账
     fr('addCoopTie');
-    if (connected()) window.Net.sendGame({ t: 'tie', x: Math.round(e.x), y: Math.round(e.y), r: e.r || 12, d: real });
+    // 客机镜像走可靠送达：合击次数是**累加值**，丢一条就是永久少记一次，
+    // 与快照那种「下一帧就来」的东西不同。重发到达时靠 onTie 里的 seen 判重。
+    if (connected()) sendReliable({ t: 'tie', x: Math.round(e.x), y: Math.round(e.y), r: e.r || 12, d: real });
     return { dmg: real, cd: tr.t.cd, tier: tr.idx };
   }
 
@@ -668,6 +672,12 @@
   }
   function onTie(data) {
     const g = G(); if (!g) return;
+    // 可靠送达会重发：同一记合击只入账一次，否则默契会被重发的同一条刷高
+    if (data._s != null) {
+      if (seen.has(data._s)) return;
+      seen.add(data._s);
+      if (seen.size > 64) seen.clear();
+    }
     if (!sharesMap(g)) return;
     paintTie(data.x, data.y, data.d || 0, data.r || 12);
     fr('addCoopTie');    // 自己这边也记一次默契
