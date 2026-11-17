@@ -43,6 +43,7 @@ const ITEMS = [
   { key: 'batch7', file: 'verify-batch7.mjs', kind: 'gate', desc: '联机闭环（双人合击 + 协作解锁）：夹击两秒窗口 / 超窗不续 / 夹击破罩更快 / 只对精英报字 / 合击只打硬仗 / 真伤兜底 / CD 真挡 / 单人零泄漏 + 默契三档边界与数值 / 存档落盘与老档补零账 / 面板档位与进度' },
   { key: 'batch8', file: 'verify-batch8.mjs', kind: 'gate', desc: '同行纪（随行者的往来账 + 羁绊三档）：只带出门的才记一场 / 破境关没闭成不记 / 灵宠与同伴各记各的 / 三档边界 0·8·25 / 本命绝学 CD 1·0.88·0.78 / 生死之交殒了自个儿回来 / 殒落计数 / 洞府两页标签与静修「同行」一节的排序 / 双皮字站对边' },
   { key: 'batch9', file: 'verify-batch9.mjs', kind: 'gate', desc: '放生（账本结转 + 故交册 + 告别 + 防误触）：放生清现役账 / 重获从初识起 CD 回 1 / 故交册字段齐且按放生倒序 / 老档迁移与清档 / 两段式（有账两次、空账直放、超时重算）/ 殒落欠费残留清理 / 告别词报场数与档位 / 静修故交节 DOM=数据 / 双皮字站对边' },
+  { key: 'save-symmetry', file: 'verify-save-symmetry.mjs', kind: 'gate', desc: '存档字段对称（P0）：loadSave 键集不漏 defaultSave 五字段 / 道陨·炼丹·药圃真数据读回与脏数据清洗 / 转世清本世账留生涯累计 / 主循环连错进安全且干净帧自动恢复' },
 ];
 
 const argv = process.argv.slice(2);

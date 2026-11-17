@@ -352,6 +352,35 @@
         cleared: Array.isArray(s.cleared) ? s.cleared.filter(id => typeof id === 'string') : [],
         unlocked: unlocked.length ? unlocked : ['qixuan'],
         mapId: (typeof s.mapId === 'string' && MAPS.some(m => m.id === s.mapId)) ? s.mapId : 'qixuan',
+        // P0 读档对称：以下五个字段在 defaultSave 里有，但旧版 loadSave 重建对象时漏了 ——
+        // 各处虽有 `|| {}` 兜底不会崩，可读档即被当成空账：道陨掉的道具再也赎不回、炼丹熟手加成清零、
+        // 药圃百年进度归零。这里逐字段清洗后读回；键名与 defaultSave 一一对齐（见 verify-save-symmetry 闸门）。
+        // stoneBurned 是累计灵石（可达十余位），禁用 |0，走 Math.floor(+x||0)。
+        stoneBurned: Math.max(0, Math.floor(+s.stoneBurned || 0)),
+        // deathLost = { 地图id: { items: { 道具id: 件数 } } }；件数是小整数才用 |0。
+        deathLost: (function () {
+          const o = {};
+          const src = (s.deathLost && typeof s.deathLost === 'object') ? s.deathLost : {};
+          for (const id in src) {
+            const rec = src[id]; if (!rec || typeof rec !== 'object') continue;
+            const items = {};
+            const its = (rec.items && typeof rec.items === 'object') ? rec.items : {};
+            for (const iid in its) { const c = its[iid] | 0; if (c > 0) items[iid] = c; }
+            o[id] = { items: items };
+          }
+          return o;
+        })(),
+        // alchemy.n 是开炉次数（小整数），存档被写坏时回 0，不白送熟手加成。
+        alchemy: { n: Math.max(0, ((s.alchemy && s.alchemy.n) || 0) | 0) },
+        // gardenCharge 逐畦 clamp 到 99（与 GARDEN_CAP 同口径，此处避开 TDZ 不引用那个 const）。
+        gardenCharge: (function () {
+          const o = {};
+          const src = (s.gardenCharge && typeof s.gardenCharge === 'object') ? s.gardenCharge : {};
+          for (const id in src) { const c = src[id] | 0; if (c > 0) o[id] = Math.min(99, c); }
+          return o;
+        })(),
+        // gardenTick 是不足 1 秒的零头，夹在 [0,1)；脏数据（NaN/负数/超大）一律回 0。
+        gardenTick: (function () { const t = +s.gardenTick; return (isFinite(t) && t > 0 && t < 1) ? t : 0; })(),
         cultivate: {
           level: Math.max(1, cult.level || (s.best && s.best.level) || 1),
           xp: Math.max(0, cult.xp || 0),
@@ -15059,7 +15088,9 @@
   // 一定会执行 —— 最坏只丢一帧，不会整局报废。
   let last = performance.now();
   let _verShown = null;   // 版本水印：仅在标题首页显示，缓存避免每帧重复写
-  let _loopGen = 0, _loopTickAt = 0, _loopErrN = 0, _loopErrAt = 0;
+  let _loopGen = 0, _loopTickAt = 0, _loopErrN = 0, _loopErrAt = 0, _loopOkN = 0;
+  const LOOP_ERR_TRIP = 8;        // 连错超过 8 帧进安全模式（保住「还能继续打」）
+  const LOOP_SAFE_RECOVER = 180;  // 安全模式下连续 180 帧无错 → 试探恢复特效（约 3s，不永久锁死）
   // 用「代际」而不是布尔锁：每次调度都 +1，回调先比代际，被更新的一次取代就直接退出。
   // 这样看门狗可以在「rAF 已经被掐掉、上一帧的调度却还挂着」时强行重新点火，
   // 又绝不会跑出第二条循环（布尔锁在那种场景下会永远卡死，看门狗反而不起作用）。
@@ -15072,6 +15103,7 @@
   }
   function onLoopError(e) {
     _loopErrN++;
+    _loopOkN = 0;                 // 又错了：连续的「干净帧」计数清零，重新等恢复窗口
     G.lastErr = String((e && (e.stack || e.message)) || e || '');
     const now = Date.now();
     if (now - _loopErrAt > 4000) {        // 别让一个每帧都错的 bug 把屏幕刷满
@@ -15080,10 +15112,21 @@
       try { banner('脚本出错 · 已跳过这一帧'); } catch (_) {}   // 看得见的提示，好过静悄悄定格
     }
     // 连着出错 = 这一屏某个特效有毒：进安全模式，只跑逻辑不画特效，先保住「能继续打」
-    if (_loopErrN > 8) G.safeMode = true;
+    if (_loopErrN > LOOP_ERR_TRIP) G.safeMode = true;
+  }
+  function onLoopClean() {
+    // 正常帧：错误计数归零（安全模式是「连错」而非「累计错」，见 LOOP_ERR_TRIP 注释）。
+    // 旧版只增不减，9 次偶发异常就把这一局余下时间永久关掉特效、跨图也不恢复 —— 这里修掉。
+    if (_loopErrN) _loopErrN = 0;
+    if (G.safeMode && ++_loopOkN >= LOOP_SAFE_RECOVER) {
+      G.safeMode = false; _loopOkN = 0;
+      try { banner('灵光渐复'); } catch (_) {}
+    }
   }
   function loop(t) {
-    try { tickFrame(t); } catch (e) { onLoopError(e); }
+    let frameOk = true;
+    try { tickFrame(t); } catch (e) { frameOk = false; onLoopError(e); }
+    if (frameOk) onLoopClean();
     _loopTickAt = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
     scheduleLoop();
   }
@@ -15163,7 +15206,15 @@
     save.gift_zhilongguo = false;
     save.gardenSeed = {};     // 洞府重开：移栽的品种一并清掉（基础品种写在数据里，会随洞府重开回来）
     // 催千年的状态也要清：否则重开后某畦还挂着「在催」，绿液却已归零，那一畦永远长不成
-    save.gardenYear = {}; save.gardenQianT = {}; save.gardenCharge = {};
+    save.gardenYear = {}; save.gardenQianT = {}; save.gardenCharge = {}; save.gardenTick = 0;
+    // P0 转世清账对称（与 defaultSave / loadSave 同一批字段）：以下都是「本世」账，换一世就得从头。
+    // deathLost 是本世道陨掉的道具（新世装备全清，旧账留着只会错乱赎回）；
+    // alchemy 是本世开炉次数（熟手加成跟着修为走）；wushuai 是压在这一世的衰；
+    // allyDead / allyOwe 是这一世随行者的殒落与欠费（不清会让新世同 id 的伴一出生就被判死）。
+    save.deathLost = {}; save.alchemy = { n: 0 };
+    save.wushuai = { n: 0, log: {} };
+    save.allyDead = {}; save.allyOwe = {};
+    // stoneBurned 有意**不清**：与 totalKills / playTime / coop 同属生涯累计（注释见 defaultSave「只增不减永不退还」）。
     save.repBlack = 0; save.repWhite = 0; save.identity = 'han'; save.liUnlocked = false;
     // 赌局台账也清：转世之后挡过的那三道雷不算数了（人都不一样了）
     save.stakeLog = {};
@@ -15594,7 +15645,18 @@
     parryVuln() { return G.parry ? { e: !!G.parry.vulnE, t: +(G.parry.vulnT || 0).toFixed(3), chain: G.parry.chain || 0 } : null; },
     // 20261111I：主循环自保状态。lastError 是手机卡死后唯一能拿到的线索 ——
     // 复现时先看它：有栈 = 某处抛异常（循环已自愈，只丢了一帧）；空 = 是死循环/停摆（看 watchdog）。
-    lastError() { return { err: G.lastErr || '', count: _loopErrN, safeMode: !!G.safeMode, frameReal: +_frameReal.toFixed(1), frameAvg: +_frameAvg.toFixed(1) }; },
+    lastError() { return { err: G.lastErr || '', count: _loopErrN, okN: _loopOkN, safeMode: !!G.safeMode, frameReal: +_frameReal.toFixed(1), frameAvg: +_frameAvg.toFixed(1) }; },
+    // 闸门精确驱动「连错进安全 / 干净帧恢复」，不靠真实 rAF 碰运气（与主循环共用 onLoopClean）。
+    injectLoopErr(n) { for (let i = 0; i < Math.min(Math.max(0, n | 0), 100); i++) { _loopErrN++; _loopOkN = 0; } if (_loopErrN > LOOP_ERR_TRIP) G.safeMode = true; return { count: _loopErrN, safeMode: !!G.safeMode }; },
+    cleanFrames(n) { for (let i = 0; i < Math.min(Math.max(0, n | 0), 2000); i++) onLoopClean(); return { count: _loopErrN, safeMode: !!G.safeMode, okN: _loopOkN }; },
+    // P0 存档对称：键集与五个风险字段，供闸门断言读档不漏、转世清账、生涯累计不清。
+    saveDefaultKeys() { return Object.keys(defaultSave()); },
+    saveKeys() { return Object.keys(save); },
+    saveFields() {
+      return JSON.parse(JSON.stringify({ stoneBurned: save.stoneBurned, deathLost: save.deathLost,
+        alchemy: save.alchemy, gardenCharge: save.gardenCharge, gardenTick: save.gardenTick,
+        allyDead: save.allyDead, allyOwe: save.allyOwe, wushuai: save.wushuai }));
+    },
     // 20261111G：爆炸清场 + 无敌帧探针。不按键也能单独验证清场半径内的东西是否被扫掉。
     parryClear() { return parryBlast(); },
     parryIv() { return G.player ? { iv: +(G.player.iv || 0).toFixed(3), grant: +((G.parry && G.parry.ivGrant) || 0).toFixed(3) } : null; },

@@ -294,12 +294,17 @@ ok(/if \(!fatal\) parryHitFlash\(\)/.test(hud), 'fatal 时不再打全屏贴边�
 // ⑧ 主循环自保：异常不许让整局停摆（20261111I 用户实测「网页卡死、按钮还在动」）
 ok(/function scheduleLoop\(\)/.test(hud) && /function tickFrame\(t\)/.test(hud),
     '主循环拆成 loop(外壳) + tickFrame(本体)');
-ok(/try \{ tickFrame\(t\); \} catch \(e\) \{ onLoopError\(e\); \}/.test(hud),
+ok(/try \{ tickFrame\(t\); \} catch \(e\) \{ frameOk = false; onLoopError\(e\); \}/.test(hud)
+   && /if \(frameOk\) onLoopClean\(\)/.test(hud),
     'tickFrame 包 try/catch（一处异常只丢一帧，不再整局停摆）');
 ok(!/if \(window\.Chat\) window\.Chat\.setVisible\(CHAT_STATES\[G\.state\] === 1\);\s*requestAnimationFrame\(loop\);/.test(hud),
     'rAF 不再挂在循环体末尾（末尾挂 = 一旦抛异常就永久停）');
 ok(/setInterval\(\(\) => \{[\s\S]{0,400}?_loopTickAt < 1500/.test(hud), '看门狗：1500ms 没推进就重新点火 rAF');
-ok(/if \(_loopErrN > 8\) G\.safeMode = true/.test(hud), '连错 8 次进 safeMode（先保住能玩）');
+ok(/const LOOP_ERR_TRIP = 8/.test(hud) && /if \(_loopErrN > LOOP_ERR_TRIP\) G\.safeMode = true/.test(hud),
+    '连错 8 次进 safeMode（先保住能玩）');
+ok(/function onLoopClean\(\)/.test(hud) && /if \(_loopErrN\) _loopErrN = 0/.test(hud)
+   && /_loopOkN >= LOOP_SAFE_RECOVER/.test(hud),
+    '干净帧清零错误计数 + 连续干净帧自动恢复特效（不永久锁死）');
 ok(/lastError\(\) \{ return \{ err: G\.lastErr/.test(hud), '__FR.lastError() 暴露异常栈 / 次数 / 档位');
 
 // ⑨ 死循环护栏
