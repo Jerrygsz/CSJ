@@ -1,7 +1,13 @@
 // 轻量 WebAudio 音效合成（无需音频文件）
 window.Sfx = (function () {
   let ctx = null;
-  let muted = false;
+  // 静音是跨会话偏好：手机玩家在办公室/地铁里关掉音效，下次打开不该又突然响。
+  // 放在独立的 localStorage 键里，不进存档 —— 换档、转世、清档都不该把「静音」这个
+  // 设备级偏好带走（清档后音效自动炸响是更糟的体验）。
+  const MUTE_KEY = 'fanren_audio_muted';
+  let muted = (function () {
+    try { return localStorage.getItem(MUTE_KEY) === '1'; } catch (e) { return false; }
+  })();
 
   function ensure() {
     if (!ctx) {
@@ -137,7 +143,11 @@ window.Sfx = (function () {
       tone(f, 0.04, 'square', 0.03, f * 1.1);
     },
 
-    toggle() { muted = !muted; return muted; },
+    toggle() {
+      muted = !muted;
+      try { localStorage.setItem(MUTE_KEY, muted ? '1' : '0'); } catch (e) {}
+      return muted;
+    },
     get muted() { return muted; }
   };
 })();

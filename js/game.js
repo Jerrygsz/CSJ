@@ -145,6 +145,9 @@
   // 上一版落盘内容的副本：主档解析失败（半截写入 / 被别的程序写坏）时回滚用。
   // 这是长线养成游戏，几百小时的账只在本地一个槽里 —— 没有回滚等于一次坏写全丢。
   const SAVE_BAK = 'fanren_save_v1_bak';
+  // 上次真正落盘的墙钟时间。**不写进 save 本身** —— 写进去会导致每次 writeSave
+  // 序列化结果都不一样，`json === _savedRaw` 的跳过判断永远失效，备份会被无意义地往前推。
+  const SAVE_AT_KEY = 'fanren_save_at';
   // 转世重修：独立于主存档的「轮回余荫」池，删档也保留，代代叠加。
   // 只炼「人物属性值」——本世超出凡胎初始的属性（生命/伤害/攻速/移速等）各取 1/81，
   // 叠加进新生角色的属性面板；功法、法器、灵石、洞府等一律清零、从头再来。
@@ -171,7 +174,7 @@
   function defaultSave() {
     return {
       version: 5,
-      settings: { autoSave: true, manualSave: true },
+      settings: { autoSave: true, manualSave: true, shake: true, shakeSet: false },
       best: { time: 0, kills: 0, level: 1 },
       wins: 0, seen: [],
       // 剧情只演一次：intro / scene / outro 三类节点键也记在 seen 里（见 storySeen）。
@@ -534,6 +537,8 @@
     try {
       if (_savedRaw) { try { localStorage.setItem(SAVE_BAK, _savedRaw); } catch (_) {} }
       localStorage.setItem(SAVE_KEY, json);
+      // 时间戳写失败不影响存档本身，所以单独 try，别让它把成功当失败
+      try { localStorage.setItem(SAVE_AT_KEY, String(Date.now())); } catch (_) {}
       _savedRaw = json;
       if (_saveFail) { _saveFail = 0; _saveWarned = false; }
       return true;
@@ -9720,7 +9725,7 @@
   let _drawEnemies = [];   // 性能优化：敌人绘制排序复用，避免每帧 slice 分配（零视觉变化）
   function render() {
     let sx = 0, sy = 0;
-    if (G.shake > 0) { sx = U.rand(-G.shake, G.shake); sy = U.rand(-G.shake, G.shake); }
+    if (G.shake > 0 && shakeOn()) { sx = U.rand(-G.shake, G.shake); sy = U.rand(-G.shake, G.shake); }
     ctx.setTransform(PR, 0, 0, PR, 0, 0);
     ctx.clearRect(0, 0, W, H);
     const sc3 = ensureScenery3();   // 带缓存；下方贴地层与地标绘制复用同一份，不重复烘焙
@@ -10728,6 +10733,17 @@
     setTimeout(function () {
       if (G.state === 'play' && G.trial) banner('不必按键 · 功法自会出手　·　闪身之后一息之内，出手更重');
     }, 2200);
+    // 第三句讲弹反。它在剧情文本里一个字都没提过，而 HUD 上那颗键
+    // 光看「护体」两个字推不出「单击可格开并反震」——核心操作不能靠猜。
+    // 排在两条之后（5.6s）以免前两句还没读完就被顶掉；写进 save.seen 只念一次。
+    if (!storySeen('parryTip')) {
+      storyMarkSeen('parryTip');
+      setTimeout(function () {
+        if (G.state === 'play' && G.trial) {
+          banner('弹反 · 按住「护体」稳住身形，招至一瞬单击「格开」，可反震伤敌', { ms: 3600 });
+        }
+      }, 5600);
+    }
     return true;
   }
   // 教学战的收尾：场上清空后留一小口气（让最后一击的碎屑落完），再进结算
@@ -11206,14 +11222,35 @@
   function manualSave() {
     if (!save.settings.manualSave) { notify('手动存档已关闭'); return false; }
     writeSave();
-    if (elSaveHint) elSaveHint.textContent = '已存档 ' + new Date().toTimeString().slice(0, 8);
+    syncSaveHint();
     notify('已手动存档');
     return true;
+  }
+  // 画面震动：默认跟随系统的「减少动态效果」；玩家手动勾/取消过就固定下来，不再被系统覆盖。
+  // 震屏只在 render() 里乘一次系数，不改各处 G.shake 的赋值 —— 那些数值还牵着打击感调参。
+  const _reduceMQ = (typeof window.matchMedia === 'function')
+    ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+  function shakeOn() {
+    const st = save.settings || {};
+    if (st.shakeSet) return st.shake !== false;
+    return !(_reduceMQ && _reduceMQ.matches);
+  }
+  // 「上次存档」：只读一个墙钟键，不参与存档内容，所以不会打乱 writeSave 的跳过判断。
+  // 玩家真正想知道的是「我刚玩的这几分钟到底进没进存档」，一个绝对时间比不上相对时间好读。
+  function syncSaveHint() {
+    if (!elSaveHint) return;
+    let at = 0;
+    try { at = +localStorage.getItem(SAVE_AT_KEY) || 0; } catch (e) {}
+    if (!at) { elSaveHint.textContent = '存档含道具与加成，跨地图保留'; return; }
+    const mins = Math.floor((Date.now() - at) / 60000);
+    const when = mins < 1 ? '刚刚' : (mins < 60 ? mins + ' 分钟前' : (Math.floor(mins / 60) + ' 小时前'));
+    elSaveHint.textContent = '上次存档：' + when + ' · 含道具与加成';
   }
   function syncSettingsUI() {
     if (elAutoSaveChk) elAutoSaveChk.checked = !!save.settings.autoSave;
     if (elManualSaveChk) elManualSaveChk.checked = !!save.settings.manualSave;
     if (elSaveNowBtn) { elSaveNowBtn.disabled = !save.settings.manualSave; elSaveNowBtn.style.opacity = save.settings.manualSave ? 1 : 0.45; }
+    if (elShakeChk) elShakeChk.checked = shakeOn();
   }
   // 图标位：把 emoji 包进固定宽度的槽再跟文字
   // 依据：同为 17px 字号，各 emoji 墨迹宽实测 9–24px（🗡 9 / 🗺 24，差 2.67 倍）。
@@ -14272,6 +14309,11 @@
   const elManualSaveChk = document.getElementById('manualSaveChk');
   const elSaveNowBtn = document.getElementById('saveNowBtn');
   const elSaveHint = document.getElementById('saveHint');
+  const elShakeChk = document.getElementById('shakeChk');
+  const elSaveIO = document.getElementById('saveIO');
+  const elSaveIOText = document.getElementById('saveIOText');
+  const elSaveIOHint = document.getElementById('saveIOHint');
+  const elSaveIOBtn = document.getElementById('saveIOBtn');
   const elWorldmap = document.getElementById('worldmap');
   const elWmList = document.getElementById('wmList');
   const elWmCodex = document.getElementById('wmCodex');
@@ -14416,6 +14458,10 @@
     if (elParryBtn) elParryBtn.classList.remove('on');   // 弹反键同理（独立元素，得单独收）
     // 联机时才给「离开房间」的出口，单人时别占位置
     if (elPauseLeaveCoop) elPauseLeaveCoop.style.display = (window.Net && window.Net.self()) ? '' : 'none';
+    // 面板打开时读一次墙钟就够，不必每帧算；「再按一次」的授权不跨次复用
+    syncSaveHint();
+    resetRestartArm();
+    syncFullBtns();
     // 联机：我暂停 → 对方也一起停下（双方好说话）
     if (window.Coop) window.Coop.sendPause(true);
   }
@@ -14490,7 +14536,37 @@
   bindParryDrag();
   applyParryBtnPos();
   window.addEventListener('resize', () => applyParryBtnPos());
-  document.getElementById('restartBtn').addEventListener('click', () => startMap(G.mapId || save.mapId || 'qixuan'));
+  // —— 重新开始：两段式确认 ——
+  // 它紧挨在「继续」下面（320 宽实测纵向只隔 3px），而内部 startMap → resetRun
+  // 会清掉本局拾取 / 连斩 / 战利品，一键下去没有后悔路。与「放生灵宠」同一套窗口语义：
+  // ARM 窗口内再按一次才执行，超时自动撤回。
+  const RESTART_ARM_MS = 3000;
+  let _restartArmAt = 0;
+  const elRestartBtn = document.getElementById('restartBtn');
+  const RESTART_LABEL = elRestartBtn ? elRestartBtn.textContent : '重新开始';
+  function resetRestartArm() {
+    if (!elRestartBtn) return;
+    _restartArmAt = 0;
+    elRestartBtn.textContent = RESTART_LABEL;
+    elRestartBtn.classList.remove('danger');
+    clearTimeout(elRestartBtn._armT);
+  }
+  if (elRestartBtn) elRestartBtn.addEventListener('click', () => {
+    const now = Date.now();
+    if (!_restartArmAt || now - _restartArmAt > RESTART_ARM_MS) {
+      _restartArmAt = now;
+      elRestartBtn.textContent = '再按一次 · 本局作废';
+      elRestartBtn.classList.add('danger');
+      Sfx.warn();
+      clearTimeout(elRestartBtn._armT);
+      elRestartBtn._armT = setTimeout(() => {
+        if (Date.now() - _restartArmAt >= RESTART_ARM_MS - 100) resetRestartArm();
+      }, RESTART_ARM_MS);
+      return;
+    }
+    resetRestartArm();
+    startMap(G.mapId || save.mapId || 'qixuan');
+  });
   document.getElementById('pauseBack').addEventListener('click', () => { elPause.style.display = 'none'; openWorldMap(); });
   document.getElementById('wmClose').addEventListener('click', () => { hideAllOverlays(); G.state = 'title'; elTitle.style.display = 'flex'; refreshTitle(); });
   if (elWmCodex) elWmCodex.addEventListener('click', openWanling);
@@ -14609,6 +14685,15 @@
   const fswBtn2 = document.getElementById('fullPause');
   if (fswBtn1) fswBtn1.addEventListener('click', toggleFullscreen);
   if (fswBtn2) fswBtn2.addEventListener('click', toggleFullscreen);
+  // 全屏是「有状态」的按钮：进去以后仍写着「全屏」，玩家会以为没生效又点一次（= 退出）。
+  // 两处入口各写一遍文案，不走 innerHTML，避免把按钮里别的东西冲掉。
+  function syncFullBtns() {
+    const on = !!(fsElement() || document.body.classList.contains('immersive'));
+    const t = on ? '⛶ 退出全屏' : '⛶ 全屏';
+    if (fswBtn1) fswBtn1.textContent = t;
+    if (fswBtn2) fswBtn2.textContent = t;
+  }
+  syncFullBtns();
 
   if (elWmNext) elWmNext.addEventListener('click', () => {
     const id = elWmNext.getAttribute('data-goto'); if (!id) return;
@@ -14993,6 +15078,85 @@
     notify(save.settings.manualSave ? '手动存档：开' : '手动存档：关');
   });
   if (elSaveNowBtn) elSaveNowBtn.addEventListener('click', manualSave);
+  // 画面震动：勾过一次就固定（shakeSet），此后不再被系统的减少动态效果覆盖
+  if (elShakeChk) elShakeChk.addEventListener('change', () => {
+    save.settings.shake = !!elShakeChk.checked;
+    save.settings.shakeSet = true;
+    writeSave();
+    notify(save.settings.shake ? '画面震动：开' : '画面震动：关');
+  });
+
+  // ---------- 存档迁移 ----------
+  // localStorage 只活在当前浏览器 / 当前站点源下：换手机、换浏览器、清过站点数据，
+  // 进度就没了。做一段可抄可粘的文字，比下载文件省事（iOS 上不必绕「文件」App）。
+  // 编码用 base64(encodeURIComponent)，纯 ASCII 且能防住聊天软件吃掉换行/引号。
+  function saveToCode(txt) { try { return 'CSJ1:' + btoa(unescape(encodeURIComponent(String(txt)))); } catch (e) { return ''; } }
+  function codeToSave(code) { try { return decodeURIComponent(escape(atob(String(code)))); } catch (e) { return ''; } }
+  function saveIOHint(msg, bad) {
+    if (!elSaveIOHint) return;
+    elSaveIOHint.textContent = msg || '';
+    elSaveIOHint.classList.toggle('bad', !!bad);
+  }
+  if (elSaveIOBtn) elSaveIOBtn.addEventListener('click', () => {
+    if (!elSaveIO) return;
+    // 打开时先清空：上一次的导出内容留在框里，很容易被下次粘贴的东西混在一起
+    if (elSaveIOText) elSaveIOText.value = '';
+    saveIOHint('');
+    elSaveIO.style.display = 'flex';
+  });
+  if (document.getElementById('saveIOClose')) document.getElementById('saveIOClose').addEventListener('click', () => {
+    if (elSaveIO) elSaveIO.style.display = 'none';
+  });
+  if (document.getElementById('saveIOExport')) document.getElementById('saveIOExport').addEventListener('click', () => {
+    let raw = '';
+    try { raw = localStorage.getItem(SAVE_KEY) || ''; } catch (e) {}
+    if (!raw) { try { raw = JSON.stringify(save); } catch (e) { raw = ''; } }
+    if (!raw) { saveIOHint('读不到存档内容', true); return; }
+    const code = saveToCode(raw);
+    if (!code) { saveIOHint('导出失败', true); return; }
+    if (elSaveIOText) { elSaveIOText.value = code; elSaveIOText.select && elSaveIOText.select(); }
+    saveIOHint('已导出 · 把这段文字抄走即可');
+  });
+  if (document.getElementById('saveIOCopy')) document.getElementById('saveIOCopy').addEventListener('click', () => {
+    const v = elSaveIOText ? elSaveIOText.value : '';
+    if (!v) { saveIOHint('先点「导出当前」', true); return; }
+    // navigator.clipboard 在非安全上下文（file://、http）不可用，退回 execCommand
+    const fallback = () => {
+      try {
+        elSaveIOText.select();
+        const ok = document.execCommand && document.execCommand('copy');
+        saveIOHint(ok ? '已复制' : '复制被拦下 · 请长按选中后手动复制', !ok);
+      } catch (e) { saveIOHint('复制被拦下 · 请长按选中后手动复制', true); }
+    };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(v).then(() => saveIOHint('已复制'), fallback);
+      } else fallback();
+    } catch (e) { fallback(); }
+  });
+  if (document.getElementById('saveIOImport')) document.getElementById('saveIOImport').addEventListener('click', () => {
+    const raw = elSaveIOText ? elSaveIOText.value.trim() : '';
+    if (!raw) { saveIOHint('框里还没有内容', true); return; }
+    let json = '';
+    if (raw.indexOf('CSJ1:') === 0) json = codeToSave(raw.slice(5));
+    else if (raw.charAt(0) === '{') json = raw;                 // 也接受直接粘原始 JSON
+    if (!json) { saveIOHint('这段文字不是本游戏的存档', true); return; }
+    let o = null;
+    try { o = JSON.parse(json); } catch (e) { saveIOHint('存档已损坏，解析失败', true); return; }
+    // 只认得出「本游戏存档」的形状：别的 JSON（比如任意网页数据）不该覆盖几百小时的档
+    if (!o || typeof o !== 'object' || !o.cultivate || typeof o.cultivate.level !== 'number') {
+      saveIOHint('不像是本游戏的存档', true); return;
+    }
+    try {
+      // 覆盖前先把当前档推进备份槽：导错了还能从「主档坏了走备份」那条路回去
+      const cur = localStorage.getItem(SAVE_KEY);
+      if (cur) localStorage.setItem(SAVE_BAK, cur);
+      localStorage.setItem(SAVE_KEY, json);
+      try { localStorage.setItem(SAVE_AT_KEY, String(Date.now())); } catch (e) {}
+    } catch (e) { saveIOHint('写入失败 · 存储可能已满', true); return; }
+    saveIOHint('已导入 · 正在重载');
+    setTimeout(() => { try { location.reload(); } catch (e) {} }, 420);
+  });
 
   // ---------- 适配：安全区 + 舞台 ----------
   const elWrap = document.getElementById('wrap');
@@ -15110,6 +15274,7 @@
     // iOS Safari / 内嵌 WebView：无 Fullscreen API，退化为沉浸模式
     const on = !document.body.classList.contains('immersive');
     document.body.classList.toggle('immersive', on);
+    syncFullBtns();
     refreshView();
     setTimeout(refreshView, 120);
     if (on) {
@@ -15124,6 +15289,7 @@
     document.addEventListener(ev, () => {
       const on = !!fsElement();
       document.body.classList.toggle('fs', on);
+      syncFullBtns();
       refreshView();
       setTimeout(refreshView, 60);
       if (!on) fsHint('已退出全屏', 700);
@@ -16555,6 +16721,15 @@
     banner(t) { banner(t || '测试横幅'); return !!(elBanner && elBanner.style.display === 'block'); },
     notifyBig(t) { notifyBig(t || '测试重要提示'); return !!(elBanner && elBanner.classList.contains('big')); },
     buildVer() { return buildVer(); },
+    // 批次16 验收口：震动开关 / 存档时间提示 / 重开授权 / 静音偏好
+    shakeOn() { return shakeOn(); },
+    setShake(v) { save.settings.shake = !!v; save.settings.shakeSet = true; writeSave(); syncSettingsUI(); return shakeOn(); },
+    shakeReduceMatch() { return !!(_reduceMQ && _reduceMQ.matches); },
+    saveHintText() { syncSaveHint(); return elSaveHint ? elSaveHint.textContent : ''; },
+    restartArmed() { return !!_restartArmAt; },
+    restartLabel() { return elRestartBtn ? elRestartBtn.textContent : ''; },
+    muteToggle() { Sfx.toggle(); syncMute(); return Sfx.muted; },
+    fullBtnText() { return fswBtn1 ? fswBtn1.textContent : ''; },
     bannerDown() { return !!(elBanner && elBanner.style.display === 'block'); },
     skin(name) { if (name === undefined) return save.skin; applySkin(name === 'guigu' ? 'guigu' : 'jin'); return save.skin; },
     grassTile() { return buildGrass._tile || null; },
@@ -16920,6 +17095,9 @@
       clear: () => {
         try { localStorage.removeItem(SAVE_KEY); } catch (_) {}
         try { localStorage.removeItem(SAVE_BAK); } catch (_) {}
+        // 「上次存档」是存档的影子，档清了它也必须清，否则暂停面板会报一个不存在的存档时间。
+        // 音效静音是设备级偏好（fanren_audio_muted），有意**不**清。
+        try { localStorage.removeItem(SAVE_AT_KEY); } catch (_) {}
         _savedRaw = null; _saveFail = 0; _saveWarned = false;
         return '已清除存档';
       },

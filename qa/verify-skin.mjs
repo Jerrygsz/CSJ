@@ -32,8 +32,16 @@ await page.goto('http://127.0.0.1:' + PORT + '/index.html?test=1');
 await page.waitForFunction(() => !!window.__FR, { timeout: 20000 });
 
 const readSaveKey = await page.evaluate(() => window.__FR.SAVE_KEY || null);
-// __FR 若没暴露 SAVE_KEY，就从 localStorage 里找唯一以 fanren 开头的键
-const key = readSaveKey || await page.evaluate(() => Object.keys(localStorage).find(k => /fanren|save/i.test(k)));
+// __FR 没暴露 SAVE_KEY 时不能随手抓第一个 /fanren|save/ 的键：
+// 主档之外还有 fanren_save_v1_bak（上一版）、fanren_save_at（墙钟）、fanren_audio_muted（设备偏好）、
+// fanren_rebirth_v1（轮回池），它们全命中这个正则；抓错就会 JSON.parse 出一个数字或别的结构，
+// 断言随之变成「skin === undefined」这种莫名其妙的样子。
+const key = readSaveKey || await page.evaluate(() => {
+  const keys = Object.keys(localStorage);
+  return keys.find(k => k === 'fanren_save_v1')
+    || keys.find(k => /^fanren_save_/.test(k) && !/_bak$|_at$/.test(k))
+    || keys.find(k => /fanren|save/i.test(k));
+});
 console.log('存档键：', key);
 
 // 1) 默认皮肤

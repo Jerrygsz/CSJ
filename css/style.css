@@ -714,6 +714,26 @@ body.rot #ver { visibility: hidden; }
 #saveHint, .savesub { font-size: var(--fs-micro); color: var(--text-4); line-height: 1.5; }
 #saveNowBtn { margin-top: 0; }
 
+/* ---------- 存档迁移 ---------- */
+/* 它是从暂停面板里打开的，而 #pause 自己用 --z-modal(60)、比 .overlay 默认的
+   --z-panel(30) 高一层。不单独抬一下就会被暂停面板整个盖住（点「存档迁移」像没反应）。 */
+#saveIO { z-index: 62; }
+/* 存档只有 1KB 上下，用不着做文件下载：一段可抄可粘的文本最省事，
+   iOS 上也不必跟「下载到文件 App」打交道。 */
+#saveIOText {
+  width: 100%; height: 96px; resize: none; box-sizing: border-box;
+  margin: var(--sp-2) 0; padding: 8px 10px;
+  font-family: ui-monospace, Menlo, Consolas, monospace; font-size: var(--fs-micro);
+  line-height: 1.5; word-break: break-all;
+  color: var(--text-1); background: rgba(0,0,0,0.34);
+  border: 1px solid rgba(201,162,74,0.32); border-radius: var(--r-md);
+  -webkit-user-select: text; user-select: text;
+}
+#saveIOText::placeholder { color: var(--text-4); }
+body[data-skin="guigu"] #saveIOText { background: rgba(255,255,255,0.5); color: #241f16; border-color: rgba(122,63,34,0.35); }
+#saveIOHint { min-height: 1.5em; text-align: center; }
+#saveIOHint.bad { color: #c0352a; }
+
 /* ---------- 战利品清单 ---------- */
 #victoryLoot { width: 100%; max-height: 196px; overflow-y: auto; background: rgba(0,0,0,0.3); border: 1px solid rgba(201,162,74,0.3); border-radius: var(--r-md); padding: 8px 8px; text-align: left; margin: 4px 0 0; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); }
 #victoryNext { width: 100%; text-align: left; }
@@ -1300,6 +1320,14 @@ body[data-skin="guigu"] #parryBtn[data-chain]::before { color: #8f4f2e; text-sha
      横向维持原样 —— 商店分类页签、列表行的购买按钮都是紧挨着的。 */
   .tab::after { top: -6px; bottom: -6px; }
   .sr-btn::after { top: -8px; bottom: -8px; }
+  /* 战斗里这两颗是常驻按钮，但没有 .btn 类，上面那组泛化规则漏了它们：
+     #pauseBtn 实测 37×29、「大衍」实测 39×21（320 宽机型，整体 scale 0.667）。
+     21px 在手机上要连点两三次 —— 而「大衍」正是单手挂机的主要入口。
+     只用没被占用的伪元素做纵向热区：#pauseBtn 的 ::before 是边框、::after 空着；
+     #autoBtn 的 ::after 是「入定」小圆点、::before 空着。横向不扩，两者水平只隔 18 逻辑 px。 */
+  #pauseBtn::after, #autoBtn::before {
+    content: ''; position: absolute; left: 0; right: 0; top: -6px; bottom: -6px;
+  }
 }
 
 /* 战前运功面板：功法再多也只在面板内滚动，绝不顶出屏幕 */
