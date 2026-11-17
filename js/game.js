@@ -225,6 +225,9 @@
       // 同行纪（批次 8）：{ 实体id: { n 同行场数, down 殒落次数, map 最后一仗, year 那一年 } }。
       // 只给「带出门的那一个」记，灵兽袋里躺着的不算同行。
       together: {},
+      // 故交册（批次 9）：放生时把上面那本账结转过来 —— 交情清零，但念想留着。
+      // 分两本的意义：现役的才给 CD / 回生那一条，放走的只进这里，重逢从头相识。
+      togetherGone: {},
       // 战斗右侧快捷栏：三格，每格 { kind:'pet'|'item', id }
       quick: [null, null, null],
       // 修为被封印（五鬼锁魂这类）：{ name, dmg, hp, note }
@@ -421,6 +424,22 @@
             o[id] = {
               n: Math.max(0, r.n | 0), down: Math.max(0, r.down | 0),
               map: typeof r.map === 'string' ? r.map : '', year: Math.max(0, r.year | 0)
+            };
+          }
+          return o;
+        })(),
+        // 故交册（批次 9）：老存档没有这本，补空账。同样逐行洗脏字段，
+        // 多两个时间字段：goneAt 是放生那一年的入道年数，goneTs 是墙钟（排序用）。
+        togetherGone: (function () {
+          const o = {};
+          const src = (s.togetherGone && typeof s.togetherGone === 'object') ? s.togetherGone : {};
+          for (const id in src) {
+            const r = src[id];
+            if (!r || typeof r !== 'object') continue;
+            o[id] = {
+              n: Math.max(0, r.n | 0), down: Math.max(0, r.down | 0),
+              map: typeof r.map === 'string' ? r.map : '', year: Math.max(0, r.year | 0),
+              goneAt: Math.max(0, r.goneAt | 0), goneTs: Math.max(0, Math.floor(+r.goneTs || 0))
             };
           }
           return o;
@@ -3024,6 +3043,34 @@
     out.sort((a, b) => (b.b.n - a.b.n) || (a.name < b.name ? -1 : 1));
     return out;
   }
+  // 放生那一下的告别词要报档位：按当时的场数现推，和故交册同一套口径
+  function goneTierLabel(n) {
+    let label = BOND_TIERS[0].label;
+    for (let k = 0; k < BOND_TIERS.length; k++) if (n >= BOND_TIERS[k].n) label = BOND_TIERS[k].label;
+    return label;
+  }
+  // 故交册（批次 9）：按放生的墙钟倒序 —— 最近放的排最前。
+  function goneRows() {
+    if (!save.togetherGone || typeof save.togetherGone !== 'object') return [];
+    const out = [];
+    for (const id in save.togetherGone) {
+      const r = save.togetherGone[id];
+      if (!r || typeof r !== 'object') continue;
+      const n = Math.max(0, r.n | 0);
+      if (n <= 0) continue;
+      // 放生时的档位：按当时的场数现推，别存死（档位门槛万一调了，账是对的就行）
+      let tier = BOND_TIERS[0], ti = 0;
+      for (let k = 0; k < BOND_TIERS.length; k++) if (n >= BOND_TIERS[k].n) { tier = BOND_TIERS[k]; ti = k; }
+      out.push({
+        id: id, name: allyNameOf(id), n: n, down: Math.max(0, r.down | 0),
+        map: r.map || '', year: Math.max(0, r.year | 0),
+        goneAt: Math.max(0, r.goneAt | 0), goneTs: Math.max(0, Math.floor(+r.goneTs || 0)),
+        label: tier.label, tier: ti
+      });
+    }
+    out.sort((a, b) => (b.goneTs - a.goneTs) || (b.n - a.n));
+    return out;
+  }
   function hpMulBase() {
     const d = curDiff();
     const B = window.BALANCE;
@@ -4102,13 +4149,48 @@
     writeSave();
     return 'ok';
   }
+  // 放生（批次 9）：账本要结转，不能凭空消失。养熟的这段时间是有成本的 ——
+  // 放走之后重获一只新的，从「初识」重新养起，CD / 回生那些好处都归零。
+  // 但也不做生硬抹除：把那本账搬进「故交册」，静修页看得见，算个念想。
+  // 返回结转出去的账（供 UI 念告别词）；没有账则返回 null。
   function releasePet(id) {
     normalizePets();
     const i = save.pets.findIndex(x => x && x.id === id);
-    if (i >= 0) save.pets.splice(i, 1);
+    if (i < 0) return null;
+    const b = bondOf(id);
+    let gone = null;
+    if (b.n > 0) {   // 真同行过才进故交册 —— 从没带出门的，走了就走了，不占地方
+      if (!save.togetherGone || typeof save.togetherGone !== 'object') save.togetherGone = {};
+      gone = {
+        id: id, n: b.n, down: b.down, map: b.map, year: b.year,
+        goneAt: Math.floor(curYear()), goneTs: Date.now()
+      };
+      save.togetherGone[id] = gone;
+    }
+    if (save.together) delete save.together[id];
+    // 人都不在了，殒落 / 欠费那两笔旧账也一并清掉，免得重获一只新的还挂着「已殒」
+    if (save.allyDead) delete save.allyDead[id];
+    if (save.allyOwe) delete save.allyOwe[id];
+    if (G._releaseArm && G._releaseArm.id === id) G._releaseArm = null;
+    save.pets.splice(i, 1);
     if (save.pet === id) { save.pet = null; G.pet = null; }
     for (let k = 0; k < 3; k++) { const s = quickSlot(k); if (s && s.kind === 'pet' && s.id === id) setQuick(k, null, null); }
     writeSave();
+    return gone;
+  }
+  // 两段式放生（批次 9）：有交情的，第一次按只上膛、第二次按才真放 —— 防手滑抹掉养熟的账。
+  // 没交情（从没带出门）的一按就放，不为难人。状态挂在 G 上，不入存档，换页/重进自然失效。
+  const RELEASE_ARM_MS = 3000;
+  function requestRelease(id) {
+    const b = bondOf(id);
+    const now = Date.now();
+    if (b.n > 0 && !(G._releaseArm && G._releaseArm.id === id && now - G._releaseArm.t < RELEASE_ARM_MS)) {
+      G._releaseArm = { id: id, t: now };
+      return { armed: true, bond: b };
+    }
+    G._releaseArm = null;
+    const gone = releasePet(id);
+    return { armed: false, gone: gone, bond: b };
   }
   function petGainXp(id, v) {
     const e = petEntry(id); if (!e) return;
@@ -12228,7 +12310,8 @@
         '<div class="rr-right">' +
         (dead ? '<button class="sr-btn' + (canPay ? ' buy' : ' ghost') + '" data-revive="' + id + '">交钱复活</button> ' : '') +
         '<button class="sr-btn' + (on ? ' ghost' : ' buy') + '" data-pet="' + id + '">' + (on ? '收回' : '放出') + '</button> ' +
-        '<button class="sr-btn ghost" data-release="' + id + '">放生</button></div></div>';
+        '<button class="sr-btn ghost' + (G._releaseArm && G._releaseArm.id === id ? ' release-arm' : '') + '" data-release="' + id + '">' +
+        (G._releaseArm && G._releaseArm.id === id ? '再按一次' : '放生') + '</button></div></div>';
     }
     html += '</div>';
     return html;
@@ -13342,6 +13425,20 @@
           }).join('') + '</div>')
         : '<div class="cs-empty">还没有人跟你走过一整图。</div>') +
       '</div>';
+    // 故交册（批次 9）：放走的不是没发生过 —— 场数留着，但不给任何加成，重逢从初识起。
+    const gRows = goneRows();
+    const goneHtml = gRows.length ? ('<div class="cave-sec"><div class="cs-title">故交</div>' +
+      '<div class="cs-note">放归山野的那些。交情到此为止，不再添本命绝学的速度；重逢时是从初识重新认起。</div>' +
+      '<div class="jz-list gone-list">' + gRows.map(r => {
+        const mm = MAPS.find(x => x.id === r.map);
+        const when = r.map ? ((mm ? mm.name : r.map) + ' · ' + (r.year > 0 ? '入道 ' + r.year + ' 年' : '开元')) : '';
+        const at = r.goneAt > 0 ? ('入道 ' + r.goneAt + ' 年放归') : '开元放归';
+        return '<div class="jz-row gone">' +
+          '<i>' + at + '</i>' +
+          '<b>' + r.name + ' · ' + r.label + '</b>' +
+          '<em>同行 ' + r.n + ' 场' + (r.down ? ' · 殒过 ' + r.down + ' 回' : '') +
+          (when ? '　最后一仗 ' + when : '') + '</em></div>';
+      }).join('') + '</div></div>') : '';
     return (encBtn ? '<div class="cave-sec">' + encBtn + '</div>' : '') +
       '<div class="cave-sec"><div class="cs-title">闭关静修</div>' +
       '<div class="cs-note">' + c.restTip + '</div>' +
@@ -13360,7 +13457,7 @@
       '<div class="restbtns">' +
       '<button class="btn small" data-rest="1"' + (capped || atGate ? ' disabled' : '') + '>闭关一次</button>' +
       '<button class="btn small" data-rest="5"' + (capped || atGate ? ' disabled' : '') + '>闭关五次</button>' +
-      '</div></div></div>' + gateBox + chronHtml + togetherHtml;
+      '</div></div></div>' + gateBox + chronHtml + togetherHtml + goneHtml;
   }
 
   // ---------- 太南小会 ----------
@@ -14655,13 +14752,25 @@
     // 灵宠：放出 / 收回
     const pb = e.target.closest('button[data-pet]');
     if (pb) { setPet(pb.getAttribute('data-pet')); return; }
-    // 灵宠：放生
+    // 灵宠：放生（批次 9）：有交情的两次确认，告别词念出场数与档位
     const rl = e.target.closest('button[data-release]');
     if (rl) {
       const id = rl.getAttribute('data-release');
       const d = petDefOf(id);
-      releasePet(id);
-      notify((d ? d.name : '灵宠') + ' 已放生'); Sfx.warn();
+      const nm = d ? d.name : '灵宠';
+      const r = requestRelease(id);
+      if (r.armed) {
+        notify('真要放走 ' + nm + '？同行 ' + r.bond.n + ' 场 · ' + r.bond.label + ' — 再按一次，交情清零');
+        Sfx.warn();
+        renderCave();
+        return;
+      }
+      if (r.gone) {
+        notify(nm + ' 已放归 · 同行 ' + r.gone.n + ' 场（' + goneTierLabel(r.gone.n) + '）记入故交册，重逢从初识起');
+      } else {
+        notify(nm + ' 已放生');
+      }
+      Sfx.warn();
       renderCave(); refreshTitle();
       return;
     }
@@ -15043,6 +15152,7 @@
     save.mates = []; save.mate = null;
     // 同行纪也清：转世之后是另一世的人，账从头记（共斗默契 save.coop 不清，那是跟队友的账）
     save.together = {};
+    save.togetherGone = {};   // 故交册一并清 —— 那一世的人，这一世也不认得了
     save.quick = [null, null, null];
     save.petFeed = { on: false, t: 0 };
     save.greenLiquid = 0; save.ach = {};
@@ -15862,7 +15972,12 @@
     pets() { normalizePets(); return { owned: JSON.parse(JSON.stringify(save.pets || [])), active: save.pet || null, cap: petCap(), bag: petBagName() }; },
     setPet(id) { if (id && !petEntry(id)) return 'no pet'; setPet(id); return save.pet; },
     addPet(id) { return addPet(id); },
-    releasePet(id) { releasePet(id); return (save.pets || []).length; },
+    releasePet(id) { const gone = releasePet(id); return (save.pets || []).length; },
+    // 批次 9 · 放生探针：requestRelease 走真实的两段式入口，goneRows 读故交册
+    requestRelease(id) { return requestRelease(id); },
+    releaseArm() { return G._releaseArm ? Object.assign({}, G._releaseArm) : null; },
+    clearReleaseArm() { G._releaseArm = null; return true; },
+    goneRows() { return goneRows(); },
     petLv(id) { return petLv(id); },
     petRoom() { return petRoom(); },
     eggs() { return eggRows(); },

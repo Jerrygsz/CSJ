@@ -358,6 +358,14 @@ body[data-skin="guigu"] #chronicle .ch-sub { color: #3a332a; }
 .jz-row em { grid-column: 2; font-style: normal; font-size: var(--fs-micro); color: var(--text-3); line-height: 1.5; }
 .jz-row.start { border-left-color: rgba(201,162,74,0.85); }
 .jz-row.start b { color: var(--accent); }
+/* 故交册（批次 9）：墨线细框、字压一档 —— 与现役同行那栏分开，一眼看出「这段过去了」 */
+.jz-row.gone { border-left-color: rgba(140,140,150,0.42); opacity: 0.82; }
+.jz-row.gone i { color: var(--text-3); }
+.jz-row.gone b { color: var(--text-2); font-weight: 500; }
+/* 两段式放生的「再按一次」：朱砂描边醒目，但不动布局。
+   写成 button.sr-btn 提一档优先级 —— .sr-btn.ghost:hover 在后面会把边框刷成紫色，
+   点击后鼠标正停在按钮上，不提优先级就永远看到紫色（实拍踩过）。 */
+button.sr-btn.release-arm, button.sr-btn.release-arm:hover { border-color: #c0352a; color: #e0573a; font-weight: 600; }
 /* 同伴 / 灵宠的「性子」（P2-5）：一个字的路数，不是数值 —— 带谁出门先看这个。
    色只用浅底淡描，别做成四块彩色小标签：那在纸皮上比什么都跳。 */
 .ally-role {
@@ -2031,6 +2039,11 @@ body[data-skin="guigu"] .jz-row b { color: #241f16; }
 body[data-skin="guigu"] .jz-row em { color: #5a5142; }
 body[data-skin="guigu"] .jz-row.start { border-left-color: rgba(143,79,46,0.72); }
 body[data-skin="guigu"] .jz-row.start b { color: #8f4f2e; }
+body[data-skin="guigu"] .jz-row.gone { border-left-color: rgba(90,81,66,0.42); opacity: 0.9; }
+body[data-skin="guigu"] .jz-row.gone i { color: #6b6252; }
+body[data-skin="guigu"] .jz-row.gone b { color: #3a352c; }
+body[data-skin="guigu"] button.sr-btn.release-arm,
+body[data-skin="guigu"] button.sr-btn.release-arm:hover { border-color: #8f2f24; color: #8f2f24; }
 body[data-skin="guigu"] .ally-role { border-color: rgba(60,56,48,0.28); color: #5a5142; background: rgba(60,56,48,0.05); }
 body[data-skin="guigu"] .ally-role[data-role="困"] { color: #3f5a6b; border-color: rgba(63,90,107,0.34); }
 body[data-skin="guigu"] .ally-role[data-role="补"] { color: #3f6b4a; border-color: rgba(63,107,74,0.34); }
