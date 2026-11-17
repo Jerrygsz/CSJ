@@ -762,6 +762,9 @@ body.rot #ver { visibility: hidden; }
    不抢标题的字号，也不做成按钮块 —— 它是路标，不是工具栏。 */
 .wm-next {
   display: flex; align-items: center; gap: var(--sp-2);
+  /* 逻辑 44px：与 .btn.small 同档。320 宽机型上舞台整体 scale(0.667)，
+     实际只剩 29px；再靠下面的窄屏热区补偿补到能按。不设这行只有 31 逻辑 px。 */
+  min-height: 44px;
   margin-top: var(--sp-1); padding: 5px var(--sp-2) 5px var(--sp-1);
   border: 1px solid var(--line-gold); border-left: 3px solid var(--accent);
   border-radius: var(--r-sm); cursor: pointer;
@@ -1280,6 +1283,23 @@ body[data-skin="guigu"] #parryBtn[data-chain]::before { color: #8f4f2e; text-sha
 /* 触屏设备再加一档：拇指要按得住 */
 @media (pointer: coarse) {
   #parryBtn { width: 84px; height: 84px; font-size: 38px; right: 8px; }
+}
+
+/* ---------- 手机命中精度：纵向热区补偿 ----------
+   #stage 按「视口宽 / 480」整体 scale，设计稿里 44 逻辑 px 的按钮，在 320 宽机型上
+   只剩 29 实际 px，矮屏档 .title-panel .btn.small（38 逻辑）更只剩 25px —— 手指按不准。
+   这里只扩**纵向**：横向相邻按钮挨得太近，横扩会把点击让给隔壁；纵向上下都有留白。
+   扩的是 ::after 命中区，视觉尺寸与排版一点不动。6 逻辑 px ≈ 面板内 --sp-3 间隙的一半，
+   正好不会和上下相邻按钮的热区重叠。 */
+@media (max-width: 430px) {
+  .btn, .wm-next, .chat-dove { position: relative; }
+  .btn::after, .wm-next::after, .chat-dove::after {
+    content: ''; position: absolute; left: 0; right: 0; top: -6px; bottom: -6px;
+  }
+  /* 这两个本来就有热区伪元素（.tab 是 -2px / .sr-btn 是 -6px），只把纵向补到同档，
+     横向维持原样 —— 商店分类页签、列表行的购买按钮都是紧挨着的。 */
+  .tab::after { top: -6px; bottom: -6px; }
+  .sr-btn::after { top: -8px; bottom: -8px; }
 }
 
 /* 战前运功面板：功法再多也只在面板内滚动，绝不顶出屏幕 */

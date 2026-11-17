@@ -11480,7 +11480,7 @@
     // 扫一眼卡片就知道该点哪个 —— 148 张卡里只许有一个 .next。
     if (G._nextHintId === m.id) { cls.push('next'); state = '下一处'; }
     // 行脚折：默认只露两行（名/地点/状态），点「详」章才展开全文 ——
-    // 一屏能看七八处地名，才有「从青牛山一路走到五龙海」的大地图感。
+    // 一屏能看七八处地名，才有「从彩霞山一路走到五龙海」的大地图感。
     const open = !!(G.wmOpen && G.wmOpen[m.id]);
     cls.push(open ? 'open' : 'fold');
     const tagCls = isCave ? 'home' : m.side ? 'side' : m.type === 'story' ? 'story' : m.type === 'market' ? 'market' : m.type === 'boss' ? 'bossfight' : 'fight';

@@ -47,6 +47,7 @@ const ITEMS = [
   { key: 'canon-fix', file: 'verify-canon-fix.mjs', kind: 'gate', desc: '原著考据校准：道天大劫札记锚 1382 韩立渡劫（非天庭群仙战）/ 七玄山名青牛镇→彩霞山（含过场洞府）/ 啼魂·霜蚣·冰凤出处 / 发布札记与真源一致' },
   { key: 'mobile-feedback', file: 'verify-mobile-feedback.mjs', kind: 'gate', desc: '手机弹反与反馈：弹反键去 pointerleave + 捕获指针（滑出不误收招也不卡住）/ HUD 卡门显示距巅峰 N 级 / 重要事件横幅分级加粗且 900ms 宽限不被覆盖 / 回前台提示' },
   { key: 'high-polish', file: 'verify-high-polish.mjs', kind: 'gate', desc: '高级感收尾：图标槽固定 1.5em / buildVer 先认 game.js 主包 / 破境成功失败专属合成音 / 页签去系统按钮态并补双皮 hover' },
+  { key: 'hit-target', file: 'verify-hit-target.mjs', kind: 'gate', desc: '手机命中精度与考据收尾：窄屏纵向热区补偿（扩命中不改视觉、相邻按钮不抢点击）/ 主线入口对齐 44 逻辑 px / 开场旁白与卷名统一彩霞山、全源码无「青牛山」残留' },
 ];
 
 const argv = process.argv.slice(2);
