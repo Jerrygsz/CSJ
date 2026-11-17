@@ -113,6 +113,18 @@ window.Sfx = (function () {
       setTimeout(() => tone(700, 0.1, 'triangle', 0.07), 90);
       setTimeout(() => tone(980, 0.14, 'triangle', 0.07), 180);
     },
+    // 破境不是普通升级：一声沉底起势，再一层层往上开，尾音带一点灵气散开。
+    realmUp() {
+      tone(392, 0.28, 'sine', 0.055, 523);
+      setTimeout(() => tone(587, 0.32, 'triangle', 0.06, 784), 110);
+      setTimeout(() => { tone(880, 0.42, 'sine', 0.05, 1175); noise(0.22, 0.025, 3200); }, 260);
+    },
+    // 冲关失利：不是「操作错了」的短警告，而是一炉丹散掉的往下沉。
+    realmFail() {
+      tone(330, 0.26, 'sawtooth', 0.055, 196);
+      setTimeout(() => tone(220, 0.34, 'sine', 0.05, 130), 120);
+      noise(0.16, 0.035, 700);
+    },
     win() { [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => tone(f, 0.2, 'triangle', 0.08), i * 150)); },
     lose() { [400, 300, 200].forEach((f, i) => setTimeout(() => tone(f, 0.32, 'sawtooth', 0.08), i * 190)); },
 

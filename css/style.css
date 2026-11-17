@@ -391,6 +391,8 @@ button.sr-btn.release-arm, button.sr-btn.release-arm:hover { border-color: #c035
 .bond[data-bond="1"] { border-color: rgba(201,162,74,0.40); color: rgba(201,162,74,0.88); background: rgba(201,162,74,0.10); }
 .bond[data-bond="2"] { border-color: rgba(201,162,74,0.72); color: var(--accent); background: rgba(201,162,74,0.20); font-weight: 600; }
 .rr-main em.bond-line { color: var(--text-3); }
+/* 洞府 / 同行列表的单字符号槽：宽度固定，名字左边缘不随符号墨迹宽窄漂 */
+.ico { display: inline-block; width: 1.5em; text-align: center; font-style: normal; }
 /* 「灵宠 / 傀儡 / 器灵 / 化身」那一格：两个汉字不许在行尾拆成「灵」「宠」两行
    （实拍里六翼霜蚣那行字最长，第二个标签正好被挤到行尾拆开） */
 .pet-cat { white-space: nowrap; }
@@ -874,9 +876,11 @@ body[data-skin="guigu"] .mapcard.next .mc-name { color: #8f4f2e; }
   position: relative; flex: 1; padding: 8px 0; min-height: 40px;
   font-size: var(--fs-cap); font-family: inherit; cursor: pointer;
   background: rgba(255,255,255,0.06); color: var(--text-3);
+  appearance: none; -webkit-appearance: none;
   border: 1px solid rgba(201,162,74,0.3); border-radius: var(--r-md);
 }
 .tab::after { content: ''; position: absolute; inset: -2px 0; }
+.tab:hover:not(.active):not(:disabled) { background: rgba(255,255,255,0.1); border-color: rgba(201,162,74,0.5); }
 /* 已选中的页签按下去不该闪回灰底 —— 状态叠加要排除自身 */
 .tab:active:not(.active) { background: rgba(255,255,255,0.12); }
 .tab:disabled { opacity: var(--op-disabled); cursor: not-allowed; }
@@ -2141,6 +2145,7 @@ body[data-skin="guigu"] .tab.active {
   background: linear-gradient(180deg, #d6a67e, #c88f63);
   border-color: rgba(122,63,34,0.55); color: #1c1c1c;
 }
+body[data-skin="guigu"] .tab:hover:not(.active):not(:disabled) { background: rgba(143,79,46,0.10); border-color: rgba(122,63,34,0.45); }
 
 /* ============================================================================
    水墨皮 · 交互浮层补漏（第94轮）

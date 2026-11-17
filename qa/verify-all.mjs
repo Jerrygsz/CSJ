@@ -46,6 +46,7 @@ const ITEMS = [
   { key: 'save-symmetry', file: 'verify-save-symmetry.mjs', kind: 'gate', desc: '存档字段对称（P0）：loadSave 键集不漏 defaultSave 五字段 / 道陨·炼丹·药圃真数据读回与脏数据清洗 / 转世清本世账留生涯累计 / 主循环连错进安全且干净帧自动恢复' },
   { key: 'canon-fix', file: 'verify-canon-fix.mjs', kind: 'gate', desc: '原著考据校准：道天大劫札记锚 1382 韩立渡劫（非天庭群仙战）/ 七玄山名青牛镇→彩霞山（含过场洞府）/ 啼魂·霜蚣·冰凤出处 / 发布札记与真源一致' },
   { key: 'mobile-feedback', file: 'verify-mobile-feedback.mjs', kind: 'gate', desc: '手机弹反与反馈：弹反键去 pointerleave + 捕获指针（滑出不误收招也不卡住）/ HUD 卡门显示距巅峰 N 级 / 重要事件横幅分级加粗且 900ms 宽限不被覆盖 / 回前台提示' },
+  { key: 'high-polish', file: 'verify-high-polish.mjs', kind: 'gate', desc: '高级感收尾：图标槽固定 1.5em / buildVer 先认 game.js 主包 / 破境成功失败专属合成音 / 页签去系统按钮态并补双皮 hover' },
 ];
 
 const argv = process.argv.slice(2);

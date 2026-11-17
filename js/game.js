@@ -11342,7 +11342,10 @@
   // 版本串从页面上已有的 ?v= 现读，不再维护第二个 BUILD 常量（那种常量一定会忘）。
   let _jnWaiters = null;
   function buildVer() {
-    const el = document.querySelector('script[src*=".js?v="]') || document.querySelector('link[href*=".css?v="]');
+    // 先认主包：页面首个 .js?v= 可能是 utils，单独 bump 时会把札记版本带偏。
+    const el = document.querySelector('script[src*="js/game.js?v="]')
+      || document.querySelector('script[src*=".js?v="]')
+      || document.querySelector('link[href*=".css?v="]');
     const m = el && String(el.src || el.href).match(/[?&]v=([0-9A-Za-z.]+)/);
     return m ? m[1] : '0';
   }
@@ -13078,7 +13081,7 @@
         settleWushuai(gate, false, k);
         G.breakPending = gate;
         writeSave();
-        Sfx.warn();
+        Sfx.realmFail();
         showLines([['旁白', '仙窍没稳住。'],
           ['旁白', '天空暗了一下，又亮回来——那不是天在变，是衰提前来了。'],
           ['旁白', '（五衰提前降临。下一次再来，可避开的衰又少一道。）']], function () {
@@ -13094,7 +13097,7 @@
       // 「丹尽，道基未稳」是原著口气里最像的一句 —— 没成不是运气差，是底子还没到。
       breakOmen(false, gate.realm || '', '丹尽，道基未稳');
       banner('冲关失败 · 丹药散尽，另备丹药再来');
-      Sfx.warn();
+      Sfx.realmFail();
       if (onDone) onDone(gate, false);
       return;
     }
@@ -13117,7 +13120,7 @@
       showLines((extra || []).concat(tail), function () {
         breakOmen(true, realmName(newLv), '丹成 · 扛衰 ' + take + ' 道');
         banner('破境 · ' + gate.realm + ' · 扛衰 ' + take + ' 道');
-        Sfx.levelup();
+        Sfx.realmUp();
         if (onDone) onDone(gate, true);
       }, 'break:wu:ok:' + gate.lv);
       return;
@@ -13174,7 +13177,7 @@
       if (isWu) {                    // 败的不是运气，是衰提前降临
         settleWushuai(b, false, k);
         G.breakPending = b;
-        banner('五衰提前降临 · 可避开的衰少了一道'); Sfx.warn();
+        banner('五衰提前降临 · 可避开的衰少了一道'); Sfx.realmFail();
         writeSave(); renderCave(); refreshTitle();
         return false;
       }
@@ -13182,7 +13185,7 @@
       if (keep) for (const [id, had] of keep) { const it = Items.get(id); if (it && had > 0) for (let i = 0; i < had; i++) addToBag(it, { silent: true }); }
       G.breakPending = b;
       breakOmen(false, b.realm || '', '丹尽，道基未稳');
-      banner(b.keepOnFail ? '冲关失败 · 灵压反噬，丹药退回，再备料重来' : '冲关失败 · 丹药散尽，另备丹药再来'); Sfx.warn();
+      banner(b.keepOnFail ? '冲关失败 · 灵压反噬，丹药退回，再备料重来' : '冲关失败 · 丹药散尽，另备丹药再来'); Sfx.realmFail();
       writeSave(); renderCave(); refreshTitle();
       return false;
     }
@@ -13190,7 +13193,7 @@
     G.breakPending = null;
     breakOmen(true, b.realm || '', isWu ? ('丹成 · 扛衰 ' + take + ' 道') : '丹成 · 道基已固');
     banner((isWu ? ('冲关 · ' + b.realm + ' · 扛衰 ' + take + ' 道') : ('冲关 · ' + b.realm))
-      + '　入道 ' + Math.floor(yearAt(b.lv)) + ' 年'); Sfx.levelup();
+      + '　入道 ' + Math.floor(yearAt(b.lv)) + ' 年'); Sfx.realmUp();
     // 洞府里直冲（没有对应剧情图 / 调试口）：高光照样补一张纪年卡
     if (CHRONICLE_LV[b.lv]) chroniclePlay(CHRONICLE_LV[b.lv]);
     if (G.player && (G.state === 'play' || G.state === 'down')) {
@@ -16504,6 +16507,7 @@
     // 横幅压测：返回提示是否已被让位（内联 top 让到横幅实测下沿）
     banner(t) { banner(t || '测试横幅'); return !!(elBanner && elBanner.style.display === 'block'); },
     notifyBig(t) { notifyBig(t || '测试重要提示'); return !!(elBanner && elBanner.classList.contains('big')); },
+    buildVer() { return buildVer(); },
     bannerDown() { return !!(elBanner && elBanner.style.display === 'block'); },
     skin(name) { if (name === undefined) return save.skin; applySkin(name === 'guigu' ? 'guigu' : 'jin'); return save.skin; },
     grassTile() { return buildGrass._tile || null; },
