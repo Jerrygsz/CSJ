@@ -289,7 +289,7 @@
     }
     if (released) {
       save.ach = save.ach || {}; save.ach['zhuifeng'] = true;
-      notify('云翅鸟·追风 不告而别。解锁成就「追风的背影」。');
+      notifyBig('云翅鸟·追风 不告而别。解锁成就「追风的背影」。');
       Sfx.levelup();
     }
   }
@@ -308,7 +308,7 @@
     }
     if (left) {
       if (G.player) { G.gear = gearBonus(); recalcMaxhp(true); }
-      notify(left.name + ' · 离队' + (left.leaveNote ? '（' + left.leaveNote + '）' : ''));
+      notifyBig(left.name + ' · 离队' + (left.leaveNote ? '（' + left.leaveNote + '）' : ''));
       Sfx.warn();
     }
   }
@@ -317,7 +317,7 @@
     if (save.ach && save.ach[c.id]) return;
     if ((save.repBlack || 0) >= 15 && (save.repWhite || 0) >= 15) {
       save.ach = save.ach || {}; save.ach[c.id] = true;
-      notify('成就解锁 · ' + (c.name || '黑白通吃'));
+      notifyBig('成就解锁 · ' + (c.name || '黑白通吃'));
       Sfx.levelup();
     }
   }
@@ -2104,7 +2104,7 @@
     const d = (window.PETS || []).find(p => p.id === a.id) || (window.MATES || []).find(m => m.id === a.id);
     const nm = d ? d.name : a.id;
     // 钱不够时不能说「十息后复生」—— 第118轮口径是欠费不复生，得回洞府交钱
-    notify(nm + ' 殒了 · ' + ((save.stones || 0) >= ALLY_REVIVE_COST
+    notifyBig(nm + ' 殒了 · ' + ((save.stones || 0) >= ALLY_REVIVE_COST
       ? '十息后扣 ' + ALLY_REVIVE_COST + ' 灵石复生'
       : '灵石不够，出去攒够 ' + ALLY_REVIVE_COST + ' 回洞府交钱复生'));
   }
@@ -3056,7 +3056,7 @@
       back.push(allyNameOf(id));
     }
     if (back.length) {
-      notify(back.join('、') + ' 自个儿回来了 · 这一趟带着他走完了');
+      notifyBig(back.join('、') + ' 自个儿回来了 · 这一趟带着他走完了');
       Sfx.buff();
     }
   }
@@ -10122,7 +10122,16 @@
     if (elCnfill) {
       const cap = p.next || 1;
       hudPct(elCnfill, Math.max(0, Math.min(1, (p.xp || 0) / cap)));
-      if (elCnwrap) hudClass(elCnwrap, 'capped', (p.xp || 0) >= cap - 1);
+      const capped = (p.xp || 0) >= cap - 1;
+      hudClass(elCnwrap, 'capped', capped);
+      // 卡门时把「修为」二字换成还差几级到本境巅峰 —— 条子满着呼吸，却没人说为什么不能再升。
+      // 只在大境界门前（等级未到 gate.lv-1）才提示；普通升层满条不说，免得每级都刷一句噪声。
+      if (elCnLabel) {
+        const gate = capped ? nextBreakGate(save.cultivate.level || 1) : null;
+        const needLv = gate ? (gate.lv || 0) - 1 : 0;
+        const left = gate && (save.cultivate.level || 1) < needLv ? needLv - (save.cultivate.level || 1) : 0;
+        hudText(elCnLabel, left > 0 ? ('巅峰 ' + left + ' 级') : '修为');
+      }
     }
     hudText(elLevel, curRealmLabel() + (sst.dmgT > 0 ? '　·　杀意' : ''));
     // 锋芒窗口不往这行里塞字（#stats 是 flex-wrap，多两个字就可能折行，整块顶栏跳一下），
@@ -11164,8 +11173,26 @@
   // 不固定宽度时，同一列里每一行的名字左边缘会差出一个字符，整列看起来是斜的。
   function ico(x) { return '<i class="ico">' + (x || '·') + '</i>'; }
   function notify(text) { banner(text); }
-  function banner(text) {
+  // 重要事件（放生 / 成就 / 殒落 / 离队）用这一条：停留更久、金边加重，
+  // 且不被下一条普通提示立刻冲掉 —— 破境有独立演出，这些却没有，全挤 2.2 秒一条的横幅里等于没说。
+  function notifyBig(text) { banner(text, { big: true, ms: 4200 }); }
+  function banner(text, opts) {
     if (!elBanner) return;
+    const big = !!(opts && opts.big);
+    // 重要事件给一个 900ms 的「宽限」：这期间普通 banner 不覆盖它（排队延后显示）。
+    const now = Date.now();
+    if (!big && banner._bigUntil && now < banner._bigUntil) {
+      banner._queued = banner._queued || [];
+      banner._queued.push([text, opts]);
+      if (banner._queued.length > 3) banner._queued.shift();
+      if (!banner._qtimer) banner._qtimer = setTimeout(() => {
+        banner._qtimer = null;
+        const q = banner._queued || []; banner._queued = [];
+        if (q.length) banner(q[q.length - 1][0], q[q.length - 1][1]);
+      }, 1000);
+      return true;
+    }
+    if (big) banner._bigUntil = now + 900;
     // 落点按「HUD 在不在」决定，而不是枚举状态名（规格 §2.11）：
     // 152 这个高度本来就是为了让开顶栏与 boss 气血；HUD 不在时它纯属浪费，
     // 还会砸在面板上部 —— 坊市里正好压住页签，两秒多里看不见自己在点哪。
@@ -11173,11 +11200,13 @@
     // 拿 '' !== 'none' 去比会恒为真，等于永远走战斗态（已实测踩过）。
     const hudOn = !!(elHud && elHud.getClientRects().length);
     elBanner.classList.toggle('at-combat', hudOn);
+    elBanner.classList.toggle('big', big);
     elBanner.textContent = text; elBanner.style.display = 'block';
     clearTimeout(banner._t);
     banner._t = setTimeout(() => {
       elBanner.style.display = 'none';
-    }, 2200);
+      elBanner.classList.remove('big');
+    }, (opts && opts.ms) || 2200);
     return true;
   }
   // 拾取提示：只报道具名（Jerry：提示道具名即可，别糊屏）——同名合并、最多三条
@@ -13951,6 +13980,7 @@
   const elXpfill = document.getElementById('xpfill');
   const elCnfill = document.getElementById('cnfill');
   const elCnwrap = document.getElementById('cnwrap');
+  const elCnLabel = elCnwrap && elCnwrap.querySelector ? elCnwrap.querySelector('.barlabel') : null;
   const elWmNext = document.getElementById('wmNext');
   const elBreakOmen = document.getElementById('breakOmen');
   const elHpval = document.getElementById('hpval');
@@ -13985,12 +14015,19 @@
     btn.setAttribute('data-key', i + 1);   // 角上的键位号
     if (i === 2) {
       btn.addEventListener('pointerdown', ev => {
-        ev.preventDefault(); ev.stopPropagation(); parryPress();
+        ev.preventDefault(); ev.stopPropagation();
+        // 手机单手长按护体：手指在按钮上稍一滑就被 pointerleave 收招 = 护体白开。
+        // 改成捕获指针 —— 滑出按钮后 pointerup/cancel 仍回到这里，顺手收招，不误断也不卡在 hold。
+        try { if (btn.setPointerCapture) btn.setPointerCapture(ev.pointerId); } catch (_) {}
+        parryPress();
       });
-      const rel = ev => { ev.preventDefault(); ev.stopPropagation(); parryRelease(); };
+      const rel = ev => {
+        ev.preventDefault(); ev.stopPropagation();
+        try { if (btn.releasePointerCapture && btn.hasPointerCapture && btn.hasPointerCapture(ev.pointerId)) btn.releasePointerCapture(ev.pointerId); } catch (_) {}
+        parryRelease();
+      };
       btn.addEventListener('pointerup', rel);
       btn.addEventListener('pointercancel', rel);
-      btn.addEventListener('pointerleave', rel);
       // 键盘 Enter / 读屏软件走这条；pointerdown 已经处理过的，这里不再重复触发
       btn.addEventListener('click', ev => { ev.preventDefault(); ev.stopPropagation(); });
     } else {
@@ -14795,9 +14832,9 @@
         return;
       }
       if (r.gone) {
-        notify(nm + ' 已放归 · 同行 ' + r.gone.n + ' 场（' + goneTierLabel(r.gone.n) + '）记入故交册，重逢从初识起');
+        notifyBig(nm + ' 已放归 · 同行 ' + r.gone.n + ' 场（' + goneTierLabel(r.gone.n) + '）记入故交册，重逢从初识起');
       } else {
-        notify(nm + ' 已放生');
+        notifyBig(nm + ' 已放生');
       }
       Sfx.warn();
       renderCave(); refreshTitle();
@@ -15157,6 +15194,16 @@
     if (G.state === 'victory') updateSettle(dt * (G.ts || 1));
     // 飞鸽传书：战斗 / 暂停 / 选图（修行图）/ 对话时才给用，标题与结算收起来
     if (window.Chat) window.Chat.setVisible(CHAT_STATES[G.state] === 1);
+  }
+  // 切后台再回来：dt 被 clamp 到 50ms，游戏原地不动 —— 手机挂机的人回来会觉得「卡住了」。
+  // 回前台给一句话说明现场还在，只在对战时说（面板里弹字会压住正在点的东西）。
+  if (typeof document !== 'undefined' && document.addEventListener) {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible'
+          && (G.state === 'play' || G.state === 'dialog')) {
+        try { banner('神念归位 · 此间战事未歇'); } catch (_) {}
+      }
+    });
   }
   // 看门狗：rAF 偶尔会被浏览器静默掐掉（切后台再回来、渲染器恢复、页面被系统降频）。
   // 那种情况下什么异常都没有，就是永远不再回调 —— 看起来和「卡死」一模一样。
@@ -16456,6 +16503,7 @@
     },
     // 横幅压测：返回提示是否已被让位（内联 top 让到横幅实测下沿）
     banner(t) { banner(t || '测试横幅'); return !!(elBanner && elBanner.style.display === 'block'); },
+    notifyBig(t) { notifyBig(t || '测试重要提示'); return !!(elBanner && elBanner.classList.contains('big')); },
     bannerDown() { return !!(elBanner && elBanner.style.display === 'block'); },
     skin(name) { if (name === undefined) return save.skin; applySkin(name === 'guigu' ? 'guigu' : 'jin'); return save.skin; },
     grassTile() { return buildGrass._tile || null; },

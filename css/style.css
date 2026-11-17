@@ -204,6 +204,9 @@ body.fs #wrap { background: #000; }
    （Jerry 实测），底部是地面/空场，压不到谁。限宽允许换行 —— 破境提示这类长文案
    曾经 nowrap 横着冲出两屏。 */
 #banner { position: absolute; bottom: 76px; left: 50%; transform: translateX(-50%); background: rgba(10,13,20,0.94); border: 1px solid rgba(201,162,74,0.5); box-shadow: 0 6px 20px rgba(0,0,0,0.6); color: var(--accent); padding: 6px 13px; border-radius: var(--r-md); font-size: 14px; display: none; text-shadow: 0 1px 3px #000; max-width: min(calc(100vw - 28px), 460px); white-space: normal; line-height: 1.45; text-align: center; z-index: var(--z-banner); pointer-events: none; }
+/* 重要事件横幅（放生 / 成就 / 殒落 / 离队）：加粗、金边加重，与普通拾取提示分开一眼能认 */
+#banner.big { border-color: rgba(201,162,74,0.95); border-width: 2px; font-weight: 700; box-shadow: 0 6px 24px rgba(0,0,0,0.75), 0 0 14px rgba(201,162,74,0.22); }
+body[data-skin="guigu"] #banner.big { border-color: #a8281e; color: #8f4f2e; box-shadow: 0 6px 20px rgba(40,36,28,0.35); }
 
 /* ---------- 破境演出 ----------
    一块卷面：上下两道细金线，中间「破境」小字 + 大境界名 + 一句结语。

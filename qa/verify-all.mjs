@@ -45,6 +45,7 @@ const ITEMS = [
   { key: 'batch9', file: 'verify-batch9.mjs', kind: 'gate', desc: '放生（账本结转 + 故交册 + 告别 + 防误触）：放生清现役账 / 重获从初识起 CD 回 1 / 故交册字段齐且按放生倒序 / 老档迁移与清档 / 两段式（有账两次、空账直放、超时重算）/ 殒落欠费残留清理 / 告别词报场数与档位 / 静修故交节 DOM=数据 / 双皮字站对边' },
   { key: 'save-symmetry', file: 'verify-save-symmetry.mjs', kind: 'gate', desc: '存档字段对称（P0）：loadSave 键集不漏 defaultSave 五字段 / 道陨·炼丹·药圃真数据读回与脏数据清洗 / 转世清本世账留生涯累计 / 主循环连错进安全且干净帧自动恢复' },
   { key: 'canon-fix', file: 'verify-canon-fix.mjs', kind: 'gate', desc: '原著考据校准：道天大劫札记锚 1382 韩立渡劫（非天庭群仙战）/ 七玄山名青牛镇→彩霞山（含过场洞府）/ 啼魂·霜蚣·冰凤出处 / 发布札记与真源一致' },
+  { key: 'mobile-feedback', file: 'verify-mobile-feedback.mjs', kind: 'gate', desc: '手机弹反与反馈：弹反键去 pointerleave + 捕获指针（滑出不误收招也不卡住）/ HUD 卡门显示距巅峰 N 级 / 重要事件横幅分级加粗且 900ms 宽限不被覆盖 / 回前台提示' },
 ];
 
 const argv = process.argv.slice(2);
