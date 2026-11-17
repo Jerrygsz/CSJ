@@ -492,7 +492,7 @@ try {
      && out.review.overflow === false, out.review);
   ok('52 Cutscene.meta() 返回章节卡/地点/拍数/时长，与分镜表同源',
      out.review.meta && out.review.meta.title === '卷一 · 后山采药'
-     && out.review.meta.sub === '青牛山北麓 · 神手谷'
+     && out.review.meta.sub === '彩霞山北麓 · 神手谷'
      && out.review.meta.shots === 9 && out.review.meta.dur === 28.4, out.review.meta);
 
   out.reviewPlay = await page.evaluate(() => {

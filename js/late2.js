@@ -82,17 +82,17 @@
   // 都是原著里跟着韩立的：啼魂兽、六翼霜蚣、噬金虫、银月、元婴后期傀儡、冰凤
   window.PETS = [
     { id: 'p_tihun', icon: '🐾', name: '啼魂兽', spr: 'tihun', scale: 1.5, dmg: 0.5, rate: 1.0, cat: 'pet',
-      desc: '阴冥之地捡的小兽，叫声能震散阴魂。', from: '阴冥之地' },
+      desc: '元瑶在乱星海所赠的小兽，叫声能震散阴魂。', from: '乱星海·元瑶相赠' },
     { id: 'p_shijin', icon: '🐛', name: '噬金虫', spr: 'shijin', scale: 1.35, dmg: 0.42, rate: 0.8, cat: 'pet',
       desc: '一窝金虫，见石就啃。养到后来，连法宝都咬。', from: '海猿岛' },
     { id: 'p_liuyi', icon: '🦂', name: '六翼霜蚣', spr: 'liuyi', scale: 1.6, dmg: 0.62, rate: 1.1, cat: 'pet',
-      desc: '背生六翼的霜蚣，飞过之处结霜。', from: '落云宗' },
+      desc: '背生六翼的霜蚣，飞过之处结霜。', from: '御灵宗·柳玉处得虫卵' },
     { id: 'p_yinyue', icon: '🌙', name: '银月', spr: 'yinyuepet', scale: 1.5, dmg: 0.7, rate: 0.9, cat: 'spirit',
       desc: '器灵之身。一只银白小狼，跟着他很多年。', from: '落云宗' },
     { id: 'p_kui', icon: '🤖', name: '元婴后期傀儡', spr: 'kui', scale: 1.7, dmg: 0.9, rate: 1.3, cat: 'puppet',
       desc: '大衍神君毕生心血。不会说话，只服从一个人。', from: '极西之地' },
     { id: 'p_bingfeng', icon: '🕊', name: '冰凤', spr: 'bingfeng', scale: 1.8, dmg: 1.0, rate: 1.2, cat: 'pet',
-      desc: '十级冰凤，性子傲。肯跟着，是因为打不过。', from: '小极宫' }
+      desc: '十级冰凤，性子傲。小极宫时为敌，后于灵界互下禁制、结伴而行。', from: '小极宫·灵界结伴' }
   ];
 
   // ========================= 六、敌人 =========================

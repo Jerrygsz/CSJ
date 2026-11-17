@@ -44,6 +44,7 @@ const ITEMS = [
   { key: 'batch8', file: 'verify-batch8.mjs', kind: 'gate', desc: '同行纪（随行者的往来账 + 羁绊三档）：只带出门的才记一场 / 破境关没闭成不记 / 灵宠与同伴各记各的 / 三档边界 0·8·25 / 本命绝学 CD 1·0.88·0.78 / 生死之交殒了自个儿回来 / 殒落计数 / 洞府两页标签与静修「同行」一节的排序 / 双皮字站对边' },
   { key: 'batch9', file: 'verify-batch9.mjs', kind: 'gate', desc: '放生（账本结转 + 故交册 + 告别 + 防误触）：放生清现役账 / 重获从初识起 CD 回 1 / 故交册字段齐且按放生倒序 / 老档迁移与清档 / 两段式（有账两次、空账直放、超时重算）/ 殒落欠费残留清理 / 告别词报场数与档位 / 静修故交节 DOM=数据 / 双皮字站对边' },
   { key: 'save-symmetry', file: 'verify-save-symmetry.mjs', kind: 'gate', desc: '存档字段对称（P0）：loadSave 键集不漏 defaultSave 五字段 / 道陨·炼丹·药圃真数据读回与脏数据清洗 / 转世清本世账留生涯累计 / 主循环连错进安全且干净帧自动恢复' },
+  { key: 'canon-fix', file: 'verify-canon-fix.mjs', kind: 'gate', desc: '原著考据校准：道天大劫札记锚 1382 韩立渡劫（非天庭群仙战）/ 七玄山名青牛镇→彩霞山（含过场洞府）/ 啼魂·霜蚣·冰凤出处 / 发布札记与真源一致' },
 ];
 
 const argv = process.argv.slice(2);
