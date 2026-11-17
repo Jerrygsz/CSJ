@@ -142,6 +142,9 @@
 
   // ---------- 存档 ----------
   const SAVE_KEY = 'fanren_save_v1';
+  // 上一版落盘内容的副本：主档解析失败（半截写入 / 被别的程序写坏）时回滚用。
+  // 这是长线养成游戏，几百小时的账只在本地一个槽里 —— 没有回滚等于一次坏写全丢。
+  const SAVE_BAK = 'fanren_save_v1_bak';
   // 转世重修：独立于主存档的「轮回余荫」池，删档也保留，代代叠加。
   // 只炼「人物属性值」——本世超出凡胎初始的属性（生命/伤害/攻速/移速等）各取 1/81，
   // 叠加进新生角色的属性面板；功法、法器、灵石、洞府等一律清零、从头再来。
@@ -324,9 +327,22 @@
   let save = defaultSave();
   function loadSave() {
     try {
-      const raw = localStorage.getItem(SAVE_KEY);
-      if (!raw) return;
-      const s = JSON.parse(raw) || {};
+      let raw = null;
+      try { raw = localStorage.getItem(SAVE_KEY); } catch (e) {}
+      let s = null, fromBak = false;
+      if (raw) { try { s = JSON.parse(raw); } catch (e) { s = null; } }
+      // 主档坏了（写到一半被打断、或别的程序改坏）：先试上一版，总比直接开新档强。
+      // 只有备份也读不出来才退回全新存档 —— 这一步是「丢全部」与「丢最近几分钟」的区别。
+      if (!s || typeof s !== 'object' || Array.isArray(s)) {
+        try {
+          const bak = localStorage.getItem(SAVE_BAK);
+          if (bak) {
+            const b = JSON.parse(bak);
+            if (b && typeof b === 'object' && !Array.isArray(b)) { s = b; fromBak = true; }
+          }
+        } catch (e) {}
+      }
+      if (!s || typeof s !== 'object' || Array.isArray(s)) return;
       const d = defaultSave();
       const unlocked = Array.isArray(s.unlocked) && s.unlocked.length
         ? s.unlocked.filter(id => MAPS.some(m => m.id === id))
@@ -489,9 +505,40 @@
       if (save.pet && !petDefOf(save.pet)) save.pet = null;
       if (save.mate && !(window.MATES || []).some(m => m.id === save.mate)) save.mate = null;
       save.mates = (save.mates || []).filter(id => (window.MATES || []).some(m => m.id === id));
+      // 记下「盘上现在是什么」：下次写新内容前先把它留成备份。
+      // 走备份回滚时置空 —— 主档已经坏了，新内容直接覆盖它，别再拿坏档去挤备份。
+      _savedRaw = fromBak ? null : raw;
+      if (fromBak) setTimeout(() => { try { notifyBig('主存档读取失败 · 已回滚到上一版进度'); } catch (_) {} }, 1200);
     } catch (e) {}
   }
-  function writeSave() { try { save.stones = Math.round(save.stones || 0); localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
+  // 上一次真正落盘的 JSON：用于 (a) 内容没变就不重复写，(b) 写新内容前把旧值留成备份。
+  // 读档时会用读到的原文填充，这样「读进来之后的第一次写入」也能备份到老档。
+  let _savedRaw = null;
+  let _saveFail = 0, _saveWarned = false;
+  // 写不进去必须让人知道：localStorage 满了 / 被隐私模式挡住时，旧代码是 catch 里空转，
+  // 玩家连打几小时以为在存，其实一条都没落地。只在第一次失败时喊一声，之后安静重试。
+  function noteSaveFail() {
+    _saveFail++;
+    if (_saveWarned) return;
+    _saveWarned = true;
+    try { notifyBig('存档未能写入 · 浏览器存储已满或被限制，请清理后再战'); } catch (_) {}
+  }
+  function writeSave() {
+    save.stones = Math.round(save.stones || 0);
+    let json;
+    try { json = JSON.stringify(save); }
+    catch (e) { noteSaveFail(); return false; }
+    // 内容没变就别再写一遍：既省掉一次序列化后的同步写，也避免无意义地把备份往前推。
+    // 注意这里不能因为「上次失败过」就跳过 —— 失败时 _savedRaw 没更新，json 必然不等，会重试。
+    if (json === _savedRaw) return true;
+    try {
+      if (_savedRaw) { try { localStorage.setItem(SAVE_BAK, _savedRaw); } catch (_) {} }
+      localStorage.setItem(SAVE_KEY, json);
+      _savedRaw = json;
+      if (_saveFail) { _saveFail = 0; _saveWarned = false; }
+      return true;
+    } catch (e) { noteSaveFail(); return false; }
+  }
   loadSave();
   // 旧档迁移：原来那张「黑凤族领地」已经并进「木族领地」——
   // 原著里芝龙果、腾龙丹方都出在木族之行（黑凤族筱虹只是同行者）。
@@ -16869,7 +16916,19 @@
     pruneNow() { const r = pruneSkillsTop3(); return { kept: r.kept, cut: r.cut, skills: Object.assign({}, cultObj().skills), equipped: (cultObj().equipped || []).slice() }; },
     save: {
       read: () => localStorage.getItem(SAVE_KEY),
-      clear: () => { localStorage.removeItem(SAVE_KEY); return '已清除存档'; },
+      // 清档必须连备份一起清、并把「已落盘内容」置空：否则备份会把刚清掉的进度又救回来。
+      clear: () => {
+        try { localStorage.removeItem(SAVE_KEY); } catch (_) {}
+        try { localStorage.removeItem(SAVE_BAK); } catch (_) {}
+        _savedRaw = null; _saveFail = 0; _saveWarned = false;
+        return '已清除存档';
+      },
+      backup: () => {
+        let raw = null;
+        try { raw = localStorage.getItem(SAVE_BAK); } catch (_) {}
+        return { has: !!raw, len: raw ? raw.length : 0, fails: _saveFail, warned: _saveWarned, written: !!_savedRaw };
+      },
+      corrupt: () => { try { localStorage.setItem(SAVE_KEY, '{"broken":'); } catch (_) {} return '主档已写坏'; },
       wins: (v) => { save.wins = v; writeSave(); return '通关次数=' + v; },
       stones: (v) => { save.stones = Math.max(0, Math.round(v || 0)); writeSave(); return save.stones; }
     },
