@@ -11657,10 +11657,13 @@
     hideAllOverlays();
     renderWorldMap();
     if (elWorldmap) elWorldmap.style.display = 'flex';
-    // 指针指到的那张卡常常在屏幕外（新档在第一卷最上面，回刷时又在很下面）——
-    // 打开就把那张滚到中间，不然「下一处」还在，人还是要自己翻。
+    // 打开修行图就滚到「刚离开的那张图」——从哪张图出，界面就停在哪张图那里。
+    // 以前固定滚到 .next（下一处推荐），所以打完后面的图退出总落在血色禁地。
+    // G.mapId 是刚进过的图，resetRun / 结算都不清它；回退到 save.mapId / qixuan 只是给标题首进兜底。
     if (elWmList) {
-      const nx = elWmList.querySelector('.mapcard.next');
+      const focusId = G.mapId || save.mapId || 'qixuan';
+      const nx = elWmList.querySelector('.mapcard[data-map="' + focusId + '"]')
+        || elWmList.querySelector('.mapcard.next');
       if (nx && nx.scrollIntoView) { try { nx.scrollIntoView({ block: 'center' }); } catch (e) { nx.scrollIntoView(); } }
     }
     refreshTitle();
@@ -11872,6 +11875,9 @@
     // 主线指针指到的那一张：加一圈勾边（.next），和顶部「下一处」是同一处地方，
     // 扫一眼卡片就知道该点哪个 —— 148 张卡里只许有一个 .next。
     if (G._nextHintId === m.id) { cls.push('next'); state = '下一处'; }
+    // 刚离开的那张图：淡标记，配合 openWorldMap 的滚动定位，一眼看出停在何处。
+    // 只加 class、不动 state 文案与 border/尺寸（墨皮/热区闸门钉死了这些）。
+    if (G.mapId && m.id === G.mapId && G._nextHintId !== m.id) cls.push('recent');
     // 行脚折：默认只露两行（名/地点/状态），点「详」章才展开全文 ——
     // 一屏能看七八处地名，才有「从彩霞山一路走到五龙海」的大地图感。
     const open = !!(G.wmOpen && G.wmOpen[m.id]);

@@ -878,7 +878,40 @@ body[data-skin="guigu"] .mapcard.next .mc-name { color: #8f4f2e; }
 .wm-sub { color: var(--text-3); font-size: var(--fs-cap); line-height: 1.6; }
 .wm-stats { display: flex; gap: var(--sp-2); margin-top: 8px; flex-wrap: wrap; }
 .wm-stats span { font-size: var(--fs-micro); color: var(--ok-soft); background: rgba(0,0,0,0.4); border: 1px solid rgba(201,162,74,0.25); border-radius: var(--r-sm); padding: 0 8px; }
-#wmList { flex: 1 1 auto; overflow-y: auto; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); display: flex; flex-direction: column; gap: var(--sp-2); padding-bottom: var(--sp-2); -webkit-overflow-scrolling: touch; }
+#wmList { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); display: flex; flex-direction: column; gap: var(--sp-2); padding-bottom: var(--sp-2); -webkit-overflow-scrolling: touch; }
+
+/* ---------- 修行图重设计（2026-11-19）：把纵向还给列表 ----------
+   原四枚入口各占一行 44px + gap，共吃掉 212px；收成 2×2 印签后只占 ~100px，
+   列表可视面积涨近四成。保留四个 id 与 .btn.small 类（闸门钉死），只改排布。
+   头部说明压成一行、统计条收薄，进一步腾出高度。 */
+#worldmap .wm-panel { gap: var(--sp-2); }
+#worldmap .wm-sub {
+  display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
+  line-height: 1.45; margin-top: 2px;
+}
+#worldmap .wm-next { margin-top: 6px; }
+#worldmap .wm-stats { margin-top: 6px; gap: 6px; }
+#worldmap .wm-stats span { padding: 1px 7px; }
+/* 闸门钉死 wmJournal 在上、wmCodex 在下、垂直相邻且中点无热区 ——
+   用显式网格区满足：右列 jr→cx 垂直相邻（gap 14 > 热区 6+6），左列舆图/返回。 */
+.wm-foot {
+  flex: 0 0 auto; display: grid; grid-template-columns: 1fr 1fr;
+  grid-template-areas: "atlas journal" "close codex";
+  gap: 14px var(--sp-1);
+  margin-top: 4px; padding-top: var(--sp-2);
+  border-top: 1px solid var(--line-soft);
+}
+.wm-foot #wmAtlas { grid-area: atlas; }
+.wm-foot #wmJournal { grid-area: journal; }
+.wm-foot #wmCodex { grid-area: codex; }
+.wm-foot #wmClose { grid-area: close; }
+.wm-foot .btn.small { min-height: 40px; padding: 8px 4px; margin-top: 0; }
+/* 刚离开的那张图：名字后一枚「方才」淡楷小印，不碰 border/圆角/尺寸 */
+.mapcard.recent .mc-name::after {
+  content: '方才'; font-size: var(--fs-micro); font-weight: normal; letter-spacing: 1px;
+  color: var(--text-3); opacity: .8; margin-left: 6px; vertical-align: 1px;
+}
+body[data-skin="guigu"] .mapcard.recent .mc-name::after { color: #8f4f2e; opacity: .7; }
 
 .mapcard {
   border: 1px solid rgba(201,162,74,0.35); border-radius: var(--r-lg); padding: 8px 8px;
