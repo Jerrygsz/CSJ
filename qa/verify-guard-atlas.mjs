@@ -88,6 +88,18 @@ ok(/e === cur\) s \+= 30/.test(game), '当前目标有滞回（+30），不来�
 ok(/const tgt = pickTargetIn\(ax2\.ax, ax2\.ay\)/.test(game), '自动开火改走 pickTargetIn');
 ok(/function drawAimMark\(\)/.test(game) && /drawAimMark\(\);/.test(game), '锁定目标画在场上（不然玩家只看见乱打）');
 ok(/if \(G\.aimE\) G\.aimE = tgt;/.test(game) || /if \(tgt\) G\.aimE = tgt;/.test(game), '锁定目标每帧更新');
+// 标记要「隐约」：Jerry 明确说金色准星 + 呼吸收放出戏。
+// 这两条钉住「淡」这件事本身 —— 不透明度一旦回到 0.4 以上、或重新加上呼吸，
+// 就又变回射击游戏的锁定框了。
+{
+  const aimFn = (game.match(/function drawAimMark\(\)[\s\S]*?\n  \}/) || [''])[0];
+  const alphas = [...aimFn.matchAll(/rgba\([^)]*,\s*([0-9.]+)\)/g)].map(m => +m[1]);
+  ok(alphas.length > 0 && Math.max(...alphas) <= 0.40, '锁定标记保持克制（不透明度 > 0.4 就成准星了）', alphas);
+  ok(!/Math\.sin\(/.test(aimFn), '锁定标记不呼吸（会动的标记最像 UI）');
+  ok(/drawAllyName\(md\.name/.test(game) && /drawAllyName\(pd\.name/.test(game), '同伴与灵宠都用淡墨题名，不用底条');
+  ok(!/fillStyle = 'rgba\(10,20,30,0\.6\)'/.test(game), '随行之人不再画不透明底名条（那是 UI 标签）');
+  ok(/ring: true, ally: 1/.test(game) && /pt\.ally \? 0\.28 : 1/.test(game), '同伴/灵宠的技能圈改成断续淡环，不像选中框');
+}
 
 // ---------- D 静态：舆图 ----------
 ok(/js\/atlas\.js/.test(html), 'index.html 引入 atlas.js');

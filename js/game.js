@@ -3816,7 +3816,8 @@
   }
   function allyRing(x, y, rad, color, life, from) {
     // from>0 时是「往身上收」的收缩环（还魂术收魂用）；不传则照旧从内往外晕开。
-    G.parts.push({ ring: true, x, y, r: from || 8, maxr: rad, life: life || 0.36, maxlife: life || 0.36, color });
+    // ally:1 —— 这几圈是「自己人放招的范围」，不是选中标记，画法见 drawPart 的 ring 分支。
+    G.parts.push({ ring: true, ally: 1, x, y, r: from || 8, maxr: rad, life: life || 0.36, maxlife: life || 0.36, color });
   }
   // 第117轮：飞白。原来是几粒 3px 小方块，在浅宣纸上像撒了一把纸屑；
   // 改成细长笔触（复用 drawPart 的 spark 分支，尾巴朝速度反面拖），才像墨被甩出去。
@@ -9720,22 +9721,46 @@
   }
 
   // 锁定标记：自动开火正在打谁，得让玩家看得见 —— 否则「智能选靶」在玩家眼里就是「乱打」。
-  // 四角短线 + 一圈淡环，随呼吸微微收放；不挡 sprite，也不参与任何判定。
+  // 但要「隐约」：初版是金色四角准星 + 呼吸收放，一眼就是射击游戏的锁定框，跟水墨打架。
+  // 现在只留四笔淡墨短线 + 一圈几乎看不见的细环，**不呼吸、不加亮** ——
+  // 呼吸是最要命的「游戏感」：东西不动，只是淡淡在那，才读成「气机所向」而不是 UI。
+  // 墨线底下垫一层极淡的纸白：浅纸底上只看见墨，深底图上靠这层晕把墨托出来，
+  // 两种场都读得出，又不会像发光框。
   function drawAimMark() {
     const e = G.aimE;
     if (!e || e._dead || G.safeMode) return;
     if (e.hp != null && e.hp <= 0) return;
-    const t = G.time || 0;
-    const r = (e.r || 12) + 8 + Math.sin(t * 6) * 1.6;
+    const r = (e.r || 12) + 7;
     ctx.save();
     ctx.lineCap = 'round';
-    ctx.strokeStyle = 'rgba(255,216,138,0.9)'; ctx.lineWidth = 2;
-    for (let i = 0; i < 4; i++) {
-      const a0 = i * Math.PI / 2 + Math.PI / 4;
-      ctx.beginPath(); ctx.arc(e.x, e.y, r, a0 - 0.20, a0 + 0.20); ctx.stroke();
+    for (const pass of [0, 1]) {
+      ctx.strokeStyle = pass ? 'rgba(58,52,44,0.34)' : 'rgba(252,248,240,0.17)';
+      ctx.lineWidth = pass ? 1.2 : 2.8;
+      for (let i = 0; i < 4; i++) {
+        const a0 = i * Math.PI / 2 + Math.PI / 4;
+        ctx.beginPath(); ctx.arc(e.x, e.y, r, a0 - 0.17, a0 + 0.17); ctx.stroke();
+      }
+      ctx.strokeStyle = pass ? 'rgba(58,52,44,0.14)' : 'rgba(252,248,240,0.07)';
+      ctx.lineWidth = pass ? 1 : 2.4;
+      ctx.beginPath(); ctx.arc(e.x, e.y, r + 3, 0, 6.28); ctx.stroke();
     }
-    ctx.globalAlpha = 0.30; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.arc(e.x, e.y, r + 4, 0, 6.28); ctx.stroke();
+    ctx.restore();
+  }
+  // 随行之人 / 灵宠的题名：淡墨小字 + 一层极淡亮晕。
+  // 原先同伴头顶是「60% 不透明深底方块 + 亮金字 + emoji 图标」——三样都是 UI 语言，
+  // 在宣纸上像贴了张标签。去掉色块与图标，只留一笔题名式的淡墨，字号压到 10，
+  // 靠一圈 0.4 的亮晕保可读（不加晕，压在山上就糊成一团）。
+  function drawAllyName(name, x, y, size, color) {
+    if (!name) return;
+    ctx.save();
+    ctx.font = (size || 10) + 'px "Songti SC","STSong","SimSun",serif';
+    ctx.textAlign = 'center';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = 'rgba(252,248,240,0.40)';
+    ctx.lineWidth = 2.4;
+    ctx.strokeText(name, x, y);
+    ctx.fillStyle = color || 'rgba(58,52,44,0.50)';
+    ctx.fillText(name, x, y);
     ctx.restore();
   }
   function drawEnemy(e) {
@@ -9799,8 +9824,17 @@
     if (pt.ring) {
       // 半径可能是负的（收缩类特效算出来 -16 这种），arc 会直接抛错，钳一下
       const t = 1 - life; const r = Math.max(0, U.lerp(pt.r, pt.maxr, t));
-      ctx.strokeStyle = softRingFx ? inkFx : pt.color; ctx.lineWidth = (pt.lw || 4) * life + 1; ctx.globalAlpha = life * kFx;
-      ctx.beginPath(); ctx.arc(pt.x, pt.y, r, 0, 6.28); ctx.stroke(); ctx.globalAlpha = 1;
+      // ally:随行之人的技能圈。原本是一整圈实色正圆套在自己人身上 ——
+      // 跟「选中了这只单位」的 UI 圈几乎一样，最出戏。改成断续淡墨：还是那个范围，
+      // 但读起来像地上化开的一道笔痕，不像给你的人加了个框。
+      // 段长 18、间距 22：短划线太密会重新连成一圈，反而更像选中框。
+      ctx.save();
+      if (pt.ally) ctx.setLineDash([18, 22]);
+      ctx.strokeStyle = softRingFx ? inkFx : pt.color;
+      ctx.lineWidth = (pt.lw || 4) * life + 1;
+      ctx.globalAlpha = life * kFx * (pt.ally ? 0.28 : 1);
+      ctx.beginPath(); ctx.arc(pt.x, pt.y, r, 0, 6.28); ctx.stroke();
+      ctx.restore(); ctx.globalAlpha = 1;
       return;
     }
     if (pt.bolt) { drawBolt(pt); return; }
@@ -10043,9 +10077,7 @@
         const pt = G.pet;
         if (pt.dead) {
           // 殒落：只留一枚淡墨「殒」印。用户明确不显血条。
-          ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
-          ctx.fillStyle = save.skin === 'guigu' ? 'rgba(107,42,32,0.55)' : 'rgba(255,118,118,0.6)';
-          ctx.fillText('殒', pt.x, pt.y - 16);
+          drawAllyName('殒', pt.x, pt.y - 14, 10, 'rgba(143,47,36,0.42)');
         } else {
           ctx.fillStyle = 'rgba(0,0,0,0.22)'; ctx.beginPath(); ctx.ellipse(pt.x, pt.y + 9, 7, 3, 0, 0, 6.28); ctx.fill();
           // 第119轮：侧身让的那一瞬，从旧位置拖一缕淡墨到新位置，起点落一枚朱砂小印。
@@ -10087,6 +10119,9 @@
             ctx.lineWidth = 1.2 + k * 1.4;
             ctx.beginPath(); ctx.arc(pt.x, pt.y, 12 + (1 - k) * 5, 0, 6.28); ctx.stroke();
           }
+          // 灵宠也与同伴同款题名（原来它头上什么都没有，一说话全靠猜是谁的）。
+          // 比同伴再淡一线：灵宠本来就该「跟着」，不该被读成一个单位。
+          drawAllyName(pd.name, pt.x, pt.y + 24, 9, 'rgba(58,52,44,0.42)');
         }
       }
     }
@@ -10116,9 +10151,7 @@
       if (md && md.spr && Sprites[md.spr]) {
         const mt = G.mate;
         if (mt.dead) {
-          ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
-          ctx.fillStyle = save.skin === 'guigu' ? 'rgba(107,42,32,0.55)' : 'rgba(255,118,118,0.6)';
-          ctx.fillText('殒', mt.x, mt.y - 16);
+          drawAllyName('殒', mt.x, mt.y - 14, 10, 'rgba(143,47,36,0.42)');
         } else {
           ctx.fillStyle = 'rgba(0,0,0,0.22)'; ctx.beginPath(); ctx.ellipse(mt.x, mt.y + 10, 8, 3.5, 0, 0, 6.28); ctx.fill();
           // 第119轮：同伴同款侧身拖影
@@ -10154,13 +10187,9 @@
             ctx.lineWidth = 1.2 + k * 1.4;
             ctx.beginPath(); ctx.arc(mt.x, mt.y, 13 + (1 - k) * 5, 0, 6.28); ctx.stroke();
           }
-          const nm = (md.icon || '·') + ' ' + md.name;
-          ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
-          const tw = ctx.measureText(nm).width + 10;
-          ctx.fillStyle = 'rgba(10,20,30,0.6)';
-          ctx.fillRect(mt.x - tw / 2, mt.y - 38, tw, 14);
-          ctx.fillStyle = '#ffe0a8';
-          ctx.fillText(nm, mt.x, mt.y - 28);
+          // 同伴名：不再画在头上（那块深底条是全屏最像 UI 的东西）。
+          // 题在脚下偏右一点，压在影子上方，像随手落在纸上的一笔 —— 认得出是谁，但不抢眼睛。
+          drawAllyName(md.name, mt.x, mt.y + 26, 9.5);
         }
       }
     }
