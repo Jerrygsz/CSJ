@@ -241,8 +241,10 @@
       // 厉飞雨·双身份化名系统（P0-1）：韩立干脏活让「厉飞雨」背锅（黑），好事以「韩天尊」留名（白）
       repBlack: 0, repWhite: 0, identity: 'han', liUnlocked: false,
       ach: {}, greenLiquid: 0,
-      // 弹反载体补发标记：新档自带三件故直接置 true；旧档由 backfillGuardCarriers 补发后改写
+      // 弹反载体补发标记：新档自带故直接置 true；旧档由 ensureGuardCarriers 补发后改写
       gift_guard: true,
+      // 按「已通关的图」补发护体法宝（只补一次，见文件顶部的 setTimeout 段）
+      gift_guardAll: false,
       // 弹反键自定义位置：{ x, y } 按舞台宽高的比例（0..1，指按钮中心）；null = 用 CSS 默认位
       parryPos: null,
       // 炼丹炉数：原著「炼丹次数越多，成丹几率越大」——每开一炉 +0.4%，至多 +12%
@@ -435,6 +437,9 @@
         gift_zhilongguo: !!s.gift_zhilongguo,
         gift_heti: !!s.gift_heti,
         gift_guard: !!s.gift_guard,
+        // 护体法宝按「已通关的图」补发过一次没有（20261118H 起护体从 3 件扩到 10 件，
+        // 出处挂各图首通奖励；老档那些图早打穿了，首通奖励不会再发第二回，只能按通关记录补）
+        gift_guardAll: !!s.gift_guardAll,
         // 弹反键位置：只认合法的 0..1 比例，脏数据一律回默认位
         parryPos: (s.parryPos && isFinite(s.parryPos.x) && isFinite(s.parryPos.y)
           && s.parryPos.x >= 0 && s.parryPos.x <= 1 && s.parryPos.y >= 0 && s.parryPos.y <= 1)
@@ -717,31 +722,86 @@
     if (changed) writeSave();
   })();
 
-  // 老存档补发：弹反载体（护体槽三件 · 玄铁飞天盾 / 白磷盾 / 金刚符）。
-  // 凡人味防御系统随 20261111D 接入；旧档读档即补、只补一次（gift_guard）。
-  // 新档已在 defaultSave 自带（gift_guard 直接置 true），不会进这里。多给无害：储物袋可拆可卖。
-  (function backfillGuardCarriers() {
-    if (save.gift_guard) {
-      // 20261112J：老档此前只补进背包、没佩上，弹反键在战斗里是哑的。
-      // 护体槽空着就替玩家佩上玄铁飞天盾（有更强的已佩则不动）。
-      if (save.equip && !save.equip.guard && (save.inventory.g_xt_ftd || 0) > 0) {
-        save.equip.guard = 'g_xt_ftd';
-        writeSave();
+  // 护体载体（slot:'guard'）自愈：每次读档核一遍，三件事。
+  // 为什么要自愈：护体法宝是弹反的唯一载体，且全是 unique（不可卖、不可拆），
+  // 一旦没了，战斗里那颗弹反键按下去就是死的 —— 这不是「代价」，是坏档。
+  //   ① 旧版本的道陨会连护体一起抽进 deathLost：先原物捞回背包（护体法宝不离身）；
+  //   ② 整个储物袋一件护体都没有 → 补发玄铁飞天盾（新档 / 转世 / 极端旧档都兜住）；
+  //   ③ 护体槽空着 → 从「能戴的」里挑最强的一件替玩家佩上（不然键在、按不动）。
+  (function ensureGuardCarriers() {
+    const GUARD = (window.ITEMS || []).filter(it => it && it.slot === 'guard');
+    if (!GUARD.length) return;
+    save.inventory = save.inventory || {};
+    let changed = false, back = 0, given = null;
+    if (save.deathLost) {
+      for (const mid in save.deathLost) {
+        const rec = save.deathLost[mid];
+        if (!rec || !rec.items) continue;
+        for (const it of GUARD) {
+          const n = Math.floor(+rec.items[it.id] || 0);
+          if (n <= 0) continue;
+          save.inventory[it.id] = (save.inventory[it.id] || 0) + n;
+          save.totalItems = (save.totalItems || 0) + n;
+          back += n; changed = true; delete rec.items[it.id];
+        }
+        if (!Object.keys(rec.items || {}).length) delete save.deathLost[mid];
       }
-      return;
+    }
+    if (!GUARD.some(it => (save.inventory[it.id] || 0) > 0)) {
+      save.inventory.g_xt_ftd = (save.inventory.g_xt_ftd || 0) + 1;
+      save.totalItems = (save.totalItems || 0) + 1;
+      given = Items.get('g_xt_ftd') || { name: '玄铁飞天盾' };
+      changed = true;
+    }
+    save.equip = save.equip || {};
+    if (!save.equip.guard) {
+      const lv0 = save.cultivate.level || 1;
+      const best = GUARD.filter(it => (save.inventory[it.id] || 0) > 0 && (it.req || 1) <= lv0)
+        .sort((a, b) => (b.req || 1) - (a.req || 1))[0];
+      if (best) { save.equip.guard = best.id; changed = true; }
     }
     save.gift_guard = true;
-    const ids = ['g_xt_ftd', 'g_bl_dun', 'g_jg_fu'];
-    let added = 0;
-    for (const id of ids) {
-      if ((save.inventory[id] || 0) <= 0) { save.inventory[id] = 1; added++; }
-    }
-    if (added) save.totalItems = (save.totalItems || 0) + added;
-    // 补发的同时直接佩上：不然键在、按不动
-    save.equip = save.equip || {};
-    if (!save.equip.guard) save.equip.guard = 'g_xt_ftd';
-    writeSave();
+    if (changed) writeSave();
+    if (back || given) setTimeout(function () {
+      try {
+        if (back) notify('道陨丢下的护体法宝 · 已归位（' + back + ' 件）');
+        else notify('护体法宝归位 · ' + given.name + '　已佩上');
+      } catch (e) {}
+    }, 0);
   })();
+
+  // 护体法宝「按通关记录」补发一次（20261118H）。
+  // 事由：护体此前只有自带的三件，后来按原著补齐到十件，出处一律挂在各图的首通奖励上。
+  // 老档早就把那些图打穿了 —— 首通奖励不会发第二回，于是「典籍上写着从这儿得的」永远拿不到。
+  // 这一步只做一次（gift_guardAll），按 save.cleared 现查 reward.items 里 slot==='guard' 的东西。
+  // 用 setTimeout(0)：本文件先于 js/sources.js 执行，而图奖励是 sources.js 在启动时补的 ——
+  // 同步查会查到「还没挂上出处」的空表。
+  setTimeout(function () {
+    try {
+      if (save.gift_guardAll) return;
+      const items = window.ITEMS || [], maps = window.MAPS || [];
+      const got = [];
+      for (const m of maps) {
+        if ((save.cleared || []).indexOf(m.id) < 0) continue;
+        for (const id of ((m.reward && m.reward.items) || [])) {
+          const it = items.find(x => x && x.id === id);
+          if (!it || it.slot !== 'guard' || (save.inventory[id] || 0) > 0) continue;
+          save.inventory[id] = (save.inventory[id] || 0) + 1;
+          save.totalItems = (save.totalItems || 0) + 1;
+          got.push(it);
+        }
+      }
+      save.gift_guardAll = true;
+      // 趁这次把槽里那件换成「现在能戴的最强」—— 新到手的法宝不该躺在包里吃灰
+      const lv0 = save.cultivate.level || 1;
+      const pool = items.filter(it => it && it.slot === 'guard' && (save.inventory[it.id] || 0) > 0 && (it.req || 1) <= lv0);
+      const best = pool.sort((a, b) => (b.req || 1) - (a.req || 1))[0];
+      const cur = (save.equip && save.equip.guard) ? items.find(x => x.id === save.equip.guard) : null;
+      if (best && (!cur || (best.req || 1) > (cur.req || 1))) { save.equip = save.equip || {}; save.equip.guard = best.id; }
+      writeSave();
+      if (got.length) notify('护体法宝入库 · ' + got.map(x => x.name).join('、'));
+    } catch (e) {}
+  }, 0);
 
   // 老存档：在两张既有的图之间插了新图（青罗沙漠 / 落日之墓 / 山腹 / 灵地 / 木族 / 碧眼真蟾 / 天鹏圣地 / 冥河），
   // 新图的 unlock 是「上一张图」，而上一张老档早已通关 —— 但 unlocked 里没有它，就会白锁着。
@@ -1441,6 +1501,40 @@
     }
     return best;
   }
+  // ---------- 自动开火的选靶（20261118H） ----------
+  // 全自动照旧：在册功法到点自己出手，玩家一只手也能走位。变的只是「打谁」——
+  // 原来是「椭圆内最近的一只」，现在是打分。四类目标值得为它多跑几步：
+  //   ① Boss / 精英：能打死你的就那几只，清杂兵清不出胜负；
+  //   ② 正在蓄力的：打断它一次，比自己多打两下值；
+  //   ③ 罩还没破的：罩子在时本体吃不满，先破罩才有的打；
+  //   ④ 刚破罩 / 正硬直的往后放：这段本来就打不动，打了也白打。
+  // 分数 = 权重 − 距离(px)。权重最大 260，也就是「为了 Boss 可以放掉贴脸 260px 内的杂兵」——
+  // 不会出现「为了摸 Boss 而放着脸上那只不打」。目标滞回 +30：两只分数接近时不来回抖。
+  function targetScore(e, d, cur) {
+    let s = -d;
+    if (e === G.boss) s += 260; else if (e.elite) s += 150;
+    if (e.castT != null && e.castT > 0 && e.castT < 0.9) s += 110;
+    if (e.wardMax > 0 && e.ward > 0) s += 60;
+    if (e.wardMax > 0 && e.ward <= 0 && G.time < (e.wardT || 0)) s -= 90;
+    if (e.stunT > 0) s -= 70;
+    if (e === cur) s += 30;
+    return s;
+  }
+  function pickTargetIn(ax, ay) {
+    const p = G.player;
+    if (!p || !ax || !ay) return null;
+    let best = null, bs = -Infinity;
+    const cur = G.aimE;
+    for (const e of allEnemies()) {
+      if (!e || e._dead) continue;
+      const dx = e.x - p.x, dy = e.y - p.y;
+      const nx = dx / ax, ny = dy / ay;
+      if (nx * nx + ny * ny > 1) continue;
+      const s = targetScore(e, Math.hypot(dx, dy), cur);
+      if (s > bs) { bs = s; best = e; }
+    }
+    return best;
+  }
   // 椭圆在某个方向上的半径：弹道活多久，就看它能飞到这个方向的边缘为止
   function ellipseR(ang, ax, ay) {
     if (!ax || !ay) return 0;
@@ -1591,7 +1685,9 @@
       // 射程按「玩家境界 + 本门功法层数」现算，满进度正好内切屏幕四边
       const ax2 = RM.axes(e.lv, e.s.max, ri, hw, hh, a2.rangeK || 1);
       a2._ax = ax2.ax; a2._ay = ax2.ay;
-      const tgt = nearestEnemyIn(ax2.ax, ax2.ay);
+      // 自动开火照旧，只换「打谁」：打分选靶（见 pickTargetIn），并把它记成当前锁定目标
+      const tgt = pickTargetIn(ax2.ax, ax2.ay);
+      if (tgt) G.aimE = tgt;
       if (!tgt && a2.kind !== 'burst') { p[key] = 0.2; continue; }
       fireActive(e.s, a2, e.lv, tgt);
       p[key] = window.skillAtk.cd(a2, e.lv) * hasteMul() * atkMul();
@@ -2503,9 +2599,15 @@
     const mat = P.MATRIX[attr] || P.MATRIX.phys;
     if (pr.state === 'arming') {
       const tap = c.tap; if (!tap) return null;   // 不支持单击的载体（金刚符）不应进入 arming
-      const reduce = mat.tap.reduce * (tap.reduceMul != null ? tap.reduceMul : 1);
+      // 载体可以直接钉死减伤（狼首玉如意 tap.reduce=1.0：一挡即免伤），也可以只缩放（reduceMul）
+      const baseReduce = (tap.reduce != null) ? tap.reduce : mat.tap.reduce;
+      const reduce = baseReduce * (tap.reduceMul != null ? tap.reduceMul : 1);
       const counter = mat.tap.counter * (tap.counterMul != null ? tap.counterMul : 1);
-      return { handled: true, type: 'tap', reduce: reduce, counter: counter, special: mat.tap.special, attr: attr, src: src, carrier: c };
+      // 载体自带的特殊效果优先（白磷盾的蚀 / 青凝镜的定器 / 遮天钟的钟鸣 / 弥天镯的月华），
+      // 没有才回落到招式属性自带的那一条（毒系清侵蚀 / 困禁解控）。
+      // 这里原先只读 mat.tap.special —— 于是载体上写的 special 全是死数据。
+      const sp = c.special || mat.tap.special || null;
+      return { handled: true, type: 'tap', reduce: reduce, counter: counter, special: sp, attr: attr, src: src, carrier: c };
     }
     if (pr.state === 'hold') {
       const defAttr = (c.hold && c.hold.attr) ? c.hold.attr : attr;
@@ -2513,7 +2615,10 @@
       const base = baseRow.hold.base;
       let mul = 1;
       for (const d of P.HOLD_DECAY) { if (pr.holdT < d.sec) { mul = d.mul; break; } }
-      let reduce = base * mul;
+      // 载体自己的罩面大小：黄罗伞 1.12 / 金刚符 1.05 / 精钢环 0.80 —— 小盾撑不住，大伞撑得住。
+      // 硬顶 0.95：留 5% 的漏，长按不能变成完全无敌（凡人味：没有白拿的防御）。
+      const cmul = (c.hold && c.hold.mul) || 1;
+      let reduce = Math.min(0.95, base * mul * cmul);
       const lowSha = !!pr.shaLow;
       if (lowSha) reduce = P.HOLD.lowShaFallback;
       return { handled: true, type: 'hold', reduce: reduce, counter: 0, special: null, attr: attr, src: src, carrier: c, lowSha: lowSha };
@@ -2599,6 +2704,39 @@
       // poison 行自带：清除自身煞气侵蚀（当前无独立侵蚀层数，留接口）
     } else if (kind === 'free') {
       if (G.player) { G.player.rootT = 0; G.player.slowT = 0; }
+    } else if (kind === 'knock' && e) {
+      // 遮天钟：钟鸣一声，把来敌连人带势推出去 —— 不是伤害，是「站不住」。
+      // Boss 推得少（55%）：推飞了就没法打，和 JUICE.knock 一个口径。
+      const p0 = G.player;
+      if (p0 && e.x != null && !e._dead) {
+        const boss0 = !!(e.boss || e === G.boss);
+        const ang = Math.atan2(e.y - p0.y, e.x - p0.x);
+        const R = boss0 ? 34 : 76;
+        e.x += Math.cos(ang) * R; e.y += Math.sin(ang) * R;
+        e.stunT = Math.max(e.stunT || 0, boss0 ? 0.30 : 0.55);
+        spawnText(e.x, e.y - (e.r || 12) - 8, '钟鸣', '#ffd88a', 14, { punch: true });
+      }
+    } else if (kind === 'seal1s' && e) {
+      // 青凝镜：定器 —— 打断对方正在起手的那一手（castT 重新蓄），并僵住一瞬。
+      // 只认「手」不认「身」：不减速、不扣血，所以对 Boss 也不会变成一记白送的重击。
+      const boss1 = !!(e.boss || e === G.boss);
+      e.stunT = Math.max(e.stunT || 0, boss1 ? 0.35 : 0.70);
+      if (e.castT != null) e.castT = Math.max(e.castT, 1.6);
+      spawnText(e.x, e.y - (e.r || 12) - 8, '定器', '#9ad8ff', 14, { punch: true });
+    } else if (kind === 'moonSlow') {
+      // 弥天镯：月华洒下，近处群妖一时凝滞；Boss 只凝一半 —— 否则一次格开就是一次群体定身。
+      const p1 = G.player; if (!p1) return;
+      const R = 170;
+      let n = 0;
+      for (const en of allEnemies()) {
+        if (!en || en._dead) continue;
+        if (U.dist(p1.x, p1.y, en.x, en.y) > R) continue;
+        const boss2 = !!(en.boss || en === G.boss);
+        en.stunT = Math.max(en.stunT || 0, boss2 ? 0.30 : 0.80);
+        n++;
+      }
+      if (!G.safeMode) G.parts.push({ ring: true, x: p1.x, y: p1.y, r: 10, maxr: R, life: 0.5, maxlife: 0.5, color: '#cfd8ff' });
+      if (n) spawnText(p1.x, p1.y - p1.r - 44, '月华', '#cfd8ff', 15);
     }
   }
 
@@ -2612,6 +2750,23 @@
     const wasIv = p.iv > 0;
     const guarding = !!(G.parry && (G.parry.state === 'arming' || G.parry.state === 'hold'));
     if (wasIv && !(guarding && G.coopRole !== 'client')) return;
+    // 元罡盾：傀儡替身 —— 带着它时，18 秒一次的重手由傀儡替着挨（轻伤不惊动它）。
+    // 放在弹反判定之前，也放在无敌帧之后：不涨连反、不返煞气、不破罩，只保命。
+    // 判「重」的线：这一下要掉掉两成五以上的血，或直接要命 —— 不然一只杂兵的飞弹就把替身骗走了。
+    if (G.coopRole !== 'client' && !wasIv && G.parry && G.time >= (G.parry.proxyAt || 0)) {
+      const pc = parryCarrier();
+      if (pc && pc.special === 'proxy') {
+        const would = dmg * (1 - armorRate());
+        if (would >= p.maxhp * 0.25 || would >= p.hp) {
+          G.parry.proxyAt = G.time + 18;
+          p.iv = Math.max(p.iv, 0.5);
+          spawnText(p.x, p.y - p.r - 34, '傀儡替身', '#c9d6ff', 18, { punch: true, stroke: true });
+          if (!G.safeMode) G.parts.push({ ring: true, hard: true, x: p.x, y: p.y, r: 8, maxr: 64, life: 0.3, maxlife: 0.3, color: '#c9d6ff' });
+          Sfx.buff();
+          return;
+        }
+      }
+    }
     // 弹反拦截：仅单人/房主本地结算；客机不结算敌人伤害（口径 5）
     if (G.coopRole !== 'client') {
       const pr = parryResolve(dmg, sk, src);
@@ -2691,10 +2846,17 @@
             p.hp = Math.min(p.maxhp, p.hp + heal);
             spawnText(p.x - 34, p.y + p.r + 10, '引气 +' + heal, '#a8e8b0', 14, { punch: true, stroke: true });
           }
-          // 单击成功：转为长按态继续护体（若仍按住），否则收招（无 CD，鼓励连反）
+          // 单击成功：转为长按态继续护体（若仍按住），否则收招（无 CD，鼓励连反）。
+          // 写的是 G.parry（状态对象），不是 pr（parryResolve 的返回副本）—— 写到 pr 上是死写。
+          // 载体若声明了 tap.cd（精钢环 0.35s / 狼首玉如意 3.5s），成功之后强制进入 CD：
+          //   「一挡之后要缓」是这两件的代价，不然 CD 字段只是写在数据里好看。
           const c2 = parryCarrier();
           const wt = (c2 && c2.tap && c2.tap.window) || window.PARRY.TAP.window;
-          pr.state = 'hold'; pr.holdT = wt; pr.shaLow = false;
+          const gpr = G.parry;
+          if (gpr) {
+            if (c2 && c2.tap && c2.tap.cd) { gpr.state = 'cd'; gpr.cd = c2.tap.cd; gpr.holdT = 0; gpr.shaLow = false; }
+            else { gpr.state = 'hold'; gpr.holdT = wt; gpr.shaLow = false; }
+          }
         }
         if (p.hp <= 0) { p.hp = 0; coopDown(); }
         return;
@@ -9557,6 +9719,25 @@
     return tfIdle(p.x, p.y, G.time || 0, 'hanli');
   }
 
+  // 锁定标记：自动开火正在打谁，得让玩家看得见 —— 否则「智能选靶」在玩家眼里就是「乱打」。
+  // 四角短线 + 一圈淡环，随呼吸微微收放；不挡 sprite，也不参与任何判定。
+  function drawAimMark() {
+    const e = G.aimE;
+    if (!e || e._dead || G.safeMode) return;
+    if (e.hp != null && e.hp <= 0) return;
+    const t = G.time || 0;
+    const r = (e.r || 12) + 8 + Math.sin(t * 6) * 1.6;
+    ctx.save();
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = 'rgba(255,216,138,0.9)'; ctx.lineWidth = 2;
+    for (let i = 0; i < 4; i++) {
+      const a0 = i * Math.PI / 2 + Math.PI / 4;
+      ctx.beginPath(); ctx.arc(e.x, e.y, r, a0 - 0.20, a0 + 0.20); ctx.stroke();
+    }
+    ctx.globalAlpha = 0.30; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(e.x, e.y, r + 4, 0, 6.28); ctx.stroke();
+    ctx.restore();
+  }
   function drawEnemy(e) {
     ctx.fillStyle = 'rgba(0,0,0,0.25)';
     ctx.beginPath(); ctx.ellipse(e.x, e.y + e.r * 0.9, e.r * 0.9, e.r * 0.4, 0, 0, 6.28); ctx.fill();
@@ -9805,6 +9986,7 @@
     for (const e of G.enemies) es.push(e);
     es.sort((a, b) => a.y - b.y);
     for (const e of es) { if (e.x < _ex0 || e.x > _ex1 || e.y < _ey0 || e.y > _ey1) continue; drawEnemy(e); }
+    drawAimMark();
     if (G.boss) {
       const b = G.boss;
       ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.beginPath(); ctx.ellipse(b.x, b.y + b.r * 0.9, b.r * 0.9, b.r * 0.4, 0, 0, 6.28); ctx.fill();
@@ -10293,6 +10475,8 @@
 
   // ---------- 地图流程 ----------
   function hideAllOverlays() {
+    // 舆图是唯一的「挂在别的浮层之上」的全屏件：切场景时一并收掉，免得盖着新页面
+    if (window.Atlas && window.Atlas.isOpen && window.Atlas.isOpen()) window.Atlas.close();
     if (elBanner) { elBanner.style.display = 'none'; clearTimeout(banner._t); }
     if (elItemToast) elItemToast.classList.remove('below');
     elTitle.style.display = 'none';
@@ -14381,10 +14565,13 @@
       save.stoneBurned = (save.stoneBurned || 0) + out.stones;
     }
     // ② 道具：随机抽走储物袋总量的一半（穿在装备槽上的四件不动 —— 身上的东西夺不走）
+    //    护体法宝（slot:'guard'）整类都不抽：它们是弹反的唯一载体，且 unique（卖不得、拆不得），
+    //    一旦被抽进 deathLost 而这张图再没打穿，弹反就永久哑了 —— 那不是「代价」，是坏档。
     const inv = save.inventory || {};
     const equipped = {};
     for (const k in (save.equip || {})) { const v = save.equip[k]; if (v) equipped[v] = 1; }
-    const ids = Object.keys(inv).filter(id => (inv[id] || 0) > 0 && !equipped[id]);
+    const isGuard = (id) => { const it = Items.get(id); return !!(it && it.slot === 'guard'); };
+    const ids = Object.keys(inv).filter(id => (inv[id] || 0) > 0 && !equipped[id] && !isGuard(id));
     let total = 0;
     for (const id of ids) total += inv[id];
     let target = Math.floor(total * DEATH_ITEM_K);
@@ -14572,6 +14759,15 @@
   if (elWmCodex) elWmCodex.addEventListener('click', openWanling);
   if (elWanlingClose) elWanlingClose.addEventListener('click', openWorldMap);
   if (elWmJournal) elWmJournal.addEventListener('click', openJournal);
+  // 三界舆图：纯展示层。打开的是「一张长卷」，底层修行图不消失 —— 合卷即回，不用重画一次列表。
+  const elWmAtlas = document.getElementById('wmAtlas');
+  if (elWmAtlas) elWmAtlas.addEventListener('click', function () {
+    if (!window.Atlas || !window.Atlas.open) { notify('舆图未载入'); return; }
+    window.Atlas.open({
+      cleared: save.cleared || [], unlocked: save.unlocked || [],
+      mapId: save.mapId || '', skin: save.skin || 'jin', level: save.cultivate.level || 1
+    });
+  });
   if (elJnClose) elJnClose.addEventListener('click', openWorldMap);
   // 札记：点条目展开。正文是展开那一刻才拼的 —— 171 张图的考据一次性写进 DOM 太重，
   // 而且绝大多数条目玩家不会翻。
@@ -15452,6 +15648,7 @@
     save.cultivate = { level: 1, skills: { sword: 1 } };
     save.equip = { weapon: null, armor: null, trinket: null, talisman: null, guard: 'g_xt_ftd' };
     save.gift_guard = true;
+    save.gift_guardAll = true;   // 转世后 cleared 清空，没有「已通关的图」可补，标记置真免得每次读档空跑
     save.caves = []; save.diffClear = {}; save.lastDiff = 'easy'; save.met = [];
     save.best = { time: 0, kills: 0, level: 1 }; save.wins = 0;
     save.pets = []; save.pet = null; save.sealed = null;
@@ -15892,10 +16089,59 @@
     playerHp() { return G.player ? Math.round(G.player.hp) : null; },
     setGod(v) { G.god = !!v; return G.god; },
     hurtSelf(d) { hitPlayer(d); return G.player ? Math.round(G.player.hp) : null; },
+    // 带来源的受击（弹反闸门用）：走唯一入口 hitPlayer，src 取场上这只怪 ——
+    // 没有 src 就测不到反震 / 蚀 / 定器 / 钟鸣 / 月华这些「打在谁身上」的效果。
+    hurtFrom(d, enemyId) {
+      const e = allEnemies().find(x => x && x._id === enemyId);
+      if (!e) return 'no-such-enemy';
+      hitPlayer(d, { n: '测试招' }, e);
+      return { hp: Math.round(G.player.hp), eStun: +(e.stunT || 0).toFixed(2), eHp: Math.round(e.hp), eCastT: e.castT == null ? null : +e.castT.toFixed(2), eX: Math.round(e.x), eY: Math.round(e.y) };
+    },
+    // 元罡盾替身：直接读/写它的 CD，验「18 秒一次」
+    proxyState() { return { at: +(G.parry && G.parry.proxyAt || 0).toFixed(2), now: +(G.time || 0).toFixed(2) }; },
+    etchState() { return (G.etch || []).map(x => ({ id: x.e && x.e._id, t: +x.t.toFixed(2), dmg: x.dmg })); },
     // 弹反系统探针（verify-parry 用）
     parryState() { return G.parry ? Object.assign({}, G.parry) : null; },
     parryCarrier() { const c = parryCarrier(); return c ? { id: c.itemId, name: c.name, req: c.req, enabled: c.enabled, tier: c.tier } : null; },
     parryEquip(id) { save.equip = save.equip || {}; save.equip.guard = id || null; return save.equip.guard; },
+    // 护体法宝探针（verify-guard-gear 用）：包里有什么、槽里是什么、载体认不认得出
+    guardState() {
+      const items = (window.ITEMS || []).filter(it => it.slot === 'guard');
+      return {
+        bag: items.filter(it => (save.inventory[it.id] || 0) > 0).map(it => it.id),
+        all: items.map(it => ({ id: it.id, name: it.name, req: it.req, rarity: it.rarity })),
+        equip: save.equip ? save.equip.guard : null,
+        giftGuardAll: !!save.gift_guardAll,
+        carrier: (function () { const c = parryCarrier(); return c ? c.name : null; })()
+      };
+    },
+    guardGive(id) {
+      const it = Items.get(id);
+      if (!it || it.slot !== 'guard') return null;
+      save.inventory[id] = (save.inventory[id] || 0) + 1; save.totalItems = (save.totalItems || 0) + 1;
+      writeSave(); return save.inventory[id];
+    },
+    // 道陨代价探针：直接跑一次 deathToll，返回被抽走的清单（不判负、不改战斗状态）
+    deathTollTest() {
+      const before = {};
+      for (const id in save.inventory) if ((save.inventory[id] || 0) > 0) before[id] = save.inventory[id];
+      const out = deathToll();
+      const lost = {};
+      for (const id in before) { const d = before[id] - (save.inventory[id] || 0); if (d > 0) lost[id] = d; }
+      return { out: out, lost: lost };
+    },
+    // 自动开火选靶探针：按当前射程椭圆给一次「现在会打谁」
+    aim() {
+      const p = G.player; if (!p) return null;
+      const e = G.aimE;
+      return e ? { id: e._id, name: e.name, elite: !!e.elite, boss: e === G.boss, x: Math.round(e.x), y: Math.round(e.y) } : null;
+    },
+    aimPick(ax, ay) {
+      const p = G.player; if (!p) return null;
+      const w = ax || (W / 2 - 20), h = ay || (H / 2 - 20);
+      const e = pickTargetIn(w, h);
+      return e ? { id: e._id, name: e.name, elite: !!e.elite, boss: e === G.boss, score: Math.round(targetScore(e, Math.hypot(e.x - p.x, e.y - p.y), G.aimE)) } : null;
+    },
     parryPress: parryPress, parryRelease: parryRelease,
     // 弹反键位置 / 手感（20261111E）：拖动定位与命中反馈的探针
     parryPos() { return save.parryPos ? Object.assign({}, save.parryPos) : null; },

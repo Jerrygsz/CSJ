@@ -513,6 +513,7 @@ window.SHOP_STOCK = [
   { id: 'jingtie',  price: 140, cat: 'qi' },
   { id: 'money_sword', price: 240, cat: 'qi' },
   { id: 'qingzhu',  price: 360, cat: 'qi' },
+  { id: 'fb_jinguang', price: 560, cat: 'fu' },   // 金光砖符宝：万宝楼那趟货（第163章）
   { id: 'juling',   price: 300, cat: 'qi' },
   { id: 'xuantie',  price: 620, cat: 'qi' },
   { id: 'huyu',     price: 640, cat: 'qi' },

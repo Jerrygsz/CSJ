@@ -171,45 +171,76 @@ window.PARRY = (function () {
 
   // —— 10. 弹反载体（非衣物类防御法宝/符箓）——
   // tier: 'low'(法器) | 'talisman'(符箓) | 'high'(高阶法宝)
-  // enabled: 是否接入本版逻辑（首版仅三档：玄铁飞天盾/白磷盾/金刚符）
-  // tap.window / tap.counterMul / tap.cd : 覆盖或缩放 MATRIX 的对应项；tap:null 表示不支持单击
+  // enabled: 是否接入本版逻辑（20261118H：原著里叫得出名的护体法宝全部接入）
+  // tap.window / tap.counterMul / tap.cd / tap.reduceMul : 覆盖或缩放 MATRIX 的对应项；
+  //   tap:null 表示不支持单击（只长按）
+  // tap.cd : 单击成功后强制转入 CD（狼首玉如意这类「救命一挡」）
+  // hold.mul : 长按减伤倍率（黄罗伞罩得远、伞面大，撑得比小盾住）
   // hold.moveSlow : 覆盖 HOLD.moveSlow
   // special : 见下方说明
-  // itemId : 对应游戏已有装备 id（虚天鼎=t_xutianding），新载体为 null（待 items 数据新增 slot:'guard'）
+  // itemId : 对应 items.js 里 slot:'guard' 的装备 id —— 两者必须一一对应，
+  //          qa/verify-guard-gear.mjs 会逐条比对；对不上就等于这件法宝 Game 里摸不到手。
   const CARRIERS = {
-    // —— 首版接入（enabled:true）——
     xt_ftd: {
-      name: '玄铁飞天盾', icon: '🛡', tier: 'low', req: 8, enabled: true, itemId: 'g_xt_ftd',
+      name: '玄铁飞天盾', icon: '🛡', tier: 'low', req: 1, enabled: true, itemId: 'g_xt_ftd',
       desc: '玄阴玄铁炼制，绕身全方位防御。基础弹反盾：单击窗口宽，反伤偏低。',
       tap: { window: 0.28, counterMul: 0.85 }, hold: { attr: 'phys' }, special: null,
+    },
+    jg_huan: {
+      name: '精钢环', icon: '⭕', tier: 'low', req: 11, enabled: true, itemId: 'g_jg_huan',
+      desc: '攻守兼备的上品法器。窗口窄、CD 短，反伤低 —— 靠连点接招，不靠一记打疼人。',
+      tap: { window: 0.20, counterMul: 0.55, reduceMul: 0.60, cd: 0.35 },
+      hold: { attr: 'phys', mul: 0.80 }, special: null,
     },
     bl_dun: {
       name: '白磷盾', icon: '🛡', tier: 'low', req: 14, enabled: true, itemId: 'g_bl_dun',
       desc: '墨蛟白磷炼制，韩立筑基期主力防具。弹反成功附加“蚀”持续伤害。',
       tap: { window: 0.26, counterMul: 1.35 }, hold: { attr: 'poison' }, special: 'etch',
     },
+    zt_zhong: {
+      name: '遮天钟', icon: '🔔', tier: 'low', req: 16, enabled: true, itemId: 'g_zt_zhong',
+      desc: '宣乐之物，攻守兼备，罩身困敌。单击格开时把来敌连人带势推开。',
+      tap: { window: 0.25, counterMul: 0.95 }, hold: { attr: 'phys', mul: 0.95 }, special: 'knock',
+    },
     jg_fu: {
       name: '金刚符', icon: '📜', tier: 'talisman', req: 18, enabled: true, itemId: 'g_jg_fu',
       desc: '金色光罩挡法器攻击，身法变慢。不支援单击弹反，长按专用。',
-      tap: null, hold: { attr: 'phys', moveSlow: 0.30 }, special: null,
+      tap: null, hold: { attr: 'phys', moveSlow: 0.30, mul: 1.05 }, special: null,
     },
-
-    // —— 占位（enabled:false，数据就绪，逻辑暂跳过）——
-    zt_zhong: {
-      name: '遮天钟', icon: '🔔', tier: 'low', req: 22, enabled: false, itemId: null,
-      desc: '宣乐之物，攻守兼备，罩身困敌。单击弹反+小范围震退；长按带“钟鸣”短暂抵抗眩晕。',
-      tap: { window: 0.25, counterMul: 0.9 }, hold: {}, special: 'knock',
+    hl_san: {
+      name: '黄罗伞', icon: '🌂', tier: 'low', req: 30, enabled: true, itemId: 'g_hl_san',
+      desc: '顶级防御法器：罩得远，长按比小盾住；只是笨重，反伤平平。',
+      tap: { window: 0.32, counterMul: 0.60, reduceMul: 1.12 },
+      hold: { attr: 'phys', mul: 1.12, moveSlow: 0.72 }, special: null,
     },
     qn_jing: {
-      name: '青凝镜', icon: '🪞', tier: 'low', req: 20, enabled: false, itemId: null,
-      desc: '喷青光定住法器，使敌宝暂时失灵。弹反成功附加“定器”：反弹后使对方法宝 1 秒失效。',
-      tap: { window: 0.25, counterMul: 0.9 }, hold: {}, special: 'seal1s',
+      name: '青凝镜', icon: '🪞', tier: 'low', req: 33, enabled: true, itemId: 'g_qn_jing',
+      desc: '喷青光定住法器，使敌宝暂时失灵。格开成功附带「定器」：打断对方这一手。',
+      tap: { window: 0.26, counterMul: 0.80 }, hold: { attr: 'phys' }, special: 'seal1s',
     },
-    jg_huan: {
-      name: '精钢环', icon: '⭕', tier: 'low', req: 12, enabled: false, itemId: null,
-      desc: '攻守兼备的上品法器。快速连点弹反，但单次减伤低。',
-      tap: { window: 0.20, counterMul: 0.4, reduceMul: 0.5 }, hold: {}, special: null, rapidTap: true,
+    lsy_ruyi: {
+      name: '狼首玉如意', icon: '🐺', tier: 'high', req: 45, enabled: true, itemId: 'g_lsy_ruyi',
+      desc: '红黄护罩挡元婴一击。一挡即免伤，但之后要缓很久。',
+      tap: { window: 0.22, counterMul: 0.50, reduce: 1.0, cd: 3.5 },
+      hold: { attr: 'phys', mul: 1.02 }, special: null,
     },
+    yg_dun: {
+      name: '元罡盾', icon: '🛡', tier: 'high', req: 55, enabled: true, itemId: 'g_yg_dun',
+      desc: '韩立给大衍傀儡炼的防御法宝。傀儡协同：可替身挡一次。',
+      tap: { window: 0.24, counterMul: 1.0 }, hold: { attr: 'phys' }, special: 'proxy',
+    },
+    jg_zhao: {
+      name: '金刚罩', icon: '🌟', tier: 'high', req: 58, enabled: true, itemId: 'g_jg_zhao',
+      desc: '佛门舍利金光，护身融入自身。本命级弹反：单击窗口极窄但反伤极高。',
+      tap: { window: 0.16, counterMul: 2.0 }, hold: { attr: 'phys', mul: 1.06 }, special: null,
+    },
+    mt_zhuo: {
+      name: '弥天镯', icon: '⭕', tier: 'high', req: 60, enabled: true, itemId: 'g_mt_zhuo',
+      desc: '通天灵宝仿制，黄光护体。格开时洒下一圈月华，近处群妖凝滞。',
+      tap: { window: 0.22, counterMul: 1.0 }, hold: { attr: 'phys' }, special: 'moonSlow',
+    },
+
+    // —— 占位（enabled:false）：符宝类一次性 / 与既有槽位冲突，本版不接 ——
     fjfb: {
       name: '飞剑符宝', icon: '🗡', tier: 'talisman', req: 16, enabled: false, itemId: null,
       desc: '一次性爆发符宝，耗尽威能。弹反成功时消耗 1 张，触发一次反打。',
@@ -222,46 +253,25 @@ window.PARRY = (function () {
     },
     xt_ding: {
       name: '虚天鼎', icon: '🏺', tier: 'high', req: 56, enabled: false, itemId: 't_xutianding',
-      desc: '放大罩身硬抗通天灵宝攻击，青丝困敌。顶级鼎类弹反：长按可完全免伤但煞气消耗翻倍；弹反成功扣 1% 当前血量（灵宝反噬）。',
+      desc: '放大罩身硬抗通天灵宝攻击。虚天鼎本体已占「佩饰」槽，不与护体槽重复占位。',
       tap: { window: 0.22, counterMul: 1.0 }, hold: { shaMul: 2 }, special: 'backlash1pct',
-    },
-    jg_zhao: {
-      name: '金刚罩', icon: '🛡', tier: 'high', req: 80, enabled: false, itemId: null,
-      desc: '佛门舍利金光，护身融入自身。本命级弹反：单击窗口极窄但反伤极高。',
-      tap: { window: 0.16, counterMul: 2.0 }, hold: {}, special: null,
-    },
-    yg_dun: {
-      name: '元罡盾', icon: '🛡', tier: 'high', req: 90, enabled: false, itemId: null,
-      desc: '韩立给大衍傀儡炼的防御法宝。傀儡协同弹反：可替身挡一次。',
-      tap: { window: 0.22, counterMul: 1.0 }, hold: {}, special: 'proxy',
-    },
-    lsy_ruyi: {
-      name: '狼首玉如意', icon: '🐺', tier: 'high', req: 70, enabled: false, itemId: null,
-      desc: '红黄护罩挡元婴一击。触发式弹反：CD 长但免伤高。',
-      tap: { window: 0.22, counterMul: 0.5, reduce: 1.0, cd: 4 }, hold: {}, special: null,
-    },
-    mt_zhuo: {
-      name: '弥天镯', icon: '⭕', tier: 'high', req: 120, enabled: false, itemId: null,
-      desc: '通天灵宝，黄光护体。高阶环类：弹反成功附加“月华”减速场。',
-      tap: { window: 0.20, counterMul: 1.0 }, hold: {}, special: 'moonSlow',
     },
     yy_huan: {
       name: '映月环', icon: '🌙', tier: 'high', req: 120, enabled: false, itemId: null,
-      desc: '通天灵宝，黄光护体。高阶环类：弹反成功附加“月华”减速场。',
-      tap: { window: 0.20, counterMul: 1.0 }, hold: {}, special: 'moonSlow',
+      desc: '通天灵宝原宝（弥天镯即其仿制）。本版只接仿制品，原宝留待灵界篇扩写。',
+      tap: { window: 0.20, counterMul: 1.0 }, hold: { attr: 'phys' }, special: 'moonSlow',
     },
   };
 
   // special 键语义（runtime 实现时消费）：
   //   etch        : 单击反伤成功后，给攻击者附加“蚀”持续伤害（DoT）
-  //   knock       : 单击成功小范围震退 + “钟鸣”短暂抵抗眩晕
-  //   seal1s      : 单击成功后使对方法宝/招式失效 1 秒（解控/封招）
+  //   knock       : 单击成功额外震退 + 短暂硬直（遮天钟的钟鸣）
+  //   seal1s      : 单击成功后打断对方这一手并短定（青凝镜的定器）
   //   clearErosion1: 单击成功清除自身 1 层煞气侵蚀（poison 行自带）
   //   free        : 单击成功仅解控，不反伤（bind 行自带）
-  //   backlash1pct: 单击/长按成功扣 1% 当前血量（灵宝反噬，xt_ding）
-  //   proxy       : 长按/弹反可让傀儡替身承受一次攻击（yg_dun）
-  //   moonSlow    : 弹反成功在范围内附加“月华”减速场（mt_zhuo/yy_huan）
-  //   consumeOnCounter: 单击成功消耗 1 张对应符宝触发一次反打（fjfb/jgzb）
+  //   proxy       : 护体槽带着元罡盾时，每 18 秒替他硬吃一记（hitPlayer 消费）
+  //   moonSlow    : 弹反成功在范围内附加「月华」凝滞（弥天镯）
+  //   consumeOnCounter: 单击成功消耗 1 张对应符宝触发一次反打（fjfb/jgzb，本版未接）
 
   return {
     META, SKILL_ATTR, KEYWORDS, FX_ATTR, SPIRIT_BOSSES,

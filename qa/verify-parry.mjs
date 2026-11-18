@@ -25,14 +25,22 @@ const P = globalThis.window.PARRY;
 ok(!!P, 'js/parry.js 暴露 window.PARRY');
 ok(P && P.META && /runtime/.test(P.META.version || ''), 'META.version 标记为已接入 runtime', P && P.META && P.META.version);
 
-// 载体：本版恰好 3 件 enabled 且 itemId 非 null
+// 载体：件数不再写死（20261118H 起从 3 件补到 11 件），改为与 items.js 的护体槽现对齐
 const carriers = P ? P.CARRIERS : {};
 const enabled = Object.keys(carriers).filter(k => carriers[k].enabled && carriers[k].itemId);
-ok(enabled.length === 3, '本版启用 3 件弹反载体（enabled 且 itemId 非空）', enabled);
+// items.js 的护体槽（slot:'guard' 且 unique）就是唯一合法载体来源
+const itemsSrc = fs.readFileSync(join(root, 'js', 'items.js'), 'utf8');
+const guardIds = [...itemsSrc.matchAll(/\{[^{}]*id:\s*'(g_[a-z0-9_]+)'[^{}]*\}/g)]
+  .filter(m => /slot:\s*'guard'/.test(m[0]) && /unique:\s*true/.test(m[0]))
+  .map(m => m[1]);
+ok(guardIds.length >= 11, 'items.js 护体槽（unique）已补齐到 11 件以上', guardIds.length);
+ok(enabled.length === guardIds.length, '启用载体件数 == items.js 护体槽件数（' + guardIds.length + '）', enabled.length);
+ok(guardIds.every(id => enabled.some(k => carriers[k].itemId === id)),
+  '每件护体都有一枚载体接手（不漏）', guardIds.filter(id => !enabled.some(k => carriers[k].itemId === id)));
 ok(enabled.every(k => carriers[k].itemId.startsWith('g_')), '启用载体 itemId 与 items.js 的 g_* 一一对应', enabled.map(k => carriers[k].itemId));
 ok(P && P.CARRIERS.xt_ftd && P.CARRIERS.bl_dun && P.CARRIERS.jg_fu &&
     P.CARRIERS.xt_ftd.enabled && P.CARRIERS.bl_dun.enabled && P.CARRIERS.jg_fu.enabled,
-    '首版三件（玄铁飞天盾 / 白磷盾 / 金刚符）均为 enabled');
+    '首版三件（玄铁飞天盾 / 白磷盾 / 金刚符）仍为 enabled');
 ok(P && P.CARRIERS.jg_fu && P.CARRIERS.jg_fu.tap === null,
     '金刚符 tap:null（长按专用，不支持单击弹反）', P && P.CARRIERS.jg_fu && P.CARRIERS.jg_fu.tap);
 

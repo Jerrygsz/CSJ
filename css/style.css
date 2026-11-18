@@ -2371,3 +2371,221 @@ body[data-skin="guigu"].sc3-paper .chat-wrap #chatInput {
   border-color: rgba(58,53,44,0.14);
   color: rgba(51,47,40,0.82);
 }
+
+
+/* ============================================================================
+   三界舆图（手绘长卷）—— 20261118H
+   ----------------------------------------------------------------------------
+   形态：一条横向长卷，人界/灵界/仙界 三段首尾相接，地点是散落在山水间的印章。
+   刻意不做的事：不画节点连线、不排成整齐的行列、不用三个上下大板块 ——
+   前三版就是栽在「组织架构图」的骨架上，换多少皮都救不回来。
+   两套皮：鎏金（暗绢 + 金线）与水墨（宣纸 + 墨线），靠 body[data-skin] 切。
+   ========================================================================== */
+#atlas.atlas {
+  display: none;
+  flex-direction: column;
+  z-index: var(--z-modal);
+  background:
+    radial-gradient(120% 70% at 50% 0%, rgba(201,162,74,0.10), transparent 62%),
+    linear-gradient(180deg, #15181f 0%, #0b0d12 100%);
+  color: var(--text-2);
+}
+body[data-skin="guigu"] #atlas.atlas {
+  background:
+    radial-gradient(120% 70% at 50% 0%, rgba(255,255,255,0.6), transparent 62%),
+    linear-gradient(180deg, #f5eedd 0%, #e7ddc7 100%);
+  color: #3a332a;
+}
+#atlas .at-head {
+  flex: 0 0 auto;
+  width: 100%;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--line-soft);
+}
+body[data-skin="guigu"] #atlas .at-head { border-bottom-color: rgba(58,53,44,0.18); }
+body[data-skin="guigu"] #atlas .at-view { border-color: rgba(58,53,44,0.16); }
+#atlas .at-title h2 {
+  margin: 0;
+  font-family: "Songti SC", "STSong", "SimSun", serif;
+  font-size: var(--fs-h1);
+  letter-spacing: 4px;
+  color: var(--accent);
+  font-weight: 600;
+}
+body[data-skin="guigu"] #atlas .at-title h2 { color: #8f4f2e; }
+#atlas .at-stat {
+  margin: 4px 0 0;
+  font-size: var(--fs-micro);
+  color: var(--text-3);
+  letter-spacing: 1px;
+}
+body[data-skin="guigu"] #atlas .at-stat { color: rgba(58,53,44,0.62); }
+
+#atlas .at-view {
+  position: relative;
+  border-top: 1px solid rgba(201,162,74,0.18);
+  border-bottom: 1px solid rgba(201,162,74,0.18);
+  flex: 1 1 auto;
+  /* .overlay 用 align-items:center，横向不再拉伸 —— 不写 width:100% 的话
+     这块会被内容撑到 8000px 宽，overflow-x 根本没得滚（长卷看着像被裁了一半） */
+  width: 100%;
+  align-self: stretch;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+  cursor: grab;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+#atlas .at-view::-webkit-scrollbar { display: none; }
+#atlas .at-view.drag { cursor: grabbing; }
+#atlas .at-scroll { position: relative; }
+
+/* —— 三段山水 —— */
+#atlas .at-seg { position: absolute; top: 0; overflow: hidden; }
+#atlas .at-seg svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+/* 山：一片化开的墨（渐变填面）+ 一道山脊线。纯填色会成板子，纯线又细到看不见。 */
+#atlas .at-ws1 { stop-color: #c9a24a; stop-opacity: .26; }
+#atlas .at-ws2 { stop-color: #c9a24a; stop-opacity: .06; }
+#atlas .at-ws0 { stop-color: #c9a24a; stop-opacity: 0; }
+#atlas .at-hill { fill: none; stroke: rgba(201,162,74,0.34); stroke-width: 1.4; }
+#atlas .at-h1 { stroke: rgba(201,162,74,0.16); stroke-width: 1.1; }
+#atlas .at-h2 { stroke: rgba(201,162,74,0.24); stroke-width: 1.2; }
+#atlas .at-h3 { stroke: rgba(201,162,74,0.36); stroke-width: 1.5; }
+#atlas .at-water { fill: none; stroke: rgba(201,162,74,0.30); stroke-width: 1.6; }
+#atlas .at-isle ellipse { fill: rgba(201,162,74,0.09); stroke: rgba(201,162,74,0.26); stroke-width: 1; }
+#atlas .at-isle path { fill: rgba(201,162,74,0.07); stroke: rgba(201,162,74,0.18); stroke-width: 1; }
+#atlas .at-cloud { fill: none; stroke: rgba(201,162,74,0.16); stroke-width: 1.2; stroke-dasharray: 26 18 6 18; }
+#atlas .at-cloud-sea { fill: rgba(201,162,74,0.05); stroke: rgba(201,162,74,0.22); stroke-width: 1.2; }
+#atlas .at-stars circle { fill: rgba(242,232,213,0.62); }
+#atlas .at-sun { fill: rgba(255,210,74,0.07); stroke: rgba(255,210,74,0.22); stroke-width: 1.2; }
+body[data-skin="guigu"] #atlas .at-ws1 { stop-color: #3a332a; stop-opacity: .16; }
+body[data-skin="guigu"] #atlas .at-ws2 { stop-color: #3a332a; stop-opacity: .06; }
+body[data-skin="guigu"] #atlas .at-ws0 { stop-color: #3a332a; stop-opacity: 0; }
+body[data-skin="guigu"] #atlas .at-hill { stroke: rgba(58,53,44,0.42); }
+body[data-skin="guigu"] #atlas .at-h1 { stroke: rgba(58,53,44,0.18); }
+body[data-skin="guigu"] #atlas .at-h2 { stroke: rgba(58,53,44,0.30); }
+body[data-skin="guigu"] #atlas .at-h3 { stroke: rgba(58,53,44,0.46); }
+body[data-skin="guigu"] #atlas .at-water { stroke: rgba(58,53,44,0.30); }
+body[data-skin="guigu"] #atlas .at-isle ellipse { fill: rgba(58,53,44,0.06); stroke: rgba(58,53,44,0.26); }
+body[data-skin="guigu"] #atlas .at-isle path { fill: rgba(58,53,44,0.05); stroke: rgba(58,53,44,0.20); }
+body[data-skin="guigu"] #atlas .at-cloud { stroke: rgba(58,53,44,0.20); }
+body[data-skin="guigu"] #atlas .at-cloud-sea { fill: rgba(58,53,44,0.04); stroke: rgba(58,53,44,0.20); }
+body[data-skin="guigu"] #atlas .at-stars circle { fill: rgba(58,53,44,0.32); }
+body[data-skin="guigu"] #atlas .at-sun { fill: rgba(168,40,30,0.05); stroke: rgba(168,40,30,0.18); }
+
+/* 界名水印：一大块极淡的字压在段首，读起来像卷上的题头，不占印章的地方 */
+#atlas .at-wm {
+  position: absolute; left: 18px; top: 4px;
+  font-family: "Songti SC", "STSong", "SimSun", serif;
+  font-size: 62px; letter-spacing: 10px; line-height: 1;
+  color: rgba(201,162,74,0.10);
+  pointer-events: none; user-select: none;
+}
+body[data-skin="guigu"] #atlas .at-wm { color: rgba(58,53,44,0.07); }
+
+/* —— 界痕：段与段之间只留一道虚线，界名由段首大水印负责 —— */
+#atlas .at-edge {
+  position: absolute; top: 4%; height: 84%; width: 0;
+  border-left: 1px dashed rgba(201,162,74,0.34);
+  pointer-events: none;
+}
+body[data-skin="guigu"] #atlas .at-edge { border-left-color: rgba(58,53,44,0.28); }
+
+/* —— 印章 —— */
+#atlas .at-seal {
+  position: absolute;
+  width: 56px; height: 56px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 1px;
+  padding: 0 2px;
+  background: rgba(23,28,39,0.80);
+  border: 1px solid rgba(201,162,74,0.52);
+  border-radius: 4px;
+  color: var(--text-2);
+  font-family: "Songti SC", "STSong", "SimSun", serif;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: box-shadow .16s ease, opacity .16s ease, background .16s ease;
+}
+#atlas .at-seal b {
+  font-size: 13px; font-weight: 600; letter-spacing: 1px; line-height: 1.14;
+  white-space: nowrap;
+}
+/* 「此刻」：唯一写进印面的状态字 —— 只此一处存在，不与其它色标重复 */
+#atlas .at-seal u {
+  position: absolute; left: 50%; top: -12px; transform: translateX(-50%);
+  font-size: 10px; font-style: normal; text-decoration: none; letter-spacing: 1px;
+  color: var(--accent); background: rgba(11,13,18,0.94); padding: 0 5px; border-radius: 3px;
+  border: 1px solid rgba(255,210,74,0.45);
+  white-space: nowrap;
+}
+body[data-skin="guigu"] #atlas .at-seal u { color: #8f4f2e; background: rgba(250,246,236,0.97); border-color: rgba(143,79,46,0.45); }
+#atlas .at-seal.done {
+  background: linear-gradient(160deg, #c0352a 0%, #9a2a21 100%);
+  border-color: #d4553f;
+  color: #fdf3e4;
+  box-shadow: 0 3px 14px rgba(192,53,42,0.38);
+}
+#atlas .at-seal.open { border-color: rgba(201,162,74,0.85); background: rgba(38,46,64,0.9); color: var(--text-1); }
+#atlas .at-seal.cur {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(255,210,74,0.26), 0 0 20px rgba(255,210,74,0.38);
+}
+#atlas .at-seal.locked { opacity: .62; border-style: dashed; }
+#atlas .at-seal.picked { box-shadow: 0 0 0 2px rgba(255,210,74,0.6), 0 0 24px rgba(255,210,74,0.5); }
+#atlas .at-seal:active { filter: brightness(1.14); }
+body[data-skin="guigu"] #atlas .at-seal {
+  background: rgba(252,248,238,0.94);
+  border-color: rgba(58,53,44,0.38);
+  color: #332e26;
+}
+body[data-skin="guigu"] #atlas .at-seal.done {
+  background: #a8281e; border-color: #8f1f16; color: #fbf3e6;
+  box-shadow: 0 3px 10px rgba(168,40,30,0.3);
+}
+body[data-skin="guigu"] #atlas .at-seal.open { border-color: rgba(58,53,44,0.62); color: #2b261f; }
+body[data-skin="guigu"] #atlas .at-seal.cur { border-color: #8f4f2e; box-shadow: 0 0 0 2px rgba(143,79,46,0.22), 0 0 16px rgba(143,79,46,0.26); }
+body[data-skin="guigu"] #atlas .at-seal.locked { opacity: .66; }
+
+/* —— 底部详情 —— */
+#atlas .at-foot {
+  flex: 0 0 auto;
+  width: 100%;
+  min-height: 78px;
+  padding: 10px 16px 14px;
+  border-top: 1px solid var(--line-soft);
+  background: linear-gradient(180deg, rgba(20,23,29,0), rgba(10,12,16,0.62));
+}
+body[data-skin="guigu"] #atlas .at-foot {
+  border-top-color: rgba(58,53,44,0.18);
+  background: linear-gradient(180deg, rgba(245,238,221,0), rgba(226,214,190,0.8));
+}
+#atlas .at-foot-in { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 8px; }
+#atlas .at-foot-in b {
+  font-family: "Songti SC", "STSong", "SimSun", serif;
+  font-size: var(--fs-h2); color: var(--text-1); letter-spacing: 2px;
+}
+body[data-skin="guigu"] #atlas .at-foot-in b { color: #2f2a23; }
+#atlas .at-foot-in i {
+  flex: 1 1 100%;
+  font-style: normal; font-size: var(--fs-cap); line-height: 1.5; color: var(--text-3);
+}
+body[data-skin="guigu"] #atlas .at-foot-in i { color: rgba(58,53,44,0.72); }
+#atlas .at-tag {
+  font-size: var(--fs-micro); letter-spacing: 1px;
+  padding: 1px 7px; border-radius: var(--r-sm);
+  border: 1px solid var(--line-soft); color: var(--text-3);
+}
+#atlas .at-tag.ok { border-color: rgba(192,53,42,0.6); color: #ff9d8a; }
+#atlas .at-tag.on { border-color: rgba(201,162,74,0.6); color: var(--accent); }
+body[data-skin="guigu"] #atlas .at-tag { border-color: rgba(58,53,44,0.24); color: rgba(58,53,44,0.65); }
+body[data-skin="guigu"] #atlas .at-tag.ok { border-color: rgba(168,40,30,0.5); color: #8f2f24; }
+body[data-skin="guigu"] #atlas .at-tag.on { border-color: rgba(143,79,46,0.5); color: #8f4f2e; }
+#atlas .at-bird { fill: none; stroke: rgba(201,162,74,0.55); stroke-width: 1.8; stroke-linecap: round; }
+body[data-skin="guigu"] #atlas .at-bird { stroke: rgba(58,53,44,0.52); }
+/* 舆图开着时压住战斗 HUD 的残余（它本身是满屏层，但 HUD 仍会透出来） */
+body.atlas-open #hud, body.atlas-open #quickBtns { visibility: hidden; }

@@ -50,6 +50,7 @@ const ITEMS = [
   { key: 'hit-target', file: 'verify-hit-target.mjs', kind: 'gate', desc: '手机命中精度与考据收尾：窄屏纵向热区补偿（扩命中不改视觉、相邻按钮不抢点击）/ 主线入口对齐 44 逻辑 px / 开场旁白与卷名统一彩霞山、全源码无「青牛山」残留' },
   { key: 'save-durability', file: 'verify-save-durability.mjs', kind: 'gate', desc: '存档耐久：写入失败不再静默（配额满会提示且只喊一次）/ 写新内容前留上一版备份 / 主档写坏可回滚并告知 / 清档连备份一起清' },
   { key: 'batch16', file: 'verify-batch16.mjs', kind: 'gate', desc: '战斗按钮热区（禁制 29px / 大衍 21px 补纵向 ±6 逻辑 px）· 重新开始两段式确认 · 静音跨刷新保留且清档不清 · 画面震动开关认系统减少动效 · 存档导出导入闭环且拒收异形 JSON · 暂停面板报上次存档时间 · 弹反首战提示只念一次' },
+  { key: 'guard-atlas', file: 'verify-guard-atlas.mjs', kind: 'gate', desc: '护体与舆图（原著护体补齐 + 智能选靶 + 三界长卷）：道陨不抽 unique 护体 / 11 件载体与 parry.js 一一对应且 special 真生效 / 无护体自愈与按通关补发 / 打分选靶优先 Boss·精英与破罩降权 / 舆图 320 与 390 双视口可开可拖可点不溢出' },
 ];
 
 const argv = process.argv.slice(2);

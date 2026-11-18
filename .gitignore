@@ -41,3 +41,7 @@ qa/shots/*.png
 
 # 发布白名单产物：由 scripts/build-site.mjs 生成，每次 Actions 重建，不入库。
 _site/
+
+# 一次性诊断探针（断言的价值已固化进 qa/verify-*.mjs，脚本本身不入库）
+qa/_probe-*.mjs
+qa/_shot-*.mjs

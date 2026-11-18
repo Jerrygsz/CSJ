@@ -135,6 +135,7 @@ window.ITEMS = [
   { id: 'money_sword', name: '金蚨子母刃', rarity: 2, icon: '🪙', slot: 'weapon', req: 5,  desc: '伤害 +16%，攻速 +3%。母刃一把、子刃八把，精铁精金所炼；手持母刃便可同时驱使八把子刃。韩立早年在万宝楼用它换来的第一套趁手法器', effect: { dmg: 0.16, atkSpd: 0.03 } },
   { id: 'chitong',  name: '赤铜短戟',   rarity: 2, icon: '🔱', slot: 'weapon', req: 9,  desc: '伤害 +14%，上限 +10。赤铜导灵，斩妖不卷刃', effect: { dmg: 0.14, maxhp: 10 } },
   { id: 'qingzhu',  name: '青竹剑',     rarity: 2, icon: '⚔', slot: 'weapon', req: 7,  desc: '伤害 +18%，移速 +3%。竹中取青，轻而不飘', effect: { dmg: 0.18, spd: 0.03 } },
+  { id: 'qingjiao', name: '青蛟旗',     rarity: 2, icon: '🚩', slot: 'weapon', req: 10, desc: '伤害 +18%，攻速 +5%。下山岔道那面旗，聚够了灵气便如青蛟扑食——旗在人在，旗折人亡', effect: { dmg: 0.18, atkSpd: 0.05 } },
   { id: 'moyu',     name: '墨玉飞刀',   rarity: 3, icon: '🔪', slot: 'weapon', req: 12, desc: '伤害 +22%，重击 +6%。飞出无声，回手带血', effect: { dmg: 0.22, crit: 0.06 } },
   { id: 'xuantie',  name: '玄铁重剑',   rarity: 3, icon: '🗡', slot: 'weapon', req: 16, desc: '伤害 +34%。重得压手，一剑下去山石开裂', effect: { dmg: 0.34 } },
 
@@ -151,26 +152,45 @@ window.ITEMS = [
   { id: 't_xuanyu', name: '玄玉珠',     rarity: 3, icon: '⚪', slot: 'trinket', req: 13, desc: '每秒回血 +0.8，上限 +20。玉里像有水在走', effect: { regen: 0.8, maxhp: 20 } },
   { id: 't_tianlei',name: '天雷子',     rarity: 4, icon: '🟣', slot: 'trinket', req: 22, desc: '重击 +12%，伤害 +15%。截取天地雷电凝成的雷珠，原本共七十三粒，如今所剩无几——据说筑基修士正面硬抗也会灰飞烟灭', effect: { crit: 0.12, dmg: 0.15 } },
   { id: 't_zhangtie',name: '张铁的铁牌', rarity: 2, icon: '🪙', slot: 'trinket', req: 5, desc: '上限 +22，减伤 4%。铁牌边角磨得发亮，背面刻着一个「铁」字', effect: { maxhp: 22, armor: 0.04 }, unique: true },
+  { id: 't_tayun',  name: '踏云靴',     rarity: 2, icon: '👢', slot: 'trinket', req: 8,  desc: '移速 +12%，减伤 2%。靴底软而薄，踩碎石不出声——先到的那个，往往不是最能打的', effect: { spd: 0.12, armor: 0.02 } },
 
   // ==== 符宝（装备）====
   { id: 'fb_huo',   name: '火球符宝',   rarity: 2, icon: '🔥', slot: 'talisman', req: 5,  desc: '伤害 +12%，重击 +3%。贴在袖里，出手就是一团火', effect: { dmg: 0.12, crit: 0.03 } },
   { id: 'fb_bing',  name: '冰锥符宝',   rarity: 2, icon: '❄', slot: 'talisman', req: 8,  desc: '伤害 +10%，移速 +3%。锥出成线，落地成霜', effect: { dmg: 0.10, spd: 0.03 } },
   { id: 'huyu',     name: '护身玉符',   rarity: 3, icon: '🛡', slot: 'talisman', req: 10, desc: '减伤 10%，上限 +25。三道灵纹，替他挨过一刀', effect: { armor: 0.10, maxhp: 25 } },
   { id: 'fb_feng',  name: '风刃符宝',   rarity: 3, icon: '🌀', slot: 'talisman', req: 12, desc: '攻速 +14%，伤害 +8%。刃过之处风声先到', effect: { atkSpd: 0.14, dmg: 0.08 } },
+  { id: 'fb_jinguang', name: '金光砖符宝', rarity: 2, icon: '🧱', slot: 'talisman', req: 10, desc: '伤害 +14%，重击 +5%。万宝楼从一个小家族手里巨价收来的崭新符宝，压在袖里像压着一块金砖', effect: { dmg: 0.14, crit: 0.05 } },
 
   // ==== 护体（弹反载体，slot:'guard'；无 effect，不进属性加成，由 js/parry.js 的弹反系统单独消费）====
-  // 不随机掉落（noDrop），只走「读档补发 / 新档自带」。
-  // unique：世上只此一件 —— 拆了/卖了就再也拿不到第二件，等于永久失去弹反，所以走 unique 的
-  // 「只此一件」分支（不卖、不拆、不叠第二件），而不是留个「拆」按钮给人误点。
-  // itemId 与 PARRY.CARRIERS[*].itemId 一一对应，弹反系统据此认载体。
-  // req 由 8 收到 1：这是入门弟子随身之物，韩立初入七玄门就带在身上。
-  // 原来的 Lv8 门槛让「新档默认装备」变成越级佩戴，战斗里弹反键能按、装备页却写着「需炼气八层」。
+  // 不走随机池（noDrop）—— 护体法宝在原著里件件有旧主，是「打下来的」不是「捡来的」，
+  // 出处一律写在地图首通奖励里（见 js/sources.js 与 道具总表.md 的「护体」一节）。
+  // unique：世上只此一件 —— 卖了/拆了就再也拿不到第二件，等于永久失去这一档弹反。
+  // itemId 与 PARRY.CARRIERS[*].itemId 一一对应（见 js/parry.js），弹反系统据此认载体。
+  // req 与所在图的境界对齐：拿到手就能戴，不做「打完人界、炼虚才戴得上」的摆设。
+  //
+  // 排序按原著出场先后（也是 req 由低到高）：入门 → 炼气 → 筑基 → 结丹 → 元婴。
   { id: 'g_xt_ftd', name: '玄铁飞天盾', rarity: 2, icon: '🛡', slot: 'guard', req: 1,  noDrop: true, unique: true,
-    desc: '玄阴玄铁炼制，绕身全方位防御。入门随身之物。基础弹反盾：单击窗口宽，反伤偏低。' },
+    desc: '玄阴玄铁精炼，一经驱动绕身自动防御（第二卷163章「锦盒之宝」）。入门随身之物。基础弹反盾：单击窗口宽，反伤偏低。' },
+  { id: 'g_jg_huan', name: '精钢环', rarity: 2, icon: '⭕', slot: 'guard', req: 11, noDrop: true, unique: true,
+    desc: '上品法器，攻守兼备。下山岔道那场，风刃把环切得粉碎，人却还在。单击窗口窄、CD 短，反伤偏低——碎了也不心疼。' },
   { id: 'g_bl_dun', name: '白磷盾',     rarity: 3, icon: '🛡', slot: 'guard', req: 14, noDrop: true, unique: true,
     desc: '墨蛟白磷炼制，韩立筑基期主力防具。弹反成功附加“蚀”持续伤害。' },
+  { id: 'g_zt_zhong', name: '遮天钟', rarity: 3, icon: '🔔', slot: 'guard', req: 16, noDrop: true, unique: true,
+    desc: '宣乐那口掺了铜精的法宝，罩身困敌、钟鸣震退。单击格开时把来敌推得更远。' },
   { id: 'g_jg_fu',  name: '金刚符',     rarity: 3, icon: '📜', slot: 'guard', req: 18, noDrop: true, unique: true,
-    desc: '金色光罩挡法器攻击，身法变慢。不支援单击弹反，长按专用。' }
+    desc: '金色光罩挡法器攻击，身法变慢。不支援单击弹反，长按专用。' },
+  { id: 'g_hl_san', name: '黄罗伞', rarity: 3, icon: '🌂', slot: 'guard', req: 30, noDrop: true, unique: true,
+    desc: '封岳视若性命的顶级防御法器，人没了伞留下。伞面宽、罩得远，长按减伤更高；只是笨重，收放都慢。' },
+  { id: 'g_qn_jing', name: '青凝镜', rarity: 3, icon: '🪞', slot: 'guard', req: 33, noDrop: true, unique: true,
+    desc: '掩月双娇的旧物，喷青光定住对方法器。格开时顺带打断对方这一手，定器一瞬。' },
+  { id: 'g_lsy_ruyi', name: '狼首玉如意', rarity: 4, icon: '🐺', slot: 'guard', req: 45, noDrop: true, unique: true,
+    desc: '红黄两色护罩，硬挡过元婴一击（第四卷499章「狼形器灵」）。触发即免伤，但 CD 长——救命的东西不能当饭吃。' },
+  { id: 'g_yg_dun', name: '元罡盾', rarity: 4, icon: '🛡', slot: 'guard', req: 55, noDrop: true, unique: true,
+    desc: '韩立本体亲炼、专为那具人形傀儡配的防御法宝（第六卷971章）。关键时刻让傀儡替身挡一记，十八秒一次。' },
+  { id: 'g_jg_zhao', name: '金刚罩', rarity: 5, icon: '🌟', slot: 'guard', req: 58, noDrop: true, unique: true,
+    desc: '老和尚舍利炼化的佛门至宝，金光护身融进肉身。单击窗口极窄，可一旦卡准，反伤高得不像话。' },
+  { id: 'g_mt_zhuo', name: '弥天镯', rarity: 4, icon: '⭕', slot: 'guard', req: 60, noDrop: true, unique: true,
+    desc: '通天灵宝映月环的仿制品，黄光护体。格开时洒下一圈月华，近处群妖一时凝滞。' }
 ];
 
 // 索引：成品 + 材料

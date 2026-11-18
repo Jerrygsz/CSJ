@@ -106,15 +106,21 @@ const A = await page.evaluate(() => {
   out.gapAfter = window.__FR.crossOf(e._id).cross;
 
   // A4 夹击 vs 普通：罩被扣掉多少（每次先清干净上一笔）
+  // 取 8 轮最小值：伤害链里有 5% 起的暴击，暴击只会把扣量抬高，会假性压掉两边的比值
+  // （曾实测 plain 撞上暴击变成 1800、cross 没暴击 2016，k 从 2.0 假跌到 1.12）。
   e = setup();
   const wardOf = (crossed) => {
-    e._hitMark = { me: -99, pt: -99 }; e._cross = 0;
-    if (crossed) { hit(e, false, 0.1); hit(e, true, 0.1); }
-    else { hit(e, false, 0.1); hit(e, false, 0.1); }
-    window.__FR.setWard(e._id, 1.0);
-    const before = e.ward;
-    window.__FR.damageEnemyById(e._id, 1000);
-    return Math.round(before - e.ward);
+    let mn = Infinity;
+    for (let i = 0; i < 8; i++) {
+      e._hitMark = { me: -99, pt: -99 }; e._cross = 0;
+      if (crossed) { hit(e, false, 0.1); hit(e, true, 0.1); }
+      else { hit(e, false, 0.1); hit(e, false, 0.1); }
+      window.__FR.setWard(e._id, 1.0);
+      const before = e.ward;
+      window.__FR.damageEnemyById(e._id, 1000);
+      mn = Math.min(mn, before - e.ward);
+    }
+    return Math.round(mn);
   };
   out.wardPlain = wardOf(false);
   out.wardCross = wardOf(true);

@@ -583,11 +583,14 @@ if (fs.existsSync(truthPath)) {
   const htmlVer = (html.match(/sw\.js\?v=(20\d{6}[A-Z])/) || [])[1];
   const swVer = (swSrc.match(/const BUILD = '([^']+)'/) || [])[1];
   const verHits = htmlVer ? (html.match(new RegExp(htmlVer, 'g')) || []).length : 0;
-  // 35 = 34 处（原有 33 个 ?v= 脚本 + css + #ver + sw 注册） + 新增 js/chronicle.js 一条 ?v= 引用。
-  // 以后每新增一条带 ?v= 的脚本引用，此处同步 +1。
-  ok(!!htmlVer && htmlVer === swVer && verHits === 35,
-     'index.html 35 处版本号与 sw.js BUILD 自洽（当前 ' + (htmlVer || '未找到') + '）',
-     { html: verHits, sw: swVer });
+  // 不写死条数（20261118H 新增 js/atlas.js 一条 ?v= 后由 35 变 36）：
+  // 断言改成「所有 ?v= 都等于当前版本 + 总出现次数 = ?v= 条数 + #ver 一处」——
+  // 少改一条旧版本会立刻掉在这里，加了新脚本却不用再来改闸门。
+  const qvAll = (html.match(/\?v=[0-9A-Za-z]+/g) || []);
+  const qvSame = htmlVer ? qvAll.filter(s => s === '?v=' + htmlVer).length : 0;
+  ok(!!htmlVer && htmlVer === swVer && qvAll.length >= 30 && qvSame === qvAll.length && verHits === qvAll.length + 1,
+     'index.html 全部 ?v= 与 sw.js BUILD 自洽（' + qvSame + '/' + qvAll.length + ' 处，当前 ' + (htmlVer || '未找到') + '）',
+     { html: verHits, qv: qvAll.length, same: qvSame, sw: swVer });
 
   // ---- 时间线守门（按 D:/Games/CSJ/raw 原著全文校对后的四处时序 + 两段台词归属） ----
   // 真源 order 是考据账本，运行时 MAPS 数组与 unlock/next 是实际推进顺序；两边必须同步改。
