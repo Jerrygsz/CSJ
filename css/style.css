@@ -364,6 +364,10 @@ body[data-skin="guigu"] #chronicle .ch-sub { color: #3a332a; }
 /* 故交册（批次 9）：墨线细框、字压一档 —— 与现役同行那栏分开，一眼看出「这段过去了」 */
 .jz-row.gone { border-left-color: rgba(140,140,150,0.42); opacity: 0.82; }
 .jz-row.gone i { color: var(--text-3); }
+/* 历练岁月：另一本账的汇总行，虚线区分于「入道 X 年」那条道行时间轴 */
+.jz-row.eros { border-left: 2px dashed rgba(201,162,74,0.5); margin-top: 4px; }
+.jz-row.eros i { color: var(--text-3); }
+body[data-skin="guigu"] .jz-row.eros { border-left-color: rgba(58,52,44,0.42); }
 .jz-row.gone b { color: var(--text-2); font-weight: 500; }
 /* 两段式放生的「再按一次」：朱砂描边醒目，但不动布局。
    写成 button.sr-btn 提一档优先级 —— .sr-btn.ghost:hover 在后面会把边框刷成紫色，

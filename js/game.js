@@ -177,6 +177,8 @@
       settings: { autoSave: true, manualSave: true, shake: true, shakeSet: false },
       best: { time: 0, kills: 0, level: 1 },
       wins: 0, seen: [],
+      // 历练岁月：本世累计，转世清零（与「入道年数」那本境界现推的账分开）
+      erosDays: 0,
       // 剧情只演一次：intro / scene / outro 三类节点键也记在 seen 里（见 storySeen）。
       // 古传送阵跌境界是「一次性剧情代价」——重修把修为补回来时 save.wounded 会被清空，
       // 只靠 !save.wounded 判断，第二次进这张图就会再跌一回，故单独立一个不回退的标志。
@@ -378,6 +380,8 @@
         // 药圃百年进度归零。这里逐字段清洗后读回；键名与 defaultSave 一一对齐（见 verify-save-symmetry 闸门）。
         // stoneBurned 是累计灵石（可达十余位），禁用 |0，走 Math.floor(+x||0)。
         stoneBurned: Math.max(0, Math.floor(+s.stoneBurned || 0)),
+        // 历练岁月同属大事账，也禁 |0（扫荡几千趟就可能越过 2^31 的日子虽远，别留隐患）
+        erosDays: Math.max(0, Math.floor(+s.erosDays || 0)),
         // deathLost = { 地图id: { items: { 道具id: 件数 } } }；件数是小整数才用 |0。
         deathLost: (function () {
           const o = {};
@@ -3189,6 +3193,35 @@
     const hasBottle = (save.inventory['gupu'] || 0) > 0 || (save.inventory['zhangtian'] || 0) > 0;
     if (hasBottle) save.greenLiquid = (save.greenLiquid || 0) + 1;
     return '百年一瞬 · 入道 ' + (b * 100) + ' 年' + (hasBottle ? '　瓶底夜凝一滴绿液' : '');
+  }
+
+  // ==========================================================================
+  // 历练岁月（批次22）—— 与上面那本「岁月纪」并立的另一本账
+  // --------------------------------------------------------------------------
+  // 岁月纪记「道行」：年数由境界现推，结婴 207 年、道祖万余年，是原著称谓的那条线。
+  // 这一本记「历练」：做一件完整的事就过一天，本世累计、转世清零，落进存档。
+  // 两本账量级不同、语义不同 —— 分开摆，谁也不替换谁（见 renderCaveRest 的两栏）。
+  // 天数取原著锚点：炼丹按丹方的 days（筑基丹「十年出一鼎」、腾龙丹「六十年苦修」），
+  // 进出洞府 / 坊市、踏进战图、闭关静养这类「寻常日子」各记一天。
+  const EROS_DAYS = {
+    enterMap: 1,    // 踏进一张战斗图
+    sweep: 1,       // 扫荡每一趟（一次扫荡走 SWEEP_N 趟）
+    rest: 1,        // 闭关 / 静养每一次
+    cave: 1,        // 进一次洞府
+    shop: 1,        // 进一次坊市
+    finish: 1,      // 打穿一张图
+    encounter: 1    // 了却一件际遇
+  };
+  function erosDays() { return Math.max(0, Math.floor(+save.erosDays || 0)); }
+  function addErosDays(n) {
+    const d = Math.max(0, Math.floor(+n || 0));
+    if (!d) return;
+    save.erosDays = erosDays() + d;
+    writeSave();   // 本世账必须耐久：进洞府 / 坊市这类入口原本不写档，这里兜住
+  }
+  function erosText() {
+    const n = erosDays();
+    return n + ' 日' + (n >= 365 ? '（约 ' + Math.floor(n / 365) + ' 年）' : '');
   }
 
   // ==========================================================================
@@ -7157,6 +7190,9 @@
     if (c.level && curLevel() < c.level) return false;
     if (c.cleared) for (const id of c.cleared) if (save.cleared.indexOf(id) < 0) return false;
     if (c.notCleared) for (const id of c.notCleared) if (save.cleared.indexOf(id) >= 0) return false;
+    // 可反复的小事（repeat:true）按设计故意不写 save.met，所以菜单「待办」必须主动排除，
+    // 否则洞府静修页演完一次立刻又生成同一个按钮，永远消不掉（对照 meetThenShop 的过滤）。
+    if (e.repeat) return false;
     if (!e.repeat && (save.met || []).indexOf(e.id) >= 0) return false;
     return true;
   }
@@ -7245,6 +7281,7 @@
   }
   function meetEncounter(def) {
     if (!def) return;
+    addErosDays(EROS_DAYS.encounter);   // 了却一件际遇，算过一日
     if (!def.repeat) {
       save.met = save.met || [];
       if (save.met.indexOf(def.id) < 0) save.met.push(def.id);
@@ -10739,6 +10776,7 @@
     // 词缀必须在 resetRun 之前定下来：resetRun 里第一只精英的时间要按它算
     applyAffixes(G.diff);
     save.mapId = id;
+    addErosDays(EROS_DAYS.enterMap);   // 踏进一张图就是一日历练
     openScroll();       // 墨皮才有：宣纸展开一页，替代硬切
     resetRun();
     setupAlchQuota();   // 破境药材：按本图 + 本难度定这一趟的产量
@@ -11099,6 +11137,7 @@
   }
   function finishMap(m) {
     if (!m) return;
+    addErosDays(EROS_DAYS.finish);   // 打穿一张图是一件完整的事，另记一日
     // 天人有五衰：每打通一张图，压在身上的衰消一层（X2C327「只能扛」——扛完才过去）
     if (wuLayers() > 0) {
       const st = wuState();
@@ -12072,6 +12111,7 @@
       matN += got[id];
     }
     save.wins = (save.wins || 0) + SWEEP_N;
+    addErosDays(EROS_DAYS.sweep * SWEEP_N);   // 扫荡九趟就是九日，不是一次
     writeSave();
     renderSweepResult(m, d, cost, stoneGot, got, matN, bMin === 99 ? 0 : bMin, bMax, stonesBefore);
     return { cost: cost, stone: stoneGot, mats: got, matN: matN, stonesBefore: stonesBefore, stonesAfter: save.stones,
@@ -12119,6 +12159,7 @@
   function openCave(caveId) {
     const c = CAVES[caveId]; if (!c) return;
     G.caveId = caveId; G.breakCaveId = caveId; G.state = 'cave';
+    addErosDays(EROS_DAYS.cave);   // 进一趟洞府一日（重绘页签不计，只认真正进门）
     const tabs = caveTabs(c);
     if (!tabs.some(t => t.id === G.caveTab)) G.caveTab = 'stat';
     hideAllOverlays();
@@ -13756,10 +13797,12 @@
       gateBox = '<div class="cave-sec"><div class="cs-title">进阶 · ' + (gate.from || '') + ' → ' + (gate.realm || '') + '</div>' +
         '<div class="resttip warn">' + (gate.tip ? stripCite(gate.tip) : '') + needLine + '。</div></div>';
     }
+    // 满修为 / 灵气已尽照样能闭关：原著里租洞府静养几日本就合情理，
+    // 瓶底夜里凝绿液不问修为涨不涨。只是此时不灌修为、不碰突破信号。
     const restNote = atGate
-      ? '<div class="resttip warn">修为已至 ' + (gate.from || '') + ' 巅峰 · 大境界门未开，闭关无用。</div>'
+      ? '<div class="resttip warn">修为已至 ' + (gate.from || '') + ' 巅峰 · 大境界门未开。仍可闭关静养：不涨修为，瓶底照凝绿液，须往「进阶」页冲关。</div>'
       : (capped
-        ? '<div class="resttip warn">此地灵气已尽，再坐也是空耗。须往更远处去。</div>'
+        ? '<div class="resttip warn">此地灵气已尽。仍可闭关静养：不涨修为，瓶底照凝绿液；须往更远处去。</div>'
         : '<div class="resttip">按现下灵石，可坐 ' + Math.floor((save.stones || 0) / c.restStone) + ' 次。</div>');
     // 岁月纪（P2-2）：入道年数由境界现推，不落存档（见 MAJOR_YEARS 那段注释）。
     // 年表只记「关」：破境与硬仗 —— 全是已发生的事实，不编历史上的事。
@@ -13774,7 +13817,11 @@
         return '<div class="jz-row' + (e.k === 'start' ? ' start' : '') + '">' +
           '<i>' + (y === 0 ? '开元' : '入道 ' + y + ' 年') + '</i>' +
           '<b>' + e.t + '</b><em>' + (e.s || '') + '</em></div>';
-      }).join('') + '</div></div>') : '';
+      }).join('') +
+        // 另一本账的落点：上面那些「入道 X 年」是道行，这一行是实实在在过掉的日子。
+        '<div class="jz-row eros"><i>历练</i><b>共 ' + erosText() + '</b>' +
+        '<em>进图、扫荡、静修、开炉、逛街……一件一件攒起来的岁月</em></div>' +
+      '</div></div>') : '';
     // 同行纪（批次 8）：岁月纪只记「关」，这一节记「人」—— 谁跟你走过多少路。
     // 只算带出门打完的整图；换人之后新的一本从头记，所以这条账决定「带谁」而不只是「谁强」。
     const tRows = togetherRows();
@@ -13812,6 +13859,7 @@
       '<div class="statgrid">' +
       '<div class="statcell"><i>当前境界</i><b>' + curRealmLabel() + '</b></div>' +
       '<div class="statcell"><i>入道年数</i><b>' + yrs + ' 年</b></div>' +
+      '<div class="statcell"><i>历练岁月</i><b>' + erosText() + '</b></div>' +
       '<div class="statcell"><i>此境寿元</i><b>' + lifeTxt + '</b></div>' +
       '<div class="statcell"><i>此地可修至</i><b>' + realmName(c.capLevel) + '</b></div>' +
       '<div class="statcell"><i>修为积累</i><b>' + xp + ' / ' + need + '</b></div>' +
@@ -13821,14 +13869,15 @@
       '</div>' +
       restNote +
       '<div class="restbtns">' +
-      '<button class="btn small" data-rest="1"' + (capped || atGate ? ' disabled' : '') + '>闭关一次</button>' +
-      '<button class="btn small" data-rest="5"' + (capped || atGate ? ' disabled' : '') + '>闭关五次</button>' +
+      '<button class="btn small" data-rest="1">闭关一次</button>' +
+      '<button class="btn small" data-rest="5">闭关五次</button>' +
       '</div></div></div>' + gateBox + chronHtml + togetherHtml + goneHtml;
   }
 
   // ---------- 太南小会 ----------
   function openShop(tab) {
     G.state = 'shop';
+    addErosDays(EROS_DAYS.shop);   // 逛一趟坊市一日（renderShop 切页签不重复计）
     G.shopTab = tab || G.shopTab || 'buy';
     renderShop();
     hideAllOverlays();
@@ -14114,6 +14163,8 @@
       if (save.inventory[m[0]] <= 0) delete save.inventory[m[0]];
       save.totalItems = Math.max(0, (save.totalItems || 1) - m[1]);
     }
+    // 开炉就耗岁月，炸炉也一样耗（丹方 days 取原著锚点；缺省一日）
+    addErosDays(Math.max(1, Math.floor(+(r.days || 1) || 1)));
     // 火候不会每次都听话。材料进了炉，出不出得来是另一回事 ——
     // 这才是「必须炼制」的分量：筑基丹这种，宗师也只有几成把握。
     const rate = craftRateOf(r);
@@ -14174,23 +14225,33 @@
   }
   function doRest(times) {
     const c = CAVES[G.caveId]; if (!c) return;
-    let n = 0, gated = false;
+    let n = 0, idle = 0, gated = false;
     const y0 = curYear();
     for (let i = 0; i < times; i++) {
       const lv = save.cultivate.level || 1;
-      if (lv >= c.capLevel) break;
+      // 只有灵石不足才真停：灵气已尽 / 卡大境界门都还能「静养」——
+      // 租个洞府安静住几天，不涨修为，但瓶底照凝绿液。
       if ((save.stones || 0) < c.restStone) break;
       save.stones -= c.restStone;
-      addCultivateXp(Math.max(1, Math.round(xpNeed(lv) * c.restXp)));
+      const gate = nextBreakGate(lv);
+      const capped = lv >= c.capLevel;
+      const atGate = gate && breakLevelOk(gate);
+      if (!capped && !atGate) {
+        addCultivateXp(Math.max(1, Math.round(xpNeed(lv) * c.restXp)));
+        // 撞上大境界门：修为顶在门口，再坐也是白烧灵石 —— 停在本次产完绿液之后
+        if ((save.cultivate.level || 1) === lv && (save.cultivate.xp || 0) >= xpNeed(lv) - 1) gated = true;
+      } else {
+        idle++;   // 静养：不灌修为，也就不碰 G.breakPending / G.minorPending
+      }
       n++;
-      // 撞上大境界门：修为顶在门口，再坐也是白烧灵石 —— 立刻停下，催他去「进阶」页
-      if ((save.cultivate.level || 1) === lv && (save.cultivate.xp || 0) >= xpNeed(lv) - 1) { gated = true; break; }
       // 掌天瓶日产绿液 —— 只要瓶子在手上（七玄门那一趟就该拿到了）。
       // 不再卡「筑基之后」：原著里绿液是瓶底夜里自己凝的，韩立自小就攒；
       // 而筑基那一关现在要一株千年灵药（园里催出来的），绿液若锁在筑基之后，这一关永远过不去。
       const hasBottle = (save.inventory['gupu'] || 0) > 0 || (save.inventory['zhangtian'] || 0) > 0;
       if (hasBottle) save.greenLiquid = (save.greenLiquid || 0) + 1;
+      if (gated) break;
     }
+    if (n) addErosDays(EROS_DAYS.rest * n);   // 闭关 / 静养都算日子
     if (n) { writeSave(); }
     if (gated) {
       const nextLv = (save.cultivate.level || 1) + 1;
@@ -14210,12 +14271,12 @@
       }
       Sfx.warn();
     } else if (!n) {
-      const lv = save.cultivate.level || 1;
-      notify(lv >= c.capLevel ? '此地灵气已尽，须往更远处去' : '灵石不足');
+      notify('灵石不足');
       Sfx.warn();
     } else {
       Sfx.levelup();
-      notify('闭关 ' + n + ' 次 · 入道 ' + Math.floor(curYear()) + ' 年　今在 ' + realmName(save.cultivate.level));
+      notify('闭关 ' + n + ' 次' + (idle ? '（静养 ' + idle + ' 次）' : '') +
+        ' · 入道 ' + Math.floor(curYear()) + ' 年　今在 ' + realmName(save.cultivate.level));
     }
     // 跨过整百年：报一声。放在最后，且只在这一次真坐出年数时算 ——
     // 打坐给的是修为，年数由境界推，所以连坐十次也未必跨年，跨了才有这一声。
@@ -15696,6 +15757,7 @@
     save.quick = [null, null, null];
     save.petFeed = { on: false, t: 0 };
     save.greenLiquid = 0; save.ach = {};
+    save.erosDays = 0;   // 历练岁月是「这一世」的账，换一世从零开始记
     save.wounded = null;      // 存档重来：修为受创一并清掉
     G.breakCaveId = null; G.breakPending = null;  // 清掉过图会话态：避免重生后误吃原著洞府 +30%
     save.gift_zhuji = false;
@@ -17087,6 +17149,10 @@
       return { major: MAJOR_YEARS, life: LIFESPAN, majorNow: curMajor(), perLevel: +yearsPerLevel(save.cultivate.level || 1).toFixed(3) };
     },
     chronicle() { return chronicleEntries().map(e => ({ k: e.k, y: Math.floor(e.y), t: e.t, s: e.s })); },
+    // 历练岁月调试口：既有真源可查，也能直接记几天来验证显示与落盘
+    erosDays() { return erosDays(); },
+    addErosDays(n) { addErosDays(n); renderCave(); return erosDays(); },
+    erosTable() { return JSON.parse(JSON.stringify(EROS_DAYS)); },
     // 性子（P2-5）调试口：查表 + 查随行者的路数与它的贴人半径是否跟角色对得上
     allyRole(id) { const r = (window.allyRoleOf ? window.allyRoleOf(id) : null); return r ? { role: r.role, note: r.note } : null; },
     allyRoles() {

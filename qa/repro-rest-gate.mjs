@@ -5,7 +5,7 @@
 // 修复后应成立：
 //   A(Lv180) 静修可用、不误报巅峰；进阶清单显式列出「修 修为至 炼虚后期·巅峰(Lv199) 180/199」；
 //            breakMissing(200) 含 kind:'level'。
-//   B(Lv199) 才正确报「已至巅峰·大境界门未开」、闭关禁用、给出进阶指引；
+//   B(Lv199) 才正确报「已至巅峰·大境界门未开」、闭关仍可静养（不涨修为但凝绿液）、给出进阶指引；
 //            「修」行消失（门槛已满足）；breakMissing(200) 不再含 kind:'level'。
 //   C 单面板 openBreak(200) 同样显示「修为至」行。
 import { createRequire } from 'node:module';
@@ -99,7 +99,7 @@ A('A Lv180 进阶清单显式列出隐藏「修为」项', hasLevelGate(out.A_br
 A('A breakMissing(200) 含 level', out.A_missing.indexOf('level') >= 0, out.A_missing);
 A('C 单面板同样显示「修为至」行', /修为至/.test(out.C_breakBody || '') && /Lv199/.test(out.C_breakBody || ''), (out.C_breakBody || '').slice(0, 260));
 A('B Lv199 才正确报「已至巅峰」', hasPeakWarn(out.B_rest_text), out.B_rest_text.slice(0, 160));
-A('B Lv199 闭关按钮禁用', out.B_rest_disabled === true, out.B_rest_disabled);
+A('B Lv199 闭关按钮仍可用（静养不涨修为但凝绿液）', out.B_rest_disabled === false, out.B_rest_disabled);
 A('B Lv199 给出「进阶·炼虚后期→合体初期」指引', /进阶/.test(out.B_rest_text || '') && /炼虚后期/.test(out.B_rest_text || '') && /合体初期/.test(out.B_rest_text || ''), out.B_rest_text.slice(0, 260));
 A('B Lv199 进阶清单不再有「修为至」行', !/修为至/.test(out.B_break_text || ''), out.B_break_text.slice(0, 260));
 A('B breakMissing(200) 不再含 level', out.B_missing.indexOf('level') < 0, out.B_missing);
