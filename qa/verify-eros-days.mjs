@@ -75,7 +75,7 @@ ok(/erosShichen: Math\.min\(11, Math\.max\(0, Math\.floor\(\+s\.erosShichen \|\|
 ok(/save\.erosShichen = 0;/.test(game) && /save\.beidanDone = false;/.test(game), 'resetAllProgress 清零本世账（时辰、备丹）');
 ok(/function addErosShichen\(n\)[\s\S]{0,350}save\.erosDays = erosDays\(\) \+ days/.test(game), '时辰满 12 进位成一日');
 // 冷却：只拦 UI 点击，不进 craftRecipe（闸门/挂机不受影响）
-ok(/const CRAFT_COOL_MS = 120000/.test(game), '单炉冷却 2 分钟（原著一个时辰的游戏化）');
+ok(/const CRAFT_COOL_MS = 1500/.test(game), '单炉冷却 1.5 秒（只拦 UI 连点）');
 ok(/function craftOnCool\(\)/.test(game) && /craftOnCool\(\)/.test(game), '冷却判定存在');
 ok(/if \(rr && rr\.kind === 'alchemy' && craftOnCool\(\)\)/.test(game), '冷却只在 UI 点击层拦截炼丹');
 ok(!/function craftRecipe\(rid\)[\s\S]{0,3200}craftOnCool/.test(game), 'craftRecipe 本体不含冷却闸门（调试口同步连开不阻塞）');
@@ -227,7 +227,7 @@ const r9 = await page.evaluate(() => {
   F.erosReset();
   return { ms: F.craftCoolMs(), left: F.craftCoolLeft(), before: F.erosDays() * 12 + F.erosShichen() };
 });
-ok(r9.ms === 120000, '单炉冷却常量为 2 分钟', r9.ms);
+ok(r9.ms === 1500, '单炉冷却常量为 1.5 秒', r9.ms);
 ok(r9.left === 0, '初始无冷却（调试口不自动触发）', r9);
 // craftRecipe 本体不含 craftOnCool 由上面的静态断言证明；运行时再确认调试口调用不启动冷却：
 // 用 addErosShichen 模拟「调试口连续 12 炉的记账」，冷却态必须始终为 0（脚本连开不被拖）。

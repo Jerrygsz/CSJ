@@ -111,6 +111,16 @@ try {
   ok('2 分镜共 9 拍', out.boot.shots === 9, out.boot.shots);
   ok('3 自动化回归默认不播（保住既有闸门）', out.boot.available === false && out.boot.webdriver === true, out.boot);
 
+  // ---- 2026-11-19 新口径：取消进图强制动画，真实玩家改走普通 showLines 对白 ----
+  const gameSrc = fs.readFileSync(path.join(ROOT, 'js', 'game.js'), 'utf8');
+  ok('0a qixuan 进图过场只在 force 时播（默认普通对白）',
+     /id === 'qixuan' && window\.Cutscene && window\.Cutscene\.force && !storySeen\(sc\.key\)/.test(gameSrc), null);
+  ok('0b houshan 进图过场只在 force 时播，真实玩家走 showLines 对白',
+     /id === 'houshan' && !G\.coopRole && !storySeen\('cut:houshan'\)/.test(gameSrc)
+     && /hsLines\.length && window\.Cutscene && window\.Cutscene\.force/.test(gameSrc)
+     && /else if \(hsLines\.length && !\(window\.__CSJ_QA__ \|\| \(typeof navigator !== 'undefined' && navigator\.webdriver\)\)\)/.test(gameSrc)
+     && /showLines\(hsLines, \(\) => \{ storyMarkSeen\('cut:houshan'\)/.test(gameSrc), null);
+
   // ---- A 自动化默认路径：仍走原 showLines 对白通道 ----
   await fresh();
   out.vanilla = await page.evaluate(() => {

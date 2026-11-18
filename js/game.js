@@ -10916,14 +10916,10 @@
       // 破境剧情图（闭府结丹 / 云梦山结婴…）的开场要按「门开不开得了」分流：
       // 物事没备齐，就不能演「丹成」那一版，否则对话说成了、结算却说没成（自相矛盾）。
       const sc = storySceneOf(m, id);
-      // ===== 第一张地图「七玄门·山门」：独立过场层 =====
-      // 剧情 / 对白 / 场景严格来自 MAP_STORIES.qixuan（过场层按 li 索引逐字取用，不另写台词）。
-      // 人物衣着则走当前护甲：startMap 已调 applyHeroSprite()，Sprites.hanli 就是这一局
-      // 身上穿的那件，过场与随后战斗读同一张图，衣色不会跳。
-      // 联机按既定口径：进图直接开打 / 结算，不建过场层、不写 seen，后果（奖励 / 解锁）照走，
-      // 把首次演出留给单机。自动化回归由 Cutscene.available() 判掉，走原对白通道以保住闸门。
-      if (id === 'qixuan' && window.Cutscene && window.Cutscene.available() && !storySeen(sc.key)) {
-        if (G.coopRole) { onStoryMapDone(m); return; }   // 跳过 ≠ 演完：不记账
+      // 第一张地图「七玄门·山门」：2026-11-19 取消进图强制动画 —— 正常玩家与所有剧情图一样直接走下面的 showLines 对白。
+      // 只有 Cutscene.force=true（闸门 / 洞府剧场主动点播）时才播那段过场动画；联机一律直接结算、不写 seen。
+      if (id === 'qixuan' && window.Cutscene && window.Cutscene.force && !storySeen(sc.key)) {
+        if (G.coopRole) { onStoryMapDone(m); return; }   // 联机跳过 ≠ 演完：不记账
         G.state = 'dialog';
         G.dialogLines = sc.lines; G.dialogIdx = 0; G.dialogSynced = false;
         G.dialogId = 'map:' + id;
@@ -10936,6 +10932,7 @@
         }, 'map:' + id);
         return;
       }
+      if (G.coopRole) { onStoryMapDone(m); return; }   // 联机：后果照走，对白留给单机
       if (storySeen(sc.key)) { onStoryMapDone(m); return; }   // 演过就不再念，后果照走（奖励/破境判定不受影响）
       G.state = 'dialog';
       showLines(sc.lines, () => { storyMarkSeen(sc.key); onStoryMapDone(m); }, 'map:' + id);
@@ -10987,29 +10984,27 @@
       showLines(MAP_STORIES[m.intro], () => { storyMarkSeen(introKey); afterIntro(); }, 'map:' + id);
       return;
     }
-    // ===== 第二张地图「七玄门·后山」：进图序章（独立过场层）=====
-    // 这是战斗图，动画必须放在战斗初始化全部完成之后：只把 G.state 临时压成 dialog 冻住主循环，
-    // 播完恢复 play 并重置 last —— 否则 28 秒过场会把 dt 攒成一发扑面而来的怪潮。
-    // 台词来自 MAP_STORIES.houshan（原著后山采药段），与战斗内 hs_open / hs_meet / hs_clue
+    // ===== 第二张地图「七玄门·后山」：进图序章（2026-11-19 起，真实玩家改普通对白）=====
+    // 台词仍取 MAP_STORIES.houshan（原著后山采药段），与战斗内 hs_open / hs_meet / hs_clue
     // 三个定时节点互不重叠：序章讲入门后的日常，那三段讲这一趟采药的具体事，不重播同一句。
-    // 联机按既定口径直接开打：不建层、不写 seen；自动化回归由 available() 判掉，旧闸门照旧走。
-    if (id === 'houshan' && window.Cutscene && window.Cutscene.available()
-        && !storySeen('cut:houshan') && !G.coopRole) {
+    // 三态：force=true（闸门/剧场主动点播）→过场动画；自动化回归→直接开打（保住旧闸门）；
+    //       真实玩家→与其他战斗图一致的 showLines 对白。联机一律直接开打、不写 seen。
+    if (id === 'houshan' && !G.coopRole && !storySeen('cut:houshan')) {
       const hsLines = MAP_STORIES.houshan || [];
-      if (hsLines.length) {
+      if (hsLines.length && window.Cutscene && window.Cutscene.force) {
         G.state = 'dialog';
         G.dialogLines = hsLines; G.dialogIdx = 0; G.dialogSynced = false;
         G.dialogId = 'map:houshan';
         G.cutscene = true;
-        G.dialogEnd = () => {
-          storyMarkSeen('cut:houshan');
-          G.state = 'play'; last = performance.now();
-        };
+        G.dialogEnd = () => { storyMarkSeen('cut:houshan'); G.state = 'play'; last = performance.now(); };
         window.Cutscene.play(hsLines, () => {
           G.cutscene = false;
           const f = G.dialogEnd; G.dialogEnd = null; G.dialogLines = null;
           if (f) f();
         }, 'map:houshan');
+      } else if (hsLines.length && !(window.__CSJ_QA__ || (typeof navigator !== 'undefined' && navigator.webdriver))) {
+        showLines(hsLines, () => { storyMarkSeen('cut:houshan'); G.state = 'play'; last = performance.now(); }, 'map:houshan');
+        return;
       }
     }
     if (save.settings.autoSave) writeSave();
@@ -14224,7 +14219,7 @@
   // 关键：冷却只拦「界面上的炼制按钮」，不碰 craftRecipe 本身 ——
   // 闸门/挂机脚本走调试口 craft() 同步连开几十炉，若在这里设闸会全红；且原著本就是
   // 一炉接一炉地反复开，玩家等得起，脚本不该被拖。冷却是内存态，刷新页面即重置（对玩家有利）。
-  const CRAFT_COOL_MS = 120000;                 // 2 分钟 = 一个时辰的游戏化
+  const CRAFT_COOL_MS = 1500;                  // 1.5 秒：只拦 UI 连点，不再模拟「一个时辰」的等待
   let craftReadyAt = 0;                          // 下一炉可开的时间戳（Date.now()）
   function craftCoolLeft() { return Math.max(0, craftReadyAt - Date.now()); }
   function craftOnCool() { return craftCoolLeft() > 0; }
