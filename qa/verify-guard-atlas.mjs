@@ -105,6 +105,16 @@ ok(/if \(G\.aimE\) G\.aimE = tgt;/.test(game) || /if \(tgt\) G\.aimE = tgt;/.tes
   ok(!/rgba\(255,86,86,' \+ \(0\.02 \+ k \* 0\.035\)[\s\S]{0,400}p\.hurtFlash/.test(game), '主角自己的受击红圈没被一起淡掉（保位置可读）');
   ok((game.match(/FX3\.spawn\('rune'[^;]*dim: 0\.20/g) || []).length === 4, '同伴/灵宠的像素法阵也淡 80%（FX3 dim=0.2，共 4 处）');
   ok(/it\.tag \? prevA \* ha : prevA\) \* it\.dim/.test(fx), 'FX3 支持逐实例 dim，主角特效不被动');
+  // 第122轮：套在己方身上的技能特效本体（飞白/放射/弯月/FX3 一次性特效）再淡一半。
+  ok(/const ALLY_FX_DIM = 0\.5;/.test(game), '己方技能特效统一系数 0.5');
+  ok(/life: 0\.34, maxlife: 0\.34, color, fxDim: ALLY_FX_DIM/.test(game), '飞白笔触走 fxDim');
+  ok(/life: 0\.36, maxlife: 0\.36, color, fxDim: ALLY_FX_DIM/.test(game), '放射光条走 fxDim');
+  ok(/ctx\.globalAlpha = life \* \(pt\.fxDim \|\| 1\); ctx\.strokeStyle = pt\.color;\s*\n\s*ctx\.lineWidth = pt\.w/.test(game), 'spark 绘制层应用 fxDim');
+  ok(/ctx\.globalAlpha = life \* 0\.9 \* kFx \* \(pt\.fxDim \|\| 1\)/.test(game), 'ray 绘制层应用 fxDim');
+  ok(/const dim = pt\.fxDim \|\| 1;/.test(game) && /fd \* 0\.30 \* dim/.test(game) && /fd \* dim; ctx\.strokeStyle = '#ffffff'/.test(game), 'slash 三层都用 fxDim');
+  ok((game.match(/spawnSlash\([^;]*ALLY_FX_DIM\)/g) || []).length === 5, '同伴的 5 处弯月斩都传 fxDim');
+  ok((game.match(/FX3\.spawn\('(?:crit|poof|nova|pickup)'[^;]*dim: ALLY_FX_DIM/g) || []).length === 5, '同伴的 5 处 FX3 一次性特效传 dim');
+  ok(!/FX3\.spawn\('rune'[^;]*dim: ALLY_FX_DIM/.test(game), '像素法阵 dim 仍是 0.2，没被统一系数覆盖');
 }
 
 // ---------- D 静态：舆图 ----------

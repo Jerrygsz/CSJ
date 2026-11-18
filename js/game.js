@@ -2264,7 +2264,7 @@
       a.y = G.player.y + 12;
     }
     allyRing(a.x, a.y, 52, '#c0352a', 0.55);
-    if (window.FX3) FX3.spawn('pickup', a.x, a.y, { pal: 'xue' });
+    if (window.FX3) FX3.spawn('pickup', a.x, a.y, { pal: 'xue', dim: ALLY_FX_DIM });
     spawnText(a.x, a.y - 34, '复生', save.skin === 'guigu' ? '#6b2a20' : '#7fe0a0', 13, { seal: true });
     Sfx.levelup();
     if (!save.allyDead) save.allyDead = {};
@@ -3819,6 +3819,10 @@
     // ally:1 —— 这几圈是「自己人放招的范围」，不是选中标记，画法见 drawPart 的 ring 分支。
     G.parts.push({ ring: true, ally: 1, x, y, r: from || 8, maxr: rad, life: life || 0.36, maxlife: life || 0.36, color });
   }
+  // 第122轮：套在己方身上的技能特效整体再淡一半。Jerry 连着几轮都在说「出戏」——
+  // 标记、圈、法阵都淡完了，剩下飞白 / 放射 / 弯月这些特效本体还盖在同伴身上。
+  // 这里用 fxDim 统一压，只作用于随行之人，主角自己的特效不吃。
+  const ALLY_FX_DIM = 0.5;
   // 第117轮：飞白。原来是几粒 3px 小方块，在浅宣纸上像撒了一把纸屑；
   // 改成细长笔触（复用 drawPart 的 spark 分支，尾巴朝速度反面拖），才像墨被甩出去。
   function allySpark(x, y, color, n) {
@@ -3829,7 +3833,7 @@
       G.parts.push({
         spark: true, x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 30,
         len: U.rand(8, 17), w: U.rand(1.2, 2.3),
-        life: 0.34, maxlife: 0.34, color
+        life: 0.34, maxlife: 0.34, color, fxDim: ALLY_FX_DIM
       });
     }
   }
@@ -3839,7 +3843,7 @@
     const k = n || 12;
     for (let i = 0; i < k; i++) {
       const ang = i * 6.283 / k + U.rand(-0.07, 0.07);
-      G.parts.push({ ray: true, x, y, ang, len: rad * U.rand(0.66, 0.98), life: 0.36, maxlife: 0.36, color });
+      G.parts.push({ ray: true, x, y, ang, len: rad * U.rand(0.66, 0.98), life: 0.36, maxlife: 0.36, color, fxDim: ALLY_FX_DIM });
     }
   }
   // 天落雷折线：与主角 thunderStrike 同一个 drawBolt，字段一致即可，不改渲染层。
@@ -3898,8 +3902,8 @@
       const t = nearestEnemyFrom(x, y, 520);
       const a = t ? Math.atan2(t.y - y, t.x - x) : ((G.player.dir || 1) >= 0 ? 0 : Math.PI);
       // 身前一道弯月：fireActive 剑系同款。以前只有弹飞出去，看不出「谁挥的」。
-      spawnSlash(x + Math.cos(a) * 14, y - 5 + Math.sin(a) * 14, a, col, 28, 2.0);
-      if (window.FX3) FX3.spawn('crit', x, y - 4, { pal, scale: 0.9 });
+      spawnSlash(x + Math.cos(a) * 14, y - 5 + Math.sin(a) * 14, a, col, 28, 2.0, ALLY_FX_DIM);
+      if (window.FX3) FX3.spawn('crit', x, y - 4, { pal, scale: 0.9, dim: ALLY_FX_DIM });
       G.bullets.push({
         x, y, vx: Math.cos(a) * 380, vy: Math.sin(a) * 380, r: 8,
         dmg, life: 1.5, pierce: sk.pierce || 3, hit: new Set(), home: true,
@@ -3911,8 +3915,8 @@
       const base = t ? Math.atan2(t.y - y, t.x - x) : 0;
       const n = sk.count || 3, spread = 0.72;
       // 三层错开的半月弧，先把「扇」这个形画出来，弹才有出处
-      for (let j = 0; j < 3; j++) spawnSlash(x, y - 4, base, col, 26 + j * 10, 1.7 - j * 0.24);
-      if (window.FX3) FX3.spawn('poof', x, y, { pal });
+      for (let j = 0; j < 3; j++) spawnSlash(x, y - 4, base, col, 26 + j * 10, 1.7 - j * 0.24, ALLY_FX_DIM);
+      if (window.FX3) FX3.spawn('poof', x, y, { pal, dim: ALLY_FX_DIM });
       for (let i = 0; i < n; i++) {
         const a = base + (n === 1 ? 0 : (i / (n - 1) - 0.5) * spread);
         G.bullets.push({
@@ -3928,7 +3932,7 @@
       allyRing(x, y, rad * 0.62, col, 0.32);       // 双环：外晕 + 内核，和 novaBlast 一个层次
       allyRays(x, y, rad, col, 12);                 // 12 道飞白放射
       allySpark(x, y, col, 12);
-      if (window.FX3) FX3.spawn('nova', x, y, { pal });
+      if (window.FX3) FX3.spawn('nova', x, y, { pal, dim: ALLY_FX_DIM });
       G.shake = Math.max(G.shake, 3);              // 只给一点落笔的顿感，比主角 Boss 技（10+）轻得多
       for (const e of allyVictims(x, y, rad)) { allyDamage(e, dmg); hit++; }
       Sfx.nova();
@@ -3966,7 +3970,7 @@
       allyRing(x, y, rad, col, 0.42);
       allyRing(x, y, 8, col, 0.46, rad * 0.9);    // 收缩环：墨往身上收，读作「把生气收回来」
       spawnRune(x, y, rad * 0.42, col, 1);            // 第二层贴地阵，与起手那圈套成双环
-      if (window.FX3) FX3.spawn('pickup', x, y, { pal });
+      if (window.FX3) FX3.spawn('pickup', x, y, { pal, dim: ALLY_FX_DIM });
       let total = 0;
       for (const e of allyVictims(x, y, rad)) { allyDamage(e, dmg); total += dmg; hit++; }
       if (total > 0 && G.player.hp > 0 && sk.leech) {
@@ -3986,8 +3990,8 @@
       const rad = sk.rad || 54;
       const t = nearestEnemyFrom(x, y, 260);
       const a = t ? Math.atan2(t.y - y, t.x - x) : 0;
-      spawnSlash(x + Math.cos(a) * 10, y - 4, a, col, 22, 1.7);
-      spawnSlash(x + Math.cos(a) * 16, y - 6, a, col, 30, 1.3);
+      spawnSlash(x + Math.cos(a) * 10, y - 4, a, col, 22, 1.7, ALLY_FX_DIM);
+      spawnSlash(x + Math.cos(a) * 16, y - 6, a, col, 30, 1.3, ALLY_FX_DIM);
       allyRing(x, y, rad * 0.72, col, 0.28);
       allySpark(x, y, col, 5);
       for (const e of allyVictims(x, y, rad)) { allyDamage(e, dmg); hit++; }
@@ -3995,7 +3999,7 @@
       const t = nearestEnemyFrom(x, y, 520);
       const base = t ? Math.atan2(t.y - y, t.x - x) : 0;
       const n = sk.count || 2, spread = 0.32;
-      spawnSlash(x + Math.cos(base) * 14, y - 4, base, col, 24, 1.7);
+      spawnSlash(x + Math.cos(base) * 14, y - 4, base, col, 24, 1.7, ALLY_FX_DIM);
       for (let i = 0; i < n; i++) {
         const a = base + (n === 1 ? 0 : (i / (n - 1) - 0.5) * spread);
         G.bullets.push({
@@ -6618,11 +6622,11 @@
   // 剑光弧：出手那一下在身前拉出一道弯月。
   // 这是画面里唯一"看得见刀刃"的东西 —— 角色只有一张网格，不出这道弧，
   // 玩家根本分不清他刚才是挥了一剑还是站着没动。
-  function spawnSlash(x, y, ang, color, rad, arc) {
+  function spawnSlash(x, y, ang, color, rad, arc, fxDim) {
     G.parts.push({
       slash: true, x, y, ang,
       rad: rad || 21, arc: arc == null ? 1.9 : arc,
-      life: 0.2, maxlife: 0.2, color: color || '#eafcff'
+      life: 0.2, maxlife: 0.2, color: color || '#eafcff', fxDim: fxDim || 1
     });
   }
   // 起手符文：脚下一圈刻痕，铺在地上（所以要按 0.42 压扁，才像贴地而不是立着的环）
@@ -9844,7 +9848,7 @@
     }
     if (pt.bolt) { drawBolt(pt); return; }
     if (pt.ray) {
-      ctx.globalAlpha = life * 0.9 * kFx; ctx.strokeStyle = softRingFx ? inkFx : pt.color; ctx.lineWidth = 3 * life + 1;
+      ctx.globalAlpha = life * 0.9 * kFx * (pt.fxDim || 1); ctx.strokeStyle = softRingFx ? inkFx : pt.color; ctx.lineWidth = 3 * life + 1;
       ctx.beginPath(); ctx.moveTo(pt.x, pt.y);
       ctx.lineTo(pt.x + Math.cos(pt.ang) * pt.len, pt.y + Math.sin(pt.ang) * pt.len);
       ctx.stroke(); ctx.globalAlpha = 1; return;
@@ -9857,11 +9861,12 @@
       const a0 = pt.ang - open / 2, a1 = pt.ang + open / 2;
       const r = Math.max(0, pt.rad * (0.82 + t * 0.32));   // 弯月的半径也要钳，负数会让 arc 抛错
       ctx.save(); ctx.lineCap = 'round';
-      ctx.globalAlpha = fd * 0.30; ctx.strokeStyle = pt.color; ctx.lineWidth = 9 * fd + 2;
+      const dim = pt.fxDim || 1;   // 随行之人的特效整体压淡；主角自己没有这个字段，dim=1 原样
+      ctx.globalAlpha = fd * 0.30 * dim; ctx.strokeStyle = pt.color; ctx.lineWidth = 9 * fd + 2;
       ctx.beginPath(); ctx.arc(pt.x, pt.y, r, a0, a1); ctx.stroke();
-      ctx.globalAlpha = fd * 0.85; ctx.lineWidth = 3.4 * fd + 0.8;
+      ctx.globalAlpha = fd * 0.85 * dim; ctx.lineWidth = 3.4 * fd + 0.8;
       ctx.beginPath(); ctx.arc(pt.x, pt.y, r, a0, a1); ctx.stroke();
-      ctx.globalAlpha = fd; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.4 * fd + 0.4;
+      ctx.globalAlpha = fd * dim; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.4 * fd + 0.4;
       ctx.beginPath(); ctx.arc(pt.x, pt.y, r, a0, a1); ctx.stroke();
       ctx.restore(); ctx.globalAlpha = 1;
       return;
@@ -9915,7 +9920,7 @@
       // 细长火花：尾巴永远朝速度的反面拖，速度被重力改向时尾巴也跟着往下垂
       const m = Math.hypot(pt.vx, pt.vy) || 1;
       const len = pt.len * (0.35 + life * 0.65);
-      ctx.globalAlpha = life; ctx.strokeStyle = pt.color;
+      ctx.globalAlpha = life * (pt.fxDim || 1); ctx.strokeStyle = pt.color;
       ctx.lineWidth = pt.w * (0.5 + life * 0.5); ctx.lineCap = 'round';
       ctx.beginPath(); ctx.moveTo(pt.x, pt.y);
       ctx.lineTo(pt.x - pt.vx / m * len, pt.y - pt.vy / m * len);
