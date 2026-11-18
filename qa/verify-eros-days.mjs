@@ -48,20 +48,38 @@ ok(/if \(gated\) break;/.test(doRestFn) && /if \(hasBottle\) save\.greenLiquid/.
 ok(/version: 5,[\s\S]{0,600}erosDays: 0,/.test(game), 'defaultSave 有 erosDays');
 ok(/erosDays: Math\.max\(0, Math\.floor\(\+s\.erosDays \|\| 0\)\),/.test(game), 'loadSave 清洗 erosDays（禁 |0）');
 ok(/save\.erosDays = 0;   \/\/ 历练岁月是「这一世」的账/.test(game), 'resetAllProgress 清零 erosDays（本世账）');
-ok(/const EROS_DAYS = \{[\s\S]{0,500}encounter: 1[^\n]*\n\s*\};/.test(game), '动作→天数表齐全');
+ok(/const EROS_DAYS = \{[\s\S]{0,900}encounter: 1/.test(game) && /beidanHalf: 183/.test(game), '动作→天数表齐全（含备丹/冲关里程碑）');
 ok(/function addErosDays\(n\)[\s\S]{0,300}writeSave\(\)/.test(game), '记账即落盘（洞府/坊市入口原本不写档）');
 ok(/addErosDays\(EROS_DAYS\.enterMap\)/.test(game), '进战斗图计一日');
 ok(/addErosDays\(EROS_DAYS\.sweep \* SWEEP_N\)/.test(game), '扫荡按趟计（SWEEP_N 趟 = N 日）');
 ok(/addErosDays\(EROS_DAYS\.rest \* n\)/.test(game), '闭关/静养按次数计');
 ok(/addErosDays\(EROS_DAYS\.cave\)/.test(game) && /addErosDays\(EROS_DAYS\.shop\)/.test(game), '进出洞府/坊市各计一日');
-ok(/addErosDays\(Math\.max\(1, Math\.floor\(\+\(r\.days \|\| 1\) \|\| 1\)\)\)/.test(game), '开炉按丹方 days 计');
+ok(/addErosShichen\(Math\.max\(1, Math\.floor\(\+\(r\.hours \|\| 1\) \|\| 1\)\)\)/.test(game), '开炉按丹方 hours 记时辰细账（不再记成整日）');
 ok(/addErosDays\(EROS_DAYS\.finish\)/.test(game) && /addErosDays\(EROS_DAYS\.encounter\)/.test(game), '通关与际遇各计一日');
 ok(/<i>历练岁月<\/i><b>' \+ erosText\(\)/.test(game), '静修页属性格并列显示历练岁月');
 ok(/class="jz-row eros"/.test(game), '岁月纪年表末尾有历练汇总行');
-// 丹方锚点
-ok(/id: 'r_zhuji'[^\n]*days: 3650/.test(recipes), '筑基丹 3650 日（原著「十年才出一鼎」）');
-ok(/id: 'r_tenglong'[^\n]*days: 21900/.test(recipes), '腾龙丹 21900 日（原著「六十年苦修之功」）');
-ok((recipes.match(/kind: 'alchemy'[^\n]*days: \d+/g) || []).length === 7, '七味丹方都有 days');
+// —— 三层时间分离（原著考据）：单炉一个时辰 / 备齐丹药半年 / 服丹冲关一年 ——
+ok(/id: 'r_zhuji'[^\n]*rate: 0\.25, hours: 1/.test(recipes), '筑基丹单炉 1 时辰、初期成丹率 0.25（原著十颗成三颗≈30%）');
+ok(/id: 'r_tenglong'[^\n]*hours: 1/.test(recipes), '腾龙丹单炉也记 1 时辰（六十年苦修是整段周期，不摊到每炉）');
+ok(!/days: 3650|days: 21900/.test(recipes), '丹方里不再有「把整段备药周期当单炉耗时」的 3650/21900 日');
+ok((recipes.match(/kind: 'alchemy'[^\n]*hours: \d+/g) || []).length === 7, '七味丹方都有 hours（时辰）字段');
+ok(/const BREAK_CLOSE_DAYS = \{ 36: 365, 56: 730, 82: 1095, 112: 2190 \}/.test(game), '四道破境门各有闭关岁月：筑基365/结丹730/元婴1095/化神2190 日');
+ok(/beidanHalf: 183/.test(game) && /breakBase: 365/.test(game), '备丹半年=183 日、冲关兜底=365 日两个里程碑常量');
+ok(/function breakCloseDays\(b\)/.test(game) && /addErosDays\(breakCloseDays\(gate\)\)/.test(game) && /addErosDays\(breakCloseDays\(b\)\)/.test(game), '冲关记账接进剧情图与洞府直冲两条成功路径');
+ok(/function beidanProgress\(justMade\)[\s\S]{0,450}addErosDays\(EROS_DAYS\.beidanHalf\)/.test(game), '首次炼成筑基丹补记半年里程碑');
+ok(/if \(r\.out === 'zhuji'\) beidanProgress\(true\)/.test(game), '开炉成功分支挂上备丹里程碑');
+ok(/if \(r\.out === 'zhuji'\) beidanProgress\(\)/.test(game), '炸炉也算进备丹半年（前二十几次全废）');
+// 时辰细账：三处对称 + 进位
+ok(/erosShichen: 0,/.test(game) && /beidanDone: false,/.test(game), 'defaultSave 有时辰细账与备丹里程碑字段');
+ok(/erosShichen: Math\.min\(11, Math\.max\(0, Math\.floor\(\+s\.erosShichen \|\| 0\)\)\)/.test(game), 'loadSave 清洗时辰细账到 0~11');
+ok(/save\.erosShichen = 0;/.test(game) && /save\.beidanDone = false;/.test(game), 'resetAllProgress 清零本世账（时辰、备丹）');
+ok(/function addErosShichen\(n\)[\s\S]{0,350}save\.erosDays = erosDays\(\) \+ days/.test(game), '时辰满 12 进位成一日');
+// 冷却：只拦 UI 点击，不进 craftRecipe（闸门/挂机不受影响）
+ok(/const CRAFT_COOL_MS = 120000/.test(game), '单炉冷却 2 分钟（原著一个时辰的游戏化）');
+ok(/function craftOnCool\(\)/.test(game) && /craftOnCool\(\)/.test(game), '冷却判定存在');
+ok(/if \(rr && rr\.kind === 'alchemy' && craftOnCool\(\)\)/.test(game), '冷却只在 UI 点击层拦截炼丹');
+ok(!/function craftRecipe\(rid\)[\s\S]{0,3200}craftOnCool/.test(game), 'craftRecipe 本体不含冷却闸门（调试口同步连开不阻塞）');
+ok(/^    beidan: \{[\s\S]{0,500}seal: '备丹'/m.test(fs.readFileSync(join(root, 'js', 'chronicle.js'), 'utf8')), '纪年卡新增「备丹」三屏');
 
 // ==================== 运行时 ====================
 const browser = await chromium.launch({ channel: 'chrome' });
@@ -167,6 +185,63 @@ ok(r6.disabled === false, '修为顶在门口时闭关按钮仍可点', r6);
 ok(r6.liquid1 > r6.liquid0, '静养照样凝出绿液（原来撞门那次 break 在产液之前）', r6);
 ok(r6.xp1 <= r6.xp0, '静养不涨修为（xp 没有上升）', r6);
 ok(r6.d1 > r6.d0, '静养也记历练岁月', r6);
+
+// ===== R7 时辰细账：单炉 1 时辰，12 时辰进位成 1 日 =====
+// 用调试口清本世账（不 reload：reload 会把旧内存态写回 localStorage，清档被复活）
+await page.evaluate(() => window.__FR.erosReset());
+const r7 = await page.evaluate(() => {
+  const F = window.__FR;
+  const a = { d: F.erosDays(), s: F.erosShichen() };
+  const r = F.addErosShichen(1);            // 1 时辰
+  const r11 = F.addErosShichen(10);         // 累到 11 时辰
+  const r12 = F.addErosShichen(1);          // 第 12 时辰 → 进位成 1 日
+  return { a, r, r11, r12, end: { d: F.erosDays(), s: F.erosShichen() } };
+});
+ok(r7.a.d === 0 && r7.a.s === 0, '新档时辰细账从 0 起', r7.a);
+ok(r7.r.days === 0 && r7.r.shichen === 1, '单炉记 1 时辰，不记成 1 日', r7.r);
+ok(r7.r11.shichen === 11 && r7.r11.days === 0, '累到 11 时辰仍是 0 日', r7.r11);
+ok(r7.r12.days === 1 && r7.r12.shichen === 0, '第 12 时辰进位成 1 日、余数归零', r7.r12);
+
+// ===== R8 备丹半年里程碑：一次入账 + 转世清零 =====
+const r8 = await page.evaluate(() => {
+  const F = window.__FR;
+  const before = F.erosDays();
+  const first = F.beidanNow();              // 首次：+183
+  const done1 = F.beidanDone();
+  const second = F.beidanNow();             // 再次：不重复
+  return { before, first, done1, second, after: F.erosDays() };
+});
+ok(r8.first - r8.before === 183, '首次炼成筑基丹补记半年=183 日', r8);
+ok(r8.done1 === true, '备丹里程碑本世标记已置位', r8);
+ok(r8.second === r8.first, '再次触发不重复记账（一次性）', r8);
+// 落盘后刷新仍在
+await page.reload();
+await page.waitForFunction(() => !!window.__FR, null, { timeout: 15000 });
+const r8b = await page.evaluate(() => ({ d: window.__FR.erosDays(), done: window.__FR.beidanDone() }));
+ok(r8b.d === 184 && r8b.done === true, '备丹里程碑落盘（刷新后 1 日+183=184 仍在）', r8b);
+
+// ===== R9 冷却只拦 UI、不阻塞调试口 =====
+// 清本世账用调试口（saveApi.clear 会连 seen 一起清，但这里只要干净的本世账）
+const r9 = await page.evaluate(() => {
+  const F = window.__FR;
+  F.erosReset();
+  return { ms: F.craftCoolMs(), left: F.craftCoolLeft(), before: F.erosDays() * 12 + F.erosShichen() };
+});
+ok(r9.ms === 120000, '单炉冷却常量为 2 分钟', r9.ms);
+ok(r9.left === 0, '初始无冷却（调试口不自动触发）', r9);
+// craftRecipe 本体不含 craftOnCool 由上面的静态断言证明；运行时再确认调试口调用不启动冷却：
+// 用 addErosShichen 模拟「调试口连续 12 炉的记账」，冷却态必须始终为 0（脚本连开不被拖）。
+const r9b = await page.evaluate(() => {
+  const F = window.__FR;
+  for (let i = 0; i < 12; i++) F.addErosShichen(1);
+  return { after: F.erosDays() * 12 + F.erosShichen(), coolLeft: F.craftCoolLeft() };
+});
+ok(r9b.after - r9.before === 12 && r9b.coolLeft === 0, '连开 12 炉记账不启动冷却（闸门/挂机不受影响）', { r9, r9b });
+
+// ===== R10 冲关闭关岁月梯度（静态表 + 兜底） =====
+const r10 = await page.evaluate(() => window.__FR.erosBreakDays());
+ok(r10 && r10['36'] === 365 && r10['56'] === 730 && r10['82'] === 1095 && r10['112'] === 2190,
+   '四道门闭关岁月梯度正确（筑基一年→化神六年）', r10);
 
 ok(errors.length === 0, '全程无 JS 报错', errors.slice(0, 4));
 

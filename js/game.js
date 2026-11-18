@@ -179,6 +179,10 @@
       wins: 0, seen: [],
       // 历练岁月：本世累计，转世清零（与「入道年数」那本境界现推的账分开）
       erosDays: 0,
+      // 时辰细账：单炉开火记 1 时辰，攒够 12 进位成一日（原著「单炉一个时辰」）
+      erosShichen: 0,
+      // 备丹半年里程碑是否已记（本世账，转世随 erosDays 一起清零；不与跨世的 seen 混）
+      beidanDone: false,
       // 剧情只演一次：intro / scene / outro 三类节点键也记在 seen 里（见 storySeen）。
       // 古传送阵跌境界是「一次性剧情代价」——重修把修为补回来时 save.wounded 会被清空，
       // 只靠 !save.wounded 判断，第二次进这张图就会再跌一回，故单独立一个不回退的标志。
@@ -382,6 +386,10 @@
         stoneBurned: Math.max(0, Math.floor(+s.stoneBurned || 0)),
         // 历练岁月同属大事账，也禁 |0（扫荡几千趟就可能越过 2^31 的日子虽远，别留隐患）
         erosDays: Math.max(0, Math.floor(+s.erosDays || 0)),
+        // 时辰细账：0~11 的余数，回读夹到区间里（单炉一个时辰，12 时辰进位成日）
+        erosShichen: Math.min(11, Math.max(0, Math.floor(+s.erosShichen || 0))),
+        // 备丹半年是本世账，转世随历练岁月归零；这里按布尔回读
+        beidanDone: !!s.beidanDone,
         // deathLost = { 地图id: { items: { 道具id: 件数 } } }；件数是小整数才用 |0。
         deathLost: (function () {
           const o = {};
@@ -3201,8 +3209,9 @@
   // 岁月纪记「道行」：年数由境界现推，结婴 207 年、道祖万余年，是原著称谓的那条线。
   // 这一本记「历练」：做一件完整的事就过一天，本世累计、转世清零，落进存档。
   // 两本账量级不同、语义不同 —— 分开摆，谁也不替换谁（见 renderCaveRest 的两栏）。
-  // 天数取原著锚点：炼丹按丹方的 days（筑基丹「十年出一鼎」、腾龙丹「六十年苦修」），
-  // 进出洞府 / 坊市、踏进战图、闭关静养这类「寻常日子」各记一天。
+  // 天数取原著锚点：寻常日子（进出洞府/坊市、踏进战图、闭关静养）各记一日；
+  // 「炼丹」按时辰细账另记 —— 原著单炉一个时辰（韩立投十枚药丸，过一个时辰丹成），
+  // 不能再把「十年一鼎 / 六十年苦修」那种整段备药周期摊到每一炉上（那是里程碑，见备丹/冲关）。
   const EROS_DAYS = {
     enterMap: 1,    // 踏进一张战斗图
     sweep: 1,       // 扫荡每一趟（一次扫荡走 SWEEP_N 趟）
@@ -3210,9 +3219,36 @@
     cave: 1,        // 进一次洞府
     shop: 1,        // 进一次坊市
     finish: 1,      // 打穿一张图
-    encounter: 1    // 了却一件际遇
+    encounter: 1,   // 了却一件际遇
+    // 备药 / 冲关是「整段岁月」的里程碑，一次记入，不按天逐日跑（原著口径见下）。
+    //   备丹半年：韩立在黄枫谷地火屋断续炼半年，前二十几次全废，末了炼出二十几颗筑基丹。
+    //   服丹冲关：吞近十颗筑基丹后闭关约一年才出关（筑基）；结丹/元婴等大关各有年数。
+    beidanHalf: 183,   // 首次炼成筑基丹：半年≈183 日（一次性）
+    breakBase: 365     // 服丹冲关兜底一年≈365 日；每道门用 BREAK_CLOSE_DAYS 覆盖
   };
+  // 每道破境门的「闭关岁月」（原著锚点，日）。筑基吞丹后闭关约一年；
+  // 结丹原著 58→126 岁闭死关，元婴碎丹、化神开芥子空间又是二百余年 —— 逐级放大，
+  // 但仍是「里程碑一次记入」，不与闭关静养那种按日累加的寻常日子混。
+  const BREAK_CLOSE_DAYS = { 36: 365, 56: 730, 82: 1095, 112: 2190 };
+  function breakCloseDays(b) {
+    return (b && BREAK_CLOSE_DAYS[b.lv]) || EROS_DAYS.breakBase;
+  }
   function erosDays() { return Math.max(0, Math.floor(+save.erosDays || 0)); }
+  // 时辰细账：12 时辰 = 1 日。单炉开火记 1 时辰，攒够 12 进位成一日 ——
+  // 这样「一个时辰」不再被当成一整日糊弄过去，也不用把历练岁月改成小数。
+  function erosShichen() {
+    const n = Math.floor(+(save.erosShichen || 0));
+    return n >= 0 ? n : 0;
+  }
+  function addErosShichen(n) {
+    const add = Math.floor(+n || 0);
+    if (add <= 0) return;
+    const total = erosShichen() + add;
+    const days = Math.floor(total / 12);
+    save.erosShichen = total % 12;
+    if (days) save.erosDays = erosDays() + days;
+    writeSave();
+  }
   function addErosDays(n) {
     const d = Math.max(0, Math.floor(+n || 0));
     if (!d) return;
@@ -3220,8 +3256,9 @@
     writeSave();   // 本世账必须耐久：进洞府 / 坊市这类入口原本不写档，这里兜住
   }
   function erosText() {
-    const n = erosDays();
-    return n + ' 日' + (n >= 365 ? '（约 ' + Math.floor(n / 365) + ' 年）' : '');
+    const n = erosDays(), s = erosShichen();
+    let txt = n + ' 日' + (s ? ' ' + s + ' 时辰' : '') + (n >= 365 ? '（约 ' + Math.floor(n / 365) + ' 年）' : '');
+    return txt;
   }
 
   // ==========================================================================
@@ -7130,6 +7167,23 @@
   }
   // 哪些破境门对应哪张卡（洞府直冲、没有对应剧情图时走这条）
   const CHRONICLE_LV = { 56: 'jiedan', 82: 'jieying' };
+
+  // ---------- 备丹半年：首次炼成筑基丹的里程碑 ----------
+  // 原著（黄枫谷地火屋）：韩立断续炼了半年，前二十几次全废，最后炼出二十几颗筑基丹 ——
+  // 「这些丹药，就是韩立这半年来倾注了无数心血的所有收获」。这是「整段备药」的重量，
+  // 不能摊到每一炉上（单炉只有一个时辰）。故在开炉这条线上单独记一次半年，
+  // 用本世字段 beidanDone 守门（与跨世的 seen、纪年卡的 chron:beidan 都不混），
+  // QA 下不演卡也照记账；转世随 erosDays 一起清零，下一世重新计。
+  function beidanProgress(justMade) {
+    if (save.beidanDone) return;
+    save.beidanDone = true;
+    addErosDays(EROS_DAYS.beidanHalf);   // 半年≈183 日，一次入账（内部 writeSave 会带 beidanDone 落盘）
+    if (justMade) {
+      // 纪年卡只演一次；available() 在 QA/webdriver 下为 false，账已记、卡跳过，不影响流程。
+      chroniclePlay('beidan');
+    }
+    notify('历练岁月 · 半年备丹，一朝丹成（+183 日）');
+  }
 
   // ---------- 战斗内定时剧情 ----------
   function checkStory() {
@@ -12484,6 +12538,8 @@
         const effRate = craftRateOf(r);
         const ratePct = Math.round(effRate * 100);
         const profTip = (r.kind === 'alchemy' && alchemyCount() > 0) ? '（含熟手 ' + Math.round(alchemyProf() * 100) + '%）' : '';
+        const cooling = r.kind === 'alchemy' && craftOnCool();
+        const craftLabel = cooling ? ('文火 ' + Math.ceil(craftCoolLeft() / 1000) + 's') : '炼制';
         rows += '<div class="recrow' + (can ? ' can' : '') + '">' +
           '<div class="rr-main"><b style="color:' + rar.color + '">' + r.name + (r.outN > 1 ? ' ×' + r.outN : '') + '</b>' +
           '<span class="rr-rate">成算 ' + ratePct + '%' + profTip + (ratePct < 100 ? ' · 败则料尽' : '') + '</span>' +
@@ -12491,7 +12547,7 @@
           '<em>' + r.desc + '</em></div>' +
           '<div class="rr-right">' +
           (!okBook ? '<span class="gr-need">缺丹方</span>'
-            : okReq ? '<button class="sr-btn buy" data-craft="' + r.id + '"' + (can ? '' : ' disabled') + '>炼制</button>'
+            : okReq ? '<button class="sr-btn buy" data-craft="' + r.id + '"' + ((can && !cooling) ? '' : ' disabled') + '>' + craftLabel + '</button>'
             : '<span class="gr-need">需' + realmName(r.req) + '</span>') +
           '</div></div>';
       }
@@ -13119,6 +13175,29 @@
     clearTimeout(elBreakOmen._t);
     elBreakOmen._t = setTimeout(function () { elBreakOmen.classList.remove('on'); }, 2600);
   }
+  // 服丹冲关的闭关进度条：一条墨线从空滚到满，天数同步从 0 跳到这道门的闭关年数。
+  // 独立定时器驱动，不进主循环（主循环一抛异常整页卡死，这里绝不能搭进去）；
+  // 次数封顶、到点自停。QA / webdriver 下不演（不阻塞逻辑，只求截图干净）。
+  function closeBarPlay(gate, force) {
+    if (!elCloseBar || !gate) return;
+    if (!force && (window.__CSJ_QA__ || (typeof navigator !== 'undefined' && navigator.webdriver))) return;
+    const days = breakCloseDays(gate);
+    const nm = elCloseBar.querySelector('.cb-name');
+    const numEl = elCloseBar.querySelector('.cb-num');
+    if (nm) nm.textContent = gate.realm || '';
+    if (numEl) numEl.textContent = '0';
+    restartAnim(elCloseBar, 'on');
+    clearInterval(elCloseBar._t);
+    let step = 0;
+    const total = 26;                       // 26 步 × 100ms = 2.6 秒，与 CSS 的 2.6s/2.8s 对齐
+    elCloseBar._t = setInterval(function () {
+      step++;
+      if (numEl) numEl.textContent = String(Math.round(days * Math.min(1, step / total)));
+      if (step >= total) { clearInterval(elCloseBar._t); elCloseBar._t = 0; }
+    }, 100);
+    clearTimeout(elCloseBar._off);
+    elCloseBar._off = setTimeout(function () { elCloseBar.classList.remove('on'); }, 2800);
+  }
   function breakSceneThen(gate, onDone) {    if (!gate) { if (onDone) onDone(null, true); return; }
     G.breakCur = gate;
     const scene = (gate.story && gate.story[0] && gate.story[0].name) || '洞府';
@@ -13451,6 +13530,9 @@
     save.cultivate.level = newLv;
     save.cultivate.xp = 0;
     syncBestLevel();
+    // 服丹冲关的闭关岁月一次入账（筑基约一年，逐级放大）——与炼丹的时辰细账彻底分开。
+    addErosDays(breakCloseDays(gate));
+    closeBarPlay(gate);
     const take = isWu ? settleWushuai(gate, true, k) : 0;
     if (G.player) {
       G.player.level = Math.max(G.player.level || 1, newLv);
@@ -13537,6 +13619,9 @@
     }
     const take = isWu ? settleWushuai(b, true, k) : 0;
     G.breakPending = null;
+    // 服丹冲关的闭关岁月一次入账（筑基约一年，逐级放大）——与炼丹的时辰细账彻底分开。
+    addErosDays(breakCloseDays(b));
+    closeBarPlay(b);
     breakOmen(true, b.realm || '', isWu ? ('丹成 · 扛衰 ' + take + ' 道') : '丹成 · 道基已固');
     banner((isWu ? ('冲关 · ' + b.realm + ' · 扛衰 ' + take + ' 道') : ('冲关 · ' + b.realm))
       + '　入道 ' + Math.floor(yearAt(b.lv)) + ' 年'); Sfx.realmUp();
@@ -14134,6 +14219,37 @@
     if (!r || !r.book) return true;
     return (save.inventory[r.book] || 0) > 0;
   }
+  // ---------------- 单炉冷却：原著「一个时辰」的即时感 ----------------
+  // 原著单炉「过一个时辰丹药形成」——游戏化约 2 分钟实时（见用户考据里的游戏化建议）。
+  // 关键：冷却只拦「界面上的炼制按钮」，不碰 craftRecipe 本身 ——
+  // 闸门/挂机脚本走调试口 craft() 同步连开几十炉，若在这里设闸会全红；且原著本就是
+  // 一炉接一炉地反复开，玩家等得起，脚本不该被拖。冷却是内存态，刷新页面即重置（对玩家有利）。
+  const CRAFT_COOL_MS = 120000;                 // 2 分钟 = 一个时辰的游戏化
+  let craftReadyAt = 0;                          // 下一炉可开的时间戳（Date.now()）
+  function craftCoolLeft() { return Math.max(0, craftReadyAt - Date.now()); }
+  function craftOnCool() { return craftCoolLeft() > 0; }
+  function startCraftCool() { craftReadyAt = Date.now() + CRAFT_COOL_MS; }
+  // 冷却倒计时只改按钮文字/禁用态，不重绘整个洞府面板（重绘会打断翻页/介绍卡）。
+  // 单次倒计时一个 interval，到点自停；次数封顶防跑飞。
+  let craftCoolTimer = 0;
+  function tickCraftCool() {
+    if (craftCoolTimer) clearInterval(craftCoolTimer);
+    let ticks = 0;
+    const paint = () => {
+      const btns = document.querySelectorAll('button[data-craft]');
+      const left = craftCoolLeft();
+      btns.forEach(b => {
+        const rr = Recipes.get(b.getAttribute('data-craft'));
+        if (!rr || rr.kind !== 'alchemy') return;
+        if (left > 0) { b.disabled = true; b.textContent = '文火 ' + Math.ceil(left / 1000) + 's'; }
+        else { b.disabled = false; b.textContent = '炼制'; }
+      });
+      if (left <= 0 || ++ticks > 130) { clearInterval(craftCoolTimer); craftCoolTimer = 0; }
+    };
+    paint();
+    craftCoolTimer = setInterval(paint, 1000);
+  }
+
   // ---------------- 炼丹成功率（按原著设定） ----------------
   // 原著口径（第 x 卷「筑基丹」一节）：就是当世最盛名的几位炼丹宗师亲自出手，
   // 成丹的概率也不会太高，约只有一半；而且炼的还得是他们最拿手的那味丹。
@@ -14163,8 +14279,9 @@
       if (save.inventory[m[0]] <= 0) delete save.inventory[m[0]];
       save.totalItems = Math.max(0, (save.totalItems || 1) - m[1]);
     }
-    // 开炉就耗岁月，炸炉也一样耗（丹方 days 取原著锚点；缺省一日）
-    addErosDays(Math.max(1, Math.floor(+(r.days || 1) || 1)));
+    // 单炉开火 = 一个时辰（原著「过了一个时辰丹药形成」），炸炉也一样耗 ——
+    // 走时辰细账，攒够 12 时辰才进位成一日；不再把整段备药周期摊到每一炉上。
+    addErosShichen(Math.max(1, Math.floor(+(r.hours || 1) || 1)));
     // 火候不会每次都听话。材料进了炉，出不出得来是另一回事 ——
     // 这才是「必须炼制」的分量：筑基丹这种，宗师也只有几成把握。
     const rate = craftRateOf(r);
@@ -14172,6 +14289,8 @@
     if (Math.random() >= rate) {
       const back = Math.round(r.cost * 0.5);
       save.stones += back;
+      // 炸炉也算备丹的那半年：原著前二十几次全废，废炉的时日都倾注在里面。
+      if (r.out === 'zhuji') beidanProgress();
       writeSave();
       Sfx.warn();
       notify('炸炉 · ' + r.name + '废了' + (back ? '（退回灵石 ' + back + '）' : ''));
@@ -14190,6 +14309,8 @@
     Sfx.buff(); Sfx.levelup();
     notify('炼成 · ' + r.name + (made > 1 ? ' ×' + made : ''));
     if (out) itemToast(out);
+    // 首次炼成筑基丹：补记「半年备丹」里程碑并演那张纪年卡（一次性）。
+    if (r.out === 'zhuji') beidanProgress(true);
     renderCave();
   }
   function addCultivateXp(amount) {
@@ -14352,6 +14473,7 @@
   const elCnLabel = elCnwrap && elCnwrap.querySelector ? elCnwrap.querySelector('.barlabel') : null;
   const elWmNext = document.getElementById('wmNext');
   const elBreakOmen = document.getElementById('breakOmen');
+  const elCloseBar = document.getElementById('closeBar');
   const elHpval = document.getElementById('hpval');
   const elXpval = document.getElementById('xpval');
   const elLevel = document.getElementById('level');
@@ -15163,7 +15285,19 @@
     const da = e.target.closest('button[data-decompall]');
     if (da) { decomposeItem(da.getAttribute('data-decompall'), true); return; }
     const cr = e.target.closest('button[data-craft]');
-    if (cr) { craftRecipe(cr.getAttribute('data-craft')); return; }
+    if (cr) {
+      const rid = cr.getAttribute('data-craft');
+      const rr = Recipes.get(rid);
+      // 炼丹单炉冷却：原著「一个时辰」，游戏化约 2 分钟。只拦界面点击，
+      // 不进 craftRecipe（调试口/闸门同步连开不受影响）。炼器/制符不设炉火冷却。
+      if (rr && rr.kind === 'alchemy' && craftOnCool()) {
+        notify('丹炉火未歇 · 再等 ' + Math.ceil(craftCoolLeft() / 1000) + ' 秒');
+        Sfx.warn(); return;
+      }
+      craftRecipe(rid);
+      if (rr && rr.kind === 'alchemy') { startCraftCool(); tickCraftCool(); }
+      return;
+    }
     // 炼丹/炼器/制符：点料名看「去哪取」（不挂问号，点字就出）
     const mt = e.target.closest('.mat.clk[data-mat]');
     if (mt) { showItemHint(mt.getAttribute('data-mat'), mt); return; }
@@ -15758,6 +15892,8 @@
     save.petFeed = { on: false, t: 0 };
     save.greenLiquid = 0; save.ach = {};
     save.erosDays = 0;   // 历练岁月是「这一世」的账，换一世从零开始记
+    save.erosShichen = 0;   // 时辰细账同属本世账，一并清零
+    save.beidanDone = false;   // 备丹里程碑也是本世账，转世后重新计
     save.wounded = null;      // 存档重来：修为受创一并清掉
     G.breakCaveId = null; G.breakPending = null;  // 清掉过图会话态：避免重生后误吃原著洞府 +30%
     save.gift_zhuji = false;
@@ -17151,8 +17287,18 @@
     chronicle() { return chronicleEntries().map(e => ({ k: e.k, y: Math.floor(e.y), t: e.t, s: e.s })); },
     // 历练岁月调试口：既有真源可查，也能直接记几天来验证显示与落盘
     erosDays() { return erosDays(); },
+    erosShichen() { return erosShichen(); },
     addErosDays(n) { addErosDays(n); renderCave(); return erosDays(); },
+    addErosShichen(n) { addErosShichen(n); renderCave(); return { days: erosDays(), shichen: erosShichen() }; },
     erosTable() { return JSON.parse(JSON.stringify(EROS_DAYS)); },
+    erosBreakDays() { return JSON.parse(JSON.stringify(BREAK_CLOSE_DAYS)); },
+    beidanDone() { return !!save.beidanDone; },
+    beidanNow() { beidanProgress(true); return erosDays(); },
+    erosReset() { save.erosDays = 0; save.erosShichen = 0; save.beidanDone = false; writeSave(); return 0; },
+    craftCoolMs() { return CRAFT_COOL_MS; },
+    craftCoolLeft() { return craftCoolLeft(); },
+    craftCoolSkip() { craftReadyAt = 0; if (craftCoolTimer) { clearInterval(craftCoolTimer); craftCoolTimer = 0; } return 0; },
+    closeBar(lv) { const b = (window.BREAKTHROUGH || []).find(x => x.lv === (lv || 36)); if (b) closeBarPlay(b, true); return b ? breakCloseDays(b) : 0; },
     // 性子（P2-5）调试口：查表 + 查随行者的路数与它的贴人半径是否跟角色对得上
     allyRole(id) { const r = (window.allyRoleOf ? window.allyRoleOf(id) : null); return r ? { role: r.role, note: r.note } : null; },
     allyRoles() {

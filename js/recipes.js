@@ -2,9 +2,12 @@
 // kind: alchemy 炼丹 | forge 炼器 | talisman 制符
 // mats: [[材料id, 数量], ...]   cost: 灵石
 // req: 角色等级门槛（含），不足则看得见做不了
-// days: 开炉耗去几日（记进「历练岁月」那本账）；缺省 1 日。
-//       取原著锚点：筑基丹「七大派联手十年才出一鼎」=3650 日；
-//       腾龙丹「六十年苦修之功凝成一粒」=21900 日（V9C1364）。
+// hours: 单炉开火耗去几「时辰」（1 时辰≈2 小时，记进「历练岁月」的时辰细账，12 时辰=1 日）；缺省 1 时辰。
+//        「备齐丹药」那段年月另算里程碑，不摊在每一炉上 —— 别把单炉时长和整段备药周期混了。
+//        原著：韩立投十枚药丸入炉，过一个时辰丹成（只成三颗）；在黄枫谷地火屋断续炼半年，
+//        前二十几次全废，最后炼出二十几颗筑基丹。故单炉记 1 时辰，完整备丹由剧情节点一次记半年。
+//        腾龙丹「六十年苦修之功凝成一粒」（V9C1364）说的是整段苦修，不是单炉时长，
+//        故它也按单炉 1 时辰记，六十年那份重量放在服丹冲关/岁月纪呈现，不记到每炉上。
 
 window.RECIPE_KINDS = {
   alchemy:  { name: '炼丹', icon: '⚗', tip: '以灵草入炉，取丹丸。' },
@@ -14,17 +17,17 @@ window.RECIPE_KINDS = {
 
 window.RECIPES = [
   // ================= 炼丹 =================
-  { id: 'r_huiqi', kind: 'alchemy', name: '止血丹', out: 'huiqi', outN: 2, cost: 8, req: 1, rate: 0.42, days: 1,
+  { id: 'r_huiqi', kind: 'alchemy', name: '止血丹', out: 'huiqi', outN: 2, cost: 8, req: 1, rate: 0.42, hours: 1,
     mats: [['m_chijing', 2]], desc: '药庐里最粗浅的一味。一炉出两颗，够用一路。' },
-  { id: 'r_lingzhi', kind: 'alchemy', name: '辟谷丹', out: 'lingzhi', outN: 2, cost: 6, req: 1, rate: 0.42, days: 1,
+  { id: 'r_lingzhi', kind: 'alchemy', name: '辟谷丹', out: 'lingzhi', outN: 2, cost: 6, req: 1, rate: 0.42, hours: 1,
     mats: [['m_huangjing', 2], ['m_chijing', 1]], desc: '老黄精配人参，蒸出来的药膏。饿极了含一颗，能顶几天。' },
-  { book: 'f_peiyuan', id: 'r_peiyuan', kind: 'alchemy', name: '养精丹', out: 'peiyuan', outN: 1, cost: 34, req: 3, rate: 0.34, days: 1,
+  { book: 'f_peiyuan', id: 'r_peiyuan', kind: 'alchemy', name: '养精丹', out: 'peiyuan', outN: 1, cost: 34, req: 3, rate: 0.34, hours: 1,
     mats: [['m_chijing', 3], ['m_huangjing', 2]], desc: '药庐的看家方子，墨大夫只教过一次。' },
-  { book: 'f_huanglong', id: 'r_huanglong', kind: 'alchemy', name: '黄龙丹', out: 'huanglong', outN: 1, cost: 95, req: 8, rate: 0.28, days: 3,
+  { book: 'f_huanglong', id: 'r_huanglong', kind: 'alchemy', name: '黄龙丹', out: 'huanglong', outN: 1, cost: 95, req: 8, rate: 0.28, hours: 1,
     mats: [['m_huanglongcao', 2], ['m_kulianhua', 1], ['m_wolfdan', 1]], desc: '黄龙草、苦莲花、忘忧果——正是韩立在园中催熟的那几味。丹名就从黄龙草上来。' },
-  { book: 'f_jinsui', id: 'r_jinsui', kind: 'alchemy', name: '金髓丸', out: 'jinsui', outN: 1, cost: 170, req: 12, rate: 0.24, days: 3,
+  { book: 'f_jinsui', id: 'r_jinsui', kind: 'alchemy', name: '金髓丸', out: 'jinsui', outN: 1, cost: 170, req: 12, rate: 0.24, hours: 1,
     mats: [['m_huangqiucao', 1], ['m_wangyouguo', 2], ['m_sanwucao', 1], ['m_chongjing', 1], ['m_yusui', 1]], desc: '丹成色如金髓，入口滚烫。黄球草先养一身血肉，忘忧果定神、三乌草补元——脱胎换骨的一味。' },
-  { book: 'f_zhuji', id: 'r_zhuji', kind: 'alchemy', name: '筑基丹', out: 'zhuji', outN: 1, cost: 820, req: 35, rate: 0.10, days: 3650,
+  { book: 'f_zhuji', id: 'r_zhuji', kind: 'alchemy', name: '筑基丹', out: 'zhuji', outN: 1, cost: 820, req: 35, rate: 0.25, hours: 1,
     // 原著丹方：主药三味 + 辅药三十一种。辅药里千结花、黑芍草、金精参有名字，
     // 余下廿八味收作一包（m_fuyaobao）；龙鳞果、血煞珠原著不是筑基丹用料，已移出。
     mats: [['m_yusuizhi', 3], ['m_zihua', 3], ['m_tianling', 3],
@@ -32,7 +35,7 @@ window.RECIPES = [
     desc: '主药三味：玉髓芝、紫猴花、天灵果。辅药三十一味：千结花、黑芍草、金精参之外，还有廿八味药收在一只青布包里。' +
       '药书写得明白，辅药味味都要数百年的火候——园里最老的化龙草也不过百余年，差得远；三味主药又是天地灵气幻化、天生自长，园中一株都无。' +
       '所以整个越国七大派联手，也要十年才出得一鼎，区区千余颗。' },
-  { book: 'f_tenglong', id: 'r_tenglong', kind: 'alchemy', name: '腾龙丹', out: 'tenglong', outN: 1, cost: 5000, req: 132, rate: 0.42, days: 21900,
+  { book: 'f_tenglong', id: 'r_tenglong', kind: 'alchemy', name: '腾龙丹', out: 'tenglong', outN: 1, cost: 5000, req: 132, rate: 0.42, hours: 1,
     mats: [['m_zhilongguo', 1], ['m_zhenlingxue', 1], ['m_zhenlinglin', 3]],
     desc: '芝龙果三万年一结果，为主药；真灵之血凝魂，真灵鳞锁灵。三味齐入炉，地火一催，六十年苦修之功凝成一粒（V9C1364）。木族之行所得丹方，材料也出自那一趟（黑凤族筱虹同行，陨于归途）。' },
 
