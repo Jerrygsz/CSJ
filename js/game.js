@@ -1774,11 +1774,11 @@
   // 魔道 / 血道之敌：辟邪神雷见之先矮三分（韩立专修克制魔功的神雷，以金雷竹为引）
   function isEvil(e) { return !!(e && (e.kind === 'mo' || e.kind === 'blood' || e.spr === 'mo' || e.evil === true)); }
   // 雷网：落点处一圈交错的金白电网，魔道身上网更密
-  function spawnWeb(x, y, rad, color, evil) {
+  function spawnWeb(x, y, rad, color, evil, ally) {
     const n = evil ? 3 : 2;
     for (let k = 0; k < n; k++) {
       const a0 = U.rand(0, 6.28), a1 = a0 + U.rand(0.7, 1.9);
-      G.parts.push({ web: true, x, y, a0, a1, rad: rad * U.rand(0.6, 1), seed: U.rand(0, 6.28), life: 0.3, maxlife: 0.3, color });
+      G.parts.push({ web: true, ally: ally || 0, x, y, a0, a1, rad: rad * U.rand(0.6, 1), seed: U.rand(0, 6.28), life: 0.3, maxlife: 0.3, color });
     }
   }
   function thunderStrike(x, y, dmg, target) {
@@ -3855,10 +3855,10 @@
     // 不叠像素符文、不响清音、不做身体起手（否则 0.18s 一重置会一直抽）。
     // 本命绝学仍走全套：脚下大阵 + 像素符文 + tfStrike 起手 + 一声清音。
     if (!sk.light) ent.skCast = ALLY_CAST_T;
-    spawnRune(ent.x, ent.y, sk.light ? 14 : 22, col);
+    spawnRune(ent.x, ent.y, sk.light ? 14 : 22, col, 1);
     if (window.FX3 && !sk.light) {
       FX3.spawn('rune', ent.x, ent.y + 6, {
-        pal: ALLY_PALS.indexOf(sk.pal) >= 0 ? sk.pal : 'qi', scale: 1.15
+        pal: ALLY_PALS.indexOf(sk.pal) >= 0 ? sk.pal : 'qi', scale: 1.15, dim: 0.20
       });
     }
     allySpark(ent.x, ent.y - 4, col, sk.light ? 3 : 6);
@@ -3937,14 +3937,14 @@
       let k = 1;
       for (const e of list) {
         allyBolt(e.x, e.y, col);                   // 自天而降的折线，thunderStrike 同款画法
-        spawnWeb(e.x, e.y, 26 + k * 6, col);      // 落点雷网 / 神念网
+        spawnWeb(e.x, e.y, 26 + k * 6, col, false, 1);      // 落点雷网 / 神念网
         allyRing(e.x, e.y, 30 + k * 6, col, 0.3);
         spawnHit(e.x, e.y, col);
         allyDamage(e, dmg * Math.pow(0.82, k - 1));
         hit++; k++;
       }
       if (list.length) {
-        if (window.FX3) FX3.spawn('rune', list[0].x, list[0].y + 6, { pal });
+        if (window.FX3) FX3.spawn('rune', list[0].x, list[0].y + 6, { pal, dim: 0.20 });
         Sfx.nova();
       }
     } else if (kind === 'chill') {
@@ -3952,9 +3952,9 @@
       allyRing(x, y, rad, col, 0.45);
       allyRing(x, y, rad * 0.7, col, 0.34);
       // 蛛网 / 冰纹：三道交错细线网，正好是「白液出口成网」「寒气封住」的字面画法
-      for (let i = 0; i < 3; i++) spawnWeb(x, y, rad * (0.5 + i * 0.22), col, i === 0);
+      for (let i = 0; i < 3; i++) spawnWeb(x, y, rad * (0.5 + i * 0.22), col, i === 0, 1);
       allySpark(x, y, col, 10);
-      if (window.FX3) FX3.spawn('rune', x, y + 6, { pal });
+      if (window.FX3) FX3.spawn('rune', x, y + 6, { pal, dim: 0.20 });
       for (const e of allyVictims(x, y, rad)) {
         allyDamage(e, dmg);
         if (sk.stun) e.stunT = Math.max(e.stunT || 0, sk.stun);
@@ -3965,7 +3965,7 @@
       const rad = sk.rad || 92;
       allyRing(x, y, rad, col, 0.42);
       allyRing(x, y, 8, col, 0.46, rad * 0.9);    // 收缩环：墨往身上收，读作「把生气收回来」
-      spawnRune(x, y, rad * 0.42, col);            // 第二层贴地阵，与起手那圈套成双环
+      spawnRune(x, y, rad * 0.42, col, 1);            // 第二层贴地阵，与起手那圈套成双环
       if (window.FX3) FX3.spawn('pickup', x, y, { pal });
       let total = 0;
       for (const e of allyVictims(x, y, rad)) { allyDamage(e, dmg); total += dmg; hit++; }
@@ -3979,9 +3979,9 @@
       ent.guardT = ALLY_GUARD_DUR;
       allyRing(x, y, 46, col, 0.5);
       allyRing(x, y, 30, col, 0.42, 46);        // 往身上收：罩子合拢
-      spawnRune(x, y, 34, col);                 // 第二层贴地阵，与起手那圈套成双环
+      spawnRune(x, y, 34, col, 1);                 // 第二层贴地阵，与起手那圈套成双环
       allySpark(x, y, col, 6);
-      if (window.FX3) FX3.spawn('rune', x, y + 6, { pal: pal, scale: 0.8 });
+      if (window.FX3) FX3.spawn('rune', x, y + 6, { pal: pal, scale: 0.8, dim: 0.20 });
     } else if (kind === 'melee') {
       const rad = sk.rad || 54;
       const t = nearestEnemyFrom(x, y, 260);
@@ -6626,8 +6626,8 @@
     });
   }
   // 起手符文：脚下一圈刻痕，铺在地上（所以要按 0.42 压扁，才像贴地而不是立着的环）
-  function spawnRune(x, y, r, color) {
-    G.parts.push({ rune: true, x, y, r: r || 24, life: 0.34, maxlife: 0.34, color: color || '#ffe98a' });
+  function spawnRune(x, y, r, color, ally) {
+    G.parts.push({ rune: true, ally: ally || 0, x, y, r: r || 24, life: 0.34, maxlife: 0.34, color: color || '#ffe98a' });
   }
   // 击杀碎裂：把精灵切成 3×3 炸开。比撒一把金粉更像"这东西被劈了"，
   // 而且用的就是它自己的样子 —— 不用多画一帧碎尸。
@@ -9724,6 +9724,8 @@
   // 但要「隐约」：初版是金色四角准星 + 呼吸收放，一眼就是射击游戏的锁定框，跟水墨打架。
   // 现在只留四笔淡墨短线 + 一圈几乎看不见的细环，**不呼吸、不加亮** ——
   // 呼吸是最要命的「游戏感」：东西不动，只是淡淡在那，才读成「气机所向」而不是 UI。
+  // 第120轮再收淡 50%：Jerry 仍嫌出戏。墨线 0.17 / 纸白晕 0.085 / 细环 0.07，
+  // 只有盯着看才认得出有四笔；余光里就是纸上一点脏，不是准星。
   // 墨线底下垫一层极淡的纸白：浅纸底上只看见墨，深底图上靠这层晕把墨托出来，
   // 两种场都读得出，又不会像发光框。
   function drawAimMark() {
@@ -9734,13 +9736,13 @@
     ctx.save();
     ctx.lineCap = 'round';
     for (const pass of [0, 1]) {
-      ctx.strokeStyle = pass ? 'rgba(58,52,44,0.34)' : 'rgba(252,248,240,0.17)';
+      ctx.strokeStyle = pass ? 'rgba(58,52,44,0.17)' : 'rgba(252,248,240,0.085)';
       ctx.lineWidth = pass ? 1.2 : 2.8;
       for (let i = 0; i < 4; i++) {
         const a0 = i * Math.PI / 2 + Math.PI / 4;
         ctx.beginPath(); ctx.arc(e.x, e.y, r, a0 - 0.17, a0 + 0.17); ctx.stroke();
       }
-      ctx.strokeStyle = pass ? 'rgba(58,52,44,0.14)' : 'rgba(252,248,240,0.07)';
+      ctx.strokeStyle = pass ? 'rgba(58,52,44,0.07)' : 'rgba(252,248,240,0.035)';
       ctx.lineWidth = pass ? 1 : 2.4;
       ctx.beginPath(); ctx.arc(e.x, e.y, r + 3, 0, 6.28); ctx.stroke();
     }
@@ -9828,11 +9830,13 @@
       // 跟「选中了这只单位」的 UI 圈几乎一样，最出戏。改成断续淡墨：还是那个范围，
       // 但读起来像地上化开的一道笔痕，不像给你的人加了个框。
       // 段长 18、间距 22：短划线太密会重新连成一圈，反而更像选中框。
+      // 第120轮再淡 80%（0.28 → 0.056）：Jerry 仍读得出「有人被圈住了」。
+      // 淡到这个程度只在盯着看时有一道笔痕，余光里随行的功法范围就该是空气。
       ctx.save();
       if (pt.ally) ctx.setLineDash([18, 22]);
       ctx.strokeStyle = softRingFx ? inkFx : pt.color;
       ctx.lineWidth = (pt.lw || 4) * life + 1;
-      ctx.globalAlpha = life * kFx * (pt.ally ? 0.28 : 1);
+      ctx.globalAlpha = life * kFx * (pt.ally ? 0.056 : 1);
       ctx.beginPath(); ctx.arc(pt.x, pt.y, r, 0, 6.28); ctx.stroke();
       ctx.restore(); ctx.globalAlpha = 1;
       return;
@@ -9865,7 +9869,7 @@
       // 贴地的环：按 0.42 压扁才是「画在地上」，不压就成了立着的铁圈
       const t = 1 - life;
       const rr = pt.r * Math.min(1, 0.35 + t * 1.6);
-      const al = (t < 0.22 ? t / 0.22 : 1 - (t - 0.22) / 0.78);
+      const al = (t < 0.22 ? t / 0.22 : 1 - (t - 0.22) / 0.78) * (pt.ally ? 0.20 : 1);
       const rot = t * 1.5;
       ctx.save(); ctx.translate(pt.x, pt.y); ctx.scale(1, 0.42);
       ctx.globalAlpha = al * 0.10; ctx.fillStyle = pt.color;
@@ -9919,7 +9923,7 @@
     }
     if (pt.web) {
       // 雷网：落点处一圈交错的金白电网，魔道身上网更密更亮
-      const a = Math.max(0, pt.life / pt.maxlife);
+      const a = Math.max(0, pt.life / pt.maxlife) * (pt.ally ? 0.20 : 1);
       ctx.globalAlpha = a; ctx.strokeStyle = pt.color; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
       const seg = 5;
       ctx.beginPath();
@@ -10095,12 +10099,12 @@
           // 护体罩：实拍里浅纸底上单描一圈太淡，补一层极淡朱砂晕 + 外圈细印边，随 guardT 淡出
           if (pt.guardT > 0) {
             const gk = Math.min(1, pt.guardT / ALLY_GUARD_DUR);
-            ctx.fillStyle = 'rgba(143,47,36,' + (0.04 + 0.06 * gk) + ')';
+            ctx.fillStyle = 'rgba(143,47,36,' + (0.008 + 0.012 * gk) + ')';
             ctx.beginPath(); ctx.arc(pt.x, pt.y - 2, 22, 0, 6.28); ctx.fill();
-            ctx.strokeStyle = 'rgba(143,47,36,' + (0.34 + 0.34 * gk) + ')';
+            ctx.strokeStyle = 'rgba(143,47,36,' + (0.07 + 0.07 * gk) + ')';
             ctx.lineWidth = 1.8;
             ctx.beginPath(); ctx.arc(pt.x, pt.y - 2, 22, 0, 6.28); ctx.stroke();
-            ctx.strokeStyle = 'rgba(143,47,36,' + (0.14 + 0.18 * gk) + ')';
+            ctx.strokeStyle = 'rgba(143,47,36,' + (0.03 + 0.04 * gk) + ')';
             ctx.lineWidth = 1;
             ctx.beginPath(); ctx.arc(pt.x, pt.y - 2, 27, 0, 6.28); ctx.stroke();
           }
@@ -10115,13 +10119,12 @@
           if (pt.hurtFlash > 0) {
             // 受击只描一圈红边，不碰主角的屏震 / 闪白 / 连斩
             const k = Math.min(1, pt.hurtFlash / 0.2);
-            ctx.strokeStyle = 'rgba(255,86,86,' + (0.2 + k * 0.34) + ')';
+            ctx.strokeStyle = 'rgba(255,86,86,' + (0.04 + k * 0.07) + ')';
             ctx.lineWidth = 1.2 + k * 1.4;
             ctx.beginPath(); ctx.arc(pt.x, pt.y, 12 + (1 - k) * 5, 0, 6.28); ctx.stroke();
           }
-          // 灵宠也与同伴同款题名（原来它头上什么都没有，一说话全靠猜是谁的）。
-          // 比同伴再淡一线：灵宠本来就该「跟着」，不该被读成一个单位。
-          drawAllyName(pd.name, pt.x, pt.y + 24, 9, 'rgba(58,52,44,0.42)');
+          // 第120轮：名字整个隐去。Jerry 说名字一出来就像单位标签，随行的人 / 灵宠
+          // 该靠动作与站位认，不靠脚下一行字。函数只留给殒落时的状态提示。
         }
       }
     }
@@ -10166,12 +10169,12 @@
           }
           if (mt.guardT > 0) {
             const gk = Math.min(1, mt.guardT / ALLY_GUARD_DUR);
-            ctx.fillStyle = 'rgba(143,47,36,' + (0.04 + 0.06 * gk) + ')';
+            ctx.fillStyle = 'rgba(143,47,36,' + (0.008 + 0.012 * gk) + ')';
             ctx.beginPath(); ctx.arc(mt.x, mt.y - 2, 24, 0, 6.28); ctx.fill();
-            ctx.strokeStyle = 'rgba(143,47,36,' + (0.34 + 0.34 * gk) + ')';
+            ctx.strokeStyle = 'rgba(143,47,36,' + (0.07 + 0.07 * gk) + ')';
             ctx.lineWidth = 1.8;
             ctx.beginPath(); ctx.arc(mt.x, mt.y - 2, 24, 0, 6.28); ctx.stroke();
-            ctx.strokeStyle = 'rgba(143,47,36,' + (0.14 + 0.18 * gk) + ')';
+            ctx.strokeStyle = 'rgba(143,47,36,' + (0.03 + 0.04 * gk) + ')';
             ctx.lineWidth = 1;
             ctx.beginPath(); ctx.arc(mt.x, mt.y - 2, 29, 0, 6.28); ctx.stroke();
           }
@@ -10183,13 +10186,12 @@
           drawSpr(md.spr, mt.x, mt.y, md.scale || 1.5, (mt.dir || 1) < 0, mtf);
           if (mt.hurtFlash > 0) {
             const k = Math.min(1, mt.hurtFlash / 0.2);
-            ctx.strokeStyle = 'rgba(255,86,86,' + (0.2 + k * 0.34) + ')';
+            ctx.strokeStyle = 'rgba(255,86,86,' + (0.04 + k * 0.07) + ')';
             ctx.lineWidth = 1.2 + k * 1.4;
             ctx.beginPath(); ctx.arc(mt.x, mt.y, 13 + (1 - k) * 5, 0, 6.28); ctx.stroke();
           }
-          // 同伴名：不再画在头上（那块深底条是全屏最像 UI 的东西）。
-          // 题在脚下偏右一点，压在影子上方，像随手落在纸上的一笔 —— 认得出是谁，但不抢眼睛。
-          drawAllyName(md.name, mt.x, mt.y + 26, 9.5);
+          // 第120轮：同伴名字整个隐去。名字一出现在脚下就像游戏单位标签，
+          // 随行之人该靠动作与站位认，不靠一行字。
         }
       }
     }

@@ -31,6 +31,7 @@ function ok(cond, msg, extra) {
 const items = fs.readFileSync(join(root, 'js', 'items.js'), 'utf8');
 const parry = fs.readFileSync(join(root, 'js', 'parry.js'), 'utf8');
 const game = fs.readFileSync(join(root, 'js', 'game.js'), 'utf8');
+const fx = fs.readFileSync(join(root, 'js', 'fxpix.js'), 'utf8');
 const sources = fs.readFileSync(join(root, 'js', 'sources.js'), 'utf8');
 const atlas = fs.readFileSync(join(root, 'js', 'atlas.js'), 'utf8');
 const html = fs.readFileSync(join(root, 'index.html'), 'utf8');
@@ -94,11 +95,16 @@ ok(/if \(G\.aimE\) G\.aimE = tgt;/.test(game) || /if \(tgt\) G\.aimE = tgt;/.tes
 {
   const aimFn = (game.match(/function drawAimMark\(\)[\s\S]*?\n  \}/) || [''])[0];
   const alphas = [...aimFn.matchAll(/rgba\([^)]*,\s*([0-9.]+)\)/g)].map(m => +m[1]);
-  ok(alphas.length > 0 && Math.max(...alphas) <= 0.40, '锁定标记保持克制（不透明度 > 0.4 就成准星了）', alphas);
+  ok(alphas.length > 0 && Math.max(...alphas) <= 0.20, '锁定标记再收淡一半（不透明度 > 0.2 就还能读成准星了）', alphas);
   ok(!/Math\.sin\(/.test(aimFn), '锁定标记不呼吸（会动的标记最像 UI）');
-  ok(/drawAllyName\(md\.name/.test(game) && /drawAllyName\(pd\.name/.test(game), '同伴与灵宠都用淡墨题名，不用底条');
+  ok(!/drawAllyName\((md|pd)\.name/.test(game), '同伴与灵宠不再显示名字（脚下一行字就是单位标签）');
   ok(!/fillStyle = 'rgba\(10,20,30,0\.6\)'/.test(game), '随行之人不再画不透明底名条（那是 UI 标签）');
-  ok(/ring: true, ally: 1/.test(game) && /pt\.ally \? 0\.28 : 1/.test(game), '同伴/灵宠的技能圈改成断续淡环，不像选中框');
+  ok(/ring: true, ally: 1/.test(game) && /pt\.ally \? 0\.056 : 1/.test(game), '同伴/灵宠技能圈再淡 80%（0.28 → 0.056）');
+  ok(/rgba\(143,47,36,' \+ \(0\.07 \+ 0\.07 \* gk\)/.test(game), '同伴/灵宠护体罩朱砂圈淡到隐约（主圈 ≤ 0.14）');
+  ok(/rgba\(255,86,86,' \+ \(0\.04 \+ k \* 0\.07\)/.test(game), '同伴/灵宠受击红圈淡到隐约（≤ 0.11）');
+  ok(!/rgba\(255,86,86,' \+ \(0\.04 \+ k \* 0\.07\)[\s\S]{0,400}p\.hurtFlash/.test(game), '主角自己的受击红圈没被一起淡掉（保位置可读）');
+  ok((game.match(/FX3\.spawn\('rune'[^;]*dim: 0\.20/g) || []).length === 4, '同伴/灵宠的像素法阵也淡 80%（FX3 dim=0.2，共 4 处）');
+  ok(/it\.tag \? prevA \* ha : prevA\) \* it\.dim/.test(fx), 'FX3 支持逐实例 dim，主角特效不被动');
 }
 
 // ---------- D 静态：舆图 ----------

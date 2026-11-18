@@ -89,7 +89,7 @@
       light: 0,                                        // 见文件头第 1 条：宣纸底不要加法光
       ...(o.opts || {}),
     });
-    const inst = { key, mod, fx, slot, w, h, x, y, ox: mod.meta.origin[0], oy: mod.meta.origin[1], scale: o.scale || 1 };
+    const inst = { key, mod, fx, slot, w, h, x, y, ox: mod.meta.origin[0], oy: mod.meta.origin[1], scale: o.scale || 1, dim: o.dim || 1 };
     live.push(inst);
     return inst;
   }
@@ -129,7 +129,7 @@
     ctx.imageSmoothingEnabled = false;
     for (const it of live) {
       const s = it.scale;
-      ctx.globalAlpha = it.tag ? prevA * ha : prevA;
+      ctx.globalAlpha = (it.tag ? prevA * ha : prevA) * it.dim;
       ctx.drawImage(it.slot.cv, it.x - it.ox * s, it.y - it.oy * s, it.w * s, it.h * s);
     }
     ctx.globalAlpha = prevA;
