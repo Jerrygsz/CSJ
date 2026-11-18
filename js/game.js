@@ -9736,13 +9736,13 @@
     ctx.save();
     ctx.lineCap = 'round';
     for (const pass of [0, 1]) {
-      ctx.strokeStyle = pass ? 'rgba(58,52,44,0.17)' : 'rgba(252,248,240,0.085)';
+      ctx.strokeStyle = pass ? 'rgba(58,52,44,0.085)' : 'rgba(252,248,240,0.043)';
       ctx.lineWidth = pass ? 1.2 : 2.8;
       for (let i = 0; i < 4; i++) {
         const a0 = i * Math.PI / 2 + Math.PI / 4;
         ctx.beginPath(); ctx.arc(e.x, e.y, r, a0 - 0.17, a0 + 0.17); ctx.stroke();
       }
-      ctx.strokeStyle = pass ? 'rgba(58,52,44,0.07)' : 'rgba(252,248,240,0.035)';
+      ctx.strokeStyle = pass ? 'rgba(58,52,44,0.035)' : 'rgba(252,248,240,0.018)';
       ctx.lineWidth = pass ? 1 : 2.4;
       ctx.beginPath(); ctx.arc(e.x, e.y, r + 3, 0, 6.28); ctx.stroke();
     }
@@ -9836,7 +9836,8 @@
       if (pt.ally) ctx.setLineDash([18, 22]);
       ctx.strokeStyle = softRingFx ? inkFx : pt.color;
       ctx.lineWidth = (pt.lw || 4) * life + 1;
-      ctx.globalAlpha = life * kFx * (pt.ally ? 0.056 : 1);
+      // 第121轮再淡一半：0.056 → 0.028，淡到只有极刻意去找才看得见笔痕。
+      ctx.globalAlpha = life * kFx * (pt.ally ? 0.028 : 1);
       ctx.beginPath(); ctx.arc(pt.x, pt.y, r, 0, 6.28); ctx.stroke();
       ctx.restore(); ctx.globalAlpha = 1;
       return;
@@ -10099,12 +10100,12 @@
           // 护体罩：实拍里浅纸底上单描一圈太淡，补一层极淡朱砂晕 + 外圈细印边，随 guardT 淡出
           if (pt.guardT > 0) {
             const gk = Math.min(1, pt.guardT / ALLY_GUARD_DUR);
-            ctx.fillStyle = 'rgba(143,47,36,' + (0.008 + 0.012 * gk) + ')';
+            ctx.fillStyle = 'rgba(143,47,36,' + (0.004 + 0.006 * gk) + ')';
             ctx.beginPath(); ctx.arc(pt.x, pt.y - 2, 22, 0, 6.28); ctx.fill();
-            ctx.strokeStyle = 'rgba(143,47,36,' + (0.07 + 0.07 * gk) + ')';
+            ctx.strokeStyle = 'rgba(143,47,36,' + (0.035 + 0.035 * gk) + ')';
             ctx.lineWidth = 1.8;
             ctx.beginPath(); ctx.arc(pt.x, pt.y - 2, 22, 0, 6.28); ctx.stroke();
-            ctx.strokeStyle = 'rgba(143,47,36,' + (0.03 + 0.04 * gk) + ')';
+            ctx.strokeStyle = 'rgba(143,47,36,' + (0.015 + 0.02 * gk) + ')';
             ctx.lineWidth = 1;
             ctx.beginPath(); ctx.arc(pt.x, pt.y - 2, 27, 0, 6.28); ctx.stroke();
           }
@@ -10119,7 +10120,7 @@
           if (pt.hurtFlash > 0) {
             // 受击只描一圈红边，不碰主角的屏震 / 闪白 / 连斩
             const k = Math.min(1, pt.hurtFlash / 0.2);
-            ctx.strokeStyle = 'rgba(255,86,86,' + (0.04 + k * 0.07) + ')';
+            ctx.strokeStyle = 'rgba(255,86,86,' + (0.02 + k * 0.035) + ')';
             ctx.lineWidth = 1.2 + k * 1.4;
             ctx.beginPath(); ctx.arc(pt.x, pt.y, 12 + (1 - k) * 5, 0, 6.28); ctx.stroke();
           }
@@ -10169,12 +10170,12 @@
           }
           if (mt.guardT > 0) {
             const gk = Math.min(1, mt.guardT / ALLY_GUARD_DUR);
-            ctx.fillStyle = 'rgba(143,47,36,' + (0.008 + 0.012 * gk) + ')';
+            ctx.fillStyle = 'rgba(143,47,36,' + (0.004 + 0.006 * gk) + ')';
             ctx.beginPath(); ctx.arc(mt.x, mt.y - 2, 24, 0, 6.28); ctx.fill();
-            ctx.strokeStyle = 'rgba(143,47,36,' + (0.07 + 0.07 * gk) + ')';
+            ctx.strokeStyle = 'rgba(143,47,36,' + (0.035 + 0.035 * gk) + ')';
             ctx.lineWidth = 1.8;
             ctx.beginPath(); ctx.arc(mt.x, mt.y - 2, 24, 0, 6.28); ctx.stroke();
-            ctx.strokeStyle = 'rgba(143,47,36,' + (0.03 + 0.04 * gk) + ')';
+            ctx.strokeStyle = 'rgba(143,47,36,' + (0.015 + 0.02 * gk) + ')';
             ctx.lineWidth = 1;
             ctx.beginPath(); ctx.arc(mt.x, mt.y - 2, 29, 0, 6.28); ctx.stroke();
           }
@@ -10186,7 +10187,7 @@
           drawSpr(md.spr, mt.x, mt.y, md.scale || 1.5, (mt.dir || 1) < 0, mtf);
           if (mt.hurtFlash > 0) {
             const k = Math.min(1, mt.hurtFlash / 0.2);
-            ctx.strokeStyle = 'rgba(255,86,86,' + (0.04 + k * 0.07) + ')';
+            ctx.strokeStyle = 'rgba(255,86,86,' + (0.02 + k * 0.035) + ')';
             ctx.lineWidth = 1.2 + k * 1.4;
             ctx.beginPath(); ctx.arc(mt.x, mt.y, 13 + (1 - k) * 5, 0, 6.28); ctx.stroke();
           }
