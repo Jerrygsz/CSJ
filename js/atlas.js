@@ -56,84 +56,144 @@ window.Atlas = (function () {
 
   // ---------- 山水：三段各画自己的地势 ----------
   // 全部用 SVG 路径现算，不引素材；浓淡交给 CSS 变量，两套皮肤各自用自己的墨色。
-  // 山脊线放在画幅下三分之一，印章浮在它上面 —— 卷是「山水为底、印为记」，不是「框里放字」。
-  // 水墨的山是「一片淡淡化开的墨」，不是一根线，也不是一块实色。
-  // 所以每层山都用「上浓下透」的线性渐变填面：ridge 处最浓，落到底已经化没了 ——
-  // 既不会像线描那样细到看不见，也不会像纯色块那样变成一堵墙。
+  // 一条经验（改了四版才定）：**线是骨架、面只是衬底**。
+  // 面画浓了会变成一堵横贯画面的色块（第一版像墙），线画淡了又细到看不见（第二版全白）——
+  // 所以山脊线用实描边走到 1.6~2.4px，渐变填面压到 0.10~0.30，让人先看见山形，再感觉到墨。
   function washDef(k) {
     return '<defs><linearGradient id="atw' + k + '" x1="0" y1="0" x2="0" y2="1">' +
-      '<stop offset="0" class="at-ws1"/><stop offset="0.72" class="at-ws2"/><stop offset="1" class="at-ws0"/>' +
+      '<stop offset="0" class="at-ws1"/><stop offset="0.68" class="at-ws2"/><stop offset="1" class="at-ws0"/>' +
       '</linearGradient></defs>';
   }
+  // 一道山脊：尖峰 + 圆谷，峰距与峰高都不均。
+  // 早先写成等距折线，出来是一排三角波（像示波器不像山）——山要的是「主峰高、次峰矮、谷是圆的」。
+  function ridge(w, h, base, amp, seed) {
+    let line = 'M-24,' + base.toFixed(1);
+    let x = -24, i = 0;
+    while (x < w + 60) {
+      const span = 132 + seedRand(seed, i * 5) * 122;                 // 一峰的跨度 132~254
+      const px = x + span * 0.42;
+      const py = base - (0.32 + seedRand(seed, i * 5 + 1) * 0.68) * amp;  // 峰高 0.32~1.00
+      const vx = x + span;
+      const vy = base - seedRand(seed, i * 5 + 2) * 0.16 * amp;       // 谷不落到底，留着起伏
+      line += ' L' + px.toFixed(1) + ',' + py.toFixed(1);             // 峰：尖
+      line += ' C' + (px + span * 0.20).toFixed(1) + ',' + vy.toFixed(1) +
+        ' ' + (vx - span * 0.22).toFixed(1) + ',' + vy.toFixed(1) +
+        ' ' + vx.toFixed(1) + ',' + vy.toFixed(1);                    // 谷：圆
+      x = vx; i++;
+    }
+    // 面只填到山脚下一小段就收，不拉到画幅底部：
+    // 三层山各自成为一条「山脉带」，带与带之间留白 —— 水墨画就是靠留白分远近的，
+    // 三块实色一路拉到底只会糊成一片。
+    const foot = base + Math.max(64, amp * 0.56);
+    return { line: line, face: line + ' L' + (w + 60) + ',' + foot.toFixed(1) + ' L-24,' + foot.toFixed(1) + ' Z' };
+  }
+  // 稳定的伪随机（与 hash 分开：这里要的是「同一段每次画得一样」，不是「同一个 id 一样」）
+  function seedRand(seed, i) {
+    const x = Math.sin((i + 1) * 12.9898 + seed * 78.233) * 43758.5453;
+    return x - Math.floor(x);
+  }
   function landscape(k, w, h) {
-    const rnd = (i) => { const x = Math.sin(i * 127.1 + k * 311.7) * 43758.5453; return x - Math.floor(x); };
-    const baseY = h * 0.60;
+    const rnd = (i) => seedRand(k * 7 + 1, i);
     const fill = 'url(#atw' + k + ')';
     let s = '';
     if (k === 0) {
-      // 人界：三重山脊（远淡近浓），山脚一条水
+      // 人界：三重山脊（远淡近浓）+ 山脚一条水 + 几只飞鸟
+      // 山要占住画面上半部：base 从 0.44 起、amp 逐层加大 —— 全压在下半幅会留下半屏空黑。
       for (let layer = 0; layer < 3; layer++) {
-        const base = baseY + layer * 30;
-        const amp = 158 - layer * 34;
-        let d = '';
-        for (let x = 0; x <= w + 64; x += 64) {
-          const peak = base - (0.30 + rnd(layer * 97 + x) * 0.70) * amp;
-          d += (x === 0 ? 'M0,' : ' L' + x + ',') + peak.toFixed(1);
+        const base = h * (0.44 + layer * 0.14);
+        const amp = 122 + layer * 46;
+        const R = ridge(w, h, base, amp, layer + 1);
+        // 三层浓度必须拉开（0.26 / 0.50 / 0.62）：等差递减出来的三块几乎同色，
+        // 叠在一起就成了一整片灰，远近全靠浓淡说话。近景也不给满 ——
+        // 水墨的底子是纸，山压太实就把纸吃掉了。
+        const op = [0.26, 0.50, 0.62][layer];
+        s += '<path class="at-wash" d="' + R.face + '" fill="' + fill + '" opacity="' + op + '"/>';
+        s += '<path class="at-hill at-h' + (layer + 1) + '" d="' + R.line + '"/>';
+      }
+      // 水：不横贯整幅（那样像一根电线穿过山腰），只在近景山脚下游走，另配几笔碎波
+      const wy = h * 0.80;
+      s += '<path class="at-water" d="M-10,' + wy.toFixed(0) +
+        ' Q' + (w * 0.16).toFixed(0) + ',' + (wy - 26).toFixed(0) + ' ' + (w * 0.34).toFixed(0) + ',' + (wy + 4).toFixed(0) +
+        ' T' + (w * 0.68).toFixed(0) + ',' + (wy - 16).toFixed(0) +
+        ' T' + (w + 10) + ',' + (wy + 6).toFixed(0) + '"/>';
+      // 水与飞鸟也按屏铺：段长四千多，只画七道波纹、九只鸟，一屏里摊不到一处
+      const b0 = Math.max(1, Math.round(w / 600)), per0 = w / b0;
+      for (let bi = 0; bi < b0; bi++) {
+        for (let i = 0; i < 3; i++) {
+          const wx = per0 * bi + rnd(bi * 17 + i + 11) * per0 * 0.9, wyy = wy - 34 + rnd(bi * 23 + i + 23) * 52;
+          const ww = 16 + rnd(bi * 31 + i + 37) * 26;
+          s += '<path class="at-ripple" d="M' + wx.toFixed(0) + ',' + wyy.toFixed(0) +
+            ' q' + (ww * 0.5).toFixed(0) + ',-6 ' + ww.toFixed(0) + ',0"/>';
         }
-        d += ' L' + w + ',' + (h + 10) + ' L0,' + (h + 10) + ' Z';
-        s += '<path class="at-wash" d="' + d + '" fill="' + fill + '" opacity="' + (0.55 - layer * 0.16).toFixed(2) + '"/>';
-        s += '<path class="at-hill at-h' + (layer + 1) + '" d="' + d.split(' L' + w + ',' + (h + 10))[0] + '"/>';
+        for (let i = 0; i < 3; i++) {
+          const bx = per0 * bi + 20 + rnd(bi * 43 + i + 41) * (per0 - 60), by = h * 0.12 + rnd(bi * 59 + i + 67) * h * 0.26;
+          s += '<path class="at-bird" d="M' + bx.toFixed(0) + ',' + by.toFixed(0) +
+            ' q7,-8 14,0 q7,-8 14,0"/>';
+        }
       }
-      for (let i = 0; i < 6; i++) {
-        const bx = 50 + rnd(i + 41) * (w - 100), by = h * 0.14 + rnd(i + 67) * h * 0.34;
-        s += '<path class="at-bird" d="M' + bx.toFixed(0) + ',' + by.toFixed(0) +
-          ' q7,-8 14,0 q7,-8 14,0"/>';
-      }
-      s += '<path class="at-water" d="M0,' + (baseY + 16).toFixed(0) +
-        ' Q' + (w * 0.24).toFixed(0) + ',' + (baseY - 14).toFixed(0) + ' ' + (w * 0.48).toFixed(0) + ',' + (baseY + 10).toFixed(0) +
-        ' T' + w + ',' + (baseY - 2).toFixed(0) + '"/>';
     } else if (k === 1) {
-      // 灵界：浮岛 —— 上头一块平，下头几笔碎岩，散在云里
-      for (let i = 0; i < 12; i++) {
-        const cx = 30 + rnd(i + 3) * (w - 60);
-        const cy = h * 0.14 + rnd(i + 17) * h * 0.50;
-        const rw = 40 + rnd(i + 29) * 78;
-        s += '<g class="at-isle"><ellipse cx="' + cx.toFixed(0) + '" cy="' + cy.toFixed(0) + '" rx="' + rw.toFixed(0) + '" ry="' + (rw * 0.26).toFixed(0) + '"/>' +
-          '<path d="M' + (cx - rw * 0.62).toFixed(0) + ',' + (cy + rw * 0.12).toFixed(0) +
-          ' L' + (cx - rw * 0.2).toFixed(0) + ',' + (cy + rw * 0.78).toFixed(0) +
-          ' L' + (cx + rw * 0.3).toFixed(0) + ',' + (cy + rw * 0.2).toFixed(0) + ' Z"/></g>';
+      // 灵界：云海之上几重若隐若现的远峰。
+      // 原本想画「浮岛」，试了三版都不行——椭圆+倒三角像漏斗、圆拱+斜切像扁帽、
+      // 深锥像倒扣的碗。浮岛是侧视立体，塞进一条扁长的横卷里必然走形。
+      // 改用「云海 + 露头的峰尖」：这是水墨画里最稳的灵界意象，也与人界的三重山脊分得开
+      // （人界是实山近景，灵界是远景+大量留白云气）。
+      for (let layer = 0; layer < 2; layer++) {
+        const base = h * (0.56 + layer * 0.12);
+        const amp = 150 + layer * 56;
+        const R = ridge(w, h, base, amp, layer + 11);
+        s += '<path class="at-wash" d="' + R.face + '" fill="' + fill + '" opacity="' + (layer ? 0.46 : 0.28) + '"/>';
+        s += '<path class="at-hill at-h' + (layer ? 2 : 1) + '" d="' + R.line + '"/>';
       }
-      for (let i = 0; i < 5; i++) {
-        const cy = h * 0.12 + i * h * 0.16;
-        s += '<path class="at-cloud" d="M0,' + cy.toFixed(0) + ' Q' + (w * 0.25).toFixed(0) + ',' + (cy - 22).toFixed(0) + ' ' + (w * 0.5).toFixed(0) + ',' + (cy + 6).toFixed(0) +
-          ' T' + w + ',' + (cy - 10).toFixed(0) + '"/>';
+      // 云海：三层横带压住山脚，越往下越淡；再补几缕横云浮在半空
+      const cop = [0.50, 0.32, 0.18];
+      for (let layer = 0; layer < 3; layer++) {
+        const by = h * (0.62 + layer * 0.11);
+        let dd = 'M-24,' + by.toFixed(0);
+        for (let x = -24; x <= w + 48; x += 96) {
+          dd += ' Q' + (x + 48) + ',' + (by - 16 - rnd(x + layer * 19) * 18).toFixed(0) + ' ' + (x + 96) + ',' + by.toFixed(0);
+        }
+        s += '<path class="at-wash" d="' + dd + ' L' + (w + 48) + ',' + (h + 12) + ' L-24,' + (h + 12) + ' Z" fill="' + fill + '" opacity="' + cop[layer] + '"/>';
+        s += '<path class="at-cloud" d="' + dd + '"/>';
       }
-      // 底下一片云海
-      let d2 = 'M0,' + (baseY + 40).toFixed(0);
-      for (let x = 0; x <= w + 80; x += 80) {
-        d2 += ' Q' + (x + 40) + ',' + (baseY + 10 + rnd(x) * 30).toFixed(0) + ' ' + (x + 80) + ',' + (baseY + 40).toFixed(0);
+      const b1 = Math.max(1, Math.round(w / 640)), per1 = w / b1;
+      for (let bi = 0; bi < b1; bi++) for (let i = 0; i < 2; i++) {
+        const cx = per1 * bi + 30 + rnd(bi * 17 + i + 61) * (per1 - 140), cy = h * 0.14 + rnd(bi * 29 + i + 79) * h * 0.32;
+        const cw = 90 + rnd(bi * 37 + i + 97) * 90;
+        s += '<path class="at-cloud" d="M' + cx.toFixed(0) + ',' + cy.toFixed(0) +
+          ' q' + (cw * 0.3).toFixed(0) + ',-14 ' + (cw * 0.55).toFixed(0) + ',-2 q' + (cw * 0.2).toFixed(0) + ',8 ' + (cw * 0.45).toFixed(0) + ',2"/>';
       }
-      d2 += ' L' + w + ',' + (h + 10) + ' L0,' + (h + 10) + ' Z';
-      s += '<path class="at-wash" d="' + d2 + '" fill="' + fill + '" opacity="0.30"/>';
     } else {
-      // 仙界：星野 + 一轮淡日 + 底下翻起的云海
-      let dots = '';
-      for (let i = 0; i < 70; i++) {
-        const cx = rnd(i + 5) * w, cy = rnd(i + 51) * h * 0.88, r = 0.7 + rnd(i + 91) * 1.7;
-        dots += '<circle cx="' + cx.toFixed(0) + '" cy="' + cy.toFixed(0) + '" r="' + r.toFixed(1) + '"/>';
+      // 仙界：星野 + 淡日 + 云海。
+      // 装饰必须按「每屏一份」铺：段宽两千多像素、视口只有四百，整段只画一个太阳的话，
+      // 滚到别处就是一片纯黑的空屏（第一版就是这样，看起来像是坏了）。
+      const bandW = 660;
+      const bands = Math.max(1, Math.round(w / bandW));
+      const per = w / bands;
+      let dots = '', suns = '';
+      for (let b = 0; b < bands; b++) {
+        const ox = per * b;
+        const sx = ox + per * (0.34 + rnd(b + 5) * 0.32);
+        const sy = h * (b % 2 ? 0.30 : 0.20);
+        suns += '<circle class="at-sun" cx="' + sx.toFixed(0) + '" cy="' + sy.toFixed(0) + '" r="' + (Math.min(per, h) * 0.11).toFixed(0) + '"/>';
+        for (let i = 0; i < 46; i++) {
+          const cx = ox + rnd(b * 71 + i + 5) * per, cy = rnd(b * 97 + i + 51) * h * 0.56, r = 0.7 + rnd(b * 13 + i + 91) * 1.8;
+          dots += '<circle cx="' + cx.toFixed(0) + '" cy="' + cy.toFixed(0) + '" r="' + r.toFixed(1) + '"/>';
+        }
       }
-      s += '<g class="at-stars">' + dots + '</g>';
+      s += '<g class="at-stars">' + dots + '</g>' + suns;
+      for (let layer = 0; layer < 3; layer++) {
+        const by = h * (0.60 + layer * 0.12);
+        let dd = 'M-24,' + by.toFixed(0);
+        for (let x = -24; x <= w + 48; x += 96) {
+          dd += ' Q' + (x + 48) + ',' + (by - 26 - rnd(x + 7 + layer * 23) * 26).toFixed(0) + ' ' + (x + 96) + ',' + by.toFixed(0);
+        }
+        s += '<path class="at-wash" d="' + dd + ' L' + (w + 48) + ',' + (h + 12) + ' L-24,' + (h + 12) + ' Z" fill="' + fill + '" opacity="' + [0.62, 0.42, 0.26][layer].toFixed(2) + '"/>';
+        s += '<path class="at-cloud" d="' + dd + '"/>';
+      }
       for (let i = 0; i < 3; i++) {
-        const bx = 40 + rnd(i + 71) * (w - 80), by = h * 0.6 + rnd(i + 83) * h * 0.2;
+        const bx = 40 + rnd(i + 71) * (w - 80), by = h * 0.52 + rnd(i + 83) * h * 0.1;
         s += '<path class="at-bird" d="M' + bx.toFixed(0) + ',' + by.toFixed(0) + ' q7,-8 14,0 q7,-8 14,0"/>';
       }
-      s += '<circle class="at-sun" cx="' + (w * 0.52).toFixed(0) + '" cy="' + (h * 0.3).toFixed(0) + '" r="' + (Math.min(w, h) * 0.15).toFixed(0) + '"/>';
-      let d3 = 'M0,' + (baseY + 44).toFixed(0);
-      for (let x = 0; x <= w + 90; x += 90) {
-        d3 += ' Q' + (x + 45) + ',' + (baseY + 6 + rnd(x + 7) * 36).toFixed(0) + ' ' + (x + 90) + ',' + (baseY + 44).toFixed(0);
-      }
-      d3 += ' L' + w + ',' + (h + 10) + ' L0,' + (h + 10) + ' Z';
-      s += '<path class="at-wash" d="' + d3 + '" fill="' + fill + '" opacity="0.34"/>';
     }
     return washDef(k) + s;
   }
@@ -193,17 +253,21 @@ window.Atlas = (function () {
   function layout(w, h) {
     const segs = SEGS.map((s, k) => {
       const list = mapsOf(k);
-      // 一枚印章 60 宽、左右至少留 8 的空，所以每处 46 步进是下限；
-      // 段宽取 max(460, 96 + n*46) —— 长卷本来就该长，挤在一起就成表格了。
-      const wSeg = Math.max(460, 96 + list.length * 46);
+      // 一枚印章 56 宽，左右至少留 10 的空；每处 52 步进是「能压着一点、但不叠死」的下限。
+      // 段宽取 max(520, 110 + n*52) —— 长卷本来就该长，挤在一起就成表格了。
+      const wSeg = Math.max(520, 110 + list.length * 52);
+      const step = (wSeg - 90) / Math.max(1, list.length);
       const items = list.map((m, i) => {
         const r = hash(m.id);
+        // 横向也给一点手摆的错落：完全等距排下来，一眼就是表格而不是卷。
+        // 抖动幅度压在 ±0.30 步进 —— 再大就会让相邻两枚压在一起看不清字。
+        const jx = ((hash(m.id + '#x') % 1000) / 1000 - 0.5) * step * 0.60;
         return {
           m: m,
-          x: 40 + (i + 0.5) * ((wSeg - 80) / Math.max(1, list.length)),
+          x: Math.min(wSeg - 30, Math.max(30, 45 + step * (i + 0.5) + jx)),
           // 纵向铺满整幅（从题头下方到山脚之前）：印章本来就该落在山水之间，
           // 只挤在顶上那条带，下半幅会空成一张白纸。
-          y: h * 0.15 + ((r % 1000) / 1000) * Math.max(60, h * 0.66)
+          y: h * 0.13 + ((r % 1000) / 1000) * Math.max(60, h * 0.70)
         };
       });
       return { k: k, meta: s, list: list, w: wSeg, items: items };
