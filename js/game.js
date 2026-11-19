@@ -5059,6 +5059,16 @@
       }
       const ang = Math.atan2(ty - e.y, tx - e.x);
       let px = Math.cos(ang), py = Math.sin(ang);
+      // 五子以上的同场阵容：各守一个环位，不挤到主角脚下叠成一坨。
+      // 只改走位，不改招式/伤害/结算；两人同场没有 coAngle，走原来的贴身逻辑。
+      if (e.coBoss && e.coAngle != null && e.coRadius > 0) {
+        const wx = tx + Math.cos(e.coAngle) * e.coRadius;
+        const wy = ty + Math.sin(e.coAngle) * e.coRadius;
+        if (U.dist(wx, wy, e.x, e.y) > 14) {
+          const wa = Math.atan2(wy - e.y, wx - e.x);
+          px = Math.cos(wa); py = Math.sin(wa);
+        } else { px = 0; py = 0; }
+      }
       if (e.charge && U.dist(p.x, p.y, e.x, e.y) < 260) spd *= 1.7;
       if (e.dash) { e.dashT -= dt; if (e.dashT <= 0) { e.dashing = 0.25; e.dashT = U.rand(2, 4); } if (e.dashing > 0) { spd *= 2.4; e.dashing -= dt; } }
       if (e.wob) { const perp = ang + Math.PI / 2; const w = Math.sin(e.t * 6) * 0.5; px += Math.cos(perp) * w; py += Math.sin(perp) * w; }
@@ -5220,6 +5230,10 @@
         hitFlash: 0, t: 0, ang: 0, shootT: 1 + i * 0.5, teleT: 6 + i, sumT: 9 + i,
         dashT: 3, dashAng: 0, dashing: 0, _orbCd: {},
         elite: true, coBoss: true, xpVal: 120,
+        // 四人以上同场时留一个环形站位：否则所有人都追到玩家脚底叠成一坨，
+        // 五子同场看着像一只怪。两人同场不设，保持老行为不动。
+        coAngle: list.length >= 4 ? a : null,
+        coRadius: list.length >= 4 ? (92 + (c.scale || 3) * 4) : 0,
         summon: c.summon === undefined ? '' : c.summon,
         noSummon: c.noSummon !== false,
         attr: c.attr || bossAttr(kind)
@@ -11120,22 +11134,29 @@
     G.trial = { need: n, doneT: 0, hinted: 0 };
     G.state = 'play'; last = performance.now();
     for (let i = 0; i < n; i++) spawnEnemy(list[i % list.length]);
-    banner('山道 · ' + n + ' 只山兽挡路 · 清完便可下山');
-    // 第一场就要把两件事说清楚，否则等于让新手猜：
-    // ① 打怪不用按键（自动出手，单手也玩得动）；② 闪身之后一息之内出手更重。
-    setTimeout(function () {
-      if (G.state === 'play' && G.trial) banner('不必按键 · 功法自会出手　·　闪身之后一息之内，出手更重');
-    }, 2200);
-    // 第三句讲弹反。它在剧情文本里一个字都没提过，而 HUD 上那颗键
-    // 光看「护体」两个字推不出「单击可格开并反震」——核心操作不能靠猜。
-    // 排在两条之后（5.6s）以免前两句还没读完就被顶掉；写进 save.seen 只念一次。
-    if (!storySeen('parryTip')) {
-      storyMarkSeen('parryTip');
+    // 后期剧情图的「对白后一战」沿用同一套脚本战，但文案必须按图走：
+    // 不能再对渡劫/斩尸的玩家喊「山道 · 山兽挡路」，那是最出戏的 UI 腔。
+    const label = t.label || '山道';
+    const unit = t.unit || '山兽';
+    banner(label + ' · ' + n + ' 只' + unit + '挡路 · ' + (t.tail || '清完便可下山'));
+    // 教学三句只给开局第一张图；后期图玩家早就会自动出手、闪身与弹反，再念就是新手教程复读。
+    if (m && m.id === 'qixuan') {
+      // 第一场就要把两件事说清楚，否则等于让新手猜：
+      // ① 打怪不用按键（自动出手，单手也玩得动）；② 闪身之后一息之内出手更重。
       setTimeout(function () {
-        if (G.state === 'play' && G.trial) {
-          banner('弹反 · 按住「护体」稳住身形，招至一瞬单击「格开」，可反震伤敌', { ms: 3600 });
-        }
-      }, 5600);
+        if (G.state === 'play' && G.trial) banner('不必按键 · 功法自会出手　·　闪身之后一息之内，出手更重');
+      }, 2200);
+      // 第三句讲弹反。它在剧情文本里一个字都没提过，而 HUD 上那颗键
+      // 光看「护体」两个字推不出「单击可格开并反震」——核心操作不能靠猜。
+      // 排在两条之后（5.6s）以免前两句还没读完就被顶掉；写进 save.seen 只念一次。
+      if (!storySeen('parryTip')) {
+        storyMarkSeen('parryTip');
+        setTimeout(function () {
+          if (G.state === 'play' && G.trial) {
+            banner('弹反 · 按住「护体」稳住身形，招至一瞬单击「格开」，可反震伤敌', { ms: 3600 });
+          }
+        }, 5600);
+      }
     }
     return true;
   }
@@ -17594,7 +17615,8 @@
     coBossInfo() {
       return (G.enemies || []).filter(e => e && e.coBoss && !e._dead).map(e => ({
         name: e.name, hp: Math.round(e.hp), maxhp: Math.round(e.maxhp), dmg: +e.dmg.toFixed(1),
-        kit: !!e.kit, ward: Math.round(e.ward || 0), x: Math.round(e.x), y: Math.round(e.y)
+        kit: !!e.kit, ward: Math.round(e.ward || 0), x: Math.round(e.x), y: Math.round(e.y),
+        coAngle: e.coAngle == null ? null : +e.coAngle.toFixed(2), coRadius: Math.round(e.coRadius || 0)
       }));
     },
     boss(kind) {

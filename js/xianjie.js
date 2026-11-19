@@ -213,6 +213,10 @@
       type: 'story', tag: '破境',
       desc: '气泡散尽时，他已站在一片陌生的海上。岛外站着三个人，等他给一个说法。',
       startLevel: 420, endLevel: 460, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      // 原著里三人围岛只为「承认身份」，没有真正交手。这里只留两名祖神随侍做威压余波，
+      // 清完即收，不把这场写成另一个 Boss 图。
+      trial: { label: '黑风海域·围岛', unit: '祖神随侍', tail: '规矩认下，再论其他', need: 2,
+        enemies: ['xj_tianwei', 'x4_yingwei'] },
       unlock: 'poxu', next: 'chulong',
       reward: { stones: 260000, mats: [['m_xianyuanshi', 6], ['m_xuanhuang', 3]] },
       clearTitle: '金仙',
@@ -425,6 +429,10 @@
       type: 'story', tag: '剧情',
       desc: '殿里金光正盛。蟹道人忽然仰起头——他好像一直在等这一刻。',
       startLevel: 520, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      // 这一劫是蟹道人的，韩立只是旁观。用脚本战承接天劫余威 + 黑灵傀儡的敌意，
+      // 不设主 Boss、不写「韩立迎劫」，免得与 X5C1382 他自己的那场串台。
+      trial: { label: '天劫余威', unit: '黑色傀儡虚影', tail: '余威散尽，再记住那片天色', need: 3,
+        enemies: ['x5_guiwu', 'xj_yizhou', 'x5_huanghun'] },
       unlock: 'dadi', next: 'jingong',
       reward: { stones: 620000, mats: [['m_xianyuanshi', 12], ['m_shijian', 4]] },
       clearTitle: '别人的劫',
@@ -449,6 +457,16 @@
       elites: ['金源仙宫·侍卫', '天阴五子'],
       mats: ['m_xianyuanshi', 'm_shijian'],
       boss: { kind: 'mo', name: '东方白·金源宫主', hp: 520000, spd: 98, dmg: 440, r: 30, spr: 'dongfangbai', scale: 9.4 },
+      // X4C1022《独闯仙宫》：宫门外逾百仙宫修士结阵，另有五名太乙黑袍老者；
+      // X4C1024《诛五恶》：天阴五子各戴一枚黑玉戒指，刻虎、鹿、熊、猿、鹰。
+      // 正好五人同场，卡满 CO_MAX=5；份额压低到主将的 1/7 上下，守 TTK 带宽。
+      coBoss: [
+        { kind: 'mo', name: '天阴五子·虎', spr: 'mo2', scale: 6.2, hpMul: 0.15, dmgMul: 0.62 },
+        { kind: 'mo', name: '天阴五子·鹿', spr: 'xuangu', scale: 6.0, hpMul: 0.15, dmgMul: 0.62 },
+        { kind: 'mo', name: '天阴五子·熊', spr: 'xj_tianwei', scale: 6.4, hpMul: 0.16, dmgMul: 0.64 },
+        { kind: 'mo', name: '天阴五子·猿', spr: 'ape', scale: 6.2, hpMul: 0.15, dmgMul: 0.62 },
+        { kind: 'mo', name: '天阴五子·鹰', spr: 'assassin', scale: 5.8, hpMul: 0.14, dmgMul: 0.6 }
+      ],
       reward: { stones: 720000, mats: [['m_xianyuanshi', 16], ['m_shijian', 3]] },
       clearTitle: '诛五恶',
       clearDesc: '五枚戒指上刻着五个字。五个人的账，他一笔一笔算完，然后推开里面那扇门。'
@@ -584,6 +602,10 @@
       type: 'story', tag: '剧情',
       desc: '坛上有两个人面对面坐着。其中一个，坐的是他的旧躯壳。',
       startLevel: 580, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      // X5C1273：恶尸占着旧躯壳，韩立以阴阳双鱼符阵 + 虚光锁链拆出三尸；
+      // X5C1092/1098 还有水元幻阵与火元宫禁制。做成幻境脚本战，主题与「斩尸」一致。
+      trial: { label: '祭坛·斩尸', unit: '幻阵恶尸', tail: '三尸拆开，账才算清', need: 3,
+        enemies: ['x5_huanghun', 'x5_guiwu', 'xj_shimei'] },
       unlock: 'zaimiao', next: 'youming',
       reward: { stones: 1600000, mats: [['m_xianyuanshi', 22], ['m_shijian', 10]] },
       clearTitle: '斩尸',
@@ -615,6 +637,10 @@
       type: 'story', tag: '剧情',
       desc: '雷夔的影像散尽时，天上有门。门没开，只从里面漏出来一点威势。',
       startLevel: 580, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      // X5C1324：雷夔之眼里纯粹是雷电能量，没有神念意志；炼化时一头头雷夔虚影
+      // 从眼中凝出、裹着金雷撞丹炉。做成「护炉撑过雷影」的脚本战，不做成人物 Boss。
+      trial: { label: '雷海·炼剑', unit: '雷夔虚影', tail: '剑成，眼还在', need: 4,
+        enemies: ['lh_tiangui', 'x4_tianyin', 'x5_huanghun', 'x4_yingwei'] },
       unlock: 'youming', next: 'fuyao',
       reward: { stones: 1900000, mats: [['m_xianyuanshi', 24], ['m_shijian', 12]] },
       clearTitle: '雷海',
@@ -671,6 +697,10 @@
       type: 'story', tag: '破境',
       desc: '不是在闭关里，是在打着的中间。五感先走，然后是那一扇门。',
       startLevel: 580, endLevel: 640, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      // X5C1382：道天大劫不是在闭关里，是在打的过程中。灰云（勾动心魔）先来，
+      // 再是红莲神雷（灭魂）。两段天劫做成脚本战，结算仍走破境图的原有账。
+      trial: { label: '道天大劫', unit: '天劫雷影', tail: '门后面还有人在等', need: 4,
+        enemies: ['x5_huanghun', 'x4_daobing', 'xj_daozhu', 'x5_guibing'] },
       unlock: 'shifang', next: 'daoyi',
       reward: { stones: 2600000, mats: [['m_xianyuanshi', 30], ['m_shijian', 16]] },
       clearTitle: '道祖',
@@ -1706,5 +1736,39 @@
   if (window.MAP_ARCS && !window.MAP_ARCS.some(a => a.id === 'M')) {
     window.MAP_ARCS.push({ id: 'M', name: '仙界·飞升之后', note: '灵寰界落难，烛龙道，灰界，积鳞空境，天庭' });
   }
+
+  // 战斗内定时剧情：17 条旧节点全在 A–E 段，F 段以后打 Boss 只有血条没有叙事节拍。
+  // 这里只给四张重头 boss 图补戏，台词都取原著实有场面；muteStory(true) 会整段绕过，
+  // 不污染 QA 的伤害计量。
+  window.STORY.push(
+    {
+      id: 'xs_fight', map: 'xisha', t: 86, lines: [
+        ['旁白', '四座雷池同时翻起青紫银金四色雷光。鬼木的八张黑符化成八根漆黑巨兵，每一根的气息都不下于一件仙器。'],
+        ['韩立', '（阴栝、幽络也到了。三位九幽族大罗，一起围上来。）'],
+        ['旁白', '啼魂在池边抬手，金雷落进池心。洗煞之前，先得站住脚。']
+      ]
+    },
+    {
+      id: 'sj_fight', map: 'shijin', t: 88, lines: [
+        ['旁白', '山崖平台上散着数十具枯骨，幽绿磷火顺着煞气往深渊下飘。'],
+        ['旁白', '噬金仙的五色晶矛刺来，金童挡在前面，嘴角见血。'],
+        ['旁白', '蟹道人提起「斩霆」战刀，一记旱地升雷劈进谷底。']
+      ]
+    },
+    {
+      id: 'sd_fight', map: 'suidian', t: 92, lines: [
+        ['旁白', '三十六柄石剑堵在殿门前，剑尖一律朝上。'],
+        ['旁白', '金甲道兵借祭坛之力合拢。双灵域一重合，他们与祭坛的联系断了。'],
+        ['韩立', '（神灯就在里面。奇摩子还没退。）']
+      ]
+    },
+    {
+      id: 'sf_fight', map: 'shifang', t: 96, lines: [
+        ['旁白', '四道银光柱落下，方圆百万里化作绝地。'],
+        ['旁白', '十扇天窗里各坐着数位大罗、数百太乙、数千金仙——这座阵是拿仙域做阵脚的。'],
+        ['韩立', '（不是宴。是阵。）']
+      ]
+    }
+  );
 
 })();

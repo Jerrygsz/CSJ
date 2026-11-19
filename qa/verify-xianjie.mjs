@@ -384,6 +384,15 @@ const R6 = await page.evaluate(async (ids) => {
   for (const id of ids) {
     F.enterMap(id, 'easy');
     for (let k = 0; k < 24; k++) { F.skipStory(); F.tickFrames(2); }
+    // 对白后脚本战（wumengdao/xiedao/zhanshi/leihai/daotian）：清完才结算，多跑几帧。
+    const m0 = W.MAPS.find(x => x.id === id);
+    if (m0 && m0.trial) {
+      for (let k = 0; k < 600; k++) {
+        F.skipStory(); F.tickFrames(2);
+        if (F.info().state === 'levelup') F.insightAuto();
+        if (F.info().cleared.indexOf(id) >= 0) break;
+      }
+    }
     const m = W.MAPS.find(x => x.id === id);
     if (m.type === 'market') {
       // 坊市不靠打架通关：得把摊关掉（shopClose）才会结算并记入已通关

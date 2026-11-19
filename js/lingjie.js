@@ -1042,6 +1042,10 @@
       type: 'story', tag: '剧情',
       desc: '祭坛下方，一面青色古镜悬在半空。镜里是噬金虫王，正和金甲士缠斗。银色法盘还在往法阵里灌符文。',
       startLevel: 342, endLevel: 348, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      // 镜里那场虫王缠斗不该只写在台词里：对白播完就地打一场「镜中余烬」，
+      // 只清几只金甲士残影——韩立仍是旁观者，马良不在这一场出场（留给 zhanxian）。
+      trial: { label: '古镜余烬', unit: '金甲士残影', tail: '镜中缠斗散去，再回祭坛', need: 3,
+        enemies: ['x4_daobing', 'x4_daobing', 'guixiu'] },
       unlock: 'qunqiang', next: 'zhangtianping',
       reward: { stones: 130000, mats: [['m_zhenlingxue', 3], ['m_xuantianteng', 1]] },
       clearTitle: '献祭',
@@ -1060,6 +1064,11 @@
       elites: ['九元观随从', '金色甲士'],
       mats: ['m_zhenlingxue', 'm_xuantianteng'],
       boss: { kind: 'mo', name: '马良·真仙之身', hp: 260000, spd: 86, dmg: 300, r: 27, spr: 'maliang', scale: 8.0 },
+      // 取瓶这一章原著没有正面斗法，只补一名九元观护法做轻量拦截；
+      // 份额压到主将的一半以下，免得「两瓶相认」的戏被群殴盖掉。
+      coBoss: [
+        { kind: 'mo', name: '九元观护法', spr: 'xuangu', scale: 6.4, hpMul: 0.45, dmgMul: 0.6 }
+      ],
       reward: { stones: 220000, items: ['t_zhangtianping', 't_daotianping'], mats: [['m_xuantianteng', 1], ['m_zhenlingxue', 3]] },
       clearTitle: '掌天瓶',
       clearDesc: '青瓶与墨绿瓶之间的嗡鸣声越来越响，像两头隔着水面互相呼唤的兽。原来它有名字。'
@@ -1078,6 +1087,12 @@
       elites: ['万灵血龙', '九元观随从'],
       mats: ['m_zhenlingxue', 'm_xuantianteng'],
       boss: { kind: 'mo', name: '马良·九元观真仙', hp: 300000, spd: 88, dmg: 320, r: 28, spr: 'maliang', scale: 8.2 },
+      // 原著 2426–2428：马良吞真魂丹后召出「天外魔头」（黑肤青年），火须子（怪蛟）也现身。
+      // 梵圣魔神是韩立自己化的，绝不能做成敌方同场强敌。两位副手按主将派生、压低份额。
+      coBoss: [
+        { kind: 'mo', name: '天外魔君·化身', spr: 'heitian', scale: 7.4, hpMul: 0.46, dmgMul: 0.78 },
+        { kind: 'beast', name: '火须子', spr: 'moyuanbeast', scale: 6.8, hpMul: 0.36, dmgMul: 0.7 }
+      ],
       reward: { stones: 240000, items: ['t_wanlingxueyi', 't_moguang', 't_huoxuzi', 'dan_zhihun'], mats: [['m_xuantianteng', 2], ['m_zhenlingxue', 4]] },
       clearTitle: '斩仙',
       clearDesc: '墨绿细线从脖颈一闪而过，一颗头颅滚落下来。灵界最后一场硬仗，打完了。'
@@ -1106,6 +1121,10 @@
       type: 'story', tag: '剧情',
       desc: '银色鳞片浮出一行古文：两年后，真龙之岛，广灵道果大会。赴会之前，先去魔界寻瓶灵。',
       startLevel: 372, endLevel: 378, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      // 原著写的是「碰到魔族魔兽也一掠而过」。只做几只拦路魔兽的轻量遭遇，
+      // 文案保留「未停留」；元魇圣祖仍只站在阵外，不做成敌人。
+      trial: { label: '魔源海·掠过', unit: '拦路魔兽', tail: '未作停留，直接掠过', need: 3,
+        enemies: ['yaoshou2', 'yuyao', 'haishou'] },
       unlock: 'diyi', next: 'daoguo',
       reward: { stones: 190000, mats: [['m_zhenlingxue', 2], ['m_zhenlinglin', 3]] },
       clearTitle: '瓶灵回归',

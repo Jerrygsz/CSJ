@@ -58,6 +58,34 @@ ok(enemiesOf(late2, 'huanglong') >= 4 && enemiesOf(late2, 'mulan') >= 4, '两张
 ok(/chaseBoss:\s*\[/.test(late2.slice(late2.indexOf("id: 'huanglong'"), late2.indexOf("id: 'huanglong'") + 1500)), 'huanglong 配了仲神师追兵');
 ok(/chaseBoss:\s*\[/.test(late2.slice(late2.indexOf("id: 'mulan'"), late2.indexOf("id: 'mulan'") + 1500)), 'mulan 配了上阶仙师追兵');
 
+// ---------- 静态：后期薄图补战斗（20261119T） ----------
+console.log('\n== 静态：后期薄图补战斗 ==');
+function segOf(src, id, len) {
+  const at = src.indexOf("id: '" + id + "'");
+  return at < 0 ? '' : src.slice(at, at + (len || 1800));
+}
+const TRIAL_MAP = {
+  xianshi: lj, huimoyuan: lj, wumengdao: xj,
+  xiedao: xj, zhanshi: xj, leihai: xj, daotian: xj
+};
+for (const id in TRIAL_MAP) {
+  ok(/trial:\s*\{/.test(segOf(TRIAL_MAP[id], id)), id + ' 配了对白后脚本战');
+}
+ok(/const label = t\.label \|\| '山道'/.test(g) && /if \(m && m\.id === 'qixuan'\)/.test(g),
+   '脚本战文案按图参数化，教学三句只在 qixuan 播');
+const CO2 = { zhangtianping: lj, zhanxian: lj, jingong: xj };
+for (const id in CO2) {
+  ok(/coBoss:\s*\[/.test(segOf(CO2[id], id)), id + ' 配了原著同场强敌');
+}
+ok(/天阴五子·虎[\s\S]{0,600}天阴五子·鹰/.test(segOf(xj, 'jingong', 2400)),
+   '独闯仙宫是五子同场（虎鹿熊猿鹰，卡满 CO_MAX=5）');
+const zxCo = (segOf(lj, 'zhanxian', 1800).match(/coBoss:\s*\[([\s\S]*?)\]/) || ['', ''])[1];
+ok(!!zxCo && !/梵圣魔神/.test(zxCo) && /天外魔君·化身/.test(zxCo) && /火须子/.test(zxCo),
+   '斩仙同场名单里没有韩立所化的梵圣魔神', zxCo && zxCo.slice(0, 80));
+ok(/window\.STORY\.push\(/.test(xj)
+   && ['xs_fight', 'sj_fight', 'sd_fight', 'sf_fight'].every(k => xj.indexOf("id: '" + k + "'") >= 0),
+   '四张 boss 图补了战斗内定时剧情');
+
 // ---------- 实机：生成与数值 ----------
 console.log('\n== 实机：同场强敌生成 ==');
 const browser = await chromium.launch({ channel: 'chrome' });
@@ -122,6 +150,39 @@ const r4 = await page.evaluate(() => {
 });
 ok(r4mid === 'huanglong' && !r4.boss, '逃亡图不设主 Boss', r4.boss);
 ok(r4.co.some(x => x.indexOf('仲神师') >= 0), '逃亡图追兵到点现身', r4.co);
+
+// R6 独闯仙宫：五子同场，主 Boss 仍是东方白
+const r6mid = await enter('jingong', 520);
+const r6 = await page.evaluate(() => {
+  const F = window.__FR, G = F.G;
+  F.boss(); F.setGod(true); F.tickFrames(180, 0.05);
+  return { mid: G.mapId, boss: G.boss ? G.boss.name : null, co: F.coBossInfo() };
+});
+ok(r6mid === 'jingong' && r6.boss === '东方白·金源宫主', '仙宫主 Boss 正常出场', r6.boss);
+ok(r6.co.length === 5 && r6.co.every(x => /天阴五子/.test(x.name)), '天阴五子五人同场', r6.co.map(x => x.name));
+ok(r6.co.every(x => x.kit && x.maxhp > 0 && x.dmg > 0), '五子都有招式/血量/伤害', r6.co.map(x => x.name));
+ok(r6.co.every(x => x.coAngle != null && x.coRadius > 0)
+   && new Set(r6.co.map(x => x.coAngle)).size === 5, '五子各守一个环位，不叠成一坨', r6.co.map(x => x.coAngle));
+
+// R7 斩仙：天外魔头与火须子同场，梵圣魔神是韩立自己
+const r7mid = await enter('zhanxian', 380);
+const r7 = await page.evaluate(() => {
+  const F = window.__FR, G = F.G;
+  F.boss();
+  return { mid: G.mapId, boss: G.boss ? G.boss.name : null, co: F.coBossInfo().map(x => x.name) };
+});
+ok(r7mid === 'zhanxian' && r7.boss === '马良·九元观真仙', '斩仙主 Boss 仍是马良', r7.boss);
+ok(r7.co.includes('天外魔君·化身') && r7.co.includes('火须子'), '敌方是天外魔头与火须子', r7.co);
+ok(!r7.co.some(x => /梵圣魔神/.test(x.name)), '梵圣魔神没被错配成敌人', r7.co);
+
+// R8 对白后脚本战：雷海这种零怪池薄图也能真的打一场
+const r8mid = await enter('leihai', 600);
+const r8 = await page.evaluate(() => {
+  const F = window.__FR, G = F.G;
+  return { mid: G.mapId, state: G.state, trial: F.trialState(), n: F.enemies().n };
+});
+ok(r8mid === 'leihai' && r8.state === 'play', '雷海对白后进入战斗态', r8.state);
+ok(!!r8.trial && r8.trial.need === 4 && r8.n >= 4, '雷海脚本战按配置刷出四道雷夔虚影', r8);
 
 // R5 连帧稳定：同场强敌在场时主循环不崩
 await page.evaluate(() => { const F = window.__FR; F.tickFrames(180, 0.05); });

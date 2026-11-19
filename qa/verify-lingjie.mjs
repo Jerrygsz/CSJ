@@ -400,7 +400,12 @@ const XS = await page.evaluate(() => {
   F.clearProgress(); F.setLevel(329); F.god(true); F.unlockAll();
   // ① 献祭：剧情图
   F.enterMap('xianshi');
-  for (let k = 0; k < 24; k++) { F.skipStory(); F.tickFrames(2); if (F.info().state === 'levelup') F.insightAuto(); }
+  // 对白后新增一场「古镜余烬」脚本战：多跑几帧清掉金甲士残影再验结算。
+  for (let k = 0; k < 600; k++) {
+    F.skipStory(); F.tickFrames(2);
+    if (F.info().state === 'levelup') F.insightAuto();
+    if (F.info().cleared.indexOf('xianshi') >= 0) break;
+  }
   const xsText = (W.MAP_STORIES['xianshi'] || []).map(x => x[1]).join('');
   const xsCleared = F.info().cleared.indexOf('xianshi') >= 0;
   const zsOpen = F.info().unlocked.indexOf('zhenxian') >= 0;
@@ -498,7 +503,11 @@ const END2 = await page.evaluate(() => {
   // ① 再回魔源：剧情，瓶灵回归（无战斗，但是有对峙张力）
   F.enterMap('huimoyuan');
   const s1 = F.info().state;
-  for (let k = 0; k < 24; k++) { F.skipStory(); F.tickFrames(2); }
+  // 「魔源海·掠过」新增轻量拦截：清完脚本战才结算。
+  for (let k = 0; k < 600; k++) {
+    F.skipStory(); F.tickFrames(2);
+    if (F.info().cleared.indexOf('huimoyuan') >= 0) break;
+  }
   const c1 = F.info().cleared.indexOf('huimoyuan') >= 0;
   const o1 = F.info().unlocked.indexOf('daoguo') >= 0;
   const fruitAfterHui = F.bag().dan_guangling || 0;
