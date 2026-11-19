@@ -328,9 +328,16 @@
       startLevel: 88, startSkills: { sword: 6, fire: 5, orb: 5, nova: 5, frost: 5 },
       unlock: 'yanyue', next: 'bianjie',
       diff: 2.8, escapeAt: 95,
-      enemies: ['moxiu2', 'gui2', 'fashi'],
+      enemies: ['moxiu2', 'gui2', 'fashi', 'moxiu', 'guiling'],
       elites: ['魔道长老', '仲神师随从'],
       mats: ['m_xueyu', 'm_hantie', 'm_yusui', 'm_lingmo'],
+      // 原著（五卷 729–735 章）：慕兰三大神师之一仲神师亲至，带两个元婴化身追杀。
+      // 逃亡图不设主 Boss（撑到 escapeAt 脱身），追兵做成定时现身的强敌，打不打得过
+      // 都不影响脱身 —— 但想全身而退，得先扛住这一波。
+      chaseBoss: [
+        { at: 42, kind: 'mo', name: '仲神师·化身甲', spr: 'fashi', scale: 4.0, hpMul: 0.8, dmgMul: 0.9 },
+        { at: 70, kind: 'mo', name: '仲神师·化身乙', spr: 'fashi', scale: 4.0, hpMul: 0.8, dmgMul: 0.9 }
+      ],
       reward: { stones: 2600, mats: [['m_xueyu', 4], ['m_hantie', 3]] },
       outro: 'huanglong_out',
       clearTitle: '全身而退',
@@ -524,10 +531,16 @@
       startLevel: 90, startSkills: { sword: 6, fire: 5, orb: 5, nova: 5, frost: 5 },
       unlock: 'jixi', next: 'lingmiao',
       diff: 2.95, bossAt: 130, intro: 'zhuimo', outro: 'zhuimo_out',
-      enemies: ['yaoshou2', 'gui2', 'shixiao'],
+      enemies: ['yaoshou2', 'gui2', 'shixiao', 'moxiu2'],
       elites: ['古魔分魂', '古魔'],
       mats: ['m_lingzhu', 'm_huodan', 'm_gangyin', 'm_gengjing'],
       boss: { kind: 'blood', name: '古魔主魂', hp: 24000, spd: 58, dmg: 62, r: 22, spr: 'mo', scale: 5.8 },
+      // 原著（六卷 838–858 章「双魔会」）：古魔主魂带两个分魂同时现身，慕兰仲神师与
+      // 一众元婴老怪围着打，原文说它「神通犹在上古修士之上」。分魂与主魂同场。
+      coBoss: [
+        { kind: 'blood', name: '古魔·分魂甲', spr: 'mo', scale: 4.2, hpMul: 0.78, dmgMul: 0.9 },
+        { kind: 'blood', name: '古魔·分魂乙', spr: 'mo', scale: 4.2, hpMul: 0.78, dmgMul: 0.9 }
+      ],
       reward: { stones: 4200, items: ['a_jiaolong'], mats: [['m_lingzhu', 1], ['m_huodan', 1], ['m_gangyin', 2]] },
       clearTitle: '灵烛果已摘',
       clearDesc: '果子摘到了，魔也放出来了。空间裂缝一开，人就被卷了进去。'
@@ -549,9 +562,15 @@
       startLevel: 94, startSkills: { sword: 6, fire: 5, orb: 5, nova: 5, frost: 5 },
       unlock: 'lingmiao', next: 'dajin',
       diff: 3.0, escapeAt: 90,
-      enemies: ['fashi', 'moxiu2', 'gui2'],
+      enemies: ['fashi', 'moxiu2', 'gui2', 'moxiu'],
       elites: ['突兀人仙师', '草原追兵'],
       mats: ['m_xueyu', 'm_hanhuo', 'm_yusui'],
+      // 原著（六卷 880–884 章）：突兀人上阶仙师（元婴）一路追杀，呼大仙师趁隙偷袭重伤韩立。
+      // 逃亡图不设主 Boss，追兵强敌定时现身；seal 的「修为封四成」仍由脱身结算给。
+      chaseBoss: [
+        { at: 38, kind: 'mo', name: '突兀人·上阶仙师', spr: 'fashi', scale: 4.2, hpMul: 0.85, dmgMul: 0.92 },
+        { at: 66, kind: 'mo', name: '呼大仙师', spr: 'moxiu', scale: 4.4, hpMul: 0.9, dmgMul: 0.95 }
+      ],
       reward: {
         stones: 1800, mats: [['m_xueyu', 3]],
         seal: { name: '五鬼锁魂', dmg: 0.45, hp: 0.45, note: '煞气封体，修为只剩四成' }

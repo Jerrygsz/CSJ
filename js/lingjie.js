@@ -754,10 +754,16 @@
       startLevel: 245, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
       unlock: 'moyuan', next: 'lanpu',
       diff: 4.3, bossAt: 0, intro: 'modajie', outro: 'modajie_out',
-      enemies: ['gui2', 'moxiu2', 'guixiu'],
+      enemies: ['gui2', 'moxiu2', 'guixiu', 'moxiu'],
       elites: ['始祖魔卫', '苦灵岛守卫'],
       mats: ['m_yimojin', 'm_zhenlingxue', 'm_yaodan'],
       boss: { kind: 'mo', name: '元魇始祖·化身', hp: 165000, spd: 78, dmg: 186, r: 26, spr: 'yuanyan', scale: 7.9 },
+      // 原著（V10C1911–C1930）：元魇始祖、宝花圣祖、灵王分魂、涅槃圣祖化身在苦灵岛同时现身。
+      // 宝花仍走续战（保顺序），这里把涅槃圣祖化身与灵王分魂同时请上场。
+      coBoss: [
+        { kind: 'mo', name: '涅槃圣祖·化身', spr: 'yuanyan', scale: 6.2, hpMul: 0.85, dmgMul: 0.9 },
+        { kind: 'mo', name: '灵王·分魂', spr: 'baohua', scale: 5.8, hpMul: 0.75, dmgMul: 0.86 }
+      ],
       extraBoss: [{ kind: 'mo', name: '宝花圣祖', hp: 150000, spd: 62, dmg: 196, r: 25, spr: 'baohua', scale: 6.6, summon: '' }],
       reward: { stones: 92000, items: ['t_jinglinglian'], pets: ['p_xiedaoren'],
         mats: [['m_xilingchi', 2], ['m_zhenlingxue', 3], ['m_yimojin', 2]] },

@@ -266,11 +266,18 @@
       startLevel: 460, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
       unlock: 'huijie', next: 'xianyun',
       diff: 5.2, bossAt: 0, intro: 'shijin', outro: 'shijin_out',
-      enemies: ['yj_guhai'],
+      enemies: ['yj_guhai', 'x5_guibing', 'xj_shimei', 'xj_yizhou'],
       elites: ['骸骨', '傀儡'],
       mats: ['m_xianyuanshi', 'm_shijian'],
       // 太乙境噬金仙：甲虫身、五彩晶光、钢矛般的前肢。它是这一卷里第一个「打不动」的东西。
       boss: { kind: 'beast', name: '太乙境噬金仙', hp: 400000, spd: 96, dmg: 420, r: 28, spr: 'shijin', scale: 7.6, summon: '' },
+      // 原著（X3C562–564 虫兽大战 / C578–580 深渊）：同期有太乙玉仙与真灵九尾青狐
+      // 一同被卷进这场厮杀，「威压远在太乙噬金仙之上」。补两只同场强敌，让深渊不再是
+      // 一只怪的木桩图；金童、蟹道人是友军，不做成敌人。
+      coBoss: [
+        { kind: 'mo', name: '太乙玉仙', spr: 'xj_tianwei', scale: 6.8, hpMul: 0.88, dmgMul: 0.92 },
+        { kind: 'beast', name: '九尾青狐·真灵', spr: 'beast4', scale: 7.2, hpMul: 0.95, dmgMul: 0.98 }
+      ],
       reward: { stones: 380000, mats: [['m_xianyuanshi', 10], ['m_shijian', 2]] },
       clearTitle: '深渊',
       clearDesc: '神念囚笼碎了，可它也没能站起来。金童的嘴角还挂着血，蟹道人的刀已经卷了口。'
@@ -325,7 +332,7 @@
       startLevel: 460, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
       unlock: 'shuiyan', next: 'taiyi',
       diff: 5.4, bossAt: 60, intro: 'xisha', outro: 'xisha_out',
-      enemies: ['jy_younu', 'jy_xiushi'],
+      enemies: ['jy_younu', 'jy_xiushi', 'xj_yizhou', 'x5_guibing'],
       // 硬度性格：幽奴是快攻刺客（薄、快、狠），九幽族修士是正面修士（厚）。
       // 两者 def.hp 只差 7%，开方后几乎一样；这里按角色重标，整图平均归一，不改整图难度。
       hulMap: { jy_younu: 0.80, jy_xiushi: 1.20 },
@@ -333,6 +340,12 @@
       mats: ['m_xianyuanshi', 'm_shijian'],
       // 鬼木：九幽族大罗。八张黑色符箓化八根漆黑巨兵，「每一根散发的气息，都不逊于一件入品仙器」。
       boss: { kind: 'mo', name: '鬼木', hp: 440000, spd: 92, dmg: 440, r: 27, spr: 'guimu', scale: 8.2 },
+      // 原著（X3C725–754）：鬼木、阴栝（煞雷法则大罗）、幽络（本命法则强者）三位九幽族
+      // 大罗同时围住韩立一行；啼魂与柳岐老祖是友军，不做敌人。两位同场强敌按主将派生。
+      coBoss: [
+        { kind: 'mo', name: '阴栝', spr: 'guixiu', scale: 7.0, hpMul: 0.9, dmgMul: 0.95 },
+        { kind: 'mo', name: '幽络', spr: 'assassin', scale: 6.4, hpMul: 0.82, dmgMul: 0.9 }
+      ],
       // 洗煞池洗的是煞气。身上若还压着「五鬼锁魂」这类煞气封印，这一池水一并洗掉。
       reward: { stones: 480000, unseal: true, mats: [['m_xianyuanshi', 14], ['m_shijian', 4]] },
       clearTitle: '洗煞',
@@ -483,6 +496,13 @@
       elites: ['岁月殿·金甲道兵', '石剑残影'],
       mats: ['m_xianyuanshi', 'm_shijian'],
       boss: { kind: 'mo', name: '奇摩子', hp: 780000, spd: 104, dmg: 500, r: 32, spr: 'qimozi', scale: 10.3 },
+      // 原著（X4C1119–1124）：奇摩子、黑天魔祖（「大罗境内堪称无敌」）、柳自在、石穿空
+      // 同时在岁月殿夺灯。黑天、柳自在仍走续战（保既有顺序），这里把同场的太岁残灵与
+      // 被提及的赤融道祖一并请出，群雄夺灯的场面就齐了。
+      coBoss: [
+        { kind: 'mo', name: '太岁残灵·石穿空', spr: 'xj_lunhui', scale: 8.4, hpMul: 0.8, dmgMul: 0.92 },
+        { kind: 'mo', name: '赤融道祖', spr: 'xj_daozhu', scale: 9.0, hpMul: 0.95, dmgMul: 1.0 }
+      ],
       extraBoss: [{ kind: 'mo', name: '黑天魔祖', hp: 720000, spd: 100, dmg: 520, r: 30, spr: 'heitian', scale: 10.4, summon: '' }, { kind: 'mo', name: '柳自在', hp: 820000, spd: 102, dmg: 540, r: 31, spr: 'liuzizai', scale: 8.8, summon: '' }],
       reward: { stones: 980000, items: ['t_suiyueshendeng'], mats: [['m_xianyuanshi', 20], ['m_shijian', 8]] },
       clearTitle: '入手神灯',
@@ -625,10 +645,17 @@
       startLevel: 580, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
       unlock: 'fuyao', next: 'daotian',
       diff: 6.8, bossAt: 0, intro: 'shifang', outro: 'shifang_out',
-      enemies: ['x5_huanghun', 'x5_guibing', 'x4_daobing'],
+      enemies: ['x5_huanghun', 'x5_guibing', 'x4_daobing', 'x4_tianyin'],
       elites: ['天庭·仙使', '天道七君座下'],
       mats: ['m_xianyuanshi', 'm_shijian'],
       boss: { kind: 'mo', name: '东离虎·道祖', hp: 1400000, spd: 112, dmg: 640, r: 35, spr: 'donglihu', scale: 12.1 },
+      // 原著（X5C1355–1356）：紫杉、东离虎、朱颜三位道祖同设十方万仙阵，「每个仙域由
+      // 数十大罗、数百太乙、数千金仙镇守」。三道祖仍走续战，这里补两位镇阵大罗同场，
+      // 让「群仙列阵」的量级先立起来。
+      coBoss: [
+        { kind: 'mo', name: '镇阵大罗·左', spr: 'xj_tianwei', scale: 8.0, hpMul: 0.72, dmgMul: 0.88 },
+        { kind: 'mo', name: '镇阵大罗·右', spr: 'xj_tianwei', scale: 8.0, hpMul: 0.72, dmgMul: 0.88 }
+      ],
       extraBoss: [{ kind: 'mo', name: '紫杉', hp: 1250000, spd: 110, dmg: 610, r: 32, spr: 'neimen', scale: 9.8, summon: '' },
         { kind: 'mo', name: '朱颜', hp: 1250000, spd: 108, dmg: 620, r: 32, spr: 'guixiu', scale: 9.8, summon: '' }],
       reward: { stones: 2400000, mats: [['m_xianyuanshi', 30], ['m_shijian', 16]] },

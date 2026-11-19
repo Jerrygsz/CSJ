@@ -5181,6 +5181,86 @@
   function spawnBoss() {
     const cfg = (G.map && G.map.boss) || { kind: 'mo', name: '墨大夫', hp: 1800, spd: 40, dmg: 18, r: 20, spr: 'mo2', scale: 1.8 };
     spawnBossFrom(cfg);
+    spawnCoBosses();
+  }
+
+  // ---------- 同场强敌（按原著「几大老怪同时现身」） ----------
+  // 主 Boss 用 G.boss 单槽（84 处判定不动它）；同场的另外几位做成「带 kit 的精英」放进
+  // G.enemies —— updateEnemies 里 `if (e.kit) updateBossKit(e, e.kit, dt)` 已经让精英跑 Boss
+  // 同一套招式引擎。于是它们能打、有前摇预警、有护罩、有专属招式，却不会碰 onBossDead /
+  // startPhase2 这些只认 `e === G.boss` 的结算分支。死一只就是普通精英之死，主 Boss 倒下
+  // 才是这一局的胜负——和原著「群魔围着韩立，但真正要过的是那一位」对得上。
+  // 数值不写死：按该图主 Boss 的生效值（BALANCE.BOSS）乘系数派生，闸门仍只量主 Boss，
+  // 同场强敌再强也不改变「单只单击占血」的守门口径；总压靠数量而非单只超模。
+  const CO_MAX = 5;   // 同场强敌硬上限：再多就是弹幕海，不是斗法
+  // list=配置数组；baseHp/baseDmg=该图基准（主 Boss 图取主 Boss 生效值，chase 图取精英基准）
+  function spawnCoList(list, baseHp, baseDmg) {
+    if (!list || !list.length || !(baseHp > 0)) return 0;
+    let made = 0;
+    for (let i = 0; i < list.length && made < CO_MAX; i++) {
+      const c = list[i];
+      if (!c || !c.name) continue;
+      // 基准乘该强敌的份额；没写系数就按 0.85/0.9 走（略弱于主将）
+      const hpMul = c.hpMul != null ? c.hpMul : 0.85;
+      const dmgMul = c.dmgMul != null ? c.dmgMul : 0.9;
+      const hp = Math.max(1, Math.round(baseHp * hpMul));
+      const dmg = Math.max(1, baseDmg * dmgMul);
+      const kind = c.kind || 'mo';
+      const pos = spawnPos();
+      // 错开出生位置：几位一起现身时别叠在一个点上（叠了看着像一只，招式也全糊一起）。
+      // 位移按体型放大：scale 8 的大罗要错开 60+px，不然三只叠成一坨看不出是"群雄"。
+      const spread = 26 + (c.scale || 3) * 5;
+      const a = (i / Math.max(1, list.length)) * 6.28 + 0.6;
+      const e = {
+        _id: ++enemySeq,
+        type: kind, kind: kind, name: c.name,
+        x: pos.x + Math.cos(a) * spread, y: pos.y + Math.sin(a) * (spread * 0.7),
+        hp: hp, maxhp: hp, spd: (c.spd || 62) * (curDiff().spd || 1), dmg: dmg,
+        r: c.r || 22, spr: c.spr || 'mo2', scale: c.scale || 3.2,
+        hitFlash: 0, t: 0, ang: 0, shootT: 1 + i * 0.5, teleT: 6 + i, sumT: 9 + i,
+        dashT: 3, dashAng: 0, dashing: 0, _orbCd: {},
+        elite: true, coBoss: true, xpVal: 120,
+        summon: c.summon === undefined ? '' : c.summon,
+        noSummon: c.noSummon !== false,
+        attr: c.attr || bossAttr(kind)
+      };
+      // 护罩：按族给，和真 Boss 一个口径（同场强敌也该有「先破罩」这一层）
+      const base = { mo: 0.10, blood: 0.12, beast: 0.06, swarm: 0.08 }[kind] || 0.08;
+      e.wardMax = hp * base; e.ward = e.wardMax;
+      // 招式：按名找专属表，没有就按族走通用表（两者都在 bosskit.js 里）
+      const named = namedKitOf(c.name);
+      const kit = named || ((window.BOSS_KIT_KIND || {})[kind]) || null;
+      if (kit && kit.skills && kit.skills.length) {
+        e.kit = kit; e.kitNamed = !!named; e.cds = {}; e.pending = null;
+        kit.skills.forEach((sk, k) => { e.cds[k] = (sk.cd || 6) * (0.6 + k * 0.2); });
+      }
+      G.enemies.push(e);
+      made++;
+    }
+    if (made) { G.flash = Math.max(G.flash, 0.35); G.shake = Math.max(G.shake, 8); }
+    return made;
+  }
+  function spawnCoBosses() {
+    if (!G.boss) return 0;
+    return spawnCoList((G.map && G.map.coBoss) || null, G.boss.maxhp, G.boss.dmg);
+  }
+
+  // 逃亡图的追兵强敌：按配置的 at 秒数定时现身，不设主 Boss、不触发胜负结算。
+  // 基准用该等级的精英血/伤（BALANCE.eliteHp/eliteDmg），追兵比普通精英厚一点但远不及守关 Boss。
+  function tickChaseBosses() {
+    const list = (G.map && G.map.chaseBoss) || null;
+    if (!list || !list.length) return;
+    const B = window.BALANCE;
+    const baseHp = B ? B.eliteHp(mapLv()) * 4.5 : (600 + G.time * 4);
+    const baseDmg = B ? B.eliteDmg(mapLv()) * 1.6 : (30 + G.time * 0.2);
+    for (let i = 0; i < list.length; i++) {
+      const c = list[i];
+      const key = (G.mapId || '?') + ':' + i;
+      if (!c || (G.chaseBossDone || (G.chaseBossDone = {}))[key] || G.time < (c.at || 0)) continue;
+      G.chaseBossDone[key] = true;   // 一次性：同一局不重复刷（重开由 resetRun 清）
+      const made = spawnCoList([c], baseHp, baseDmg);
+      if (made) banner('⚠ 追兵 · ' + c.name);
+    }
   }
 
   // 二阶段演出：定身 + 冲击波 + 屏幕血光
@@ -8307,6 +8387,10 @@
       if (at > 0 && G.time >= at) spawnBoss();
     }
 
+    // 逃亡图的追兵强敌：到点现身，但不改「撑到时辰脱身」的规则
+    if (G.map && G.map.type === 'chase' && !G.chaseDone
+        && !(G.coopRole === 'client' && G.coopShared)) tickChaseBosses();
+
     // 追逃图：打不过就跑。撑到时辰，自然脱身
     if (G.map && G.map.type === 'chase' && G.map.escapeAt && !G.chaseDone && G.time >= G.map.escapeAt
         && !(G.coopRole === 'client' && G.coopShared)) {   // 共斗时脱身由房主广播 end，客机不自行结算
@@ -10642,6 +10726,7 @@
     G.pickPulseAt = 0;   // 进图头 1.2 秒展示一次神念拾取圈
     G.fxBullets.length = 0; G.coopFrozen = false; G.dialogSynced = false;
     G.boss = null; G.bossActive = false; G.bossSpawned = false; G.bossWarned = false; G.extraIdx = 0;
+    G.chaseBossDone = {};   // 逃亡图追兵强敌的一次性标记（按 图id:索引，不污染 MAPS 配置）
     G.fieldSlow = []; G.shake = 0; G.flash = 0; G.hitStop = 0;
     G.decor = []; G.chunkMap = {}; G.cam = { x: -W / 2, y: -H / 2 }; G.orbPos = []; G.camLag = null;
     G.vacuumT = 0; G.pendingEnding = false; G.runLoot = []; G.matGain = 0; G.lastAutoSave = 0; G.pickLeft = 0;
@@ -17504,6 +17589,14 @@
       return { dx: +(best.x - p.x).toFixed(1), dy: +(best.y - p.y).toFixed(1), dist: +bd.toFixed(1), elite: !!best.elite, boss: best === G.boss };
     },
     elite(i) { if (G.player) spawnElite(i || 0); },
+    // 同场强敌调试口：spawnCo() 立刻按当前图的 coBoss 配置生成；coBossInfo() 读场上状态
+    spawnCo() { return spawnCoBosses(); },
+    coBossInfo() {
+      return (G.enemies || []).filter(e => e && e.coBoss && !e._dead).map(e => ({
+        name: e.name, hp: Math.round(e.hp), maxhp: Math.round(e.maxhp), dmg: +e.dmg.toFixed(1),
+        kit: !!e.kit, ward: Math.round(e.ward || 0), x: Math.round(e.x), y: Math.round(e.y)
+      }));
+    },
     boss(kind) {
       if (!G.player) return;
       if (G.boss) return '已有 Boss';

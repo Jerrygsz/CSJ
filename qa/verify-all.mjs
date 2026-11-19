@@ -52,6 +52,7 @@ const ITEMS = [
   { key: 'batch16', file: 'verify-batch16.mjs', kind: 'gate', desc: '战斗按钮热区（禁制 29px / 大衍 21px 补纵向 ±6 逻辑 px）· 重新开始两段式确认 · 静音跨刷新保留且清档不清 · 画面震动开关认系统减少动效 · 存档导出导入闭环且拒收异形 JSON · 暂停面板报上次存档时间 · 弹反首战提示只念一次' },
   { key: 'guard-atlas', file: 'verify-guard-atlas.mjs', kind: 'gate', desc: '护体与舆图（原著护体补齐 + 智能选靶 + 三界长卷）：道陨不抽 unique 护体 / 11 件载体与 parry.js 一一对应且 special 真生效 / 无护体自愈与按通关补发 / 打分选靶优先 Boss·精英与破罩降权 / 舆图 320 与 390 双视口可开可拖可点不溢出' },
   { key: 'eros-days', file: 'verify-eros-days.mjs', kind: 'gate', desc: '历练岁月与静修：际遇按钮演完即消失（排除 repeat 小事）· 满修为可静养不涨修为但照凝绿液 · 按行为记账（进图/扫荡/静修/洞府/坊市/开炉按原著天数）本世累计转世清零且与「入道年数」两账并存' },
+  { key: 'boss-ensemble', file: 'verify-boss-ensemble.mjs', kind: 'gate', desc: '战斗内容增强（原著同场强敌）：七张原著群敌图按主 Boss 派生同场强敌（走精英 kit 引擎不占 G.boss 槽 / 带护罩 / 数量硬上限）· 薄图补怪种（shijin 1→4、xisha 2→4、两张逃亡图）· 逃亡图追兵按时现身且不设主 Boss 不破脱身 · 主 Boss 单击守门口径不变 · 同场连帧无报错' },
 ];
 
 const argv = process.argv.slice(2);

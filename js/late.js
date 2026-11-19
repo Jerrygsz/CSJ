@@ -347,10 +347,17 @@
       startLevel: 68, startSkills: { sword: 6, fire: 5, orb: 4, nova: 4, frost: 4 },
       unlock: 'guxiu', next: 'wuzhong',
       diff: 2.25, bossAt: 0, intro: 'xutian', outro: 'xutian_out',
-      enemies: ['guixiu', 'kui', 'ghoul'],
+      enemies: ['guixiu', 'kui', 'ghoul', 'moxiu', 'guiling'],
       elites: ['阴灵', '守殿傀儡'],
       mats: ['m_yanghun', 'm_lingru', 'm_jinlei', 'm_yaodan', 'm_xueyu'],
       boss: { kind: 'mo', name: '玄骨上人', hp: 8600, spd: 56, dmg: 36, r: 20, spr: 'xuangu', scale: 5.0 },
+      // 原著（四卷 431–500 章）：虚天殿内殿里六位元婴老怪同时现身，蛮胡子、万天明各以元婴
+      // 出窍拼命，玄骨只是其中之一。这里把同场的几位老怪一起请出来（能力按主将派生，
+      // 不动 BALANCE 的单只单击口径）。
+      coBoss: [
+        { kind: 'mo', name: '蛮胡子', spr: 'mo2', scale: 4.4, hpMul: 0.95, dmgMul: 0.92 },
+        { kind: 'mo', name: '万天明', spr: 'xuangu', scale: 4.0, hpMul: 0.85, dmgMul: 0.88 }
+      ],
       reward: { stones: 1400, items: ['t_xutianding', 't_yinyue', 'butian'], mats: [['m_lingru', 2], ['m_yanghun', 2]] },
       clearTitle: '虚天殿闭',
       clearDesc: '玄骨散了，鼎口压着一缕乾蓝的焰。鼎腹里那道银白身影睁了眼，没有出声。'
@@ -378,10 +385,16 @@
       startLevel: 76, startSkills: { sword: 6, fire: 5, orb: 4, nova: 4, frost: 4 },
       unlock: 'wuzhong', next: 'yuanyao',
       diff: 2.45, bossAt: 0, intro: 'waihai', outro: 'waihai_out',
-      enemies: ['haishou', 'guixiu', 'kui', 'dujiao'],
+      enemies: ['haishou', 'guixiu', 'kui', 'dujiao', 'yuyao'],
       elites: ['化形妖', '深海巨兽'],
       mats: ['m_yaodan', 'm_banyao', 'm_jinlei', 'm_yanghun'],
       boss: { kind: 'beast', name: '八级妖兽·毒蛟', hp: 9800, spd: 64, dmg: 40, r: 23, spr: 'dujiao', scale: 6.6, summon: 'yuyao' },
+      // 原著（四卷 521–525 章）：毒蛟、妙鹤、九级裂风兽风希与几名元婴老道一同围来。
+      // 妙鹤仍走续战（保原有顺序），这里把风希与那名元婴老道同时请上场。
+      coBoss: [
+        { kind: 'beast', name: '九级裂风兽·风希', spr: 'haishou', scale: 5.4, hpMul: 0.92, dmgMul: 0.95 },
+        { kind: 'mo', name: '元婴老道', spr: 'moxiu', scale: 3.8, hpMul: 0.72, dmgMul: 0.85 }
+      ],
       extraBoss: [{ kind: 'mo', name: '妙鹤真人', hp: 9200, spd: 58, dmg: 44, r: 20, spr: 'miaohe', scale: 5.2, summon: '' }],
       reward: { stones: 2000, items: ['fb_fenglei'], mats: [['m_jinlei', 2], ['m_yaodan', 4], ['m_lingmo', 4], ['m_xueyu', 2]] },
       clearTitle: '风雷翅已夺',
