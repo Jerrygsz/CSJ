@@ -13417,26 +13417,26 @@
     return got;
   }
 
-  // ① 天澜圣山 · 替圣兽挡三道化形雷（一辈子只此一回）
+  // ① 天澜圣山 · 替圣兽挡最后三波化形雷（一辈子只此一回）
   // 原著这一段的账是这么算的：雷是真的，骨头也是真的（「骨头又断了两根。值。」）。
   // 所以代价不写玄的 —— 折修为，折的是自己一步一步修来的那一截。
   function stakeTianlan(next) {
-    // 一辈子只此一回：挡过的雷不会再压下来（探针也从这道门走，免得绕过去多算一次）
+    // 一辈子只此一回：挡过的雷不会再压下来（探针也从这波门走，免得绕过去多算一次）
     if (stakeDone('tianlan')) { if (next) next(); return false; }
     const cur = save.cultivate || (save.cultivate = { level: 1, xp: 0, skills: {} });
     const xpNow = Math.max(0, cur.xp || 0);
-    const per = Math.max(1, Math.round(xpNow * 0.08));       // 每挡一道折 8% 修为
+    const per = Math.max(1, Math.round(xpNow * 0.08));       // 每挡一波折 8% 修为
     const shi = Items.get('m_xianyuanshi') || null;
     const shiName = shi ? shi.name : '仙元石';
     askStake({
       id: 'tianlan',
-      prompt: '三道化形雷已经压到云底。'
-        + '「替我挡三道，我化形之后就跟你。」它说得客气，可雷是真的。'
-        + '挡得越多，它欠你越多 —— 折的是你自己的修为。眼下修为 ' + xpNow + '，这一炉挡几道？',
+      prompt: '最后三波化形雷已经压到云底。'
+        + '「替我挡下来，我化形之后就跟你。」它说得客气，可雷是真的。'
+        + '挡得越多，它欠你越多 —— 折的是你自己的修为。眼下修为 ' + xpNow + '，这一炉挡几波？',
       max: 3, have: xpNow, unit: '道',
       costOf: k => per * k,
       labelOf: k => (k === 0 ? '不挡 · 退到一边'
-        : ('挡 ' + k + ' 道 · 折修为 ' + (per * k) + ' · 得 ' + (k + (k >= 3 ? 2 : 0)) + ' 枚' + shiName)),
+        : ('挡 ' + k + ' 波 · 折修为 ' + (per * k) + ' · 得 ' + (k + (k >= 3 ? 2 : 0)) + ' 枚' + shiName)),
       onPick: function (k) {
         if (k <= 0) {
           return [['旁白', '他往后退了一步，看着雷落下来。'],
@@ -13449,9 +13449,9 @@
         const real = grantItems(shi, got);
         writeSave();
         Sfx.buff();
-        const lines = [['旁白', '第一道雷落下来，山石碎了一半。']];
-        if (k >= 2) lines.push(['旁白', '第二道。骨头响了一声，没断。']);
-        if (k >= 3) lines.push(['旁白', '第三道。他站住了，雷光在身前散成一片碎金。']);
+        const lines = [['旁白', '第一波雷落下来，山石碎了一半。']];
+        if (k >= 2) lines.push(['旁白', '第二波。银盾挡了大半，余威压在骨上。']);
+        if (k >= 3) lines.push(['旁白', '第三波。圣兽妖丹抵住最后一线，他站住了。']);
         lines.push(['天澜圣兽', '……化形之后，我记着你这一份。']);
         lines.push(['旁白', '（折去修为 ' + burn + '，得' + shiName + ' ' + real + ' 枚。）']);
         return lines;
@@ -16018,7 +16018,7 @@
     save.allyDead = {}; save.allyOwe = {};
     // stoneBurned 有意**不清**：与 totalKills / playTime / coop 同属生涯累计（注释见 defaultSave「只增不减永不退还」）。
     save.repBlack = 0; save.repWhite = 0; save.identity = 'han'; save.liUnlocked = false;
-    // 赌局台账也清：转世之后挡过的那三道雷不算数了（人都不一样了）
+    // 赌局台账也清：转世之后挡过的那三波雷不算数了（人都不一样了）
     save.stakeLog = {};
     // 共斗默契（save.coop）有意**不清**：它是「跟队友一起打了多少仗」，与这一世修到哪一境无关，
     // 转世回来还是他 —— 与 totalKills / playTime 同属生涯累计。清档只清修为与掉落侧的东西。

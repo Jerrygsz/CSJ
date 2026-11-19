@@ -444,7 +444,7 @@ F.enterMap('zhangtie');
 frames(3);
 F.skipStory();
 frames(4);
-ok(F.info().cleared.includes('zhangtie'), '剧情支线可通关（张铁埋骨处）');
+ok(F.info().cleared.includes('zhangtie'), '剧情支线可通关（张铁练功石）');
 
 // 际遇不会重复给同一段「一次性」因缘
 F.enterMap('houshan', 'easy');
@@ -823,7 +823,7 @@ ok(!hasLine('zhuji_out', '李化元', '记名弟子'), '收徒不再错放在筑
 eq(M('xuese').boss.name, '墨蛟', '血色禁地 Boss 是墨蛟（原著禁地关底）');
 ok(M('xuese').boss.kind === 'beast', '墨蛟按妖兽打法（beast），不是修士打法');
 ok(W.CAVES.huangfeng.pos.indexOf('百药') >= 0 || W.CAVES.huangfeng.name.indexOf('百药') >= 0, '黄枫谷洞府落在百药园');
-ok(M('zhangtie').name.indexOf('铁匠') >= 0, '张铁支线改成铁匠棚（原著里他没有坟）');
+ok(M('zhangtie').name.indexOf('练功石') >= 0 && M('zhangtie').name.indexOf('铁匠') < 0, '张铁支线改成练功石（原著里他没有坟，也不是铁匠出身）');
 
 // 金鼓原：令狐老祖把低阶弟子当弃子；古阵在灵石矿底下
 ok(hasLine('jingu', null, '令狐老祖'), '金鼓原点明令狐老祖的弃子之计');

@@ -24,7 +24,7 @@ const LIST = [
   ['luxiong', '陆师兄'], ['qingyan', '青颜真人'], ['rehuo', '热火仙尊'], ['jingyang', '景阳上人'],
   ['xiedaoren', '蟹道人'], ['jintong', '金童'], ['liuleer', '柳乐儿'],
   ['hanli', '韩立（主角）'], ['wangchan', '王蝉'], ['linmo', '林师兄'],
-  ['yuehuang', '越皇'], ['liudao', '六道·万天明'], ['qianlaomo', '乾老魔'],
+  ['yuehuang', '越皇'], ['liudao', '万天明'], ['qianlaomo', '乾老魔'],
   ['xuangu', '玄骨上人'], ['yecha', '夜叉王'], ['yanyue', '掩月宗大长老'],
   ['hanlishang', '寒骊上人'], ['longjia', '陇家老祖'], ['fujia', '付家家主'],
   ['qinglong', '青龙上人'], ['lizunzhe', '力尊者'], ['xueguang', '血光圣祖'],

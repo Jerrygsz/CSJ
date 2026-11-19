@@ -35,7 +35,7 @@ const WANT = [
   ['luxiong', '陆师兄'], ['qingyan', '青颜真人'], ['rehuo', '热火仙尊'], ['jingyang', '景阳上人'],
   ['xiedaoren', '蟹道人'], ['jintong', '金童'], ['liuleer', '柳乐儿'],
   // 后期首领：原来 12 个 boss 共用一张「内门弟子」、9 个共用一张「魔修」
-  ['yuehuang', '越皇'], ['liudao', '六道·万天明'], ['qianlaomo', '乾老魔'],
+  ['yuehuang', '越皇'], ['liudao', '万天明'], ['qianlaomo', '乾老魔'],
   ['xuangu', '玄骨上人'], ['yecha', '夜叉王'], ['yanyue', '掩月宗大长老'],
   // 二批：剩 12 位有名有姓的首领，也是「内门弟子 / 魔修 / 鬼修」三种轮换图的最后一批
   ['hanlishang', '寒骊上人'], ['longjia', '陇家老祖'], ['fujia', '付家家主'],

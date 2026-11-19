@@ -111,7 +111,7 @@ const reload = async () => { await page.reload(); await page.waitForTimeout(1100
   ok(/长老会/.test(t.liangzu) && /谷家/.test(t.liangzu) && /灵皇大比/.test(t.liangzu), '天渊城来客：长老会 + 谷家 + 灵皇大比三张帖子', t.liangzu.slice(0, 30));
   ok(/万宝大会/.test(t.jiuxian) && /冰髓/.test(t.jiuxian) && /白果儿/.test(t.jiuxian) && /天元圣皇/.test(t.jiuxian),
     '九仙山万宝大会：收三徒（救白果儿冰髓之体）、初见天元圣皇', t.jiuxian.slice(-40));
-  ok(/黑域/.test(t.heiyu) && /冰凤/.test(t.heiyu) && /齐天锣/.test(t.heiyu), '黑域交换会：齐天锣/聚灵桩 + 带走冰凤', t.heiyu.slice(-30));
+  ok(/黑域/.test(t.heiyu) && /冰凤/.test(t.heiyu) && /齐天锣/.test(t.heiyu) && !/买下|笼里卧着/.test(t.heiyu), '黑域交换会：齐天锣/聚灵桩 + 只问冰凤下落（未买下）', t.heiyu.slice(-30));
   ok(/陇家/.test(t.longjia) && /巨猿/.test(t.longjia) && /器灵子/.test(t.longjia), '陇家：器灵子被掳，化巨猿与陇家老祖对轰', t.longjia.slice(-30));
   ok(/圣岛/.test(t.shengdao) && /迷天楼/.test(t.shengdao) && /秦/.test(t.shengdao), '圣岛：迷天楼七层，遇秦氏姐妹', t.shengdao.slice(-30));
   ok(/万灵台/.test(t.zhenling) && /血槽/.test(t.zhenling) && /陇家老祖/.test(t.zhenling), '真灵大典：万灵台血祭比斗，陇家老祖相邀', t.zhenling.slice(-30));

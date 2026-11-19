@@ -153,11 +153,11 @@ const POS = {
   ok(/金刚舍利/.test(t('dajin')) && /煞气/.test(t('dajin')), '大晋佛宗：金刚舍利镇煞、修为回来还厚一分', t('dajin').slice(-30));
   ok(/乾老魔/.test(t('kunwu')) && /五子同心魔/.test(t('kunwu')) && /封魂咒/.test(t('kunwu')), '昆吾山：乾老魔伏诛、得五子同心魔、搜出封魂咒解术', t('kunwu').slice(-40));
   ok(/银月/.test(t('zhenmo')) && /玲珑/.test(t('zhenmo')) && /元刹/.test(t('zhenmo')), '镇魔塔：银月是玲珑、元刹分魂、空间节点与破界符', t('zhenmo').slice(-40));
-  ok(/小极宫/.test(t('xiaoji')) && /乾蓝冰焰/.test(t('xiaoji')) && /冰凤/.test(t('xiaoji')), '小极宫：仿制虚天鼎与乾蓝冰焰、十级冰凤认主', t('xiaoji').slice(-30));
-  ok(/八十年/.test(t('xutian2')) && /元婴后期/.test(t('xutian2')), '虚天殿闭关：八十年、元婴后期出关', t('xutian2').slice(-30));
-  ok(/凌玉灵/.test(t('xinggong')) && /三次出手/.test(t('xinggong')) && /元磁神光/.test(t('xinggong')), '星宫：凌玉灵以三次出手换元磁神光法门', t('xinggong').slice(-30));
-  ok(/鲲鹏/.test(t('kunpeng')) && /羽毛/.test(t('kunpeng')), '鲲鹏之战：罗睺对鲲鹏，捡到一根鲲鹏之羽', t('kunpeng').slice(-30));
-  ok(/六道/.test(t('liudao')) && /万天明/.test(t('liudao')) && /紫灵/.test(t('liudao')), '斩六道：六道夺舍万天明、第三次出手、天星城遇紫灵', t('liudao').slice(-40));
+  ok(/小极宫/.test(t('xiaoji')) && /乾蓝冰焰/.test(t('xiaoji')) && /冰凤/.test(t('xiaoji')) && /互下禁制/.test(t('xiaoji')) && !/认主/.test(t('xiaoji')), '小极宫：仿制虚天鼎与乾蓝冰焰、冰凤仅对峙（飞升节点前互下禁制）', t('xiaoji').slice(-30));
+  ok(!/八十年/.test(t('xutian2')) && /三百年/.test(t('xutian2')) && /元婴后期/.test(t('xutian2')), '虚天殿闭关：三百年、元婴后期出关', t('xutian2').slice(-30));
+  ok(/凌玉灵/.test(t('xinggong')) && /三次出手/.test(t('xinggong')) && !/元磁神光/.test(t('xinggong')), '星宫：旧约只换三次出手（元磁神光不是交易来的法门）', t('xinggong').slice(-30));
+  ok(/鲲鹏/.test(t('kunpeng')) && /灵羽/.test(t('kunpeng')) && !/罗睺.{0,10}交战/.test(t('kunpeng')), '鲲鹏之战：跨界异动落下鲲鹏灵羽（非罗睺外海交战）', t('kunpeng').slice(-30));
+  ok(/六道极圣/.test(t('liudao')) && /同归于尽/.test(t('liudao')) && /万天明/.test(t('liudao')) && /紫灵/.test(t('liudao')) && !/夺舍/.test(t('liudao')), '星宫之战：六道与天星双圣同归、万天明战死、天星城遇紫灵', t('liudao').slice(-40));
   ok(/元磁/.test(t('jiezi')) && /芥子/.test(t('jiezi')), '芥子空间：化神前把元磁山炼化，一闭关二百多年', t('jiezi').slice(-30));
   ok(/空间节点/.test(t('feisheng')) && /灵界/.test(t('feisheng')), '五龙海：银月留下的空间节点、偷渡灵界', t('feisheng').slice(-30));
   const storyMaps = data.human.filter(m => m.type !== 'combat' && m.type !== 'boss' && m.type !== 'chase');
