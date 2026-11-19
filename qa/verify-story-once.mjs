@@ -195,7 +195,7 @@ ok(silent(S.outroSecond), '重刷收场不再念，直接结算', S.outroSecond)
 console.log('\n== E 古传送阵跌境界只一次 ==');
 ok(shows(S.gSceneFirst, 'map:guchuan'), '首进 guchuan 会演疗伤剧情', S.gSceneFirst);
 ok(S.gAfterDrop && S.gAfterDrop.lv === 7 && S.gAfterDrop.woundedTo === 48,
-   '首刷真跌回炼气期四层（Lv7），wounded.to = 48', S.gAfterDrop);
+   '首刷跌回炼气期（原著三四层，游戏取 Lv7），wounded.to = 48', S.gAfterDrop);
 ok(S.gAfterDrop && S.gAfterDrop.woundedDone === true, '跌完打上一次性标记 woundedDone', S.gAfterDrop);
 ok(S.gAfterDrop && S.gAfterDrop.sceneSeen === true, 'guchuan 剧情也记进 scene:guchuan', S.gAfterDrop);
 ok(S.gRebuilt && S.gRebuilt.lv === 48 && S.gRebuilt.wounded === null,

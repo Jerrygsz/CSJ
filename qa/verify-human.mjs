@@ -221,7 +221,7 @@ const POS = {
   }, ORDER);
   const bad = ORDER.filter(id => !(run[id] && run[id].cleared));
   ok(bad.length === 0, '55 图逐张进得去、走得完、记入已通关', bad.map(id => id + ':' + JSON.stringify(run[id])));
-  ok(run.guchuan && run.guchuan.lvAfter < 10, '古传送阵之后修为受创跌回炼气期（原著：越国弃子脱身，真元尽失）', run.guchuan && run.guchuan.lvAfter);
+  ok(run.guchuan && run.guchuan.lvAfter < 10, '古传送阵之后跌回炼气期（原著 CH361：真元被南宫屏吸干）', run.guchuan && run.guchuan.lvAfter);
   const bossMaps = data.human.filter(m => m.type === 'boss').map(m => m.id);
   const noBoss = bossMaps.filter(id => !(run[id] && run[id].boss));
   ok(noBoss.length === 0, '剧情战图一进门首领就在场（' + bossMaps.length + ' 张）', noBoss);

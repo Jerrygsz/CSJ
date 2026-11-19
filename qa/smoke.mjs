@@ -830,10 +830,13 @@ ok(hasLine('jingu', null, '令狐老祖'), '金鼓原点明令狐老祖的弃子
 ok(hasLine('guchuan', null, '王蝉'), '古传送阵遭鬼灵门王蝉、李氏兄弟压顶');
 ok(!hasLine('guchuan', null, '南宫屏'), '不再误作南宫屏');
 ok(hasLine('guchuan', null, '灵石矿底'), '古传送阵在灵石矿底');
+ok(hasLine('guchuan', null, '辛如音') && hasLine('guchuan', null, '中阶灵石'), '古阵由辛如音验图、换中阶灵石才驱动（CH278/363）');
+ok(!hasLine('guchuan', null, '只够走一次') && !hasLine('guchuan', null, '齐云霄修复'), '删掉「齐云霄修阵 / 材料只够走一次」旧说');
 
-// 乱星海：法力枯竭，不是境界跌落
-ok(!hasLine('kuixing', null, '筑基掉回炼气'), '乱星海不再「修为跌落」');
-ok(hasLine('kuixing', null, '水遁符'), '乱星海改为落海 + 水遁符浮海');
+// 古传送阵 / 乱星海：CH361 真元被南宫屏吸干跌回炼气三四层；CH364 落点孤岛石屋 + 王长青翻译巨舟
+ok(hasLine('kuixing', null, '真元被南宫屏吸干，修为跌回炼气'), '修为跌落归因于南宫屏吸真元（CH361）');
+ok(hasLine('kuixing', null, '孤岛') && hasLine('kuixing', null, '王长青'), '落点是孤岛石屋，巨舟上由王长青翻译（CH364/365）');
+ok(!hasLine('kuixing', null, '水遁符') && !hasLine('kuixing', null, '老船工'), '删掉落海 / 水遁符 / 老船工指路旧说');
 
 // 术语统一：原著境界叫「结丹」
 ok(W.REALM_LAYERS.every(r => !r.name.includes('金丹')), '境界名统一为「结丹」');

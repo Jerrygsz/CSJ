@@ -1134,7 +1134,7 @@
     save.bonuses[k] = Math.min(BONUS_CAP[k] || 99, (save.bonuses[k] || 0) + v);
   }
   function addRunBonus(k, v) { G.bonus[k] = Math.min(BONUS_CAP[k] || 99, (G.bonus[k] || 0) + v); }
-  // 修为受创（古传送阵被南宫婉吸走修为）之后有一段重修期：经验翻倍，修回原层即止
+  // 修为受创（CH361 救南宫屏被吸干真元）之后有一段重修期：经验翻倍，修回原层即止
   function clearWoundedIfDone() {
     if (save.wounded && (save.cultivate.level || 1) >= (save.wounded.to || 0)) {
       save.wounded = null;
@@ -11402,8 +11402,8 @@
       const _tr = autoTransplant(true);
       if (_tr.length) gained.transplants = _tr;
     }
-    // 古传送阵：为南宫婉疗伤，修为被吸干 —— 原著第403章左右：跌回「炼气期四层」。
-    // 照原著照抄：真跌到炼气期四层。恢复不走打怪，走「回洞府闭关 + 大量服食丹药」，见 REBUILD_STAGES。
+    // 古传送阵：CH361 救下的蒙面女子实为南宫屏（即改容的南宫婉），真元被吸干，修为从筑基中期跌到炼气三四层。
+    // 跌境界是真事，不是「只空了法力」；游戏取 Lv7 映射炼气四层。恢复不走打怪，走「回洞府闭关 + 大量服食丹药」，见 REBUILD_STAGES。
     if (m.id === 'guchuan' && !save.wounded && !save.woundedDone) {
       const lv0 = save.cultivate.level || 1;
       if (lv0 > 7) {
