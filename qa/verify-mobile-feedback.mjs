@@ -134,6 +134,40 @@ if (!D.skip) {
   ok(/神念归位/.test(D.text || ''), '回前台在对战时给一句提示', D);
 }
 
+// ---------- E 顶栏长高后 Boss 牌仍在它下面 ----------
+// 高境界图的图名行会挂「境界压制」，顶栏比低境界图高一截；Boss 牌原来按登场那一刻
+// 量到的高度（常常还是 0）定位，落回写死的 96，正好压住这一行。这里在该场景下实测两块的间距。
+const E = await page.evaluate(async () => {
+  const F = window.__FR;
+  F.clearProgress && F.clearProgress();
+  F.setLevel && F.setLevel(400);
+  try { F.god && F.god(true); } catch (e) {}
+  F.unlockAll && F.unlockAll();
+  F.muteStory && F.muteStory(true);
+  F.enterMap && F.enterMap('muzu2', 'easy');
+  for (let k = 0; k < 40; k++) {
+    const st = F.info().state;
+    if (st === 'dialog') F.skipStory();
+    else if (st === 'levelup') { try { F.insightAuto(); } catch (e) {} }
+    else { try { F.boss(); } catch (e) {} F.tickFrames(6, 0.05); }
+  }
+  await new Promise(r => requestAnimationFrame(r));
+  F.tickFrames(6, 0.05);
+  const t = document.getElementById('topbar').getBoundingClientRect();
+  const bw = document.getElementById('bosswrap').getBoundingClientRect();
+  return {
+    shown: getComputedStyle(document.getElementById('bosswrap')).display !== 'none',
+    gap: +(bw.top - t.bottom).toFixed(1),
+    mapName: (document.getElementById('mapName') || {}).textContent || '',
+  };
+});
+if (E.shown) {
+  ok(/境界压制/.test(E.mapName), '高境界图图名行确实挂了「境界压制」', E);
+  ok(E.gap >= 0, 'Boss 牌在顶栏下方（不压住境界压制行）', E);
+} else {
+  ok(false, '高境界图 Boss 牌应当显示（用于验证顶栏让位）', E);
+}
+
 ok(errs.length === 0, '零 pageerror / console error', errs.slice(0, 5));
 
 await b.close();

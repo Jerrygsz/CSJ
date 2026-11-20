@@ -1,4 +1,4 @@
-// 多 Boss（extraBoss）回归：覆盖全部 12 张挂了续战 Boss 的图（人界 + 灵界 + 仙界）。
+// 多 Boss（extraBoss）回归：覆盖全部挂了续战 / 同场 Boss 的图（人界 + 灵界 + 仙界）。
 // 验证：配置存在 → 主 Boss 与续战 Boss 逐只刷出、顺序正确 → 连杀后能结算。
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -35,19 +35,31 @@ let pass = 0, fail = 0;
 const ok = (c, name, extra) => { if (c) { pass++; console.log('  ✓ ' + name); } else { fail++; console.log('  ✗ ' + name + (extra !== undefined ? '   → ' + JSON.stringify(extra) : '')); } };
 const eq = (a, b, name) => ok(a === b, name, a === b ? undefined : { got: a, want: b });
 
+// 名字口径以地图配置为准，但每个都回原著核过：
+//   山贼头目 / 黑煞教长老（七玄门、黑煞教段）、贾天龙（野狼帮）、青龙上人（X10C1983《青龙陨落》，
+//   韩立以毒 + 豹麟兽取命）、第一魔尊（X10C1989-2000，血光圣祖麾下）、柳自在（X4C1124 天狐一族，
+//   柳岐老祖三尸；白云道祖是 X4C1138 天庭那位，不在岁月殿）。
+//   元魇两位化身：苦灵岛（X10C2087 章名《元魇始祖》）与始印之地（后文多称「元魇圣祖」），
+//   是同一存在的两次出场，原著两种称呼都有，故按各段原文分别保留，招式表也各有一套。
 const TABLE = {
-  houshan:  { boss: '狼妖',               extra: ['贾天龙'] },
+  houshan:  { boss: '狼妖',               extra: ['山贼头目'] },
+  yelang:   { boss: '金光上人',            extra: ['野狼帮帮主·贾天龙'] },
   waihai:   { boss: '八级妖兽·毒蛟',       extra: ['妙鹤真人'] },
-  heisha:   { boss: '越皇',               extra: ['令狐老祖'] },
+  heisha:   { boss: '越皇',               extra: ['黑煞教长老'] },
   kunwu:    { boss: '阴罗宗大长老·乾老魔', extra: ['银翅夜叉'] },
   zhenmo:   { boss: '元刹圣祖分魂',        extra: ['敖啸老祖'] },
   xiaoji:   { boss: '寒骊上人',            extra: ['冰凤'] },
   luoyun2:  { boss: '鸾鸣门·双修夫妇',     extra: ['至阳上人'] },
-  yitian:   { boss: '魔族魔修',            extra: ['青龙上人'] },
-  modajie:  { boss: '元魇圣祖·化身',       extra: ['宝花圣祖'] },
   linghuang:{ boss: '灵将',               extra: ['陇家老祖', '银光仙子'] },
+  tianzhan: { boss: '青龙上人',            extra: ['第一魔尊'] },
+  modajie:  { boss: '元魇始祖·化身',       extra: ['宝花圣祖'] },
+  shiyin:   { boss: '螟虫之母·元神',        extra: ['元魇圣祖·化身'] },
+  xiaoxiuluo:{ boss: '修罗蛛·族母',        extra: ['五光族·奕姓大乘'] },
+  minghe2:  { boss: '黄元子',              extra: ['不灭天尊'] },
+  qiangzhe: { boss: '凶司王',              extra: ['佛骨王'] },
   lingyan:  { boss: '白胖僧人',            extra: ['高瘦男子'] },
-  suidian:  { boss: '奇摩子',              extra: ['黑天魔祖', '白云道祖'] },
+  suidian:  { boss: '奇摩子',              extra: ['黑天魔祖', '柳自在'] },
+  shifang:  { boss: '东离虎·道祖',         extra: ['紫杉', '朱颜'] },
 };
 
 console.log('\n== 静态：extraBoss 配置 ==');
@@ -64,9 +76,9 @@ for (const id in TABLE) {
   if (JSON.stringify(d.extra) !== JSON.stringify(TABLE[id].extra)) staticBad.push(id + ':extra=' + JSON.stringify(d.extra));
   for (const f of d.fields) if (!f.kind || !f.hp || !f.spd || !f.dmg || !f.r || !f.spr) staticBad.push(id + ':field');
 }
-ok(staticBad.length === 0, '12 张图 extraBoss 名字/字段与配置一致', staticBad);
-eq(Object.keys(staticData).length, 12, '共 12 张图挂了 extraBoss');
-eq(Object.values(staticData).reduce((a, d) => a + d.extra.length, 0), 14, '续战 Boss 共 14 个');
+ok(staticBad.length === 0, '18 张图 extraBoss 名字/字段与配置一致', staticBad);
+eq(Object.keys(staticData).length, 18, '共 18 张图挂了 extraBoss');
+eq(Object.values(staticData).reduce((a, d) => a + d.extra.length, 0), 21, '续战 Boss 共 21 个');
 
 console.log('\n== 动态：逐只刷出顺序 ==');
 const fightBad = [];
@@ -99,7 +111,7 @@ for (const id in TABLE) {
   const want = [TABLE[id].boss, ...TABLE[id].extra];
   if (JSON.stringify(got) !== JSON.stringify(want)) fightBad.push(id + ':' + JSON.stringify(got) + ' want ' + JSON.stringify(want));
 }
-ok(fightBad.length === 0, '12 张图逐只刷出顺序 = 主 Boss + extraBoss', fightBad);
+ok(fightBad.length === 0, '18 张图逐只刷出顺序 = 主 Boss + extraBoss', fightBad);
 
 console.log('\n== 收尾：连杀后能结算 ==');
 const endBad = [];
@@ -112,12 +124,21 @@ for (const id in TABLE) {
     F.boss();
     F.killBoss();
     for (let t = 0; t < 260; t++) { try { F.insightAuto(); } catch (e) {} await new Promise(res => requestAnimationFrame(res)); }
+    // 模式图（守阵 / 撑过 / 逃遁 / 潜入）打死 Boss 不等于通关：时钟要走完才结算
+    const hasMode = !!(window.MAPS.find(m => m.id === id) || {}).mode;
+    if (hasMode) {
+      for (let t = 0; t < 240; t++) {
+        try { F.insightAuto(); } catch (e) {}
+        if (F.info().cleared.indexOf(id) >= 0) break;
+        F.tickFrames(10, 0.05);
+      }
+    }
     for (let k = 0; k < 24; k++) { try { F.skipStory(); } catch (e) {} await new Promise(res => requestAnimationFrame(res)); }
     return F.info().state;
   }, id);
   if (!['victory', 'dialog', 'map', 'levelup'].includes(st)) endBad.push(id + ':' + st);
 }
-ok(endBad.length === 0, '12 张图连杀全部 Boss 后都能结算', endBad);
+ok(endBad.length === 0, '18 张图连杀全部 Boss 后都能结算', endBad);
 
 ok(errs.length === 0, '全程无 JS 报错', errs.slice(0, 3));
 

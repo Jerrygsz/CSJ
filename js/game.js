@@ -3595,8 +3595,19 @@
   let _hudSkillSig = null;             // 功法栏签名：等级没变就不重建
   let _hudSec = -1;                    // 计时只按整秒刷
   let _bossTop = -1, _bossOn = false;  // Boss 血条的顶位（只有窗口/Boss 变化时重测）
+  let _bossTopAt = 0;                  // 上次量顶栏高度的时刻（节流用）
+  // 顶栏不是定高的：图名后面会挂难度与「境界压制」，限时增益又可能多占一行。
+  // 原来只在 Boss 登场那一刻量一次，而那一刻 #topbar 常还是 0 高（#hud 尚未显示），
+  // 于是落回写死的 96 —— 比真实顶栏（99）还矮，正好压住「境界压制」这行（320 宽实测压 2px）。
+  // 现在：量不到就下一帧再量（不缓存 0），量到之后每 0.6 秒复核一次（增益胶囊会加行），
+  // 且结果永远不低于顶栏底边。
   function bossBarTop() {
-    if (_bossTop < 0) _bossTop = (elTopbar && elTopbar.offsetHeight > 40) ? (elTopbar.offsetHeight + 8) : 96;
+    const now = Date.now();
+    if (_bossTop < 0 || now - _bossTopAt > 600) {
+      const h = elTopbar ? elTopbar.offsetHeight : 0;
+      if (h > 40) { _bossTop = Math.max(h + 8, 96); _bossTopAt = now; }
+      else if (_bossTop < 0) return 96;      // 还量不到：先用兜底值，但不落缓存
+    }
     return _bossTop;
   }
   function renderQuickBar() {
@@ -14672,6 +14683,11 @@
   const elCombo = document.getElementById('combo');
   const elSkillrow = document.getElementById('skillrow');
   const elBuffrow = document.getElementById('buffrow');
+  // 顶栏会随图名尾巴（难度 / 境界压制）与增益胶囊长高，Boss 牌按它定位；
+  // 用 ResizeObserver 盯尺寸而不是每帧读 offsetHeight（后者每帧都会逼一次同步布局）。
+  if (elTopbar && typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(() => { _bossTop = -1; }).observe(elTopbar);
+  }
   const elQuick = document.getElementById('quickbar');
   // 弹反键独立浮动：比 1/2 格更大、位置可拖动自定义（暂停菜单）。它仍是「第 3 格」，
   // 所以 elQuickBtns[2] 指向它，着色 / 冷却 / 状态全部沿用原来那套绘制逻辑。

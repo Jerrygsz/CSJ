@@ -1,4 +1,4 @@
-// 一键回归：把常驻验收脚本一次跑完（当前十九个），谁红谁绿一眼看全。
+// 一键回归：把常驻验收脚本一次跑完，谁红谁绿一眼看全。
 //
 // 动机（第110轮）：八批下来只有 verify-scenery3 / smoke / verify-ver 是每轮必跑的，
 // 其余五个全凭记忆挑着跑，结果 verify-ink-sprite 的两条断言在第102轮 UI 柔化时就已作废、
@@ -54,6 +54,7 @@ const ITEMS = [
   { key: 'eros-days', file: 'verify-eros-days.mjs', kind: 'gate', desc: '历练岁月与静修：际遇按钮演完即消失（排除 repeat 小事）· 满修为可静养不涨修为但照凝绿液 · 按行为记账（进图/扫荡/静修/洞府/坊市/开炉按原著天数）本世累计转世清零且与「入道年数」两账并存' },
   { key: 'boss-ensemble', file: 'verify-boss-ensemble.mjs', kind: 'gate', desc: '战斗内容增强（原著同场强敌）：七张原著群敌图按主 Boss 派生同场强敌（走精英 kit 引擎不占 G.boss 槽 / 带护罩 / 数量硬上限）· 薄图补怪种（shijin 1→4、xisha 2→4、两张逃亡图）· 逃亡图追兵按时现身且不设主 Boss 不破脱身 · 主 Boss 单击守门口径不变 · 同场连帧无报错' },
   { key: 'dialogue-canon', file: 'verify-dialogue-canon.mjs', kind: 'gate', desc: '全地图剧情对白守原著：人界事件因果 / 灵界法宝突破 / 仙界身份姓名共 28 类纠错，静态扫描禁绝夺舍万天明、星宫扣紫灵、八十年虚天殿、土皇钉界心钉、买下冰凤、九劫串台、渠灵太乙灰仙、厉飞羽真名错比' },
+  { key: 'extraboss',  file: 'verify-extraboss.mjs',  kind: 'gate', desc: '续战 / 同场 Boss：18 张图 21 个 extraBoss 名字与字段、逐只刷出顺序、连杀后结算（模式图要等时钟走完）；名字逐条回原著核过（青龙上人 X10C1983 陨落、第一魔尊 X10C1989、柳自在 X4C1124、元魇两段称谓各按原文）' },
 ];
 
 const argv = process.argv.slice(2);
