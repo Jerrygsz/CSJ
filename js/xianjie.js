@@ -282,6 +282,9 @@
         { kind: 'mo', name: '太乙玉仙', spr: 'xj_tianwei', scale: 6.8, hpMul: 0.88, dmgMul: 0.92 },
         { kind: 'beast', name: '九尾青狐·真灵', spr: 'beast4', scale: 7.2, hpMul: 0.95, dmgMul: 0.98 }
       ],
+      // 原著 X3C568《夺路狂奔》/C574《濒临极限》：这一战的胜负是「甩不甩得掉」，不是打死它。
+      // 替代胜利条件：撑过 75 息脱身（Boss 与同场强敌照打，打死仍按原链路结算）。
+      mode: { kind: 'escape', sec: 75, tip: '别回头 · 熬过追猎', win: '甩开噬金仙 · 脱身' },
       reward: { stones: 380000, mats: [['m_xianyuanshi', 10], ['m_shijian', 2]] },
       clearTitle: '深渊',
       clearDesc: '神念囚笼碎了，可它也没能站起来。金童的嘴角还挂着血，蟹道人的刀已经卷了口。'
@@ -431,8 +434,11 @@
       startLevel: 520, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
       // 这一劫是蟹道人的，韩立只是旁观。用脚本战承接天劫余威 + 黑灵傀儡的敌意，
       // 不设主 Boss、不写「韩立迎劫」，免得与 X5C1382 他自己的那场串台。
-      trial: { label: '天劫余威', unit: '黑色傀儡虚影', tail: '余威散尽，再记住那片天色', need: 3,
+      trial: { label: '天劫余威', unit: '黑色傀儡虚影', tail: '余威散尽，再记住那片天色',
+        banner: '天劫余威 · 法力不通，熬过这一场便过去', need: 3,
         enemies: ['x5_guiwu', 'xj_yizhou', 'x5_huanghun'] },
+      // 原著 X3C846《冒险》法力魔气全禁、C856《打不过就跑》：这一场靠熬，不靠清怪。
+      mode: { kind: 'survive', sec: 42, tip: '法力不通 · 熬过这一场', win: '天色压下来，又过去了' },
       unlock: 'dadi', next: 'jingong',
       reward: { stones: 620000, mats: [['m_xianyuanshi', 12], ['m_shijian', 4]] },
       clearTitle: '别人的劫',
@@ -699,8 +705,12 @@
       startLevel: 580, endLevel: 640, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
       // X5C1382：道天大劫不是在闭关里，是在打的过程中。灰云（勾动心魔）先来，
       // 再是红莲神雷（灭魂）。两段天劫做成脚本战，结算仍走破境图的原有账。
-      trial: { label: '道天大劫', unit: '天劫雷影', tail: '门后面还有人在等', need: 4,
+      trial: { label: '道天大劫', unit: '天劫雷影', tail: '门后面还有人在等',
+        banner: '道天大劫 · 无法抵御，熬到门开', need: 4,
         enemies: ['x5_huanghun', 'x4_daobing', 'xj_daozhu', 'x5_guibing'] },
+      // 原著 X3C989《道天大劫》：韩立「根本无法抵御」，二话不说转身飞遁，被威压击晕。
+      // 这不是打赢的仗，是撑过去的劫 —— 撑过 55 息，门自己开。
+      mode: { kind: 'survive', sec: 55, tip: '无法抵御 · 熬到门开', win: '劫云散 · 门后有人在等' },
       unlock: 'shifang', next: 'daoyi',
       reward: { stones: 2600000, mats: [['m_xianyuanshi', 30], ['m_shijian', 16]] },
       clearTitle: '道祖',

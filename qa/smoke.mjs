@@ -602,9 +602,16 @@ for (const id of storyNew) {
   frames(4);
   F.skipStory();
   frames(6);
+  // guchuan 改成守阵撑过图：对白后进 trial，要撑满模式时钟才结算。
+  if (ALLM.find(m => m.id === id) && ALLM.find(m => m.id === id).mode) {
+    for (let k = 0; k < 3200 && !F.info().cleared.includes(id) && F.info().state !== 'victory'; k++) {
+      if (F.info().state === 'dialog') F.skipStory();
+      frames(1);
+    }
+  }
   if (!F.info().cleared.includes(id)) storyBad.push(id);
 }
-eq(storyBad.length, 0, '五张新剧情图都能通关', storyBad);
+eq(storyBad.length, 0, '五张新剧情图都能通关（含 guchuan 守阵撑过）' + (storyBad.length ? ':' + storyBad.join(',') : ''), storyBad);
 F.enterMap('tianxing');
 frames(4);
 // 结丹之后第一次进天星城，紫灵会在中街拦人（坊市图靠「进门遇人」触发）

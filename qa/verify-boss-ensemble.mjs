@@ -184,6 +184,69 @@ const r8 = await page.evaluate(() => {
 ok(r8mid === 'leihai' && r8.state === 'play', '雷海对白后进入战斗态', r8.state);
 ok(!!r8.trial && r8.trial.need === 4 && r8.n >= 4, '雷海脚本战按配置刷出四道雷夔虚影', r8);
 
+// R9 替代胜利条件（2026-11-20）：原著「打不过只能熬过去」的图，胜负不再只看清怪。
+console.log('\n== R9 撑过 / 守阵 / 逃遁模式 ==');
+const MODE_CFG = {
+  guchuan: { kind: 'hold', ratio: [0.6, 2.0] },
+  shijin: { kind: 'escape', ratio: [0.6, 4.0] },
+  xiedao: { kind: 'survive', ratio: [0.6, 2.0] },
+  daotian: { kind: 'survive', ratio: [0.6, 3.0] }
+};
+for (const id of Object.keys(MODE_CFG)) {
+  const src = id === 'guchuan' ? late : xj;
+  const seg = src.slice(src.indexOf("id: '" + id + "'"), src.indexOf("id: '" + id + "'") + 2600);
+  ok(/mode:\s*\{/.test(seg) && new RegExp("kind:\\s*'" + MODE_CFG[id].kind + "'").test(seg),
+    id + ' 配了 ' + MODE_CFG[id].kind + ' 模式');
+}
+ok(/G\.modeRun = m\.mode \?/.test(g), 'startMap 按配置初始化 modeRun');
+ok(/if \(G\.modeRun\) return;/.test(g), '撑过模式下清怪不抢先结算');
+ok(/if \(mr\.t >= mr\.sec\)/.test(g) && /G\.pendingEnding = true;/.test(g), '撑到时限走既有收尾链路');
+ok(/mr\.radius > 0/.test(g) && /holdOk = U\.dist/.test(g), '守阵模式离开阵心停表');
+ok(/t\.banner \|\| \(label/.test(g), '撑过图 banner 可覆盖教学腔（不再喊「清完便可下山」）');
+ok(/if \(!tgt && a2\.kind !== 'burst'\)/.test(g), '自动开火选靶逻辑未动（单手底线）');
+
+// 实机：清光脚本怪也不结算，撑到时钟才通关
+for (const id of ['guchuan', 'xiedao', 'daotian']) {
+  const mid = await enter(id, 600);
+  const s0 = await page.evaluate(() => {
+    const F = window.__FR, G = F.G;
+    const before = F.modeState();
+    G.enemies.length = 0;                 // 清光压力怪：原著里这一步本来就不该提前赢
+    F.tickFrames(20, 0.05);
+    return { before, after: F.modeState(), cleared: F.info().cleared.indexOf(G.mapId) >= 0, state: G.state };
+  });
+  ok(mid === id && !!s0.before && s0.before.kind === MODE_CFG[id].kind, id + ' 进了 ' + MODE_CFG[id].kind + ' 模式', s0.before);
+  ok(!s0.cleared && s0.state === 'play', id + ' 清光压力怪不提前结算', s0);
+  ok(s0.after && s0.after.t > s0.before.t, id + ' 撑过时钟仍在推进', { a: s0.before && s0.before.t, b: s0.after && s0.after.t });
+  const s1 = await page.evaluate(() => {
+    const F = window.__FR, G = F.G;
+    const id0 = G.mapId;
+    for (let i = 0; i < 2200 && F.info().cleared.indexOf(id0) < 0; i++) {
+      if (G.state === 'dialog') F.skipStory();
+      else if (G.state === 'levelup') F.insightAuto();
+      else F.tickFrames(1, 0.05);
+    }
+    return { cleared: F.info().cleared.indexOf(id0) >= 0, state: G.state, mode: F.modeState() };
+  });
+  ok(s1.cleared, id + ' 撑到时限才通关', s1);
+}
+
+// shijin：Boss 与同场强敌照常在场，但多一条「甩开追猎」的脱身路
+const r9mid = await enter('shijin', 520);
+const r9 = await page.evaluate(() => {
+  const F = window.__FR, G = F.G;
+  F.boss();
+  const before = F.modeState();
+  for (let i = 0; i < 2200 && F.info().cleared.indexOf('shijin') < 0; i++) {
+    if (G.state === 'dialog') F.skipStory();
+    else if (G.state === 'levelup') F.insightAuto();
+    else F.tickFrames(1, 0.05);
+  }
+  return { before, cleared: F.info().cleared.indexOf('shijin') >= 0, state: G.state, mode: F.modeState() };
+});
+ok(r9mid === 'shijin' && !!r9.before && r9.before.kind === 'escape', 'shijin 有逃遁模式且 Boss 照常出场', r9.before);
+ok(r9.cleared, 'shijin 可甩开追猎脱身（不必打死太乙噬金仙）', r9);
+
 // R5 连帧稳定：同场强敌在场时主循环不崩
 await page.evaluate(() => { const F = window.__FR; F.tickFrames(180, 0.05); });
 ok(errors.length === 0, '同场强敌在场连续 180 帧无 JS 报错', errors.slice(0, 3));

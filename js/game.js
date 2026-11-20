@@ -8415,6 +8415,34 @@
     }
 
     if (!G.bossActive && G.vacuumT <= 0 && !G.bossSpawned && !(G.coopRole === 'client' && G.coopShared)) spawnDirector(dt);
+    // 替代胜利条件（撑过 / 守阵 / 逃遁）：原著里「打不过只能熬过去」的图，目标不是杀光。
+    // 与逃亡图 escapeAt 同一条收尾链路；到点清场、走 outro → finishMap。共斗由房主广播 end。
+    if (G.modeRun && !G.chaseDone && G.vacuumT <= 0
+        && !(G.coopRole === 'client' && G.coopShared)) {
+      const mr = G.modeRun;
+      let holdOk = true;
+      if (mr.radius > 0) {
+        holdOk = U.dist(p.x, p.y, mr.cx, mr.cy) <= mr.radius;
+        if (!holdOk && !mr.out) { mr.out = 1; banner('离阵太远 · 阵纹停转，回到阵心'); }
+        if (holdOk && mr.out) { mr.out = 0; banner('回到阵心 · 阵纹续转'); }
+      }
+      if (holdOk) mr.t += dt;
+      const left = Math.max(0, mr.sec - mr.t);
+      const h = left <= 10 ? 3 : left <= mr.sec * 0.5 ? 2 : left <= mr.sec * 0.8 ? 1 : 0;
+      if (h > mr.hinted) {
+        mr.hinted = h;
+        if (left > 0) banner((mr.tip ? mr.tip + ' · ' : '') + '还剩 ' + Math.ceil(left) + ' 息');
+      }
+      if (mr.t >= mr.sec) {
+        G.chaseDone = true; G.bossSpawned = true;
+        G.boss = null; G.bossActive = false;
+        G.victoryNote = mr.win;
+        G.enemies.length = 0; G.ebullets.length = 0;
+        G.modeRun = null; G.trial = null;
+        banner(mr.win); Sfx.win();
+        G.vacuumT = 0.9; G.pendingEnding = true;
+      }
+    }
     if (G.trial) updateTrial(dt);   // 开局教学战：场上清空即结算
     // Boss 战后收取战利品（演出 + 自动入袋）
     if (G.vacuumT > 0) {
@@ -10741,6 +10769,9 @@
     G.fxBullets.length = 0; G.coopFrozen = false; G.dialogSynced = false;
     G.boss = null; G.bossActive = false; G.bossSpawned = false; G.bossWarned = false; G.extraIdx = 0;
     G.chaseBossDone = {};   // 逃亡图追兵强敌的一次性标记（按 图id:索引，不污染 MAPS 配置）
+    // 替代胜利条件（2026-11-20）：逃遁 / 撑过 / 守阵。原著里「打不过只能跑」「熬过去就算」。
+    // 不设即是老规矩（清怪或斩 Boss）；设了也不碰 fireWeapons / 挂机 / 存档字段。
+    G.modeRun = null;
     G.fieldSlow = []; G.shake = 0; G.flash = 0; G.hitStop = 0;
     G.decor = []; G.chunkMap = {}; G.cam = { x: -W / 2, y: -H / 2 }; G.orbPos = []; G.camLag = null;
     G.vacuumT = 0; G.pendingEnding = false; G.runLoot = []; G.matGain = 0; G.lastAutoSave = 0; G.pickLeft = 0;
@@ -10970,6 +11001,14 @@
     G.pet = save.pet ? makeAlly(save.pet, p.x - 24, p.y + 10) : null;
     G.mate = save.mate ? makeAlly(save.mate, p.x + 34, p.y + 12) : null;
     G.chaseDone = false;
+    // 替代胜利条件（撑过 / 守阵）：原著里「打不过只能熬过去」的图，目标不是杀光。
+    // 只记时钟，不改自动开火、不改挂机判据、不落存档；到点照旧走 vacuumT → startOutro → finishMap。
+    G.modeRun = m.mode ? {
+      kind: m.mode.kind || 'survive', sec: Math.max(1, m.mode.sec || 30),
+      t: 0, hinted: 0, out: 0,
+      tip: m.mode.tip || '', win: m.mode.win || '撑过去了',
+      radius: m.mode.radius || 0, cx: p.x, cy: p.y
+    } : null;
     G.quickCd = [0, 0, 0];
     renderQuickBar();
     p.hp = p.maxhp;
@@ -11138,7 +11177,8 @@
     // 不能再对渡劫/斩尸的玩家喊「山道 · 山兽挡路」，那是最出戏的 UI 腔。
     const label = t.label || '山道';
     const unit = t.unit || '山兽';
-    banner(label + ' · ' + n + ' 只' + unit + '挡路 · ' + (t.tail || '清完便可下山'));
+    // 撑过 / 守阵图的 banner 直接说清目标：不是「清完便可下山」，而是「熬到阵成 / 劫过」。
+    banner(t.banner || (label + ' · ' + n + ' 只' + unit + '挡路 · ' + (t.tail || '清完便可下山')));
     // 教学三句只给开局第一张图；后期图玩家早就会自动出手、闪身与弹反，再念就是新手教程复读。
     if (m && m.id === 'qixuan') {
       // 第一场就要把两件事说清楚，否则等于让新手猜：
@@ -11164,6 +11204,9 @@
   function updateTrial(dt) {
     const tr = G.trial; if (!tr) return;
     if (G.state !== 'play') return;
+    // 撑过模式：胜负由 modeRun 的时钟判，脚本战刷出来的怪只是「劫数 / 追兵」的压力，
+    // 清光了也不结算（否则打手快的人反而跳过原著里必须熬过去的那一段）。
+    if (G.modeRun) return;
     if (G.enemies.length > 0) return;
     tr.doneT += dt;
     if (tr.doneT > 1.0) {
@@ -17175,6 +17218,13 @@
     hasNextHint() { return !!nextHintMap(); },
     // 开局教学战 / 锋芒窗口的探针
     trialState() { return G.trial ? { need: G.trial.need, doneT: +G.trial.doneT.toFixed(2), enemies: G.enemies.length } : null; },
+    // 替代胜利条件探针：撑过 / 守阵 / 逃遁的时钟与进度（QA 读它断言「清光不结算、撑到才结算」）
+    modeState() {
+      const r = G.modeRun;
+      if (!r) return null;
+      return { kind: r.kind, sec: r.sec, t: +r.t.toFixed(2), left: +Math.max(0, r.sec - r.t).toFixed(2),
+        hinted: r.hinted, out: r.out, trial: !!G.trial, enemies: G.enemies.length };
+    },
     edgeState() { return { t: +(G.edgeT || 0).toFixed(3), mul: DASH_EDGE_MUL, sec: DASH_EDGE_SEC }; },
     // 锋芒窗口的伤害验收：同一记伤害、窗口关 / 开各打一遍，成对采样再比。
     // 必须成对：damageEnemy 里有暴击（×1.8）随机，单次比值会被暴击污染；

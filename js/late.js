@@ -210,6 +210,12 @@
       desc: '辛如音验出是古传送阵、修好阵图；韩立按图在灵石矿底修复。阵纹一亮，天南就在身后了。',
       startLevel: 44, startSkills: { sword: 5, fire: 3, orb: 3, nova: 2, frost: 1 },
       unlock: 'jingu', next: 'kuixing',
+      // 原著 X3C363《传送》：王蝉率魔道追兵压到矿底，韩立不是要打赢，是要在阵纹描完前站住。
+      // 守阵模式：撑过 34 息阵成脱身；脚本刷的追兵只是压力，清光也不提前结算。
+      trial: { label: '古传送阵', unit: '魔道追兵', tail: '阵纹描完，便可脱身',
+        banner: '古传送阵 · 守住阵心，阵纹描完便可脱身', need: 5,
+        enemies: ['moxiu', 'assassin', 'guiling'] },
+      mode: { kind: 'hold', sec: 34, tip: '守住阵心 · 阵纹渐亮', win: '阵成 · 黄光吞没，脱身', radius: 260 },
       reward: { stones: 360, mats: [['m_xuantie', 2], ['m_hantie', 2]] },
       clearTitle: '越国已远',
       clearDesc: '黄光散尽，矿底的洞窟空了。他和曲魂一同站进阵中，魔道的攻击全落在虚空里。'

@@ -64,6 +64,15 @@ const R = await page.evaluate(() => {
   // 所以「是否正在演」只能看 state === 'dialog'，不能看 dialogId 是否为空。
   const dlg = () => ({ open: G.state === 'dialog', state: G.state, id: G.state === 'dialog' ? (G.dialogId || null) : null, n: G.dialogLines ? G.dialogLines.length : 0 });
   const tick = n => F.tickFrames(n == null ? 2 : n, 1 / 60);
+  // guchuan 现在是「守阵撑过」图：对白演完进 trial，撑到 mode.sec 才结算。
+  // 旧口径 clearAll() 直接看结算，会把跌境界的一次性代价漏掉。
+  const clearMode = (maxFrames = 1400) => {
+    for (let i = 0; i < maxFrames; i++) {
+      if (G.state === 'dialog') { F.skipStory(); continue; }
+      F.tickFrames(1, 0.05);
+      if (F.info().cleared.indexOf('guchuan') >= 0) break;
+    }
+  };
   const clearAll = () => { for (let i = 0; i < 30 && G.state === 'dialog'; i++) F.skipStory(); };
 
   try {
@@ -118,7 +127,7 @@ const R = await page.evaluate(() => {
     F.setLevel(48);
     F.enterMap('guchuan', 'easy');
     out.steps.gSceneFirst = dlg();
-    clearAll();                                            // 演完 → onStoryMapDone → finishMap
+    clearMode();                                           // 演完 → trial 守阵撑过 → finishMap
     const s1 = readSave();
     out.steps.gAfterDrop = {
       lv: F.info().cultivate.level,
@@ -132,7 +141,7 @@ const R = await page.evaluate(() => {
     out.steps.gRebuilt = { lv: F.info().cultivate.level, wounded: s2.wounded || null };
     F.enterMap('guchuan', 'easy');
     out.steps.gSceneSecond = dlg();
-    clearAll();
+    clearMode();
     out.steps.gAfterSecond = { lv: F.info().cultivate.level, woundedDone: !!readSave().woundedDone };
 
     // ---------------- F 破境图「料没齐」不记正剧账（jiedan） ----------------
