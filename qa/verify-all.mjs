@@ -108,9 +108,14 @@ for (const it of items) {
   const badge = r.kind === 'metric' ? (r.code === 0 ? '·' : '✗') : (r.code === 0 ? '✓' : '✗');
   console.log(badge + ' ' + r.sec + 's  ' + r.summary);
   if (r.code !== 0 && r.kind === 'gate') {
-    // 失败时把该脚本的失败行摘出来，省得再翻日志
+    // 失败时把该脚本的失败行摘出来，省得再翻日志；完整输出落到 _out/fail-<key>.log
     const bad = r.out.split('\n').filter(l => /❌|✗|失败：/.test(l)).slice(0, 6);
     if (bad.length) console.log('    ' + bad.map(s => s.trim()).join('\n    '));
+    try {
+      fs.mkdirSync(join(HERE, '_out'), { recursive: true });
+      fs.writeFileSync(join(HERE, '_out', 'fail-' + r.key + '.log'), r.out, 'utf8');
+      console.log('    （完整输出：qa/_out/fail-' + r.key + '.log）');
+    } catch (e) {}
   }
 }
 

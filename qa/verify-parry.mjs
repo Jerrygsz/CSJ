@@ -187,7 +187,7 @@ ok(/引气 \+/.test(game) && /煞气 \+/.test(game), '奖励飘字：煞气 / �
 
 // HUD：按钮上方「连 ×N」+ 金环加粗加长
 ok(/data-chain/.test(game) && /#parryBtn\[data-chain\]::before/.test(css), '弹反键上方显示「连 ×N」');
-ok(/parryHitFlash \.46s/.test(css) && /inset 0 0 0 7px/.test(css), '#parryHit 金环加粗加长（7px / 0.46s）');
+ok(/parryHitFlash var\(--dur-ring\)/.test(css) && /--dur-ring: 460ms/.test(css) && /inset 0 0 0 7px/.test(css), '#parryHit 金环加粗加长（7px / 0.46s 走 --dur-ring）');
 
 // ---------- 8. 20261111G：大爆炸清场 + 无敌帧（连反叠加、封顶 2 秒）----------
 // 口径：弹反那一圈冲击波不只是好看 —— 半径内的杂兵 / 弹幕 / 地面持续区 / 真判定光柱一起扫掉；

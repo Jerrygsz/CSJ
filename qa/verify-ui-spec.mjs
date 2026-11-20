@@ -39,15 +39,25 @@ await page.waitForTimeout(900);
 // ---- 浏览器内量取工具 ----
 const HELPERS = `
 window.__ui = {
+  // #stage 是按机型整体 scale 的（390 宽时 480 逻辑宽 → 0.8125），getBoundingClientRect 给的是
+  // 变换后的屏幕像素；而字号、间距、44px 热区这些规格全写在舞台逻辑坐标里。混着比会得出
+  // 「46 逻辑 px 的快捷栏只有 37px」这种假红，所以统一换算回逻辑坐标。
+  scale() {
+    const st = document.getElementById('stage');
+    const w = st ? st.getBoundingClientRect().width : 0;
+    return w > 0 ? w / 480 : 1;
+  },
   hit(el) {
+    const S = window.__ui.scale();
     const r = el.getBoundingClientRect();
     const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
     const inside = (x, y) => { const e = document.elementFromPoint(x, y); return !!e && (e === el || el.contains(e) || e.contains(el)); };
-    if (!inside(cx, cy)) return { covered: true, w: +r.width.toFixed(1), h: +r.height.toFixed(1), hitH: 0 };
+    if (!inside(cx, cy)) return { covered: true, w: +(r.width / S).toFixed(1), h: +(r.height / S).toFixed(1), hitH: 0, S: +S.toFixed(3) };
     let up = 0, down = 0;
-    for (let d = 1; d <= 30; d++) { if (inside(cx, cy - d)) up = d; else break; }
-    for (let d = 1; d <= 30; d++) { if (inside(cx, cy + d)) down = d; else break; }
-    return { w: +r.width.toFixed(1), h: +r.height.toFixed(1), hitH: +(r.height + up + down).toFixed(1), up, down };
+    for (let d = 1; d <= 40; d++) { if (inside(cx, cy - d)) up = d; else break; }
+    for (let d = 1; d <= 40; d++) { if (inside(cx, cy + d)) down = d; else break; }
+    return { w: +(r.width / S).toFixed(1), h: +(r.height / S).toFixed(1), hitH: +((r.height + up + down) / S).toFixed(1),
+      up: +(up / S).toFixed(1), down: +(down / S).toFixed(1), S: +S.toFixed(3) };
   },
   fonts() {
     const out = {};
@@ -235,25 +245,48 @@ console.log('\n== 10. 交互状态矩阵：按下真生效 / 禁用统一 / 选�
 // 按下反馈不只有 transform：.sr-btn 用 filter 提亮（为了不打断金底渐变），所以三样一起比
 const pressOf = async (prep, sel) => {
   await open(prep);
-  const snap = s => {
-    const e = document.querySelector(s); if (!e) return null;
+  // 同一个选择器可能命中多个：修行图列表会自动滚到当前图，第一张卡常在视口上方；
+  // 洞府里前面还有折叠区的按钮、尺寸为 0。取「第一个真的点得到」的那个 ——
+  // 除了在视口内，中心点还必须命中它自己或子节点（滚动容器裁掉、被底栏盖住都不算），
+  // 否则鼠标点在别的元素上，:active 永远不会触发。
+  const pickSrc = `(s) => {
+    for (const e of document.querySelectorAll(s)) {
+      const r = e.getBoundingClientRect();
+      if (!(r.width > 4 && r.height > 4)) continue;
+      const t = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+      if (t && (t === e || e.contains(t))) return e;
+    }
+    return null;
+  }`;
+  const SNAP = `(() => {
+    const pick = ${pickSrc};
+    const s = ${JSON.stringify(sel)};
+    const e = pick(s); if (!e) return null;
     const cs = getComputedStyle(e);
     return [cs.transform, cs.filter, cs.backgroundColor, cs.backgroundImage].join('|');
-  };
+  })()`;
   for (let attempt = 0; attempt < 6; attempt++) {
     // 进图可能先过剧情，此时暂停键是隐藏的 —— 先把它推完，别在 0 尺寸上取中心点
     await page.evaluate(() => { const F = window.__FR; if (F && F.skipStory) F.skipStory(); });
-    const box = await page.evaluate(s => {
-      const e = document.querySelector(s); if (!e) return null;
+    // 装备行在滚动体里，首屏可能整个落在底栏后面 —— 先滚到中间再取点。
+    // 注意要拿「有尺寸」的那一行去滚：折叠区里的同名元素是 0 高，对它 scrollIntoView 不动。
+    await page.evaluate(s => {
+      for (const e of document.querySelectorAll(s)) {
+        const r = e.getBoundingClientRect();
+        if (r.height > 4) { try { e.scrollIntoView({ block: 'center' }); } catch (err) {} return; }
+      }
+    }, sel);
+    const box = await page.evaluate(`(() => {
+      const e = (${pickSrc})(${JSON.stringify(sel)}); if (!e) return null;
       const r = e.getBoundingClientRect();
       return { x: r.x + r.width / 2, y: r.y + r.height / 2, w: r.width, h: r.height };
-    }, sel);
+    })()`);
     if (box && box.w > 4 && box.h > 4) {
-      const before = await page.evaluate(snap, sel);
+      const before = await page.evaluate(SNAP);
       await page.mouse.move(box.x, box.y);
       await page.mouse.down();
       await page.waitForTimeout(130);
-      const down = await page.evaluate(snap, sel);
+      const down = await page.evaluate(SNAP);
       await page.mouse.up();
       await page.waitForTimeout(90);
       return { before, down, changed: before !== down };
@@ -263,10 +296,12 @@ const pressOf = async (prep, sel) => {
   return null;
 };
 
-const fightPrep = () => { const F = window.__FR; F.muteStory(true); F.clearProgress(); F.setLevel(60); F.unlockAll(); F.enterMap('zhuji'); };
-const mapPrep = () => { const F = window.__FR; F.clearProgress(); F.setLevel(60); F.unlockAll(); F.toTitle(); F.worldmap(); };
-const cavePrep = () => { const F = window.__FR; F.clearProgress(); F.setLevel(60); F.addItem('a_lupi', 2); F.cave('qixuan'); F.caveTab('equip'); };
-const shopPrep = () => { const F = window.__FR; F.clearProgress(); F.setLevel(60); F.grant(999999); F.shop('buy'); };
+// 每个 prep 先 closeAll：上一段留下的浮层不会自己关（正常 UI 是点关闭键，
+// 调试 API 不代劳）。不关的话目标卡会被上一个 wm-panel 盖住，:active 永远不触发。
+const fightPrep = () => { const F = window.__FR; F.closeAll && F.closeAll(); F.muteStory(true); F.clearProgress(); F.setLevel(60); F.unlockAll(); F.enterMap('zhuji'); };
+const mapPrep = () => { const F = window.__FR; F.closeAll && F.closeAll(); F.clearProgress(); F.setLevel(60); F.unlockAll(); F.toTitle(); F.worldmap(); };
+const cavePrep = () => { const F = window.__FR; F.closeAll && F.closeAll(); F.clearProgress(); F.setLevel(60); F.addItem('a_lupi', 2); F.cave('qixuan'); F.caveTab('equip'); };
+const shopPrep = () => { const F = window.__FR; F.closeAll && F.closeAll(); F.clearProgress(); F.setLevel(60); F.grant(999999); F.shop('buy'); };
 
 const cases = [
   ['#pauseBtn', fightPrep, '暂停键（原先完全没有按下态）'],
@@ -329,7 +364,12 @@ if (tabBox) {
 // 内联样式与 JS 动态设置也逃不掉。只统计真正有过渡/动画的元素，
 // 否则混进默认值 ease / 0s，白名单就失去意义。
 console.log('\n== 动效阶梯 ==');
-const DUR_OK = ['0.09s', '0.12s', '0.14s', '0.2s', '0.28s'];
+// 两套阶梯，分开校验：
+//   交互 5 档 —— 按下 / 悬停 / 位移 / 强调 / 数值条，按手指跟得上的速度定。
+//   环境 4 档 —— 入场 / 呼吸 / 天兆 / 极慢呼吸，keyframes 的时长，按「一口气多长」定。
+// 早期把两种混在一张白名单里，结果 2.6s 的转场被迫和 90ms 的按压同档，只能写死字面值。
+const T_DUR_OK = ['0.09s', '0.12s', '0.14s', '0.2s', '0.28s'];
+const A_DUR_OK = ['0.46s', '0.5s', '1.6s', '2.6s', '3.6s'];
 const EASE_OK = [
   'linear',
   'cubic-bezier(0.2,0.7,0.3,1)',    // --ease-press
@@ -340,7 +380,7 @@ const norm = s => String(s).replace(/\s+/g, '').trim();
 
 async function collectMotion() {
   return page.evaluate(() => {
-    const durs = new Set(), eases = new Set();
+    const td = new Set(), te = new Set(), ad = new Set(), ae = new Set();
     // 必须按括号深度拆：cubic-bezier(0.2, 0.7, 0.3, 1) 自带逗号，
     // 直接 split(',') 会把它拆成 "0.2" / "0.7" 这种碎片，白名单永远对不上。
     function splitTop(v) {
@@ -354,19 +394,21 @@ async function collectMotion() {
       out.push(cur.trim());
       return out;
     }
+    function grab(cs, dProp, eProp, dSet, eSet) {
+      const ds = splitTop(cs[dProp]), es = splitTop(cs[eProp]);
+      ds.forEach((d, i) => {
+        if (!d || d === '0s') return;
+        dSet.add(d);
+        const e = es[i] || es[0];
+        if (e) eSet.add(e);
+      });
+    }
     document.querySelectorAll('*').forEach(el => {
       const cs = getComputedStyle(el);
-      for (const [dProp, eProp] of [['transitionDuration', 'transitionTimingFunction'], ['animationDuration', 'animationTimingFunction']]) {
-        const ds = splitTop(cs[dProp]), es = splitTop(cs[eProp]);
-        ds.forEach((d, i) => {
-          if (!d || d === '0s') return;
-          durs.add(d);
-          const e = es[i] || es[0];
-          if (e) eases.add(e);
-        });
-      }
+      grab(cs, 'transitionDuration', 'transitionTimingFunction', td, te);
+      grab(cs, 'animationDuration', 'animationTimingFunction', ad, ae);
     });
-    return { durs: [...durs].sort(), eases: [...eases].sort() };
+    return { tdurs: [...td].sort(), teases: [...te].sort(), adurs: [...ad].sort(), aeases: [...ae].sort() };
   });
 }
 
@@ -378,17 +420,21 @@ const mCave = await collectMotion();
 await open(() => { const F = window.__FR; F.clearProgress(); F.setLevel(20); F.unlockAll(); F.start(); });
 const mMap = await collectMotion();
 
-const allDur = [...new Set([...mShop.durs, ...mCave.durs, ...mMap.durs])].sort();
-const allEase = [...new Set([...mShop.eases, ...mCave.eases, ...mMap.eases])].sort();
-const badDur = allDur.filter(d => !DUR_OK.includes(d));
+const uniq = k => [...new Set([...mShop[k], ...mCave[k], ...mMap[k]])].sort();
+const tDur = uniq('tdurs'), aDur = uniq('adurs');
+const allDur = [...new Set([...tDur, ...aDur])].sort();
+const allEase = [...new Set([...uniq('teases'), ...uniq('aeases')])].sort();
+const badTDur = tDur.filter(d => !T_DUR_OK.includes(d));
+const badADur = aDur.filter(d => !A_DUR_OK.includes(d));
 const badEase = allEase.filter(e => !EASE_OK.includes(norm(e)));
 
-ok(allDur.length > 0, '采到动效样本（' + allDur.length + ' 种时长）', allDur);
-ok(badDur.length === 0, '★ 时长全部出自 5 档 token（无 .1s/.15s/.16s/.18s/.22s/.26s/.3s 这类野值）', badDur);
+ok(allDur.length > 0, '采到动效样本（' + allDur.length + ' 种时长 / ' + tDur.length + ' 过渡 + ' + aDur.length + ' 动画）', allDur);
+ok(badTDur.length === 0, '★ 过渡时长全部出自交互 5 档（90/120/140/200/280ms）', badTDur);
+ok(badADur.length === 0, '★ 动画时长全部出自环境 5 档（460/500/1600/2600/3600ms）', badADur);
 ok(allEase.length > 0, '采到缓动样本（' + allEase.length + ' 种）', allEase);
 ok(badEase.length === 0, '★ 缓动全部出自 4 档 token（无浏览器默认 ease，除非真没写过渡）', badEase);
-ok(allDur.includes('0.12s'), '数值条专用 120ms 仍在用（血条匀速档没被误删）', allDur);
-ok(allDur.includes('0.09s'), '按压档 90ms 在用', allDur);
+ok(tDur.includes('0.12s'), '数值条专用 120ms 仍在用（血条匀速档没被误删）', tDur);
+ok(tDur.includes('0.09s'), '按压档 90ms 在用', tDur);
 
 // ================= 横幅两套落点（v1.5） =================
 console.log('\n== 横幅落点 ==');
@@ -407,9 +453,13 @@ ok(panelCase.banner && panelCase.banner.h > 20, '面板态横幅真的显示了�
 ok(panelCase.cls.indexOf('at-combat') < 0, '面板态（HUD 隐藏）不加 at-combat', panelCase.cls);
 ok(panelCase.hudRects === 0, '面板态 HUD 确实不可见（判定输入正确）', panelCase.hudRects);
 if (panelCase.banner && panelCase.panel) {
-  ok(panelCase.banner.bot <= panelCase.panel.top,
-    '★ 面板态横幅落在面板上沿之外，不压面板（间隙 ' + (panelCase.panel.top - panelCase.banner.bot).toFixed(1) + 'px）',
-    { bannerBot: panelCase.banner.bot, panelTop: panelCase.panel.top });
+  // 面板态横幅是底部 toast（bottom:76），不是早期那版贴顶 16 —— 判据改成「真不重叠」：
+  // 要么整条在面板上沿之上，要么整条在面板下沿之下。
+  const clear = panelCase.banner.bot <= panelCase.panel.top || panelCase.banner.top >= panelCase.panel.bot;
+  ok(clear,
+    '★ 面板态横幅不压面板（横幅 ' + panelCase.banner.top + '–' + panelCase.banner.bot
+      + ' / 面板 ' + panelCase.panel.top + '–' + panelCase.panel.bot + '）',
+    { bannerTop: panelCase.banner.top, bannerBot: panelCase.banner.bot, panelTop: panelCase.panel.top, panelBot: panelCase.panel.bot });
 }
 
 // 战斗态：让 HUD 处于战斗可见状态，量 CSS 落点是否让开顶栏与 boss 血条。
@@ -466,7 +516,10 @@ const icoInfo = await page.evaluate(() => {
     return null;
   }).filter(v => v != null))];
   const fs = parseFloat(getComputedStyle(els[0]).fontSize);
-  return { n: els.length, widths: ws, starts, fs, em: +(ws[0] / fs).toFixed(2) };
+  // 宽度读 computed（19.5px）而不是 rect：rect 是 #stage scale 之后的屏幕像素，
+  // 13px 字号的 1.5em 量出来只有 1.22em，会把做对了的槽判成红。
+  const cw = parseFloat(getComputedStyle(els[0]).width);
+  return { n: els.length, widths: ws, starts, fs, cw, em: +(cw / fs).toFixed(3) };
 });
 ok(icoInfo && icoInfo.n >= 2, '同伴页取到多行图标位（' + (icoInfo ? icoInfo.n : 0) + ' 行）');
 ok(icoInfo && icoInfo.widths.length === 1, '★ 图标位宽度一致（不随 emoji 墨迹宽窄变化）', icoInfo && icoInfo.widths);

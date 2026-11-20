@@ -39,6 +39,24 @@ html, body {
   --press-lg: 0.99;   /* 大卡片：地图卡 / 难度卡 */
   --op-disabled: 0.45;
 
+  /* ---------- 动效：两套阶梯（规格 §2.11） ----------
+     交互 5 档按「眼睛多久跟得上」定；环境动画（呼吸 / 出场 / 转场）是另一套，
+     它们不响应手指，按「这一口气多长」定。两套都只允许走 token，不许再写字面值。 */
+  --dur-press: 90ms;    /* 按下反馈：手指落下到看见，超过 100ms 就发肉 */
+  --dur-bar: 120ms;     /* 数值条：跟随连续数值，太快抖、太慢糊 */
+  --dur-hover: 140ms;   /* 悬停 / 边框色 / 背景色 */
+  --dur-move: 200ms;    /* 位移 / 展开折叠 / 输入框伸缩 */
+  --dur-pop: 280ms;     /* 强调：连斩弹出、标记闪现 */
+  --dur-ring: 460ms;    /* 环境：弹反金环的扩散，节奏比普通入场慢半拍 */
+  --dur-enter: 500ms;   /* 环境：面板 / 卷轴入场 */
+  --dur-breathe: 1600ms;/* 环境：呼吸灯、待机脉动 */
+  --dur-omen: 2600ms;   /* 环境：天兆 / 转场这类一次到底的长镜头 */
+  --dur-slow: 3600ms;   /* 环境：标题按钮的极慢呼吸 */
+  --ease-press: cubic-bezier(.2,.7,.3,1);    /* 快起微收，有回弹感不弹过头 */
+  --ease-out: cubic-bezier(.22,1,.36,1);     /* 出场与位移：快起慢收 */
+  --ease-inout: cubic-bezier(.4,0,.2,1);     /* 双向变化：两端对称 */
+  --ease-bar: linear;                        /* 数值条必须匀速 */
+
   /* ---------- 层级：8 层（规格 §2.6） ----------
      z-combat 必须独立成层：战斗里弹剧情时，快捷栏/飘字仍要压过对话遮罩
      z-banner 必须压过 panel：坊市、洞府里的操作反馈（灵石不足/买到了）原先被面板盖住，
@@ -124,31 +142,31 @@ body.fs #wrap { background: #000; }
 /* 顶栏不再逐项垫底色块——整条压一层由深到透的暮色，字浮在幕上，画面干净 */
 #topbar { position: absolute; top: 0; left: 0; right: 0; padding: 8px 12px 12px; display: flex; flex-direction: column; gap: var(--sp-1); background: linear-gradient(180deg, rgba(5,7,10,0.66) 0%, rgba(5,7,10,0.38) 62%, rgba(5,7,10,0) 100%); }
 #hpwrap, #xpwrap { position: relative; height: 13px; background: rgba(0,0,0,0.52); border: 1px solid var(--line-soft); border-radius: var(--r-pill); overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.45); }
-#hpfill { height: 100%; width: 100%; background: linear-gradient(90deg,var(--hp-a),var(--hp-b)); transition: width .12s linear; }
-#xpfill { height: 100%; width: 0%; background: linear-gradient(90deg,var(--mp-a),var(--mp-b)); transition: width .12s linear; }
+#hpfill { height: 100%; width: 100%; background: linear-gradient(90deg,var(--hp-a),var(--hp-b)); transition: width var(--dur-bar) var(--ease-bar); }
+#xpfill { height: 100%; width: 0%; background: linear-gradient(90deg,var(--mp-a),var(--mp-b)); transition: width var(--dur-bar) var(--ease-bar); }
 .barlabel { position: absolute; left: 9px; top: 0; line-height: 13px; font-size: var(--fs-micro); letter-spacing: 2px; color: var(--text-2); text-shadow: 0 1px 2px #000; }
 /* 血量 / 灵力数值：等宽数字，位数变化时不会左右抖 */
 .barval { position: absolute; right: 9px; top: 0; line-height: 13px; font-size: var(--fs-num); font-variant-numeric: tabular-nums; color: var(--text-2); text-shadow: 0 1px 2px #000; }
 /* 修为：第三条细条。比生命/煞气矮一截 —— 它是「进度」，不是「资源」，
    平时只需要让人余光扫到「快满了」，不该和血条抢注意力。金色与大/小境界的题款同色。
    高度必须给到 10px：9px 的字放 8px 的槽里会溢出下沿，压到下面那行境界名上。 */
-#cnwrap { position: relative; height: 10px; background: rgba(0,0,0,0.42); border: 1px solid var(--line-soft); border-radius: var(--r-pill); overflow: hidden; }
-#cnfill { height: 100%; width: 0%; background: linear-gradient(90deg,#7a5f24,#e0bf62); transition: width .18s linear; }
-#cnwrap .barlabel { line-height: 10px; font-size: 9px; letter-spacing: 1px; }
+#cnwrap { position: relative; height: 12px; background: rgba(0,0,0,0.42); border: 1px solid var(--line-soft); border-radius: var(--r-pill); overflow: hidden; }
+#cnfill { height: 100%; width: 0%; background: linear-gradient(90deg,#7a5f24,#e0bf62); transition: width var(--dur-bar) var(--ease-bar); }
+#cnwrap .barlabel { line-height: 12px; font-size: var(--fs-micro); letter-spacing: 1px; }
 /* 修为刚满、正等着回洞府破境：让这条细条轻轻呼吸一下，提示「该去进阶了」。
    只动 opacity —— 它走合成器，不重绘；动 box-shadow / filter 就得每帧重画一遍。 */
-#cnwrap.capped #cnfill { animation: cnCapped 1.6s ease-in-out infinite; }
+#cnwrap.capped #cnfill { animation: cnCapped var(--dur-breathe) var(--ease-inout) infinite; }
 @keyframes cnCapped { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
 /* 数值行：去底块，一行细字浮在幕上；等宽数字防跳位。右侧留出自动/暂停键的位置 */
-#stats { display: flex; flex-wrap: wrap; gap: 14px; padding-right: 104px; font-size: var(--fs-num); letter-spacing: 1px; font-variant-numeric: tabular-nums; color: var(--text-2); text-shadow: 0 1px 3px #000; }
+#stats { display: flex; flex-wrap: wrap; gap: 14px; padding-right: calc(var(--sp-6) * 3 + var(--sp-2)); font-size: var(--fs-num); letter-spacing: 1px; font-variant-numeric: tabular-nums; color: var(--text-2); text-shadow: 0 1px 3px #000; }
 #stats span { white-space: nowrap; }
 #level { color: var(--accent-soft); letter-spacing: 2px; }
 #time { color: var(--text-3); }
 #stones { color: var(--accent); }
-#mapName { align-self: flex-start; font-size: var(--fs-micro); letter-spacing: 3px; color: var(--text-3); border-left: 2px solid var(--line-gold); padding-left: 7px; text-shadow: 0 1px 2px #000; }
+#mapName { align-self: flex-start; font-size: var(--fs-micro); letter-spacing: 3px; color: var(--text-3); border-left: 2px solid var(--line-gold); padding-left: 8px; text-shadow: 0 1px 2px #000; }
 /* 禁制（暂停）键：与「大衍」同为细长素签。热区保持 ≥44×44（点得中），
    「看得见的那颗」是 32px 高的金线胶囊：圆签用 ::before 画，文字套 span 浮在其上 */
-#pauseBtn { position: absolute; right: 12px; top: 52px; min-width: 44px; height: 44px; border: none; background: transparent; color: var(--text-2); pointer-events: auto; display: flex; align-items: center; justify-content: center; padding: 0 12px; }
+#pauseBtn { position: absolute; right: 12px; top: 52px; min-width: 44px; height: 44px; border: none; background: transparent; color: var(--text-2); pointer-events: auto; display: flex; align-items: center; justify-content: center; padding: 0 12px; font-size: var(--fs-cap); }
 #pauseBtn::before { content: ''; position: absolute; inset: 6px 0; border: 1px solid rgba(201,162,74,0.5); border-radius: var(--r-pill); background: rgba(10,13,18,0.58); box-shadow: 0 1px 4px rgba(0,0,0,0.4); }
 #pauseBtn span { position: relative; font-size: var(--fs-micro); letter-spacing: 3px; text-indent: 3px; color: var(--text-2); }
 #pauseBtn:active::before { background: rgba(8,10,14,0.7); }
@@ -157,7 +175,7 @@ body.fs #wrap { background: #000; }
 #autoBtn { position: absolute; right: 74px; top: 58px; height: 32px; padding: 0 12px; border: 1px solid rgba(201,162,74,0.5); border-radius: var(--r-pill); background: rgba(10,13,18,0.58); color: var(--text-2); font-size: var(--fs-micro); letter-spacing: 4px; text-indent: 2px; pointer-events: auto; display: none; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0,0,0,0.4); }
 #autoBtn:active { background: rgba(8,10,14,0.7); transform: scale(var(--press)); }
 #autoBtn.on { border-color: var(--accent-deep); color: var(--accent); background: rgba(24,18,6,0.66); text-shadow: 0 0 8px rgba(255,210,74,0.45); }
-#autoBtn.on::after { content: ''; width: 5px; height: 5px; margin-left: 2px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px rgba(255,210,74,0.8); animation: autoDot 1.1s ease-in-out infinite; }
+#autoBtn.on::after { content: ''; width: 5px; height: 5px; margin-left: 4px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px rgba(255,210,74,0.8); animation: autoDot var(--dur-breathe) var(--ease-inout) infinite; }
 @keyframes autoDot { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
 /* Boss 名牌：金线从两侧渐隐收拢，名字鎏金，血条鎏金描边带顶部高光 —— 修仙应该有的那点体面 */
 #bosswrap { position: absolute; top: 96px; left: 14px; right: 14px; display: none; }
@@ -165,7 +183,7 @@ body.fs #wrap { background: #000; }
   font-size: var(--fs-body); font-weight: 600; letter-spacing: 5px; text-indent: 5px;
   background: linear-gradient(180deg, #ffe9b0 20%, var(--accent) 85%);
   -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.85)); margin-bottom: 5px; }
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.85)); margin-bottom: 4px; }
 #bossname::before, #bossname::after { content: ''; flex: 1; height: 1px; }
 #bossname::before { background: linear-gradient(90deg, rgba(201,162,74,0), rgba(201,162,74,0.7)); }
 #bossname::after  { background: linear-gradient(270deg, rgba(201,162,74,0), rgba(201,162,74,0.7)); }
@@ -174,20 +192,20 @@ body.fs #wrap { background: #000; }
   box-shadow: 0 1px 6px rgba(0,0,0,0.55), inset 0 1px 3px rgba(0,0,0,0.85); }
 #bossbar::after { content: ''; position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0) 46%); }
-#bossfill { height: 100%; width: 100%; background: linear-gradient(90deg,var(--danger-deep),#ff5a4a); transition: width .15s linear; }
+#bossfill { height: 100%; width: 100%; background: linear-gradient(90deg,var(--danger-deep),#ff5a4a); transition: width var(--dur-bar) var(--ease-bar); }
 /* 二阶段：血条泛红光，脉一下停一下，不吵但看得见 */
-#bossbar.p2 { border-color: rgba(255,90,74,0.8); animation: bossP2 1.6s ease-in-out infinite; }
+#bossbar.p2 { border-color: rgba(255,90,74,0.8); animation: bossP2 var(--dur-breathe) var(--ease-inout) infinite; }
 @keyframes bossP2 { 0%, 100% { box-shadow: 0 1px 6px rgba(0,0,0,0.55), 0 0 4px rgba(255,60,40,0.25); } 50% { box-shadow: 0 1px 6px rgba(0,0,0,0.55), 0 0 12px rgba(255,60,40,0.65); } }
 /* 护体灵光（P1-2）：血条上面一道细金线。它跟血条是两回事 —— 血是「还剩多少」，罩是「打不打得动」。
    高度只给 3px：它是一条状态线，不是第二条血条，抢了血条的分量反而误读。 */
-#bossward { position: relative; height: 5px; margin-bottom: 3px; border-radius: var(--r-pill); overflow: hidden;
+#bossward { position: relative; height: 5px; margin-bottom: 4px; border-radius: var(--r-pill); overflow: hidden;
   background: rgba(46,40,32,0.62); border: 1px solid rgba(60,52,40,0.5); display: none; }
 #bossward.on { display: block; }
 /* 填充必须是实金：浅纸底上 0.55 半透明的金叠在深槽里只剩一条灰绿，4 倍放大也读不出「这是罩」。
    实测落屏 RGB ≈ (190,140,40) → (250,222,146)，才一眼认得出是金线。 */
 #bosswardfill { height: 100%; width: 100%;
   background: linear-gradient(90deg, #b07d1c, #f5c94e 55%, #ffe9a8);
-  transition: width .15s linear; }
+  transition: width var(--dur-bar) var(--ease-bar); }
 /* 罩破了：金线换成一条墨线按秒退完，外面箍一圈朱砂细框。
    这里刻意不用朱砂填充 —— 正下方就是朱砂血条，两条同色叠在一起，一眼看过去会读成
    「血条上多了一道描边」，反而分不清哪个是哪个。墨线 = 罩没了，朱砂框 = 这六秒吃满伤。 */
@@ -203,7 +221,7 @@ body.fs #wrap { background: #000; }
    落点钉在底部技能行上方居中：boss 与玩家都占屏幕中部，横幅悬中间容易糊住 boss 外观
    （Jerry 实测），底部是地面/空场，压不到谁。限宽允许换行 —— 破境提示这类长文案
    曾经 nowrap 横着冲出两屏。 */
-#banner { position: absolute; bottom: 76px; left: 50%; transform: translateX(-50%); background: rgba(10,13,20,0.94); border: 1px solid rgba(201,162,74,0.5); box-shadow: 0 6px 20px rgba(0,0,0,0.6); color: var(--accent); padding: 6px 13px; border-radius: var(--r-md); font-size: 14px; display: none; text-shadow: 0 1px 3px #000; max-width: min(calc(100vw - 28px), 460px); white-space: normal; line-height: 1.45; text-align: center; z-index: var(--z-banner); pointer-events: none; }
+#banner { position: absolute; bottom: 76px; left: 50%; transform: translateX(-50%); background: rgba(10,13,20,0.94); border: 1px solid rgba(201,162,74,0.5); box-shadow: 0 6px 20px rgba(0,0,0,0.6); color: var(--accent); padding: 8px 12px; border-radius: var(--r-md); font-size: var(--fs-body); display: none; text-shadow: 0 1px 3px #000; max-width: min(calc(100vw - 28px), 460px); white-space: normal; line-height: 1.45; text-align: center; z-index: var(--z-banner); pointer-events: none; }
 /* 重要事件横幅（放生 / 成就 / 殒落 / 离队）：加粗、金边加重，与普通拾取提示分开一眼能认 */
 #banner.big { border-color: rgba(201,162,74,0.95); border-width: 2px; font-weight: 700; box-shadow: 0 6px 24px rgba(0,0,0,0.75), 0 0 14px rgba(201,162,74,0.22); }
 body[data-skin="guigu"] #banner.big { border-color: #a8281e; color: #8f4f2e; box-shadow: 0 6px 20px rgba(40,36,28,0.35); }
@@ -215,9 +233,9 @@ body[data-skin="guigu"] #banner.big { border-color: #a8281e; color: #8f4f2e; box
 #breakOmen {
   position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%);
   display: none; pointer-events: none; z-index: var(--z-banner);
-  padding: 0 18px; text-align: center;
+  padding: 0 16px; text-align: center;
 }
-#breakOmen.on { display: block; animation: boIn 2.6s ease-out both; }
+#breakOmen.on { display: block; animation: boIn var(--dur-omen) var(--ease-out) both; }
 #breakOmen .bo-frame { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 #breakOmen .bo-rule {
   display: block; width: 132px; height: 1px;
@@ -239,12 +257,12 @@ body[data-skin="guigu"] #banner.big { border-color: #a8281e; color: #8f4f2e; box
 #closeBar {
   position: absolute; left: 50%; top: 58%; transform: translate(-50%, -50%);
   display: none; pointer-events: none; z-index: var(--z-banner);
-  padding: 0 18px; text-align: center; width: 240px;
+  padding: 0 16px; text-align: center; width: 240px;
 }
-#closeBar.on { display: block; animation: cbIn 2.8s ease-out both; }
+#closeBar.on { display: block; animation: cbIn var(--dur-omen) var(--ease-out) both; }
 #closeBar .cb-frame {
   display: flex; flex-direction: column; align-items: center; gap: 6px;
-  padding: 12px 20px 10px;
+  padding: 12px 16px 8px;
   background: rgba(8,7,6,0.88);
   border-top: 1px solid var(--line-gold); border-bottom: 1px solid var(--line-gold);
   box-shadow: 0 6px 24px rgba(0,0,0,0.5);
@@ -260,7 +278,7 @@ body[data-skin="guigu"] #banner.big { border-color: #a8281e; color: #8f4f2e; box
   display: block; height: 100%; width: 0;
   background: linear-gradient(90deg, var(--hp-a), var(--accent));
 }
-#closeBar.on .cb-fill { animation: cbFill 2.6s linear both; }
+#closeBar.on .cb-fill { animation: cbFill var(--dur-omen) var(--ease-bar) both; }
 #closeBar .cb-days { font-size: var(--fs-num); letter-spacing: 1px; color: var(--text-1); text-shadow: 0 1px 4px #000; font-variant-numeric: tabular-nums; }
 @keyframes cbIn {
   0%   { opacity: 0; transform: translate(-50%, -46%); }
@@ -298,18 +316,18 @@ body[data-skin="guigu"] #breakOmen.fail .bo-name { color: #6a6154; }
   align-items: center; justify-content: center;
   background: rgba(6,5,4,0.66);
   z-index: calc(var(--z-modal) + 5);
-  padding: 24px 26px;
+  padding: 24px 24px;
 }
 #chronicle.on { display: flex; }
 #chronicle .ch-scroll { position: relative; width: 100%; max-width: 330px; }
-#chronicle .ch-scroll.in { animation: chIn 0.5s ease-out both; }
+#chronicle .ch-scroll.in { animation: chIn var(--dur-enter) var(--ease-out) both; }
 #chronicle .ch-rod {
   display: block; height: 7px; border-radius: 4px;
   background: linear-gradient(180deg, #d8b96a, #8a6a2a 55%, #4a3413);
 }
 #chronicle .ch-body {
   display: flex; flex-direction: column; align-items: center; gap: 10px;
-  padding: 26px 22px 24px; text-align: center;
+  padding: 24px 24px 24px; text-align: center;
   background: linear-gradient(180deg, rgba(24,21,16,0.97), rgba(17,15,11,0.97));
   border-left: 1px solid rgba(201,162,74,0.34);
   border-right: 1px solid rgba(201,162,74,0.34);
@@ -337,7 +355,7 @@ body[data-skin="guigu"] #breakOmen.fail .bo-name { color: #6a6154; }
 }
 #chronicle .ch-skip {
   position: absolute; right: 16px; top: 16px;
-  padding: 5px 10px; font-size: var(--fs-micro); letter-spacing: 1px;
+  padding: 4px 8px; font-size: var(--fs-micro); letter-spacing: 1px;
   color: var(--text-2); background: rgba(0,0,0,0.3);
   border: 1px solid rgba(201,162,74,0.28); border-radius: 3px;
 }
@@ -390,17 +408,17 @@ body[data-skin="guigu"] #chronicle .ch-sub { color: #3a332a; }
 .brk-row.ok i { background: var(--ok); }
 .brk-row.ok b { color: var(--ok); }
 /* 可点击的道具行：点一下看「去哪取」（不挂问号，字底一道虚线当暗记） */
-.brk-row.click { cursor: pointer; transition: border-color .12s, background .12s; }
+.brk-row.click { cursor: pointer; transition: border-color var(--dur-hover) var(--ease-out), background var(--dur-hover) var(--ease-out); }
 .brk-row.click:hover { border-color: rgba(201,162,74,0.55); background: rgba(201,162,74,0.10); }
 .brk-row.click span { text-decoration: underline dotted rgba(201,162,74,0.4); text-underline-offset: 3px; }
-.brk-hint { color: rgba(201,162,74,0.8); font-size: var(--fs-micro); margin: 2px 0 0; }
+.brk-hint { color: rgba(201,162,74,0.8); font-size: var(--fs-micro); margin: 4px 0 0; }
 /* 岁月纪（P2-2）：一行一条 —— 年数在左，事在中，注在事下面。
    左侧那道竖线是「时间轴」，不是装饰：整块读下来要有「一年一年往下走」的感觉。 */
-.jz-list { display: flex; flex-direction: column; gap: 7px; margin: 8px 0 2px; }
+.jz-list { display: flex; flex-direction: column; gap: 7px; margin: 8px 0 4px; }
 .jz-row {
   display: grid; grid-template-columns: 88px 1fr; gap: 1px var(--sp-2);
   font-size: var(--fs-cap); color: var(--text-2);
-  border-left: 2px solid rgba(201,162,74,0.4); padding: 3px 0 3px 9px;
+  border-left: 2px solid rgba(201,162,74,0.4); padding: 4px 0 4px 8px;
 }
 .jz-row i { font-style: normal; font-size: var(--fs-micro); color: var(--accent); white-space: nowrap; }
 .jz-row b { font-weight: 600; color: var(--text-1); }
@@ -423,7 +441,7 @@ button.sr-btn.release-arm, button.sr-btn.release-arm:hover { border-color: #c035
    色只用浅底淡描，别做成四块彩色小标签：那在纸皮上比什么都跳。 */
 .ally-role {
   display: inline-block; font-size: var(--fs-micro); line-height: 1.5; font-weight: 400;
-  padding: 0 5px; border-radius: var(--r-sm);
+  padding: 0 4px; border-radius: var(--r-sm);
   border: 1px solid rgba(201,162,74,0.46); color: var(--accent); background: rgba(201,162,74,0.15);
 }
 .ally-role[data-role="困"] { border-color: rgba(150,190,220,0.46); color: #a8d0e8; background: rgba(150,190,220,0.14); }
@@ -435,7 +453,7 @@ button.sr-btn.release-arm, button.sr-btn.release-arm:hover { border-color: #c035
    初识要淡到几乎不显（那是默认状态，不该抢眼），越走越深才显出来。 */
 .bond {
   display: inline-block; font-size: var(--fs-micro); line-height: 1.5; font-weight: 400;
-  padding: 0 5px; border-radius: var(--r-sm); white-space: nowrap;
+  padding: 0 4px; border-radius: var(--r-sm); white-space: nowrap;
   border: 1px solid rgba(201,162,74,0.20); color: rgba(201,162,74,0.56); background: transparent;
 }
 .bond[data-bond="1"] { border-color: rgba(201,162,74,0.40); color: rgba(201,162,74,0.88); background: rgba(201,162,74,0.10); }
@@ -450,10 +468,10 @@ button.sr-btn.release-arm, button.sr-btn.release-arm:hover { border-color: #c035
 .item-tip { background: rgba(18,14,9,0.97); border: 1px solid rgba(201,162,74,0.5);
   border-radius: var(--r-md); padding: 8px 12px; font-size: var(--fs-cap);
   line-height: 1.55; pointer-events: none; }
-.item-tip b { display: block; color: var(--accent); margin-bottom: 3px; letter-spacing: .5px; }
+.item-tip b { display: block; color: var(--accent); margin-bottom: 4px; letter-spacing: .5px; }
 .item-tip span { color: var(--text-2); }
 /* 就地展开：贴在点过的那一行下面，不遮列表也不盖按钮 */
-.item-tip.inline { margin: 0 0 6px; border-left: 2px solid var(--accent); }
+.item-tip.inline { margin: 0 0 8px; border-left: 2px solid var(--accent); }
 /* 兜底：没有落点就浮在底部 */
 .item-tip.float { position: fixed; left: 50%; bottom: 9%; transform: translateX(-50%);
   width: max-content; max-width: min(460px, 88vw); box-shadow: 0 8px 26px rgba(0,0,0,0.55); z-index: 60; }
@@ -479,7 +497,7 @@ button.sr-btn.release-arm, button.sr-btn.release-arm:hover { border-color: #c035
 }
 .title-panel {
   position: relative;
-  padding: 24px 22px 16px;
+  padding: 24px 24px 16px;
   border-radius: var(--r-sm);
   /* 内缩一圈细线：像裱好的画心，比加粗描边更轻 */
   outline: 1px solid rgba(201,162,74,0.20); outline-offset: -7px;
@@ -501,9 +519,9 @@ button.sr-btn.release-arm, button.sr-btn.release-arm:hover { border-color: #c035
   box-shadow: 0 0 18px rgba(255,210,74,0.20), inset 0 0 12px rgba(255,210,74,0.10);
   transform: rotate(-3deg);
 }
-.t-seal b { font-size: 23px; font-weight: normal; line-height: 1; color: var(--accent); }
+.t-seal b { font-size: var(--fs-h1); font-weight: normal; line-height: 1; color: var(--accent); }
 .title-panel h1 {
-  font-size: 33px; letter-spacing: 6px; margin-bottom: 6px;
+  font-size: var(--fs-display); letter-spacing: 6px; margin-bottom: 8px;
   color: var(--accent); text-shadow: 0 2px 10px rgba(0,0,0,0.75);
 }
 /* 金色渐变字：老浏览器没有 background-clip:text 时会退化成上面的纯金色，不会变透明 */
@@ -516,29 +534,29 @@ button.sr-btn.release-arm, button.sr-btn.release-arm:hover { border-color: #c035
   }
 }
 /* 题字下的分隔：两侧细线，中间两个字，模仿卷首的界栏 */
-.t-rule { display: flex; align-items: center; gap: 10px; margin: 12px 0 14px; }
+.t-rule { display: flex; align-items: center; gap: 10px; margin: 12px 0 16px; }
 .t-rule i { flex: 1; height: 1px; background: linear-gradient(90deg, rgba(201,162,74,0), rgba(201,162,74,0.52), rgba(201,162,74,0)); }
 .t-rule b { flex: none; font-weight: normal; font-size: 11px; letter-spacing: 6px; color: rgba(201,162,74,0.72); }
 .title-panel .cite {
-  text-align: left; padding-left: 11px;
+  text-align: left; padding-left: 12px;
   border-left: 2px solid rgba(201,162,74,0.34);
-  line-height: 1.75; margin: 2px 0 16px;
+  line-height: 1.75; margin: 4px 0 16px;
 }
 .title-panel .t-start {
   min-width: 216px; letter-spacing: 3px;
   box-shadow: 0 4px 0 var(--accent-shadow), 0 0 26px rgba(255,190,70,0.26);
 }
 /* 常态呼吸光晕；按下时交给 :active，免得两套 box-shadow 打架 */
-.title-panel .t-start:not(:active) { animation: tStartGlow 3.6s ease-in-out infinite; }
+.title-panel .t-start:not(:active) { animation: tStartGlow var(--dur-slow) var(--ease-inout) infinite; }
 @keyframes tStartGlow {
   0%, 100% { box-shadow: 0 4px 0 var(--accent-shadow), 0 0 18px rgba(255,190,70,0.18); }
   50% { box-shadow: 0 4px 0 var(--accent-shadow), 0 0 34px rgba(255,190,70,0.44); }
 }
 .t-foot {
   display: flex; justify-content: space-between; align-items: baseline;
-  margin-top: 14px; padding-top: 8px;
+  margin-top: 16px; padding-top: 8px;
   border-top: 1px dotted rgba(201,162,74,0.16);
-  font-size: 10px; letter-spacing: 2px; color: var(--text-4);
+  font-size: var(--fs-micro); letter-spacing: 2px; color: var(--text-4);
 }
 /* ---- 鬼谷水墨：同一套骨架，换纸墨朱砂 ---- */
 body[data-skin="guigu"] .title-overlay {
@@ -588,19 +606,19 @@ body[data-skin="guigu"] .t-foot { border-top-color: rgba(74,68,56,0.18); color: 
 /* ---- 矮屏档（16:9 老机型 / 小窗口）：首页内容顶出去时整体收紧一档 ----
    只压间距与小装饰，不删信息、不缩正文字号 —— 该读的字一个不少，
    只是别让「转世重修」掉到屏幕外面去。 */
-body.short .title-panel { padding: 16px 18px 12px; }
+body.short .title-panel { padding: 16px 16px 12px; }
 body.short .t-seal { width: 34px; height: 34px; margin-bottom: 8px; }
-body.short .t-seal b { font-size: 18px; }
-body.short .title-panel h1 { font-size: 28px; letter-spacing: 5px; margin-bottom: 4px; }
+body.short .t-seal b { font-size: var(--fs-h2); }
+body.short .title-panel h1 { font-size: var(--fs-h1); letter-spacing: 5px; margin-bottom: 4px; }
 body.short .title-panel .sub { margin-bottom: 8px; }
-body.short .t-rule { margin: 8px 0 10px; }
-body.short .title-panel .desc { font-size: 14px; line-height: 1.62; margin-bottom: 10px; }
-body.short .title-panel .cite { margin: 0 0 10px; line-height: 1.6; }
-body.short #best { margin-top: 10px; }
+body.short .t-rule { margin: 8px 0 8px; }
+body.short .title-panel .desc { font-size: var(--fs-body); line-height: 1.62; margin-bottom: 8px; }
+body.short .title-panel .cite { margin: 0 0 8px; line-height: 1.6; }
+body.short #best { margin-top: 8px; }
 body.short .ts-row { line-height: 1.62; }
 body.short .title-panel .hint { margin-top: 8px; font-size: 11px; line-height: 1.62; }
-body.short .title-panel .btnrow { margin-top: 2px; }
-body.short .title-panel .btn.small { min-height: 38px; padding: 9px 12px; }
+body.short .title-panel .btnrow { margin-top: 4px; }
+body.short .title-panel .btn.small { min-height: 38px; padding: 8px 12px; }
 body.short .t-foot { margin-top: 8px; }
 
 /* ============ 横屏提示 ============ */
@@ -620,12 +638,12 @@ body.rot #ver { visibility: hidden; }
 /* 手机轮廓从横到竖地转，动作本身就是说明 */
 .rh-phone {
   width: 40px; height: 66px; border: 2px solid var(--line-gold); border-radius: 8px;
-  position: relative; animation: rhTilt 2.6s ease-in-out infinite;
+  position: relative; animation: rhTilt var(--dur-omen) var(--ease-inout) infinite;
   box-shadow: 0 0 20px rgba(201,162,74,0.20);
 }
 .rh-phone::after {
-  content: ''; position: absolute; left: 50%; bottom: 5px; width: 11px; height: 2px;
-  margin-left: -5.5px; background: var(--line-gold); border-radius: 1px;
+  content: ''; position: absolute; left: 50%; bottom: 4px; width: 12px; height: 2px;
+  margin-left: calc(var(--sp-3) / -2); background: var(--line-gold); border-radius: 1px;
 }
 @keyframes rhTilt {
   0%, 38% { transform: rotate(90deg); }
@@ -635,8 +653,8 @@ body.rot #ver { visibility: hidden; }
 .sub { color: var(--accent-soft); font-size: var(--fs-body); margin-bottom: var(--sp-3); letter-spacing: 1px; }
 .desc { color: var(--text-2); font-size: var(--fs-body); line-height: 1.7; margin-bottom: 16px; }
 /* 百药园园门题字：两行，落款压一行，别抢标题 */
-.cite { color: var(--accent-soft); font-size: var(--fs-cap); line-height: 1.9; letter-spacing: 2px; margin: 2px 0 14px; opacity: .82; }
-.cite i { display: block; font-style: normal; color: var(--text-3); font-size: var(--fs-cap); letter-spacing: 1px; margin-top: 2px; }
+.cite { color: var(--accent-soft); font-size: var(--fs-cap); line-height: 1.9; letter-spacing: 2px; margin: 4px 0 16px; opacity: .82; }
+.cite i { display: block; font-style: normal; color: var(--text-3); font-size: var(--fs-cap); letter-spacing: 1px; margin-top: 4px; }
 .hint { color: var(--text-3); font-size: var(--fs-cap); line-height: 1.7; margin-top: 12px; }
 .btn { background: linear-gradient(180deg,var(--accent-lite),var(--accent-deep)); color: var(--ink); border: none; border-radius: var(--r-md); padding: 12px 24px; min-height: 48px; font-size: var(--fs-body); font-family: inherit; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 var(--accent-shadow); margin-top: 4px; }
 .btn:not(.small) { min-width: 160px; }
@@ -661,13 +679,13 @@ body.rot #ver { visibility: hidden; }
 
 /* 道陨代价：灵石折半（不退）＋ 道具折半（可打回来）。用暗红细框，读起来像账，不像报错。 */
 .toll {
-  margin: 10px 0 14px; padding: 9px 12px; text-align: left;
+  margin: 8px 0 16px; padding: 8px 12px; text-align: left;
   border: 1px solid rgba(168, 58, 42, 0.5); border-radius: 6px;
   background: rgba(168, 58, 42, 0.08);
   color: var(--text-2); font-size: var(--fs-cap); line-height: 1.7;
 }
 .toll b { color: #e8735c; font-size: var(--fs-body); }
-.toll .toll-h { display: block; color: #c25a48; font-size: var(--fs-cap); letter-spacing: .14em; margin-bottom: 2px; }
+.toll .toll-h { display: block; color: #c25a48; font-size: var(--fs-cap); letter-spacing: .14em; margin-bottom: 4px; }
 .toll:empty { display: none; }
 
 /* ---------- 对话 ---------- */
@@ -689,12 +707,12 @@ body.rot #ver { visibility: hidden; }
    也不能按内容宽度自由折行：长标签一人一行会把整摞拖到右侧快捷栏上。
    所以——独立纸卡 + 三档以上排两列等宽 + 有抉择时整摞上抬。 */
 #dialog.has-choices { padding-bottom: 15%; }
-.dlg-choices { width: 92%; max-width: 460px; margin: 10px auto 0; padding: 10px 12px;
+.dlg-choices { width: 92%; max-width: 460px; margin: 10px auto 0; padding: 8px 12px;
   display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
   writing-mode: horizontal-tb;
   background: var(--paper); border: 2px solid var(--line-gold); border-radius: var(--r-lg);
   box-shadow: 0 8px 30px rgba(0,0,0,0.6); }
-.dlg-choices.many .btn { flex: 1 1 44%; font-size: var(--fs-micro); padding: 7px 6px; line-height: 1.45; }
+.dlg-choices.many .btn { flex: 1 1 44%; font-size: var(--fs-micro); padding: 8px 8px; line-height: 1.45; }
 /* 纸卡上的按钮不能沿用 .btn.small 的浅色字（那是给暗面板用的）：浅字压在米黄纸上等于没有字。 */
 .dlg-choices .btn.small {
   background: rgba(58,53,44,0.05); color: var(--ink);
@@ -712,7 +730,7 @@ body.rot #ver { visibility: hidden; }
 }
 #dialogbox.has-face #dialogFace { display: flex; }
 /* 头像占左侧一条，整个内容区右移让位（只给名字让位不够：正文照样从框边起排，会被压住） */
-#dialogbox.has-face { padding-left: 78px; }
+#dialogbox.has-face { padding-left: calc(var(--sp-6) * 2 + var(--sp-3)); }
 #dialogFace canvas { height: 52px; width: auto; image-rendering: pixelated; image-rendering: crisp-edges; }
 #dialogSpeaker { color: var(--danger-deep); font-weight: bold; font-size: var(--fs-h2); margin-bottom: 8px; }
 #dialogText { font-size: var(--fs-h2); line-height: 1.7; min-height: 54px; }
@@ -727,7 +745,7 @@ body.rot #ver { visibility: hidden; }
 #levelup { background: rgba(8,10,14,0.85); }
 .lu-title { color: var(--accent); font-size: var(--fs-h1); margin-bottom: 4px; text-shadow: 0 2px 6px #000; }
 #cards { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; max-width: 460px; }
-.card { width: 118px; min-height: 150px; background: linear-gradient(180deg,var(--bg-card-a),var(--bg-card-b)); border: 1px solid var(--line-gold); border-radius: var(--r-lg); padding: 12px 8px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); transition: transform .1s, border-color .1s; }
+.card { width: 118px; min-height: 150px; background: linear-gradient(180deg,var(--bg-card-a),var(--bg-card-b)); border: 1px solid var(--line-gold); border-radius: var(--r-lg); padding: 12px 8px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); transition: transform var(--dur-press) var(--ease-press), border-color var(--dur-hover) var(--ease-out); }
 .card:active { transform: scale(var(--press)); }
 .card:hover { border-color: var(--accent); }
 .cicon { font-size: var(--fs-display); }
@@ -749,12 +767,12 @@ body.rot #ver { visibility: hidden; }
 }
 .itoast {
   background: rgba(10,13,19,0.80); border: 1px solid var(--line-gold); border-radius: var(--r-md);
-  padding: 3px 7px; font-size: 10px; line-height: 1.3; max-width: 100%;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.45); animation: toastIn .16s ease-out;
+  padding: 4px 8px; font-size: var(--fs-micro); line-height: 1.3; max-width: 100%;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.45); animation: toastIn var(--dur-hover) var(--ease-out);
 }
 .itoast b { display: block; font-size: 11px; font-weight: 600; letter-spacing: .3px; }
-.itoast b i { font-style: normal; color: var(--accent-soft); margin-left: 4px; font-size: 10px; }
-.itoast.more { color: var(--text-3); font-size: 10px; border-color: rgba(201,162,74,0.35); }
+.itoast b i { font-style: normal; color: var(--accent-soft); margin-left: 4px; font-size: var(--fs-micro); }
+.itoast.more { color: var(--text-3); font-size: var(--fs-micro); border-color: rgba(201,162,74,0.35); }
 @keyframes toastIn { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
 
 /* ---------- 存档设置 ---------- */
@@ -772,7 +790,7 @@ body.rot #ver { visibility: hidden; }
    iOS 上也不必跟「下载到文件 App」打交道。 */
 #saveIOText {
   width: 100%; height: 96px; resize: none; box-sizing: border-box;
-  margin: var(--sp-2) 0; padding: 8px 10px;
+  margin: var(--sp-2) 0; padding: 8px 8px;
   font-family: ui-monospace, Menlo, Consolas, monospace; font-size: var(--fs-micro);
   line-height: 1.5; word-break: break-all;
   color: var(--text-1); background: rgba(0,0,0,0.34);
@@ -805,7 +823,7 @@ body[data-skin="guigu"] #saveIOText { background: rgba(255,255,255,0.5); color: 
 }
 #combo b { display: block; font-size: var(--fs-display); line-height: 1; color: var(--accent); letter-spacing: 1px; }
 #combo span { display: block; font-size: var(--fs-cap); color: var(--accent-soft); margin-top: 0; letter-spacing: 1px; }
-#combo.pop { animation: comboPop .26s ease-out; }
+#combo.pop { animation: comboPop var(--dur-pop) var(--ease-out); }
 @keyframes comboPop {
   0% { transform: scale(1.5); opacity: .25; }
   55% { transform: scale(0.96); opacity: 1; }
@@ -824,7 +842,10 @@ body[data-skin="guigu"] #saveIOText { background: rgba(255,255,255,0.5); color: 
 /* 这五个是「换页签换内容的列表」，高度必须固定：否则内容一多一少，面板就上下跳。
    难度选择不进这组 —— 它只有三五张卡，定高只留下一片空。 */
 #worldmap .wm-panel, #shop .wm-panel, #cave .wm-panel, #prefight .wm-panel {
-  height: min(calc(100% - var(--sp-6)), 720px);
+  /* 736 而不是 720：390×844 上舞台按 0.8125 缩放，720 量下来占屏 69.3%，
+     差 6px 不到「列表型面板至少占七成」的线。736 在四种常见比例下都在 70% 以上，
+     内容再多也是内部滚动，不会把底栏顶出舞台。 */
+  height: min(calc(100% - var(--sp-6)), 736px);
 }
 
 /* ---------- 主线指针「下一处」 ----------
@@ -844,7 +865,7 @@ body[data-skin="guigu"] #saveIOText { background: rgba(255,255,255,0.5); color: 
 }
 .wm-next:active { filter: brightness(1.25); }
 .wm-next .wn-k {
-  flex: 0 0 auto; padding: 1px 5px; border-radius: 2px;
+  flex: 0 0 auto; padding: 0px 4px; border-radius: 2px;
   background: var(--accent); color: #1a1206;
   font-size: var(--fs-micro); letter-spacing: 1px; font-weight: 700;
 }
@@ -887,11 +908,11 @@ body[data-skin="guigu"] .mapcard.next .mc-name { color: #8f4f2e; }
 #worldmap .wm-panel { gap: var(--sp-2); }
 #worldmap .wm-sub {
   display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
-  line-height: 1.45; margin-top: 2px;
+  line-height: 1.45; margin-top: 4px;
 }
-#worldmap .wm-next { margin-top: 6px; }
-#worldmap .wm-stats { margin-top: 6px; gap: 6px; }
-#worldmap .wm-stats span { padding: 1px 7px; }
+#worldmap .wm-next { margin-top: 8px; }
+#worldmap .wm-stats { margin-top: 8px; gap: 6px; }
+#worldmap .wm-stats span { padding: 0px 8px; }
 /* 闸门钉死 wmJournal 在上、wmCodex 在下、垂直相邻且中点无热区 ——
    用显式网格区满足：右列 jr→cx 垂直相邻（gap 14 > 热区 6+6），左列舆图/返回。 */
 .wm-foot {
@@ -909,22 +930,22 @@ body[data-skin="guigu"] .mapcard.next .mc-name { color: #8f4f2e; }
 /* 刚离开的那张图：名字后一枚「方才」淡楷小印，不碰 border/圆角/尺寸 */
 .mapcard.recent .mc-name::after {
   content: '方才'; font-size: var(--fs-micro); font-weight: normal; letter-spacing: 1px;
-  color: var(--text-3); opacity: .8; margin-left: 6px; vertical-align: 1px;
+  color: var(--text-3); opacity: .8; margin-left: 8px; vertical-align: 1px;
 }
 body[data-skin="guigu"] .mapcard.recent .mc-name::after { color: #8f4f2e; opacity: .7; }
 
 .mapcard {
   border: 1px solid rgba(201,162,74,0.35); border-radius: var(--r-lg); padding: 8px 8px;
   background: linear-gradient(180deg, var(--bg-card-a), var(--bg-card-b));
-  cursor: pointer; transition: border-color .12s, transform .1s;
+  cursor: pointer; transition: border-color var(--dur-hover) var(--ease-out), transform var(--dur-press) var(--ease-press);
   position: relative;
 }
 /* ---- 行脚折：行程线 + 折叠节点（大地图感：一屏看七八处地名） ---- */
-.wm-route { position: relative; padding-left: 15px; display: flex; flex-direction: column; gap: var(--sp-2); }
+.wm-route { position: relative; padding-left: 16px; display: flex; flex-direction: column; gap: var(--sp-2); }
 .wm-route::before { content: ''; position: absolute; left: 4px; top: 14px; bottom: 14px;
   border-left: 1px dashed rgba(201,162,74,0.30); }
 .wm-route .mapcard { position: relative; }
-.wm-route .mapcard::before { content: ''; position: absolute; left: -15px; top: 50%; margin-top: -5px;
+.wm-route .mapcard::before { content: ''; position: absolute; left: -15px; top: 50%; margin-top: -4px;
   width: 9px; height: 9px; border-radius: 50%; box-sizing: border-box;
   background: rgba(201,162,74,0.18); border: 1.5px solid rgba(201,162,74,0.55); z-index: 1; }
 .wm-route .mapcard.done::before { background: var(--line-gold); border-color: var(--line-gold); box-shadow: 0 0 6px rgba(255,210,74,0.45); }
@@ -933,12 +954,12 @@ body[data-skin="guigu"] .mapcard.recent .mc-name::after { color: #8f4f2e; opacit
 .wm-route .mapcard.locked::before { background: rgba(70,74,86,0.9); border-color: rgba(120,126,140,0.5); box-shadow: none; }
 .mapcard.fold .mc-body { display: none; }
 .mapcard.open .mc-mini { visibility: hidden; }   /* 展开后底部已有状态字，右上那枚藏着 */
-.mapcard.fold { padding: 7px 8px; }
-.mc-row2 { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-2); margin-top: 3px; }
+.mapcard.fold { padding: 8px 8px; }
+.mc-row2 { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-2); margin-top: 4px; }
 .mc-mini { font-size: var(--fs-micro); flex: none; }
 .mc-mini.on { color: var(--ok); }
 .mc-mini.off { color: var(--text-4); }
-.mc-info { flex: none; font-size: var(--fs-micro); line-height: 1.5; padding: 0 6px;
+.mc-info { flex: none; font-size: var(--fs-micro); line-height: 1.5; padding: 0 8px;
   border: 1px solid rgba(201,162,74,0.45); border-radius: var(--r-sm); color: var(--accent-soft); cursor: pointer; }
 .mc-info:hover { color: var(--accent); border-color: var(--accent); }
 .mapcard.open .mc-info { border-color: rgba(201,162,74,0.25); color: var(--text-3); }
@@ -994,7 +1015,7 @@ body[data-skin="guigu"] .mapcard.recent .mc-name::after { color: #8f4f2e; opacit
 #shopList { flex: 1 1 auto; overflow-y: auto; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); display: flex; flex-direction: column; gap: var(--sp-2); -webkit-overflow-scrolling: touch; padding-bottom: var(--sp-2); }
 .shoprow { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(201,162,74,0.2); border-radius: var(--r-md); }
 /* 晶龙阁拍卖会标题条（天南交易会限定） */
-.shopauc { display: flex; flex-direction: column; gap: 2px; margin: 2px 0 6px; padding: 8px 10px; background: linear-gradient(90deg, rgba(201,162,74,0.22), rgba(201,162,74,0.06)); border: 1px solid rgba(201,162,74,0.45); border-radius: var(--r-md); color: #f0d79a; font-size: var(--fs-cap); letter-spacing: 0.5px; }
+.shopauc { display: flex; flex-direction: column; gap: 2px; margin: 4px 0 8px; padding: 8px 8px; background: linear-gradient(90deg, rgba(201,162,74,0.22), rgba(201,162,74,0.06)); border: 1px solid rgba(201,162,74,0.45); border-radius: var(--r-md); color: #f0d79a; font-size: var(--fs-cap); letter-spacing: 0.5px; }
 .shopauc span { color: var(--text-3); font-size: var(--fs-micro); letter-spacing: 0; }
 .shoprow.poor { opacity: .55; }
 /* 一键卖出材料：与常规卖行区分，强调是「批量」入口 */
@@ -1007,14 +1028,14 @@ body[data-skin="guigu"] .mapcard.recent .mc-name::after { color: #8f4f2e; opacit
 
 /* 混沌万灵榜（图鉴 / 收藏） */
 #wanlingList { flex: 1 1 auto; overflow-y: auto; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); display: flex; flex-direction: column; gap: var(--sp-2); -webkit-overflow-scrolling: touch; padding-bottom: var(--sp-2); }
-.wl-row { display: grid; grid-template-columns: 30px 26px 1fr auto; gap: 8px; align-items: center; text-align: left; background: rgba(0,0,0,0.32); border: 1px solid rgba(201,162,74,0.18); border-radius: var(--r-sm); padding: 8px 10px; }
+.wl-row { display: grid; grid-template-columns: 30px 26px 1fr auto; gap: 8px; align-items: center; text-align: left; background: rgba(0,0,0,0.32); border: 1px solid rgba(201,162,74,0.18); border-radius: var(--r-sm); padding: 8px 8px; }
 .wl-row.got { border-color: rgba(201,162,74,0.55); background: rgba(40,32,16,0.5); }
 .wl-rank { font-weight: bold; color: var(--accent-soft); font-size: var(--fs-cap); text-align: center; }
 .wl-icon { font-size: 20px; text-align: center; }
 .wl-main { min-width: 0; }
 .wl-name { font-size: var(--fs-cap); color: var(--ink); font-weight: 600; }
 .wl-name .wl-lock { color: var(--text-4); font-weight: 400; font-size: var(--fs-micro); margin-left: 4px; }
-.wl-note { font-size: var(--fs-micro); color: var(--text-4); margin-top: 2px; line-height: 1.4; }
+.wl-note { font-size: var(--fs-micro); color: var(--text-4); margin-top: 4px; line-height: 1.4; }
 .wl-meta { text-align: right; display: flex; flex-direction: column; gap: 2px; flex: 0 0 auto; }
 .wl-req { font-size: var(--fs-micro); color: var(--ok-soft); }
 .wl-status { font-size: var(--fs-micro); color: var(--accent-soft); }
@@ -1025,43 +1046,43 @@ body[data-skin="guigu"] .mapcard.recent .mc-name::after { color: #8f4f2e; opacit
    万灵榜录「物」，札记录「地」。两者同一套版式语言：一枚闲章起卷、一条一条列下去。
    正文按「折叠才拼」处理 —— 171 张图的考据一次性写进 DOM 太重，玩家多半也只翻几条。 */
 #jnList { flex: 1 1 auto; overflow-y: auto; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 8px), transparent); -webkit-overflow-scrolling: touch; padding-bottom: var(--sp-2); }
-.jn-arc { margin-bottom: 10px; }
-.jn-arc-hd { display: flex; align-items: center; gap: 7px; padding: 0 2px 5px; margin-bottom: 6px; border-bottom: 1px solid var(--line-soft); }
+.jn-arc { margin-bottom: 8px; }
+.jn-arc-hd { display: flex; align-items: center; gap: 7px; padding: 0 4px 4px; margin-bottom: 8px; border-bottom: 1px solid var(--line-soft); }
 .jn-seal { flex: 0 0 auto; width: 18px; height: 18px; line-height: 17px; text-align: center; font-size: 11px;
   border-radius: var(--r-sm); color: var(--accent); border: 1px solid rgba(201,162,74,0.45); }
 .jn-arc-name { flex: 1 1 auto; font-size: var(--fs-cap); letter-spacing: 2px; color: var(--text-2); }
 .jn-arc-n { font-size: var(--fs-micro); color: var(--text-4); font-variant-numeric: tabular-nums; }
-.jn-row { background: rgba(0,0,0,0.32); border: 1px solid rgba(201,162,74,0.18); border-radius: var(--r-sm); margin-bottom: 5px; }
+.jn-row { background: rgba(0,0,0,0.32); border: 1px solid rgba(201,162,74,0.18); border-radius: var(--r-sm); margin-bottom: 4px; }
 .jn-row.full { border-color: rgba(201,162,74,0.42); }
 /* 「未至」不用整体降透明度：整行压暗会连名字一起糊掉，而那正是这一行唯一该读的字。
    改成名字降一档色、状态字降一档色，行本身不动。 */
 .jn-row.locked { border-style: dashed; border-color: rgba(201,162,74,0.14); background: rgba(0,0,0,0.18); }
 .jn-row.locked .jn-name { color: var(--text-4); font-weight: 400; }
-.jn-hd { display: flex; align-items: center; gap: 7px; padding: 9px 10px; cursor: pointer; }
+.jn-hd { display: flex; align-items: center; gap: 7px; padding: 8px 8px; cursor: pointer; }
 .jn-name { flex: 1 1 auto; min-width: 0; font-size: var(--fs-cap); color: var(--text-1); font-weight: 600; }
-.jn-tag { flex: 0 0 auto; font-size: 9px; padding: 0 4px; border-radius: var(--r-sm);
+.jn-tag { flex: 0 0 auto; font-size: var(--fs-micro); padding: 0 4px; border-radius: var(--r-sm);
   color: var(--accent); border: 1px solid rgba(201,162,74,0.4); }
 .jn-st { flex: 0 0 auto; font-size: var(--fs-micro); color: var(--text-4); }
 .jn-row.full .jn-st { color: var(--accent); }
-.jn-caret { flex: 0 0 auto; font-size: 10px; color: var(--text-4); transition: transform .18s; }
+.jn-caret { flex: 0 0 auto; font-size: var(--fs-micro); color: var(--text-4); transition: transform var(--dur-move) var(--ease-out); }
 .jn-row.open .jn-caret { transform: rotate(90deg); }
-.jn-body { display: none; padding: 0 10px 10px; }
+.jn-body { display: none; padding: 0 8px 8px; }
 .jn-row.open .jn-body { display: block; }
-.jn-src { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-.jn-src-tag { font-size: 9px; padding: 0 5px; border-radius: var(--r-sm);
+.jn-src { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.jn-src-tag { font-size: var(--fs-micro); padding: 0 4px; border-radius: var(--r-sm);
   color: var(--accent); border: 1px solid rgba(201,162,74,0.4); }
 .jn-pos2 { font-size: var(--fs-micro); color: var(--text-3); }
 .jn-sights { display: flex; flex-direction: column; gap: 2px; margin-bottom: 8px; }
 .jn-sight { font-size: var(--fs-micro); color: var(--text-3); line-height: 1.5; }
-.jn-sight b { color: var(--text-2); font-weight: 600; margin-right: 6px; }
+.jn-sight b { color: var(--text-2); font-weight: 600; margin-right: 8px; }
 /* 考据正文：这是全篇唯一「要读」的文字，行高给到 1.85，别挤成一行行密网 */
 .jn-canon { font-size: var(--fs-cap); line-height: 1.85; color: var(--text-2); text-align: justify; margin: 0 0 8px; }
 .jn-quotes { display: flex; flex-direction: column; gap: 7px; }
 .jn-quote { padding-left: 8px; border-left: 2px solid rgba(201,162,74,0.42); }
 .jn-qtext { font-size: var(--fs-micro); line-height: 1.75; color: var(--text-2); margin: 0; }
-.jn-qref { display: block; font-size: 9px; color: var(--text-4); margin-top: 2px; letter-spacing: 1px; }
-.jn-diff { margin-top: 8px; padding: 6px 8px; border: 1px dashed rgba(201,162,74,0.32); border-radius: var(--r-sm); }
-.jn-diff b { display: block; font-size: 9px; color: var(--accent); letter-spacing: 1px; margin-bottom: 3px; }
+.jn-qref { display: block; font-size: var(--fs-micro); color: var(--text-4); margin-top: 4px; letter-spacing: 1px; }
+.jn-diff { margin-top: 8px; padding: 8px 8px; border: 1px dashed rgba(201,162,74,0.32); border-radius: var(--r-sm); }
+.jn-diff b { display: block; font-size: var(--fs-micro); color: var(--accent); letter-spacing: 1px; margin-bottom: 4px; }
 .jn-diff span { display: block; font-size: var(--fs-micro); line-height: 1.6; color: var(--text-3); }
 .jn-blank { font-size: var(--fs-micro); line-height: 1.7; color: var(--text-4); margin: 0; }
 /* 水墨皮：深蒙版一律换淡墨，朱砂类小签换印泥色（与万灵榜同款处理） */
@@ -1121,7 +1142,7 @@ body[data-skin="guigu"] .jn-row.full .jn-st { color: #8f4f2e; }
 .diffcard {
   position: relative; cursor: pointer; padding: 8px 12px; border-radius: var(--r-lg);
   border: 1px solid rgba(201,162,74,0.3); background: linear-gradient(180deg,var(--bg-card-a),var(--bg-card-b));
-  transition: border-color .12s, transform .1s;
+  transition: border-color var(--dur-hover) var(--ease-out), transform var(--dur-press) var(--ease-press);
 }
 .diffcard:hover { border-color: var(--dc); }
 .diffcard:active { transform: scale(var(--press-lg)); }
@@ -1135,13 +1156,13 @@ body[data-skin="guigu"] .jn-row.full .jn-st { color: #8f4f2e; }
 /* 词缀（P1-5）：难度卡上最要紧的一行 —— 它决定这一趟该带什么功法。
    每条词缀一小块，左边一道 --dc 色的竖线当签；没有词缀的档也占一格，写「无词缀」，
    免得玩家以为「这档没写就是没做」。 */
-.dc-affix { display: flex; flex-direction: column; gap: 3px; margin-top: 5px; }
+.dc-affix { display: flex; flex-direction: column; gap: 3px; margin-top: 4px; }
 .dc-afx { font-size: var(--fs-micro); color: var(--text-3); line-height: 1.5;
-  padding-left: 6px; border-left: 2px solid var(--dc, var(--line)); }
-.dc-afx b { color: var(--dc, var(--text)); font-weight: 600; margin-right: 6px; letter-spacing: 1px; }
+  padding-left: 8px; border-left: 2px solid var(--dc, var(--line)); }
+.dc-afx b { color: var(--dc, var(--text)); font-weight: 600; margin-right: 8px; letter-spacing: 1px; }
 .dc-afx.none { border-left-color: var(--line); opacity: 0.7; }
 /* 原文语汇那一行：替代 ×1.75。数字仍然在数据里（扫荡 / 药材配额要读），只是不摆在脸上。 */
-.dc-word { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-2); margin-top: 5px; }
+.dc-word { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-2); margin-top: 4px; }
 .dc-word span { font-size: var(--fs-micro); color: var(--text-3); }
 .dc-word b { color: var(--text-2); font-weight: 600; }
 .dc-go { text-align: right; color: var(--dc); font-size: var(--fs-cap); margin-top: 4px; }
@@ -1150,9 +1171,9 @@ body[data-skin="guigu"] .jn-row.full .jn-st { color: #8f4f2e; }
 /* 扫荡：已破之境才给的快手，价钱直接写在按钮上，点之前就看得见 */
 .dc-sweep {
   cursor: pointer; display: inline-flex; align-items: baseline; gap: 4px;
-  font-size: var(--fs-cap); color: var(--accent); padding: 2px 8px;
+  font-size: var(--fs-cap); color: var(--accent); padding: 4px 8px;
   border: 1px solid rgba(201,162,74,0.55); border-radius: var(--r-sm);
-  background: rgba(201,162,74,0.08); transition: background .12s, border-color .12s;
+  background: rgba(201,162,74,0.08); transition: background var(--dur-hover) var(--ease-out), border-color var(--dur-hover) var(--ease-out);
 }
 .dc-sweep:hover { background: rgba(201,162,74,0.18); border-color: var(--accent); }
 .dc-sweep:active { transform: scale(var(--press-sm, 0.97)); }
@@ -1192,7 +1213,7 @@ body[data-skin="guigu"] .jn-row.full .jn-st { color: #8f4f2e; }
 .skipill i { font-style: normal; font-size: var(--fs-micro); color: var(--accent); }
 
 .equipgrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-2); }
-.eqslot { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 8px; border-radius: var(--r-md); border: 1px dashed rgba(201,162,74,0.3); background: rgba(255,255,255,0.03); cursor: pointer; transition: background .1s; }
+.eqslot { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 8px; border-radius: var(--r-md); border: 1px dashed rgba(201,162,74,0.3); background: rgba(255,255,255,0.03); cursor: pointer; transition: background var(--dur-press) var(--ease-press), transform var(--dur-press) var(--ease-press); }
 .eqslot:active { transform: scale(var(--press)); background: rgba(255,255,255,0.08); }
 .eqslot.filled { border-style: solid; border-color: rgba(109,182,255,0.45); background: rgba(109,182,255,0.07); }
 .es-ico { font-size: var(--fs-h2); }
@@ -1202,7 +1223,7 @@ body[data-skin="guigu"] .jn-row.full .jn-st { color: #8f4f2e; }
 .es-off { font-size: var(--fs-micro); color: var(--danger); border: 1px solid rgba(255,154,154,0.4); border-radius: var(--r-sm); padding: 0 4px; }
 
 .gearlist { display: flex; flex-direction: column; gap: var(--sp-2); }
-.gearrow { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 8px; border-radius: var(--r-md); border: 1px solid rgba(201,162,74,0.2); background: rgba(255,255,255,0.04); cursor: pointer; transition: background .1s; }
+.gearrow { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 8px; border-radius: var(--r-md); border: 1px solid rgba(201,162,74,0.2); background: rgba(255,255,255,0.04); cursor: pointer; transition: background var(--dur-press) var(--ease-press), transform var(--dur-press) var(--ease-press); }
 .gearrow:active { transform: scale(var(--press)); background: rgba(255,255,255,0.09); }
 .gearrow.equipped { border-color: rgba(111,224,138,0.5); background: rgba(111,224,138,0.07); }
 .gearrow.locked { opacity: var(--op-disabled); cursor: not-allowed; }
@@ -1215,10 +1236,10 @@ body[data-skin="guigu"] .jn-row.full .jn-st { color: #8f4f2e; }
 .gr-on { font-size: var(--fs-micro); color: var(--ok); }
 
 /* 储物袋 · 其他（丹药 / 符箓 / 灵物 / 丹方 / 材料） */
-.baggrp { display: flex; flex-direction: column; gap: var(--sp-2); margin-top: 2px; }
-.cs-sub { color: var(--accent-soft); font-size: var(--fs-cap); letter-spacing: 1px; border-left: 2px solid rgba(201,162,74,0.35); padding-left: var(--sp-2); margin-top: 2px; }
+.baggrp { display: flex; flex-direction: column; gap: var(--sp-2); margin-top: 4px; }
+.cs-sub { color: var(--accent-soft); font-size: var(--fs-cap); letter-spacing: 1px; border-left: 2px solid rgba(201,162,74,0.35); padding-left: var(--sp-2); margin-top: 4px; }
 .baglist { display: flex; flex-direction: column; gap: var(--sp-2); }
-.bagrow { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 8px; border-radius: var(--r-md); border: 1px solid rgba(201,162,74,0.18); background: rgba(255,255,255,0.03); cursor: pointer; transition: background .1s; }
+.bagrow { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 8px; border-radius: var(--r-md); border: 1px solid rgba(201,162,74,0.18); background: rgba(255,255,255,0.03); cursor: pointer; transition: background var(--dur-press) var(--ease-press), transform var(--dur-press) var(--ease-press); }
 .bagrow:active { transform: scale(var(--press)); background: rgba(255,255,255,0.08); }
 
 .recrow { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 8px; border-radius: var(--r-md); border: 1px solid rgba(201,162,74,0.18); background: rgba(255,255,255,0.03); }
@@ -1234,7 +1255,7 @@ body[data-skin="guigu"] .jn-row.full .jn-st { color: #8f4f2e; }
 .mat.stone { color: var(--accent); border-color: rgba(255,210,74,0.3); }
 .mat.stone.ok { color: var(--accent); border-color: rgba(255,210,74,0.6); }
 /* 可点的料名：点一下写它去哪儿取 */
-.mat.clk { cursor: pointer; transition: border-color .12s, background .12s; }
+.mat.clk { cursor: pointer; transition: border-color var(--dur-hover) var(--ease-out), background var(--dur-hover) var(--ease-out); }
 .mat.clk:hover { background: rgba(201,162,74,0.16); border-color: rgba(201,162,74,0.6); }
 .rr-right { flex: 0 0 auto; }
 
@@ -1270,7 +1291,7 @@ body[data-skin="guigu"] .resttip { color: #46654a; }
   position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
   background: rgba(0,0,0,0.72); color: var(--accent); border: 1px solid rgba(201,162,74,0.5);
   border-radius: var(--r-md); padding: 8px 16px; font-size: var(--fs-cap); letter-spacing: 1px;
-  opacity: 0; pointer-events: none; transition: opacity .3s; z-index: var(--z-modal); white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: opacity var(--dur-pop) var(--ease-out); z-index: var(--z-modal); white-space: nowrap;
 }
 #fsHint.show { opacity: 1; }
 
@@ -1355,11 +1376,11 @@ body[data-skin="guigu"] .resttip { color: #46654a; }
   border-color: #ffb060;
   box-shadow: 0 0 0 3px rgba(255,176,96,0.36), 0 0 22px rgba(255,150,60,0.55);
 }
-#parryBtn.parrying .qb-icon { animation: parryKeyPulse .5s ease-in-out infinite; }
+#parryBtn.parrying .qb-icon { animation: parryKeyPulse var(--dur-enter) var(--ease-inout) infinite; }
 #parryBtn.cooling { border-color: rgba(120,124,132,0.5); }
 @keyframes parryKeyPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
 /* 格开那一下：按钮自己亮一下（只动 filter / box-shadow，不动 transform —— 自定义位置用的是 inline left/top + transform） */
-#parryBtn.ok { animation: parryKeyHit .34s ease-out; }
+#parryBtn.ok { animation: parryKeyHit var(--dur-pop) var(--ease-out); }
 @keyframes parryKeyHit {
   0%   { filter: brightness(2.6) saturate(1.6); box-shadow: 0 0 0 9px rgba(255,214,120,0.55), 0 0 36px rgba(255,180,90,0.9); }
   100% { filter: brightness(1); }
@@ -1369,7 +1390,7 @@ body[data-skin="guigu"] .resttip { color: #46654a; }
 /* 未佩护体法宝时按下去亮一下再暗回去：告诉玩家「这颗键现在没通电」，不是坏了。
    不动 transform —— 默认位与自定义位用的是两套 transform（translateY(-50%) / none），
    动它会让按钮跳位；filter 只重绘这 72px 的圆钮本身。 */
-#parryBtn.nudge { animation: parryKeyNudge .3s ease-out; }
+#parryBtn.nudge { animation: parryKeyNudge var(--dur-pop) var(--ease-out); }
 @keyframes parryKeyNudge {
   0%, 100% { filter: brightness(1); }
   30%      { filter: brightness(1.75) saturate(1.5); }
@@ -1425,17 +1446,17 @@ body[data-skin="guigu"] #parryBtn[data-chain]::before { color: #8f4f2e; text-sha
 /* flex:0 0 auto 很关键：#pfBody 是 flex 列，档位块一旦可收缩就会被压扁（内容被裁掉），
    必须保持自身高度，让它撑出滚动条，而不是被挤没 */
 .pf-tier { flex: 0 0 auto; margin: 8px 0; border: 1px solid rgba(201,178,122,0.26); border-radius: var(--r-md); overflow: hidden; }
-.pf-tier-hd { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 12px; cursor: pointer; background: rgba(201,178,122,0.08); font-weight: 700; -webkit-user-select: none; user-select: none; transition: background .1s; }
+.pf-tier-hd { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 12px; cursor: pointer; background: rgba(201,178,122,0.08); font-weight: 700; -webkit-user-select: none; user-select: none; transition: background var(--dur-press) var(--ease-press), transform var(--dur-press) var(--ease-press); }
 .pf-tier-hd:hover { background: rgba(201,178,122,0.14); }
 .pf-tier-hd:active { background: rgba(201,178,122,0.2); }
-.pf-tier-hd .caret { display: inline-block; transition: transform .18s; opacity: .85; }
+.pf-tier-hd .caret { display: inline-block; transition: transform var(--dur-move) var(--ease-out); opacity: .85; }
 .pf-tier.open .pf-tier-hd .caret { transform: rotate(90deg); }
 .pf-tier .pf-list { display: none; padding: 4px 8px 8px; }
 .pf-tier.open .pf-list { display: block; }
 .pf-tier.cur > .pf-tier-hd { background: rgba(255,210,74,0.15); }
 .pf-count { font-size: var(--fs-micro); font-weight: 400; opacity: .72; }
 /* 属性签（P1-2）：战前挑功法时最要紧的一格 —— 带错属性，练满也白练。 */
-.pf-attr { display: inline-block; margin-left: 6px; padding: 0 4px; font-size: var(--fs-micro);
+.pf-attr { display: inline-block; margin-left: 8px; padding: 0 4px; font-size: var(--fs-micro);
   font-weight: 600; letter-spacing: 1px; border-radius: var(--r-sm);
   color: var(--accent); border: 1px solid rgba(201,162,74,0.45); background: rgba(201,162,74,0.10); }
 .pf-note { flex: 0 0 auto; font-size: var(--fs-micro); opacity: .7; padding: 4px 0 8px; }
@@ -1456,7 +1477,7 @@ body[data-skin="guigu"] #parryBtn[data-chain]::before { color: #8f4f2e; text-sha
 /* 第115轮：#buffrow 原是 #hud 里唯一的 static 子元素，从 y=0 起排，而 #topbar 是
    absolute top:0 —— 增益胶囊正好盖住 y=7–18 的 #hpwrap 生命条。现移进 #topbar 末尾，
    随 flex 排在地名下方；padding-right 给右侧「大衍 / 禁制」让位。 */
-#buffrow { display: none; gap: var(--sp-2); flex-wrap: wrap; margin-top: 4px; padding-right: 104px; }
+#buffrow { display: none; gap: var(--sp-2); flex-wrap: wrap; margin-top: 4px; padding-right: calc(var(--sp-6) * 3 + var(--sp-2)); }
 /* 第115轮：单字签做成一排淡朱砂小方印，紧凑挨着；沿用地图卡图号印（.mc-num）
    的朱砂色与 2px 方角，整行不再加框，align-self 让印按内容宽收拢、不撞右侧按钮。 */
 body[data-skin="guigu"] #buffrow {
@@ -1498,7 +1519,7 @@ body[data-skin="guigu"] .bpip b { color: inherit; font-weight: 400; }
    金皮是暗底浅字、墨皮是宣底墨字，写死一个底色就必然有一边看不清。 */
 .coop-tie {
   display: flex; flex-direction: column; gap: 5px;
-  padding: 8px 10px; border-radius: var(--r-md);
+  padding: 8px 8px; border-radius: var(--r-md);
   border: 1px solid var(--line-gold);
   background: linear-gradient(180deg, var(--bg-card-a), var(--bg-card-b));
   font-size: var(--fs-cap); color: var(--text-2);
@@ -1510,7 +1531,7 @@ body[data-skin="guigu"] .bpip b { color: inherit; font-weight: 400; }
 /* 进度条底色走 --line-soft 而不是写死 rgba(0,0,0,·)：金皮是暗底亮金条，墨皮是宣底浅灰条，
    两种皮都要与 --accent 拉开明度差才看得见 —— 写死一个深色，在宣纸上就糊成一条灰线。 */
 .coop-tie .ct-bar { height: 6px; border-radius: 999px; background: var(--line-soft); overflow: hidden; }
-.coop-tie .ct-bar i { display: block; height: 100%; border-radius: 999px; background: var(--accent); transition: width .3s ease; }
+.coop-tie .ct-bar i { display: block; height: 100%; border-radius: 999px; background: var(--accent); transition: width var(--dur-move) var(--ease-bar); }
 .coop-tie .ct-note { font-size: var(--fs-micro); line-height: 1.6; color: var(--text-2); }
 .coop-tie .ct-note b { color: var(--accent); font-weight: 600; }
 .coop-tie .ct-note.dim { color: var(--text-3); }
@@ -1538,7 +1559,7 @@ body[data-skin="guigu"] .bpip b { color: inherit; font-weight: 400; }
   width: 0; padding: 0; border: none; opacity: 0;
   height: 34px; border-radius: var(--r-lg); background: rgba(20, 17, 12, 0.86);
   border: 1px solid rgba(201, 162, 74, 0.34); color: var(--text-1); font-size: var(--fs-cap);
-  outline: none; transition: width .22s ease, opacity .22s ease, padding .22s ease;
+  outline: none; transition: width var(--dur-move) var(--ease-out), opacity var(--dur-move) var(--ease-out), padding var(--dur-move) var(--ease-out);
   font-family: inherit;
 }
 .chat-wrap.open #chatInput { width: 190px; padding: 0 12px; opacity: 1; }
@@ -1684,7 +1705,7 @@ body[data-skin="guigu"] .mapcard.current {
 /* 图号：鎏金圆角 → 朱砂小方印 */
 body[data-skin="guigu"] .mc-num {
   color: #8f2f24; background: rgba(192,57,43,0.10);
-  border: 1px solid rgba(143,47,36,0.55); border-radius: 2px; padding: 0 3px;
+  border: 1px solid rgba(143,47,36,0.55); border-radius: 2px; padding: 0 4px;
 }
 /* 篇章印记：墨皮走朱砂，不引入彩色 */
 body[data-skin="guigu"] .mc-seal {
@@ -1693,7 +1714,7 @@ body[data-skin="guigu"] .mc-seal {
 /* 地名：淡墨笔意下划（毛笔扫过的横痕） */
 body[data-skin="guigu"] .mc-name {
   background: linear-gradient(90deg, rgba(60,56,48,0.42) 0%, rgba(60,56,48,0.10) 92%, rgba(60,56,48,0) 100%) no-repeat left bottom / 100% 2px;
-  padding-bottom: 2px;
+  padding-bottom: 4px;
 }
 /* 侧线卡墨印翻淡紫墨 */
 body[data-skin="guigu"] .mapcard.side .mc-num { color: #5d5570; background: rgba(160,154,174,0.16); border-color: rgba(93,85,112,0.55); }
@@ -1741,7 +1762,7 @@ body[data-skin="guigu"] #bossSeal.on {
   background: #b93325; color: #f4f1e8;
   font-size: 15px; font-weight: bold; font-family: "KaiTi", "STKaiti", serif;
   box-shadow: inset 0 0 0 1.5px rgba(244,241,232,0.45), 0 1px 4px rgba(40,36,28,0.35);
-  animation: stampIn 0.5s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+  animation: stampIn var(--dur-enter) var(--ease-out) both;
   pointer-events: none;
 }
 @keyframes stampIn {
@@ -1751,8 +1772,8 @@ body[data-skin="guigu"] #bossSeal.on {
 }
 /* 大地图标题旁落一方小印：竖排白文「凡人」 */
 body[data-skin="guigu"] .wm-head h2::after {
-  content: '凡人'; display: inline-block; vertical-align: 8px; margin-left: 10px;
-  padding: 5px 2px; writing-mode: vertical-rl; letter-spacing: 3px;
+  content: '凡人'; display: inline-block; vertical-align: 8px; margin-left: 8px;
+  padding: 4px 4px; writing-mode: vertical-rl; letter-spacing: 3px;
   font-size: 11px; line-height: 1; font-weight: normal; font-family: "KaiTi", "STKaiti", serif;
   color: #f4f1e8; background: #b93325; border-radius: 3px;
   box-shadow: inset 0 0 0 1px rgba(244,241,232,0.4);
@@ -1765,7 +1786,7 @@ body[data-skin="guigu"] .wm-head h2::after {
   left: 50%; bottom: 18%; width: 86%; max-width: 420px; aspect-ratio: 1024 / 1451;
   transform: translateX(-50%);
   background-position: center bottom; background-size: contain; background-repeat: no-repeat;
-  z-index: 3; opacity: 0; transition: opacity 1.2s ease;
+  z-index: 3; opacity: 0; transition: opacity var(--dur-pop) var(--ease-out);
   -webkit-mask-image: radial-gradient(ellipse 70% 62% at 50% 58%, #000 30%, transparent 78%);
   mask-image: radial-gradient(ellipse 70% 62% at 50% 58%, #000 30%, transparent 78%);
 }
@@ -1778,15 +1799,15 @@ body[data-skin="guigu"] #bossArt.on {
 /* 卷首退场：一张插画和屏上的像素怪同时抢眼，两者互相打架。
    所以只在 boss 出场那一刻「展卷」——浮起约 2.6 秒后退成一层极淡的墨痕，
    当背景用，不与像素怪争主体。 */
-body[data-skin="guigu"] #bossArt.on.fade { opacity: 0.09; transition: opacity 2.4s ease; }
+body[data-skin="guigu"] #bossArt.on.fade { opacity: 0.09; transition: opacity var(--dur-pop) var(--ease-out); }
 /* 金皮强行兜底：即使类名残留也不显示 */
 body:not([data-skin="guigu"]) #bossArt { display: none !important; }
 
 /* 水墨皮 · 竖排对话框：右起左行的竖排正文 + 竖排名帖，宣纸底墨线框 */
 /* 让位快捷栏：底部抬高过物品栏、右侧让开技能钮（结印场景居中排版不受此限） */
 body[data-skin="guigu"] #dialog:not(.break-scene) {
-  padding-bottom: 118px;
-  padding-right: 86px;
+  padding-bottom: calc(var(--sp-6) * 3 + var(--sp-5));
+  padding-right: calc(var(--sp-6) * 2 + var(--sp-5));
 }
 body[data-skin="guigu"] #dialogbox {
   display: flex; flex-direction: row-reverse; gap: 12px; align-items: stretch;
@@ -1800,7 +1821,7 @@ body[data-skin="guigu"] #dialogbox {
 body[data-skin="guigu"] #dialogSpeaker {
   writing-mode: vertical-rl; text-orientation: upright; letter-spacing: 6px;
   flex: none; align-self: flex-start; max-height: 62%; overflow: hidden;
-  margin: 0; padding: 6px 3px;
+  margin: 0; padding: 8px 4px;
   border-left: 1px solid rgba(60,56,48,0.18); border-radius: 2px;
   background: rgba(192,57,43,0.07); color: #8f2f24; font-size: var(--fs-body);
 }
@@ -1809,16 +1830,16 @@ body[data-skin="guigu"] #dialogSpeaker {
 body[data-skin="guigu"] #dialogText {
   writing-mode: vertical-rl; text-orientation: mixed; letter-spacing: 3px;
   line-height: 2.15; flex: 1 1 auto; min-height: 0; height: auto;
-  max-height: 100%; overflow: auto; padding: 2px 4px;
-  font-size: 18px; color: #241f16;
+  max-height: 100%; overflow: auto; padding: 4px 4px;
+  font-size: var(--fs-h2); color: #241f16;
 }
 /* 落款：框右下角一方淡朱砂小印，补掉竖排短句后的大片空，像画上题跋 */
 body[data-skin="guigu"] #dialogbox::after {
   content: '凡人'; position: absolute; right: 9px; bottom: 8px;
   writing-mode: vertical-rl; text-orientation: upright;
-  font-size: 10px; line-height: 1; letter-spacing: 2px;
+  font-size: var(--fs-micro); line-height: 1; letter-spacing: 2px;
   color: rgba(168,58,42,0.55); border: 1px solid rgba(168,58,42,0.42);
-  border-radius: 2px; padding: 3px 2px; pointer-events: none;
+  border-radius: 2px; padding: 4px 4px; pointer-events: none;
 }
 /* 继续提示：竖排版式里移到左下角（阅读终点） */
 body[data-skin="guigu"] #dialogHint {
@@ -1944,7 +1965,7 @@ body[data-skin="guigu"] #skillrow .pip span {
   position: absolute; inset: 0; pointer-events: none; opacity: 0; z-index: 46;
   background: radial-gradient(ellipse 85% 62% at 50% 46%, rgba(178,58,44,0) 45%, rgba(178,58,44,0.24) 100%);
 }
-body[data-skin="guigu"] #critFlash.go { animation: critInk 0.32s ease-out; }
+body[data-skin="guigu"] #critFlash.go { animation: critInk var(--dur-pop) var(--ease-out); }
 @keyframes critInk {
   0%   { opacity: 1; transform: scale(1.03); }
   60%  { opacity: 0.45; }
@@ -1956,13 +1977,13 @@ body[data-skin="guigu"] #critFlash.go { animation: critInk 0.32s ease-out; }
    双皮通用：暗红边缘 + 轻微脉冲，提示「正在以煞气护体、身法受限」。 */
 #parryEdge {
   position: absolute; inset: 0; pointer-events: none; opacity: 0; z-index: 47;
-  transition: opacity .12s ease-out;
+  transition: opacity var(--dur-hover) var(--ease-out);
   /* 贴边内阴影为主：只染四边，不糊中间（水墨皮是浅底，大片渐变会把整屏洗成粉雾） */
   box-shadow:
     inset 0 0 28px 3px rgba(196,54,42,0.42),
     inset 0 0 62px 0   rgba(196,54,42,0.10);
 }
-#parryEdge.on { opacity: 1; animation: parryPulse 1.1s ease-in-out infinite; will-change: opacity; }
+#parryEdge.on { opacity: 1; animation: parryPulse var(--dur-breathe) var(--ease-inout) infinite; will-change: opacity; }
 @keyframes parryPulse {
   0%,100% { opacity: 0.55; }
   50%     { opacity: 1; }
@@ -1978,7 +1999,7 @@ body[data-skin="guigu"] #critFlash.go { animation: critInk 0.32s ease-out; }
   position: absolute; inset: 0; pointer-events: none; opacity: 0; z-index: 48;
   box-shadow: inset 0 0 0 7px rgba(255,228,152,0.98), inset 0 0 64px 14px rgba(255,206,112,0.62);
 }
-#parryHit.go { animation: parryHitFlash .46s ease-out; }
+#parryHit.go { animation: parryHitFlash var(--dur-ring) var(--ease-out); }
 @keyframes parryHitFlash {
   0%   { opacity: 1; }
   38%  { opacity: .78; }
@@ -1991,7 +2012,7 @@ body[data-skin="guigu"] #critFlash.go { animation: critInk 0.32s ease-out; }
 body[data-skin="guigu"] #parryHit {
   box-shadow: inset 0 0 0 5px rgba(168,40,30,0.92), inset 0 0 52px 8px rgba(168,40,30,0.40);
 }
-body[data-skin="guigu"] #parryHit.go { animation: parryHitInk .46s ease-out; }
+body[data-skin="guigu"] #parryHit.go { animation: parryHitInk var(--dur-ring) var(--ease-out); }
 @keyframes parryHitInk {
   0%   { opacity: 1; }
   38%  { opacity: .70; }
@@ -2003,7 +2024,7 @@ body[data-skin="guigu"] #parryHit.go { animation: parryHitInk .46s ease-out; }
    拖动时描一圈绿光、禁掉页面滚动，松手即存（save.parryPos）。 */
 #parryDragBar {
   display: none; position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%);
-  align-items: center; gap: var(--sp-3); padding: 8px 10px 8px 16px;
+  align-items: center; gap: var(--sp-3); padding: 8px 8px 8px 16px;
   max-width: calc(100% - 24px); border-radius: 999px;
   background: rgba(10,12,18,0.9); border: 1px solid rgba(201,162,74,0.5);
   color: var(--text-1); font-size: var(--fs-cap); line-height: 1.3;
@@ -2035,7 +2056,7 @@ body[data-skin="guigu"] #parryDragBar {
     linear-gradient(0deg, rgba(58,53,44,0.92) 0, rgba(58,53,44,0.55) 3px, rgba(58,53,44,0) 7px),
     linear-gradient(180deg, #f3eddb, #ddd6c3);
 }
-body[data-skin="guigu"] #scrollOpen.play { display: block; animation: scrollUnroll .66s cubic-bezier(.2,.85,.3,1) forwards; }
+body[data-skin="guigu"] #scrollOpen.play { display: block; animation: scrollUnroll var(--dur-enter) var(--ease-out) forwards; }
 @keyframes scrollUnroll {
   0%   { transform: scaleY(0.03); opacity: 1; }
   58%  { transform: scaleY(1);    opacity: 1; }
@@ -2049,7 +2070,7 @@ body:not([data-skin="guigu"]) #scrollOpen {
     radial-gradient(ellipse at center, rgba(0,0,0,0) 36%, rgba(14,9,3,0.6) 100%);
   box-shadow: inset 0 0 0 2px rgba(201,162,74,0.55), inset 0 0 70px rgba(14,9,3,0.55);
 }
-body:not([data-skin="guigu"]) #scrollOpen.play { display: block; animation: jinSeal .6s cubic-bezier(.2,.85,.3,1) forwards; }
+body:not([data-skin="guigu"]) #scrollOpen.play { display: block; animation: jinSeal var(--dur-enter) var(--ease-out) forwards; }
 @keyframes jinSeal {
   0%   { opacity: 0; transform: scale(1.05); }
   42%  { opacity: 1; transform: scale(1); }
@@ -2060,7 +2081,7 @@ body:not([data-skin="guigu"]) #scrollOpen.play { display: block; animation: jinS
    原来卡名、地点、状态、标签四层几乎同一种灰度，一眼扫过去分不出主次。
    重排：名浓（墨）、地淡（淡墨）、标签改墨线小签（不用彩色浅底）、
    状态用竹青（当前）/ 淡墨（未至），已过的图不压成死灰。 */
-body[data-skin="guigu"] .mc-name { color: #1f1b13; font-size: 16px; letter-spacing: 2px; }
+body[data-skin="guigu"] .mc-name { color: #1f1b13; font-size: var(--fs-h2); letter-spacing: 2px; }
 body[data-skin="guigu"] .mc-pos,
 body[data-skin="guigu"] .mc-desc,
 body[data-skin="guigu"] .mc-meta,
@@ -2104,7 +2125,7 @@ body[data-skin="guigu"] .mapcard.current {
 /* 水墨皮 · 对话头像：卷首小像（宣纸底 + 墨线框，贴在右起竖排名帖的左侧） */
 body[data-skin="guigu"] #dialogFace {
   position: static; order: 2; flex: none; align-self: flex-start;
-  width: auto; height: auto; padding: 5px;
+  width: auto; height: auto; padding: 4px;
   background: linear-gradient(180deg, #f7f2e3, #e9e3d2);
   border: 1px solid rgba(60,56,48,0.45); border-radius: 2px;
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5);
@@ -2218,7 +2239,7 @@ body[data-skin="guigu"] .gr-need { color: #8f2f24; }
 .fold { display: flex; flex-direction: column; }
 .fold-h {
   width: 100%; display: flex; align-items: center; gap: 8px;
-  padding: 7px 8px; margin-top: 2px;
+  padding: 8px 8px; margin-top: 4px;
   background: transparent; border: 0; border-bottom: 1px solid var(--line-soft);
   color: var(--text-2); font-family: inherit; font-size: var(--fs-cap);
   letter-spacing: 1px; text-align: left; cursor: pointer;
@@ -2226,10 +2247,10 @@ body[data-skin="guigu"] .gr-need { color: #8f2f24; }
 }
 .fold-h::after { content: ''; position: absolute; inset: -4px 0; }   /* 放大点击区 */
 .fold-h .fh-n { color: var(--text-4); font-size: var(--fs-micro); letter-spacing: 0; }
-.fold-h .fh-ar { margin-left: auto; font-size: 10px; color: var(--text-4); transition: transform .16s; }
+.fold-h .fh-ar { margin-left: auto; font-size: var(--fs-micro); color: var(--text-4); transition: transform var(--dur-move) var(--ease-out); }
 .fold.open .fold-h .fh-ar { transform: rotate(180deg); }
 .fold.open .fold-h { color: var(--accent); border-bottom-color: rgba(201,162,74,0.5); }
-.fold-b { display: none; flex-direction: column; gap: 6px; padding: 6px 0 2px; }
+.fold-b { display: none; flex-direction: column; gap: 6px; padding: 8px 0 4px; }
 .fold.open .fold-b { display: flex; }
 /* 分组内的行去掉顶层的分隔感，靠组头分隔 */
 .fold .bagrow, .fold .gearrow, .fold .recrow, .fold .brk-row { margin: 0; }
@@ -2484,7 +2505,7 @@ body[data-skin="guigu"] #atlas.atlas {
   width: 100%;
   display: flex; align-items: flex-end; justify-content: space-between;
   gap: 12px;
-  padding: 14px 16px 10px;
+  padding: 16px 16px 8px;
   border-bottom: 1px solid var(--line-soft);
 }
 body[data-skin="guigu"] #atlas .at-head { border-bottom-color: rgba(58,53,44,0.18); }
@@ -2591,7 +2612,7 @@ body[data-skin="guigu"] #atlas .at-edge { border-left-color: rgba(58,53,44,0.28)
   width: 56px; height: 56px;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 1px;
-  padding: 0 2px;
+  padding: 0 4px;
   background: rgba(32,38,52,0.92);
   border: 1px solid rgba(201,162,74,0.52);
   border-radius: 2px;
@@ -2599,7 +2620,7 @@ body[data-skin="guigu"] #atlas .at-edge { border-left-color: rgba(58,53,44,0.28)
   font-family: "Songti SC", "STSong", "SimSun", serif;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: box-shadow .16s ease, opacity .16s ease, background .16s ease;
+  transition: box-shadow var(--dur-hover) var(--ease-out), opacity var(--dur-hover) var(--ease-out), background var(--dur-hover) var(--ease-out);
 }
 #atlas .at-seal b {
   font-size: 13px; font-weight: 600; letter-spacing: 1px; line-height: 1.14;
@@ -2608,8 +2629,8 @@ body[data-skin="guigu"] #atlas .at-edge { border-left-color: rgba(58,53,44,0.28)
 /* 「此刻」：唯一写进印面的状态字 —— 只此一处存在，不与其它色标重复 */
 #atlas .at-seal u {
   position: absolute; left: 50%; top: -12px; transform: translateX(-50%);
-  font-size: 10px; font-style: normal; text-decoration: none; letter-spacing: 1px;
-  color: var(--accent); background: rgba(11,13,18,0.94); padding: 0 5px; border-radius: 3px;
+  font-size: var(--fs-micro); font-style: normal; text-decoration: none; letter-spacing: 1px;
+  color: var(--accent); background: rgba(11,13,18,0.94); padding: 0 4px; border-radius: 3px;
   border: 1px solid rgba(255,210,74,0.45);
   white-space: nowrap;
 }
@@ -2655,7 +2676,7 @@ body[data-skin="guigu"] #atlas .at-seal.locked { opacity: .74; }
   flex: 0 0 auto;
   width: 100%;
   min-height: 78px;
-  padding: 10px 16px 14px;
+  padding: 8px 16px 16px;
   border-top: 1px solid var(--line-soft);
   background: linear-gradient(180deg, rgba(20,23,29,0), rgba(10,12,16,0.62));
 }
@@ -2676,7 +2697,7 @@ body[data-skin="guigu"] #atlas .at-foot-in b { color: #2f2a23; }
 body[data-skin="guigu"] #atlas .at-foot-in i { color: rgba(58,53,44,0.72); }
 #atlas .at-tag {
   font-size: var(--fs-micro); letter-spacing: 1px;
-  padding: 1px 7px; border-radius: var(--r-sm);
+  padding: 0px 8px; border-radius: var(--r-sm);
   border: 1px solid var(--line-soft); color: var(--text-3);
 }
 #atlas .at-tag.ok { border-color: rgba(192,53,42,0.6); color: #ff9d8a; }
