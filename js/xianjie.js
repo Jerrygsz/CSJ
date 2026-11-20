@@ -106,7 +106,7 @@
     lh_xiongshou: { name: '灵寰凶兽', hp: 9000, spd: 46, dmg: 120, r: 15, xp: 40, spr: 'wolf', drop: 0.10, tier: 0, mats: ['m_xianyuanshi'] },
     lh_hanbing:   { name: '冷焰宗弟子', hp: 13000, spd: 54, dmg: 155, r: 15, xp: 55, spr: 'disciple', drop: 0.12, tier: 0, mats: ['m_xianyuanshi'] },
     lh_lingzhu:   { name: '灵寰灵族', hp: 17000, spd: 60, dmg: 185, r: 16, xp: 70, spr: 'neimen', drop: 0.12, tier: 0, mats: ['m_xianyuanshi', 'm_xuanhuang'] },
-    lh_baishi:    { name: '白石真人', hp: 62000, spd: 68, dmg: 230, r: 23, xp: 300, spr: 'hermit', drop: 0.5, tier: 2, mats: ['m_xianyuanshi', 'm_xuanhuang'] },
+    lh_baishi:    { name: '冷焰宗·执事', hp: 62000, spd: 68, dmg: 230, r: 23, xp: 300, spr: 'hermit', drop: 0.5, tier: 2, mats: ['m_xianyuanshi', 'm_xuanhuang'] },
     lh_tiangui:   { name: '百目天鬼', hp: 88000, spd: 74, dmg: 268, r: 25, xp: 420, spr: 'baimu', drop: 0.6, tier: 2, mats: ['m_xianyuanshi', 'm_xuanhuang'] },
     // 卷四档（太岁府 / 虫巢 / 九元城）：此时韩立仍是太乙巅峰，对手已经开始是大罗的东西。
     // 九元观影卫（X4C1035，4 次）、金仙修士（金仙 1333 次；五子作精英名）、火岁萤虫（114 次）、
@@ -162,8 +162,18 @@
       enemies: ['lh_hanbing', 'lh_xiongshou', 'lh_lingzhu'],
       elites: ['冷焰宗·护法', '灵寰散修'],
       mats: ['m_xianyuanshi', 'm_xuanhuang'],
-      boss: { kind: 'mo', name: '白石真人', hp: 62000, spd: 68, dmg: 230, r: 23, spr: 'hermit', scale: 5.4 },
-      extraBoss: [{ kind: 'mo', name: '冷焰老祖', hp: 58000, spd: 62, dmg: 240, r: 22, spr: 'lengyan', scale: 6.4, summon: '' }],
+      // 守内阁的是两名炼虚修士（X1C36：「白胖僧人」「高瘦男子」），不是白石真人——
+      // 白石真人是天鬼宗外门长老（X1C18 出场），跟冷焰宗藏经阁没有关系。
+      boss: { kind: 'mo', name: '白胖僧人', hp: 62000, spd: 68, dmg: 230, r: 23, spr: 'hermit', scale: 5.4 },
+      extraBoss: [{ kind: 'mo', name: '高瘦男子', hp: 58000, spd: 62, dmg: 240, r: 22, spr: 'lengyan', scale: 6.4, summon: '' }],
+      // 原著（X1C33–C36《先天紫气》《失窃》《瞒天过海》《偷梁换柱》）：他先用迷魂术问出藏经阁
+      // 内外两阁布局，再化为一团虚无飘进去；钟鸣示警、「有人闯入藏经阁了」之后，他也
+      // 「丝毫没有理会外面两个炼虚修士」，继续挨个石柜看玉简。所以这一关不是打赢守阁人，
+      // 是把玉简看完再脱身——贴到守卫眼皮底下会攒侦测，满了就只能强闯。
+      mode: { kind: 'stealth', sec: 42, seenR: 130, seenRate: 26, seenDecay: 14, escapeSec: 18,
+        tip: '潜行 · 别贴到巡阁人身边',
+        win: '瞒天过海 · 玉简看完，人已出阁',
+        winCaught: '警钟已响 · 强闯出阁' },
       reward: { stones: 160000, mats: [['m_xianyuanshi', 4], ['m_xuanhuang', 2]] },
       clearTitle: '瞒天过海',
       clearDesc: '典籍到手，人也全身而退。只是那一下撞上来的神念，让他明白两件事：自己伤没好，这地方藏不住多久。'
@@ -976,7 +986,7 @@
     ['韩立', '（得走了。这地方藏不住多久。）']
   ];
   window.MAP_STORIES.lingyan_out = [
-    ['旁白', '典籍到手，他一步没停地往谷外退。白石真人的护法追了半程，撞上那道无形的界壁，闷哼着退了回去。'],
+    ['旁白', '典籍到手，他一步没停地往谷外退。宗内护法追了半程，撞上那道无形的界壁，闷哼着退了回去。'],
     ['韩立', '（一具虚影能撞碎，十几个真人呢？不知道。）'],
     ['旁白', '他不知道的是，那道光柱撞碎之后，冷焰老祖在祖殿里坐了整整一夜。']
   ];
@@ -1036,6 +1046,8 @@
   ];
   window.MAP_STORIES.huijie = [
     ['旁白', '整座府邸定格在崩塌的那一刻。碎瓦悬在半空，一盏也没有落下来。'],
+    // 原著（X2C392）：三人假扮散修混进冥寒仙府——「假扮成三名散修潜入」「暴露的可能性更大」。
+    ['旁白', '三个人一路假扮散修，贴着残破禁制往里走。走错一步，身份就露了。'],
     ['旁白', '长廊两侧立着石像。一尊老年道士，颌下一缕山羊胡须，道袍褶皱，衣袂飘摇。'],
     ['旁白', '一尊宫装女子，身形竟比男子还高，面容不俗，只是线条硬朗，英姿勃发。'],
     ['韩立', '（换上合体甲胄，倒更衬这身段。）'],

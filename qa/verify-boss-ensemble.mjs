@@ -247,6 +247,81 @@ const r9 = await page.evaluate(() => {
 ok(r9mid === 'shijin' && !!r9.before && r9.before.kind === 'escape', 'shijin 有逃遁模式且 Boss 照常出场', r9.before);
 ok(r9.cleared, 'shijin 可甩开追猎脱身（不必打死太乙噬金仙）', r9);
 
+// R10 第二批（2026-11-20）：守阵 / 潜入 / 三魔同场
+console.log('\n== R10 守阵 · 潜入 · 三魔同场 ==');
+const M2 = {
+  muzu2: { kind: 'hold', src: lj },
+  lingyan: { kind: 'stealth', src: xj },
+  tianpeng: { kind: 'stealth', src: lj }
+};
+for (const id of Object.keys(M2)) {
+  const s = M2[id].src;
+  const at = s.indexOf("id: '" + id + "'");
+  const seg = s.slice(at, at + 3400);
+  ok(at >= 0 && /mode:\s*\{/.test(seg) && new RegExp("kind:\\s*'" + M2[id].kind + "'").test(seg),
+    id + ' 配了 ' + M2[id].kind + ' 模式');
+}
+ok(/kind === 'stealth' && mr\.seenR > 0/.test(g) && /mr\.seen \+ \(near > 0/.test(g), '主循环有 stealth 侦测段');
+ok(/mr\.caught = 1/.test(g) && /mr\.sec = Math\.min\(mr\.sec, mr\.t \+ mr\.escapeSec\)/.test(g), '侦测满百转限时硬闯');
+ok(/const winTxt = mr\.caught \? mr\.winCaught : mr\.win/.test(g), '暴露与未暴露走两套收场文案');
+
+// huangquan：原著《激战三魔》，力尊者 / 米尊者 / 蓝尊者同场，不是逃遁
+{
+  const at = lj.indexOf("id: 'huangquan'");
+  const seg = lj.slice(at, at + 2400);
+  ok(/coBoss:\s*\[/.test(seg) && /米尊者/.test(seg) && /蓝尊者/.test(seg), 'huangquan 三魔同场（米尊者 / 蓝尊者）');
+  ok(!/extraBoss:[\s\S]{0,200}米尊者/.test(seg), 'huangquan 米尊者不再是续战出场');
+}
+
+// 实机：muzu2 守阵——在阵心计时推进，离阵停表
+const m2mid = await enter('muzu2', 400);
+const holdIn = await page.evaluate(() => {
+  const F = window.__FR, G = F.G;
+  const a = F.modeState();
+  F.tickFrames(40, 0.05);
+  const b = F.modeState();
+  return { a, b, cx: (G.modeRun || {}).cx, cy: (G.modeRun || {}).cy, r: (G.modeRun || {}).radius };
+});
+ok(m2mid === 'muzu2' && holdIn.a && holdIn.a.kind === 'hold', 'muzu2 进图即守阵计时', holdIn.a);
+ok(holdIn.b.t > holdIn.a.t, 'muzu2 在阵心内计时推进', { a: holdIn.a.t, b: holdIn.b.t });
+const holdOut = await page.evaluate(() => {
+  const F = window.__FR, G = F.G;
+  const mr = G.modeRun;
+  const before = mr.t;
+  G.player.x = mr.cx + mr.radius + 420; G.player.y = mr.cy + 240;   // 走出阵心
+  F.tickFrames(40, 0.05);
+  const after = F.modeState();
+  return { before, after };
+});
+ok(holdOut.after.out === 1 && holdOut.after.t - holdOut.before < 0.4, 'muzu2 离阵即停表', holdOut);
+
+// 实机：lingyan 潜入——贴身涨侦测、退开回落、满百转硬闯
+const l2mid = await enter('lingyan', 500);
+const st = await page.evaluate(() => {
+  const F = window.__FR, G = F.G;
+  F.boss();
+  const a = F.modeState();
+  G.player.x = G.boss.x + 20; G.player.y = G.boss.y + 20;
+  F.tickFrames(20, 0.05);
+  const b = F.modeState();
+  G.player.x = G.boss.x + 2400; G.player.y = G.boss.y + 2400;
+  F.tickFrames(20, 0.05);
+  const c = F.modeState();
+  return { a, b, c };
+});
+ok(l2mid === 'lingyan' && st.a && st.a.kind === 'stealth', 'lingyan 进图即潜入模式', st.a);
+ok(st.b.seen > st.a.seen, 'lingyan 贴近守阁人侦测上涨', { a: st.a.seen, b: st.b.seen });
+ok(st.c.seen < st.b.seen, 'lingyan 退开侦测回落', { b: st.b.seen, c: st.c.seen });
+const caught = await page.evaluate(() => {
+  const F = window.__FR, G = F.G;
+  const mr = G.modeRun;
+  mr.seen = 99.5; mr.caught = 0;
+  G.player.x = G.boss.x; G.player.y = G.boss.y;
+  F.tickFrames(6, 0.05);
+  return F.modeState();
+});
+ok(caught.caught === 1 && caught.sec - caught.t <= 18.6, 'lingyan 侦测满百即暴露，转入限时硬闯', caught);
+
 // R5 连帧稳定：同场强敌在场时主循环不崩
 await page.evaluate(() => { const F = window.__FR; F.tickFrames(180, 0.05); });
 ok(errors.length === 0, '同场强敌在场连续 180 帧无 JS 报错', errors.slice(0, 3));

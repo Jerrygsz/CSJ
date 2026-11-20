@@ -6219,6 +6219,14 @@
     // 破境药材：这一趟没落完的，Boss 一倒全补齐 —— 打完就够开炉
     if (alchLeft() > 0) alchGrant(alchLeft());
     G.enemies.length = 0;
+    // 替代胜利条件（守阵 / 潜入）：Boss 倒下不等于这一关结束。原著里守阁人退了，
+    // 警钟和魔族大军还在，韩立仍得等到手/守满才走。所以这里只收战利品，不接收尾。
+    if (G.modeRun) {
+      G.vacuumT = 1.2;
+      banner(name + ' 已伏诛 · ' + (G.modeRun.tip || '这一关还没完'));
+      Sfx.levelup();
+      return;
+    }
     G.vacuumT = 1.7; G.pendingEnding = true;
     banner(name + ' 已伏诛 · 收取战利品'); Sfx.levelup();
   }
@@ -8426,6 +8434,28 @@
         if (!holdOk && !mr.out) { mr.out = 1; banner('离阵太远 · 阵纹停转，回到阵心'); }
         if (holdOk && mr.out) { mr.out = 0; banner('回到阵心 · 阵纹续转'); }
       }
+      // 潜入：贴到守卫眼皮底下就攒侦测，退开就回落。满百不是判负，是「惊动了人」——
+      // 原著里韩立被撞破也是接着拿走东西再脱身，所以只把脱身段提前。
+      if (mr.kind === 'stealth' && mr.seenR > 0 && !mr.caught) {
+        let near = 0;
+        for (let i = 0; i < G.enemies.length; i++) {
+          const e = G.enemies[i];
+          if (e && !e._dead && U.dist(e.x, e.y, p.x, p.y) <= mr.seenR) near++;
+        }
+        if (G.boss && G.boss.hp > 0 && U.dist(G.boss.x, G.boss.y, p.x, p.y) <= mr.seenR * 1.3) near += 2;
+        mr.seen = Math.max(0, Math.min(100,
+          mr.seen + (near > 0 ? mr.seenRate * Math.min(near, 3) : -mr.seenDecay) * dt));
+        const sh = mr.seen >= 80 ? 4 : mr.seen >= 50 ? 3 : mr.seen >= 25 ? 2 : mr.seen > 0 ? 1 : 0;
+        if (sh > mr.seenHint) {
+          mr.seenHint = sh;
+          if (sh > 0) banner('行迹 · 已被察觉 ' + Math.round(mr.seen) + '%');
+        }
+        if (mr.seen >= 100) {
+          mr.caught = 1;
+          mr.sec = Math.min(mr.sec, mr.t + mr.escapeSec);   // 只剩硬闯这一段
+          banner(mr.winCaught); Sfx.win();
+        }
+      }
       if (holdOk) mr.t += dt;
       const left = Math.max(0, mr.sec - mr.t);
       const h = left <= 10 ? 3 : left <= mr.sec * 0.5 ? 2 : left <= mr.sec * 0.8 ? 1 : 0;
@@ -8436,10 +8466,11 @@
       if (mr.t >= mr.sec) {
         G.chaseDone = true; G.bossSpawned = true;
         G.boss = null; G.bossActive = false;
-        G.victoryNote = mr.win;
+        const winTxt = mr.caught ? mr.winCaught : mr.win;
+        G.victoryNote = winTxt;
         G.enemies.length = 0; G.ebullets.length = 0;
         G.modeRun = null; G.trial = null;
-        banner(mr.win); Sfx.win();
+        banner(winTxt); Sfx.win();
         G.vacuumT = 0.9; G.pendingEnding = true;
       }
     }
@@ -11007,7 +11038,13 @@
       kind: m.mode.kind || 'survive', sec: Math.max(1, m.mode.sec || 30),
       t: 0, hinted: 0, out: 0,
       tip: m.mode.tip || '', win: m.mode.win || '撑过去了',
-      radius: m.mode.radius || 0, cx: p.x, cy: p.y
+      radius: m.mode.radius || 0, cx: p.x, cy: p.y,
+      // 潜入（stealth）：贴身即被察觉，侦测条满则行迹暴露，提前转入「硬闯脱身」。
+      // 不新增渲染、不碰自动开火：只读场上敌人与玩家的距离，提示仍走 banner。
+      seenR: m.mode.seenR || 0, seen: 0, seenHint: -1, caught: 0,
+      seenRate: m.mode.seenRate || 22, seenDecay: m.mode.seenDecay || 12,
+      escapeSec: m.mode.escapeSec || 18,
+      winCaught: m.mode.winCaught || '行迹暴露 · 强闯出去'
     } : null;
     G.quickCd = [0, 0, 0];
     renderQuickBar();
@@ -17223,7 +17260,8 @@
       const r = G.modeRun;
       if (!r) return null;
       return { kind: r.kind, sec: r.sec, t: +r.t.toFixed(2), left: +Math.max(0, r.sec - r.t).toFixed(2),
-        hinted: r.hinted, out: r.out, trial: !!G.trial, enemies: G.enemies.length };
+        hinted: r.hinted, out: r.out, seen: +(r.seen || 0).toFixed(1), caught: r.caught || 0,
+        trial: !!G.trial, enemies: G.enemies.length };
     },
     edgeState() { return { t: +(G.edgeT || 0).toFixed(3), mul: DASH_EDGE_MUL, sec: DASH_EDGE_SEC }; },
     // 锋芒窗口的伤害验收：同一记伤害、窗口关 / 开各打一遍，成对采样再比。

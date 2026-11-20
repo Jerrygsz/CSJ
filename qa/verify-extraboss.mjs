@@ -46,7 +46,7 @@ const TABLE = {
   yitian:   { boss: '魔族魔修',            extra: ['青龙上人'] },
   modajie:  { boss: '元魇圣祖·化身',       extra: ['宝花圣祖'] },
   linghuang:{ boss: '灵将',               extra: ['陇家老祖', '银光仙子'] },
-  lingyan:  { boss: '白石真人',            extra: ['冷焰老祖'] },
+  lingyan:  { boss: '白胖僧人',            extra: ['高瘦男子'] },
   suidian:  { boss: '奇摩子',              extra: ['黑天魔祖', '白云道祖'] },
 };
 

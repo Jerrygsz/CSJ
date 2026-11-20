@@ -237,7 +237,7 @@ const BOSS_SPR = [
   ['js/lingjie.js', '宝花圣祖', 'baohua'], ['js/lingjie.js', '元魇圣祖', 'yuanyan'],
   ['js/lingjie.js', '黄元子', 'huangyuanzi'], ['js/lingjie.js', '不灭天尊', 'bumietianzun'],
   ['js/lingjie.js', '马良·真仙之身', 'maliang'], ['js/lingjie.js', '马良·九元观真仙', 'maliang'],
-  ['js/xianjie.js', '冷焰老祖', 'lengyan'], ['js/xianjie.js', '黑天魔祖', 'heitian'],
+  ['js/xianjie.js', '高瘦男子', 'lengyan'], ['js/xianjie.js', '黑天魔祖', 'heitian'],
   ['js/xianjie.js', '柳自在', 'liuzizai'], ['js/xianjie.js', '鬼灵子', 'guilingzi'],
   // 五批：第三档兽形。此前 9 个 beast 型 boss 全共用 haishou（16x10 横躺的蛟龙），
   // 拿横躺的蛟去当站立的魔猿/虫母/蛛母，是形状层面的错，比撞色严重

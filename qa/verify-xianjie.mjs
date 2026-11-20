@@ -352,7 +352,7 @@ ok(I4.items.t_lingyingjianfu && I4.items.t_tianwaifeidou, '灵婴剑符 / 天外
 ok(I4.skills.length === 2 && I4.skills.every(s => s.minLv >= 430), '仙界功法两门（逆丹诀 430 / 小挪移空间术 440）', I4.skills);
 ok(I4.items.sk_niandan && I4.items.sk_niandan.teach === 'niandan', '法诀道具与功法对应', I4.items.sk_niandan);
 ok(I4.enemies.every(Boolean), '仙界篇敌人条目齐（5 种）', I4.enemies);
-ok(I4.bossNames[0] === '白石真人' && I4.bossNames[1] === '百目天鬼', '两个 Boss 用的是原著人物', I4.bossNames);
+ok(I4.bossNames[0] === '白胖僧人' && I4.bossNames[1] === '百目天鬼', '两个 Boss 用的是原著人物', I4.bossNames);
 ok(I4.prevKeeps.every(Boolean), '前传物品未被仙界篇改动', I4.prevKeeps);
 
 // ---- 5) 掉落分层：仙界档不出人界破烂 ----
@@ -387,7 +387,8 @@ const R6 = await page.evaluate(async (ids) => {
     // 对白后脚本战（wumengdao/xiedao/zhanshi/leihai/daotian）：清完才结算，多跑几帧。
     const m0 = W.MAPS.find(x => x.id === id);
     if (m0 && m0.trial) {
-      for (let k = 0; k < 600; k++) {
+      // 撑过类（xiedao 42 息 / daotian 55 息）要按秒熬满，600 帧不够；给到 2600 帧（×2≈83 秒）。
+      for (let k = 0; k < 2600; k++) {
         F.skipStory(); F.tickFrames(2);
         if (F.info().state === 'levelup') F.insightAuto();
         if (F.info().cleared.indexOf(id) >= 0) break;
