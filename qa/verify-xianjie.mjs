@@ -406,6 +406,25 @@ const R6 = await page.evaluate(async (ids) => {
       // 升级的三选一面板会挡住结算流程，必须在推进过程中顺手点掉
       for (let k = 0; k < 60; k++) { F.skipStory(); F.tickFrames(3); if (F.info().state === 'levelup') F.insightAuto(); }
     }
+    // 替代胜利条件（撑过 / 守阵 / 潜入 / 逃遁 / 钉符位 / 护炉 / 归一）：这些图不是杀光了事。
+    // 闸门得自己把目标走完，否则它们永远判不绿 —— 杀 Boss 只是收战利品，不结算。
+    if (m0 && m0.mode) {
+      for (let k = 0; k < 3200 && F.info().cleared.indexOf(id) < 0; k++) {
+        const ms = F.modeState(), mr = F.G.modeRun;
+        if (ms && mr) {
+          if (ms.kind === 'seal' && mr.pts && mr.pts[ms.cur]) {
+            F.G.player.x = mr.pts[ms.cur].x; F.G.player.y = mr.pts[ms.cur].y;
+          } else if (ms.kind === 'merge' && mr.orbs) {
+            const o = mr.orbs.find(x => !x.got);
+            if (o) { F.G.player.x = o.x; F.G.player.y = o.y; }
+          } else if (ms.kind === 'hold' || ms.kind === 'forge') {
+            F.G.player.x = mr.cx; F.G.player.y = mr.cy;
+          }
+        }
+        F.skipStory(); F.tickFrames(2, 0.05);
+        if (F.info().state === 'levelup') F.insightAuto();
+      }
+    }
     for (let k = 0; k < 12; k++) { F.skipStory(); F.tickFrames(2); if (F.info().state === 'levelup') F.insightAuto(); }
     const i = F.info();
     steps.push({ id, cleared: i.cleared.indexOf(id) >= 0, state: i.state, lv: i.level });
@@ -447,6 +466,13 @@ const R7 = await page.evaluate(async () => {
     if (m.boss) {
       F.boss(); F.killBoss();
       for (let k = 0; k < 70; k++) { F.skipStory(); F.tickFrames(3); if (F.info().state === 'levelup') F.insightAuto(); }
+    }
+    // 替代胜利条件（shijin 是逃遁图）：杀 Boss 只是收战利品，得把脱身时钟走完
+    if (m && m.mode) {
+      for (let k = 0; k < 2200 && F.info().cleared.indexOf(id) < 0; k++) {
+        F.skipStory(); F.tickFrames(2, 0.05);
+        if (F.info().state === 'levelup') F.insightAuto();
+      }
     }
     for (let k = 0; k < 14; k++) { F.skipStory(); F.tickFrames(2); if (F.info().state === 'levelup') F.insightAuto(); }
     const i = F.info();

@@ -322,6 +322,134 @@ const caught = await page.evaluate(() => {
 });
 ok(caught.caught === 1 && caught.sec - caught.t <= 18.6, 'lingyan 侦测满百即暴露，转入限时硬闯', caught);
 
+// ---------- R11 第三批：斩尸 / 雷海炼剑 / 大道归一 ----------
+console.log('\n== R11 第三批：钉符位 / 护丹炉 / 收法则 ==');
+{
+  const segZ = segOf(xj, 'zhanshi', 2600);
+  const segL = segOf(xj, 'leihai', 2600);
+  const segD = segOf(xj, 'daoyi', 2600);
+  ok(/kind: 'seal'/.test(segZ) && /'膻中', '百汇', '丹田'/.test(segZ),
+     'zhanshi 配了 seal（膻中 / 百汇 / 丹田三处大穴）');
+  ok(/kind: 'forge'/.test(segL) && /objR:/.test(segL) && /winBroke:/.test(segL),
+     'leihai 配了 forge（炉体半径 / 炉裂文案）');
+  ok(/kind: 'merge'/.test(segD) && /'时间', '空间', '轮回'/.test(segD),
+     'daoyi 配了 merge（五行 + 雷 + 三至尊法则）');
+  ok(/mr\.kind === 'seal' && mr\.pts/.test(g) && /mr\.k >= mr\.nodeSec/.test(g), '主循环有 seal 钉链段');
+  ok(/mr\.kind === 'forge'/.test(g) && /mr\.objHp = Math\.max\(0, mr\.objHp - mr\.objRate/.test(g),
+     '主循环有 forge 撞炉扣炉体段');
+  ok(/kind === 'merge'/.test(g) && /G\.boss\.ward = 0/.test(g), 'merge 归一之后混沌护体自散');
+  ok(/G\.modeRun\.kind === 'merge' && !G\.modeRun\.done\) d \*= 0\.1/.test(g),
+     '归一未成时古或今隔着瓶壁只吃一成');
+  ok(/function drawModeGoal\(/.test(g) && /drawModeGoal\(\);/.test(g),
+     '地面目标有可视化（阵心 / 符位 / 丹炉 / 光团）');
+}
+
+async function enterGod(id, lv) {
+  return page.evaluate(({ id, lv }) => {
+    const F = window.__FR;
+    F.clearProgress(); F.setLevel(lv || 100); F.unlockAll(); F.muteStory(true); F.god(true);
+    const mid = F.enterMap(id, 'easy');
+    for (let i = 0; i < 16 && F.G.state === 'dialog'; i++) F.skipStory();
+    return mid;
+  }, { id, lv });
+}
+
+// zhanshi：三处符位一处处钉，钉满才通关；清光压力怪不算赢
+const zmid = await enterGod('zhanshi', 600);
+const zr = await page.evaluate(() => {
+  const F = window.__FR, G = F.G;
+  const a = F.modeState();
+  const pts = (G.modeRun || {}).pts || [];
+  G.enemies.length = 0;
+  F.tickFrames(20, 0.05);
+  const b = F.modeState();
+  const clearedEarly = F.info().cleared.indexOf('zhanshi') >= 0;
+  const seq = [];
+  for (let k = 0; k < pts.length; k++) {
+    const pt = pts[k]; if (!pt) break;
+    G.player.x = pt.x; G.player.y = pt.y;
+    for (let i = 0; i < 240; i++) {
+      if (G.state === 'dialog') F.skipStory();
+      else F.tickFrames(1, 0.05);
+      if (!G.modeRun || G.modeRun.cur > k) break;
+    }
+    seq.push(F.modeState());
+  }
+  for (let i = 0; i < 300 && F.info().cleared.indexOf('zhanshi') < 0; i++) {
+    if (G.state === 'dialog') F.skipStory();
+    else if (G.state === 'levelup') F.insightAuto();
+    else F.tickFrames(2, 0.05);
+  }
+  return { mid: G.mapId, a, b, clearedEarly, seq, cleared: F.info().cleared.indexOf('zhanshi') >= 0, state: G.state };
+});
+ok(zmid === 'zhanshi' && zr.a && zr.a.kind === 'seal' && zr.a.nodes === 3, 'zhanshi 进图即三处符位', zr.a);
+ok(!zr.clearedEarly && zr.b && Math.abs(zr.b.t - zr.a.t) < 0.3, '斩尸不看时钟：清光压力怪也不结算', zr.b);
+ok(zr.seq[0] && zr.seq[0].cur === 1, '站进膻中符位，锁链钉满即转下一处', zr.seq[0]);
+ok(zr.cleared && zr.state !== 'play', '三处大穴钉满即斩尸成', { cleared: zr.cleared, state: zr.state });
+
+// leihai：炉盖计时，离炉停表，雷影撞炉掉炉体、撞穿转强撑
+const lmid = await enterGod('leihai', 600);
+const lr = await page.evaluate(() => {
+  const F = window.__FR, G = F.G;
+  const a = F.modeState();
+  F.tickFrames(40, 0.05);
+  const b = F.modeState();
+  const mr = G.modeRun;
+  G.player.x = mr.cx + mr.radius + 260; G.player.y = mr.cy;
+  F.tickFrames(30, 0.05);
+  const c = F.modeState();
+  G.player.x = mr.cx; G.player.y = mr.cy;
+  if (G.enemies[0]) { G.enemies[0].x = mr.cx + 20; G.enemies[0].y = mr.cy + 10; }
+  F.tickFrames(220, 0.05);
+  const d = F.modeState();
+  for (let i = 0; i < 2600 && F.info().cleared.indexOf('leihai') < 0; i++) {
+    if (G.state === 'dialog') F.skipStory();
+    else if (G.state === 'levelup') F.insightAuto();
+    else { G.player.x = mr.cx; G.player.y = mr.cy; F.tickFrames(1, 0.05); }
+  }
+  return { mid: G.mapId, a, b, c, d, cleared: F.info().cleared.indexOf('leihai') >= 0, state: G.state };
+});
+ok(lmid === 'leihai' && lr.a && lr.a.kind === 'forge', 'leihai 进图即护炉模式', lr.a);
+ok(lr.b && lr.b.t > lr.a.t, '坐在炉盖上炼化进度推进', { a: lr.a.t, b: lr.b.t });
+ok(lr.c && (lr.c.t - lr.b.t) < 0.6, '离开炉盖炼化停表', { b: lr.b.t, c: lr.c.t });
+ok(lr.d && lr.d.objHp < 60, '雷影撞炉扣炉体', lr.d && lr.d.objHp);
+ok(lr.d && lr.d.broke === 1 && lr.d.sec < 44, '炉体撞穿即转限时强撑', lr.d && { broke: lr.d.broke, sec: lr.d.sec });
+ok(lr.cleared, '雷海炼剑仍能收尾通关', { cleared: lr.cleared, state: lr.state });
+
+// daoyi：归一前打不动（一成），归一后护体自散、仍要打死古或今
+const dmid = await enterGod('daoyi', 640);
+const dr = await page.evaluate(() => {
+  const F = window.__FR, G = F.G;
+  const a = F.modeState();
+  const bossName = G.boss ? G.boss.name : null;
+  G.boss.hp = G.boss.maxhp;
+  F.bossDamage(0.01);
+  const sealedDrop = +(1 - G.boss.hp / G.boss.maxhp).toFixed(4);
+  G.boss.hp = G.boss.maxhp;
+  const orbs = (G.modeRun || {}).orbs || [];
+  for (let i = 0; i < orbs.length; i++) {
+    G.player.x = orbs[i].x; G.player.y = orbs[i].y;
+    F.tickFrames(3, 0.05);
+  }
+  const afterMerge = F.modeState();
+  const ward = G.boss ? +G.boss.ward : null;
+  const bossAlive = !!(G.boss && G.boss.hp > 0);
+  const clearedAtMerge = F.info().cleared.indexOf('daoyi') >= 0;
+  for (let i = 0; i < 3000 && F.info().cleared.indexOf('daoyi') < 0; i++) {
+    if (G.state === 'dialog') F.skipStory();
+    else if (G.state === 'levelup') F.insightAuto();
+    else { if (G.boss) F.bossDamage(0.25); F.tickFrames(2, 0.05); }
+  }
+  return { mid: G.mapId, a, bossName, sealedDrop, afterMerge, ward, bossAlive, clearedAtMerge,
+    cleared: F.info().cleared.indexOf('daoyi') >= 0, state: G.state };
+});
+ok(dmid === 'daoyi' && dr.a && dr.a.kind === 'merge' && dr.a.need === 9, 'daoyi 进图即收拢九团法则', dr.a);
+ok(/古或今/.test(dr.bossName || ''), '瓶外站着的是古或今', dr.bossName);
+ok(dr.sealedDrop < 0.08, '归一未成时打 Boss 只落一成', dr.sealedDrop);
+ok(dr.afterMerge === null && dr.ward === 0 && dr.bossAlive, '九团收满即归一：护体自散、人还站着', { mode: dr.afterMerge, ward: dr.ward, alive: dr.bossAlive });
+ok(!dr.clearedAtMerge, '归一不当场结算（仍要走夺瓶、伏诛）', dr.clearedAtMerge);
+ok(dr.cleared, '打死古或今后正常通关', { cleared: dr.cleared, state: dr.state });
+
 // R5 连帧稳定：同场强敌在场时主循环不崩
 await page.evaluate(() => { const F = window.__FR; F.tickFrames(180, 0.05); });
 ok(errors.length === 0, '同场强敌在场连续 180 帧无 JS 报错', errors.slice(0, 3));

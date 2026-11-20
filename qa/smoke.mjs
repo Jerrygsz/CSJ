@@ -606,6 +606,9 @@ for (const id of storyNew) {
   if (ALLM.find(m => m.id === id) && ALLM.find(m => m.id === id).mode) {
     for (let k = 0; k < 3200 && !F.info().cleared.includes(id) && F.info().state !== 'victory'; k++) {
       if (F.info().state === 'dialog') F.skipStory();
+      // 守阵期间杀掉追兵会涨修为：顿悟面板一弹，主循环就停在 levelup 上，时钟再也不走。
+      // 无头环境自动选第一张，别让面板把「撑满」卡死（与上面十一张战斗图同一处理）。
+      else if (F.info().state === 'levelup') F.insightAuto();
       frames(1);
     }
   }

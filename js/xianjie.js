@@ -620,8 +620,14 @@
       startLevel: 580, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
       // X5C1273：恶尸占着旧躯壳，韩立以阴阳双鱼符阵 + 虚光锁链拆出三尸；
       // X5C1092/1098 还有水元幻阵与火元宫禁制。做成幻境脚本战，主题与「斩尸」一致。
-      trial: { label: '祭坛·斩尸', unit: '幻阵恶尸', tail: '三尸拆开，账才算清', need: 3,
+      trial: { label: '祭坛·斩尸', unit: '幻阵恶尸', banner: '斩尸 · 站进膻中、百汇、丹田三处符位',
+        tail: '三处钉满，账才算清', need: 3,
         enemies: ['x5_huanghun', 'x5_guiwu', 'xj_shimei'] },
+      // 原著这一战的重点不是杀多少只：中层符阵射出的虚光锁链要一根根钉进
+      // 「膻中，百汇，丹田等大穴」——「这些地方都是恶尸改造地仙之躯的重要关隘，
+      // 必须先将这些地方控制起来」。所以做成三处符位轮流站桩，钉满即斩尸成。
+      mode: { kind: 'seal', sec: 60, tip: '虚光锁链 · 钉住三处大穴', win: '三处钉满 · 恶尸脱壳',
+        nodeSec: 5, nodeR: 72, nodeDist: 160, nodes: ['膻中', '百汇', '丹田'] },
       unlock: 'zaimiao', next: 'youming',
       reward: { stones: 1600000, mats: [['m_xianyuanshi', 22], ['m_shijian', 10]] },
       clearTitle: '斩尸',
@@ -654,9 +660,14 @@
       desc: '雷夔的影像散尽时，天上有门。门没开，只从里面漏出来一点威势。',
       startLevel: 580, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
       // X5C1324：雷夔之眼里纯粹是雷电能量，没有神念意志；炼化时一头头雷夔虚影
-      // 从眼中凝出、裹着金雷撞丹炉。做成「护炉撑过雷影」的脚本战，不做成人物 Boss。
-      trial: { label: '雷海·炼剑', unit: '雷夔虚影', tail: '剑成，眼还在', need: 4,
+      // 从眼中凝出、裹着金雷撞丹炉。韩立稳坐八角光盘（炉盖）上，「不能有丝毫分神，
+      // 必须严格控制所有飞剑和阵图，否则一旦被雷夔冲击而出，整个八卦丹炉炸裂」。
+      // 做成「护炉炼化」的脚本战：坐在炉盖上推进炼化，雷影撞炉掉炉体。
+      trial: { label: '雷海·炼剑', unit: '雷夔虚影', banner: '雷海炼剑 · 稳坐炉盖，别让雷影撞炉',
+        tail: '剑成，眼还在', need: 4,
         enemies: ['lh_tiangui', 'x4_tianyin', 'x5_huanghun', 'x4_yingwei'] },
+      mode: { kind: 'forge', sec: 44, tip: '稳坐炉盖 · 剑守为攻，大炼玄空', win: '剑成 · 雷眼封炉',
+        radius: 132, objR: 96, objRate: 13, brokeSec: 12, winBroke: '丹炉裂了 · 强撑到剑成' },
       unlock: 'youming', next: 'fuyao',
       reward: { stones: 1900000, mats: [['m_xianyuanshi', 24], ['m_shijian', 12]] },
       clearTitle: '雷海',
@@ -734,6 +745,11 @@
       type: 'boss', tag: '剧情战',
       desc: '小瓶世界里一共有三千团光。他只有一个人在里面走。',
       startLevel: 640, startSkills: { sword: 6, fire: 6, orb: 6, nova: 6, frost: 6 },
+      // X5C1385：三千大道都在瓶里，各色光团按五行归本源、五行归三大至尊法则（时间 / 空间 / 轮回），
+      // 「最后终于所以法则合而为一，融入了那团混沌法则之中」。
+      // 归一之前古或今在瓶外，隔着瓶壁打不动他；归一之后混沌护体自散 —— 这时才轮到夺瓶、伏诛。
+      mode: { kind: 'merge', tip: '三千大道 · 收拢法则光团', win: '三千归一 · 混沌护体自散',
+        spread: 470, orbs: ['金', '木', '水', '火', '土', '雷', '时间', '空间', '轮回'] },
       unlock: 'daotian', next: 'feiyu',
       diff: 7.0, bossAt: 0, intro: 'daoyi', outro: 'daoyi_out',
       enemies: ['x5_huanghun', 'x5_guiwu', 'x4_daobing'],

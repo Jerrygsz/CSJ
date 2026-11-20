@@ -1985,6 +1985,9 @@
   function damageEnemy(e, dmg, opts) {
     if (e._dead) return 0;
     let d = dmg * dmgMul();
+    // 大道归一（daoyi）：归一未成时古或今在瓶外，隔着一层瓶壁，出手只落一成。
+    // 这不是加难度，是把原著的顺序摆出来 —— 先把三千大道收拢，再谈夺瓶伏诛。
+    if (e === G.boss && G.modeRun && G.modeRun.kind === 'merge' && !G.modeRun.done) d *= 0.1;
     // 克制：属性对上了吃倍率。飘字旁边另给一个「克」字（见下），
     // 否则玩家只会觉得「这一下怎么跳了个大数字」，不知道是自己换对了功法。
     const atkAttr = (opts && opts.attr) || 'wu';
@@ -8436,11 +8439,39 @@
     if (!G.bossActive && G.vacuumT <= 0 && !G.bossSpawned && !(G.coopRole === 'client' && G.coopShared)) spawnDirector(dt);
     // 替代胜利条件（撑过 / 守阵 / 逃遁）：原著里「打不过只能熬过去」的图，目标不是杀光。
     // 与逃亡图 escapeAt 同一条收尾链路；到点清场、走 outro → finishMap。共斗由房主广播 end。
+    // 大道归一（daoyi）：这一图不靠时钟，光团收满即「归一」。归一之后古或今的混沌护体自散，
+    // 可人还站着 —— 所以这里只清 modeRun，不进 finishMap，仍按 Boss 图打下去。
+    if (G.modeRun && G.modeRun.kind === 'merge' && G.modeRun.orbs && !G.chaseDone
+        && G.vacuumT <= 0 && !(G.coopRole === 'client' && G.coopShared)) {
+      const mr = G.modeRun;
+      for (let i = 0; i < mr.orbs.length; i++) {
+        const o = mr.orbs[i];
+        if (o.got) continue;
+        if (U.dist(p.x, p.y, o.x, o.y) <= 52) {
+          o.got = 1; mr.got++;
+          banner('法则归位 · ' + o.name + '　（' + mr.got + ' / ' + mr.need + '）'); Sfx.buff();
+        }
+      }
+      if (mr.got >= mr.need && !mr.done) {
+        mr.done = 1;
+        // X5C1385：三千大道融进混沌法则之后，古或今那层混沌护体才散得开
+        if (G.boss) { G.boss.ward = 0; G.boss.wardT = G.time + WARD_SEC; banner(mr.win); }
+        else {
+          // 归一之前就把人打倒了（隔瓶只吃一成，但硬打也打得死）：瓶壁随归一一起散，
+          // 没有 Boss 可打了，这一关就地收尾 —— 否则会停在「九团收满、无人可杀」的空场里。
+          banner(mr.win); G.vacuumT = 0.9; G.pendingEnding = true;
+        }
+        Sfx.win();
+        G.victoryNote = mr.win;
+        G.modeRun = null;
+      }
+    }
     if (G.modeRun && !G.chaseDone && G.vacuumT <= 0
         && !(G.coopRole === 'client' && G.coopShared)) {
       const mr = G.modeRun;
       let holdOk = true;
-      if (mr.radius > 0) {
+      // forge 也有 radius（炉盖），但那是「炼化范围」，与守阵的停表逻辑不是一回事
+      if (mr.kind !== 'forge' && mr.radius > 0) {
         holdOk = U.dist(p.x, p.y, mr.cx, mr.cy) <= mr.radius;
         if (!holdOk && !mr.out) { mr.out = 1; banner('离阵太远 · 阵纹停转，回到阵心'); }
         if (holdOk && mr.out) { mr.out = 0; banner('回到阵心 · 阵纹续转'); }
@@ -8467,12 +8498,65 @@
           banner(mr.winCaught); Sfx.win();
         }
       }
+      // 斩尸（seal）：三处符位一处处钉。站进当前那处圈里，锁链才往里收；走开只是停住，
+      // 钉上的不会自己松 —— 三处钉满，恶尸便脱了壳。
+      if (mr.kind === 'seal' && mr.pts) {
+        const pt = mr.pts[mr.cur];
+        holdOk = false;
+        if (pt) {
+          const inR = U.dist(p.x, p.y, pt.x, pt.y) <= mr.nodeR;
+          if (inR) {
+            mr.touched = 1;
+            mr.k += dt;
+            if (mr.k >= mr.nodeSec) {
+              pt.done = 1; mr.cur++; mr.k = 0;
+              banner(pt.name + ' 已钉 · 虚光锁链收束'); Sfx.buff();
+            }
+          }
+          if (!inR && mr.touched && !mr.out) { mr.out = 1; banner('离了符位 · 锁链停在半途'); }
+          if (inR && mr.out) { mr.out = 0; banner('归位 · 锁链续收'); }
+          holdOk = inR;
+        }
+        if (mr.cur >= mr.pts.length) mr.t = mr.sec;   // 三处钉满，直接算斩尸成
+      }
+      // 雷海炼剑（forge）：坐在炉盖上炼化，进度才走；雷影撞炉掉炉体，炉体一破只剩强撑。
+      // 雷影是被玩家引过来的（怪追人，人站炉边），所以这一场真正要守的是自己的站位。
+      if (mr.kind === 'forge') {
+        const inR = U.dist(p.x, p.y, mr.cx, mr.cy) <= mr.radius;
+        holdOk = mr.broke ? true : inR;
+        if (!inR && !mr.broke && !mr.out) { mr.out = 1; banner('离了炉盖 · 炼化停住，回炉上去'); }
+        if (inR && mr.out) { mr.out = 0; banner('回到炉盖 · 剑气续炼'); }
+        if (!mr.broke) {
+          let hit = 0;
+          for (let i = 0; i < G.enemies.length; i++) {
+            const e = G.enemies[i];
+            if (e && !e._dead && U.dist(e.x, e.y, mr.cx, mr.cy) <= mr.objR + e.r) hit++;
+          }
+          if (G.boss && G.boss.hp > 0 && U.dist(G.boss.x, G.boss.y, mr.cx, mr.cy) <= mr.objR + G.boss.r) hit += 2;
+          if (hit > 0) {
+            mr.objHp = Math.max(0, mr.objHp - mr.objRate * hit * dt);
+            const w = mr.objHp <= 30 ? 3 : mr.objHp <= 60 ? 2 : mr.objHp <= 85 ? 1 : 0;
+            if (w > mr.warned) {
+              mr.warned = w;
+              banner('雷影撞炉 · 炉体 ' + Math.round(mr.objHp) + '%'); Sfx.warn();
+            }
+            if (mr.objHp <= 0) {
+              mr.broke = 1;
+              mr.sec = Math.min(mr.sec, mr.t + mr.brokeSec);   // 炉裂之后只剩强撑这一段
+              banner(mr.winBroke); Sfx.warn();
+            }
+          }
+        }
+      }
       if (holdOk) mr.t += dt;
-      const left = Math.max(0, mr.sec - mr.t);
-      const h = left <= 10 ? 3 : left <= mr.sec * 0.5 ? 2 : left <= mr.sec * 0.8 ? 1 : 0;
-      if (h > mr.hinted) {
-        mr.hinted = h;
-        if (left > 0) banner((mr.tip ? mr.tip + ' · ' : '') + '还剩 ' + Math.ceil(left) + ' 息');
+      // seal 的进度不看时钟（钉满三处即止），报「还剩几息」只会误导
+      if (mr.kind !== 'seal') {
+        const left = Math.max(0, mr.sec - mr.t);
+        const h = left <= 10 ? 3 : left <= mr.sec * 0.5 ? 2 : left <= mr.sec * 0.8 ? 1 : 0;
+        if (h > mr.hinted) {
+          mr.hinted = h;
+          if (left > 0) banner((mr.tip ? mr.tip + ' · ' : '') + '还剩 ' + Math.ceil(left) + ' 息');
+        }
       }
       if (mr.t >= mr.sec) {
         G.chaseDone = true; G.bossSpawned = true;
@@ -10206,6 +10290,79 @@
     ctx.fillRect(pt.x - pt.size / 2, pt.y - pt.size / 2, pt.size, pt.size);
     ctx.globalAlpha = 1;
   }
+  // 替代胜利条件的地面目标：阵心 / 三处符位 / 丹炉 / 法则光团。
+  // 以前只有 banner 在念「守住阵心」，玩家其实看不见阵心在哪。这一层只画目标，不碰任何判定。
+  // 全用 arc + fill，不建 gradient —— 热路径每帧新建渐变是这一版最忌讳的开销。
+  function drawModeGoal() {
+    const mr = G.modeRun; if (!mr) return;
+    const tm = G.time || 0;
+    ctx.save();
+    if (mr.kind === 'hold' && mr.radius > 0) {
+      ctx.globalAlpha = 0.13; ctx.fillStyle = '#e2c678';
+      ctx.beginPath(); ctx.arc(mr.cx, mr.cy, mr.radius, 0, 6.28); ctx.fill();
+      ctx.globalAlpha = 0.55; ctx.strokeStyle = 'rgba(226,198,120,0.9)'; ctx.lineWidth = 2;
+      ctx.setLineDash([10, 8]); ctx.lineDashOffset = -tm * 22;
+      ctx.beginPath(); ctx.arc(mr.cx, mr.cy, mr.radius, 0, 6.28); ctx.stroke();
+      ctx.setLineDash([]);
+    } else if (mr.kind === 'seal' && mr.pts) {
+      // 三处符位是这一关唯一的操作目标，必须一眼看得见：当前那处用朱砂（纸底上最跳），
+      // 已钉的转苔绿，未到的压暗 —— 只靠一圈金线在浅宣纸上几乎看不出来。
+      for (let i = 0; i < mr.pts.length; i++) {
+        const pt = mr.pts[i], cur = (!pt.done && i === mr.cur);
+        const k = pt.done ? 1 : (cur ? Math.min(1, mr.k / mr.nodeSec) : 0);
+        ctx.globalAlpha = pt.done ? 0.10 : cur ? 0.13 : 0.07;
+        ctx.fillStyle = pt.done ? '#8ea882' : cur ? '#c45640' : '#9a8250';
+        ctx.beginPath(); ctx.arc(pt.x, pt.y, mr.nodeR, 0, 6.28); ctx.fill();
+        ctx.globalAlpha = pt.done ? 0.8 : cur ? 0.95 : 0.7;
+        ctx.strokeStyle = pt.done ? 'rgba(110,140,95,0.9)' : cur ? 'rgba(176,64,46,0.95)' : 'rgba(126,96,58,0.85)';
+        ctx.lineWidth = cur ? 2.6 : 1.6;
+        ctx.setLineDash(cur ? [9, 7] : []); ctx.lineDashOffset = cur ? -tm * 26 : 0;
+        ctx.beginPath(); ctx.arc(pt.x, pt.y, mr.nodeR, 0, 6.28); ctx.stroke();
+        ctx.setLineDash([]);
+        // 钉链进度：一道弧从圈边往里收，收满即这一处钉住
+        if (k > 0 && !pt.done) {
+          ctx.globalAlpha = 0.75; ctx.strokeStyle = 'rgba(176,64,46,0.9)'; ctx.lineWidth = 3.5;
+          ctx.beginPath(); ctx.arc(pt.x, pt.y, mr.nodeR * (1 - k) + 5, -1.57, -1.57 + 6.28 * k); ctx.stroke();
+        }
+        // 穴位名：不给字，玩家只知道「有个圈」，不知道圈的是膻中还是百汇
+        ctx.globalAlpha = pt.done ? 0.75 : cur ? 0.95 : 0.8;
+        ctx.fillStyle = pt.done ? '#5c6e52' : cur ? '#a13c28' : '#7a6440';
+        ctx.font = 'bold 14px "Songti SC","STSong","SimSun",serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+        ctx.fillText(pt.done ? pt.name + ' · 已钉' : pt.name, pt.x, pt.y - mr.nodeR - 9);
+      }
+    } else if (mr.kind === 'forge') {
+      const hp = Math.max(0, mr.objHp) / (mr.objMax || 100);
+      ctx.globalAlpha = 0.10 + 0.10 * hp;
+      ctx.fillStyle = hp > 0.5 ? '#a8e2ff' : '#ff9a72';
+      ctx.beginPath(); ctx.arc(mr.cx, mr.cy, mr.objR * 1.45, 0, 6.28); ctx.fill();
+      ctx.globalAlpha = 0.6; ctx.strokeStyle = 'rgba(120,170,200,0.8)'; ctx.lineWidth = 2;
+      ctx.setLineDash([8, 8]); ctx.lineDashOffset = -tm * 18;
+      ctx.beginPath(); ctx.arc(mr.cx, mr.cy, mr.radius, 0, 6.28); ctx.stroke();
+      ctx.setLineDash([]);
+      // 炉体耐久：一圈弧随血量缩短，破了就整圈发红
+      ctx.globalAlpha = 0.95; ctx.strokeStyle = mr.broke ? 'rgba(200,80,60,0.95)'
+        : (hp > 0.5 ? 'rgba(84,150,190,0.95)' : 'rgba(196,110,50,0.95)');
+      ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.arc(mr.cx, mr.cy, mr.objR, -1.57, -1.57 + 6.28 * Math.max(0.02, hp)); ctx.stroke();
+      ctx.globalAlpha = 0.85; ctx.fillStyle = mr.broke ? '#a13c28' : '#3f667e';
+      ctx.font = 'bold 14px "Songti SC","STSong","SimSun",serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+      ctx.fillText(mr.broke ? '炉裂 · 强撑' : '炉盖 · ' + Math.round(hp * 100) + '%', mr.cx, mr.cy - mr.radius - 9);
+    } else if (mr.kind === 'merge' && mr.orbs) {
+      for (let i = 0; i < mr.orbs.length; i++) {
+        const o = mr.orbs[i]; if (o.got) continue;
+        const pu = 0.72 + 0.28 * Math.sin(tm * 2.4 + i * 1.7);
+        ctx.globalAlpha = 0.22 * pu; ctx.fillStyle = '#f0c86a';
+        ctx.beginPath(); ctx.arc(o.x, o.y, 34 * pu, 0, 6.28); ctx.fill();
+        ctx.globalAlpha = 0.95; ctx.fillStyle = 'rgba(255,250,225,0.98)';
+        ctx.beginPath(); ctx.arc(o.x, o.y, 8, 0, 6.28); ctx.fill();
+        ctx.globalAlpha = 0.75; ctx.strokeStyle = 'rgba(196,140,52,0.85)'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.arc(o.x, o.y, 20 + 4 * pu, 0, 6.28); ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
   let _drawEnemies = [];   // 性能优化：敌人绘制排序复用，避免每帧 slice 分配（零视觉变化）
   function render() {
     let sx = 0, sy = 0;
@@ -10270,6 +10427,7 @@
     // 地面持续区先铺（贴地），预警圈与弹体压在上面
     for (const z of G.zones) { if (z.x < _zx0 || z.x > _zx1 || z.y < _zy0 || z.y > _zy1) continue; drawZone(z); }
     for (const h of G.hazards) drawHazardGround(h);
+    drawModeGoal();   // 阵心 / 符位 / 丹炉 / 法则光团：地面目标，贴在特效层之下
     // Boss 出招预警：地上圈随前摇收拢、颜色由暗转亮 —— 给玩家那半秒反应
     for (const t of G.tells) {
       if (t.x < _zx0 || t.x > _zx1 || t.y < _zy0 || t.y > _zy1) continue;
@@ -11055,8 +11213,38 @@
       seenR: m.mode.seenR || 0, seen: 0, seenHint: -1, caught: 0,
       seenRate: m.mode.seenRate || 22, seenDecay: m.mode.seenDecay || 12,
       escapeSec: m.mode.escapeSec || 18,
-      winCaught: m.mode.winCaught || '行迹暴露 · 强闯出去'
+      winCaught: m.mode.winCaught || '行迹暴露 · 强闯出去',
+      // 斩尸（seal）：三处大穴各钉一根虚光锁链，站进当前那处符位圈才往里收。
+      // pts 在下面按 nodeDist 绕阵心排开；nodeSec 是每处要站多久。
+      pts: null, cur: 0, k: 0, touched: 0, nodeR: m.mode.nodeR || 92, nodeSec: m.mode.nodeSec || 5,
+      // 雷海（forge）：八卦丹炉虚影有一层炉体，雷影撞上来就掉；撞穿了只剩强撑。
+      objHp: 100, objMax: 100, objR: m.mode.objR || 96, objRate: m.mode.objRate || 13,
+      broke: 0, warned: 0, brokeSec: m.mode.brokeSec || 12,
+      winBroke: m.mode.winBroke || '炉体已裂 · 强撑到最后',
+      // 大道归一（merge）：法则光团散在小瓶世界里，收满即归一（不走时钟，也不在这里结算）。
+      orbs: null, got: 0, need: 0, done: 0, spread: m.mode.spread || 460
     } : null;
+    // seal：三处符位绕阵心排开（上 / 右下 / 左下），与祭坛上那三层环形符阵同构。
+    if (G.modeRun && G.modeRun.kind === 'seal') {
+      const names = (m.mode.nodes && m.mode.nodes.length) ? m.mode.nodes : ['膻中', '百汇', '丹田'];
+      const R = m.mode.nodeDist || 205;
+      G.modeRun.pts = names.map((nm, i) => {
+        const a = -Math.PI / 2 + i * (Math.PI * 2 / names.length);
+        return { name: nm, x: p.x + Math.cos(a) * R, y: p.y + Math.sin(a) * R, done: 0 };
+      });
+    }
+    // merge：光团按黄金角散开 —— 不排成一条线，玩家才得真的在瓶里走一圈。
+    if (G.modeRun && G.modeRun.kind === 'merge') {
+      const names = (m.mode.orbs && m.mode.orbs.length) ? m.mode.orbs
+        : ['金', '木', '水', '火', '土', '雷', '时间', '空间', '轮回'];
+      const S = G.modeRun.spread;
+      G.modeRun.orbs = names.map((nm, i) => {
+        const a = i * 2.399963 + 0.6;
+        const rr = S * Math.sqrt((i + 0.7) / names.length);
+        return { name: nm, x: p.x + Math.cos(a) * rr, y: p.y + Math.sin(a) * rr, got: 0 };
+      });
+      G.modeRun.need = names.length;
+    }
     G.quickCd = [0, 0, 0];
     renderQuickBar();
     p.hp = p.maxhp;
@@ -17277,7 +17465,11 @@
       if (!r) return null;
       return { kind: r.kind, sec: r.sec, t: +r.t.toFixed(2), left: +Math.max(0, r.sec - r.t).toFixed(2),
         hinted: r.hinted, out: r.out, seen: +(r.seen || 0).toFixed(1), caught: r.caught || 0,
-        trial: !!G.trial, enemies: G.enemies.length };
+        trial: !!G.trial, enemies: G.enemies.length,
+        // seal / forge / merge 的探针：闸门要能分别量「钉了几处 / 炉体剩多少 / 收了几团」
+        cur: r.cur || 0, nodes: r.pts ? r.pts.length : 0, nodeK: +(r.k || 0).toFixed(2),
+        objHp: r.objHp == null ? null : +r.objHp.toFixed(1), broke: r.broke || 0,
+        got: r.got || 0, need: r.need || 0, done: r.done || 0 };
     },
     edgeState() { return { t: +(G.edgeT || 0).toFixed(3), mul: DASH_EDGE_MUL, sec: DASH_EDGE_SEC }; },
     // 锋芒窗口的伤害验收：同一记伤害、窗口关 / 开各打一遍，成对采样再比。
