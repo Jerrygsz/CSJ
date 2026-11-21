@@ -3677,8 +3677,12 @@
     hudClass(btn, 'on', !!(parryDragActive() || (fight && (G.state === 'play' || G.state === 'dialog'))));
     const c = parryCarrier();
     const ic = parryIconEl(btn);
-    // 单字「护」：战斗中这颗键只有一个意思，不需要再用各家的法宝图标去分辨是哪件
-    if (ic) hudText(ic, '护');
+    // 护体键显示当前护体槽里那件法宝的图标：戴上玄铁盾就是盾、换遮天钟就是钟。
+    // 没装时才退回「护」字，让人一眼看出这颗键现在没有载体。
+    const eqId = save.equip && save.equip.guard;
+    const eqItem = eqId ? Items.get(eqId) : null;
+    const glyph = (eqItem && eqItem.icon) ? eqItem.icon : '护';
+    if (ic) hudText(ic, glyph);
     hudClass(btn, 'empty', !c);
     hudClass(btn, 'parrying', !!(pr && (pr.state === 'arming' || pr.state === 'hold')));
     hudClass(btn, 'cooling', !!(pr && pr.state === 'cd'));
@@ -3686,7 +3690,7 @@
     const ch = (pr && pr.chain >= 2) ? String(pr.chain) : '';
     if (ch) { if (btn.getAttribute('data-chain') !== ch) btn.setAttribute('data-chain', ch); }
     else if (btn.getAttribute('data-chain') != null) btn.removeAttribute('data-chain');
-    const tip = c ? '护体 · 单击格开反震，按住护体　按 3'
+    const tip = c && eqItem ? (eqItem.name + ' · 护体 · 单击格开反震，按住护体　按 3')
       : '未佩护体法宝 · 洞府 · 装备页 · 护体槽佩上一件（玄铁飞天盾已在袋中）';
     if (btn._tip !== tip) { btn._tip = tip; btn.title = tip; }   // 每帧写 title 也是 DOM 变更，先比
   }
@@ -7731,6 +7735,18 @@
   }
   function curRealmName() { return realmName(curRealmLevel()); }
   function curRealmLabel() { return stageLabel({ level: curRealmLevel() }); }
+  // 战斗顶栏的境界写法：炼气只报「炼气」；筑基起报大境界 + 初期 / 中期 / 后期 / 大圆满。
+  // 层数与「第 N/M 层」留给洞府与结算。大乘 / 渡劫 / 真仙往上原著本就不分初/中/后，
+  // 数据层也没写，就照原样显示，不臆造。
+  function curHudRealm() {
+    const lv = curRealmLevel();
+    const n = curRealmName() || '';
+    if (lv < 36) return '炼气';
+    if (!/初期|中期|后期/.test(n)) return n;
+    const span = realmSpan(lv);
+    if (span.end > lv) return n;
+    return realmMajorName(n) + '大圆满';
+  }
 
   function shaSt() {
     if (!G.sha) G.sha = { v: 0, need: SHA_NEED, dmgT: 0, x2T: 0, sayT: 26, cool: 0, pending: 0, done: 0 };
@@ -10878,9 +10894,7 @@
     // 第二条是「煞气」：攒满就顿悟。修为本身不再用 Lv 数字露脸，只显示段位
     const sst = shaSt();
     hudPct(elXpfill, sst.v / sst.need);
-    // 条上补「当前 / 上限」：只有比例看不出还差多少，也没法判断一颗丹够不够
-    if (elHpval) hudText(elHpval, Math.max(0, Math.ceil(p.hp)) + '/' + Math.ceil(p.maxhp));
-    if (elXpval) hudText(elXpval, Math.floor(sst.v) + '/' + Math.ceil(sst.need));
+    // 三条旧式圆角带只报比例，不在条上写数字 —— 当前/上限留给洞府与结算。
     // 第三条：修为。p.next 是这一层的门槛（xpNeed），满了就该回洞府进阶。
     // 大境界卡门时（breakReqFor 命中）经验会被压在 next-0.5，条子就一直是满的 ——
     // 那正好，让它呼吸（.capped）就是在说「别再刷了，去进阶」。
@@ -10898,8 +10912,9 @@
         hudText(elCnLabel, left > 0 ? ('巅峰 ' + left + ' 级') : '修为');
       }
     }
-    hudText(elLevel, curRealmLabel() + (sst.dmgT > 0 ? '　·　杀意' : ''));
-    // 锋芒窗口不往这行里塞字：只换境界名的颜色（HUD 精简后这一行已不显示，保留以防旧皮肤/截图脚本取用）
+    // 顶栏：炼气只写「炼气」；筑基起写「筑基初期 / 元婴后期 / 合体大圆满」，
+    // 层数不露脸；锋芒窗口也只换色不加字。
+    hudText(elLevel, curHudRealm());
     hudStyle(elLevel, 'color', (G.edgeT || 0) > 0 ? (save.skin === 'guigu' ? '#a8281e' : '#ffb066') : '');
     const sec = Math.floor(G.time);     // 显示只到秒：整秒没变就不用重新格式化
     if (sec !== _hudSec) { _hudSec = sec; hudText(elTime, fmtTime(G.time)); }
@@ -14960,8 +14975,6 @@
   const elWmNext = document.getElementById('wmNext');
   const elBreakOmen = document.getElementById('breakOmen');
   const elCloseBar = document.getElementById('closeBar');
-  const elHpval = document.getElementById('hpval');
-  const elXpval = document.getElementById('xpval');
   const elLevel = document.getElementById('level');
   const elTime = document.getElementById('time');
   const elKills = document.getElementById('kills');
@@ -17911,9 +17924,10 @@
       const p = G.player;
       return {
         on: !!G.autoOn, state: G.state, t: +(G.autoT || 0).toFixed(2),
-        // 战斗画面的按钮已撤：btn 现在反映暂停面板那一行是否可用，lit 读勾选状态
-        btn: elAutoFightRow ? elAutoFightRow.style.display : null,
-        lit: elAutoFightChk ? elAutoFightChk.checked : null,
+        // 大衍按钮回到经验条右下：btn 读它的 display，lit 读「入定」状态；
+        // 暂停面板那一行是兼容入口，按钮不在时才退回它。
+        btn: elAutoBtn ? elAutoBtn.style.display : (elAutoFightRow ? elAutoFightRow.style.display : null),
+        lit: elAutoBtn ? elAutoBtn.classList.contains('on') : (elAutoFightChk ? elAutoFightChk.checked : null),
         cards: G.cardsNow ? G.cardsNow.length : 0,
         // should = 按规则此刻该不该出现（DOM 的 display 要等下一帧渲染，断言用这个更准）
         should: autoBtnAllowed(),

@@ -132,6 +132,9 @@ ok(/function bindParryDrag\s*\(\)/.test(game) && /function openParryPosEdit\s*\(
 ok(/save\.parryPos\s*=\s*\{\s*x:/.test(game), '拖动松手把位置按比例写回 save.parryPos');
 ok(/parryPos\(\)\s*\{/.test(game) && /parryBtnRect\(\)\s*\{/.test(game), '__FR 暴露 parryPos / parryBtnRect 探针');
 ok(/\[heal, null, elParryBtn\]/.test(game), 'elQuickBtns[2] 指向独立弹反键（中间留空，沿用原绘制逻辑）');
+ok(/const glyph = \(eqItem && eqItem\.icon\) \? eqItem\.icon : '护'/.test(game)
+   && /hudText\(ic, glyph\)/.test(game), '护体键图标取当前护体槽道具（没装才落回「护」）');
+ok(/data-key="1"/.test(html) && !/\.qb-heal::after\s*\{\s*display:\s*none/.test(css), '快捷只留 1 号键，键位号不再隐去');
 
 // 命中反馈：「爽」的六个落点各有一条
 const J = P && P.JUICE;

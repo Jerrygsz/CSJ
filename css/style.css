@@ -146,43 +146,41 @@ body.fs #wrap { background: #000; }
 
 /* ---------- HUD ---------- */
 #hud { position: absolute; inset: 0; pointer-events: none; display: none; }
-/* 顶栏：一层由深到透的暮色，字与线浮在幕上。
-   极简口径 —— 不写「生命 / 煞气 / 修为」，三条按位置与颜色分辨；
-   题头只留「这是哪儿」与「打了多久」。 */
-#topbar { position: absolute; top: 0; left: 0; right: 0; padding: 8px 12px 12px; display: flex; flex-direction: column; gap: 5px; background: linear-gradient(180deg, rgba(4,6,9,0.72) 0%, rgba(4,6,9,0.40) 58%, rgba(4,6,9,0) 100%); }
-/* 题头一行：图名靠左、计时居中偏右，右上角让给「衍 / 禁」两字。
-   用绝对定位而不是 flex-space-between —— 时间不能跟着图名长短跑。 */
-#stats { position: relative; height: 15px; font-size: var(--fs-micro); letter-spacing: 2px; font-variant-numeric: tabular-nums; color: rgba(224,214,193,0.72); text-shadow: 0 1px 3px rgba(0,0,0,0.75); }
-#stats span { white-space: nowrap; }
-#mapName { position: absolute; left: 0; top: 0; max-width: 54%; overflow: hidden; text-overflow: ellipsis; letter-spacing: 3px; color: rgba(240,231,212,0.90); }
-/* 境界压制：不再往图名尾巴上接「· 境界压制」四个字，只把图名转暖、前面点一颗朱砂。
-   信息还在，声音小到不打断画面。 */
-#topbar.capped #mapName { color: #d9905e; }
-#topbar.capped #mapName::before { content: ''; display: inline-block; width: 4px; height: 4px; margin-right: 8px; border-radius: 50%; background: #d9905e; vertical-align: 2px; }
-#time { position: absolute; right: calc(var(--tap) + 2px); top: 0; color: rgba(224,214,193,0.58); letter-spacing: 1px; }
-/* 三条：直角细线，不描金边（金边一多就成仪表盘）。生命最厚、修为最薄。 */
-#hpwrap, #xpwrap { position: relative; height: 14px; margin-right: calc(var(--tap) + 2px); background: rgba(0,0,0,0.38); border-radius: 1px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(201,162,74,0.12); }
-#hpfill { height: 100%; width: 100%; background: linear-gradient(90deg,#8b2c27,#dd5f4c); transition: width var(--dur-bar) var(--ease-bar); }
-#xpfill { height: 100%; width: 0%; background: linear-gradient(90deg,#1d7683,#63cfdd); transition: width var(--dur-bar) var(--ease-bar); }
-/* 数值贴条内右端：等宽数字，位数变化不抖；压到半透明，只在低血时抢眼 */
-.barval { position: absolute; right: 7px; top: 0; line-height: 14px; font-size: var(--fs-num); letter-spacing: 0.5px; font-variant-numeric: tabular-nums; color: rgba(242,232,213,0.52); text-shadow: 0 1px 2px #000; }
-/* 修为：一条 3px 的进度线。它是「进度」不是「资源」，不该与两条血条抢注意力。 */
-#cnwrap { position: relative; height: 4px; margin-right: calc(var(--tap) + 2px); background: rgba(0,0,0,0.30); border-radius: 2px; overflow: hidden; }
-#cnfill { height: 100%; width: 0%; background: linear-gradient(90deg,rgba(201,162,74,0.55),#e0bf62); transition: width var(--dur-bar) var(--ease-bar); }
-/* 修为刚满、正等着回洞府破境：让这条细线轻轻呼吸一下。
-   只动 opacity —— 它走合成器，不重绘。 */
+/* 顶栏回到旧式：三条圆角带在上，「地名 / 时间 / 禁制 / 大衍」一行紧贴在经验条右下。
+   条上不写数字；热区仍是 44 物理 px（--tap），只是视觉收成细长素签。 */
+#topbar { position: absolute; top: 0; left: 0; right: 0; padding: 8px 12px 12px; display: flex; flex-direction: column; gap: 2px; background: linear-gradient(180deg, rgba(5,7,10,0.68) 0%, rgba(5,7,10,0.40) 62%, rgba(5,7,10,0) 100%); }
+#hpwrap, #xpwrap, #cnwrap { position: relative; background: rgba(0,0,0,0.52); border: 1px solid var(--line-soft); border-radius: var(--r-pill); overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.42); }
+#hpwrap { height: 13px; }
+#xpwrap { height: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.34); }
+#cnwrap { height: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.24); }
+#hpfill { height: 100%; width: 100%; background: linear-gradient(90deg,var(--hp-a),var(--hp-b)); transition: width var(--dur-bar) var(--ease-bar); }
+#xpfill { height: 100%; width: 0%; background: linear-gradient(90deg,var(--mp-a),var(--mp-b)); transition: width var(--dur-bar) var(--ease-bar); }
+#cnfill { height: 100%; width: 0%; background: linear-gradient(90deg,#7a5f24,#e0bf62); transition: width var(--dur-bar) var(--ease-bar); }
+/* 修为刚满、正等着回洞府破境：让这条细带轻轻呼吸一下。只动 opacity，走合成器。 */
 #cnwrap.capped #cnfill { animation: cnCapped var(--dur-breathe) var(--ease-inout) infinite; }
 @keyframes cnCapped { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
-/* 禁制（暂停）与大衍（自动）：右上角两个字，没有胶囊、没有底块。
-   热区按手机实际宽度给到 44px（--tap 由 JS 按当前舞台缩放比反算），
-   视觉只有一个低对比的字 —— 需要时看得见，不需要时不占视线。 */
-#pauseBtn { position: absolute; right: calc(8px / var(--view-scale)); top: 0; width: var(--tap); height: var(--tap); border: none; background: transparent; color: rgba(240,231,212,0.78); text-shadow: 0 1px 3px rgba(0,0,0,0.85), 0 0 2px rgba(0,0,0,0.7); pointer-events: auto; display: flex; align-items: flex-start; justify-content: center; padding: 4px 0 0; font-size: var(--fs-cap); letter-spacing: 0; transition: color var(--dur-hover) var(--ease-out), transform var(--dur-press) var(--ease-press); -webkit-tap-highlight-color: transparent; }
-#pauseBtn span { position: relative; font-size: var(--fs-cap); letter-spacing: 0; text-indent: 0; color: inherit; }
-#pauseBtn:active { color: var(--text-2); transform: scale(var(--press-sm)); }
-#autoBtn { position: absolute; right: calc(10px / var(--view-scale) + var(--tap)); top: 24%; width: var(--tap); height: var(--tap); border: none; background: transparent; color: rgba(240,231,212,0.78); text-shadow: 0 1px 3px rgba(0,0,0,0.85), 0 0 2px rgba(0,0,0,0.7); font-size: var(--fs-cap); letter-spacing: 0; pointer-events: auto; display: none; align-items: center; justify-content: center; padding: 0; -webkit-tap-highlight-color: transparent; }
-#autoBtn:active { color: var(--text-2); }
-#autoBtn.on { color: var(--accent); }
-#autoBtn.on::after { content: ''; position: absolute; right: 7px; bottom: 7px; width: 4px; height: 4px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px rgba(255,210,74,0.8); animation: autoDot var(--dur-breathe) var(--ease-inout) infinite; }
+/* 题头：地图名靠左、时间靠右，最右两颗常驻按钮。文字仍然只有必要两项。 */
+#stats { display: flex; align-items: center; gap: var(--sp-2); min-height: var(--tap); font-size: var(--fs-micro); letter-spacing: 1px; font-variant-numeric: tabular-nums; color: rgba(224,214,193,0.72); text-shadow: 0 1px 3px rgba(0,0,0,0.75); }
+#stats > span:not(.top-tools) { white-space: nowrap; }
+#mapName { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; letter-spacing: 3px; color: rgba(240,231,212,0.90); }
+/* 境界压制：只把图名转暖、前面点一颗朱砂，不往图名尾巴接四个字。 */
+#topbar.capped #mapName { color: #d9905e; }
+#topbar.capped #mapName::before { content: ''; display: inline-block; width: 4px; height: 4px; margin-right: 8px; border-radius: 50%; background: #d9905e; vertical-align: 2px; }
+#time { margin-left: auto; color: rgba(224,214,193,0.58); letter-spacing: 1px; }
+#kills { color: rgba(224,214,193,0.60); }
+#level { color: var(--accent-soft); letter-spacing: 2px; }
+.top-tools { display: flex; align-items: center; flex: 0 0 auto; }
+/* 禁制 / 大衍：旧的金线素签回来了，放在经验条右下。
+   按钮自身保持 var(--tap) 的热区（任何机型都是 44 屏幕 px），
+   看得见的签身是内层细胶囊，显隐 / 状态仍由 JS 每帧同步。 */
+#pauseBtn, #autoBtn { position: relative; width: calc(var(--tap) * 1.45); height: var(--tap); padding: 0; border: none; background: transparent; color: var(--text-2); pointer-events: auto; display: flex; align-items: center; justify-content: center; font-size: var(--fs-micro); letter-spacing: 3px; text-indent: 3px; -webkit-tap-highlight-color: transparent; transition: color var(--dur-hover) var(--ease-out), transform var(--dur-press) var(--ease-press); }
+#pauseBtn span, #autoBtn span { position: relative; z-index: 1; font-size: var(--fs-micro); letter-spacing: 3px; text-indent: 3px; color: inherit; }
+#pauseBtn::before { content: ''; position: absolute; inset: calc(6px / var(--view-scale)); border: 1px solid rgba(201,162,74,0.5); border-radius: var(--r-pill); background: rgba(10,13,18,0.58); box-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+#autoBtn { display: none; border: 1px solid rgba(201,162,74,0.5); border-radius: var(--r-pill); background: rgba(10,13,18,0.58); box-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+#pauseBtn:active::before, #autoBtn:active { background: rgba(8,10,14,0.7); }
+#pauseBtn:active, #autoBtn:active { transform: scale(var(--press-sm)); }
+#autoBtn.on { border-color: var(--accent-deep); color: var(--accent); background: rgba(24,18,6,0.66); text-shadow: 0 0 8px rgba(255,210,74,0.45); }
+#autoBtn.on::after { content: ''; position: absolute; right: calc(8px / var(--view-scale)); bottom: calc(8px / var(--view-scale)); width: 4px; height: 4px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px rgba(255,210,74,0.8); animation: autoDot var(--dur-breathe) var(--ease-inout) infinite; }
 @keyframes autoDot { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
 /* Boss 名牌：金线从两侧渐隐收拢，名字鎏金，血条鎏金描边带顶部高光 —— 修仙应该有的那点体面 */
 #bosswrap { position: absolute; top: 96px; left: 14px; right: 14px; display: none; }
@@ -1414,7 +1412,7 @@ body[data-skin="guigu"] .resttip { color: #46654a; }
 
 /* 补血：朱砂细环 + 单字「丹」。余量挂在圆外右上，像印章的边款 */
 .qb-heal { overflow: visible; border-color: rgba(214,92,72,0.55); color: #e8a48e; }
-.qb-heal::after { display: none; }   /* 不再显示键位号：只有一颗，数字是噪声 */
+/* 快捷只留 1 这一颗：键位号留着，手指不用猜按哪个 */
 .qb-heal .qb-n { position: absolute; right: calc(var(--tap) * -0.14); top: calc(var(--tap) * -0.10); min-width: 16px; height: 16px; padding: 0 4px; border-radius: 9px; background: rgba(10,12,17,0.96); border: 1px solid rgba(214,92,72,0.5); color: #e8a48e; font-size: var(--fs-micro); line-height: 15px; text-align: center; font-style: normal; font-variant-numeric: tabular-nums; letter-spacing: 0; pointer-events: none; }
 .qb-heal.empty .qb-n { display: none; }
 .qb-heal.cooling .qb-n { display: none; }   /* 冷却时只留倒计时，别和余量撞成两个数 */

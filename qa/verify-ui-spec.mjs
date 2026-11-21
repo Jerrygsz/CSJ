@@ -127,9 +127,11 @@ ok(tabBtn && tabBtn.hitH >= 44, '洞府页签 命中高 ≥44', tabBtn);
 
 await open(() => { window.__FR.closeAll && window.__FR.closeAll(); const F = window.__FR; F.enterMap('houshan'); });
 const qb = await hit('#quickbar .qb');
-ok(qb && qb.hitH >= 44 && qb.w >= 44, '快捷栏三格 ≥44×44', qb);
+ok(qb && qb.hitH >= 44 && qb.w >= 44, '快捷栏补血键 ≥44×44', qb);
 const pause = await hit('#pauseBtn');
-ok(pause && pause.hitH >= 44 && pause.w >= 44, '暂停键 ≥44×44', pause);
+ok(pause && pause.hitH >= 44 && pause.h >= 44, '禁制键 ≥44 物理 px 热区', pause);
+const auto = await hit('#autoBtn');
+ok(auto && auto.hitH >= 44 && auto.h >= 44, '大衍键 ≥44 物理 px 热区', auto);
 const dove = await hit('.chat-dove');
 ok(dove && dove.hitH >= 44 && dove.w >= 44, '飞鸽 44×44', dove);
 
@@ -217,16 +219,30 @@ const listH = [gWm, gShop, gCave].filter(Boolean).map(x => x.h);
 ok(new Set(listH).size === 1, '三个列表面板同高（切界面不再上下跳）', listH);
 ok(listH[0] && listH[0] / gWm.ovh > 0.7, '列表面板占屏 ≥70%（原坊市 456/844 = 54%）', { h: listH[0], ovh: gWm.ovh });
 
-console.log('\n== 9. HUD 补数值 / 标题页统计改网格 ==');
+console.log('\n== 9. HUD 旧式圆角带（无数字无标签）/ 标题页统计改网格 ==');
 await open(() => { const F = window.__FR; F.clearProgress(); F.setLevel(60); F.enterMap('houshan'); });
 const hud = await page.evaluate(() => {
-  const g = id => { const e = document.getElementById(id); return e ? { t: e.textContent.trim(), fv: getComputedStyle(e).fontVariantNumeric, fs: getComputedStyle(e).fontSize } : null; };
-  return { hp: g('hpval'), xp: g('xpval'), info: window.__FR.info() };
+  const box = id => { const e = document.getElementById(id); if (!e) return null; const r = e.getBoundingClientRect(); const s = getComputedStyle(e);
+    return { h: +r.height.toFixed(1), top: +r.top.toFixed(1), bot: +r.bottom.toFixed(1), radius: s.borderRadius, border: s.borderTopWidth }; };
+  const stats = document.getElementById('stats').getBoundingClientRect();
+  const heal = document.querySelector('#quickbar .qb-heal');
+  const healAfter = heal ? getComputedStyle(heal, '::after') : null;
+  return {
+    hp: box('hpwrap'), xp: box('xpwrap'), cn: box('cnwrap'),
+    numbers: ['hpval', 'xpval'].filter(id => document.getElementById(id)),
+    labels: document.querySelectorAll('#topbar .barlabel').length,
+    toolsTop: +stats.top.toFixed(1), cnBottom: box('cnwrap').bot,
+    healKey: heal ? { attr: heal.getAttribute('data-key'), content: healAfter.content, display: healAfter.display } : null,
+    info: window.__FR.info()
+  };
 });
-ok(hud.hp && /^\d+\/\d+$/.test(hud.hp.t), '血条上显示「当前/上限」', hud.hp);
-ok(hud.xp && /^\d+\/\d+$/.test(hud.xp.t), '灵力条上显示「当前/上限」', hud.xp);
-eq(hud.hp && hud.hp.fv, 'tabular-nums', '数值等宽（位数变化不左右抖）');
-eq(hud.hp && hud.hp.fs, '12px', '数值走 --fs-num 12px');
+ok(hud.numbers.length === 0 && hud.labels === 0, '三条旧式圆角带不写数字，也不写生命 / 煞气 / 修为', hud);
+ok(hud.hp && hud.xp && hud.cn && hud.xp.h < hud.hp.h && hud.cn.h < hud.xp.h,
+  '生命最厚，煞气与修为更细', { hp: hud.hp && hud.hp.h, xp: hud.xp && hud.xp.h, cn: hud.cn && hud.cn.h });
+ok(hud.hp && /px/.test(hud.hp.radius) && parseFloat(hud.hp.border) >= 1, '血条回到带描边的圆角带', hud.hp);
+ok(hud.toolsTop - hud.cnBottom <= 4, '题头与经验条紧贴（上下挨紧）', { gap: +(hud.toolsTop - hud.cnBottom).toFixed(1) });
+ok(hud.healKey && hud.healKey.attr === '1' && /1/.test(hud.healKey.content) && hud.healKey.display !== 'none',
+  '右侧快捷只留 1 号键，键位号真的画在圆键上', hud.healKey);
 const titleStats = await page.evaluate(() => {
   const count = s => document.querySelectorAll(s + ' .ts-row').length;
   const rows = [...document.querySelectorAll('.ts-row')];

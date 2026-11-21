@@ -195,6 +195,30 @@ async function bootPage(saveObj, opts) {
   await ctx.close();
 }
 
+// 【2·b】护体键跟着护体槽走：戴上哪件，圆键上就画哪件的图标
+{
+  const { ctx, page } = await bootPage(null);
+  await page.evaluate(() => { const F = window.__FR; F.muteStory(true); F.enterMap('houshan', 'easy'); F.skipStory(); });
+  const all = await page.evaluate(() => window.__FR.guardState().all.map(x => x.id));
+  const rows = [];
+  for (const id of all) {
+    await page.evaluate((id) => { const F = window.__FR; F.guardGive(id); F.parryEquip(id); }, id);
+    await page.waitForTimeout(250);
+    rows.push(await page.evaluate((id) => {
+      const it = (window.ITEMS || []).find(x => x.id === id);
+      return { id, want: it ? it.icon : null, equip: window.__FR.guardState().equip,
+        got: (document.querySelector('#parryBtn .qb-icon') || {}).textContent };
+    }, id));
+  }
+  ok(rows.length >= 11 && rows.every(r => r.want && r.got === r.want),
+    '护体键图标 = 当前护体槽道具图标（逐件换装实拍）', rows.filter(r => r.got !== r.want));
+  await page.evaluate(() => window.__FR.parryEquip(''));
+  await page.waitForTimeout(80);
+  const none = await page.evaluate(() => (document.querySelector('#parryBtn .qb-icon') || {}).textContent);
+  ok(none === '护', '护体槽空了才落回「护」字', none);
+  await ctx.close();
+}
+
 // 【3】道陨不抽护体
 {
   const s = {

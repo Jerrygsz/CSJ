@@ -31,14 +31,16 @@ const game = fs.readFileSync(join(root, 'js', 'game.js'), 'utf8');
 const audio = fs.readFileSync(join(root, 'js', 'audio.js'), 'utf8');
 const html = fs.readFileSync(join(root, 'index.html'), 'utf8');
 
-// ---------- A 静态：战斗按钮的触控尺寸 ----------
-// 20261121：不再用伪元素纵向补 6px，改成 --tap = 44px / 当前舞台缩放比，
-// 任何机型上量出来都是 44 物理 px。
+// ---------- A 静态：两颗常驻按钮的旧素签外观 + 44 物理 px 热区 ----------
+// 20261121D：禁制 / 大衍回到经验条右下，恢复旧金线胶囊与入定小圆点；
+// 热区仍走 --tap（44px / 当前舞台缩放比），任何机型都是 44 屏幕 px。
 ok(/--tap:\s*calc\(44px \/ var\(--view-scale\)\)/.test(css), '触控尺寸走 --tap（44 物理 px 反算回逻辑 px）');
-const pauseRule = (css.match(/#pauseBtn\s*\{([^}]*)\}/) || [])[1] || '';
-ok(/width:\s*var\(--tap\)/.test(pauseRule) && /height:\s*var\(--tap\)/.test(pauseRule), '禁制键宽高都是 --tap', pauseRule.slice(0, 120));
-ok(/id="autoFightChk"/.test(html), '大衍收进暂停面板（#autoFightChk），战斗画面不再挂按钮');
-ok(/#autoBtn\.on::after/.test(css), '#autoBtn 的 ::after 仍是「入定」小圆点（旧包裹留兼容）');
+const duoRule = (css.match(/#pauseBtn,\s*#autoBtn\s*\{([^}]*)\}/) || [])[1] || '';
+ok(/height:\s*var\(--tap\)/.test(duoRule) && /width:\s*calc\(var\(--tap\)\s*\*\s*1\.45\)/.test(duoRule),
+  '禁制 / 大衍共用的签身高 44 物理 px、宽 1.45 倍（旧细长素签）', duoRule.slice(0, 160));
+ok(/#pauseBtn::before\s*\{[^}]*inset:\s*calc\(6px \/ var\(--view-scale\)\)/.test(css), '禁制签身仍由 ::before 画金线胶囊');
+ok(/#autoBtn\.on::after\s*\{/.test(css), '#autoBtn 的 ::after 仍是「入定」小圆点');
+ok(/id="autoBtn"/.test(html) && /id="autoFightChk"/.test(html), '大衍回到战斗画面，暂停面板开关仍留作兼容');
 
 // ---------- B 静态：重开确认 ----------
 ok(/RESTART_ARM_MS\s*=\s*3000/.test(game), '重新开始有 3 秒授权窗口');
@@ -112,19 +114,17 @@ try {
           up3: hit(b.top - 3), down3: hit(b.bottom + 3), mid: hit(b.top + b.height / 2),
         };
       };
-      return {
-        pause: probe('pauseBtn'),
-        autoInHud: !!document.getElementById('autoBtn'),
-        autoChk: !!document.getElementById('autoFightChk')
-      };
+      return { pause: probe('pauseBtn'), auto: probe('autoBtn'), autoChk: !!document.getElementById('autoFightChk') };
     });
     ok(!!m.pause && !m.pause.hidden, '禁制按钮在战斗中可见');
-    ok(!m.autoInHud, '战斗画面已不再挂「大衍」按钮（收进暂停面板）');
-    ok(m.autoChk, '暂停面板里有「大衍 · 神念代驭」开关');
-    if (m.pause && !m.pause.hidden) {
-      ok(m.pause.mid === 'SELF', '禁制：中心命中自身', m.pause);
-      ok(m.pause.down3 === 'SELF', '禁制：下边界外 3px 仍命中自身', m.pause);
-      ok(m.pause.w >= 44 && m.pause.h >= 44, '禁制热区按手机实际宽度给到 44×44（物理 px）', m.pause);
+    ok(!!m.auto && !m.auto.hidden, '大衍按钮回到战斗中（经验条右下）');
+    ok(m.autoChk, '暂停面板开关仍保留（与战斗按钮双向同步）');
+    for (const [key, name] of [['pause', '禁制'], ['auto', '大衍']]) {
+      const b = m[key];
+      if (!b || b.hidden) continue;
+      ok(b.mid === 'SELF', name + '：中心命中自身', b);
+      ok(b.up3 === 'SELF' && b.down3 === 'SELF', name + '：上下边界外 3px 仍命中自身', b);
+      ok(b.h >= 44 && b.w > b.h, name + '：签身 ≥44 物理 px 高、比宽更长（旧素签）', b);
     }
     await ctx.close();
   }

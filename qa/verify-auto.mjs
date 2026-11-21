@@ -41,27 +41,28 @@ const boot = (mapId) => page.evaluate((id) => {
 }, mapId);
 
 // ---------------------------------------------------------------- 1. 按钮露面规则
-console.log('\n== 1. 大衍开关只在能打的图上给 ==');
-// 20261121：战斗画面不再挂按钮，开关收进暂停面板的 #autoFightRow。
+console.log('\n== 1. 大衍按钮只在能打的图上露面 ==');
 const b1 = await boot('houshan');
 await page.waitForTimeout(160);
-const row1 = await page.evaluate(() => {
-  document.getElementById('pauseBtn').click();
-  const e = document.getElementById('autoFightRow');
-  const d = e ? getComputedStyle(e).display : 'missing';
-  const rb = document.getElementById('resumeBtn'); if (rb) rb.click();
-  return d;
-});
-ok(b1.should === true && row1 !== 'none' && row1 !== 'missing', '战斗图（后山）暂停面板里有大衍开关', { should: b1.should, row: row1 });
+const dom1 = await page.evaluate(() => document.getElementById('autoBtn').style.display);
+ok(b1.should === true && dom1 === 'flex', '战斗图（后山）上按钮出现（经验条右下）', { should: b1.should, dom: dom1 });
 ok(b1.on === false && b1.lit === false, '刚进图时是关着的', b1);
 
 const b2 = await boot('suxing');
 await page.waitForTimeout(160);
-ok(b2.should === false, '纯剧情图上不给自动（一进去就结算，没有可自动的事）', b2);
+const v2 = await page.evaluate(() => ({
+  dom: document.getElementById('autoBtn').style.display,
+  hudHidden: document.getElementById('hud').style.display === 'none'
+}));
+ok(b2.should === false && (v2.dom === 'none' || v2.hudHidden), '纯剧情图上按钮不出现（一进去就结算）', { should: b2.should, ...v2 });
 
 const b3 = await boot('tainan');
 await page.waitForTimeout(160);
-ok(b3.should === false, '坊市上不给自动', b3);
+const v3 = await page.evaluate(() => ({
+  dom: document.getElementById('autoBtn').style.display,
+  hudHidden: document.getElementById('hud').style.display === 'none'
+}));
+ok(b3.should === false && (v3.dom === 'none' || v3.hudHidden), '坊市上按钮不出现', { should: b3.should, ...v3 });
 
 
 console.log('\n== 2. 无威胁时待命：开了就不认方向键 ==');
