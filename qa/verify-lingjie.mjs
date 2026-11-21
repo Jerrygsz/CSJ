@@ -733,7 +733,8 @@ ok(RB.items > 0, '人界小怪照常掉成品', RB.items);
 // ---- 5e) 灵界成品 + 灵界洞府 ----
 const GEAR = await page.evaluate(() => {
   const W = window, F = W.__FR;
-  const ids = ['w_wulongzha', 'w_xuejing', 't_wansen', 't_qingtian', 'dan_kunpeng'];
+  // 鲲鹏舍利是天鹏族给的机缘（V9C1423），不进随机池，单独在下面守
+  const ids = ['w_wulongzha', 'w_xuejing', 't_wansen', 't_qingtian'];
   const rows = ids.map(id => {
     const it = (W.ALL_ITEMS || []).find(x => x.id === id);
     return it ? { id, name: it.name, req: it.req, rarity: it.rarity, slot: it.slot || null,
@@ -749,7 +750,11 @@ const GEAR = await page.evaluate(() => {
     xiao: { min: Math.min.apply(null, xiao), max: Math.max.apply(null, xiao) } };
 });
 ok(GEAR.rows.every(x => x && x.req >= 150 && x.rarity === 4 && x.droppable),
-  '五件灵界成品已入库且可随机掉（五龙铡/血晶摩诃剑/万森法盘/擎天巨舟/鲲鹏舍利）', GEAR.rows);
+  '四件灵界成品已入库且可随机掉（五龙铡/血晶摩诃剑/万森法盘/擎天巨舟）', GEAR.rows);
+ok(await page.evaluate(() => {
+  const it = (window.ALL_ITEMS || []).find(x => x.id === 'dan_kunpeng');
+  return !!it && !!it.noDrop && !(window.Items.dropPool(4, { minReq: 0, maxReq: 999 }).some(x => x.id === 'dan_kunpeng'));
+}), '鲲鹏舍利只走天鹏族的机缘 reward，不进随机池（原著 V9C1423）');
 ok(GEAR.hei.max <= 172, '初入灵界（木族）不会掉出高一个大境界的东西（池子上限 172）', GEAR.hei);
 ok(GEAR.xiao.min >= 160, '小灵天之后不再掉化神旧宝（池子下限 160）', GEAR.xiao);
 

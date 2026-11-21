@@ -612,7 +612,15 @@ for (const id of storyNew) {
       if (F.info().state === 'dialog') F.skipStory();
       // 守阵期间杀掉追兵会涨修为：顿悟面板一弹，主循环就停在 levelup 上，时钟再也不走。
       // 无头环境自动选第一张，别让面板把「撑满」卡死（与上面十一张战斗图同一处理）。
-      else if (F.info().state === 'levelup') F.insightAuto();
+      else if (F.info().state === 'levelup') {
+        // 偶尔会撞上「state 已经是 levelup、卡面还没挂上」的窗口，insightAuto 返回 false；
+        // 那时主循环就永远停在面板上。兜底直接吃一张 C 卡，目的只是把状态放回 play。
+        if (!F.insightAuto()) F.insightPickC('maxhp');
+      }
+      // 守阵图还要求人站在阵心：挂机 AI 偶尔会风筝出圈，时钟就停了。
+      // 这里只验「撑满能结算」，把人按在阵心，和「打得过打不过」彻底解耦。
+      const mr = F.G && F.G.modeRun;
+      if (mr && mr.cx != null && F.G.player) { F.G.player.x = mr.cx; F.G.player.y = mr.cy; }
       frames(1);
     }
     F.god(godWas);

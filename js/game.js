@@ -1354,6 +1354,28 @@
     // 否则这一档的池子会空、只剩材料掉。
     return Math.min(360, Math.max(72, base - 60));
   }
+  // 掉落的「境界带」：req 必须落在怪物自身境界上下，不许低阶怪爆高阶成品。
+  // 以前人界完全不设带（lootMinReq=0、maxReq=0），炼气图 Boss 也能摸到 req112 的极品灵石 ——
+  // 原著没有「小怪爆神装」，妖兽按阶出材料/妖丹，法宝只从首领、古修遗骸与机缘来。
+  // 分档：
+  //   人界小怪/精英 —— 上限 startLevel+20，下限仍 0（低阶符箓照常掉，只是高阶图不会倒捡炼气货）
+  //   人界首领     —— startLevel-30 ~ startLevel+20；30 级向下借是「古修遗物」，20 级向上是极限
+  //   灵界/仙界   —— 沿用 lootMinReq / startLevel+40：这两段的池子本就稀薄，收太紧会只剩材料。
+  //                  小怪/精英一律只掉灵物（下一节），成品只由首领出。
+  // 跨境界的重要道具不靠随机：一律 unique/noDrop + 地图 reward（剧情机缘），见 canon/loot_tier.md。
+  function lootReqBand(tier) {
+    const base = (G.map && G.map.startLevel) || 1;
+    if (inXianjie()) return { minReq: 420, hardMinReq: 420, maxReq: base + 40 };
+    if (inLingjie()) {
+      const floor = lootMinReq();
+      return { minReq: floor, hardMinReq: floor, maxReq: base + 40 };
+    }
+    if (tier >= 2) {
+      const floor = Math.max(0, base - 30);
+      return { minReq: floor, hardMinReq: floor, maxReq: base + 20 };
+    }
+    return { minReq: 0, hardMinReq: 0, maxReq: base + 20 };
+  }
 
   function dropLoot(x, y, tier) {
     const d = curDiff();
@@ -1362,14 +1384,12 @@
       // 灵界讲族、讲灵物、讲灵石，修士之间靠换与抢，不靠杀怪爆装备。
       if (tier < 2) { dropMat(x, y, 1); return; }
       // 首领才带得动法宝级的旧物；且绝不降到元婴以下的破烂
-      const floor = lootMinReq();
-      const cap = ((G.map && G.map.startLevel) || 132) + 40;   // 上限：别提前爆出高一个大境界的东西
-      const item = Items.roll(2, d.rarity || 0, { minReq: floor, hardMinReq: floor, maxReq: cap });
+      const item = Items.roll(2, d.rarity || 0, lootReqBand(tier));
       if (item) G.loot.push({ x, y, r: 9, bob: Math.random() * 6.28, item });
       else dropMat(x, y, 1);
       return;
     }
-    const item = Items.roll(tier, d.rarity || 0);
+    const item = Items.roll(tier, d.rarity || 0, lootReqBand(tier));
     if (item) G.loot.push({ x, y, r: 9, bob: Math.random() * 6.28, item });
   }
   // 材料掉落：优先按「这只怪身上该有什么」，没有才退回地图物产
@@ -16911,6 +16931,7 @@
     // 掉落池探针：验证「灵界不掉人界低阶成品」与「破境丹不进随机池」
     lootEra() { return inLingjie() ? 'lingjie' : 'renjie'; },
     lootFloor() { return lootMinReq(); },
+    lootBand(tier) { return lootReqBand(tier == null ? 2 : tier); },
     simDrop(tier) {
       if (!G.player) return null;
       const n0 = G.loot.length;
@@ -16923,9 +16944,10 @@
         req: (d && d.item) ? (d.item.req || 1) : null
       };
     },
-    dropPool(r, minReq, maxReq) {
-      const floor = (minReq == null) ? lootMinReq() : minReq;   // 不传就按当前地图的档位
-      const cap = (maxReq == null) ? (inLingjie() ? (((G.map && G.map.startLevel) || 132) + 40) : 0) : maxReq;
+    dropPool(r, minReq, maxReq, tier) {
+      const band = lootReqBand(tier == null ? 2 : tier);        // 不传就按当前地图首领那档的境界带
+      const floor = (minReq == null) ? band.minReq : minReq;
+      const cap = (maxReq == null) ? band.maxReq : maxReq;
       return Items.dropPool(r == null ? 4 : r, { minReq: floor, maxReq: cap })
         .map(i => ({ id: i.id, name: i.name, req: i.req || 1, rarity: i.rarity }));
     },
