@@ -56,6 +56,7 @@ const ITEMS = [
   { key: 'dialogue-canon', file: 'verify-dialogue-canon.mjs', kind: 'gate', desc: '全地图剧情对白守原著：人界事件因果 / 灵界法宝突破 / 仙界身份姓名共 28 类纠错，静态扫描禁绝夺舍万天明、星宫扣紫灵、八十年虚天殿、土皇钉界心钉、买下冰凤、九劫串台、渠灵太乙灰仙、厉飞羽真名错比' },
   { key: 'extraboss',  file: 'verify-extraboss.mjs',  kind: 'gate', desc: '续战 / 同场 Boss：18 张图 21 个 extraBoss 名字与字段、逐只刷出顺序、连杀后结算（模式图要等时钟走完）；名字逐条回原著核过（青龙上人 X10C1983 陨落、第一魔尊 X10C1989、柳自在 X4C1124、元魇两段称谓各按原文）' },
   { key: 'loot-band',  file: 'verify-loot-band.mjs', kind: 'gate', desc: '掉宝境界带：人界小怪/精英上限 startLevel+20、首领 -30~+20，灵界沿用 -60/+40、仙界 420；171 图带内池不空、实掉不越界；掌天瓶/虚天鼎/玄天斩灵剑/鲲鹏舍利等原著机缘不进随机池且仍挂原图 reward' },
+  { key: 'breakomen', file: 'verify-breakomen.mjs', kind: 'gate', desc: '破境题款：成功时整屏收幕（地图 / 对白 / HUD / 横幅 / 飞鸽全退），题款写「进阶功成 + 境界名」，主角立绘居中在题款下方；2.6 秒后同帧收幕且对白照常回来；失败态灰墨压暗；390 / 320 双视口不出画' },
 ];
 
 const argv = process.argv.slice(2);

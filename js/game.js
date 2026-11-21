@@ -13616,17 +13616,48 @@
   // 同一条 banner —— 两秒后在同一处淡出，分量完全一样。这里给一块只属于破境的卷面：
   // 上下两道细线、一个境界名、一句结语，2.6 秒自己散，不拦操作。
   // 故意不做「点掉」：破境失败时玩家最不想做的就是再点一下。
-  function breakOmen(ok, realm, note) {
+  // onFinish 只在题款演完后触发（纪年卡层级在幕布之上，同帧上会直接把横幅盖掉）。
+  function paintBreakActor() {
+    if (!elBreakOmen) return;
+    const cv = elBreakOmen.querySelector('.bo-actor');
+    if (!cv || !cv.getContext) return;
+    const g = cv.getContext('2d');
+    if (!g) return;
+    g.clearRect(0, 0, cv.width, cv.height);
+    // 与开场过场的立绘同一路画法（js/cutscene.js bakeActor）：取当前主角的 12×14 精灵，
+    // 整数倍放大、关插值，像素颗粒不糊；脚底压在 y=302 那条基线上。
+    const spr = (window.Sprites || {})['hanli'];
+    if (!spr || !spr.width || !spr.height) return;
+    const k = Math.floor(Math.min(176 / spr.width, 250 / spr.height)) || 1;
+    const w = spr.width * k, h = spr.height * k;
+    g.imageSmoothingEnabled = false;
+    g.drawImage(spr, Math.round((cv.width - w) / 2), 302 - h, w, h);
+  }
+  function breakOmen(ok, realm, note, onFinish) {
     if (!elBreakOmen) return;
     const nm = elBreakOmen.querySelector('.bo-name');
     const sb = elBreakOmen.querySelector('.bo-sub');
+    const kk = elBreakOmen.querySelector('.bo-k');
     elBreakOmen.classList.toggle('fail', !ok);
+    if (kk) kk.textContent = ok ? '进阶功成' : '破境未成';
     if (nm) nm.textContent = realm || '';
     if (sb) sb.textContent = note || '';
+    paintBreakActor();
+    // 整屏收幕：对白 / HUD / 拾取提示在这一刻全退，眼里只剩题款与旗下那道身影。
+    document.body.classList.add('break-omen-on');
     restartAnim(elBreakOmen, 'on');
+    // 幕布与题款的子层各有自己的 2.6 秒动画；连着两次破境时也要拨回 0
+    for (const el of [elBreakOmen.querySelector('.bo-veil'), elBreakOmen.querySelector('.bo-stage')]) {
+      if (!el || !el.getAnimations) continue;
+      for (const a of el.getAnimations()) { try { a.currentTime = 0; a.play(); } catch (e) {} }
+    }
     // 动画 fill 是 both，2.6 秒后停在 opacity:0；摘类让 display 回 none（不挡住别的东西）
     clearTimeout(elBreakOmen._t);
-    elBreakOmen._t = setTimeout(function () { elBreakOmen.classList.remove('on'); }, 2600);
+    elBreakOmen._t = setTimeout(function () {
+      elBreakOmen.classList.remove('on');
+      document.body.classList.remove('break-omen-on');
+      if (onFinish) onFinish();
+    }, 2600);
   }
   // 服丹冲关的闭关进度条：一条墨线从空滚到满，天数同步从 0 跳到这道门的闭关年数。
   // 独立定时器驱动，不进主循环（主循环一抛异常整页卡死，这里绝不能搭进去）；
@@ -14075,11 +14106,13 @@
     // 服丹冲关的闭关岁月一次入账（筑基约一年，逐级放大）——与炼丹的时辰细账彻底分开。
     addErosDays(breakCloseDays(b));
     closeBarPlay(b);
-    breakOmen(true, b.realm || '', isWu ? ('丹成 · 扛衰 ' + take + ' 道') : '丹成 · 道基已固');
+    // 洞府里直冲（没有对应剧情图 / 调试口）：高光照样补一张纪年卡。
+    // 但纪年卡层级在破境幕布之上，同帧出会把题款直接盖掉 —— 等 2.6 秒演完再上。
+    breakOmen(true, b.realm || '', isWu ? ('丹成 · 扛衰 ' + take + ' 道') : '丹成 · 道基已固', function () {
+      if (CHRONICLE_LV[b.lv]) chroniclePlay(CHRONICLE_LV[b.lv]);
+    });
     banner((isWu ? ('冲关 · ' + b.realm + ' · 扛衰 ' + take + ' 道') : ('冲关 · ' + b.realm))
       + '　入道 ' + Math.floor(yearAt(b.lv)) + ' 年'); Sfx.realmUp();
-    // 洞府里直冲（没有对应剧情图 / 调试口）：高光照样补一张纪年卡
-    if (CHRONICLE_LV[b.lv]) chroniclePlay(CHRONICLE_LV[b.lv]);
     if (G.player && (G.state === 'play' || G.state === 'down')) {
       const p = G.player;
       p.xp = Math.max(p.xp, p.next);
