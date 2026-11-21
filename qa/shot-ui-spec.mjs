@@ -19,8 +19,9 @@ const server = http.createServer((rq, rs) => {
 });
 await new Promise(r => server.listen(PORT, '127.0.0.1', r));
 const browser = await chromium.launch({ channel: 'chrome' });
-const page = await browser.newPage({ viewport: { width: Number(process.env.VW || 390), height: Number(process.env.VH || 844) }, deviceScaleFactor: 2 });
-await page.goto('http://localhost:' + PORT + '/index.html');
+// 实拍必须看磁盘上的最新版：Service Worker 会 cache-first，把上一版直接端上来
+const page = await browser.newPage({ viewport: { width: Number(process.env.VW || 390), height: Number(process.env.VH || 844) }, deviceScaleFactor: 2, serviceWorkers: 'block' });
+await page.goto('http://127.0.0.1:' + PORT + '/index.html?t=' + Date.now());
 await page.waitForTimeout(900);
 fs.mkdirSync(join(here, 'shots'), { recursive: true });
 const shot = async (name) => { await page.waitForTimeout(400); await page.screenshot({ path: join(here, 'shots', name + '-' + (process.env.VW || 390) + '.png') }); console.log('shot', name); };

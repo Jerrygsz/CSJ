@@ -31,16 +31,14 @@ const game = fs.readFileSync(join(root, 'js', 'game.js'), 'utf8');
 const audio = fs.readFileSync(join(root, 'js', 'audio.js'), 'utf8');
 const html = fs.readFileSync(join(root, 'index.html'), 'utf8');
 
-// ---------- A 静态：两颗战斗按钮的热区 ----------
-const hitBlock = (css.match(/@media \(max-width: 430px\)\s*\{([\s\S]*?)\n\}/) || [])[1] || '';
-ok(/#pauseBtn::after[^{]*,\s*#autoBtn::before\s*\{/.test(hitBlock),
-  '禁制 / 大衍 两颗常驻按钮纳入窄屏热区（各用未被占用的伪元素）', hitBlock.slice(-260));
-const duoRule = (hitBlock.match(/#pauseBtn::after[^{]*\{([^}]*)\}/) || [])[1] || '';
-ok(/top:\s*-6px/.test(duoRule) && /bottom:\s*-6px/.test(duoRule), '两者纵向扩到 ±6px', duoRule);
-ok(/left:\s*0/.test(duoRule) && /right:\s*0/.test(duoRule), '横向拉满不越界（两者水平只隔 18 逻辑 px）', duoRule);
-// 伪元素不能抢占已被使用的那个槽：pauseBtn 的 ::before 是边框、autoBtn 的 ::after 是入定小圆点
-ok(/#pauseBtn::before\s*\{[^}]*inset:\s*6px 0/.test(css), '#pauseBtn 的 ::before 仍留给边框（热区没用错槽）');
-ok(/#autoBtn\.on::after\s*\{/.test(css), '#autoBtn 的 ::after 仍留给「入定」小圆点');
+// ---------- A 静态：战斗按钮的触控尺寸 ----------
+// 20261121：不再用伪元素纵向补 6px，改成 --tap = 44px / 当前舞台缩放比，
+// 任何机型上量出来都是 44 物理 px。
+ok(/--tap:\s*calc\(44px \/ var\(--view-scale\)\)/.test(css), '触控尺寸走 --tap（44 物理 px 反算回逻辑 px）');
+const pauseRule = (css.match(/#pauseBtn\s*\{([^}]*)\}/) || [])[1] || '';
+ok(/width:\s*var\(--tap\)/.test(pauseRule) && /height:\s*var\(--tap\)/.test(pauseRule), '禁制键宽高都是 --tap', pauseRule.slice(0, 120));
+ok(/id="autoFightChk"/.test(html), '大衍收进暂停面板（#autoFightChk），战斗画面不再挂按钮');
+ok(/#autoBtn\.on::after/.test(css), '#autoBtn 的 ::after 仍是「入定」小圆点（旧包裹留兼容）');
 
 // ---------- B 静态：重开确认 ----------
 ok(/RESTART_ARM_MS\s*=\s*3000/.test(game), '重新开始有 3 秒授权窗口');
@@ -114,21 +112,19 @@ try {
           up3: hit(b.top - 3), down3: hit(b.bottom + 3), mid: hit(b.top + b.height / 2),
         };
       };
-      return { pause: probe('pauseBtn'), auto: probe('autoBtn') };
+      return {
+        pause: probe('pauseBtn'),
+        autoInHud: !!document.getElementById('autoBtn'),
+        autoChk: !!document.getElementById('autoFightChk')
+      };
     });
     ok(!!m.pause && !m.pause.hidden, '禁制按钮在战斗中可见');
-    ok(!!m.auto && !m.auto.hidden, '大衍按钮在战斗中可见（所有战斗图常驻）');
+    ok(!m.autoInHud, '战斗画面已不再挂「大衍」按钮（收进暂停面板）');
+    ok(m.autoChk, '暂停面板里有「大衍 · 神念代驭」开关');
     if (m.pause && !m.pause.hidden) {
-      ok(m.pause.up3 === 'SELF', '禁制：上边界外 3px 仍命中自身', m.pause);
+      ok(m.pause.mid === 'SELF', '禁制：中心命中自身', m.pause);
       ok(m.pause.down3 === 'SELF', '禁制：下边界外 3px 仍命中自身', m.pause);
-      ok(m.pause.mid === 'SELF', '禁制：中心仍命中自身', m.pause);
-      ok(m.pause.w === 37 && m.pause.h === 29, '禁制视觉尺寸没被热区撑大（仍 37×29）', m.pause);
-    }
-    if (m.auto && !m.auto.hidden) {
-      ok(m.auto.up3 === 'SELF', '大衍：上边界外 3px 仍命中自身（原先 21px 线）', m.auto);
-      ok(m.auto.down3 === 'SELF', '大衍：下边界外 3px 仍命中自身', m.auto);
-      ok(m.auto.mid === 'SELF', '大衍：中心仍命中自身', m.auto);
-      ok(m.auto.w === 39 && m.auto.h === 21, '大衍视觉尺寸没变（热区只扩命中，不改版式）', m.auto);
+      ok(m.pause.w >= 44 && m.pause.h >= 44, '禁制热区按手机实际宽度给到 44×44（物理 px）', m.pause);
     }
     await ctx.close();
   }

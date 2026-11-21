@@ -193,9 +193,11 @@ try {
   await page.waitForTimeout(500);
   const b4 = await page.evaluate(() => ({
     mapName: (document.getElementById('mapName') || {}).textContent || '',
+    capped: document.getElementById('topbar').classList.contains('capped'),
     pr: window.__FR.pressure()
   }));
-  ok(/境界压制/.test(b4.mapName), '战斗里图名尾巴写着「境界压制」', b4.mapName);
+  ok(b4.capped && !/境界压制/.test(b4.mapName),
+    '战斗里图名只说地名；境界压制改由顶栏 .capped（图名转暖 + 朱砂点）表示', b4);
 
   await page.evaluate(() => { window.__FR.setLevel(8); window.__FR.prefight('houshan', 'easy'); });
   await page.waitForTimeout(300);
@@ -209,8 +211,11 @@ try {
 
   await page.evaluate(() => { window.__FR.setLevel(8); window.__FR.enterMap('houshan', 'easy'); window.__FR.tickFrames(3); });
   await page.waitForTimeout(400);
-  const b7 = await page.evaluate(() => (document.getElementById('mapName') || {}).textContent || '');
-  ok(!/境界压制/.test(b7), '同级之战图名干净', b7);
+  const b7 = await page.evaluate(() => ({
+    mapName: (document.getElementById('mapName') || {}).textContent || '',
+    capped: document.getElementById('topbar').classList.contains('capped')
+  }));
+  ok(!b7.capped && !/境界压制/.test(b7.mapName), '同级之战图名与顶栏都干净', b7);
 
   ok(errors.length === 0, '零 pageerror', errors.slice(0, 3));
 } finally {

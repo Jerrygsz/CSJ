@@ -84,17 +84,17 @@ const Bcap = await page.evaluate(() => {
 });
 await page.evaluate(() => { window.__FR.cultLevel(35); window.__FR.G.player.level = 35; });
 // 等 rAF 把 HUD 刷过来（syncCultivate 每帧写回 save，等它稳定）再读，避免时序竞争偶发红
+// 修为条已不再写「修为」二字：等 capped 这个 class 稳定下来就行
 await page.waitForFunction(() => {
-  const w = document.getElementById('cnwrap'); const l = w && w.querySelector('.barlabel');
-  return l && l.textContent === '修为';
+  const w = document.getElementById('cnwrap');
+  return w && !/capped/.test(w.className);
 }, { timeout: 6000 }).catch(() => {});
 const Bnorm = await page.evaluate(() => {
   const wrap = document.getElementById('cnwrap');
   return { label: wrap && wrap.querySelector('.barlabel') && wrap.querySelector('.barlabel').textContent };
 });
-ok(!!Bcap.label && /巅峰\s*\d+\s*级/.test(Bcap.label), '卡门时修为条标签提示「巅峰 N 级」', Bcap);
-ok(!!Bcap.cls && /capped/.test(Bcap.cls), '卡门时修为条仍在呼吸态', Bcap);
-ok(Bnorm.label === '修为', '等级够了标签恢复「修为」', Bnorm);
+ok(!Bcap.label && /capped/.test(Bcap.cls || ''), '卡门时修为条只靠呼吸态提示，不再挂「巅峰 N 级」文字', Bcap);
+ok(!Bnorm.label, '平时也不写「修为」二字（三条不设标签）', Bnorm);
 
 // ---------- C 通知分级 ----------
 const C = await page.evaluate(async () => {
@@ -159,10 +159,11 @@ const E = await page.evaluate(async () => {
     shown: getComputedStyle(document.getElementById('bosswrap')).display !== 'none',
     gap: +(bw.top - t.bottom).toFixed(1),
     mapName: (document.getElementById('mapName') || {}).textContent || '',
+    capped: document.getElementById('topbar').classList.contains('capped'),
   };
 });
 if (E.shown) {
-  ok(/境界压制/.test(E.mapName), '高境界图图名行确实挂了「境界压制」', E);
+  ok(E.capped && !/境界压制/.test(E.mapName), '高境界图顶栏带 .capped（图名转暖），不再挂文字', E);
   ok(E.gap >= 0, 'Boss 牌在顶栏下方（不压住境界压制行）', E);
 } else {
   ok(false, '高境界图 Boss 牌应当显示（用于验证顶栏让位）', E);

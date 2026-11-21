@@ -118,7 +118,8 @@ const gaps = await page.evaluate(() => {
 });
 if (gaps) ok((gaps.dy >= 8 || gaps.dy <= -1) && (gaps.dx >= 8 || gaps.dx <= -1), '相邻按钮间距 ≥8', gaps);
 
-await open(() => { const F = window.__FR; F.cave('qixuan'); F.caveTab('quick'); });
+// 快捷栏页已不再有装配按钮（补血键自动取丹），改到装备页量列表按钮的热区
+await open(() => { const F = window.__FR; F.addItem('a_lupi', 2); F.cave('qixuan'); F.caveTab('equip'); });
 const ghost = await hit('#caveBody .sr-btn.ghost');
 ok(ghost && ghost.hitH >= 44, '洞府内列表按钮 命中高 ≥44', ghost);
 const tabBtn = await hit('#caveTabs .tab');
@@ -469,8 +470,9 @@ await open(() => { const F = window.__FR; F.setLevel(60); F.grant(0); F.toTitle(
 const combatCase = await page.evaluate(() => {
   const g = s => { const e = document.querySelector(s); if (!e) return null; const r = e.getBoundingClientRect(); return { top: +r.top.toFixed(1), bot: +r.bottom.toFixed(1), h: +r.height.toFixed(1) }; };
   const hud = document.getElementById('hud'), el = document.getElementById('banner');
-  document.getElementById('level').textContent = 'Lv 60';
-  document.getElementById('stones').textContent = '灵石 1280';
+  const setT = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  setT('level', 'Lv 60');
+  setT('stones', '灵石 1280');
   document.getElementById('mapName').textContent = '七玄门 · 山门';
   document.getElementById('bossname').textContent = '百年狼妖';
   document.getElementById('bosswrap').style.display = 'block';

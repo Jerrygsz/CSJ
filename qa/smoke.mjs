@@ -604,6 +604,10 @@ for (const id of storyNew) {
   frames(6);
   // guchuan 改成守阵撑过图：对白后进 trial，要撑满模式时钟才结算。
   if (ALLM.find(m => m.id === id) && ALLM.find(m => m.id === id).mode) {
+    // 这一段只验「撑满时钟能通关」，不验打得过打不过：不开无敌时偶尔会被追兵打死，
+    // state 卡在 gameover、时钟再也不走，套跑时偶发一红（单跑连绿三次复现不了）。
+    const godWas = F.info().god;
+    F.god(true);
     for (let k = 0; k < 3200 && !F.info().cleared.includes(id) && F.info().state !== 'victory'; k++) {
       if (F.info().state === 'dialog') F.skipStory();
       // 守阵期间杀掉追兵会涨修为：顿悟面板一弹，主循环就停在 levelup 上，时钟再也不走。
@@ -611,6 +615,7 @@ for (const id of storyNew) {
       else if (F.info().state === 'levelup') F.insightAuto();
       frames(1);
     }
+    F.god(godWas);
   }
   if (!F.info().cleared.includes(id)) storyBad.push(id);
 }

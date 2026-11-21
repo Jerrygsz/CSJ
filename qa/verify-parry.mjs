@@ -114,11 +114,11 @@ ok(/#parryEdge\s*\{/.test(css) && /#parryEdge\.on/.test(css), 'css 为 #parryEdg
 // ---------- 6. 20261111E：弹反键放大 / 自定义位置 / 命中反馈 ----------
 ok(/id="parryBtn"\s+class="qb qb-parry"/.test(html), 'index.html 有独立弹反键 #parryBtn（qb-parry）');
 const qbHtml = (html.match(/<div id="quickbar">([\s\S]*?)<\/div>/) || [])[1] || '';
-ok((qbHtml.match(/class="qb\s/g) || []).length === 2, '#quickbar 只剩 1/2 两格（第 3 格已拆成独立键）', (qbHtml.match(/class="qb\s/g) || []).length);
+ok((qbHtml.match(/class="qb\s/g) || []).length === 1, '#quickbar 只剩补血一格（两格装配位已撤）', (qbHtml.match(/class="qb\s/g) || []).length);
 const pBtnCss = (css.match(/#parryBtn\s*\{[\s\S]*?\}/) || [''])[0];
-const pW = +(pBtnCss.match(/width:\s*(\d+)px/) || [])[1];
-const qW = +((css.match(/^\.qb\s*\{[^\n]*?width:\s*(\d+)px/m) || [])[2] || 46);
-ok(pW >= 60 && pW > qW, 'css 把弹反键放大到 ≥60px 且大于 1/2 格的 ' + qW + 'px', pW);
+ok(/width:\s*calc\(var\(--tap\)\s*\*\s*1\.16\)/.test(pBtnCss) && /height:\s*calc\(var\(--tap\)\s*\*\s*1\.16\)/.test(pBtnCss),
+  'css 把弹反键按 --tap 放大 1.16 倍（任何机型都 ≥44 物理 px，且大于补血键）', pBtnCss.slice(0, 140));
+
 ok(/@media \(pointer: coarse\)[\s\S]{0,200}#parryBtn/.test(css), '触屏设备给弹反键再加一档尺寸');
 ok(/pointer-events:\s*auto/.test(pBtnCss), '弹反键自己打开 pointer-events（#hud 是 none）');
 ok(/id="parryPosEdit"/.test(html) && /id="parryPosReset"/.test(html), '暂停菜单含「调整位置 / 恢复默认」');
@@ -131,7 +131,7 @@ ok(/function applyParryBtnPos\s*\(\)/.test(game), 'game.js 定义 applyParryBtnP
 ok(/function bindParryDrag\s*\(\)/.test(game) && /function openParryPosEdit\s*\(\)/.test(game), 'game.js 实现拖动定位（bindParryDrag / openParryPosEdit）');
 ok(/save\.parryPos\s*=\s*\{\s*x:/.test(game), '拖动松手把位置按比例写回 save.parryPos');
 ok(/parryPos\(\)\s*\{/.test(game) && /parryBtnRect\(\)\s*\{/.test(game), '__FR 暴露 parryPos / parryBtnRect 探针');
-ok(/arr\.push\(elParryBtn\)/.test(game), 'elQuickBtns[2] 指向独立弹反键（沿用原绘制逻辑）');
+ok(/\[heal, null, elParryBtn\]/.test(game), 'elQuickBtns[2] 指向独立弹反键（中间留空，沿用原绘制逻辑）');
 
 // 命中反馈：「爽」的六个落点各有一条
 const J = P && P.JUICE;

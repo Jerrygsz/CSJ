@@ -118,7 +118,9 @@ A('A 战斗等级被夹逼到 252', out.A.battleLevel === 252, out.A.battleLevel
 A('A 夹逼偏移记录 = 12', out.A.gap === 12, out.A.gap);
 A('A 存档修为未被污染', out.A.cult === 240, out.A.cult);
 A('A __FR.stage 显示真实境界', out.A.stage === EXPECT, out.A.stage);
-A('A HUD 显示真实境界', (out.A.hud || '').includes(EXPECT), out.A.hud);
+// 20261121：战斗顶栏撤掉了境界那一行（只留地名与时间），HUD 上本来就不该再有境界文字；
+// 「唯一真源」改由结算 / 道陨 / 修行图 / 洞府 / 静修这几处出口守（A2~A5）。
+A('A HUD 不再显示境界（顶栏只留地名与时间）', out.A.hud === '', out.A.hud);
 A('A info().realmLabel 显示真实境界', out.A.infoLabel === EXPECT, out.A.infoLabel);
 A('A2 结算页与修行图同口径', !out.A2_vLevel || out.A2_vLevel.includes(EXPECT), out.A2_vLevel);
 A('A3 道陨页与修行图同口径', (out.A3.goLevel || '').includes(EXPECT), out.A3.goLevel);

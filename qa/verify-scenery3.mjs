@@ -357,7 +357,7 @@ const hud = await page.evaluate(() => {
   const hp = document.getElementById('hpwrap');
   const cs = (e) => e ? getComputedStyle(e) : null;
   return {
-    // 三格 = #quickbar 的 1/2 格 + 独立弹反键
+    // 两颗 = #quickbar 里的补血 + 独立弹反键（两格装配位已在 20261121 撤掉）
     qbs: document.querySelectorAll('#quickbar .qb').length + (pb ? 1 : 0),
     pbW: pb ? pb.offsetWidth : 0,
     pips: document.querySelectorAll('#skillrow .pip').length,
@@ -367,8 +367,10 @@ const hud = await page.evaluate(() => {
     hpFill: cs(document.getElementById('hpfill')) && cs(document.getElementById('hpfill')).backgroundImage
   };
 });
-ok(hud.qbs === 3 && hud.qbW === 46 && hud.qbH === 46 && hud.pbW >= 60 && hud.pips > 0,
-   '三格快捷钮与技能栏全在：1/2 格热区 46×46 不变、弹反键独立放大（≥60）', hud);
+// 20261121：三格砍成两颗（补血 + 护体），热区改按物理像素走 --tap：任何机型屏幕上都是 44，
+// 弹反键再放大 1.16 倍。rect 拿到的就是屏幕像素，直接比 44，不必再除缩放比。
+ok(hud.qbs === 2 && Math.abs(hud.qbW - 44) <= 1 && Math.abs(hud.qbH - 44) <= 1 && hud.pbW >= 44 && hud.pips > 0,
+   '两颗圆键与技能栏全在：补血键 44×44 物理 px、弹反键再放大一圈（≥44）', hud);
 ok(hud.qbShadow === 'none' && hud.hpShadow === 'none' && hud.pipShadow === 'none',
    '双重墨框 / 投影 / 纸签阴影全部去掉', { qb: hud.qbShadow, hp: hud.hpShadow, pip: hud.pipShadow });
 // 第102轮写过「不得含 178,58,44（鲜红硬色块）」，第115轮 Jerry 要求血条回朱砂，该断言作废。

@@ -45,12 +45,14 @@ let r1 = await E(`(() => {
   F.enterMap('houshan', 'easy'); F.skipStory();
   F.G.player.xp = F.G.player.next * 0.5;
   F.tickFrames(2, 0.05);
-  const lv = document.getElementById('level').textContent;
+  const lv = (document.getElementById('level') || {}).textContent || '';   // 顶栏已撤这一行：空串即「不露 Lv」
   const xp = document.getElementById('xpval') ? document.getElementById('xpval').textContent : '';
   return { lv, stage: F.stage(), xp, hasLv: /Lv\\s*\\d/.test(lv) };
 })()`);
 ok(r1.hasLv === false, 'HUD 上不再出现 Lv 数字', r1.lv);
-ok(r1.stage.indexOf('小成') > 0 || r1.stage.indexOf('大成') > 0 || r1.stage.indexOf('圆满') > 0, '筑基以上显示「境界·小成/大成/圆满」', r1.stage);
+// 段位写法在「第N/M层」那一轮改过：旧的小成/大成/圆满会在每个大境界里循环十几遍，看着乱跳。
+// 现在筑基以上就是「筑基中期·第1/6层」这种稳定只增不减的层数，断言跟着改口径。
+ok(/·第\d+\/\d+层$/.test(r1.stage) && !/小成|大成/.test(r1.stage), '筑基以上显示「境界·第N/M层」（不再用小成/大成）', r1.stage);
 
 // ===== 2. 煞气攒满 → 顿悟面板 =====
 console.log('\n== 2. 攒满 120 就弹三选一 ==');
@@ -115,7 +117,23 @@ let r5 = await E(`(() => {
 const total = Object.values(r5).reduce((a, b) => a + b, 0);
 ok(Object.keys(r5).length >= 4, '池子里至少 4 类选项', r5);
 ok((r5.A || 0) / total > 0.2 && (r5.A || 0) / total < 0.55, 'A 技能升级约占四成', (r5.A / total).toFixed(2));
-ok((r5.B || 0) > 0 && (r5.C || 0) > 0 && (r5.D || 0) > 0, 'B/C/D 三类都抽得到', r5);
+ok((r5.C || 0) > 0 && (r5.D || 0) > 0 && (r5.E || 0) > 0, 'C/D/E 三类都抽得到', r5);
+
+// B 类（悟得新神通）不是随手就有的：池子只有 skills 里标了 enlighten 的那三门，
+// 且都带前置功法。空号硬抽当然是 0 —— 先学青元剑诀、把等级推到 60，才抽得到剑影分光术。
+let r5b = await E(`(() => {
+  const F = window.__FR;
+  F.clearProgress(); F.setLevel(60);
+  F.learn('qingyuan');
+  F.enterMap('houshan', 'easy'); F.skipStory();
+  const cnt = {}, names = {};
+  for (let i = 0; i < 300; i++) for (const c of F.insightRoll()) {
+    cnt[c.kind] = (cnt[c.kind] || 0) + 1;
+    if (c.kind === 'B') names[c.name] = (names[c.name] || 0) + 1;
+  }
+  return { cnt, names: Object.keys(names) };
+})()`);
+ok((r5b.cnt.B || 0) > 0 && /剑影分光术/.test(r5b.names.join('')), '学过青元剑诀后能悟到「剑影分光术」（B 类走得通）', r5b);
 
 // ===== 6. 出图即清空 =====
 console.log('\n== 6. 一局一清 ==');
@@ -186,7 +204,10 @@ let r9 = await E(`(() => {
 })()`);
 ok(r9.noLimit === true, '战斗图没有任何限时机制', r9.noLimit);
 ok(r9.cleared === true, '照常打到 Boss 死才结算（不提前收场）', r9.state);
-ok(r9.picks >= 9, '一局至少 9 次顿悟', { picks: r9.picks, time: r9.time });
+// 节奏的区间由第 8 节守（两分钟 3~20 次、每分钟 2~11 次）。这里只看「一局能不能多次顿悟」：
+// 顿悟间隔在 12~30 秒那一轮被拉长过，一条 houshan 线跑完约两分钟、实测 4 次，
+// 旧的「≥9」是拉长前的口径，留着只会天天红。
+ok(r9.picks >= 3, '一局下来顿悟不止一次（约两分钟 4 次）', { picks: r9.picks, time: r9.time });
 
 // ===== 10. 纯 Boss 图：顿悟节奏 =====
 console.log('');

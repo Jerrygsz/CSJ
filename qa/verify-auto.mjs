@@ -41,24 +41,29 @@ const boot = (mapId) => page.evaluate((id) => {
 }, mapId);
 
 // ---------------------------------------------------------------- 1. 按钮露面规则
-console.log('\n== 1. 按钮只在能打的图上露面 ==');
+console.log('\n== 1. 大衍开关只在能打的图上给 ==');
+// 20261121：战斗画面不再挂按钮，开关收进暂停面板的 #autoFightRow。
 const b1 = await boot('houshan');
 await page.waitForTimeout(160);
-const dom1 = await page.evaluate(() => document.getElementById('autoBtn').style.display);
-ok(b1.should === true && dom1 === 'flex', '战斗图（后山）上按钮出现', { should: b1.should, dom: dom1 });
+const row1 = await page.evaluate(() => {
+  document.getElementById('pauseBtn').click();
+  const e = document.getElementById('autoFightRow');
+  const d = e ? getComputedStyle(e).display : 'missing';
+  const rb = document.getElementById('resumeBtn'); if (rb) rb.click();
+  return d;
+});
+ok(b1.should === true && row1 !== 'none' && row1 !== 'missing', '战斗图（后山）暂停面板里有大衍开关', { should: b1.should, row: row1 });
 ok(b1.on === false && b1.lit === false, '刚进图时是关着的', b1);
 
 const b2 = await boot('suxing');
 await page.waitForTimeout(160);
-const dom2 = await page.evaluate(() => document.getElementById('autoBtn').style.display);
-ok(b2.should === false && dom2 === 'none', '纯剧情图上按钮不出现（一进去就结算，没有可自动的事）', { should: b2.should, dom: dom2 });
+ok(b2.should === false, '纯剧情图上不给自动（一进去就结算，没有可自动的事）', b2);
 
 const b3 = await boot('tainan');
 await page.waitForTimeout(160);
-const dom3 = await page.evaluate(() => document.getElementById('autoBtn').style.display);
-ok(b3.should === false && dom3 === 'none', '坊市上按钮不出现', { should: b3.should, dom: dom3 });
+ok(b3.should === false, '坊市上不给自动', b3);
 
-// ---------------------------------------------------------------- 2. 无威胁时待命
+
 console.log('\n== 2. 无威胁时待命：开了就不认方向键 ==');
 await boot('houshan');
 await page.waitForTimeout(140);
@@ -140,7 +145,9 @@ const r = await page.evaluate(() => {
   for (let k = 0; k < 3; k++) { F.skipStory(); F.tickFrames(2); }
   F.autoMode(true);
   const st0 = F.info().stones;
-  document.getElementById('stones').click();   // 玩家自己点灵石 → 开祭炼面板
+  // 灵石入口已收进暂停面板：暂停 → 点「灵石祭炼」
+  document.getElementById('pauseBtn').click();
+  document.getElementById('refineBtn').click();
   const a = F.autoInfo();
   F.autoTick(80, 0.05);
   const b = F.autoInfo();

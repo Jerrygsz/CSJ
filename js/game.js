@@ -2028,7 +2028,7 @@
             spawnText(e.x, e.y - e.r - 26, '罩破', '#e0573a', 16, { stroke: true });
             G.shake = Math.max(G.shake, 4);
             if (window.FX3) FX3.spawn('crit', e.x, e.y - e.r * 0.3, { pal: _ink ? 'xue' : 'jin' });
-            if (e === G.boss) { banner('护体灵光已破 · ' + WARD_SEC + ' 秒内吃满伤'); Sfx.buff(); }
+            if (e === G.boss) { banner('护体已破 · ' + WARD_SEC + ' 秒满伤'); Sfx.buff(); }
             else Sfx.burst();
           }
         }
@@ -3597,6 +3597,7 @@
   }
   let _hudSkillSig = null;             // 功法栏签名：等级没变就不重建
   let _hudSec = -1;                    // 计时只按整秒刷
+  let _hudQbTick = 0;                  // 补血键余量：每 12 帧同步一次
   let _bossTop = -1, _bossOn = false;  // Boss 血条的顶位（只有窗口/Boss 变化时重测）
   let _bossTopAt = 0;                  // 上次量顶栏高度的时刻（节流用）
   // 顶栏不是定高的：图名后面会挂难度与「境界压制」，限时增益又可能多占一行。
@@ -3615,25 +3616,27 @@
   }
   function renderQuickBar() {
     if (!elQuick) return;
-    const fight = G.map && (G.map.type === 'combat' || G.map.type === 'boss' || G.map.type === 'chase');
+    const fight = G.map && (G.map.type === 'combat' || G.map.type === 'boss' || G.map.type === 'chase' || !!G.trial);
     const show = !!fight && (G.state === 'play' || G.state === 'dialog');
     elQuick.classList.toggle('on', !!show);
     // 弹反键是独立元素，跟着同一套显隐规则走（拖动调整位置时强制显示）
     if (elParryBtn) elParryBtn.classList.toggle('on', !!(show || parryDragActive()));
-    for (let i = 0; i < elQuickBtns.length; i++) {
-      if (i === 2) continue;   // 第 3 格 = 弹反，由 paintParryHud 每帧绘制
-      const b = elQuickBtns[i], slot = quickSlot(i), lab = quickLabel(slot);
-      const ic = b.querySelector('.qb-icon');
-      if (ic) ic.textContent = lab.icon;
-      // 用尽的格子也压暗：一眼看出这格暂时指望不上
-      const gone = !!(slot && slot.kind === 'item' && (lab.count || 0) <= 0);
-      b.classList.toggle('empty', !slot || gone);
-      b.classList.toggle('pet', !!(slot && slot.kind === 'pet'));
-      b.title = !slot ? '空着 · 洞府里装配'
-        : lab.name + (slot.kind === 'item' ? '（余 ' + (lab.count || 0) + (gone ? ' · 已用尽' : '') + '）' : '')
-          + '　按 ' + (i + 1) + ' 或点一下';
+    // 补血键：图标固定一个字，余量挂角标；袋里一味回血丹都没有时压暗
+    const b = elQuickBtns[0];
+    if (b) {
+      const it = pickHealItem();
+      const n = it ? (save.inventory[it.id] || 0) : 0;
+      if (!b._qbN || b._qbN.parentNode !== b) b._qbN = b.querySelector('.qb-n');
+      if (!b._qbIc || b._qbIc.parentNode !== b) b._qbIc = b.querySelector('.qb-icon');
+      const badge = b._qbN, ic = b._qbIc;
+      if (badge) hudText(badge, n > 0 ? String(n) : '');
+      hudClass(b, 'empty', !it);
+      if (ic) hudText(ic, '丹');
+      const tip = it ? (it.name + '（余 ' + n + '）· 点一下服下　按 1')
+        : '袋中无回血丹药 · 坊市可买，丹炉可炼';
+      if (b._tip !== tip) { b._tip = tip; b.title = tip; }   // 每帧写 title 也是 DOM 变更，先比
     }
-    for (let i = 0; i < elQuickBtns.length; i++) { if (i === 2) continue; paintQuickCd(i); }
+    paintQuickCd(0);
   }
   // 第 3 格 = 弹反：每帧同步图标 / 状态（arming=蓄势、hold=护体、cd=回气）/ 边缘泛红
   // 20261111H：这个函数每帧都跑，原来每帧 querySelector + 写 textContent + 写 title。
@@ -3654,7 +3657,8 @@
     hudClass(btn, 'on', !!(parryDragActive() || (fight && (G.state === 'play' || G.state === 'dialog'))));
     const c = parryCarrier();
     const ic = parryIconEl(btn);
-    if (ic) hudText(ic, (c && c.icon) || '🛡');
+    // 单字「护」：战斗中这颗键只有一个意思，不需要再用各家的法宝图标去分辨是哪件
+    if (ic) hudText(ic, '护');
     hudClass(btn, 'empty', !c);
     hudClass(btn, 'parrying', !!(pr && (pr.state === 'arming' || pr.state === 'hold')));
     hudClass(btn, 'cooling', !!(pr && pr.state === 'cd'));
@@ -3662,7 +3666,7 @@
     const ch = (pr && pr.chain >= 2) ? String(pr.chain) : '';
     if (ch) { if (btn.getAttribute('data-chain') !== ch) btn.setAttribute('data-chain', ch); }
     else if (btn.getAttribute('data-chain') != null) btn.removeAttribute('data-chain');
-    const tip = c ? (c.name + ' · 按住护体（耗煞气、减速），单击格开反震　按 3 或点一下')
+    const tip = c ? '护体 · 单击格开反震，按住护体　按 3'
       : '未佩护体法宝 · 洞府 · 装备页 · 护体槽佩上一件（玄铁飞天盾已在袋中）';
     if (btn._tip !== tip) { btn._tip = tip; btn.title = tip; }   // 每帧写 title 也是 DOM 变更，先比
   }
@@ -3756,6 +3760,56 @@
     const t = G.quickCd ? (G.quickCd[i] || 0) : 0;
     if (t > 0) { b.classList.add('cooling'); const cd = b.querySelector('.qb-cd'); if (cd) cd.textContent = Math.ceil(t); }
     else b.classList.remove('cooling');
+  }
+  // ---------- 补血：一颗丹，袋里有什么吃什么 ----------
+  // 两格装配位撤掉之后，战斗里只剩这一颗键。它不绑死某味药：
+  // 先挑「够补上当前缺口的最小一味」—— 掉一成血就吞养精丹太亏；缺口太大才动大药。
+  const HEAL_ORDER = { huiqi: 0, lingzhi: 1, peiyuan: 2 };
+  function healCandidates() {
+    return (window.ITEMS || []).filter(it => it && it.effect && it.effect.healPct > 0
+      && !it.slot && !it.mat && !it.unique && !isGateNeed(it.id)
+      && (save.inventory[it.id] || 0) > 0 && canUse(it));
+  }
+  function pickHealItem() {
+    const cs = healCandidates();
+    if (!cs.length) return null;
+    cs.sort((a, b) => (a.effect.healPct - b.effect.healPct)
+      || ((HEAL_ORDER[a.id] === undefined ? 9 : HEAL_ORDER[a.id]) - (HEAL_ORDER[b.id] === undefined ? 9 : HEAL_ORDER[b.id])));
+    // 进图那一瞬 G.player 还没建好：缺口按 0 算（先选最小一味），
+    // 不能按 1 算 —— 那会让角标显示成「最大那味药的余量」，与实际不符。
+    const lack = (G.player && G.player.maxhp > 0)
+      ? Math.max(0, 1 - G.player.hp / G.player.maxhp) : 0;
+    // 找第一味够补上的；都补不满就用最大的那味
+    return cs.find(it => it.effect.healPct >= lack - 0.02) || cs[cs.length - 1];
+  }
+  function useQuickHeal() {
+    if (!(G.state === 'play' || G.state === 'dialog')) return false;
+    const pl = G.player;
+    if ((G.quickCd[0] || 0) > 0) {
+      const t = Math.ceil(G.quickCd[0]);
+      if (pl) spawnText(pl.x, pl.y - 34, '回气中 · ' + t, '#9aa7b8', 12);
+      Sfx.warn(); return false;
+    }
+    // 满血不空吞一颗：误触一次就少一粒丹，比「少一个回音」更疼
+    if (pl && pl.maxhp > 0 && pl.hp >= pl.maxhp - 0.5) {
+      spawnText(pl.x, pl.y - 34, '气血已满', '#9aa7b8', 12);
+      Sfx.warn(); return false;
+    }
+    const it = pickHealItem();
+    if (!it) {
+      if (pl) spawnText(pl.x, pl.y - 34, '袋中无丹', '#c9b27a', 12);
+      notify('袋中无回血丹药 · 坊市可买，丹炉可炼'); Sfx.warn(); return false;
+    }
+    save.inventory[it.id]--;
+    if (save.inventory[it.id] <= 0) delete save.inventory[it.id];
+    save.totalItems = Math.max(0, (save.totalItems || 1) - 1);
+    // noRun：这是"用掉"，不是"本局捡到"，别混进结算的收获清单
+    applyItem(it, { fromBag: true, noRun: true });
+    G.quickCd[0] = QUICK_CD.item;
+    writeSave();
+    refreshTitle();
+    renderQuickBar();
+    return true;
   }
   // 点/按一下就放。战斗中（含战斗里弹出的际遇对话）都能用，其余局面没有这栏
   function useQuick(i) {
@@ -7742,7 +7796,9 @@
     // 顿悟能「悟」出的新神通，只能是：① 原著明言可不凭典籍自行参悟的功法；
     // ② 在已习功法基础上、原著描述可顿悟进阶的功法（见 skills.js 的 enlighten / prereq 标注）。
     // 没学过、又无原著铺垫的功法，绝不会莫名其妙顿悟出来。
-    const pool = newSkills().filter(s => s.enlighten && (!s.prereq || (G.player.skills[s.prereq] || 0) > 0));
+    // 前置按「已习得」判，不能按「已装配」判：G.player.skills 只装本局戴上的那几门，
+    // 学过青元剑诀却没戴在槽里的人，一样该悟得到剑影分光术。
+    const pool = newSkills().filter(s => s.enlighten && (!s.prereq || (cultObj().skills[s.prereq] || 0) > 0));
     if (!pool.length) return optPassive();
     const s = U.pick(pool);
     const passive = s.type === 'passive';
@@ -7935,6 +7991,7 @@
     // 重置主角的侧身/风筝状态，免得上一趟残留的 dodging 在新一趟开头乱走
     if (G.player) { G.player.dodging = false; G.player.dodgePrev = null; G.player.dodgeT = 0; G.player.dodgeFx = 0; G.player.dodgeFrom = null; G.player.kiting = false; G.player.autoThrEvery = 0; }
     if (elAutoBtn) elAutoBtn.classList.toggle('on', on);
+    if (elAutoFightChk) elAutoFightChk.checked = on;   // 暂停面板里的勾要跟得上
     if (!silent) {
       if (on) { banner('自动战斗 · 开启（自由索敌，遇险侧身）'); Sfx.buff(); }
       else banner('自动战斗 · 关闭');
@@ -10822,22 +10879,22 @@
       }
     }
     hudText(elLevel, curRealmLabel() + (sst.dmgT > 0 ? '　·　杀意' : ''));
-    // 锋芒窗口不往这行里塞字（#stats 是 flex-wrap，多两个字就可能折行，整块顶栏跳一下），
-    // 只换境界名的颜色：闪完这一息里它是朱砂/暖橙，闪完自己变回去。
+    // 锋芒窗口不往这行里塞字：只换境界名的颜色（HUD 精简后这一行已不显示，保留以防旧皮肤/截图脚本取用）
     hudStyle(elLevel, 'color', (G.edgeT || 0) > 0 ? (save.skin === 'guigu' ? '#a8281e' : '#ffb066') : '');
     const sec = Math.floor(G.time);     // 显示只到秒：整秒没变就不用重新格式化
     if (sec !== _hudSec) { _hudSec = sec; hudText(elTime, fmtTime(G.time)); }
+    // HUD 极简后：斩 / 袋 / 灵石 不在顶栏显示（洞府与结算里都有），元素已移除，这两行留给旧探针。
     hudText(elKills, '斩 ' + G.kills);
     if (elBag) hudText(elBag, '袋 ' + (G.runLoot ? G.runLoot.length : 0));
     if (elStones) hudText(elStones, '灵石 ' + Math.round(save.stones || 0));
     if (elMapName) {
       const d = G.diff;
-      // 境界压制挂在图名这行尾巴上（不另起一块）：它是「此地对你而言是什么处境」，
-      // 与「这是哪张图 / 哪一档难度」本就是同一句话的三段。
+      // 图名只说「这是哪儿」。难度与「境界压制」不再接文字尾巴：
+      // 压制改为顶栏加 .capped（图名转暖 + 一颗朱砂点），难度只在进图前的战前提示里说。
       const pr = G.player ? pressureInfo() : null;
-      hudText(elMapName, (G.map ? G.map.name : '') + (d && d.id !== 'easy' ? '　·　' + d.name : '')
-        + (pr && pr.on ? '　·　' + pr.tag : ''));
+      hudText(elMapName, G.map ? G.map.name : '');
       hudStyle(elMapName, 'color', d && d.id !== 'easy' ? d.color : '');
+      hudClass(elTopbar, 'capped', !!(pr && pr.on));
     }
     // 快捷栏只在能打的图里露面（每帧同步，不依赖进图那一刻的状态）
     if (elQuick) {
@@ -10845,6 +10902,8 @@
       const fightMap = G.map && (G.map.type === 'combat' || G.map.type === 'boss' || G.map.type === 'chase' || !!G.trial);
       hudClass(elQuick, 'on', !!fightMap && (G.state === 'play' || G.state === 'dialog'));
       paintParryHud();
+      // 补血键的余量会随拾取 / 服用变：每 12 帧同步一次就够（内部先比后写）
+      if (((_hudQbTick = (_hudQbTick || 0) + 1) % 12) === 0) renderQuickBar();
     }
     // 功法图标栏：只有等级变动才重建（原来每帧 innerHTML='' + 逐个 createElement，
     // 手机上光这一步就是几毫秒；顺带让 .pip 的出现动画能真正播完，不再被下一帧清掉）
@@ -13030,29 +13089,17 @@
     // 能装进快捷栏的：丹药 / 符箓 / 灵石 —— 有即时功效或有「限时增益」的都算
     return ITEMS.filter(i => !i.slot && !i.mat && !i.unique && (i.effect || i.buffs) && (save.inventory[i.id] || 0) > 0);
   }
+  // 战斗里的补血键不需要预先装配：袋里有回血丹就能点。
+  // 这一节只报「现在有什么、吃哪一味」—— 不再让玩家为一场仗先回洞府配两格。
   function renderCaveQuick(lv) {
-    const slots = save.quick || [null, null, null];
-    let html = '<div class="cave-sec"><div class="cs-title">战斗快捷栏</div>' +
-      '<div class="cs-note">战斗画面右边那三格。装灵宠或消耗道具，点一下就放，也能按键盘 1 / 2 / 3 —— 灵宠回气 ' + QUICK_CD.pet + ' 息，丹药符箓 ' + QUICK_CD.item + ' 息。</div>';
-    for (let i = 0; i < 3; i++) {
-      const slot = slots[i], lab = quickLabel(slot);
-      html += '<div class="cave-sec"><div class="cs-title">第 ' + (i + 1) + ' 格　' + lab.icon + ' ' + lab.name +
-        (slot && slot.kind === 'item' ? '（余 ' + (lab.count || 0) + '）' : '') + '</div><div class="qb-picks">';
-      html += '<button class="sr-btn ghost" data-qset="' + i + '|none">空着</button>';
-      for (const p of (window.PETS || [])) {
-        if ((save.pets || []).indexOf(p.id) < 0) continue;
-        const on = slot && slot.kind === 'pet' && slot.id === p.id;
-        html += '<button class="sr-btn' + (on ? '' : ' ghost') + '" data-qset="' + i + '|pet|' + p.id + '">' +
-          (p.icon || '🐾') + ' ' + p.name + '</button>';
-      }
-      for (const it of quickItems()) {
-        const on = slot && slot.kind === 'item' && slot.id === it.id;
-        html += '<button class="sr-btn' + (on ? '' : ' ghost') + '" data-qset="' + i + '|item|' + it.id + '">' +
-          it.icon + ' ' + it.name + '（' + (save.inventory[it.id] || 0) + '）</button>';
-      }
-      html += '</div></div>';
-    }
-    return html;
+    const cs = healCandidates();
+    let html = '<div class="cave-sec"><div class="cs-title">战斗中补血</div>' +
+      '<div class="cs-note">战斗画面右侧那一颗「丹」。点一下即服，回气 ' + QUICK_CD.item +
+      ' 息；先吃够补上缺口的最小一味，缺口大才动好药 —— 不必预先装配。</div>';
+    html += cs.length
+      ? '<div class="cs-note">袋中现有：' + cs.map(it => it.icon + ' ' + it.name + '（' + (save.inventory[it.id] || 0) + '）').join('　') + '</div>'
+      : '<div class="cs-note">袋中暂无回血丹药 · 坊市可买，丹炉可炼</div>';
+    return html + '</div>';
   }
 
   function renderCavePet(lv) {
@@ -14808,9 +14855,9 @@
     else if (k === 'arrowright' || k === 'd') keys.right = true;
     else if (k === 'arrowup' || k === 'w') keys.up = true;
     else if (k === 'arrowdown' || k === 's') keys.down = true;
-    else if (k === '1' || k === '2') {
-      // 战斗快捷栏：按 1/2 用第 1/2 格（小键盘同键位）
-      if (G.state === 'play' || G.state === 'dialog') { e.preventDefault(); useQuick(+k - 1); }
+    else if (k === '1') {
+      // 补血（小键盘同键位）。第 2 格已撤，2 不再有动作
+      if (G.state === 'play' || G.state === 'dialog') { e.preventDefault(); useQuickHeal(); }
     }
     else if (k === '3') {
       // 第 3 格 = 弹反（按住护体 / 单击格开反震）：按下开始，松开收招
@@ -14877,14 +14924,14 @@
     new ResizeObserver(() => { _bossTop = -1; }).observe(elTopbar);
   }
   const elQuick = document.getElementById('quickbar');
-  // 弹反键独立浮动：比 1/2 格更大、位置可拖动自定义（暂停菜单）。它仍是「第 3 格」，
+  // 弹反键独立浮动：比补血键更大、位置可拖动自定义（暂停菜单）。它仍是「第 3 格」，
   // 所以 elQuickBtns[2] 指向它，着色 / 冷却 / 状态全部沿用原来那套绘制逻辑。
+  // 第 1/2 格的两颗装配位已撤：战斗里只剩一颗补血（索引 0），中间留空让 2 仍是弹反。
   const elParryBtn = document.getElementById('parryBtn');
   const elQuickBtns = (() => {
     const arr = (elQuick && elQuick.querySelectorAll) ? Array.prototype.slice.call(elQuick.querySelectorAll('.qb')) : [];
-    if (arr.length > 2) arr.length = 2;                       // 1/2 格原样
-    if (elParryBtn && arr.length === 2) arr.push(elParryBtn);  // 第 3 格 = 独立弹反键
-    return arr;
+    const heal = arr[0] || null;
+    return elParryBtn ? [heal, null, elParryBtn] : [heal];
   })();
   const elParryEdge = document.getElementById('parryEdge');   // 长按护体的边缘泛红（煞气外溢）
   const elParryHit = document.getElementById('parryHit');     // 弹反成功那一瞬的贴边金环
@@ -14915,7 +14962,7 @@
     } else {
       btn.addEventListener('pointerdown', ev => {
         ev.preventDefault(); ev.stopPropagation();
-        useQuick(i);
+        useQuickHeal();
       });
       // 键盘 Enter / 读屏软件走这条；pointerdown 已经处理过的，这里不再重复触发
       btn.addEventListener('click', ev => { ev.preventDefault(); ev.stopPropagation(); });
@@ -15099,10 +15146,13 @@
   const elRebirth = document.getElementById('rebirth');
   const elRebirthText = document.getElementById('rebirthText');
   const elAutoSaveChk = document.getElementById('autoSaveChk');
+  const elAutoFightChk = document.getElementById('autoFightChk');   // 大衍开关（暂停面板）
+  const elAutoFightRow = document.getElementById('autoFightRow');
   const elBossArt = document.getElementById('bossArt');   // 鬼谷水墨 · 异兽卷轴插画层
   const elBossSeal = document.getElementById('bossSeal'); // 鬼谷水墨 · boss 盖印
   const elManualSaveChk = document.getElementById('manualSaveChk');
   const elSaveNowBtn = document.getElementById('saveNowBtn');
+  const elRefineBtn = document.getElementById('refineBtn');
   const elSaveHint = document.getElementById('saveHint');
   const elShakeChk = document.getElementById('shakeChk');
   const elSaveIO = document.getElementById('saveIO');
@@ -15260,6 +15310,10 @@
     syncSaveHint();
     resetRestartArm();
     syncFullBtns();
+    // 大衍开关：只在能自动战斗的图上给这一行，打开时勾上当前状态
+    if (elAutoFightRow) elAutoFightRow.style.display = autoBtnAllowed() ? '' : 'none';
+    if (elAutoFightChk) elAutoFightChk.checked = !!G.autoOn;
+    if (elRefineBtn) elRefineBtn.textContent = '灵石祭炼 · ' + Math.round(save.stones || 0);
     // 联机：我暂停 → 对方也一起停下（双方好说话）
     if (window.Coop) window.Coop.sendPause(true);
   }
@@ -15426,11 +15480,20 @@
   }
   elDialog.addEventListener('click', () => { if (G.state === 'dialog') advanceDialog(); });
   elPauseBtn.addEventListener('click', () => { if (G.state === 'play') doPause(); });
-  // 自动战斗：战斗中随时可开可关。开着的时候人不动，对白与选卡都自己走
-  elAutoBtn.addEventListener('click', () => {
-    if (elAutoBtn.style.display === 'none') return;
-    setAuto(!G.autoOn);
+  // 灵石祭炼：顶栏的灵石数字撤掉之后，入口收进暂停面板（先回到 play，showCards 才有落脚处）
+  if (elRefineBtn) elRefineBtn.addEventListener('click', () => {
+    if (G.state !== 'pause') return;
+    doResume();
+    openRefine();
   });
+  // 自动战斗：战斗画面已不再挂按钮，开关统一走暂停面板（#autoFightChk）。
+  // 这段保留成可选绑定 —— 旧包裹 / 截图脚本若还插了 #autoBtn，行为照旧。
+  if (elAutoBtn) {
+    elAutoBtn.addEventListener('click', () => {
+      if (elAutoBtn.style.display === 'none') return;
+      setAuto(!G.autoOn);
+    });
+  }
   // 联机：暂停菜单里给个「离开联机房间」，不用回标题就能断开（没连上时自动隐藏）
   if (elPauseLeaveCoop) {
     elPauseLeaveCoop.style.display = 'none';
@@ -15889,8 +15952,11 @@
 
   // 存档开关
   if (elAutoSaveChk) elAutoSaveChk.addEventListener('change', () => {
-    save.settings.autoSave = elAutoSaveChk.checked; writeSave();
-    notify(save.settings.autoSave ? '自动存档：开' : '自动存档：关');
+    save.settings.autoSave = elAutoSaveChk.checked; writeSave();    notify(save.settings.autoSave ? '自动存档：开' : '自动存档：关');
+  });
+  // 大衍（自动战斗）：从战斗画面撤下来之后，这里是唯一的开关
+  if (elAutoFightChk) elAutoFightChk.addEventListener('change', () => {
+    setAuto(elAutoFightChk.checked);
   });
   if (elManualSaveChk) elManualSaveChk.addEventListener('change', () => {
     save.settings.manualSave = elManualSaveChk.checked; writeSave(); syncSettingsUI();
@@ -16017,6 +16083,9 @@
     ctx.imageSmoothingEnabled = false;   // 改 canvas.width 会重置上下文状态，这里补回来
     const scale = Math.min(availW / W, availH / H);
     viewScale = scale;
+    // 触控尺寸按手机实际像素：把当前缩放比交给 CSS，--tap 再反算回逻辑 px。
+    // 写 :root 不写 #stage —— --tap 要给 #hud 里的按钮继承，写在舞台外的祖先更稳。
+    try { document.documentElement.style.setProperty('--view-scale', String(Math.round(scale * 1e5) / 1e5)); } catch (e) {}
     // 舞台按逻辑尺寸布局，整体 scale：HUD / 弹窗 / 字号跟着画布一起缩，
     // 各机型看到的是同一张设计稿，只是大小不同。
     elStage.style.width = W + 'px';
@@ -17787,8 +17856,9 @@
       const p = G.player;
       return {
         on: !!G.autoOn, state: G.state, t: +(G.autoT || 0).toFixed(2),
-        btn: elAutoBtn ? elAutoBtn.style.display : null,
-        lit: elAutoBtn ? elAutoBtn.classList.contains('on') : null,
+        // 战斗画面的按钮已撤：btn 现在反映暂停面板那一行是否可用，lit 读勾选状态
+        btn: elAutoFightRow ? elAutoFightRow.style.display : null,
+        lit: elAutoFightChk ? elAutoFightChk.checked : null,
         cards: G.cardsNow ? G.cardsNow.length : 0,
         // should = 按规则此刻该不该出现（DOM 的 display 要等下一帧渲染，断言用这个更准）
         should: autoBtnAllowed(),
