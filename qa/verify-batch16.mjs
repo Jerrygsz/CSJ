@@ -31,15 +31,17 @@ const game = fs.readFileSync(join(root, 'js', 'game.js'), 'utf8');
 const audio = fs.readFileSync(join(root, 'js', 'audio.js'), 'utf8');
 const html = fs.readFileSync(join(root, 'index.html'), 'utf8');
 
-// ---------- A 静态：两颗常驻按钮的旧素签外观 + 44 物理 px 热区 ----------
-// 20261121D：禁制 / 大衍回到经验条右下，恢复旧金线胶囊与入定小圆点；
+// ---------- A 静态：两颗常驻按钮的素签外观 + 44 物理 px 热区 ----------
+// 20261122A：顶栏轻排，禁制 / 大衍从大黑胶囊收成细金线淡墨素签（宽 1.32 倍）；
+// 伪元素重新分工以便真机命中补偿：#pauseBtn::before 画签身、::after 做 coarse 热区；
+// #autoBtn 反过来 ::after 画签身、::before 做 coarse 热区，入定点移到 span::after。
 // 热区仍走 --tap（44px / 当前舞台缩放比），任何机型都是 44 屏幕 px。
 ok(/--tap:\s*calc\(44px \/ var\(--view-scale\)\)/.test(css), '触控尺寸走 --tap（44 物理 px 反算回逻辑 px）');
 const duoRule = (css.match(/#pauseBtn,\s*#autoBtn\s*\{([^}]*)\}/) || [])[1] || '';
-ok(/height:\s*var\(--tap\)/.test(duoRule) && /width:\s*calc\(var\(--tap\)\s*\*\s*1\.45\)/.test(duoRule),
-  '禁制 / 大衍共用的签身高 44 物理 px、宽 1.45 倍（旧细长素签）', duoRule.slice(0, 160));
-ok(/#pauseBtn::before\s*\{[^}]*inset:\s*calc\(6px \/ var\(--view-scale\)\)/.test(css), '禁制签身仍由 ::before 画金线胶囊');
-ok(/#autoBtn\.on::after\s*\{/.test(css), '#autoBtn 的 ::after 仍是「入定」小圆点');
+ok(/height:\s*var\(--tap\)/.test(duoRule) && /width:\s*calc\(var\(--tap\)\s*\*\s*1\.32\)/.test(duoRule),
+  '禁制 / 大衍共用的签身高 44 物理 px、宽 1.32 倍（细金线素签）', duoRule.slice(0, 160));
+ok(/#pauseBtn::before,\s*#autoBtn::after\s*\{[^}]*inset:\s*calc\(10px \/ var\(--view-scale\)\)/.test(css), '禁制签身由 ::before 画细金线素签、大衍由 ::after 画（避让 coarse 热区）');
+ok(/#autoBtn\.on span::after\s*\{/.test(css), '#autoBtn 的入定小圆点挂在 span::after（让出伪元素画签身）');
 ok(/id="autoBtn"/.test(html) && /id="autoFightChk"/.test(html), '大衍回到战斗画面，暂停面板开关仍留作兼容');
 
 // ---------- B 静态：重开确认 ----------
