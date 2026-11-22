@@ -146,45 +146,48 @@ body.fs #wrap { background: #000; }
 
 /* ---------- HUD ---------- */
 #hud { position: absolute; inset: 0; pointer-events: none; display: none; }
-/* 顶栏·轻排（v1.7）：三条圆角带在上，「地名 / 时间 / 斩怪 / 境界」一行紧贴在经验条下，
-   禁制 / 大衍两枚素签退到这一行的最右。原则是「让画面先说话」——
-   原先用一条横贯全宽、0.68 不透明度的黑幕压住画首，水墨山水被吃掉一条；现在改成
-   只在三条带背后衬一段短墨晕，向右、向下都化到透明，留出天与纸。
-   条上不写数字；热区仍是 44 物理 px（--tap），只是视觉收成细长素签。 */
-#topbar { position: absolute; top: 0; left: 0; right: 0; padding: 8px 12px 12px; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; background: none; }
-/* 短墨晕：只垫在资源带背后，宽度跟带子走，不铺满屏。用伪元素，不占布局、不吃点击。 */
-#topbar::before { content: ''; position: absolute; z-index: -1; top: 0; left: 0; width: calc(100% - 24px); height: calc(100% + 26px);
-  background: linear-gradient(180deg, rgba(5,7,10,0.56) 0%, rgba(5,7,10,0.34) 30%, rgba(5,7,10,0.20) 72%, rgba(5,7,10,0.04) 100%);
-  -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 62%, transparent 96%);
-  mask-image: linear-gradient(90deg, #000 0%, #000 62%, transparent 96%); pointer-events: none; }
-/* 三条带：由撑满全宽收成居左的 min(58%, 268px) 一段，山水从右侧露出来。
-   生命稍厚、煞气与修为更细且上下贴紧；生命红降饱和到赭朱，和纸墨不再撞色。 */
-#hpwrap, #xpwrap, #cnwrap { position: relative; width: min(58%, 268px); background: rgba(0,0,0,0.46); border: 1px solid var(--line-soft); border-radius: var(--r-pill); overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.32); }
+/* 顶栏·水墨横卷：三条毛笔横画拉通整个屏幕顶部，无描边、两端收锋；
+   题头文字左右各自靠边紧贴横画，不转行。仍是「让画面先说话」，不铺黑幕。 */
+#topbar { position: absolute; top: 0; left: 0; right: 0; padding: 8px 12px; display: flex; flex-direction: column; align-items: stretch; gap: 2px; background: none; }
+/* 极淡墨晕：全宽，只托住横画与题头，往下化到透明 —— 是宣纸上的淡墨，不是压画面的黑幕。 */
+#topbar::before { content: ''; position: absolute; z-index: -1; top: 0; left: 0; right: 0; height: calc(100% + 10px);
+  background: linear-gradient(180deg, rgba(8,10,12,0.34) 0%, rgba(8,10,12,0.17) 55%, rgba(8,10,12,0) 100%); pointer-events: none; }
+/* 三条毛笔横画：拉通整个屏幕顶部、无边框，两端用 mask 收出笔锋（起笔稍顿、收笔拖锋）。
+   槽是淡墨不是黑；生命稍厚、煞气与修为更细且上下贴紧。 */
+#hpwrap, #xpwrap, #cnwrap { position: relative; width: 100%; border: none; border-radius: 1px; overflow: hidden; background: rgba(26,22,18,0.42);
+  -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,0.3) 0, #000 2.5%, #000 92%, rgba(0,0,0,0.82) 97%, transparent 100%);
+  mask-image: linear-gradient(90deg, rgba(0,0,0,0.3) 0, #000 2.5%, #000 92%, rgba(0,0,0,0.82) 97%, transparent 100%); }
 #hpwrap { height: 11px; }
-#xpwrap { height: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.26); }
-#cnwrap { height: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.20); }
-#hpfill { height: 100%; width: 100%; background: linear-gradient(90deg,#b8483f,#e0745e); transition: width var(--dur-bar) var(--ease-bar); }
+#xpwrap { height: 8px; }
+#cnwrap { height: 6px; }
+/* 填充也收笔锋：右端（血量 / 煞气 / 修为的末端）拖出一个渐隐的尖，不是生硬方头。
+   用 mask 百分比，宽度随数值缩放时笔锋始终跟随末端。 */
+#hpfill, #xpfill, #cnfill { height: 100%;
+  -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 96%, transparent 100%);
+  mask-image: linear-gradient(90deg, #000 0%, #000 96%, transparent 100%); }
+#hpfill { width: 100%; background: linear-gradient(90deg,#b8483f,#e0745e); transition: width var(--dur-bar) var(--ease-bar); }
 /* 鬼谷皮走纸墨调，顶栏生命条也换成赭朱，别让鲜红压过整张纸 */
 body[data-skin="guigu"] #hpfill { background: linear-gradient(90deg,#a84434,#cf7358); }
-#xpfill { height: 100%; width: 0%; background: linear-gradient(90deg,var(--mp-a),var(--mp-b)); transition: width var(--dur-bar) var(--ease-bar); }
-#cnfill { height: 100%; width: 0%; background: linear-gradient(90deg,#7a5f24,#e0bf62); transition: width var(--dur-bar) var(--ease-bar); }
+#xpfill { width: 0%; background: linear-gradient(90deg,var(--mp-a),var(--mp-b)); transition: width var(--dur-bar) var(--ease-bar); }
+#cnfill { width: 0%; background: linear-gradient(90deg,#7a5f24,#e0bf62); transition: width var(--dur-bar) var(--ease-bar); }
 /* 修为刚满、正等着回洞府破境：让这条细带轻轻呼吸一下。只动 opacity，走合成器。 */
 #cnwrap.capped #cnfill { animation: cnCapped var(--dur-breathe) var(--ease-inout) infinite; }
 @keyframes cnCapped { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
-/* 题头·一簇一字（v1.7）：地名领头，时间 / 斩怪 / 境界依次收成一簇贴在左，
-   禁制 / 大衍两枚素签靠最右收尾。原先 #time 靠 margin-left:auto 把时间顶到屏中，
-   四段字被拆成「左一名、中三段、右两钮」三线，读起来散；现在同一行只有两个重心。 */
-#stats { display: flex; align-items: center; gap: var(--sp-2); width: 100%; min-height: var(--tap); font-size: var(--fs-micro); letter-spacing: 1px; font-variant-numeric: tabular-nums; color: rgba(232,223,204,0.86); text-shadow: 0 1px 2px rgba(0,0,0,0.92), 0 0 6px rgba(0,0,0,0.55); }
+/* 题头·左右两簇（v1.8）：地名 / 时间 / 斩怪 / 境界靠左一簇，禁制 / 大衍靠右一簇。
+   「上下紧凑、不空多转行」——行高由文字自身撑起（约一行的高），不再用 min-height 撑 44px
+   让 11px 的字悬在中间。按钮仍要 44 物理 px 热区，故改成绝对定位浮到右侧、不参与撑行；
+   横条右端已被 mask 收成笔锋，按钮压在其上不显突兀。 */
+#stats { position: relative; display: flex; align-items: center; gap: calc(10px / var(--view-scale)); width: 100%; min-height: 0; height: auto; line-height: 1.2; font-size: var(--fs-micro); letter-spacing: 1px; font-variant-numeric: tabular-nums; color: rgba(232,223,204,0.86); text-shadow: 0 1px 2px rgba(0,0,0,0.92), 0 0 6px rgba(0,0,0,0.55); }
 #stats > span:not(.top-tools) { white-space: nowrap; }
 #mapName { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; letter-spacing: 3px; color: rgba(240,231,212,0.90); }
 /* 境界压制：只把图名转暖、前面点一颗朱砂，不往图名尾巴接四个字。 */
 #topbar.capped #mapName { color: #d9905e; }
 #topbar.capped #mapName::before { content: ''; display: inline-block; width: 4px; height: 4px; margin-right: 8px; border-radius: 50%; background: #d9905e; vertical-align: 2px; }
 /* 三段次要信息逐级收轻：时间 > 斩怪 > 境界；用字距而非字号分层，保持极简。 */
-#time { color: rgba(232,223,204,0.72); letter-spacing: 1px; }
-#kills { color: rgba(232,223,204,0.68); letter-spacing: 0.5px; }
+#time { color: rgba(238,230,212,0.82); letter-spacing: 1px; }
+#kills { color: rgba(238,230,212,0.78); letter-spacing: 0.5px; }
 #level { color: var(--accent-soft); letter-spacing: 2px; }
-.top-tools { display: flex; align-items: center; gap: calc(2px / var(--view-scale)); flex: 0 0 auto; margin-left: auto; }
+.top-tools { position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: calc(2px / var(--view-scale)); flex: 0 0 auto; }
 /* 禁制 / 大衍：细金线描的淡墨素签，不再是大黑胶囊。
    外层按钮仍占 var(--tap) 热区（任何机型都是 44 屏幕 px）—— 锚点、显隐、状态全挂外层；
    看得见的签身移到 ::before 上收细，这样「好点」和「好看」互不迁就。 */

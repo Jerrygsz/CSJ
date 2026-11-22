@@ -222,12 +222,15 @@ ok(listH[0] && listH[0] / gWm.ovh > 0.7, '列表面板占屏 ≥70%（原坊市 
 console.log('\n== 9. HUD 旧式圆角带（无数字无标签）/ 标题页统计改网格 ==');
 await open(() => { const F = window.__FR; F.clearProgress(); F.setLevel(60); F.enterMap('houshan'); });
 const hud = await page.evaluate(() => {
-  const box = id => { const e = document.getElementById(id); if (!e) return null; const r = e.getBoundingClientRect(); const s = getComputedStyle(e);
-    return { h: +r.height.toFixed(1), top: +r.top.toFixed(1), bot: +r.bottom.toFixed(1), radius: s.borderRadius, border: s.borderTopWidth }; };
+  const box = id => { const e = document.getElementById(id); if (!e) return null; const r = e.getBoundingClientRect(); const s = getComputedStyle(e); const pm = s.webkitMaskImage || s.maskImage || '';
+    return { h: +r.height.toFixed(1), w: +r.width.toFixed(1), top: +r.top.toFixed(1), bot: +r.bottom.toFixed(1),
+      radius: s.borderRadius, border: s.borderTopWidth, masked: /gradient/.test(pm) }; };
+  const stageW = document.getElementById('stage').getBoundingClientRect().width;
   const stats = document.getElementById('stats').getBoundingClientRect();
   const heal = document.querySelector('#quickbar .qb-heal');
   const healAfter = heal ? getComputedStyle(heal, '::after') : null;
   return {
+    stageW: +stageW.toFixed(1),
     hp: box('hpwrap'), xp: box('xpwrap'), cn: box('cnwrap'),
     numbers: ['hpval', 'xpval'].filter(id => document.getElementById(id)),
     labels: document.querySelectorAll('#topbar .barlabel').length,
@@ -239,7 +242,8 @@ const hud = await page.evaluate(() => {
 ok(hud.numbers.length === 0 && hud.labels === 0, '三条旧式圆角带不写数字，也不写生命 / 煞气 / 修为', hud);
 ok(hud.hp && hud.xp && hud.cn && hud.xp.h < hud.hp.h && hud.cn.h < hud.xp.h,
   '生命最厚，煞气与修为更细', { hp: hud.hp && hud.hp.h, xp: hud.xp && hud.xp.h, cn: hud.cn && hud.cn.h });
-ok(hud.hp && /px/.test(hud.hp.radius) && parseFloat(hud.hp.border) >= 1, '血条回到带描边的圆角带', hud.hp);
+ok(hud.hp && parseFloat(hud.hp.border) === 0 && hud.hp.masked, '三条是无描边的毛笔横画（两端收锋 mask）', hud.hp);
+ok(hud.hp && hud.hp.w >= hud.stageW - 30, '三条横画拉通整个屏幕顶部', { w: hud.hp && hud.hp.w, stageW: hud.stageW });
 ok(hud.toolsTop - hud.cnBottom <= 4, '题头与经验条紧贴（上下挨紧）', { gap: +(hud.toolsTop - hud.cnBottom).toFixed(1) });
 ok(hud.healKey && hud.healKey.attr === '1' && /1/.test(hud.healKey.content) && hud.healKey.display !== 'none',
   '右侧快捷只留 1 号键，键位号真的画在圆键上', hud.healKey);
