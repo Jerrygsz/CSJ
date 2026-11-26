@@ -53,9 +53,15 @@ ok(/storyStage\(\)\s*\{\s*return window\.StoryStage/.test(game) && /storyStageTi
 ok(/id === 'qixuan' && window\.Cutscene && window\.Cutscene\.force/.test(game)
    && /else if \(hsLines\.length && !\(window\.__CSJ_QA__ \|\| \(typeof navigator !== 'undefined' && navigator\.webdriver\)\)\)/.test(game),
    '旧 Cutscene / 自动化 showLines 分流原样保留', null);
+ok(/function replayStoryLive/.test(game)
+   && /replayStoryLive\(csId\)/.test(game) && /replayStoryLive\(id\)/.test(game),
+   '洞府「重温此段 / 剧情回顾」都经 replayStoryLive 分流', null);
+ok(/sb\.id = 'storyStageSkipBtn'/.test(stageSrc) && /sb\.addEventListener\('click'/.test(stageSrc)
+   && /function placeSkip/.test(stageSrc),
+   '剧情层自带可点的「跳过」，并按舞台缩放定位', null);
 
 // ---- 数据真源：在 Node 里只跑数据层，不碰 DOM ----
-const sandbox = { window: {}, console: { warn() {} } };
+const sandbox = { window: { addEventListener() {} }, console: { warn() {} } };
 vm.runInNewContext(fs.readFileSync(join(root, 'js', 'maps.js'), 'utf8'), sandbox);
 vm.runInNewContext(stageSrc, sandbox);
 const stories = sandbox.window.MAP_STORIES;
@@ -182,6 +188,77 @@ ok(H0.stream > 1 && H0.herb < 1, '山涧加速、药畦减速（是真的速度�
 ok(H0.wall === true, '山径石壁真挡路', H0.wall);
 const H1 = await page.evaluate(() => { window.__FR.storyStageSkip(); return window.__FR.storyStage(); });
 ok(H1 && !H1.active, '后山层也能干净收掉', H1);
+
+console.log('\n== 5. 洞府回顾改走战斗地图剧情层 ==');
+const seenOf = () => page.evaluate(() => JSON.stringify(JSON.parse(localStorage.getItem('fanren_save_v1') || '{}').seen || []));
+const SEEN0 = await seenOf();
+await page.evaluate(() => {
+  const F = window.__FR;
+  F.storyStageForce(true);
+  F.cave('qixuan');
+  F.caveTab('story');
+  document.querySelector('#caveBody button[data-story="qixuan"]').click();
+});
+await page.waitForTimeout(120);
+const R0 = await page.evaluate(() => {
+  const F = window.__FR;
+  const s = F.storyStage();
+  const btn = document.getElementById('storyStageSkipBtn');
+  const r = btn.getBoundingClientRect();
+  const tb = document.getElementById('topbar').getBoundingClientRect();
+  return {
+    s, cs: window.Cutscene.active(), csHost: document.getElementById('csHost').style.display,
+    cave: document.getElementById('cave').style.display, mapId: F.G.mapId,
+    skip: { text: btn.textContent, display: getComputedStyle(btn).display,
+            y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height),
+            topbarBottom: Math.round(tb.bottom) },
+    linesSame: (document.getElementById('dialogSpeaker').textContent + '|' + document.getElementById('dialogText').textContent)
+      === window.MAP_STORIES.qixuan[0].join('|')
+  };
+});
+ok(R0.s && R0.s.active && R0.s.replay === true && R0.s.mapId === 'qixuan' && R0.s.gameState === 'dialog',
+   '点「回看」进的是主画布层（replay 标记），不是 dialog 插画', R0.s);
+ok(R0.cs === false && R0.csHost === 'none' && R0.cave === 'none' && R0.mapId === 'qixuan',
+   '旧插画层没建，洞府收起，背景换成目标图', { cs: R0.cs, host: R0.csHost, cave: R0.cave, map: R0.mapId });
+ok(R0.linesSame, '回放台词仍逐字来自 MAP_STORIES.qixuan', R0.linesSame);
+ok(R0.skip.display === 'block' && /跳过/.test(R0.skip.text) && R0.skip.y >= R0.skip.topbarBottom + 4
+   && R0.skip.w >= 44 && R0.skip.h >= 20,
+   '跳过按钮可见、够点、且不压顶栏素签', R0.skip);
+ok(await seenOf() === SEEN0, '回放不写 save.seen，账本不变', null);
+await page.screenshot({ path: join(here, 'shots', 'story-stage-replay.png') });
+
+await page.click('#storyStageSkipBtn');
+await page.waitForTimeout(120);
+const R1 = await page.evaluate(() => ({
+  s: window.__FR.storyStage(), cs: window.Cutscene.active(), state: window.__FR.G.state,
+  cave: document.getElementById('cave').style.display,
+  skip: getComputedStyle(document.getElementById('storyStageSkipBtn')).display
+}));
+ok(!R1.s.active && R1.cs === false && R1.state === 'cave' && R1.cave === 'flex' && R1.skip === 'none',
+   '点跳过只收层并回洞府，不进战斗、不留残影', R1);
+ok(await seenOf() === SEEN0, '跳过后账本仍不变', null);
+
+const R2 = await page.evaluate(() => {
+  document.getElementById('caveStory').click();
+  const s = window.__FR.storyStage();
+  return { s, cs: window.Cutscene.active() };
+});
+ok(R2.s && R2.s.active && R2.s.replay === true && R2.cs === false,
+   '「重温此段」同样走主画布剧情层', R2.s);
+await page.click('#storyStageSkipBtn');
+await page.waitForTimeout(120);
+
+const R3 = await page.evaluate(() => {
+  const F = window.__FR;
+  F.cave('qixuan'); F.caveTab('story');
+  document.querySelector('#caveBody button[data-story="houshan"]').click();
+  return { s: F.storyStage(), cs: window.Cutscene.active(), mapId: F.G.mapId };
+});
+ok(R3.s && R3.s.active && R3.s.mapId === 'houshan' && R3.s.replay === true
+   && R3.mapId === 'houshan' && R3.cs === false,
+   '后山回看也用后山背景演后山剧情，不叠在上一张图上', R3);
+await page.click('#storyStageSkipBtn');
+await page.waitForTimeout(120);
 
 ok(errs.length === 0, '全程零报错', errs.slice(0, 4));
 await b.close(); server.close();

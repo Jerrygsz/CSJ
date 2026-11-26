@@ -125,6 +125,7 @@
     zones: function (id) { return (STAGES[id] && STAGES[id].zones) || []; },
     steps: function (id) { return (STAGES[id] && STAGES[id].steps) || []; },
     start: start,
+    replay: replay,
     stop: stop,
     skip: skip,
     tick: tick,
@@ -163,6 +164,23 @@
     cv.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%;' +
       'pointer-events:none;z-index:0;display:block;';
     ctx = cv.getContext('2d');
+    // 真实玩家的收场口：旧插画层右上角有「跳过」，新层也得有，且不能穿透到战斗输入。
+    // 必须挂在 body：#stage 有 transform 会自成层叠上下文，放里面会被 #dialog(z=40) 盖住点不到。
+    var sb = document.getElementById('storyStageSkipBtn');
+    if (!sb) {
+      sb = document.createElement('button');
+      sb.id = 'storyStageSkipBtn';
+      sb.type = 'button';
+      sb.textContent = '跳过 »';
+      sb.style.cssText = 'position:fixed;z-index:9999;' +
+        'border:1px solid rgba(201,162,74,.55);border-radius:5px;' +
+        'background:rgba(12,14,17,.72);color:#e9dfc8;font-family:"KaiTi","STKaiti",serif;' +
+        'letter-spacing:1px;cursor:pointer;-webkit-tap-highlight-color:transparent;';
+      sb.addEventListener('click', function (e) { e.stopPropagation(); skip(); });
+      document.body.appendChild(sb);
+    }
+    sb.style.display = 'block';
+    placeSkip();
     if (!styleEl) {
       styleEl = document.createElement('style');
       styleEl.id = 'storyStageBackdrop';
@@ -186,6 +204,21 @@
     }
     if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     P.view = { w: w, h: h, dpr: dpr };
+    placeSkip();
+  }
+
+  // 跳过按钮跟着 #stage 的实际缩放走：逻辑坐标 right:14 / top:96 换算成屏幕 px。
+  // 96 是故意压过顶栏「大衍 / 禁制」两枚素签的，真机上不跟它们叠在一起。
+  function placeSkip() {
+    var sb = document.getElementById('storyStageSkipBtn');
+    var stage = document.getElementById('stage');
+    if (!sb || !stage || sb.style.display === 'none') return;
+    var r = stage.getBoundingClientRect();
+    var sc = (r.width || 480) / 480;
+    sb.style.top = (r.top + 96 * sc) + 'px';
+    sb.style.right = Math.max(0, window.innerWidth - r.right + 14 * sc) + 'px';
+    sb.style.fontSize = Math.max(10, 12 * sc) + 'px';
+    sb.style.padding = (5 * sc) + 'px ' + (10 * sc) + 'px';
   }
 
   function applyHero() {
@@ -541,6 +574,8 @@
   function unmount() {
     if (raf) { cancelAnimationFrame(raf); raf = 0; }
     if (cv) cv.style.display = 'none';
+    var sb = document.getElementById('storyStageSkipBtn');
+    if (sb) sb.style.display = 'none';
     if (styleEl && styleEl.parentNode) styleEl.parentNode.removeChild(styleEl);
     styleEl = null;
   }
@@ -604,6 +639,7 @@
       weather: null, fade: 0,
       i: 0, stepT: 0, active: true, finished: null,
       onDone: onDone || null,
+      replay: !!opts.replay,
       view: null
     };
     g.state = 'dialog';
@@ -618,6 +654,10 @@
     return true;
   }
 
+  function replay(mapId, onDone) {
+    return start(mapId, (window.MAP_STORIES || {})[mapId] || [], onDone, { replay: true });
+  }
+
   function state() {
     if (!P || !P.active) return { active: false, mapId: null, step: 0, total: 0 };
     var a = actor('hanli') || {};
@@ -625,6 +665,7 @@
     return {
       active: true,
       mapId: P.mapId,
+      replay: !!P.replay,
       step: P.i + 1,
       total: P.steps.length,
       kind: (P.steps[P.i] || {}).t || null,
@@ -643,6 +684,8 @@
       finished: P.finished
     };
   }
+
+  window.addEventListener('resize', function () { if (P && P.active) resize(); });
 
   window.StoryStage = API;
 })();

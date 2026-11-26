@@ -12773,6 +12773,36 @@
     if (elCave) elCave.style.display = 'flex';
     Sfx.buff();
   }
+  // 洞府「重温此段 / 剧情回顾」：前两张图改在战斗地图里演小人走位对白，不再弹旧插画层。
+  // 回放只演不记账：不写 save.seen、不重进地图、不领奖励；收场原地回洞府。
+  function replayStoryFromCave(id) {
+    const S = window.StoryStage;
+    const m = MAPS.find(x => x.id === id);
+    if (!S || !m || !S.canPlay(id)) return false;
+    // 回放要看到目标图自己的战斗地图背景，不能只把剧情人物叠在上一张图上。
+    // 只重置本局表现层，不写 save.mapId / 不加历练岁月 / 不进结算。
+    const prevMapId = G.mapId, prevMap = G.map;
+    G.mapId = id; G.map = m;
+    if (S.active && S.active()) S.stop();
+    if (window.FX3) window.FX3.clear();
+    resetRun();
+    applyHeroSprite();
+    if (!S.available()) return false;
+    hideAllOverlays();
+    const back = function () {
+      G.state = 'cave';
+      G.mapId = prevMapId; G.map = prevMap;
+      if (elCave) { elCave.style.display = 'flex'; renderCave(); }
+    };
+    if (!S.replay(id, back)) { back(); return false; }
+    return true;
+  }
+  function replayStoryLive(id) {
+    const S = window.StoryStage;
+    return !!(S && S.canPlay(id) && S.available()
+      && (S.force || !(window.__CSJ_QA__ || (typeof navigator !== 'undefined' && navigator.webdriver)))
+      && replayStoryFromCave(id));
+  }
   function realmSum(level) {
     const o = { hp: 0, dmg: 0, atk: 0, spd: 0 };
     for (const r of REALM_LAYERS) { if (level >= r.lv) { o.hp += r.hp; o.dmg += r.dmg; o.atk += r.atk; o.spd += r.spd; } else break; }
@@ -12813,7 +12843,8 @@
   }
 
   // ==================== 洞府「剧情回顾」 ====================
-  // 列出 CUTSCENES 里所有已接入动画的地图，点「回看」直接 Cutscene.replay(id)。
+  // 列出 CUTSCENES 里所有已接入动画的地图，点「回看」由 replayStoryLive 分流：
+  // 前两张图在战斗地图演小人剧情，其余图仍走旧 Cutscene.replay(id)。
   // 与 caveStory「重温此段」的区别：那个按洞府归属只播本图，这个跨全部地图，
   // 所以没有洞府的图（如后山）也有回看入口。
   // 纯播放：不重进地图、不弹难度面板、不写 save.seen、不吞奖励、不改修行进度。
@@ -12823,7 +12854,7 @@
     if (!ids.length) return '<div class="cave-sec empty"><div class="cs-empty">尚无已录的剧情过场</div></div>';
     const CN = ['壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖', '拾'];
     let h = '<div class="cave-sec"><div class="cs-title">剧情回顾 · ' + ids.length + ' 段</div>'
-          + '<div class="cs-note">只重播过场，不重进地图、不领奖励、不改修行进度；老存档亦能看。人物衣着仍是当前护甲。</div>'
+          + '<div class="cs-note">只在战斗地图重播走位对白，不重进地图、不领奖励、不改修行进度；老存档亦能看。人物衣着仍是当前护甲。</div>'
           + '<div class="brk-list">';
     ids.forEach((id, i) => {
       const m = MAPS.find(x => x.id === id);
@@ -15811,6 +15842,7 @@
     // 剧场入口：这张洞府已接入剧情动画时，「重温此段」直接重播过场。
     // 老存档也能看 —— 不依赖 save.seen，不改账本，不重进地图，不弹难度面板。
     const csId = CUTSCENE_CAVE[c.from];
+    if (csId && MAP_STORIES[csId] && replayStoryLive(csId)) return;
     if (csId && window.Cutscene && window.Cutscene.available() && MAP_STORIES[csId]) {
       window.Cutscene.replay(csId);
       return;
@@ -15865,6 +15897,7 @@
     const csBtn = e.target.closest('button[data-story]');
     if (csBtn) {
       const id = csBtn.getAttribute('data-story');
+      if ((window.MAP_STORIES[id] || []).length && replayStoryLive(id)) return;
       if (window.Cutscene && (window.MAP_STORIES[id] || []).length) window.Cutscene.replay(id);
       else notify('这段过场尚未录入');
       return;
