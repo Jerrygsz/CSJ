@@ -11297,6 +11297,8 @@
     }
 
     G.mapId = id; G.map = m;
+    // 主画布剧情层是进图独占演出：换图 / 重进一律先收干净，绝不把上一张的镜头与人物带过来
+    if (window.StoryStage) window.StoryStage.stop();
     G._refHp = null;   // 本图怪物的硬度基准要重算（见 refHpOfMap）
     if (window.FX3) FX3.clear();   // 换图：上一张图的残留特效不许跟着带过来
     G._refDmg = null;  // 本图怪物的凶悍基准要重算（见 refDmgOfMap）
@@ -11455,6 +11457,15 @@
       }
       if (G.coopRole) { onStoryMapDone(m); return; }   // 联机：后果照走，对白留给单机
       if (storySeen(sc.key)) { onStoryMapDone(m); return; }   // 演过就不再念，后果照走（奖励/破境判定不受影响）
+      // StoryStage：真实玩家首进这张图时，在战斗地图上按原著走位 / 对白 / 小动作。
+      // 自动化回归仍走下面的 showLines 通道；只有显式 force 才让闸门验新层。
+      const stageLive = window.StoryStage && window.StoryStage.canPlay(id) && window.StoryStage.available()
+        && (window.StoryStage.force || !(window.__CSJ_QA__ || (typeof navigator !== 'undefined' && navigator.webdriver)))
+        && !G.storyMute;
+      if (stageLive) {
+        window.StoryStage.start(id, sc.lines, () => { storyMarkSeen(sc.key); onStoryMapDone(m); });
+        return;
+      }
       G.state = 'dialog';
       showLines(sc.lines, () => { storyMarkSeen(sc.key); onStoryMapDone(m); }, 'map:' + id);
       return;
@@ -11524,6 +11535,14 @@
           if (f) f();
         }, 'map:houshan');
       } else if (hsLines.length && !(window.__CSJ_QA__ || (typeof navigator !== 'undefined' && navigator.webdriver))) {
+        // 真实玩家改走主画布剧情层：药庐 → 北麓石阶 → 赤水峰水汽，台词仍逐字同源。
+        const stageLive = window.StoryStage && window.StoryStage.canPlay(id) && window.StoryStage.available()
+          && (window.StoryStage.force || !(window.__CSJ_QA__ || (typeof navigator !== 'undefined' && navigator.webdriver)))
+          && !G.storyMute;
+        if (stageLive) {
+          window.StoryStage.start(id, hsLines, () => { storyMarkSeen('cut:houshan'); G.state = 'play'; last = performance.now(); });
+          return;
+        }
         showLines(hsLines, () => { storyMarkSeen('cut:houshan'); G.state = 'play'; last = performance.now(); }, 'map:houshan');
         return;
       }
@@ -16839,6 +16858,15 @@
       return delta;
     },
     skipStory() { let n = 0; while (G.state === 'dialog' && !G.dialogIsChoice && n < 80) { advanceDialog(); n++; } return n; },
+    // 主画布剧情层探针：__FR 仍只做转发，状态真源留在 js/storyStage.js
+    storyStage() { return window.StoryStage ? window.StoryStage.state() : null; },
+    storyStageForce(on) { if (window.StoryStage) window.StoryStage.force = !!on; return !!(window.StoryStage && window.StoryStage.force); },
+    storyStageStart(id) {
+      const lines = (window.MAP_STORIES && window.MAP_STORIES[id]) || [];
+      return !!(window.StoryStage && window.StoryStage.start(id, lines, () => { G.state = 'play'; last = performance.now(); }));
+    },
+    storyStageTick(dt) { return !!(window.StoryStage && window.StoryStage.tick(dt)); },
+    storyStageSkip() { return !!(window.StoryStage && window.StoryStage.skip()); },
     muteStory(on) { G.storyMute = !!on; if (on) this.skipStory(); return !!G.storyMute; },
     storyMuted() { return !!G.storyMute; },
     enterMap(id, diff) { if (!save.unlocked.includes(id)) save.unlocked.push(id); startMap(id, diff); return G.mapId; },

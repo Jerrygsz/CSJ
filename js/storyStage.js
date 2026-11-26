@@ -1,0 +1,648 @@
+/* 凡人·长生劫 —— StoryStage（主画布剧情层 · 第一版）
+ *
+ * 目标：不换引擎、不另起插画屏。人物就在战斗地图上按原著剧情走动、说话、做小动作；
+ *       建筑 / 迷宫墙 / 遗迹 / 药畦 / 山涧 / 天气是真实数据区，会挡路或改移速。
+ *
+ * 真源约束：
+ *   - 台词只写 li，正文运行时从 window.MAP_STORIES.<mapId> 取，动画不另写一句；
+ *   - 人物图读 window.Sprites，韩立仍由主画布 drawSpr 画，只是被本层临时挪位；
+ *   - 世界冻结沿用 G.state==='dialog'（loop 只在 play 跑 update，render 照常跑）；
+ *   - 镜头沿用 preview/camera-poc-runtime.js 验过的 render-time override：
+ *     dialog 态每帧写 G.cam，主画布所有视差 / 裁剪 / 地标读者一起跟着走。
+ *
+ * 命令：weather / actor / say / walk / act / cam / wait / fade
+ * 区域：zones[] 用相对进图时主角落点的坐标；block 真挡，speed 真改移速。
+ */
+(function () {
+  'use strict';
+
+  var STAGES = {
+    qixuan: {
+      canon: '第一卷·七玄门（入门试、墨大夫收徒、授长春功）',
+      title: '彩霞山山门',
+      zones: [
+        { kind: 'house',  x: -300, y: -120, w: 100, h: 70,  block: true,  name: '五里沟村舍' },
+        { kind: 'house',  x: -190, y: -95,  w: 80,  h: 60,  block: true,  name: '山边人家' },
+        { kind: 'wall',   x: 35,   y: -200, w: 22,  h: 150, block: true,  name: '山门左墙' },
+        { kind: 'wall',   x: 35,   y: 45,   w: 22,  h: 150, block: true,  name: '山门右墙' },
+        { kind: 'gate',   x: 25,   y: -55,  w: 42,  h: 100, name: '彩霞山山门' },
+        { kind: 'stair',  x: 58,   y: -105, w: 105, h: 210, speed: 0.74,  name: '落日峰石阶' },
+        { kind: 'wall',   x: 180,  y: -120, w: 16,  h: 70,  block: true,  name: '校场石墙' },
+        { kind: 'pillar', x: 205,  y: 20,   w: 20,  h: 20,  block: true,  name: '石锁' },
+        { kind: 'hut',    x: 300,  y: -85,  w: 85,  h: 62,  block: true,  name: '药庐' }
+      ],
+      actors: [
+        { id: 'hanli',    x: 0,   y: 0,   dir: 1,  spr: 'hanli',    scale: 1.7, show: true },
+        { id: 'zhangtie', x: 44,  y: 16,  dir: 1,  spr: 'zhangtie', scale: 1.6, show: true },
+        { id: 'mo',       x: 310, y: -30, dir: -1, spr: 'mo',       scale: 1.8, show: false }
+      ],
+      steps: [
+        { t: 'weather', kind: 'mist', speed: 0.90, label: '彩霞山 · 晨雾' },
+        { t: 'say', li: [0], label: '五里沟' },
+        { t: 'walk', who: 'hanli', to: [-70, 20], speed: 72, dur: 2.6, label: '韩立随张铁上路' },
+        { t: 'say', li: [1], label: '三叔捎话' },
+        { t: 'walk', who: 'zhangtie', to: [-42, 26], speed: 72, dur: 1.5, label: '张铁并肩' },
+        { t: 'say', li: [2], label: '入门试' },
+        { t: 'cam', dx: 110, dy: 0, dur: 1.1, label: '镜头移向山门' },
+        { t: 'walk', who: 'hanli', to: [92, 4], speed: 82, dur: 3.0, label: '穿过山门' },
+        { t: 'walk', who: 'zhangtie', to: [62, 12], speed: 82, dur: 3.0, label: '张铁跟进' },
+        { t: 'say', li: [3], label: '摸骨举石' },
+        { t: 'cam', dx: 215, dy: 0, dur: 0.9, label: '镜头随韩立进校场' },
+        { t: 'walk', who: 'hanli', to: [205, -8], speed: 84, dur: 2.4, label: '校场试胆' },
+        { t: 'say', li: [4], label: '墨大夫开口' },
+        { t: 'actor', who: 'mo', show: true, label: '墨大夫现身' },
+        { t: 'say', li: [5], label: '留在药庐' },
+        { t: 'act', who: 'hanli', anim: 'bow', dir: 1, dur: 0.9, label: '韩立行礼' },
+        { t: 'walk', who: 'hanli', to: [268, -12], speed: 78, dur: 1.8, label: '走向药庐' },
+        { t: 'say', li: [6], label: '一句话定了路' },
+        { t: 'weather', kind: 'clear', speed: 1, label: '雾散' },
+        { t: 'say', li: [7], label: '长春功 / 象甲功' },
+        { t: 'fade', from: 0, to: 1, dur: 0.35, label: '收场' }
+      ]
+    },
+    houshan: {
+      canon: '第一卷·后山采药（第八~十一章：药庐差事、长春功问进境、象甲功瀑布苦练）',
+      title: '七玄门·后山',
+      zones: [
+        { kind: 'hut',    x: -155, y: -125, w: 95, h: 70, block: true, name: '神手谷药庐' },
+        { kind: 'herb',   x: -20,  y: 35,   w: 120, h: 34, speed: 0.62, name: '药畦' },
+        { kind: 'wall',   x: 90,   y: -160, w: 16, h: 95, block: true, name: '山径石壁' },
+        { kind: 'stair',  x: 130,  y: -90,  w: 90, h: 180, speed: 0.78, name: '北麓山径' },
+        { kind: 'stream', x: 235,  y: -20,  w: 55, h: 140, speed: 1.25, name: '山涧顺流' },
+        { kind: 'ruin',   x: 320,  y: -110, w: 70, h: 60, block: true, name: '废弃药棚' },
+        { kind: 'herb',   x: 350,  y: 40,   w: 90, h: 30, speed: 0.65, name: '老药畦' }
+      ],
+      actors: [
+        { id: 'hanli',    x: 0,   y: 0,   dir: 1,  spr: 'hanli',    scale: 1.7, show: true },
+        { id: 'zhangtie', x: 46,  y: 18,  dir: 1,  spr: 'zhangtie', scale: 1.6, show: true },
+        { id: 'mo',       x: 168, y: -42, dir: -1, spr: 'mo',       scale: 1.8, show: true }
+      ],
+      steps: [
+        { t: 'weather', kind: 'rain', speed: 0.88, label: '后山晨雾未散' },
+        { t: 'say', li: [0], label: '神手谷药庐' },
+        { t: 'walk', who: 'hanli', to: [70, 14], speed: 72, dur: 2.2, label: '背药篓出院' },
+        { t: 'say', li: [1], label: '不教武功' },
+        { t: 'cam', dx: 130, dy: -12, dur: 1.0, label: '镜头上后山' },
+        { t: 'walk', who: 'hanli', to: [150, -8], speed: 78, dur: 2.8, label: '踩石阶' },
+        { t: 'say', li: [2], label: '长春功第几层' },
+        { t: 'say', li: [3], label: '按月查问' },
+        { t: 'weather', kind: 'mist', speed: 0.82, label: '赤水峰水汽' },
+        { t: 'cam', dx: 210, dy: 0, dur: 1.0, label: '镜头移向瀑布' },
+        { t: 'walk', who: 'hanli', to: [245, 2], speed: 82, dur: 3.0, label: '沿山涧前行' },
+        { t: 'walk', who: 'zhangtie', to: [258, 8], speed: 78, dur: 2.5, label: '张铁跟到山涧' },
+        { t: 'say', li: [4], label: '象甲功' },
+        { t: 'act', who: 'zhangtie', anim: 'lift', dir: 1, dur: 1.0, label: '顶水冲练' },
+        { t: 'say', li: [5], label: '皮糙肉厚' },
+        { t: 'weather', kind: 'mist', speed: 0.90, label: '林间兽踪' },
+        { t: 'say', li: [6], label: '山贼脚印' },
+        { t: 'walk', who: 'hanli', to: [330, -6], speed: 82, dur: 2.2, label: '采老药' },
+        { t: 'say', li: [7], label: '这一日' },
+        { t: 'weather', kind: 'clear', speed: 1, label: '雾散开打' },
+        { t: 'fade', from: 0, to: 1, dur: 0.3, label: '收场' }
+      ]
+    }
+  };
+
+  var P = null;
+  var cv = null, ctx = null, styleEl = null, raf = 0, lastT = 0, nextQueued = false;
+
+  var API = {
+    force: false,
+    available: function () {
+      return !!(window.__FR && window.__FR.G && window.__FR.G.player);
+    },
+    canPlay: function (id) { return !!STAGES[id]; },
+    blockedAt: function (id, x, y) {
+      var st = STAGES[id]; if (!st) return false;
+      for (var i = 0; i < st.zones.length; i++) if (st.zones[i].block && hitRect(x, y, 0.1, st.zones[i])) return true;
+      return false;
+    },
+    speedAtRel: function (x, y) {
+      if (!P) return 1;
+      return +speedAt(x, y).toFixed(3);
+    },
+    stages: function () { return STAGES; },
+    zones: function (id) { return (STAGES[id] && STAGES[id].zones) || []; },
+    steps: function (id) { return (STAGES[id] && STAGES[id].steps) || []; },
+    start: start,
+    stop: stop,
+    skip: skip,
+    tick: tick,
+    state: state
+  };
+
+  function cloneZone(z) {
+    var o = {};
+    for (var k in z) if (Object.prototype.hasOwnProperty.call(z, k)) o[k] = z[k];
+    return o;
+  }
+  function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+  function ease(t) { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  function actor(id) {
+    if (!P) return null;
+    for (var i = 0; i < P.actors.length; i++) if (P.actors[i].id === id) return P.actors[i];
+    return null;
+  }
+  function FR() { return window.__FR || null; }
+  function G() { return (FR() && FR().G) || null; }
+
+  function mount() {
+    var stage = document.getElementById('style') ? document.getElementById('style').parentNode : null;
+    stage = document.getElementById('stage') || stage;
+    if (!stage) return false;
+    cv = document.getElementById('storyStage');
+    if (!cv) {
+      cv = document.createElement('canvas');
+      cv.id = 'storyStage';
+      var game = document.getElementById('game');
+      if (game && game.nextSibling) stage.insertBefore(cv, game.nextSibling);
+      else stage.appendChild(cv);
+    }
+    cv.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%;' +
+      'pointer-events:none;z-index:0;display:block;';
+    ctx = cv.getContext('2d');
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = 'storyStageBackdrop';
+      // 过场时只撤掉对话遮罩，让主画布地形透出来；破境题款有自己的类，不碰。
+      styleEl.textContent = '#dialog{background:transparent !important;}' +
+        'body[data-skin="guigu"] #dialog:not(.break-scene){background:transparent !important;}';
+      document.head.appendChild(styleEl);
+    }
+    resize();
+    return true;
+  }
+
+  function resize() {
+    if (!cv || !P) return;
+    var stage = document.getElementById('stage');
+    var w = (stage && stage.clientWidth) || 480;
+    var h = (stage && stage.clientHeight) || 864;
+    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) {
+      cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+    }
+    if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    P.view = { w: w, h: h, dpr: dpr };
+  }
+
+  function applyHero() {
+    if (!P || !FR()) return;
+    var g = G(), p = g && g.player;
+    var a = actor('hanli');
+    if (!p || !a) return;
+    p.x = P.origin.x + a.x; p.y = P.origin.y + a.y;
+    p.dir = a.dir < 0 ? -1 : 1;
+    p.moving = !!a.moving;
+    if (typeof a.gait === 'number') p.gait = a.gait;
+  }
+
+  function applyCam() {
+    var g = G();
+    if (!P || !g) return;
+    g.cam.x = P.baseCam.x + P.cam.x;
+    g.cam.y = P.baseCam.y + P.cam.y;
+  }
+
+  function inRect(x, y, z) { return x >= z.x && x <= z.x + z.w && y >= z.y && y <= z.y + z.h; }
+  function hitRect(x, y, r, z) {
+    var nx = clamp(x, z.x, z.x + z.w), ny = clamp(y, z.y, z.y + z.h);
+    var dx = x - nx, dy = y - ny;
+    return dx * dx + dy * dy < r * r;
+  }
+  function blocked(x, y, r) {
+    if (!P) return false;
+    for (var i = 0; i < P.zones.length; i++) {
+      var z = P.zones[i];
+      if (z.block && hitRect(x, y, r == null ? 12 : r, z)) return true;
+    }
+    return false;
+  }
+  function speedAt(x, y) {
+    var mul = 1;
+    if (!P) return mul;
+    for (var i = 0; i < P.zones.length; i++) {
+      var z = P.zones[i];
+      if (z.speed && inRect(x, y, z)) mul *= z.speed;
+    }
+    if (P.weather && P.weather.speed) mul *= P.weather.speed;
+    return clamp(mul, 0.35, 1.8);
+  }
+
+  function moveStep(a, s, dt) {
+    var tx = s.to[0], ty = s.to[1];
+    var dx = tx - a.x, dy = ty - a.y;
+    var d = Math.hypot(dx, dy);
+    if (d < 5) { a.moving = false; if (a.id === 'hanli') applyHero(); return true; }
+    var speed = (s.speed || 76) * speedAt(a.x, a.y);
+    var step = Math.min(d, speed * dt);
+    var ux = dx / d, uy = dy / d;
+    var nx = a.x + ux * step, ny = a.y + uy * step;
+    if (!blocked(nx, ny)) { a.x = nx; a.y = ny; }
+    else if (!blocked(nx, a.y)) { a.x = nx; }
+    else if (!blocked(a.x, ny)) { a.y = ny; }
+    a.dir = ux < -0.2 ? -1 : (ux > 0.2 ? 1 : a.dir);
+    a.moving = true;
+    a.gait = (a.gait || 0) + dt * 9.5;
+    if (a.id === 'hanli') applyHero();
+    return Math.hypot(tx - a.x, ty - a.y) < 5;
+  }
+
+  function pickLines(li, lines) {
+    if (li == null) return [];
+    var idx = Array.isArray(li) ? li : [li];
+    var out = [];
+    for (var i = 0; i < idx.length; i++) {
+      var n = idx[i];
+      if (lines && lines[n]) out.push(lines[n]);
+    }
+    return out;
+  }
+
+  function sayStep(s, i) {
+    var lines = pickLines(s.li, P.lines);
+    if (!lines.length) { next(); return; }
+    var f = FR();
+    if (!f || typeof f.showLines !== 'function') { next(); return; }
+    var g = G();
+    g.state = 'dialog';
+    f.showLines(lines, function () { next(); }, 'stage:' + P.mapId + ':' + i);
+  }
+
+  function enterStep(i) {
+    if (!P || !P.active || P.finished) return;
+    if (i >= P.steps.length) { finish('normal'); return; }
+    P.i = i; P.stepT = 0;
+    var s = P.steps[i];
+    if (s.t === 'weather') {
+      P.weather = { kind: s.kind || 'clear', speed: s.speed == null ? 1 : s.speed, t: 0 };
+      next();
+    } else if (s.t === 'actor') {
+      var a = actor(s.who);
+      if (a) {
+        if (s.show != null) a.show = !!s.show;
+        if (s.x != null) a.x = s.x;
+        if (s.y != null) a.y = s.y;
+        if (s.dir != null) a.dir = s.dir;
+      }
+      next();
+    } else if (s.t === 'say') {
+      sayStep(s, i);
+    } else if (s.t === 'walk') {
+      var w = actor(s.who);
+      if (!w) { next(); return; }
+      // 起步前先朝向目标：否则上一拍往左走，下一拍「穿门向右」截出来是背对山门。
+      var wdx = (s.to && s.to[0] != null) ? s.to[0] - w.x : 0;
+      if (Math.abs(wdx) > 2) w.dir = wdx < 0 ? -1 : 1;
+      w.moving = true;
+    } else if (s.t === 'act') {
+      var b = actor(s.who);
+      if (b) {
+        b.act = s.anim || 'bow'; b.actT = 0; b.actDur = s.dur || 0.6;
+        if (s.dir != null) b.dir = s.dir;
+        // 不再借主画布 atkAnim：那道剑弧按战斗朝向画，跟「行礼」对不上，会飘在人物旁边。
+        // 动作全交给本层 drawAct，位置永远贴着剧情人物。
+      }
+    } else if (s.t === 'cam') {
+      P.camFrom = { x: P.cam.x, y: P.cam.y };
+      P.camTo = { x: s.dx || 0, y: s.dy || 0 };
+    } else if (s.t === 'fade') {
+      P.fade = s.from || 0;
+    } else if (s.t === 'wait') {
+      // 只有计时，没有副作用
+    } else {
+      console.warn('[StoryStage] 未实现的命令：', s.t);
+      next();
+    }
+  }
+
+  function advance(dt) {
+    if (!P || !P.active || P.finished) return;
+    var s = P.steps[P.i];
+    if (!s) { finish('normal'); return; }
+    P.stepT += dt;
+    if (P.weather) P.weather.t += dt;
+
+    var done = false;
+    if (s.t === 'walk') {
+      var a = actor(s.who);
+      done = !a || moveStep(a, s, dt) || P.stepT >= (s.dur || 3) + 0.8;
+      if (done && a) a.moving = false;
+    } else if (s.t === 'act') {
+      var b = actor(s.who);
+      if (b) b.actT = Math.min(b.actDur || 0.6, P.stepT);
+      done = P.stepT >= (s.dur || 0.6);
+      if (done && b) { b.act = ''; b.actT = 0; }
+    } else if (s.t === 'cam') {
+      var k = ease(P.stepT / (s.dur || 1));
+      P.cam.x = lerp(P.camFrom.x, P.camTo.x, k);
+      P.cam.y = lerp(P.camFrom.y, P.camTo.y, k);
+      done = P.stepT >= (s.dur || 1);
+    } else if (s.t === 'fade') {
+      var kf = ease(P.stepT / (s.dur || 0.4));
+      P.fade = lerp(s.from || 0, s.to || 0, kf);
+      done = P.stepT >= (s.dur || 0.4);
+    } else if (s.t === 'wait') {
+      done = P.stepT >= (s.dur || 0.5);
+    }
+    if (done) next();
+  }
+
+  function next() {
+    if (!P || !P.active || P.finished || nextQueued) return;
+    nextQueued = true;
+    // 用一次性排队代替「忙标志丢弃」：同一拍里 onEnd 与计时完成可能都叫 next，
+    // 旧写法会把后一次直接丢掉，步子就永远停在这一拍。
+    setTimeout(function () {
+      nextQueued = false;
+      if (!P || !P.active || P.finished) return;
+      enterStep(P.i + 1);
+    }, 0);
+  }
+
+  function tick(dt) {
+    if (!P || !P.active || P.finished) return false;
+    var d = clamp(+dt || 0, 0, 0.05);
+    advance(d);
+    applyCam();
+    draw();
+    return true;
+  }
+
+  function frame(t) {
+    if (!P || !P.active) return;
+    var dt = 0;
+    if (lastT) dt = clamp((t - lastT) / 1000, 0, 0.05);
+    lastT = t;
+    if (document.visibilityState !== 'hidden') advance(dt);
+    applyCam();
+    draw();
+    raf = requestAnimationFrame(frame);
+  }
+
+  function draw() {
+    if (!ctx || !P || !P.view) return;
+    var g = G();
+    if (!g) return;
+    var w = P.view.w, h = P.view.h;
+    ctx.clearRect(0, 0, w, h);
+    drawZones(g);
+    drawActors(g);
+    drawWeather(Math.min(w, h));
+    if (P.fade > 0.001) {
+      ctx.globalAlpha = clamp(P.fade, 0, 1);
+      ctx.fillStyle = '#05070a';
+      ctx.fillRect(0, 0, w, h);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  function sx(x, g) { return P.origin.x + x - g.cam.x; }
+  function sy(y, g) { return P.origin.y + y - g.cam.y; }
+
+  function drawZones(g) {
+    for (var i = 0; i < P.zones.length; i++) {
+      var z = P.zones[i];
+      var x = sx(z.x, g), y = sy(z.y, g);
+      if (x + z.w < -40 || y + z.h < -40 || x > P.view.w + 40 || y > P.view.h + 40) continue;
+      drawZone(z, x, y);
+    }
+  }
+
+  function drawZone(z, x, y) {
+    var c = ctx;
+    c.save();
+    c.globalAlpha = 0.72;
+    c.lineWidth = 1.2;
+    c.strokeStyle = 'rgba(28,24,20,.62)';
+    c.fillStyle = 'rgba(28,24,20,.30)';
+    if (z.kind === 'house' || z.kind === 'hut' || z.kind === 'ruin') {
+      c.fillRect(x, y + 10, z.w, z.h - 10);
+      c.beginPath();
+      c.moveTo(x - 8, y + 12); c.lineTo(x + z.w / 2, y - z.h * 0.34); c.lineTo(x + z.w + 8, y + 12);
+      c.closePath(); c.fill(); c.stroke();
+      if (z.kind === 'ruin') {
+        c.globalAlpha = 0.5;
+        c.beginPath(); c.moveTo(x + z.w * 0.2, y + z.h * 0.2); c.lineTo(x + z.w * 0.35, y + z.h * 0.8); c.stroke();
+      }
+    } else if (z.kind === 'wall') {
+      c.fillStyle = 'rgba(30,26,22,.55)'; c.fillRect(x, y, z.w, z.h); c.strokeRect(x, y, z.w, z.h);
+      c.globalAlpha = 0.28;
+      for (var q = 12; q < z.h; q += 18) { c.beginPath(); c.moveTo(x, y + q); c.lineTo(x + z.w, y + q + 4); c.stroke(); }
+    } else if (z.kind === 'gate') {
+      c.globalAlpha = 0.5;
+      c.beginPath(); c.moveTo(x - 10, y + z.h); c.lineTo(x + 4, y - 12); c.stroke();
+      c.beginPath(); c.moveTo(x + z.w - 4, y - 12); c.lineTo(x + z.w + 10, y + z.h); c.stroke();
+    } else if (z.kind === 'stair') {
+      c.globalAlpha = 0.32;
+      for (var t = 0; t < z.h; t += 16) { c.beginPath(); c.moveTo(x, y + t); c.lineTo(x + z.w, y + t - 5); c.stroke(); }
+    } else if (z.kind === 'herb') {
+      c.globalAlpha = 0.42;
+      for (var hx = 6; hx < z.w; hx += 14) {
+        c.beginPath(); c.moveTo(x + hx, y + z.h); c.lineTo(x + hx + 3, y + 6); c.stroke();
+      }
+    } else if (z.kind === 'stream') {
+      c.globalAlpha = 0.36;
+      for (var sy2 = 8; sy2 < z.h; sy2 += 18) {
+        c.beginPath();
+        c.moveTo(x, y + sy2);
+        c.bezierCurveTo(x + z.w * 0.3, y + sy2 - 7, x + z.w * 0.7, y + sy2 + 7, x + z.w, y + sy2);
+        c.stroke();
+      }
+    } else if (z.kind === 'pillar') {
+      c.fillStyle = 'rgba(32,28,24,.55)'; c.beginPath(); c.ellipse(x + z.w / 2, y + z.h / 2, z.w / 2, z.h / 2, 0, 0, 6.283); c.fill(); c.stroke();
+    }
+    c.restore();
+  }
+
+  function drawActors(g) {
+    for (var i = 0; i < P.actors.length; i++) {
+      var a = P.actors[i];
+      if (!a.show || a.id === 'hanli') continue;
+      var x = sx(a.x, g), y = sy(a.y, g);
+      if (x < -80 || x > P.view.w + 80 || y < -100 || y > P.view.h + 100) continue;
+      var c = (window.Sprites || {})[a.spr || a.id];
+      if (c) {
+        var sc = a.scale || 1.6;
+        var cw = c.width * sc, ch = c.height * sc;
+        ctx.save();
+        ctx.globalAlpha = 0.96;
+        ctx.translate(x, y + ch / 2);
+        if (a.dir < 0) ctx.scale(-1, 1);
+        ctx.drawImage(c, -cw / 2, -ch, cw, ch);
+        ctx.restore();
+      }
+      if (a.act) drawAct(x, y, a);
+    }
+    var h = actor('hanli');
+    if (h && h.act) drawAct(sx(h.x, g), sy(h.y, g), h);
+  }
+
+  function drawAct(x, y, a) {
+    var k = clamp((a.actT || 0) / (a.actDur || 0.6), 0, 1);
+    ctx.save();
+    ctx.globalAlpha = 0.82 * (1 - k * 0.35);
+    ctx.strokeStyle = 'rgba(201,162,74,.95)';
+    ctx.lineWidth = 1.8;
+    ctx.lineCap = 'round';
+    if (a.act === 'bow') {
+      // 俯身弧线贴着肩到膝，不飘在头顶
+      ctx.beginPath();
+      ctx.moveTo(x - 9, y - 20);
+      ctx.quadraticCurveTo(x, y - 5 - k * 4, x + 9, y - 20);
+      ctx.stroke();
+      ctx.beginPath(); ctx.arc(x, y - 24, 5 + k * 3, -0.2, Math.PI + 0.2); ctx.stroke();
+    } else if (a.act === 'lift') {
+      // 两条上举手臂 + 顶上一圈水劲，落在人物身上而不是远处
+      ctx.beginPath();
+      ctx.moveTo(x - 7, y - 14); ctx.lineTo(x - 11, y - 34 - k * 8);
+      ctx.moveTo(x + 7, y - 14); ctx.lineTo(x + 11, y - 34 - k * 8);
+      ctx.stroke();
+      ctx.beginPath(); ctx.arc(x, y - 38 - k * 8, 5 + k * 3, 0, Math.PI * 2); ctx.stroke();
+    } else {
+      ctx.beginPath(); ctx.arc(x, y - 12, 7 + k * 9, 0, Math.PI * 2); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawWeather(span) {
+    if (!P.weather || P.weather.kind === 'clear') return;
+    var kind = P.weather.kind, t = P.weather.t || 0;
+    var n = kind === 'rain' ? 72 : 44;
+    ctx.save();
+    ctx.globalAlpha = kind === 'rain' ? 0.24 : 0.16;
+    ctx.strokeStyle = kind === 'rain' ? 'rgba(190,208,220,.9)' : 'rgba(226,225,214,.9)';
+    ctx.fillStyle = ctx.strokeStyle;
+    ctx.lineWidth = 1;
+    for (var i = 0; i < n; i++) {
+      var seed = (i * 97) % 101;
+      var x = ((seed * 13 + t * (kind === 'rain' ? 62 : 14)) % (span + 90)) - 45;
+      var y = ((seed * 29 + t * (kind === 'rain' ? 380 : 22)) % (span + 90)) - 45;
+      if (kind === 'rain') {
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 5, y + 15); ctx.stroke();
+      } else {
+        ctx.beginPath(); ctx.arc(x, y, 2 + (seed % 3), 0, 6.283); ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
+  function clearDialog() {
+    var g = G();
+    if (!g) return;
+    var d = document.getElementById('dialog');
+    if (d) d.style.display = 'none';
+    g.dialogLines = null; g.dialogEnd = null; g.dialogMeta = null;
+    g.dialogId = null; g.dialogIdx = 0; g.dialogSynced = false; g.dialogIsChoice = false;
+  }
+
+  function unmount() {
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+    if (cv) cv.style.display = 'none';
+    if (styleEl && styleEl.parentNode) styleEl.parentNode.removeChild(styleEl);
+    styleEl = null;
+  }
+
+  function finish(kind) {
+    if (!P || !P.active || P.finished) return false;
+    P.finished = kind || 'normal';
+    P.active = false;
+    clearDialog();
+    var g = G(), p = g && g.player;
+    if (p) {
+      p.x = P.origin.x; p.y = P.origin.y; p.dir = P.heroDir || 1;
+      p.moving = false;
+    }
+    if (g) { g.cam.x = P.baseCam.x; g.cam.y = P.baseCam.y; g.camLag = null; }
+    unmount();
+    var f = P.onDone; P.onDone = null;
+    if (f) f(kind);
+    else if (g) g.state = 'play';
+    return true;
+  }
+
+  function stop() {
+    if (!P || !P.active) return false;
+    P.finished = 'stop';
+    P.active = false;
+    clearDialog();
+    var g = G(), p = g && g.player;
+    if (p) { p.x = P.origin.x; p.y = P.origin.y; p.dir = P.heroDir || 1; p.moving = false; }
+    if (g) { g.cam.x = P.baseCam.x; g.cam.y = P.baseCam.y; g.camLag = null; }
+    unmount();
+    P.onDone = null;
+    return true;
+  }
+
+  function skip() { return finish('skip'); }
+
+  function start(mapId, lines, onDone, opts) {
+    var st = STAGES[mapId];
+    var f = FR(), g = G();
+    if (!st || !f || !g || !g.player) { if (onDone) onDone('unavailable'); return false; }
+    if (P && P.active) stop();
+
+    opts = opts || {};
+    var p = g.player;
+    P = {
+      mapId: mapId,
+      stage: st,
+      lines: lines || (window.MAP_STORIES && window.MAP_STORIES[mapId]) || [],
+      steps: st.steps,
+      zones: st.zones.map(cloneZone),
+      actors: st.actors.map(function (a) {
+        var o = {}; for (var k in a) if (Object.prototype.hasOwnProperty.call(a, k)) o[k] = a[k];
+        o.gait = 0; o.act = ''; o.actT = 0; o.actDur = 0; o.moving = false;
+        return o;
+      }),
+      origin: { x: p.x, y: p.y },
+      heroDir: p.dir || 1,
+      baseCam: { x: g.cam.x, y: g.cam.y },
+      cam: { x: 0, y: 0 }, camFrom: { x: 0, y: 0 }, camTo: { x: 0, y: 0 },
+      weather: null, fade: 0,
+      i: 0, stepT: 0, active: true, finished: null,
+      onDone: onDone || null,
+      view: null
+    };
+    g.state = 'dialog';
+    g.camLag = null; g.shake = 0; g.flash = 0;
+    g.dialogLines = null; g.dialogEnd = null; g.dialogId = null; g.dialogIdx = 0;
+    g.dialogSynced = false; g.dialogIsChoice = false;
+    if (!mount()) { P.active = false; if (onDone) onDone('nomount'); return false; }
+    applyHero(); applyCam(); draw();
+    nextQueued = false; lastT = 0;
+    enterStep(0);
+    raf = requestAnimationFrame(frame);
+    return true;
+  }
+
+  function state() {
+    if (!P || !P.active) return { active: false, mapId: null, step: 0, total: 0 };
+    var a = actor('hanli') || {};
+    var g = G();
+    return {
+      active: true,
+      mapId: P.mapId,
+      step: P.i + 1,
+      total: P.steps.length,
+      kind: (P.steps[P.i] || {}).t || null,
+      label: (P.steps[P.i] || {}).label || '',
+      hero: { x: +(a.x || 0).toFixed(1), y: +(a.y || 0).toFixed(1), dir: a.dir || 1 },
+      zhangtie: (function () { var z = actor('zhangtie'); return z ? { x: +z.x.toFixed(1), y: +z.y.toFixed(1) } : null; })(),
+      stepT: +P.stepT.toFixed(2),
+      cam: { x: Math.round(P.cam.x), y: Math.round(P.cam.y) },
+      gameCam: g ? { x: Math.round(g.cam.x), y: Math.round(g.cam.y) } : null,
+      weather: P.weather ? P.weather.kind : null,
+      speed: +speedAt(a.x || 0, a.y || 0).toFixed(3),
+      zones: P.zones.length,
+      blockers: P.zones.filter(function (z) { return !!z.block; }).length,
+      fade: +P.fade.toFixed(3),
+      gameState: g ? g.state : null,
+      finished: P.finished
+    };
+  }
+
+  window.StoryStage = API;
+})();
