@@ -187,18 +187,21 @@ body[data-skin="guigu"] #hpfill { background: linear-gradient(90deg,#a84434,#cf7
 #time { color: rgba(238,230,212,0.82); letter-spacing: 1px; }
 #kills { color: rgba(238,230,212,0.78); letter-spacing: 0.5px; }
 #level { color: var(--accent-soft); letter-spacing: 2px; }
-.top-tools { position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 0; flex: 0 0 auto; }
+/* 两枚素签锚在题头行右侧，但整组下压 10px —— 按钮盒是 44 的拇指热区，
+   居中挂在 11px 的文字行上会让签身顶到横条（经验 / 修为）上去。
+   下压后签身顶刚好落在横条之下，热区仍然完整。 */
+.top-tools { position: absolute; right: 0; top: calc(-14px / var(--view-scale)); display: flex; align-items: center; gap: 0; flex: 0 0 auto; }
 /* 禁制 / 大衍：细金线描的淡墨素签，不再是大黑胶囊。
    外层按钮仍占 var(--tap) 热区（任何机型都是 44 屏幕 px）—— 锚点、显隐、状态全挂外层；
    看得见的签身移到 ::before 上收细，这样「好点」和「好看」互不迁就。 */
-#pauseBtn, #autoBtn { position: relative; width: calc(var(--tap) * 1.32); height: var(--tap); padding: 0; border: none; background: transparent; color: var(--text-2); pointer-events: auto; display: flex; align-items: center; justify-content: center; font-size: var(--fs-micro); letter-spacing: 2px; text-indent: 2px; -webkit-tap-highlight-color: transparent; transition: color var(--dur-hover) var(--ease-out), transform var(--dur-press) var(--ease-press); }
-#pauseBtn span, #autoBtn span { position: relative; z-index: 1; font-size: var(--fs-micro); letter-spacing: 2px; text-indent: 2px; color: inherit; }
-/* 签身：纵向仍内收 10px（热区 44 不动），横向只收 8px —— 两枚签身之间
-   只隔一层呼吸（8+8=16px），并肩而不粘连；再宽就散成两颗不相干的键了。
+#pauseBtn, #autoBtn { position: relative; width: calc(var(--tap) * 1.06); height: var(--tap); padding: 0; border: none; background: transparent; color: var(--text-2); pointer-events: auto; display: flex; align-items: center; justify-content: center; font-size: var(--fs-micro); letter-spacing: 1px; text-indent: 1px; -webkit-tap-highlight-color: transparent; transition: color var(--dur-hover) var(--ease-out), transform var(--dur-press) var(--ease-press); }
+#pauseBtn span, #autoBtn span { position: relative; z-index: 1; font-size: var(--fs-micro); letter-spacing: 1px; text-indent: 1px; color: inherit; }
+/* 签身：纵向内收 10px（热区 44 不动），横向只收 4px —— 两枚签身之间
+   只隔 8 屏幕 px，并肩成一组（大衍紧挨禁制）。横向再收就散成两颗不相干的键了。
    注意伪元素分工：#pauseBtn::before 画签身、::after 留给 coarse 命中补偿；
    #autoBtn 反过来（::after 画签身、::before 留给 coarse 命中补偿），
    否则真机上 coarse 的热区规则会把签身撑成一枚实心大圆。入定点挂在 span::after 上避让。 */
-#pauseBtn::before, #autoBtn::after { content: ''; position: absolute; inset: calc(10px / var(--view-scale)) calc(8px / var(--view-scale)); border: 1px solid rgba(201,162,74,0.38); border-radius: var(--r-pill); background: rgba(10,13,18,0.28); box-shadow: 0 1px 3px rgba(0,0,0,0.26); }
+#pauseBtn::before, #autoBtn::after { content: ''; position: absolute; inset: calc(16px / var(--view-scale)) calc(2px / var(--view-scale)); border: 1px solid rgba(201,162,74,0.38); border-radius: var(--r-pill); background: rgba(10,13,18,0.28); box-shadow: 0 1px 3px rgba(0,0,0,0.26); }
 #autoBtn { display: none; }
 #pauseBtn:active::before, #autoBtn:active::after { background: rgba(8,10,14,0.52); }
 #pauseBtn:active, #autoBtn:active { transform: scale(var(--press-sm)); }
@@ -1426,13 +1429,13 @@ body[data-skin="guigu"] .resttip { color: #46654a; }
 /* 补血键（丹）挂在护体键的右上角：真正的位置由 JS 贴着护体键算（applyQuickPos），
    护体被拖到哪儿，丹就跟到哪儿，二者永远留 6px、与右缘永远留 10px。
    这里只是 JS 还没跑起来时的兜底位 —— 与默认护体位对齐的右上角。 */
-#quickbar { position: absolute; right: calc(10px / var(--view-scale)); top: calc(64% - var(--tap) * 1.06); display: none; flex-direction: column; gap: calc(8px / var(--view-scale)); pointer-events: auto; z-index: var(--z-combat); }
+#quickbar { position: absolute; right: calc(4px / var(--view-scale)); top: calc(64% - var(--tap) * 1.06); display: none; flex-direction: column; gap: calc(8px / var(--view-scale)); pointer-events: auto; z-index: var(--z-combat); }
 #quickbar.on { display: flex; }
-.qb { position: relative; width: var(--tap); height: var(--tap); padding: 0; border-radius: 50%; border: 1px solid rgba(201,162,74,0.42); background: radial-gradient(circle at 50% 38%, rgba(30,28,28,0.62), rgba(9,10,12,0.52)); color: rgba(238,229,210,0.92); font-size: var(--fs-h2); line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; -webkit-tap-highlight-color: transparent; touch-action: manipulation; box-shadow: 0 1px 6px rgba(0,0,0,0.28); }
+.qb { position: relative; width: var(--tap); height: var(--tap); padding: 0; border-radius: 50%; border: 1px solid rgba(201,162,74,0.42); background: radial-gradient(circle at 50% 38%, rgba(30,28,26,0.46), rgba(9,10,12,0.38)); color: rgba(238,229,210,0.92); font-size: var(--fs-h2); line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; -webkit-tap-highlight-color: transparent; touch-action: manipulation; box-shadow: 0 1px 6px rgba(0,0,0,0.22); }
 .qb .qb-icon { font-style: normal; letter-spacing: 0; }
 .qb::after { content: attr(data-key); position: absolute; left: 0; right: 0; bottom: 2px; text-align: center; font-size: var(--fs-micro); line-height: 1; color: var(--line-gold); opacity: .7; pointer-events: none; z-index: 2; }
 .qb.empty::after { opacity: .3; }
-.qb.empty { opacity: .55; }
+.qb.empty { opacity: .72; }
 .qb .qb-cd { position: absolute; inset: 0; border-radius: 50%; background: rgba(8,10,14,0.55); display: none; align-items: center; justify-content: center; font-style: normal; font-size: var(--fs-cap); color: var(--accent); }
 .qb.cooling .qb-cd { display: flex; }
 .qb.pet { border-color: rgba(140,220,255,0.55); }
@@ -1451,12 +1454,12 @@ body[data-skin="guigu"] .resttip { color: #46654a; }
    补血键下面那颗，比补血大一圈 —— 它是战斗里最要紧的防守动作。
    位置仍可在暂停菜单里拖动自定义（save.parryPos，按舞台比例存）。 */
 #parryBtn {
-  position: absolute; right: calc(12px / var(--view-scale)); top: calc(64% + var(--tap) * 0.08);
+  position: absolute; right: calc(4px / var(--view-scale)); top: calc(64% + var(--tap) * 0.08);
   transform: none;
   width: calc(var(--tap) * 1.16); height: calc(var(--tap) * 1.16); font-size: var(--fs-h1);
   border-width: 1px; border-color: rgba(201,162,74,0.5);
-  background: radial-gradient(circle at 50% 38%, rgba(30,28,28,0.62), rgba(9,10,12,0.52));
-  box-shadow: 0 1px 8px rgba(0,0,0,0.30);
+  background: radial-gradient(circle at 50% 38%, rgba(30,28,26,0.46), rgba(9,10,12,0.38));
+  box-shadow: 0 1px 8px rgba(0,0,0,0.24);
   display: none; z-index: var(--z-combat);
   pointer-events: auto;   /* #hud 本身 pointer-events:none，按钮得自己打开 */
 }
@@ -1499,7 +1502,7 @@ body[data-skin="guigu"] #parryBtn[data-chain]::before { color: #8f4f2e; text-sha
 @media (pointer: coarse) {
   /* 护体是战斗里最要紧的防守，真机给到 84 的拇指热区；
      补血维持 --tap 的小一圈，二者同金线同淡墨，是「一对」而非两颗不相干的键。 */
-  #parryBtn { width: 84px; height: 84px; font-size: 38px; right: 8px; top: calc(64% + var(--tap) * 0.26); }
+  #parryBtn { width: 84px; height: 84px; font-size: 38px; right: 4px; top: calc(64% + var(--tap) * 0.26); }
 }
 
 /* ---------- 手机命中精度：纵向热区补偿 ----------
@@ -1948,32 +1951,45 @@ body[data-skin="guigu"] #dialogHint {
    改成"双重墨框小方印"——外粗内细两道线，纸底，键位号用朱砂小字，像一方连着一方的闲章。 */
 body[data-skin="guigu"] .qb {
   border-radius: 3px;
-  background: linear-gradient(180deg, #f4efe0, #e6dfcc);
-  border: 1px solid rgba(58,53,44,0.66);
+  background: rgba(246,241,226,0.34);
+  border: 1px solid rgba(58,53,44,0.42);
   color: #3a342a;
-  box-shadow: inset 0 0 0 3px #f4efe0, inset 0 0 0 4px rgba(58,53,44,0.28), 0 2px 5px rgba(40,36,28,0.22);
+  box-shadow: inset 0 0 0 3px rgba(246,241,226,0.20), inset 0 0 0 4px rgba(58,53,44,0.16), 0 2px 5px rgba(40,36,28,0.12);
 }
 /* 按下去像盖了一下章 */
-body[data-skin="guigu"] .qb:active { background: linear-gradient(180deg, #e8e1cd, #d9d2bc); transform: scale(0.94); }
+body[data-skin="guigu"] .qb:active { background: rgba(232,225,205,0.48); transform: scale(0.94); }
+/* 顶栏「大衍 / 禁制」两枚素签也换同一套半透纸底 —— 与右侧补血 / 护体一致，
+   深墨字、能透出山水，不再是两块压住画面的灰胶囊。 */
+body[data-skin="guigu"] #pauseBtn::before,
+body[data-skin="guigu"] #autoBtn::after {
+  background: rgba(246,241,226,0.30);
+  border-color: rgba(58,53,44,0.40);
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 2px rgba(246,241,226,0.16), 0 1px 3px rgba(40,36,28,0.10);
+}
+body[data-skin="guigu"] #pauseBtn, body[data-skin="guigu"] #autoBtn { color: rgba(58,53,44,0.78); }
+body[data-skin="guigu"] #autoBtn.on { color: #a83a2a; text-shadow: none; }
+body[data-skin="guigu"] #autoBtn.on::after { background: rgba(246,241,226,0.44); border-color: rgba(168,58,42,0.60); }
 /* 键位号 1/2/3：朱砂小字，落在右下角 */
 body[data-skin="guigu"] .qb::after { color: #a83a2a; opacity: .6; bottom: 1px; }
 body[data-skin="guigu"] .qb.empty::after { opacity: .32; }
-body[data-skin="guigu"] .qb.empty { opacity: .55; }
+body[data-skin="guigu"] .qb.empty { opacity: .72; }
 /* 冷却遮罩：墨色半掩 + 纸白数字 */
 body[data-skin="guigu"] .qb .qb-cd { border-radius: 2px; background: rgba(52,48,40,0.62); color: #f2ecda; }
 /* 灵宠格：竹青双边，和朱砂格分开 */
 body[data-skin="guigu"] .qb.pet {
-  border-color: rgba(63,89,65,0.72);
-  box-shadow: inset 0 0 0 3px #f4efe0, inset 0 0 0 4px rgba(63,89,65,0.38), 0 2px 5px rgba(40,36,28,0.22);
+  border-color: rgba(63,89,65,0.62);
+  box-shadow: inset 0 0 0 3px rgba(246,241,226,0.36), inset 0 0 0 4px rgba(63,89,65,0.26), 0 2px 5px rgba(40,36,28,0.16);
 }
-/* 弹反键：纸底墨框 + 金褐描边，与补血键同一套，比三联印再重一档（它是最重要的那颗） */
+/* 弹反键：同款半透纸底墨框 + 金褐描边，与补血键同一套，只重一档（它是最重要的那颗） */
 body[data-skin="guigu"] #parryBtn {
-  border-color: rgba(120,96,52,0.72); color: #3a332a;
-  box-shadow: inset 0 0 0 3px #f4efe0, inset 0 0 0 4px rgba(120,96,52,0.34), 0 3px 8px rgba(40,36,28,0.24);
+  border-color: rgba(120,96,52,0.60); color: #3a332a;
+  background: rgba(246,241,226,0.34);
+  box-shadow: inset 0 0 0 3px rgba(246,241,226,0.22), inset 0 0 0 4px rgba(120,96,52,0.22), 0 3px 8px rgba(40,36,28,0.14);
 }
 body[data-skin="guigu"] #parryBtn.parrying {
   border-color: #a83a2a;
-  box-shadow: inset 0 0 0 3px #f4efe0, inset 0 0 0 5px rgba(200,80,50,0.55), 0 0 18px rgba(200,80,50,0.4);
+  box-shadow: inset 0 0 0 3px rgba(246,241,226,0.38), inset 0 0 0 5px rgba(200,80,50,0.55), 0 0 18px rgba(200,80,50,0.4);
 }
 body[data-skin="guigu"] #parryBtn.cooling { border-color: rgba(58,53,44,0.45); }
 /* 左下角功法等级小签：黑方块也翻纸签，等级数用朱砂 */

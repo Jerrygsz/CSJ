@@ -3708,12 +3708,23 @@
     const sw = st.clientWidth || 480, sh = st.clientHeight || 800;
     const bw = elParryBtn.offsetWidth || 72, bh = elParryBtn.offsetHeight || 72;
     const pos = save && save.parryPos;
-    if (pos && isFinite(pos.x) && isFinite(pos.y)) {
+    // 靠右吸附：只要按钮右缘已经落在屏宽右侧那一段（旧档里拖过半截的也算），
+    // 就交回 CSS 的 right 定位 —— 与丹同一条右边线，两颗都在边上。
+    // 只有明确拖到左边（左手操作）才按存的坐标走。
+    const snapRight = pos && isFinite(pos.x) && (sw - (pos.x * sw + bw / 2)) <= sw * 0.26;
+    if (pos && isFinite(pos.x) && isFinite(pos.y) && !snapRight) {
       const cx = Math.max(bw / 2, Math.min(sw - bw / 2, pos.x * sw));
       const cy = Math.max(bh / 2, Math.min(sh - bh / 2, pos.y * sh));
       elParryBtn.style.left = Math.round(cx - bw / 2) + 'px';
       elParryBtn.style.top = Math.round(cy - bh / 2) + 'px';
       elParryBtn.style.right = 'auto';
+      elParryBtn.style.transform = 'none';
+    } else if (snapRight) {
+      // 横向交给 CSS 贴边，纵向留用户拖的高度
+      const cy = Math.max(bh / 2, Math.min(sh - bh / 2, pos.y * sh));
+      elParryBtn.style.left = '';
+      elParryBtn.style.right = '';
+      elParryBtn.style.top = Math.round(cy - bh / 2) + 'px';
       elParryBtn.style.transform = 'none';
     } else {
       elParryBtn.style.left = '';
@@ -3724,12 +3735,12 @@
     applyQuickPos();      // 护体挪了位，补血键跟着贴上去
   }
   function parryDragActive() { return !!(document.body && document.body.classList.contains('parry-drag')); }
-  // ---------- 补血键跟随护体键（贴在它的右上角） ----------
+  // ---------- 补血键跟随护体键（挂在它的右上角，两枚同一条右边线） ----------
   // 护体键可拖动，补血键原来写死在 CSS 的 64% 上：一旦护体被挪走，两颗就叠在一起。
-  // 这里按护体键的实际盒算补血键的落点 —— 右下角贴住护体的右上角再让出 6px，
-  // 右缘让出 10px；护体贴右时 10px 生效（丹比护体更靠边一档），护体被拖到中间时
-  // 就跟着护体走，永远不叠、也不出屏。间距都按屏幕 px 反算回逻辑 px，换机型手感一致。
-  const QUICK_GAP_CORNER = 6, QUICK_GAP_EDGE = 10, QUICK_SIDE = 44;   // 屏幕 px
+  // 现在丹的右缘与护体同贴屏幕右边（EDGE），底边距护体上沿只留一道 GAP 细缝 ——
+  // 丹的右下角正对护体的右上角，两个角咬在一处，颗颗都在边上、谁也不挡画面。
+  // 间距都按屏幕 px 反算回逻辑 px，换机型手感一致。
+  const QUICK_GAP_CORNER = 2, QUICK_GAP_EDGE = 4, QUICK_SIDE = 44;   // 屏幕 px
   function stageScaleNum() {
     const st = parryStage();
     const w = st.getBoundingClientRect ? st.getBoundingClientRect().width : 0;
@@ -3744,15 +3755,17 @@
     const st = parryStage();
     const sw = st.clientWidth || 480;
     const sc = stageScaleNum();
-    const hw = QUICK_SIDE / sc, hh = QUICK_SIDE / sc;
+    // 用实际盒子尺寸（offsetWidth 已是逻辑 px，别再除缩放比），常量只在没露脸时兜底
+    const hw = q.offsetWidth || QUICK_SIDE / sc, hh = q.offsetHeight || QUICK_SIDE / sc;
     const gapC = QUICK_GAP_CORNER / sc, gapE = QUICK_GAP_EDGE / sc;
     // 顶栏高度：护体被拖到很靠上时，丹别爬进横条里
     const bar = document.getElementById('topbar');
     const minTop = (bar ? bar.offsetHeight : 0) + gapC;
-    const right = Math.min(elParryBtn.offsetLeft + elParryBtn.offsetWidth, sw - gapE);
+    // 横向固定贴右（与护体同一条右边线），纵向挂在护体上沿之上
+    const left = Math.max(0, sw - hw - gapE);
     const bottom = elParryBtn.offsetTop - gapC;
     const top = Math.max(minTop, bottom - hh);
-    q.style.left = Math.round(right - hw) + 'px';
+    q.style.left = Math.round(left) + 'px';
     q.style.top = Math.round(top) + 'px';
     q.style.right = 'auto';
   }
@@ -3812,6 +3825,7 @@
       writeSave();
       _pdrag = null;
       elParryBtn.style.cursor = '';
+      applyParryBtnPos();   // 松手后再走一遍：落在靠右区间就吸附贴边，丹跟着贴同一条边
       haptic(12);
     };
     elParryBtn.addEventListener('pointerup', fin);

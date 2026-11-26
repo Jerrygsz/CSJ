@@ -63,8 +63,10 @@ ok(!hit(m.banner, m.boss), '横幅不压 boss 血条', { banner: m.banner, boss:
 ok(m.banner.top > m.vh * 0.5, '横幅在屏幕下半区（避开占屏幕中部的 boss 外观）', { bannerTop: m.banner.top, vh: m.vh });
 ok(m.skills && !hit(m.banner, m.skills), '横幅不压底部技能行', { banner: m.banner, skills: m.skills });
 ok(m.quick && !hit(m.toast, m.quick), '拾取提示不压右侧快捷栏', { toast: m.toast, quick: m.quick });
-ok(Math.abs(m.toast.cy - m.quick.cy) <= 8, '拾取提示与快捷栏垂直居中对齐（镜像）', { toastCy: m.toast.cy, quickCy: m.quick.cy });
-ok(Math.abs(m.toast.left - (m.vw - m.quick.right)) <= 4, '拾取提示左距 = 快捷栏右距（左右对称）', { toastLeft: m.toast.left, quickRightGap: m.vw - m.quick.right });
+// 20261122D：补血键改为挂在护体键右上角、整体贴右边缘，不再固定在 64%，
+// 所以「与快捷栏垂直镜像」不再成立 —— 守门改为「左右分区 + 同样的贴边档位」。
+ok(m.toast.right < m.quick.left - 8, '拾取提示在左、快捷栏在右，两区不重叠', { toastRight: m.toast.right, quickLeft: m.quick.left });
+ok(m.toast.left <= 16 && (m.vw - m.quick.right) <= 16, '拾取提示与快捷栏同属「贴边一档」（各让 ≤16px）', { toastLeft: m.toast.left, quickRightGap: m.vw - m.quick.right });
 ok(m.toast.right < m.vw * 0.5, '拾取提示整体在左半屏', { toastRight: m.toast.right });
 
 // 截图目检

@@ -32,15 +32,15 @@ const audio = fs.readFileSync(join(root, 'js', 'audio.js'), 'utf8');
 const html = fs.readFileSync(join(root, 'index.html'), 'utf8');
 
 // ---------- A 静态：两颗常驻按钮的素签外观 + 44 物理 px 热区 ----------
-// 20261122A：顶栏轻排，禁制 / 大衍从大黑胶囊收成细金线淡墨素签（宽 1.32 倍）；
+// 20261122D：禁制 / 大衍再缩一半，按钮盒收到 1.06 倍（近方），签身纵向内收 16px；
 // 伪元素重新分工以便真机命中补偿：#pauseBtn::before 画签身、::after 做 coarse 热区；
 // #autoBtn 反过来 ::after 画签身、::before 做 coarse 热区，入定点移到 span::after。
 // 热区仍走 --tap（44px / 当前舞台缩放比），任何机型都是 44 屏幕 px。
 ok(/--tap:\s*calc\(44px \/ var\(--view-scale\)\)/.test(css), '触控尺寸走 --tap（44 物理 px 反算回逻辑 px）');
 const duoRule = (css.match(/#pauseBtn,\s*#autoBtn\s*\{([^}]*)\}/) || [])[1] || '';
-ok(/height:\s*var\(--tap\)/.test(duoRule) && /width:\s*calc\(var\(--tap\)\s*\*\s*1\.32\)/.test(duoRule),
-  '禁制 / 大衍共用的签身高 44 物理 px、宽 1.32 倍（细金线素签）', duoRule.slice(0, 160));
-ok(/#pauseBtn::before,\s*#autoBtn::after\s*\{[^}]*inset:\s*calc\(10px \/ var\(--view-scale\)\)/.test(css), '禁制签身由 ::before 画细金线素签、大衍由 ::after 画（避让 coarse 热区）');
+ok(/height:\s*var\(--tap\)/.test(duoRule) && /width:\s*calc\(var\(--tap\)\s*\*\s*1\.06\)/.test(duoRule),
+  '禁制 / 大衍共用的热区高 44 物理 px、宽 1.06 倍（缩小后的素签）', duoRule.slice(0, 160));
+ok(/#pauseBtn::before,\s*#autoBtn::after\s*\{[^}]*inset:\s*calc\(16px \/ var\(--view-scale\)\)/.test(css), '禁制签身由 ::before 画细金线素签、大衍由 ::after 画（避让 coarse 热区）');
 ok(/#autoBtn\.on span::after\s*\{/.test(css), '#autoBtn 的入定小圆点挂在 span::after（让出伪元素画签身）');
 ok(/id="autoBtn"/.test(html) && /id="autoFightChk"/.test(html), '大衍回到战斗画面，暂停面板开关仍留作兼容');
 
