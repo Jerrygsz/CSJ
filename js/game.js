@@ -3641,6 +3641,8 @@
     elQuick.classList.toggle('on', !!show);
     // 弹反键是独立元素，跟着同一套显隐规则走（拖动调整位置时强制显示）
     if (elParryBtn) elParryBtn.classList.toggle('on', !!(show || parryDragActive()));
+    // 两颗键一露面就把补血键贴回护体键的右上角（护体藏在 display:none 时量不到盒）
+    if (show) applyQuickPos();
     // 补血键：图标固定一个字，余量挂角标；袋里一味回血丹都没有时压暗
     const b = elQuickBtns[0];
     if (b) {
@@ -3674,7 +3676,10 @@
     // G.trial：开局教学战挂在一张 story 图上，但那一刻确实是战斗 —— 键得露面，
     // 否则「第一场仗」里护体键是隐藏的，等于又把它对新玩家关了一次。
     const fight = G.map && (G.map.type === 'combat' || G.map.type === 'boss' || G.map.type === 'chase' || !!G.trial);
-    hudClass(btn, 'on', !!(parryDragActive() || (fight && (G.state === 'play' || G.state === 'dialog'))));
+    const vis = !!(parryDragActive() || (fight && (G.state === 'play' || G.state === 'dialog')));
+    hudClass(btn, 'on', vis);
+    // 露面那一刻才重算补血键的落点：每帧读 offsetLeft 会逼同步布局，翻转时算一次就够
+    if (btn._vis !== vis) { btn._vis = vis; if (vis) applyQuickPos(); }
     const c = parryCarrier();
     const ic = parryIconEl(btn);
     // 护体键显示当前护体槽里那件法宝的图标：戴上玄铁盾就是盾、换遮天钟就是钟。
@@ -3716,8 +3721,41 @@
       elParryBtn.style.right = '';
       elParryBtn.style.transform = '';
     }
+    applyQuickPos();      // 护体挪了位，补血键跟着贴上去
   }
   function parryDragActive() { return !!(document.body && document.body.classList.contains('parry-drag')); }
+  // ---------- 补血键跟随护体键（贴在它的右上角） ----------
+  // 护体键可拖动，补血键原来写死在 CSS 的 64% 上：一旦护体被挪走，两颗就叠在一起。
+  // 这里按护体键的实际盒算补血键的落点 —— 右下角贴住护体的右上角再让出 6px，
+  // 右缘让出 10px；护体贴右时 10px 生效（丹比护体更靠边一档），护体被拖到中间时
+  // 就跟着护体走，永远不叠、也不出屏。间距都按屏幕 px 反算回逻辑 px，换机型手感一致。
+  const QUICK_GAP_CORNER = 6, QUICK_GAP_EDGE = 10, QUICK_SIDE = 44;   // 屏幕 px
+  function stageScaleNum() {
+    const st = parryStage();
+    const w = st.getBoundingClientRect ? st.getBoundingClientRect().width : 0;
+    const lw = st.clientWidth || w;
+    const s = lw ? w / lw : 1;
+    return (isFinite(s) && s > 0.2 && s < 4) ? s : 1;
+  }
+  function applyQuickPos() {
+    const q = document.getElementById('quickbar');
+    if (!q || !elParryBtn) return;
+    if (!elParryBtn.offsetWidth) return;      // 护体键没露面：退回 CSS 兜底位
+    const st = parryStage();
+    const sw = st.clientWidth || 480;
+    const sc = stageScaleNum();
+    const hw = QUICK_SIDE / sc, hh = QUICK_SIDE / sc;
+    const gapC = QUICK_GAP_CORNER / sc, gapE = QUICK_GAP_EDGE / sc;
+    // 顶栏高度：护体被拖到很靠上时，丹别爬进横条里
+    const bar = document.getElementById('topbar');
+    const minTop = (bar ? bar.offsetHeight : 0) + gapC;
+    const right = Math.min(elParryBtn.offsetLeft + elParryBtn.offsetWidth, sw - gapE);
+    const bottom = elParryBtn.offsetTop - gapC;
+    const top = Math.max(minTop, bottom - hh);
+    q.style.left = Math.round(right - hw) + 'px';
+    q.style.top = Math.round(top) + 'px';
+    q.style.right = 'auto';
+  }
   function openParryPosEdit() {
     if (!elParryBtn) return;
     // 面板收起、画面留给拖动；G.state 仍是 pause，主循环不动，背景就是一帧战场
@@ -3761,6 +3799,7 @@
       elParryBtn.style.top = Math.round(y) + 'px';
       elParryBtn.style.right = 'auto';
       elParryBtn.style.transform = 'none';
+      applyQuickPos();      // 拖到哪儿，丹就跟到哪儿（右上角一格）
     });
     const fin = ev => {
       if (!_pdrag) return;
@@ -16168,6 +16207,8 @@
         document.body.classList.toggle('short', !rot && H < 1000);
       }
     } catch (e) {}
+    // 缩放比 / 逻辑视口变了：补血键贴护体右上角的那点间距要按新尺度重算
+    applyQuickPos();
   }
   G.view = { scale: 1, safe: { top: 0, right: 0, bottom: 0, left: 0 } };
   function refreshView() {

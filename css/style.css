@@ -187,17 +187,18 @@ body[data-skin="guigu"] #hpfill { background: linear-gradient(90deg,#a84434,#cf7
 #time { color: rgba(238,230,212,0.82); letter-spacing: 1px; }
 #kills { color: rgba(238,230,212,0.78); letter-spacing: 0.5px; }
 #level { color: var(--accent-soft); letter-spacing: 2px; }
-.top-tools { position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: calc(2px / var(--view-scale)); flex: 0 0 auto; }
+.top-tools { position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 0; flex: 0 0 auto; }
 /* 禁制 / 大衍：细金线描的淡墨素签，不再是大黑胶囊。
    外层按钮仍占 var(--tap) 热区（任何机型都是 44 屏幕 px）—— 锚点、显隐、状态全挂外层；
    看得见的签身移到 ::before 上收细，这样「好点」和「好看」互不迁就。 */
 #pauseBtn, #autoBtn { position: relative; width: calc(var(--tap) * 1.32); height: var(--tap); padding: 0; border: none; background: transparent; color: var(--text-2); pointer-events: auto; display: flex; align-items: center; justify-content: center; font-size: var(--fs-micro); letter-spacing: 2px; text-indent: 2px; -webkit-tap-highlight-color: transparent; transition: color var(--dur-hover) var(--ease-out), transform var(--dur-press) var(--ease-press); }
 #pauseBtn span, #autoBtn span { position: relative; z-index: 1; font-size: var(--fs-micro); letter-spacing: 2px; text-indent: 2px; color: inherit; }
-/* 签身：四边内收 (10,15)，墨底由 0.58 降到 0.28，金线由 0.5 降到 0.38 —— 远看是两枚浅浅的印。
+/* 签身：纵向仍内收 10px（热区 44 不动），横向只收 8px —— 两枚签身之间
+   只隔一层呼吸（8+8=16px），并肩而不粘连；再宽就散成两颗不相干的键了。
    注意伪元素分工：#pauseBtn::before 画签身、::after 留给 coarse 命中补偿；
    #autoBtn 反过来（::after 画签身、::before 留给 coarse 命中补偿），
    否则真机上 coarse 的热区规则会把签身撑成一枚实心大圆。入定点挂在 span::after 上避让。 */
-#pauseBtn::before, #autoBtn::after { content: ''; position: absolute; inset: calc(10px / var(--view-scale)) calc(15px / var(--view-scale)); border: 1px solid rgba(201,162,74,0.38); border-radius: var(--r-pill); background: rgba(10,13,18,0.28); box-shadow: 0 1px 3px rgba(0,0,0,0.26); }
+#pauseBtn::before, #autoBtn::after { content: ''; position: absolute; inset: calc(10px / var(--view-scale)) calc(8px / var(--view-scale)); border: 1px solid rgba(201,162,74,0.38); border-radius: var(--r-pill); background: rgba(10,13,18,0.28); box-shadow: 0 1px 3px rgba(0,0,0,0.26); }
 #autoBtn { display: none; }
 #pauseBtn:active::before, #autoBtn:active::after { background: rgba(8,10,14,0.52); }
 #pauseBtn:active, #autoBtn:active { transform: scale(var(--press-sm)); }
@@ -1422,7 +1423,10 @@ body[data-skin="guigu"] .resttip { color: #46654a; }
 /* 右侧两颗·一组（v1.7）：补血在上、护体在下，同一套金线淡墨语言、同心同色，收成紧凑一组。
    位置从正右中下移到 64%，落在拇指自然弧线上，也让开屏幕中段的战斗主体。
    尺寸走 --tap（= 44 物理 px），边距按物理 px 反算，换机型手感不变。 */
-#quickbar { position: absolute; right: calc(12px / var(--view-scale)); top: calc(64% - var(--tap) * 1.24); display: none; flex-direction: column; gap: calc(8px / var(--view-scale)); pointer-events: auto; z-index: var(--z-combat); }
+/* 补血键（丹）挂在护体键的右上角：真正的位置由 JS 贴着护体键算（applyQuickPos），
+   护体被拖到哪儿，丹就跟到哪儿，二者永远留 6px、与右缘永远留 10px。
+   这里只是 JS 还没跑起来时的兜底位 —— 与默认护体位对齐的右上角。 */
+#quickbar { position: absolute; right: calc(10px / var(--view-scale)); top: calc(64% - var(--tap) * 1.06); display: none; flex-direction: column; gap: calc(8px / var(--view-scale)); pointer-events: auto; z-index: var(--z-combat); }
 #quickbar.on { display: flex; }
 .qb { position: relative; width: var(--tap); height: var(--tap); padding: 0; border-radius: 50%; border: 1px solid rgba(201,162,74,0.42); background: radial-gradient(circle at 50% 38%, rgba(30,28,28,0.62), rgba(9,10,12,0.52)); color: rgba(238,229,210,0.92); font-size: var(--fs-h2); line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; -webkit-tap-highlight-color: transparent; touch-action: manipulation; box-shadow: 0 1px 6px rgba(0,0,0,0.28); }
 .qb .qb-icon { font-style: normal; letter-spacing: 0; }
