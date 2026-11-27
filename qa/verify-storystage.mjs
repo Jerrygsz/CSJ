@@ -106,6 +106,19 @@ for (const id of ['qixuan', 'houshan', 'mishi', 'yelang', 'xuesestory']) {
        '七玄门后期 11 张精灵作为群众演员接入野狼帮之围（金光上人 / 三师叔 / 李长老 / 传令亲信 / 返乡小妹）', spr);
     ok(!spr.includes('zhaozhanglao') && !spr.includes('yunchi'),
        '赵长老（ch69–72）与云翅鸟（韩立肩头）未混入野狼帮之围', spr);
+    ok(spr.includes('lifeiyu') && spr.includes('quhun'),
+       '厉飞雨（ch77 唯一逃回的报信人）与曲魂（ch64 张铁躯壳）接入野狼帮之围', spr);
+    ok(kinds.includes('stele'), '断碑用 stele 立在地上（pillar 的椭圆当碑会像一面镜子）', kinds);
+    {
+      const txt = (stories.yelang || []).map(l => l[1]).join('');
+      ok(/加强型军用连弩/.test(txt), '厉飞雨报丧点出「加强型军用连弩」（ch77 原文）', txt.slice(0, 40));
+      const fy = st.steps.findIndex(s => s.t === 'say' && s.li && s.li[0] === 2);
+      const yy = st.steps.findIndex(s => s.t === 'say' && s.li && s.li[0] === 4);
+      ok(fy > 0 && yy > fy, '先由厉飞雨报丧、再让贾天龙亮阵（时间线不倒错）', { fy, yy });
+      const qh = st.steps.findIndex(s => s.t === 'actor' && s.who === 'quhun' && s.show);
+      const at = st.steps.findIndex(s => s.t === 'act' && s.anim === 'throw');
+      ok(qh > 0 && qh < at, '曲魂在韩立出手之前跟到阵前', { qh, at });
+    }
     const wq = st.actors.find(a => a.id === 'wangqinxin');
     const wqStep = st.steps.find(s => s.t === 'actor' && s.who === 'wangqinxin');
     ok(wq && wq.x > 0 && wq.dir === -1 && wqStep && /七玄门/.test(wqStep.label),

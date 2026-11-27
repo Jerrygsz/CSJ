@@ -22,6 +22,8 @@ const shots = [
   ['houshan', '脚边一点青光', 0.0, 'houshan-bottle-ground'],
   ['houshan', '小绿瓶入手', 0.0, 'houshan-bottle-hand'],
   ['yelang', '金光上人掐诀逞威', 0.45, 'yelang-seal'],
+  ['yelang', '厉飞雨一身血污跑回来', 0.35, 'yelang-lifeiyu'],
+  ['yelang', '斗篷下的巨汉跟出来', 0.45, 'yelang-quhun'],
   ['yelang', '火弹甩向阵前', 0.40, 'yelang-throw'],
   ['xuesestory', '横剑拦住去路', 0.45, 'xuese-guard'],
   ['xuesestory', '于坤招手引路', 0.45, 'xuese-beckon'],

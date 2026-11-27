@@ -198,16 +198,20 @@
       title: '七玄门 · 野狼帮之围',
       zones: [
         { kind: 'house',     x: -260, y: -110, w: 96, h: 74,  block: true, name: '五里沟旧屋' },
-        { kind: 'wall',      x: -120, y: -150, w: 20,  h: 130, block: true, name: '山门左墙' },
-        { kind: 'wall',      x: -120, y: 30,   w: 20,  h: 130, block: true, name: '山门右墙' },
+        { kind: 'wall',      x: -122, y: -150, w: 18,  h: 130, block: true, name: '山门左墙' },
+        { kind: 'wall',      x: -122, y: 30,   w: 18,  h: 130, block: true, name: '山门右墙' },
         { kind: 'gate',      x: -130, y: -56,  w: 40,  h: 106, name: '七玄门山门' },
-        { kind: 'pillar',    x: -20,  y: -28,  w: 22,  h: 22,  block: true, name: '断碑' },
+        { kind: 'stele',     x: -104, y: -36,  w: 24,  h: 46,  block: true, name: '断碑' },
         { kind: 'stair',     x: 60,   y: -100, w: 100, h: 200, speed: 0.76, name: '山门石阶' },
         { kind: 'house',     x: 168,  y: -96,  w: 92,  h: 70,  block: true, name: '七玄门演武堂' },
         { kind: 'bamboo',    x: 250,  y: -70,  w: 64,  h: 140, speed: 0.82, name: '山后竹林' }
       ],
       actors: [
         { id: 'hanli',      x: 0,    y: 0,    dir: 1,  spr: 'hanli',           scale: 1.7, show: true },
+        // 厉飞雨：谈判队全灭后唯一逃回山的报信人（ch77）；曲魂是他亲眼见过的那个巨汉（ch64）
+        { id: 'lifeiyu',    x: -30,  y: 8,    dir: -1, spr: 'lifeiyu',         scale: 1.6, show: false,
+          prop: { n: 'blade', hand: 1, s: 1 } },
+        { id: 'quhun',      x: -8,   y: 22,   dir: -1, spr: 'quhun',           scale: 2.2, show: false },
         // 七玄门一侧：三位师叔 + 李长老 + 马荣 + 张袖儿 + 王门主传令亲信，山门后列阵（群众演员，不抢台词）
         { id: 'huishishu',  x: 64,   y: -22,  dir: -1, spr: 'huishishu',       scale: 1.5, show: false,
           prop: { n: 'sword', hand: 1, s: 0.9 } },
@@ -235,15 +239,22 @@
         { t: 'say', li: [0], label: '山门被围三日' },
         { t: 'walk', who: 'hanli', to: [-70, 14], speed: 74, dur: 2.4, label: '韩立绕到山门侧' },
         { t: 'say', li: [1], label: '墨居仁死了半年' },
+        // 厉飞雨：谈判队全灭，只有他一个逃回来报信（ch77）
+        { t: 'actor', who: 'lifeiyu', show: true, x: -30, y: 8, dir: -1, label: '厉飞雨一身血污跑回来' },
+        { t: 'walk', who: 'hanli', to: [-66, 15], speed: 40, dur: 0.7, label: '韩立回过身来' },
+        { t: 'act', who: 'lifeiyu', anim: 'guard', dir: -1, dur: 0.9, label: '扶着断碑喘' },
+        { t: 'say', li: [2], label: '谈判的人一个都没回来' },
+        { t: 'say', li: [3], label: '只回来他一个' },
         // 野狼帮一列依次亮相（群众演员入场）
         { t: 'actor', who: 'lanyizhifa', show: true, label: '蓝衣执法列阵' },
         { t: 'actor', who: 'jialong', show: true, label: '贾天龙出阵' },
         { t: 'cam', dx: 40, dy: 0, dur: 0.9, label: '镜头扫向阵前' },
-        { t: 'say', li: [2], label: '贾天龙阵前' },
+        { t: 'say', li: [4], label: '贾天龙阵前' },
+        { t: 'say', li: [5], label: '贾天龙请金光上人出手' },
         { t: 'actor', who: 'jinguang', show: true, x: -34, y: -26, dir: 1, label: '金光上人脚不沾地' },
         { t: 'act', who: 'jinguang', anim: 'seal', dir: 1, dur: 0.9, label: '金光上人掐诀逞威' },
-        { t: 'say', li: [3], label: '金光上人：一帮凡人' },
-        { t: 'say', li: [4], label: '韩立认出灵气' },
+        { t: 'say', li: [6], label: '金光上人：一帮凡人' },
+        { t: 'say', li: [7], label: '韩立认出灵气' },
         // 七玄门一列：三位师叔 / 李长老 / 王门主传令亲信 / 马荣 / 张袖儿守在石阶后
         { t: 'actor', who: 'huishishu', show: true, label: '灰衣剑客师叔守山' },
         { t: 'actor', who: 'rushishu', show: true, label: '儒衫师叔守山' },
@@ -253,11 +264,12 @@
         { t: 'actor', who: 'marong', show: true, label: '马荣' },
         { t: 'actor', who: 'zhangxiuer', show: true, label: '张袖儿' },
         { t: 'cam', dx: 150, dy: 0, dur: 1.0, label: '镜头移向七玄门列阵' },
-        { t: 'say', li: [5], label: '长春功第九层' },
-        { t: 'say', li: [6], label: '韩立站出来' },
-        // 阵前反杀：先打火弹，再掠返乡闪回，顺序不能反（否则主角在镜头外出手）
+        // 曲魂随行：张铁的身子里住着的那个东西，厉飞雨是亲眼见过的（ch64 / ch77）
+        { t: 'actor', who: 'quhun', show: true, x: -8, y: 22, dir: -1, label: '斗篷下的巨汉跟出来' },
+        { t: 'say', li: [8], label: '曲魂随行' },
+        { t: 'say', li: [9], label: '长春功第九层' },
         { t: 'walk', who: 'hanli', to: [-16, 2], speed: 80, dur: 2.2, label: '韩立走到石碑前' },
-        { t: 'say', li: [7], label: '手心捏起火弹' },
+        { t: 'say', li: [10], label: '手心捏起火弹' },
         { t: 'prop', who: 'hanli', n: 'talisman', hand: 1, s: 1.1, label: '指间夹起火弹符' },
         { t: 'act', who: 'hanli', anim: 'throw', dir: -1, dur: 0.9, label: '火弹甩向阵前' },
         { t: 'actor', who: 'xiaomei', show: true, label: '返乡 · 小妹嫁衣' },
@@ -816,6 +828,27 @@
       c.fillRect(x - 4, y + z.h - 10, z.w + 8, 10);
     } else if (z.kind === 'pillar') {
       c.fillStyle = 'rgba(32,28,24,.55)'; c.beginPath(); c.ellipse(x + z.w / 2, y + z.h / 2, z.w / 2, z.h / 2, 0, 0, 6.283); c.fill(); c.stroke();
+    } else if (z.kind === 'stele') {
+      // 断碑：石座 + 碑身 + 崩口 + 刻痕。pillar 的椭圆立在地上像一面镜子，当碑不能用
+      var scx = x + z.w / 2, sbw = z.w * 0.66, sby = y + z.h * 0.10, sbh = z.h * 0.90;
+      c.globalAlpha = 0.72;
+      c.fillStyle = 'rgba(70,66,60,.80)';
+      c.fillRect(x, y + sbh, z.w, z.h - sbh);
+      c.fillStyle = 'rgba(102,98,90,.86)';
+      c.strokeStyle = 'rgba(34,30,26,.9)';
+      c.beginPath();
+      c.moveTo(scx - sbw / 2, y + sbh);
+      c.lineTo(scx - sbw / 2 + 1, sby + sbh * 0.30);
+      c.lineTo(scx - sbw * 0.16, sby);
+      c.lineTo(scx + sbw * 0.24, sby + sbh * 0.11);
+      c.lineTo(scx + sbw / 2 - 1, sby + sbh * 0.36);
+      c.lineTo(scx + sbw / 2, y + sbh);
+      c.closePath(); c.fill(); c.stroke();
+      c.globalAlpha = 0.52;
+      c.fillStyle = 'rgba(44,40,34,.85)';
+      c.fillRect(scx - 3, sby + sbh * 0.40, 6, 2);
+      c.fillRect(scx - 4, sby + sbh * 0.56, 8, 2);
+      c.fillRect(scx - 2, sby + sbh * 0.72, 4, 2);
     } else if (z.kind === 'floor') {
       // 室内石砖地：把战斗地图的野外地表压住，才有「屋里的地」这一层
       // 室内石砖地：这里要「压住」战斗地图的野外地表，必须接近实色，
