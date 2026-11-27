@@ -102,8 +102,14 @@ for (const id of ['qixuan', 'houshan', 'yelang', 'xuesestory']) {
   } else if (id === 'yelang') {
     const spr = st.actors.map(a => a.spr);
     ok(['jinguangshangren','jiatianlong','lanyizhifa','wangqinxin','huishishu','rushishu','luosaihu',
-        'lizhanglao','zhaozhanglao','marong','zhangxiuer','hanxiaomei','yunchi'].every(x => spr.includes(x)),
-       '七玄门后期 13 张精灵作为群众演员接入野狼帮之围（金光上人 / 三师叔 / 二长老 / 返乡小妹）', spr);
+        'lizhanglao','marong','zhangxiuer','hanxiaomei'].every(x => spr.includes(x)),
+       '七玄门后期 11 张精灵作为群众演员接入野狼帮之围（金光上人 / 三师叔 / 李长老 / 传令亲信 / 返乡小妹）', spr);
+    ok(!spr.includes('zhaozhanglao') && !spr.includes('yunchi'),
+       '赵长老（ch69–72）与云翅鸟（韩立肩头）未混入野狼帮之围', spr);
+    const wq = st.actors.find(a => a.id === 'wangqinxin');
+    const wqStep = st.steps.find(s => s.t === 'actor' && s.who === 'wangqinxin');
+    ok(wq && wq.x > 0 && wq.dir === -1 && wqStep && /七玄门/.test(wqStep.label),
+       '王门主亲信归七玄门一侧，不站进野狼帮列阵', { wq, wqStep });
     ok(st.actors.filter(a => a.id !== 'hanli').every(a => a.show === false),
        '群众演员默认隐匿，按分镜依次现身，不抢开场', null);
   } else if (id === 'xuesestory') {

@@ -116,7 +116,7 @@
       ]
     },
     yelang: {
-      canon: '第一卷·七玄门后期（第74~95章：野狼帮围山门、金光上人逞威、韩立反杀得升仙令；落日峰三位师叔、李赵二长老、马荣、蓝衣执法、王门主亲信、张袖儿、返乡小妹均在此时出场）',
+      canon: '第一卷·七玄门后期（第74~99章：野狼帮围山门、金光上人逞威、韩立反杀得升仙令；落日峰三位师叔、李长老、马荣、蓝衣执法、王门主传令亲信、张袖儿、返乡小妹均在此时出场）',
       title: '七玄门 · 野狼帮之围',
       zones: [
         { kind: 'house',     x: -260, y: -110, w: 96, h: 74,  block: true, name: '五里沟旧屋' },
@@ -130,22 +130,20 @@
       ],
       actors: [
         { id: 'hanli',      x: 0,    y: 0,    dir: 1,  spr: 'hanli',           scale: 1.7, show: true },
-        // 七玄门一侧：三位师叔 + 李赵长老 + 马荣 + 张袖儿，山门后列阵（群众演员，不抢台词）
+        // 七玄门一侧：三位师叔 + 李长老 + 马荣 + 张袖儿 + 王门主传令亲信，山门后列阵（群众演员，不抢台词）
         { id: 'huishishu',  x: 70,   y: -18,  dir: -1, spr: 'huishishu',       scale: 1.5, show: false },
         { id: 'rushishu',   x: 92,   y: -8,   dir: -1, spr: 'rushishu',        scale: 1.5, show: false },
         { id: 'luosaihu',   x: 114,  y: 2,    dir: -1, spr: 'luosaihu',        scale: 1.6, show: false },
         { id: 'lizhanglao', x: 136,  y: -12,  dir: -1, spr: 'lizhanglao',      scale: 1.5, show: false },
-        { id: 'zhaozhanglao', x: 158, y: 6,   dir: -1, spr: 'zhaozhanglao',    scale: 1.6, show: false },
+        { id: 'wangqinxin', x: 158,  y: 6,    dir: -1, spr: 'wangqinxin',      scale: 1.6, show: false },
         { id: 'marong',     x: 180,  y: -6,   dir: -1, spr: 'marong',          scale: 1.5, show: false },
         { id: 'zhangxiuer', x: 202,  y: 10,   dir: -1, spr: 'zhangxiuer',      scale: 1.4, show: false },
-        // 野狼帮一侧：蓝衣执法 + 王门主亲信 + 贾天龙（复用既有）+ 金光上人
+        // 野狼帮一侧：蓝衣执法 + 贾天龙（复用既有）+ 金光上人
         { id: 'lanyizhifa', x: -96,  y: -14,  dir: 1,  spr: 'lanyizhifa',      scale: 1.5, show: false },
-        { id: 'wangqinxin', x: -118, y: 6,    dir: 1,  spr: 'wangqinxin',      scale: 1.6, show: false },
         { id: 'jialong',    x: -60,  y: -4,   dir: 1,  spr: 'jiatianlong',     scale: 1.7, show: false },
         { id: 'jinguang',   x: -34,  y: -26,  dir: 1,  spr: 'jinguangshangren',scale: 1.4, show: false },
-        // 返乡：韩家小妹嫁衣 + 云翅鸟（ch96–99），收场闪回一列
-        { id: 'xiaomei',    x: 232,  y: 14,   dir: -1, spr: 'hanxiaomei',      scale: 1.4, show: false },
-        { id: 'yunchi',     x: 246,  y: -30,  dir: -1, spr: 'yunchi',          scale: 1.2, show: false }
+        // 返乡：韩家小妹嫁衣（ch99），收场闪回一列；云翅鸟在 ch98 属韩立肩头，不与此列混写
+        { id: 'xiaomei',    x: 232,  y: 14,   dir: -1, spr: 'hanxiaomei',      scale: 1.4, show: false }
       ],
       steps: [
         { t: 'weather', kind: 'mist', speed: 0.90, label: '围山第三日 · 晨雾' },
@@ -153,7 +151,6 @@
         { t: 'walk', who: 'hanli', to: [-70, 14], speed: 74, dur: 2.4, label: '韩立绕到山门侧' },
         { t: 'say', li: [1], label: '墨居仁死了半年' },
         // 野狼帮一列依次亮相（群众演员入场）
-        { t: 'actor', who: 'wangqinxin', show: true, label: '王门主亲信列阵' },
         { t: 'actor', who: 'lanyizhifa', show: true, label: '蓝衣执法列阵' },
         { t: 'actor', who: 'jialong', show: true, label: '贾天龙出阵' },
         { t: 'cam', dx: 40, dy: 0, dur: 0.9, label: '镜头扫向阵前' },
@@ -162,20 +159,19 @@
         { t: 'act', who: 'jinguang', anim: 'pulse', dir: 1, dur: 0.8, label: '金光上人逞威' },
         { t: 'say', li: [3], label: '金光上人：一帮凡人' },
         { t: 'say', li: [4], label: '韩立认出灵气' },
-        // 七玄门一列：三位师叔 / 二长老 / 马荣 / 张袖儿守在石阶后
+        // 七玄门一列：三位师叔 / 李长老 / 王门主传令亲信 / 马荣 / 张袖儿守在石阶后
         { t: 'actor', who: 'huishishu', show: true, label: '灰衣剑客师叔守山' },
         { t: 'actor', who: 'rushishu', show: true, label: '儒衫师叔守山' },
         { t: 'actor', who: 'luosaihu', show: true, label: '络腮胡师叔守山' },
         { t: 'actor', who: 'lizhanglao', show: true, label: '李长老' },
-        { t: 'actor', who: 'zhaozhanglao', show: true, label: '赵长老' },
+        { t: 'actor', who: 'wangqinxin', show: true, label: '七玄门 · 王门主传令亲信现身' },
         { t: 'actor', who: 'marong', show: true, label: '马荣' },
         { t: 'actor', who: 'zhangxiuer', show: true, label: '张袖儿' },
         { t: 'cam', dx: 150, dy: 0, dur: 1.0, label: '镜头移向七玄门列阵' },
         { t: 'say', li: [5], label: '长春功第九层' },
         { t: 'say', li: [6], label: '韩立站出来' },
-        // 收场：返乡一列（韩家小妹 + 云翅鸟）闪过，接升仙令
+        // 收场：返乡一列（韩家小妹）闪过，接升仙令；云翅鸟在韩立肩头，不写进小妹队伍
         { t: 'actor', who: 'xiaomei', show: true, label: '返乡 · 小妹嫁衣' },
-        { t: 'actor', who: 'yunchi', show: true, label: '云翅鸟掠过' },
         { t: 'cam', dx: 235, dy: 0, dur: 0.9, label: '镜头掠返乡一列' },
         { t: 'walk', who: 'hanli', to: [-16, 2], speed: 80, dur: 2.2, label: '韩立走到石碑前' },
         { t: 'say', li: [7], label: '手心捏起火弹' },
@@ -183,7 +179,7 @@
       ]
     },
     xuesestory: {
-      canon: '第二卷·血色试炼（第170~190章：七派禁地混战，向之礼攒弱者联盟、封岳黄雀、钟吾换图；第230~240章：出禁地后李化元收徒，于坤/宋蒙/武炫为绿波洞同门）',
+      canon: '第二卷·血色试炼（约第170~211章：七派禁地混战，向之礼攒弱者联盟、封岳黄雀、钟吾 ch193 换中心区资料；约第231~247章：出禁地后李化元收徒，于坤/宋蒙/武炫为绿波洞同门）',
       title: '血色禁地 · 中心区',
       zones: [
         { kind: 'house',     x: -250, y: -110, w: 92, h: 70,  block: true, name: '禁地口石屋' },
