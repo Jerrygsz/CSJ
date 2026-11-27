@@ -121,6 +121,46 @@ for (const id of ['qixuan', 'houshan', 'yelang', 'xuesestory']) {
        '禁地试炼者先出场，绿波洞同门收场才露面（时间线不倒错）', show);
   }
 }
+
+// ---- 动作库 / 道具库 ----
+// 守的是「演出素材」本身：动作够不够用、道具有没有登记、挂点是不是脚底基准。
+// 曾经动作偏移按 34px 人高写死，实际精灵只有 20~24px，所有线都飘到头顶上方。
+const actBlock = stageSrc.slice(stageSrc.indexOf('var ACTS = {'), stageSrc.indexOf('function drawAct('));
+const actNames = [...actBlock.matchAll(/^ {4}([a-zA-Z]+): function \(x, y, dir, k\)/gm)].map(m => m[1]);
+const propBlock = stageSrc.slice(stageSrc.indexOf('var PROPS = {'), stageSrc.indexOf('function drawProp(n, x, y'));
+const propNames = [...propBlock.matchAll(/^ {4}([a-zA-Z0-9]+): function/gm)].map(m => m[1]);
+
+ok(actNames.length >= 24, '剧情动作库至少 24 式（礼 / 战 / 活三组）', actNames);
+ok(['bow','fist','kneel','point','refuse','beckon','taunt'].every(x => actNames.includes(x)),
+   '礼组齐全：作揖 / 抱拳 / 跪 / 指 / 摆手 / 招手 / 轻慢', actNames);
+ok(['guard','slash','thrust','palm','seal','throw','block','fall'].every(x => actNames.includes(x)),
+   '战组齐全：横剑 / 劈 / 刺 / 掌 / 掐诀 / 抛掷 / 格挡 / 跌倒', actNames);
+ok(['herb','dig','carry','wipe','drink','read','pour','refine','pickup','climb','lift','pulse'].every(x => actNames.includes(x)),
+   '活组齐全：采药 / 掘土 / 挑担 / 抹汗 / 饮 / 展卷 / 斟倒 / 控火 / 拾取 / 攀崖 / 顶水 / 按脉', actNames);
+ok(propNames.length >= 14, '剧情道具库至少 14 件', propNames);
+ok(['bottle','order','jade','map','talisman','sword','blade','token7','chest','hoe','basket','stone','pouch','cauldron','gold'].every(x => propNames.includes(x)),
+   '原著关键道具齐备：小绿瓶 / 升仙令 / 玉简 / 舆图 / 符纸 / 剑 / 刀 / 铁牌 / 药箱 / 药锄 / 药篓 / 灵石 / 储物袋 / 丹炉 / 金砖', propNames);
+
+// 剧情里用到的道具必须都在库里，不能写个空气名字
+const usedProps = [];
+for (const id of ['qixuan', 'houshan', 'yelang', 'xuesestory']) {
+  for (const s of (sandbox.window.StoryStage.steps(id) || [])) {
+    if (s.t === 'prop' && s.n) usedProps.push(s.n);
+  }
+  for (const a of ((sandbox.window.StoryStage.stages()[id] || {}).actors || [])) {
+    if (a.prop && a.prop.n) usedProps.push(a.prop.n);
+  }
+}
+ok(usedProps.length > 0 && usedProps.every(n => propNames.includes(n)),
+   '四段剧情用到的道具全部在库里登记', usedProps);
+
+ok(/ctx\.translate\(x, y\);\s*\n\s*ctx\.scale\(dir \* K, K\)/.test(stageSrc),
+   '动作线以脚底为锚并整体缩放到实际精灵高度（不再飘在头顶）', null);
+ok(/var footY = y \+ ch \/ 2 \+ oy/.test(stageSrc),
+   '手持道具挂在脚底基准的手位上', null);
+ok(!/rgba\(208,214,220/.test(stageSrc),
+   '刀剑线已改深色，不再用浅灰在米色地面上消失', null);
+
 const twoStories = JSON.stringify({ q: stories.qixuan, h: stories.houshan });
 ok(!/摸骨|举石锁|同村|按月查问|山贼脚印|药篓/.test(twoStories),
    '两段台词已去掉非原著概括', twoStories.slice(0, 120));
