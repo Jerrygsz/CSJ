@@ -116,6 +116,63 @@
           li: 7,
           cam:{ z:[1.20,1.00], x:[-10,0], y:[0,0] } }
       ]
+    },
+    // 野狼帮之围：七玄门后期人物在战斗地图当群众演员；这里只作剧目登记 / 旧插画兜底，
+    // 真实玩家与洞府回顾都由 StoryStage 分流到主画布层（见 game.js replayStoryLive）。
+    yelang: {
+      title: '卷一 · 野狼帮之围', sub: '彩霞山 · 七玄门山门', seal: '解围',
+      shots: [
+        { id:0, t:0,    dur:2.4, kind:'chapter', scene:'gate', fx:'unroll',
+          cam:{ z:[1.00,1.05], x:[0,-8], y:[0,0] }, label:'卷一 · 野狼帮之围' },
+        { id:1, t:2.4,  dur:3.2, scene:'gate', fx:'ink', li: 0,
+          cam:{ z:[1.05,1.14], x:[-8,-16], y:[0,-6] } },
+        { id:2, t:5.6,  dur:3.4, scene:'gate', actors:[['hanli','L']], fx:'mist', li: 1,
+          cam:{ z:[1.14,1.18], x:[-16,-6], y:[-6,4] } },
+        { id:3, t:9.0,  dur:3.6, scene:'trial', actors:[['hanli','L'],['mo','R']], fx:'unroll', li: 2,
+          cam:{ z:[1.00,1.12], x:[12,-4], y:[0,-8] } },
+        { id:4, t:12.6, dur:3.0, scene:'trial', actors:[['mo','R']], fx:'dim', li: 3,
+          cam:{ z:[1.12,1.08], x:[-4,6], y:[-8,0] } },
+        { id:5, t:15.6, dur:2.8, scene:'gate', actors:[['hanli','L']], fx:'ink', li: 4,
+          cam:{ z:[1.02,1.15], x:[0,0], y:[0,-8] } },
+        { id:6, t:18.4, dur:3.0, scene:'hill', fx:'seal', li: 5,
+          cam:{ z:[1.15,1.19], x:[0,-8], y:[-8,0] } },
+        { id:7, t:21.4, dur:3.2, scene:'hill', actors:[['hanli','L']], fx:'glow', li: 6,
+          cam:{ z:[1.19,1.16], x:[-8,0], y:[0,0] } },
+        { id:8, t:24.6, dur:3.8, scene:'village', fx:'roll', li: 7,
+          cam:{ z:[1.20,1.00], x:[-10,0], y:[0,0] } }
+      ]
+    },
+    // 血色禁地：向之礼 / 封岳 / 钟吾 / 于坤 / 宋蒙 / 武炫在上场；只作剧目登记。
+    xuesestory: {
+      title: '卷二 · 血色试炼', sub: '越国 · 七派共管秘境', seal: '禁地',
+      shots: [
+        { id:0,  t:0,    dur:2.4, kind:'chapter', scene:'forest', fx:'unroll',
+          cam:{ z:[1.00,1.06], x:[0,-10], y:[0,0] }, label:'卷二 · 血色试炼' },
+        { id:1,  t:2.4,  dur:3.0, scene:'forest', fx:'mist', li: 0,
+          cam:{ z:[1.06,1.15], x:[-10,-18], y:[0,-8] } },
+        { id:2,  t:5.4,  dur:3.0, scene:'forest', actors:[['hanli','L']], fx:'ink', li: 1,
+          cam:{ z:[1.15,1.18], x:[-18,-6], y:[-8,2] } },
+        { id:3,  t:8.4,  dur:3.0, scene:'herb', actors:[['hanli','L']], fx:'unroll', li: 2,
+          cam:{ z:[1.00,1.12], x:[10,-4], y:[0,-6] } },
+        { id:4,  t:11.4, dur:2.8, scene:'herb', fx:'dim', li: 3,
+          cam:{ z:[1.12,1.08], x:[-4,6], y:[-6,0] } },
+        { id:5,  t:14.2, dur:3.0, scene:'trial', actors:[['hanli','L'],['mo','R']], fx:'ink', li: 4,
+          cam:{ z:[1.02,1.14], x:[0,0], y:[0,-8] } },
+        { id:6,  t:17.2, dur:2.8, scene:'trial', actors:[['mo','R']], fx:'seal', li: 5,
+          cam:{ z:[1.14,1.10], x:[0,6], y:[-8,0] } },
+        { id:7,  t:20.0, dur:2.8, scene:'trial', actors:[['hanli','L']], fx:'glow', li: 6,
+          cam:{ z:[1.10,1.16], x:[6,-8], y:[0,0] } },
+        { id:8,  t:22.8, dur:2.8, scene:'cave', fx:'ink', li: 7,
+          cam:{ z:[1.16,1.20], x:[-8,0], y:[0,-4] } },
+        { id:9,  t:25.6, dur:2.8, scene:'cave', fx:'mist', li: 8,
+          cam:{ z:[1.20,1.14], x:[0,-6], y:[-4,0] } },
+        { id:10, t:28.4, dur:2.8, scene:'hut', actors:[['hanli','L']], fx:'unroll', li: 9,
+          cam:{ z:[1.02,1.12], x:[8,-4], y:[0,-6] } },
+        { id:11, t:31.2, dur:3.2, scene:'hut', fx:'seal', li: 10,
+          cam:{ z:[1.12,1.08], x:[-4,6], y:[-6,0] } },
+        { id:12, t:34.4, dur:3.2, scene:'hill', fx:'roll', li: 11,
+          cam:{ z:[1.18,1.00], x:[-10,0], y:[0,0] } }
+      ]
     }
   };
   var curMap = 'qixuan', SHOTS = CUTSCENES.qixuan.shots;

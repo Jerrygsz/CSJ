@@ -1797,6 +1797,361 @@
     ] }
   ];
 
+  // ---------- 人界人物 / 群众（第一批）：剧情动画素材 ----------
+  // 只放考据确认、且 Sprites 里没有的名字；已有 hanli/mo/zhangtie/lifeiyu 等不重画。
+  // 全部沿用 12×14 人形骨架，方便 StoryStage 与战斗通用；墨皮识别符往里收一格，
+  // 不用贴边的 1px 特征，避免被 inkSprite 的外缘浓墨吃掉。
+  const REN = [
+    // 七玄门入门（ch1–5）
+    { name: 'sanshu', label: '三叔·韩胖子', pal: { K, H: '#23242e', S: '#e0b48a', G: '#355f86', g: '#23405e', B: '#8a6a2a' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBBgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'wuyan', label: '舞岩', pal: { K, H: '#2a2026', S: '#e9bd97', G: '#7a3a6a', g: '#562747', B: '#c9a227' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KBBBBBBK..', '.KGgGGGGgGK.', '.KGgGGGGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'yuetangzhu', label: '岳堂主', pal: { K, H: '#cfcfd4', S: '#d98a6e', G: '#8a3a30', g: '#63271f', B: '#b09050' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'wanghufa', label: '王护法', pal: { K, H: '#1c2028', S: '#e0b48a', G: '#2c4666', g: '#1b3047', B: '#9aa0ad' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'zhangjun', label: '张均师兄', pal: { K, H: '#202028', S: '#d9ad84', G: '#3f5c78', g: '#2a4056', B: '#7a8270' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGGGGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'wumingrui', label: '吴铭瑞师兄', pal: { K, H: '#2a2620', S: '#d9ad84', G: '#5a624a', g: '#3c4230', B: '#9a8050' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGGGGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    // 神手谷终局（ch42–64）
+    { name: 'yuzitong', label: '余子童', pal: { K, H: '#cfd2d8', S: '#e2c6a8', G: '#9aa0ab', g: '#6e7580', B: '#b0b6c0' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGGGGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'quhun', label: '曲魂·铁奴', pal: { K, H: '#22232a', S: '#9fa089', G: '#2f3238', g: '#1e2026', B: '#5a5f66' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    // 七玄门覆灭（ch81–95）
+    { name: 'wangjuechu', label: '王绝楚', pal: { K, H: '#2a2c34', S: '#e0c4aa', G: '#d8dce2', g: '#a8afba', B: '#6a5230' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'jiatianlong', label: '贾天龙', pal: { K, H: '#1d1a1c', S: '#dcc0a8', G: '#7a2f2c', g: '#57201e', B: '#9a3a30' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    // 嘉元城墨府（ch100–124）
+    { name: 'sunergou', label: '孙二狗', pal: { K, H: '#26211c', S: '#c99a72', G: '#6a5840', g: '#493c2b', B: '#8a6a3a' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'yanfuren', label: '严氏', pal: { K, H: '#1c1d26', S: '#e6bf9a', G: '#6a3348', g: '#482230', B: '#c9a227' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'moyuzhu', label: '墨玉珠', pal: { K, H: '#1c1d26', S: '#eac8a4', G: '#a83b48', g: '#7a2732', B: '#d8b45a' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'mocaihuan', label: '墨彩环', pal: { K, H: '#1c1d26', S: '#eac8a4', G: '#7a9c72', g: '#55704f', B: '#d8c878' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'mofengwu', label: '墨凤舞', pal: { K, H: '#1c1d26', S: '#eac8a4', G: '#c2a44a', g: '#907832', B: '#e0d078' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'yange', label: '燕歌', pal: { K, H: '#26262e', S: '#dfb892', G: '#5a6478', g: '#3c4456', B: '#8a90a0' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    // 太南小会 / 黄枫谷（ch126–171）
+    { name: 'wanshanxiao', label: '万小山', pal: { K, H: '#23232c', S: '#e0b48a', G: '#4a6a8a', g: '#324a66', B: '#b09050' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'zhonglingdao', label: '钟灵道', pal: { K, H: '#4a4a52', S: '#dfc4a8', G: '#3a6a7a', g: '#274a56', B: '#9a8a5a' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'tianbuli', label: '田卜离', pal: { K, H: '#303038', S: '#dfc4a8', G: '#b8b8ae', g: '#898980', B: '#6a6a62' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'nieying', label: '聂盈', pal: { K, H: '#1c1d26', S: '#eac8a4', G: '#3a5f9c', g: '#274272', B: '#b8c8e0' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    // 血色试炼 / 黑煞教（ch187–363）
+    { name: 'dongxuaner', label: '董萱儿', pal: { K, H: '#24202c', S: '#eac8a4', G: '#a04a7a', g: '#743456', B: '#d8a0b8' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'yanyu', label: '燕雨', pal: { K, H: '#20242c', S: '#dfb892', G: '#4a5a72', g: '#323e52', B: '#b0b6c0' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'yanruyan', label: '燕如嫣', pal: { K, H: '#1c1d26', S: '#eac8a4', G: '#8a5a94', g: '#633c6a', B: '#d8b8e0' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'xinyin', label: '辛如音', pal: { K, H: '#1c1d26', S: '#eac8a4', G: '#6a7a8a', g: '#485663', B: '#9ab0c0' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'linghu', label: '令狐老祖', pal: { K, H: '#d0d0d4', S: '#dcc0a8', G: '#5a5a70', g: '#3e3e50', B: '#b0a060' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    // 七玄门后期（ch29–99）：墨大夫终局 / 落日峰死斗 / 返乡。
+    // 王绝楚、贾天龙、厉飞雨、余子童、张铁/曲魂、万小山等已在上面，直接复用不重画。
+    // 金光上人：三尺侏儒，金丝红袍、金牙金饰，肩线几乎与头齐——用矮身宽底剪影。
+    { name: 'jinguangshangren', label: '金光上人', pal: { K, H: '#3a2a20', S: '#d9b28c', R: '#b5302c', r: '#7f1f1c', Y: '#e0b438', B: '#f0d066' }, rows: [
+      '...KKKKKK...', '..KHHHHHHK..', '.KHHHHHHHHK.', '.KHSSSSSSHK.',
+      '.KSSBSBSSSK.', '..KSSSSSSK..', '..KYRRRRKY..', '.KYRRRRRRKY.',
+      '.KYRrRRrRYK.', '.KYRRRRRRKY.', '..KRrRRrRK..', '..KRRKKRRK..',
+      '..KRK..KRK..'
+    ] },
+    // 张袖儿：荷绿长裙 + 碧玉发簪 + 双辫，窄肩少女。
+    { name: 'zhangxiuer', label: '张袖儿', pal: { K, H: '#2a2026', S: '#eac8a4', G: '#78a878', g: '#527a52', B: '#5aa87a' }, rows: [
+      '....KKKK....', '..KKHHHHKK..', '.KBKHHHHKBK.', '..KSSSSSSK..',
+      '..KSKSSKSK..', '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.',
+      '.KGgGBBGgGK.', '..KgGGGGgK..', '..KGGKKGGK..', '..KGK..KGK..',
+      '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    // 三位师叔：灰衣背剑客（冷脸高瘦、剑柄金）。
+    { name: 'huishishu', label: '灰衣剑客师叔', pal: { K, H: '#2c2c34', S: '#d9b28c', G: '#8a8a90', g: '#62626a', B: '#c0a860' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..',
+      '..KSKSSKSK..', '...KSSSSK...', '..KGGGGGGK..', '.KGGKGGKGGK.',
+      '.KGgKGGKgGK.', '..KgGGGGgK..', '..KGGKKGGK..', '..KGK..KGK..',
+      '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    // 三位师叔：儒衫师叔（宽袖方肩、袖口暗器）。
+    { name: 'rushishu', label: '儒衫师叔', pal: { K, H: '#30303a', S: '#dfc0a0', G: '#6a7a8c', g: '#485564', B: '#b8c8d8' }, rows: [
+      '...KKKKKK...', '..KHHHHHHK..', '.KHHHHHHHHK.', '..KSSSSSSK..',
+      '..KSKSSKSK..', '...KSSSSK...', 'KKGGGGGGGGKK', 'KGGgGGGGgGGK',
+      'KGBgGGGGgBGK', '.KgGGGGGGgK.', '..KGGKKGGK..', '..KGK..KGK..',
+      '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    // 三位师叔：络腮胡猛将（袒胸露怀、钢针胡须、倒三角宽肩，年过花甲）。
+    { name: 'luosaihu', label: '络腮胡师叔', pal: { K, H: '#3a3228', S: '#d9ac86', G: '#7a5a3a', g: '#57402a' }, rows: [
+      '...KKKKKK...', '..KHHHHHHK..', '.KHHHHHHHHK.', '..KSSSSSSK..',
+      '.KSKSSSSKSK.', '..KSSSSSSK..', 'KKGGGGGGGGKK', 'KGSGSSSSGSGK',
+      'KGSGSSSSGSGK', '.KgGGGGGGgK.', '..KGGKKGGK..', '..KGK..KGK..',
+      '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    // 李长老：慈眉老者，青衫；中毒版面部铜钱毒斑用 P。
+    { name: 'lizhanglao', label: '李长老', pal: { K, H: '#cfcfd4', S: '#e0b892', G: '#5a7a72', g: '#3c564f', P: '#7a5a9a', B: '#c9a227' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..',
+      '..KSKPSKSK..', '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.',
+      '.KGgGBBGgGK.', '..KgGGGGgK..', '..KGGKKGGK..', '..KGK..KGK..',
+      '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    // 赵长老：红脸魁梧、十指短粗，与络腮胡师叔区别在无须、正红脸。
+    { name: 'zhaozhanglao', label: '赵长老', pal: { K, H: '#3a2a26', S: '#cf6a52', G: '#8a4a3a', g: '#643026', B: '#c09a5a' }, rows: [
+      '...KKKKKK...', '..KHHHHHHK..', '.KHHHHHHHHK.', '..KSSSSSSK..',
+      '.KSKSSSSKSK.', '..KSSSSSSK..', 'KKGGGGGGGGKK', 'KGGgGGGGgGGK',
+      'KGBgGGGGgBGK', '.KGGGGGGGGK.', '..KGGKKGGK..', '..KGK..KGK..',
+      '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    // 马荣：锦衣高级弟子，前倾跑姿，锦衣高领。
+    { name: 'marong', label: '马荣', pal: { K, H: '#26242e', S: '#e0b48a', G: '#9a7a3a', g: '#6a5226', B: '#d0b060' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..',
+      '..KSKSSKSK..', '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.',
+      '.KGgGBBGgGK.', '..KgGGGGgK..', '..KGGKKGGK..', '..KGK..KGK..',
+      '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    // 蓝衣执法：野狼帮蓝袍执法，与红衣铁卫形成色块对比，腰牌 Y。
+    { name: 'lanyizhifa', label: '蓝衣执法', pal: { K, H: '#22232e', S: '#d9b28c', G: '#3a5a8a', g: '#273c60', Y: '#c0a850' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..',
+      '..KSKSSKSK..', '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.',
+      '.KGgGYGGgGK.', '..KgGGGGgK..', '..KGGKKGGK..', '..KGK..KGK..',
+      '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    // 王门主亲信胖子：大腹便便、小眼睛、金色腰牌，圆球轮廓。
+    { name: 'wangqinxin', label: '王门主亲信', pal: { K, H: '#26221c', S: '#c99a72', G: '#6a5840', g: '#493c2b', Y: '#d8b040' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..',
+      '..KSKSKSSK..', '...KSSSSK...', '.KGGGGGGGGK.', 'KGgGGGGGGgGK',
+      'KGgGGYGGgGGK', 'KGgGGGGGGgGK', '.KGGKKKKGGK.', '..KGK..KGK..',
+      '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    // 韩家小妹：出阁嫁衣版，花红嫁衣 + 红绸，尖下巴少女。
+    { name: 'hanxiaomei', label: '韩家小妹·嫁衣', pal: { K, H: '#201d24', S: '#eac8a4', R: '#b83238', r: '#842126', Y: '#d8b040' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..',
+      '...KSSSSK...', '..KRRRRRRK..', '.KRgRRRRgRK.', '.KRgRYYRgRK.',
+      '.KRgRRRRgRK.', '..KRgRRgRK..', '..KRRKKRRK..', '..KRK..KRK..',
+      '..KRK..KRK..', '..KKK..KKK..'
+    ] },
+    // 云翅鸟：墨大夫监视灵鸟 / 韩立肩头标志，黄色羽毛小尺寸横向展翅，非人形。
+    { name: 'yunchi', label: '云翅鸟', pal: { K, Y: '#e0b830', y: '#a8801c', O: '#c86a20' }, rows: [
+      'K..........K', 'KYK......KYK', '.KYYKKKKYYK.', '..KYYYYYYK..',
+      '..KYKYYKYK..', '..KYYYYYYK..', '...KYOYK...', '....KYYK....',
+      '....KKKK....'
+    ] },
+    // 血色试炼 / 七派禁地（ch170–190）：向之礼、封岳、钟吾是禁地同场试炼者。
+    // 向之礼：黄枫谷十层功力的老滑头，攒「弱者联盟」投机活到最后；白发白须、眯眼、黄衫，袍窄。
+    { name: 'xiangzhili', label: '向之礼·黄枫谷滑头', pal: { K, H: '#dcdcd8', S: '#e0b48a', M: '#d2d2c8', Y: '#b8a040', g: '#8a7630' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..',
+      '..KSKMKMSK..', '...KMMMMK...', '...KMMMMK...', '..KYYYYYYK..',
+      '.KYgYYYYgYK.', '.KYgYYYYgYK.', '..KYgYYgYK..', '..KYK..KYK..',
+      '..KYK..KYK..', '..KKK..KKK..'
+    ] },
+    // 封岳：天阙堡「狂人」，筑基未成十三层顶峰，满脸疤痕、鹰勾鼻、细长眼、蓝袍、煞气外露。
+    { name: 'fengyue', label: '封岳·天阙堡狂人', pal: { K, H: '#1e2028', S: '#c99a72', X: '#a05040', N: '#c98f6a', B: '#2a3a5c', G: '#3c4c70', g: '#1e2a44' }, rows: [
+      '...KKKKKK...', '..KHHHHHHK..', '..KHHHHHHK..', '..KSSXSSSK..',
+      '..KSNSNSNK..', '...KSSSSK...', '..KSSXSSSK..', 'KKGBBBBBBGGK',
+      'KGBBBBBBBBGK', 'KGBBBBBBBBGK', '.KGBBBBBBGK.', '..KBBKKBBK..',
+      '..KBK..KBK..', '..KKK..KKK..'
+    ] },
+    // 钟吾：灵兽山丑汉，满脸大小麻子、一双大小眼，贪滑，驱飞蛇与巨型黄蜂；乱发、兽皮袍。
+    { name: 'zhongwu', label: '钟吾·灵兽山丑汉', pal: { K, H: '#3a3028', S: '#c49a76', P: '#e8d8b0', p: '#9a7450', G: '#6a5a40', g: '#483c2a' }, rows: [
+      '...KKKKKK...', '..KHHKHHHK..', '..KHHHHHHK..', '..KSSSSSSK..',
+      '..KSPSSpSK..', '..KSpSSpSK..', '...KSSSSK...', '.KGGGGGGGGK.',
+      '.KGgGGGGgGK.', '.KGpGGGGpGK.', '..KgGGGGgK..', '..KGGKKGGK..',
+      '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    // 黄枫谷绿波洞同门（ch230–240）：于坤 / 宋蒙 / 武炫是李化元门下师兄，非禁地试炼者。
+    // 于坤：大师兄，三十余岁瘦削儒生，满面笑容、斯文亲切（原著第 238 章「于坤的可怕」）；方巾窄肩青衫。
+    { name: 'yukun', label: '于坤·黄枫谷大师兄', pal: { K, H: '#26262e', S: '#dfc0a0', Q: '#4a6a70', g: '#324a50' }, rows: [
+      '..KKKKKKKK..', '..KHHHHHHK..', '..KHHHHHHK..', '..KSSSSSSK..',
+      '..KSKSSKSK..', '...KSSSSK...', '...KSSSSK...', '...KQQQQK...',
+      '..KQgQQgQK..', '..KQgQQgQK..', '..KQgQQgQK..', '..KQK..KQK..',
+      '..KQK..KQK..', '..KKK..KKK..'
+    ] },
+    // 宋蒙：四师兄，五行法术实战第一，冷漠寡言、眼中精光暴射；宽肩厚背灰褐袍。
+    { name: 'songmeng', label: '宋蒙·黄枫谷四师兄', pal: { K, H: '#23232a', S: '#d9ad84', W: '#f0e0a0', G: '#6a6258', g: '#4a443c' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..',
+      '..KWKSSKWK..', '..KSSSSSSK..', '...KSSSSK...', 'KKGGGGGGGGKK',
+      'KGGGGGGGGGGK', 'KGgGGGGGGgGK', 'KGgGGGGGGgGK', '.KGGKKKKGGK.',
+      '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    // 武炫：六弟子，二十许岁唇红齿白的英俊青年，因双修落选对韩立冷淡敌视；清瘦挺拔素白袍。
+    { name: 'wuxuan', label: '武炫·黄枫谷六弟子', pal: { K, H: '#24242c', S: '#eac8a4', L: '#c85050', W: '#deded8', g: '#b0b0a8' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..',
+      '..KSKSSKSK..', '...KLLSSK...', '...KSSSSK...', '..KWWWWWWK..',
+      '.KWgWWWWgWK.', '.KWgWWWWgWK.', '..KWgWWgWK..', '..KWK..KWK..',
+      '..KWK..KWK..', '..KKK..KKK..'
+    ] }
+  ];
+  // 只登记进 DEFS：map 的统一生成在下面，这里不能提前碰 map（TDZ）。
+  for (const d of REN) DEFS.push(d);
+  window.REN_ROSTER = REN.map(d => ({ name: d.name, label: d.label }));
+  window.REN_SPRITES = REN;
+
+  // ---------- 人界群众（第一批）：路人 / 杂役 / 商贩 / 车船夫 ----------
+  // 剪影必须分得开：头巾、草帽、斗笠、方巾、光头、面甲、扁担、赤膊、矮个。
+  // 只靠换袍色路人会糊成一张脸；墨皮又把饱和度压低，所以差别做在头与肩上。
+  const CROWD = [
+    { name: 'cunfu', label: '村夫', pal: { K, H: '#2a2420', S: '#c99a72', G: '#8a7850', g: '#66573a', B: '#3a3028' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'cunpo', label: '村妇', pal: { K, H: '#5a6470', S: '#d9ad84', G: '#6a7480', g: '#48505c', B: '#9aa0a8' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'zayi', label: '杂役', pal: { K, H: '#26231e', S: '#cf9f76', G: '#72664e', g: '#514634', B: '#8a6a3a' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KBgGGGGgBK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'xiaofan', label: '小贩', pal: { K, H: '#2a241e', S: '#d9ad84', G: '#8a6a44', g: '#634b2e', B: '#a08850', T: '#7a5c34' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '.TTKGGGGKTT.', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'tanzhu', label: '坊市摊主', pal: { K, H: '#30333c', S: '#d9ad84', G: '#4a6a78', g: '#324a56', B: '#8a94a0' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSKSSKSK..', '...KSSSSK...',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'huojie', label: '店伙计', pal: { K, H: '#252832', S: '#d9ad84', G: '#5a7c8c', g: '#3c5866', B: '#c0c8cc' }, rows: [
+      '............', '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..',
+      '..KSKSSKSK..', '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGGGBBGGGK.',
+      '..KgGGGGgK..', '..KGGKKGGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'kuli', label: '码头苦力', pal: { K, H: '#231f1c', S: '#b98c64', G: '#8a3a2e', g: '#63271f', B: '#c04a3a', T: '#7a5c34' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '.TTKSSSSKTT.', '.KSgSSSSgSK.', '.KSgTTSgSSK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'chefu', label: '车夫', pal: { K, H: '#24201c', S: '#b98c64', G: '#6a5c46', g: '#4a4030', B: '#9a8a5a' }, rows: [
+      '..KKKKKKKK..', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'chuanfu', label: '船夫', pal: { K, H: '#2a2620', S: '#b98c64', G: '#3a6a70', g: '#284a50', B: '#9a8a5a', T: '#8a7a48' }, rows: [
+      '.....KK.....', '...KTTTTK...', '..KTTTTTTK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'shusheng', label: '书生', pal: { K, H: '#20242e', S: '#dfb892', G: '#8a94a8', g: '#626c80', B: '#d8d0b8' }, rows: [
+      '..KKKKKKKK..', '..KHHHHHHK..', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'daoshi', label: '散修道士', pal: { K, H: '#d0d3d8', S: '#dfb892', G: '#b8bcb4', g: '#8a8e88', B: '#6a5a3a' }, rows: [
+      '....KKKK....', '...KHTHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'heshang', label: '小和尚', pal: { K, H: '#c99a72', S: '#c99a72', G: '#8a8068', g: '#625a48', B: '#b8ac88' }, rows: [
+      '....KKKK....', '...KSSSSK...', '..KSSSSSSK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'tongzi', label: '孩童', pal: { K, H: '#26231e', S: '#d9ad84', G: '#8a6a4a', g: '#634b32', B: '#9a8a5a' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '..KgGGGGgK..', '..KGGKKGGK..',
+      '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'jintongzi', label: '锦衣孩童', pal: { K, H: '#2a2026', S: '#e9bd97', G: '#7a3a6a', g: '#562747', B: '#c9a227' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KBBBBBBK..', '.KGgGGGGgGK.', '..KgGGGGgK..', '..KGGKKGGK..',
+      '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'tiewei', label: '野狼帮铁卫', pal: { K, H: '#1e2026', S: '#c99a72', G: '#a83a2f', g: '#7a2820', B: '#b8bcc4' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KBBBBBBK..', '..KSKSSKSK..',
+      '...KBBBBK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] }
+  ];
+  for (const d of CROWD) DEFS.push(d);
+  window.CROWD_ROSTER = CROWD.map(d => ({ name: d.name, label: d.label }));
+  window.CROWD_SPRITES = CROWD;
+
   // ---------- 手绘跑步关键帧（四帧一轮，不增加任何文件） ----------
   // 程序化切片只能把整条腿上下挪 1.6 个精灵像素，挪不出「一腿提膝、一腿撑地」的形状。
   // 这里手写四组腿，只换精灵末尾那个人形腿块；X 是身体色占位符，逐精灵替换。

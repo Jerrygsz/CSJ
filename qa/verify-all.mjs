@@ -37,7 +37,7 @@ const ITEMS = [
   { key: 'realm-single', file: 'repro-realm-single-source.mjs', kind: 'gate', desc: '境界唯一真源：夹逼图内外同口径（HUD/结算/道陨/通览/修行图/万灵榜/洞府/静修）+ 图内升级不暴涨 + 非夹逼图正常落盘' },
   { key: 'xianjie-order', file: 'repro-xianjie-break.mjs', kind: 'gate', desc: '仙界进阶次序：破境门按原著真仙→金仙→太乙→大罗→道祖升序 + 组头/默认展开/冲关入口都落在下一关' },
   { key: 'cutscene-qixuan', file: 'verify-cutscene-qixuan.mjs', kind: 'gate', desc: '剧情动画资产（两张图 18 拍 + 剧场入口 + 洞府剧情回顾 + 逐拍版式）：2026-11-19 取消进图强制动画——真实玩家首进改走普通 showLines 对白，动画仅在 force（闸门/剧场主动点播）时播；台词逐字同源 MAP_STORIES、人物逐像素等于当前护甲 Sprites.hanli、剧场/回顾列表跨全图点播含无洞府的后山且不写 seen、分镜互不串台、联机不建层不写 seen、双皮只读 SKIN_INK、矮视口不裁字幕、印章不裁字、场景元素避开字幕区、瀑布人物改为潭面打坐（无上举悬空剪影）、跳过/记账/回归兼容' },
-  { key: 'storystage',  file: 'verify-storystage.mjs',  kind: 'gate',   desc: '主画布剧情层：qixuan / houshan 按原著细化——炼骨崖结绳、舞岩轻慢、神手谷田园与石室、半年把脉、赤水峰瀑布顶水、踢到小绿瓶；台词只写 li 且逐字同源 MAP_STORIES；竹林 / 岩壁 / 瀑布 / 天气真改移速，石墙真挡；剧情独占画面隐去战斗 HUD 只留跳过；洞府「回看 / 重温此段」也改在目标图回放、不写 seen 不领奖，旧 Cutscene 通道不受影响' },
+  { key: 'storystage',  file: 'verify-storystage.mjs',  kind: 'gate',   desc: '主画布剧情层四段：qixuan / houshan 按原著细化——炼骨崖结绳、舞岩轻慢、神手谷田园与石室、半年把脉、赤水峰瀑布顶水、踢到小绿瓶；yelang 野狼帮之围把七玄门后期 13 张精灵当群众演员依次现身；xuesestory 血色禁地让向之礼/封岳/钟吾先上场、于坤/宋蒙/武炫收场才露面（时间线不倒错）；台词只写 li 且逐字同源 MAP_STORIES；竹林 / 岩壁 / 瀑布 / 天气真改移速，石墙真挡；剧情独占画面隐去战斗 HUD 只留跳过；洞府「回看 / 重温此段」也改在目标图回放、不写 seen 不领奖，旧 Cutscene 通道不受影响' },
   { key: 'parry', file: 'verify-parry.mjs', kind: 'gate', desc: '弹反系统（凡人味防御）：数据层（3 件启用载体 / 六类属性矩阵 / 长按衰减 1.0·0.71·0.43 / 共用煞气池 / 联机仅房主）+ runtime 接入（parryResolve/hitPlayer 透传 sk·src / __FR 探针 / guard 槽与三件 g_* 载体 / index.html 引用与加载顺序 / #parryEdge 边缘泛红）' },
   { key: 'batch5', file: 'verify-batch5.mjs', kind: 'gate', desc: '行脚札记（考据可见层）：懒加载 / 171 图分卷 / 未至·到过·已清三档 / 与真源一致 / 发布清单收录 / 双皮站对边 + 境界压制：三档倍率与封顶 / 大境界阶梯现推 / 小怪遁速实测 / 图名尾巴与战前提示' },
   { key: 'batch6', file: 'verify-batch6.mjs', kind: 'gate', desc: '岁月纪（闭关纪年）：入道年数由境界现推（207 年结婴对得上原著）/ 大境界跨度现量 / 不落存档 / 静修页两栏 / 岁月纪只记已过的关 / 打坐真推年数 / 双皮站对边 + 性子：14 条全覆 / 四类齐全 / 洞府可见 / 补型贴身 / 守型护主' },
@@ -58,6 +58,7 @@ const ITEMS = [
   { key: 'extraboss',  file: 'verify-extraboss.mjs',  kind: 'gate', desc: '续战 / 同场 Boss：18 张图 21 个 extraBoss 名字与字段、逐只刷出顺序、连杀后结算（模式图要等时钟走完）；名字逐条回原著核过（青龙上人 X10C1983 陨落、第一魔尊 X10C1989、柳自在 X4C1124、元魇两段称谓各按原文）' },
   { key: 'loot-band',  file: 'verify-loot-band.mjs', kind: 'gate', desc: '掉宝境界带：人界小怪/精英上限 startLevel+20、首领 -30~+20，灵界沿用 -60/+40、仙界 420；171 图带内池不空、实掉不越界；掌天瓶/虚天鼎/玄天斩灵剑/鲲鹏舍利等原著机缘不进随机池且仍挂原图 reward' },
   { key: 'breakomen', file: 'verify-breakomen.mjs', kind: 'gate', desc: '破境题款：成功时整屏收幕（地图 / 对白 / HUD / 横幅 / 飞鸽全退），题款写「进阶功成 + 境界名」，主角立绘居中在题款下方；2.6 秒后同帧收幕且对白照常回来；失败态灰墨压暗；390 / 320 双视口不出画' },
+  { key: 'ren-roster', file: 'verify-ren-roster.mjs', kind: 'gate', desc: '人界角色 / 群众精灵库：43 位具名人物 + 15 类路人按原著考据登记（第一批七玄门 / 墨府 / 黄枫谷，第二批七玄门后期金光上人·张袖儿·三位师叔·李赵长老·马荣·蓝衣执法·云翅鸟，第三批血色试炼向之礼·封岳·钟吾与黄枫谷于坤·宋蒙·武炫；王侠·乌龙·马亮等无据者不画；王绝楚/贾天龙/厉飞雨/曲魂复用不重画）；禁地试炼者与黄枫谷同门身份分开标注；金皮与鬼谷墨皮都取得到、尺寸不变、非空白且墨化真降饱和；路人 / 后期 / 血色三批头肩剪影分开而非换色脸' },
 ];
 
 const argv = process.argv.slice(2);

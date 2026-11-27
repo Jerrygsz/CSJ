@@ -11279,11 +11279,15 @@
   // 洞府「重温此段」→ 剧场回看：只有列在这里的洞府把按钮改成「播过场」，
   // 其余洞府保持原「重进地图」行为。新增动画地图时同步登记即可。
   // 回看是纯播放：不重进地图、不弹难度面板、不写 save.seen、不吞奖励。
-  const CUTSCENE_CAVE = { qixuan: 'qixuan', houshan: 'houshan' };
+  const CUTSCENE_CAVE = { qixuan: 'qixuan', houshan: 'houshan', yelang: 'yelang', xuesestory: 'xuesestory' };
   // 剧情回顾列表的「已阅」标记：与 startMap() / storySceneOf() 写进 save.seen 的键一致。
   // qixuan 是整场剧情图（scene:qixuan），houshan 是战斗图进图序章（cut:houshan）。
   // 只用于展示，不写、不删；铺新图时同步登记。
-  const CUTSCENE_SEEN = { qixuan: 'scene:qixuan', houshan: 'cut:houshan' };
+  const CUTSCENE_SEEN = { qixuan: 'scene:qixuan', houshan: 'cut:houshan', yelang: 'intro:yelang', xuesestory: 'cut:xuesestory' };
+  // 剧目 id → 回放时铺的战斗地图 id；只有 xuesestory 与地图不同名。
+  const STORY_REPLAY_MAP = { xuesestory: 'xuese' };
+  // 剧目 id → 回顾列表显示名；xuesestory 不是地图 id，没有 MAPS.name 可用。
+  const STORY_REPLAY_NAME = { xuesestory: '血色禁地·中心区' };
 
   function startMap(id, diffId) {
     const m = MAPS.find(x => x.id === id);
@@ -11512,6 +11516,15 @@
       };
       const introKey = 'intro:' + m.id;
       if (storySeen(introKey)) { afterIntro(); return; }   // 过场看过就直接开打，别再念一遍
+      // StoryStage：野狼帮之围首进在战斗地图上把七玄门后期人物当群众演员演一遍。
+      // QA / webdriver 仍走下面的 showLines，记账口径（intro:yelang）完全一致。
+      if (m.id === 'yelang' && window.StoryStage && window.StoryStage.canPlay('yelang')
+          && window.StoryStage.available()
+          && (window.StoryStage.force || !(window.__CSJ_QA__ || (typeof navigator !== 'undefined' && navigator.webdriver)))
+          && !G.storyMute) {
+        window.StoryStage.start('yelang', MAP_STORIES[m.intro], () => { storyMarkSeen(introKey); afterIntro(); });
+        return;
+      }
       G.state = 'dialog';
       showLines(MAP_STORIES[m.intro], () => { storyMarkSeen(introKey); afterIntro(); }, 'map:' + id);
       return;
@@ -11544,6 +11557,22 @@
           return;
         }
         showLines(hsLines, () => { storyMarkSeen('cut:houshan'); G.state = 'play'; last = performance.now(); }, 'map:houshan');
+        return;
+      }
+    }
+    // 血色禁地：真实玩家首进在战斗地图上先演一段「七派混战 → 绿波洞拜师」，
+    // 向之礼 / 封岳 / 钟吾 / 于坤 / 宋蒙 / 武炫按原著上场。QA / webdriver 直接开打。
+    if (id === 'xuese' && !G.coopRole && !storySeen('cut:xuesestory')) {
+      const xsLines = MAP_STORIES.xuesestory || [];
+      if (xsLines.length && !(window.__CSJ_QA__ || (typeof navigator !== 'undefined' && navigator.webdriver))) {
+        const stageLive = window.StoryStage && window.StoryStage.canPlay('xuesestory') && window.StoryStage.available()
+          && (window.StoryStage.force || !(window.__CSJ_QA__ || (typeof navigator !== 'undefined' && navigator.webdriver)))
+          && !G.storyMute;
+        if (stageLive) {
+          window.StoryStage.start('xuesestory', xsLines, () => { storyMarkSeen('cut:xuesestory'); G.state = 'play'; last = performance.now(); });
+          return;
+        }
+        showLines(xsLines, () => { storyMarkSeen('cut:xuesestory'); G.state = 'play'; last = performance.now(); }, 'map:xuese');
         return;
       }
     }
@@ -12777,12 +12806,15 @@
   // 回放只演不记账：不写 save.seen、不重进地图、不领奖励；收场原地回洞府。
   function replayStoryFromCave(id) {
     const S = window.StoryStage;
-    const m = MAPS.find(x => x.id === id);
+    // 剧目 id 与背景地图 id 分离：血色试炼段是禁地地图上的一段独立剧情，剧目叫 xuesestory，
+    // 背景仍取 xuese 这张图；其余剧目同名。
+    const mapId = STORY_REPLAY_MAP[id] || id;
+    const m = MAPS.find(x => x.id === mapId);
     if (!S || !m || !S.canPlay(id)) return false;
     // 回放要看到目标图自己的战斗地图背景，不能只把剧情人物叠在上一张图上。
     // 只重置本局表现层，不写 save.mapId / 不加历练岁月 / 不进结算。
     const prevMapId = G.mapId, prevMap = G.map;
-    G.mapId = id; G.map = m;
+    G.mapId = mapId; G.map = m;
     if (S.active && S.active()) S.stop();
     if (window.FX3) window.FX3.clear();
     resetRun();
@@ -12863,7 +12895,7 @@
       const seen = storySeen(CUTSCENE_SEEN[id] || ('scene:' + id));
       h += '<div class="brk-row cs-row">'
          + '<i>' + (CN[i] || (i + 1)) + '</i>'
-         + '<span><span class="cs-nm">' + (m ? m.name : id) + '</span>'
+         + '<span><span class="cs-nm">' + (STORY_REPLAY_NAME[id] || (m ? m.name : id)) + '</span>'
          + '<span class="cs-meta">' + (meta ? meta.title + ' · ' + meta.sub + ' · ' : '')
          + (meta ? meta.shots + ' 拍 / ' + meta.dur.toFixed(1) + 's · ' : '')
          + lines + ' 句台词 · ' + (seen ? '已阅' : '未阅') + '</span></span>'

@@ -71,12 +71,12 @@ const stories = sandbox.window.MAP_STORIES;
 const stages = sandbox.window.StoryStage.stages();
 const DATA = {};
 console.log('\n== 2. 原著剧情与地形数据 ==');
-for (const id of ['qixuan', 'houshan']) {
+for (const id of ['qixuan', 'houshan', 'yelang', 'xuesestory']) {
   const st = stages[id];
   DATA[id] = st;
   const li = st.steps.filter(s => s.t === 'say').reduce((a, s) => a.concat(s.li || []), []);
   const n = (stories[id] || []).length;
-  ok(!!st && !!st.canon && /原著|第一卷|入门试|后山|药庐/.test(st.canon), id + ' 标注原著卷章锚', st && st.canon);
+  ok(!!st && !!st.canon && /原著|第一卷|第二卷/.test(st.canon), id + ' 标注原著卷章锚', st && st.canon);
   ok(n > 0 && li.length === n && li.every((x, i) => x === i),
      id + ' 的 ' + n + ' 句按 0..' + (n - 1) + ' 顺序引用，无自写台词', { li, n });
   ok(st.steps.filter(s => s.t === 'say').every(s => s.li && s.text == null),
@@ -91,16 +91,28 @@ for (const id of ['qixuan', 'houshan']) {
        'qixuan 有竹林 / 炼骨崖岩壁 / 打结麻绳', kinds);
     ok(st.steps.some(s => s.t === 'act' && s.anim === 'climb') && st.steps.some(s => s.t === 'act' && s.anim === 'taunt'),
        '舞岩轻慢与韩立攀崖都有贴身动作', null);
-  } else {
+  } else if (id === 'houshan') {
     ok(kinds.includes('stoneDoor') && kinds.includes('waterfall'),
        'houshan 有石室青石门与赤水峰瀑布', kinds);
     ok(st.steps.some(s => s.t === 'act' && s.anim === 'pulse') && st.steps.some(s => s.t === 'act' && s.anim === 'bottle'),
        '半年把脉与踢到小绿瓶都有动作', null);
-  }
-  if (id === 'houshan') {
     const zt = st.steps.findIndex(s => s.t === 'walk' && s.who === 'zhangtie');
     const lift = st.steps.findIndex(s => s.t === 'act' && s.anim === 'lift');
     ok(zt > 0 && lift > zt, '张铁先走到瀑布下再演顶水冲练', { zt, lift });
+  } else if (id === 'yelang') {
+    const spr = st.actors.map(a => a.spr);
+    ok(['jinguangshangren','jiatianlong','lanyizhifa','wangqinxin','huishishu','rushishu','luosaihu',
+        'lizhanglao','zhaozhanglao','marong','zhangxiuer','hanxiaomei','yunchi'].every(x => spr.includes(x)),
+       '七玄门后期 13 张精灵作为群众演员接入野狼帮之围（金光上人 / 三师叔 / 二长老 / 返乡小妹）', spr);
+    ok(st.actors.filter(a => a.id !== 'hanli').every(a => a.show === false),
+       '群众演员默认隐匿，按分镜依次现身，不抢开场', null);
+  } else if (id === 'xuesestory') {
+    const spr = st.actors.map(a => a.spr);
+    ok(['xiangzhili','fengyue','zhongwu','yukun','songmeng','wuxuan'].every(x => spr.includes(x)),
+       '血色试炼 6 人全部上场（禁地三人 + 黄枫谷三师兄）', spr);
+    const show = st.steps.filter(s => s.t === 'actor' && s.show).map(s => s.who);
+    ok(['xiangzhili','fengyue','zhongwu'].every(x => show.indexOf(x) < show.indexOf('yukun')),
+       '禁地试炼者先出场，绿波洞同门收场才露面（时间线不倒错）', show);
   }
 }
 const twoStories = JSON.stringify({ q: stories.qixuan, h: stories.houshan });
@@ -210,6 +222,41 @@ ok(H0.wall === true, '山径石壁真挡路', H0.wall);
 const H1 = await page.evaluate(() => { window.__FR.storyStageSkip(); return window.__FR.storyStage(); });
 ok(H1 && !H1.active, '后山层也能干净收掉', H1);
 
+console.log('\n== 4b. 野狼帮之围 / 血色禁地两段实机 ==');
+const Y0 = await page.evaluate(async () => {
+  window.__FR.storyStageStart('yelang');
+  await new Promise(r => setTimeout(r, 30));   // weather 首拍经 setTimeout 才进 say
+  const s = window.__FR.storyStage();
+  return { s, first: document.getElementById('dialogText').textContent,
+           want: window.MAP_STORIES.yelang[0][1],
+           gate: window.StoryStage.blockedAt('yelang', -110, -100),
+           gap: window.StoryStage.blockedAt('yelang', -110, 0) };
+});
+ok(Y0.s && Y0.s.active && Y0.s.mapId === 'yelang' && Y0.s.zones >= 7,
+   '野狼帮之围段落点挂上，台词取 MAP_STORIES.yelang[0]', { s: Y0.s, first: Y0.first });
+ok(Y0.first === Y0.want, '开场白逐字同源', { got: Y0.first, want: Y0.want });
+ok(Y0.gate === true && Y0.gap === false, '山门左墙真挡、门洞留通道', { gate: Y0.gate, gap: Y0.gap });
+const Y1 = await page.evaluate(async () => { await window.__ssRun('fade', 200); return window.__FR.storyStage(); });
+ok(Y1 && Y1.step >= 20, '野狼帮之围能一路演到收场（群众演员逐拍现身不卡住）', Y1 && { step: Y1.step, total: Y1.total });
+await page.evaluate(() => window.__FR.storyStageSkip());
+
+const X0 = await page.evaluate(async () => {
+  window.__FR.storyStageStart('xuesestory');
+  await new Promise(r => setTimeout(r, 30));   // weather 首拍经 setTimeout 才进 say
+  const s = window.__FR.storyStage();
+  return { s, first: document.getElementById('dialogText').textContent,
+           want: window.MAP_STORIES.xuesestory[0][1],
+           pillar: window.StoryStage.blockedAt('xuesestory', 70, -20),
+           herb: window.StoryStage.speedAtRel(90, 50) };
+});
+ok(X0.s && X0.s.active && X0.s.mapId === 'xuesestory' && X0.s.zones >= 7,
+   '血色禁地段落点挂上，台词取 MAP_STORIES.xuesestory[0]', { s: X0.s, first: X0.first });
+ok(X0.first === X0.want, '开场白逐字同源', { got: X0.first, want: X0.want });
+ok(X0.pillar === true && X0.herb < 1, '断柱真挡、灵药凹地减速', { pillar: X0.pillar, herb: X0.herb });
+const X1 = await page.evaluate(async () => { await window.__ssRun('fade', 300); return window.__FR.storyStage(); });
+ok(X1 && X1.step >= 30, '血色禁地能一路演到收场（六人依次上场不卡住）', X1 && { step: X1.step, total: X1.total });
+await page.evaluate(() => window.__FR.storyStageSkip());
+
 console.log('\n== 5. 洞府回顾改走战斗地图剧情层 ==');
 const seenOf = () => page.evaluate(() => JSON.stringify(JSON.parse(localStorage.getItem('fanren_save_v1') || '{}').seen || []));
 const SEEN0 = await seenOf();
@@ -288,6 +335,23 @@ ok(R3.s && R3.s.active && R3.s.mapId === 'houshan' && R3.s.replay === true
    '后山回看也用后山背景演后山剧情，不叠在上一张图上', R3);
 await page.click('#storyStageSkipBtn');
 await page.waitForTimeout(120);
+
+// 血色试炼剧目 id（xuesestory）与地图 id（xuese）不同名：回看要铺禁地背景、仍不写 seen。
+const R4 = await page.evaluate(() => {
+  const F = window.__FR;
+  F.cave('xuese'); F.caveTab('story');
+  const btn = document.querySelector('#caveBody button[data-story="xuesestory"]');
+  if (btn) btn.click();
+  return { s: F.storyStage(), cs: window.Cutscene.active(), mapId: F.G.mapId,
+           names: Array.from(document.querySelectorAll('#caveBody .cs-nm')).map(x => x.textContent) };
+});
+ok(R4.s && R4.s.active && R4.s.replay === true && R4.s.mapId === 'xuesestory'
+   && R4.mapId === 'xuese' && R4.cs === false,
+   '血色试炼回看铺禁地背景（剧目 id 与地图 id 分离），不弹旧插画层', R4);
+ok(R4.names.indexOf('血色禁地·中心区') >= 0, '回顾列表用中文剧目名，不裸显 xuesestory', R4.names);
+await page.click('#storyStageSkipBtn');
+await page.waitForTimeout(120);
+ok(await seenOf() === SEEN0, '新增剧目回看仍不写账本', null);
 
 ok(errs.length === 0, '全程零报错', errs.slice(0, 4));
 await b.close(); server.close();

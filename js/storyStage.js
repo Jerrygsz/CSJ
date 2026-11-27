@@ -114,6 +114,132 @@
         { t: 'weather', kind: 'clear', speed: 1, label: '雾散' },
         { t: 'fade', from: 0, to: 1, dur: 0.3, label: '收场' }
       ]
+    },
+    yelang: {
+      canon: '第一卷·七玄门后期（第74~95章：野狼帮围山门、金光上人逞威、韩立反杀得升仙令；落日峰三位师叔、李赵二长老、马荣、蓝衣执法、王门主亲信、张袖儿、返乡小妹均在此时出场）',
+      title: '七玄门 · 野狼帮之围',
+      zones: [
+        { kind: 'house',     x: -260, y: -110, w: 96, h: 74,  block: true, name: '五里沟旧屋' },
+        { kind: 'wall',      x: -120, y: -150, w: 20,  h: 130, block: true, name: '山门左墙' },
+        { kind: 'wall',      x: -120, y: 30,   w: 20,  h: 130, block: true, name: '山门右墙' },
+        { kind: 'gate',      x: -130, y: -56,  w: 40,  h: 106, name: '七玄门山门' },
+        { kind: 'pillar',    x: -20,  y: -28,  w: 22,  h: 22,  block: true, name: '断碑' },
+        { kind: 'stair',     x: 60,   y: -100, w: 100, h: 200, speed: 0.76, name: '山门石阶' },
+        { kind: 'house',     x: 168,  y: -96,  w: 92,  h: 70,  block: true, name: '七玄门演武堂' },
+        { kind: 'bamboo',    x: 250,  y: -70,  w: 64,  h: 140, speed: 0.82, name: '山后竹林' }
+      ],
+      actors: [
+        { id: 'hanli',      x: 0,    y: 0,    dir: 1,  spr: 'hanli',           scale: 1.7, show: true },
+        // 七玄门一侧：三位师叔 + 李赵长老 + 马荣 + 张袖儿，山门后列阵（群众演员，不抢台词）
+        { id: 'huishishu',  x: 70,   y: -18,  dir: -1, spr: 'huishishu',       scale: 1.5, show: false },
+        { id: 'rushishu',   x: 92,   y: -8,   dir: -1, spr: 'rushishu',        scale: 1.5, show: false },
+        { id: 'luosaihu',   x: 114,  y: 2,    dir: -1, spr: 'luosaihu',        scale: 1.6, show: false },
+        { id: 'lizhanglao', x: 136,  y: -12,  dir: -1, spr: 'lizhanglao',      scale: 1.5, show: false },
+        { id: 'zhaozhanglao', x: 158, y: 6,   dir: -1, spr: 'zhaozhanglao',    scale: 1.6, show: false },
+        { id: 'marong',     x: 180,  y: -6,   dir: -1, spr: 'marong',          scale: 1.5, show: false },
+        { id: 'zhangxiuer', x: 202,  y: 10,   dir: -1, spr: 'zhangxiuer',      scale: 1.4, show: false },
+        // 野狼帮一侧：蓝衣执法 + 王门主亲信 + 贾天龙（复用既有）+ 金光上人
+        { id: 'lanyizhifa', x: -96,  y: -14,  dir: 1,  spr: 'lanyizhifa',      scale: 1.5, show: false },
+        { id: 'wangqinxin', x: -118, y: 6,    dir: 1,  spr: 'wangqinxin',      scale: 1.6, show: false },
+        { id: 'jialong',    x: -60,  y: -4,   dir: 1,  spr: 'jiatianlong',     scale: 1.7, show: false },
+        { id: 'jinguang',   x: -34,  y: -26,  dir: 1,  spr: 'jinguangshangren',scale: 1.4, show: false },
+        // 返乡：韩家小妹嫁衣 + 云翅鸟（ch96–99），收场闪回一列
+        { id: 'xiaomei',    x: 232,  y: 14,   dir: -1, spr: 'hanxiaomei',      scale: 1.4, show: false },
+        { id: 'yunchi',     x: 246,  y: -30,  dir: -1, spr: 'yunchi',          scale: 1.2, show: false }
+      ],
+      steps: [
+        { t: 'weather', kind: 'mist', speed: 0.90, label: '围山第三日 · 晨雾' },
+        { t: 'say', li: [0], label: '山门被围三日' },
+        { t: 'walk', who: 'hanli', to: [-70, 14], speed: 74, dur: 2.4, label: '韩立绕到山门侧' },
+        { t: 'say', li: [1], label: '墨居仁死了半年' },
+        // 野狼帮一列依次亮相（群众演员入场）
+        { t: 'actor', who: 'wangqinxin', show: true, label: '王门主亲信列阵' },
+        { t: 'actor', who: 'lanyizhifa', show: true, label: '蓝衣执法列阵' },
+        { t: 'actor', who: 'jialong', show: true, label: '贾天龙出阵' },
+        { t: 'cam', dx: 40, dy: 0, dur: 0.9, label: '镜头扫向阵前' },
+        { t: 'say', li: [2], label: '贾天龙阵前' },
+        { t: 'actor', who: 'jinguang', show: true, x: -34, y: -26, dir: 1, label: '金光上人脚不沾地' },
+        { t: 'act', who: 'jinguang', anim: 'pulse', dir: 1, dur: 0.8, label: '金光上人逞威' },
+        { t: 'say', li: [3], label: '金光上人：一帮凡人' },
+        { t: 'say', li: [4], label: '韩立认出灵气' },
+        // 七玄门一列：三位师叔 / 二长老 / 马荣 / 张袖儿守在石阶后
+        { t: 'actor', who: 'huishishu', show: true, label: '灰衣剑客师叔守山' },
+        { t: 'actor', who: 'rushishu', show: true, label: '儒衫师叔守山' },
+        { t: 'actor', who: 'luosaihu', show: true, label: '络腮胡师叔守山' },
+        { t: 'actor', who: 'lizhanglao', show: true, label: '李长老' },
+        { t: 'actor', who: 'zhaozhanglao', show: true, label: '赵长老' },
+        { t: 'actor', who: 'marong', show: true, label: '马荣' },
+        { t: 'actor', who: 'zhangxiuer', show: true, label: '张袖儿' },
+        { t: 'cam', dx: 150, dy: 0, dur: 1.0, label: '镜头移向七玄门列阵' },
+        { t: 'say', li: [5], label: '长春功第九层' },
+        { t: 'say', li: [6], label: '韩立站出来' },
+        // 收场：返乡一列（韩家小妹 + 云翅鸟）闪过，接升仙令
+        { t: 'actor', who: 'xiaomei', show: true, label: '返乡 · 小妹嫁衣' },
+        { t: 'actor', who: 'yunchi', show: true, label: '云翅鸟掠过' },
+        { t: 'cam', dx: 235, dy: 0, dur: 0.9, label: '镜头掠返乡一列' },
+        { t: 'walk', who: 'hanli', to: [-16, 2], speed: 80, dur: 2.2, label: '韩立走到石碑前' },
+        { t: 'say', li: [7], label: '手心捏起火弹' },
+        { t: 'fade', from: 0, to: 1, dur: 0.3, label: '收场' }
+      ]
+    },
+    xuesestory: {
+      canon: '第二卷·血色试炼（第170~190章：七派禁地混战，向之礼攒弱者联盟、封岳黄雀、钟吾换图；第230~240章：出禁地后李化元收徒，于坤/宋蒙/武炫为绿波洞同门）',
+      title: '血色禁地 · 中心区',
+      zones: [
+        { kind: 'house',     x: -250, y: -110, w: 92, h: 70,  block: true, name: '禁地口石屋' },
+        { kind: 'wall',      x: -140, y: -120, w: 22, h: 150, block: true, name: '灰白迷雾石壁' },
+        { kind: 'gate',      x: -150, y: -50,  w: 40, h: 100, name: '禁地入口' },
+        { kind: 'herb',      x: -30,  y: 34,   w: 120, h: 38, speed: 0.64, name: '灵药凹地' },
+        { kind: 'pillar',    x: 60,   y: -30,  w: 24, h: 24,  block: true, name: '断裂石柱' },
+        { kind: 'stair',     x: 110,  y: -96,  w: 96, h: 190, speed: 0.74, name: '中心区石阶' },
+        { kind: 'stoneDoor', x: 208,  y: -40,  w: 58, h: 50,  block: true, name: '中心区禁制门' },
+        { kind: 'stream',    x: 260,  y: -20,  w: 54, h: 130, speed: 1.22, name: '山涧急流' }
+      ],
+      actors: [
+        { id: 'hanli',      x: 0,   y: 0,   dir: 1,  spr: 'hanli',          scale: 1.7, show: true },
+        // 禁地同场试炼者：向之礼 / 封岳 / 钟吾
+        { id: 'xiangzhili', x: -92, y: -12, dir: 1,  spr: 'xiangzhili',    scale: 1.5, show: false },
+        { id: 'fengyue',    x: 96,  y: -8,  dir: -1, spr: 'fengyue',        scale: 1.7, show: false },
+        { id: 'zhongwu',    x: 168, y: 12,  dir: -1, spr: 'zhongwu',        scale: 1.6, show: false },
+        // 绿波洞同门（收场才露面）：于坤 / 宋蒙 / 武炫
+        { id: 'yukun',      x: 262, y: -10, dir: -1, spr: 'yukun',          scale: 1.5, show: false },
+        { id: 'songmeng',   x: 284, y: 8,   dir: -1, spr: 'songmeng',       scale: 1.6, show: false },
+        { id: 'wuxuan',     x: 306, y: -6,  dir: -1, spr: 'wuxuan',         scale: 1.5, show: false }
+      ],
+      steps: [
+        { t: 'weather', kind: 'mist', speed: 0.88, label: '禁地 · 灰白迷雾' },
+        { t: 'say', li: [0], label: '七派弟子各占一方' },
+        { t: 'walk', who: 'hanli', to: [-44, 26], speed: 72, dur: 2.2, label: '韩立蹲下探路' },
+        { t: 'say', li: [1], label: '看清地面' },
+        { t: 'actor', who: 'xiangzhili', show: true, label: '向之礼凑上来' },
+        { t: 'walk', who: 'xiangzhili', to: [-20, 14], speed: 66, dur: 1.4, label: '老滑头靠近' },
+        { t: 'say', li: [2], label: '弱者联盟' },
+        { t: 'act', who: 'xiangzhili', anim: 'bow', dir: 1, dur: 0.7, label: '笑得圆滑' },
+        { t: 'say', li: [3], label: '眼睛瞟储物袋' },
+        { t: 'actor', who: 'xiangzhili', show: false, label: '向之礼走开' },
+        { t: 'cam', dx: 120, dy: 0, dur: 1.0, label: '镜头移向西边' },
+        { t: 'actor', who: 'fengyue', show: true, label: '封岳挡路' },
+        { t: 'say', li: [4], label: '疤脸蓝袍中年人' },
+        { t: 'act', who: 'fengyue', anim: 'taunt', dir: -1, dur: 0.8, label: '鹰勾鼻狞笑' },
+        { t: 'say', li: [5], label: '把东西留下' },
+        { t: 'say', li: [6], label: '十三层狂人，先稳住' },
+        { t: 'actor', who: 'fengyue', show: false, label: '封岳退场' },
+        { t: 'cam', dx: 195, dy: 0, dur: 1.0, label: '镜头转向麻子丑汉' },
+        { t: 'actor', who: 'zhongwu', show: true, label: '钟吾凑过来' },
+        { t: 'walk', who: 'zhongwu', to: [146, 8], speed: 68, dur: 1.4, label: '大小眼滴溜溜' },
+        { t: 'say', li: [7], label: '满脸麻子的丑汉' },
+        { t: 'say', li: [8], label: '换图' },
+        { t: 'say', li: [9], label: '各留一手' },
+        { t: 'weather', kind: 'clear', speed: 1, label: '迷雾散去' },
+        // 收场：镜头掠到禁地口，李化元收徒，三位同门依次露面
+        { t: 'cam', dx: 285, dy: 0, dur: 1.1, label: '镜头回禁地口' },
+        { t: 'actor', who: 'yukun', show: true, label: '于坤引路' },
+        { t: 'actor', who: 'songmeng', show: true, label: '宋蒙冷眼' },
+        { t: 'actor', who: 'wuxuan', show: true, label: '武炫别过脸' },
+        { t: 'say', li: [10], label: '记名弟子韩立' },
+        { t: 'say', li: [11], label: '黄枫谷的门开了' },
+        { t: 'fade', from: 0, to: 1, dur: 0.3, label: '收场' }
+      ]
     }
   };
 

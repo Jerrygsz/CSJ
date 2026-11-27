@@ -489,16 +489,19 @@ try {
       overflow: body.scrollWidth > body.clientWidth + 2, state: F.G.state
     };
   });
-  ok('50 洞府新增「剧情回顾」页签，列表跨全部地图（含没有洞府的后山）',
-     out.review.tabs.indexOf('story') >= 0 && out.review.ids.length === 2
-     && out.review.rows.length === 2 && out.review.rows[0].id === 'qixuan'
-     && out.review.rows[1].id === 'houshan'
-     && /七玄门·后山/.test(out.review.rows[1].nm) && out.review.state === 'cave', out.review);
+  ok('50 洞府新增「剧情回顾」页签，列表跨全部地图（含没有洞府的后山 / 野狼帮之围 / 血色试炼）',
+     out.review.tabs.indexOf('story') >= 0 && out.review.ids.length === 4
+     && out.review.rows.length === 4 && out.review.rows[0].id === 'qixuan'
+     && out.review.rows[1].id === 'houshan' && out.review.rows[2].id === 'yelang'
+     && out.review.rows[3].id === 'xuesestory'
+     && /七玄门·后山/.test(out.review.rows[1].nm) && /野狼帮之围/.test(out.review.rows[2].nm)
+     && /血色禁地/.test(out.review.rows[3].nm) && out.review.state === 'cave', out.review);
   ok('51 列表元数据取自分镜表与 MAP_STORIES，已阅/未阅按 save.seen 显示',
-     /2 段/.test(out.review.title)
+     /4 段/.test(out.review.title)
      && /卷一 · 七玄门/.test(out.review.rows[0].meta) && /9 拍 \/ 28\.4s/.test(out.review.rows[0].meta)
      && /8 句台词 · 已阅/.test(out.review.rows[0].meta)
      && /卷一 · 后山采药/.test(out.review.rows[1].meta) && /8 句台词 · 未阅/.test(out.review.rows[1].meta)
+     && /野狼帮之围/.test(out.review.rows[2].meta) && /血色试炼/.test(out.review.rows[3].meta)
      && out.review.overflow === false, out.review);
   ok('52 Cutscene.meta() 返回章节卡/地点/拍数/时长，与分镜表同源',
      out.review.meta && out.review.meta.title === '卷一 · 后山采药'
@@ -538,7 +541,7 @@ try {
   });
   ok('55 播完只收层回洞府：账本一字不改、列表仍在、不进战斗',
      out.reviewEnd.active === false && out.reviewEnd.display === 'none'
-     && out.reviewEnd.state === 'cave' && out.reviewEnd.rows === 2
+     && out.reviewEnd.state === 'cave' && out.reviewEnd.rows === 4
      && JSON.stringify(out.reviewEnd.seen) === JSON.stringify(['scene:qixuan']), out.reviewEnd);
 
   out.reviewQX = await page.evaluate(() => {
@@ -562,7 +565,7 @@ try {
              overflow: b.scrollWidth > b.clientWidth + 2 };
   });
   ok('57 墨皮下剧情回顾列表仍完整、无横向溢出',
-     out.reviewInk.rows === 2 && out.reviewInk.ink === true && out.reviewInk.overflow === false, out.reviewInk);
+     out.reviewInk.rows === 4 && out.reviewInk.ink === true && out.reviewInk.overflow === false, out.reviewInk);
 
   // ---- 逐拍审片回归（2026-11-10）：矮视口不裁、印章不裁、场景元素不落进字幕区 ----
   await page.setViewportSize({ width: 1280, height: 720 });
