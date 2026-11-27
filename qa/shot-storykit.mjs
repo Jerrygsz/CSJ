@@ -24,7 +24,11 @@ const shots = [
   ['yelang', '金光上人掐诀逞威', 0.45, 'yelang-seal'],
   ['yelang', '火弹甩向阵前', 0.40, 'yelang-throw'],
   ['xuesestory', '横剑拦住去路', 0.45, 'xuese-guard'],
-  ['xuesestory', '于坤招手引路', 0.45, 'xuese-beckon']
+  ['xuesestory', '于坤招手引路', 0.45, 'xuese-beckon'],
+  ['mishi', '取出四角檀木盒', 0.35, 'mishi-box'],
+  ['mishi', '当着他的面吞下', 0.45, 'mishi-swallow'],
+  ['mishi', '铁塔般堵在门口', 0.30, 'mishi-quhun'],
+  ['mishi', '灯影里浮起一团模糊人影', 0.45, 'mishi-ghost']
 ];
 
 const b = await chromium.launch({ channel: 'chrome' });

@@ -10780,7 +10780,9 @@
         ctx.strokeStyle = 'rgba(143,47,36,' + (0.48 * dk) + ')'; ctx.lineWidth = 1.2;
         ctx.beginPath(); ctx.arc(p.dodgeFrom.x, p.dodgeFrom.y, 8, 0, 6.28); ctx.stroke();
       }
-      drawSpr('hanli', p.x, p.y, 1.7, p.dir < 0, playerTf(p));
+      // 室内剧情（StoryStage 场调）时主角改由剧情层绘制：那一层的地面是实色的，
+      // 主画布画的主角会被整块盖住，只剩一个淡影。
+      if (!G.hideHero) drawSpr('hanli', p.x, p.y, 1.7, p.dir < 0, playerTf(p));
       if (p.hurtFlash > 0) {
         // 受击提示只描一圈红边，不糊一层红饼：打起来最需要看清的就是自己站在哪，
         // 一层不透明红圆盖上去，人是被提示了，但位置也看不见了。
@@ -11279,11 +11281,11 @@
   // 洞府「重温此段」→ 剧场回看：只有列在这里的洞府把按钮改成「播过场」，
   // 其余洞府保持原「重进地图」行为。新增动画地图时同步登记即可。
   // 回看是纯播放：不重进地图、不弹难度面板、不写 save.seen、不吞奖励。
-  const CUTSCENE_CAVE = { qixuan: 'qixuan', houshan: 'houshan', yelang: 'yelang', xuesestory: 'xuesestory' };
+  const CUTSCENE_CAVE = { qixuan: 'qixuan', houshan: 'houshan', mishi: 'mishi', yelang: 'yelang', xuesestory: 'xuesestory' };
   // 剧情回顾列表的「已阅」标记：与 startMap() / storySceneOf() 写进 save.seen 的键一致。
   // qixuan 是整场剧情图（scene:qixuan），houshan 是战斗图进图序章（cut:houshan）。
   // 只用于展示，不写、不删；铺新图时同步登记。
-  const CUTSCENE_SEEN = { qixuan: 'scene:qixuan', houshan: 'cut:houshan', yelang: 'intro:yelang', xuesestory: 'cut:xuesestory' };
+  const CUTSCENE_SEEN = { qixuan: 'scene:qixuan', houshan: 'cut:houshan', mishi: 'intro:mishi', yelang: 'intro:yelang', xuesestory: 'cut:xuesestory' };
   // 剧目 id → 回放时铺的战斗地图 id；只有 xuesestory 与地图不同名。
   const STORY_REPLAY_MAP = { xuesestory: 'xuese' };
   // 剧目 id → 回顾列表显示名；xuesestory 不是地图 id，没有 MAPS.name 可用。
@@ -11516,13 +11518,15 @@
       };
       const introKey = 'intro:' + m.id;
       if (storySeen(introKey)) { afterIntro(); return; }   // 过场看过就直接开打，别再念一遍
-      // StoryStage：野狼帮之围首进在战斗地图上把七玄门后期人物当群众演员演一遍。
-      // QA / webdriver 仍走下面的 showLines，记账口径（intro:yelang）完全一致。
-      if (m.id === 'yelang' && window.StoryStage && window.StoryStage.canPlay('yelang')
-          && window.StoryStage.available()
-          && (window.StoryStage.force || !(window.__CSJ_QA__ || (typeof navigator !== 'undefined' && navigator.webdriver)))
-          && !G.storyMute) {
-        window.StoryStage.start('yelang', MAP_STORIES[m.intro], () => { storyMarkSeen(introKey); afterIntro(); });
+      // StoryStage：野狼帮之围 / 墨府密谋首进，都在战斗地图上按原著演一遍走位对白。
+      // QA / webdriver 仍走下面的 showLines，记账口径（intro:<id>）完全一致。
+      const stageIntro = (m.id === 'yelang' || m.id === 'mishi')
+        && window.StoryStage && window.StoryStage.canPlay(m.id)
+        && window.StoryStage.available()
+        && (window.StoryStage.force || !(window.__CSJ_QA__ || (typeof navigator !== 'undefined' && navigator.webdriver)))
+        && !G.storyMute;
+      if (stageIntro) {
+        window.StoryStage.start(m.id, MAP_STORIES[m.intro], () => { storyMarkSeen(introKey); afterIntro(); });
         return;
       }
       G.state = 'dialog';

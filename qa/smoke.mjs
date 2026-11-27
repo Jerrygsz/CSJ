@@ -810,9 +810,10 @@ ok((W.STORY || []).some(s => s.id === 'hs_meet' && s.lines.some(l => String(l[1]
 
 // 墨大夫夺舍这一战的原著要素
 ok(hasLine('mishi', '墨大夫', '尸虫丸'), '补上尸虫丸（逼他一年修到四层）');
-ok(hasLine('mishi', null, '魔银手'), '补上魔银手');
-ok(hasLine('mishi', '墨大夫', '井底之蛙'), '墨大夫那句「井底之蛙」');
+ok(hasLine('mishi', '墨大夫', '魔银手'), '墨大夫亮成名绝技魔银手（第47章原话）');
+ok(hasLine('mishi', '墨大夫', '三十七') && hasLine('mishi', '墨大夫', '岚州'), '墨大夫自陈三十七岁、岚州出身（第30章口供，不是「困了三十年」）');
 ok(hasLine('mishi', '韩立', '第六层'), '韩立已到第六层（对方算他四层）');
+ok(hasLine('mishi', null, '曲魂'), '张铁躯壳改叫曲魂（第64章）');
 ok(hasLine('moutro', null, '张铁'), '铁奴揭面是张铁');
 ok(hasLine('moutro', null, '嘉元城'), '遗书指向嘉元城墨府');
 

@@ -71,7 +71,7 @@ const stories = sandbox.window.MAP_STORIES;
 const stages = sandbox.window.StoryStage.stages();
 const DATA = {};
 console.log('\n== 2. 原著剧情与地形数据 ==');
-for (const id of ['qixuan', 'houshan', 'yelang', 'xuesestory']) {
+for (const id of ['qixuan', 'houshan', 'mishi', 'yelang', 'xuesestory']) {
   const st = stages[id];
   DATA[id] = st;
   const li = st.steps.filter(s => s.t === 'say').reduce((a, s) => a.concat(s.li || []), []);
@@ -119,6 +119,24 @@ for (const id of ['qixuan', 'houshan', 'yelang', 'xuesestory']) {
     const show = st.steps.filter(s => s.t === 'actor' && s.show).map(s => s.who);
     ok(['xiangzhili','fengyue','zhongwu'].every(x => show.indexOf(x) < show.indexOf('yukun')),
        '禁地试炼者先出场，绿波洞同门收场才露面（时间线不倒错）', show);
+  } else if (id === 'mishi') {
+    const spr = st.actors.map(a => a.spr);
+    ok(['hanli','mo','quhun','yuzitong'].every(x => spr.includes(x)),
+       '墨府密谋四人到位：韩立 / 墨居仁 / 铁奴（张铁躯壳）/ 余子童元神', spr);
+    ok(kinds.includes('lamp') && kinds.includes('stoneDoor'),
+       'mishi 有满屋灯烛与封闭石门（原著「四壁无窗、灯烛辉煌」）', kinds);
+    const txt = (stories.mishi || []).map(l => l[1]).join('');
+    ok(/三十七/.test(txt) && /尸虫丸/.test(txt) && /第六层/.test(txt),
+       '台词守住三处原著硬点：三十七岁 / 尸虫丸 / 第六层', txt.slice(0, 60));
+    ok(!/三十年/.test(txt) && !/七盏灯/.test(txt),
+       '不写「困在凡躯三十年」与「七盏油灯」这两处旧偏差', null);
+    const gi = st.steps.findIndex(s => s.t === 'act' && s.anim === 'give');
+    const box = st.steps.findIndex(s => s.t === 'prop' && s.n === 'box');
+    const qh = st.steps.findIndex(s => s.t === 'actor' && s.who === 'quhun' && s.show);
+    ok(box > 0 && gi > box, '先取檀木盒，再递到韩立面前', { box, gi });
+    ok(qh > gi, '铁奴在摊牌之后才踏进石门（不提前到摊牌拍）', { qh, gi });
+    const ghost = st.actors.find(a => a.id === 'yuzitong');
+    ok(ghost && ghost.ghost === true, '余子童以元神的半透明幽影出现，不做成活人', ghost);
   }
 }
 
@@ -137,13 +155,17 @@ ok(['guard','slash','thrust','palm','seal','throw','block','fall'].every(x => ac
    '战组齐全：横剑 / 劈 / 刺 / 掌 / 掐诀 / 抛掷 / 格挡 / 跌倒', actNames);
 ok(['herb','dig','carry','wipe','drink','read','pour','refine','pickup','climb','lift','pulse'].every(x => actNames.includes(x)),
    '活组齐全：采药 / 掘土 / 挑担 / 抹汗 / 饮 / 展卷 / 斟倒 / 控火 / 拾取 / 攀崖 / 顶水 / 按脉', actNames);
+ok(['give','swallow','clench'].every(x => actNames.includes(x)),
+   '密谋组齐全：递物 / 吞服 / 握拳（尸虫丸那段全靠这三式）', actNames);
 ok(propNames.length >= 14, '剧情道具库至少 14 件', propNames);
 ok(['bottle','order','jade','map','talisman','sword','blade','token7','chest','hoe','basket','stone','pouch','cauldron','gold'].every(x => propNames.includes(x)),
    '原著关键道具齐备：小绿瓶 / 升仙令 / 玉简 / 舆图 / 符纸 / 剑 / 刀 / 铁牌 / 药箱 / 药锄 / 药篓 / 灵石 / 储物袋 / 丹炉 / 金砖', propNames);
+ok(['box','pill','lamp'].every(x => propNames.includes(x)),
+   '密室道具齐备：檀木盒 / 白丸 / 油灯', propNames);
 
 // 剧情里用到的道具必须都在库里，不能写个空气名字
 const usedProps = [];
-for (const id of ['qixuan', 'houshan', 'yelang', 'xuesestory']) {
+for (const id of ['qixuan', 'houshan', 'mishi', 'yelang', 'xuesestory']) {
   for (const s of (sandbox.window.StoryStage.steps(id) || [])) {
     if (s.t === 'prop' && s.n) usedProps.push(s.n);
   }
@@ -152,7 +174,7 @@ for (const id of ['qixuan', 'houshan', 'yelang', 'xuesestory']) {
   }
 }
 ok(usedProps.length > 0 && usedProps.every(n => propNames.includes(n)),
-   '四段剧情用到的道具全部在库里登记', usedProps);
+   '五段剧情用到的道具全部在库里登记', usedProps);
 
 ok(/ctx\.translate\(x, y\);\s*\n\s*ctx\.scale\(dir \* K, K\)/.test(stageSrc),
    '动作线以脚底为锚并整体缩放到实际精灵高度（不再飘在头顶）', null);
@@ -301,6 +323,26 @@ ok(X0.first === X0.want, '开场白逐字同源', { got: X0.first, want: X0.want
 ok(X0.pillar === true && X0.herb < 1, '断柱真挡、灵药凹地减速', { pillar: X0.pillar, herb: X0.herb });
 const X1 = await page.evaluate(async () => { await window.__ssRun('fade', 300); return window.__FR.storyStage(); });
 ok(X1 && X1.step >= 30, '血色禁地能一路演到收场（六人依次上场不卡住）', X1 && { step: X1.step, total: X1.total });
+await page.evaluate(() => window.__FR.storyStageSkip());
+
+console.log('\n== 4c. 墨府密谋实机 ==');
+const M0 = await page.evaluate(async () => {
+  window.__FR.storyStageStart('mishi');
+  await new Promise(r => setTimeout(r, 30));   // weather 首拍经 setTimeout 才进 say
+  const s = window.__FR.storyStage();
+  return { s, first: document.getElementById('dialogText').textContent,
+           want: window.MAP_STORIES.mishi[0][1],
+           door: window.StoryStage.blockedAt('mishi', 230, -30),
+           stair: window.StoryStage.speedAtRel(140, 70),
+           ghost: (window.StoryStage.stages().mishi.actors.find(a => a.id === 'yuzitong') || {}).ghost };
+});
+ok(M0.s && M0.s.active && M0.s.mapId === 'mishi' && M0.s.zones >= 6,
+   '墨府密谋段落点挂上，台词取 MAP_STORIES.mishi[0]', { s: M0.s, first: M0.first });
+ok(M0.first === M0.want, '开场白逐字同源', { got: M0.first, want: M0.want });
+ok(M0.door === true && M0.stair < 1, '封闭石门真挡、门内石阶减速', { door: M0.door, stair: M0.stair });
+ok(M0.ghost === true, '余子童元神带 ghost 标记（半透明幽影）', M0.ghost);
+const M1 = await page.evaluate(async () => { await window.__ssRun('fade', 400); return window.__FR.storyStage(); });
+ok(M1 && M1.step >= 34, '墨府密谋能一路演到收场（摊牌→吞丸→一年后铁奴）', M1 && { step: M1.step, total: M1.total });
 await page.evaluate(() => window.__FR.storyStageSkip());
 
 console.log('\n== 5. 洞府回顾改走战斗地图剧情层 ==');

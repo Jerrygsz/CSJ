@@ -126,6 +126,73 @@
         { t: 'fade', from: 0, to: 1, dur: 0.3, label: '收场' }
       ]
     },
+    mishi: {
+      canon: '第一卷·墨府密谋（第29~31章：墨居仁自陈三十七岁、岚州鬼手、被亲信下毒；要练至第四层者运功推拿；以尸虫丸与家人相挟。第43章韩立已秘练至第六层。第47~57章魔银手对罗烟步、铁奴出手、夺舍失败身死；第59章夺舍三大铁则。第64章韩立收张铁躯壳为曲魂）',
+      title: '七玄门 · 墨大夫密室',
+      tone: 'indoor',
+      zones: [
+        { kind: 'floor',     x: -280, y: -480, w: 560, h: 960, name: '石屋地面' },
+        { kind: 'wall',      x: -280, y: -480, w: 560, h: 38,  block: true, name: '石屋后壁' },
+        { kind: 'wall',      x: -280, y: -480, w: 44,  h: 960, block: true, name: '石屋左壁' },
+        { kind: 'wall',      x: 226,  y: -480, w: 44,  h: 960, block: true, name: '石屋右壁' },
+        { kind: 'stoneDoor', x: 190,  y: -70,  w: 54,  h: 56,  block: true, name: '封闭石门' },
+        { kind: 'bed',       x: -196, y: 52,   w: 96,  h: 44,  block: true, name: '石床' },
+        { kind: 'rack',      x: -150, y: -150, w: 96,  h: 40,  block: true, name: '药架' },
+        { kind: 'lamp',      x: -140, y: -80,  w: 250, h: 40,  name: '满屋灯烛' },
+        { kind: 'lamp',      x: -140, y: 150,  w: 250, h: 36,  name: '地角灯烛' },
+        { kind: 'table',     x: 104,  y: -78,  w: 46,  h: 26,  block: true, name: '石桌' },
+        { kind: 'stair',     x: 96,   y: 60,   w: 100, h: 70,  speed: 0.80, name: '石门内石阶' }
+      ],
+      actors: [
+        { id: 'hanli',    x: 0,   y: 0,   dir: 1,  spr: 'hanli',    scale: 1.7, show: true },
+        { id: 'mo',       x: 62,  y: -14, dir: -1, spr: 'mo',       scale: 1.8, show: false },
+        { id: 'quhun',    x: 148, y: 10,  dir: -1, spr: 'quhun',    scale: 2.3, show: false },
+        { id: 'yuzitong', x: 26,  y: -52, dir: 1,  spr: 'yuzitong', scale: 1.5, show: false, ghost: true }
+      ],
+      steps: [
+        { t: 'weather', kind: 'clear', speed: 1, label: '石屋 · 灯烛通明' },
+        { t: 'say', li: [0], label: '后山石屋，四壁无窗' },
+        { t: 'walk', who: 'hanli', to: [34, 6], speed: 56, dur: 1.8, label: '被让到石桌前站定' },
+        { t: 'actor', who: 'mo', show: true, x: 62, y: -14, dir: -1, label: '墨大夫从桌后转出' },
+        { t: 'cam', dx: 26, dy: -8, dur: 0.9, label: '镜头推近灯下' },
+        { t: 'say', li: [1], label: '你猜我多大岁数' },
+        { t: 'say', li: [2], label: '看面相六十有余' },
+        { t: 'say', li: [3], label: '我今年三十七' },
+        { t: 'act', who: 'mo', anim: 'fist', dir: -1, dur: 0.8, label: '自陈岚州鬼手' },
+        { t: 'say', li: [4], label: '黑白两道，顺我者生' },
+        { t: 'say', li: [5], label: '被亲信下毒' },
+        { t: 'act', who: 'mo', anim: 'clench', dir: -1, dur: 1.1, label: '指甲插进掌心' },
+        { t: 'say', li: [6], label: '那双手泛着青黑' },
+        { t: 'say', li: [7], label: '只差一个第四层的人推拿' },
+        { t: 'say', li: [8], label: '他算的是第四层' },
+        { t: 'prop', who: 'mo', n: 'box', hand: 1, s: 1, label: '取出四角檀木盒' },
+        { t: 'act', who: 'mo', anim: 'give', dir: -1, dur: 0.9, label: '递到韩立面前' },
+        { t: 'say', li: [9], label: '盒中一粒白丸' },
+        { t: 'say', li: [10], label: '尸虫丸，一年为期' },
+        { t: 'prop', who: 'mo', n: null, label: '盒收回袖中' },
+        { t: 'prop', who: 'hanli', n: 'pill', hand: 1, s: 1.1, label: '指间捏起白丸' },
+        { t: 'act', who: 'hanli', anim: 'swallow', dir: 1, dur: 1.0, label: '当着他的面吞下' },
+        { t: 'prop', who: 'hanli', n: null, label: '药丸入口' },
+        { t: 'act', who: 'hanli', anim: 'clench', dir: 1, dur: 0.9, label: '强压怒火' },
+        { t: 'say', li: [11], label: '他以为我两年没进境' },
+        { t: 'say', li: [12], label: '你家里银子够用吗' },
+        { t: 'say', li: [13], label: '比尸虫丸更毒' },
+        // 一年之期：灯烛不灭，人换了进来
+        { t: 'weather', kind: 'clear', speed: 1, label: '一年后的夜里' },
+        { t: 'say', li: [14], label: '石门再开，进来的是铁奴' },
+        { t: 'actor', who: 'quhun', show: true, x: 142, y: 12, dir: -1, label: '铁奴踏进石门' },
+        { t: 'act', who: 'quhun', anim: 'guard', dir: -1, dur: 1.1, label: '铁塔般堵在门口' },
+        { t: 'say', li: [15], label: '铁奴，拿下他' },
+        { t: 'act', who: 'mo', anim: 'seal', dir: -1, dur: 0.9, label: '七鬼噬魂' },
+        { t: 'actor', who: 'yuzitong', show: true, x: 26, y: -52, dir: 1, label: '灯影里浮起一团模糊人影' },
+        { t: 'act', who: 'quhun', anim: 'slash', dir: -1, dur: 1.0, label: '铁奴扑上来' },
+        { t: 'say', li: [16], label: '成名绝技魔银手' },
+        { t: 'say', li: [17], label: '他借来的法力压不住第六层' },
+        { t: 'say', li: [18], label: '墨居仁没能走出石屋' },
+        { t: 'cam', dx: 0, dy: 0, dur: 0.8, label: '镜头拉回全景' },
+        { t: 'fade', from: 0, to: 1, dur: 0.35, label: '收场' }
+      ]
+    },
     yelang: {
       canon: '第一卷·七玄门后期（第74~99章：野狼帮围山门、金光上人逞威、韩立反杀得升仙令；落日峰三位师叔、李长老、马荣、蓝衣执法、王门主传令亲信、张袖儿、返乡小妹均在此时出场）',
       title: '七玄门 · 野狼帮之围',
@@ -606,12 +673,45 @@
     raf = requestAnimationFrame(frame);
   }
 
+  // 场调层：预渲染到离屏画布，只在尺寸 / 种类变化时重建（每帧都要贴一次）
+  var toneCv = null, toneKey = '';
+  function drawTone(w, h) {
+    if (!P.tone || P.tone === 'none') return;
+    // 版本前缀：改了配色/参数一定换 key，否则旧场调会被缓存一直贴下去
+    var key = 't2:' + P.tone + ':' + w + 'x' + h;
+    if (key !== toneKey || !toneCv) {
+      toneKey = key;
+      toneCv = document.createElement('canvas');
+      toneCv.width = w; toneCv.height = h;
+      var t2 = toneCv.getContext('2d');
+      var cx = w / 2, cy = h * 0.56;
+      // 四壁压暗：越靠边越黑，模拟只有一盏盏灯烛照着的封闭石屋
+      // 只压边缘、中心留透：韩立是主画布画的，整屏压暗会把他一起吃掉。
+      var grd = t2.createRadialGradient(cx, cy, Math.min(w, h) * 0.16, cx, cy, Math.max(w, h) * 0.80);
+      grd.addColorStop(0, 'rgba(44,28,16,0)');
+      grd.addColorStop(0.45, 'rgba(38,25,14,.10)');
+      grd.addColorStop(0.78, 'rgba(26,17,10,.40)');
+      grd.addColorStop(1, 'rgba(14,9,6,.66)');
+      t2.fillStyle = grd;
+      t2.fillRect(0, 0, w, h);
+      // 中心暖光：油灯的火色，很轻，只染气氛
+      var warm = t2.createRadialGradient(cx, cy, 8, cx, cy, Math.min(w, h) * 0.42);
+      warm.addColorStop(0, 'rgba(246,192,104,.16)');
+      warm.addColorStop(0.55, 'rgba(232,166,76,.07)');
+      warm.addColorStop(1, 'rgba(226,164,80,0)');
+      t2.fillStyle = warm;
+      t2.fillRect(0, 0, w, h);
+    }
+    ctx.drawImage(toneCv, 0, 0);
+  }
+
   function draw() {
     if (!ctx || !P || !P.view) return;
     var g = G();
     if (!g) return;
     var w = P.view.w, h = P.view.h;
     ctx.clearRect(0, 0, w, h);
+    drawTone(w, h);
     drawZones(g);
     drawProps(g);
     drawActors(g);
@@ -716,6 +816,79 @@
       c.fillRect(x - 4, y + z.h - 10, z.w + 8, 10);
     } else if (z.kind === 'pillar') {
       c.fillStyle = 'rgba(32,28,24,.55)'; c.beginPath(); c.ellipse(x + z.w / 2, y + z.h / 2, z.w / 2, z.h / 2, 0, 0, 6.283); c.fill(); c.stroke();
+    } else if (z.kind === 'floor') {
+      // 室内石砖地：把战斗地图的野外地表压住，才有「屋里的地」这一层
+      // 室内石砖地：这里要「压住」战斗地图的野外地表，必须接近实色，
+      // 否则远山、树、屋舍会从砖缝里透出来，一眼就露馅。
+      c.globalAlpha = 1;
+      var fg = c.createLinearGradient(0, y, 0, y + z.h);
+      fg.addColorStop(0, 'rgba(148,130,106,1)');
+      fg.addColorStop(0.55, 'rgba(136,118,96,1)');
+      fg.addColorStop(1, 'rgba(118,102,84,1)');
+      c.fillStyle = fg;
+      c.fillRect(x, y, z.w, z.h);
+      c.globalAlpha = 0.26;
+      c.strokeStyle = 'rgba(56,44,32,.9)';
+      for (var fy = 0; fy < z.h; fy += 22) {
+        c.beginPath(); c.moveTo(x, y + fy); c.lineTo(x + z.w, y + fy); c.stroke();
+      }
+      for (var fx = 0; fx < z.w; fx += 34) {
+        c.beginPath(); c.moveTo(x + fx, y); c.lineTo(x + fx, y + z.h); c.stroke();
+      }
+    } else if (z.kind === 'table') {
+      // 石桌：一条桌面 + 两条腿，侧视才像桌子（不要用 pillar 的椭圆，会像一摊水）
+      c.globalAlpha = 0.66;
+      c.fillStyle = 'rgba(116,88,58,.66)';
+      c.strokeStyle = 'rgba(38,30,22,.9)';
+      c.fillRect(x, y, z.w, 7); c.strokeRect(x, y, z.w, 7);
+      c.beginPath();
+      c.moveTo(x + 6, y + 7); c.lineTo(x + 6, y + z.h);
+      c.moveTo(x + z.w - 6, y + 7); c.lineTo(x + z.w - 6, y + z.h);
+      c.stroke();
+      // 桌上一只药碗
+      c.globalAlpha = 0.5;
+      c.beginPath(); c.arc(x + z.w * 0.32, y + 2, 3.2, Math.PI, 0); c.stroke();
+    } else if (z.kind === 'bed') {
+      // 石床：整块石台，一头堆着薄被
+      c.globalAlpha = 0.54;
+      c.fillStyle = 'rgba(96,86,72,.55)';
+      c.fillRect(x, y, z.w, z.h);
+      c.strokeRect(x, y, z.w, z.h);
+      c.globalAlpha = 0.34;
+      c.fillStyle = 'rgba(198,188,168,.62)';
+      c.fillRect(x + 6, y + z.h * 0.50, z.w - 12, z.h * 0.44);
+      c.globalAlpha = 0.26;
+      c.beginPath(); c.moveTo(x + 9, y + z.h * 0.72); c.lineTo(x + z.w - 9, y + z.h * 0.64); c.stroke();
+    } else if (z.kind === 'rack') {
+      // 药架：三层格，摆着一排小瓶
+      c.globalAlpha = 0.60;
+      c.strokeStyle = 'rgba(38,30,22,.85)';
+      c.fillStyle = 'rgba(98,80,58,.50)';
+      c.fillRect(x, y, z.w, z.h); c.strokeRect(x, y, z.w, z.h);
+      for (var r = 1; r <= 2; r++) {
+        c.beginPath(); c.moveTo(x, y + z.h * r / 3); c.lineTo(x + z.w, y + z.h * r / 3); c.stroke();
+      }
+      c.fillStyle = 'rgba(200,192,170,.82)';
+      for (var p = 0; p < 6; p++) {
+        c.fillRect(x + 8 + p * (z.w - 18) / 5, y + (p % 3) * z.h / 3 + 4, 4, 7);
+      }
+    } else if (z.kind === 'lamp') {
+      // 满屋灯烛：一排小盏 + 暖黄火点，室内戏的主要光源
+      c.globalAlpha = 0.82;
+      var ln = Math.max(2, Math.round(z.w / 26));
+      for (var li = 0; li < ln; li++) {
+        var lx = x + (z.w / (ln + 1)) * (li + 1);
+        var ly = y + z.h * (0.34 + (li % 3) * 0.16);
+        c.strokeStyle = 'rgba(170,156,132,.95)';
+        c.fillStyle = 'rgba(86,76,62,.72)';
+        c.beginPath(); c.ellipse(lx, ly, 3.2, 1.8, 0, 0, 6.283); c.fill(); c.stroke();
+        c.fillStyle = 'rgba(244,196,104,.95)';
+        c.beginPath(); c.ellipse(lx, ly - 4.4, 1.5, 3, 0, 0, 6.283); c.fill();
+        c.globalAlpha = 0.34;
+        c.strokeStyle = 'rgba(240,196,112,.9)';
+        c.beginPath(); c.arc(lx, ly - 4, 11, 0, 6.283); c.stroke();
+        c.globalAlpha = 0.82;
+      }
     }
     c.restore();
   }
@@ -744,7 +917,9 @@
       var x = sx(a.x, g), y = sy(a.y, g);
       if (x < -80 || x > P.view.w + 80 || y < -100 || y > P.view.h + 100) continue;
       var dir = a.dir < 0 ? -1 : 1;
-      var c = isHero ? null : (window.Sprites || {})[a.spr || a.id];
+      // 室内场调下主角也由本层画（地面实色会盖住主画布的主角）
+      var c = (window.Sprites || {})[a.spr || a.id];
+      if (isHero && !P.drawHero) c = null;
       var baseH = c ? c.height : (((window.Sprites || {}).hanli || { height: 14 }).height);
       var baseW = c ? c.width : 12;
       var sc = a.scale || 1.6;
@@ -753,12 +928,22 @@
       var oy = (ACT_DROP[a.act] || 0) * K;
       var footY = y + ch / 2 + oy;
       if (c) {
+        // ghost：元神 / 幽影。半透明 + 极轻的上下浮动，不当作活人站着。
+        var gop = a.ghost ? 0.40 : 0.96;
+        var gy = a.ghost ? Math.sin((P.clock || 0) * 1.7 + a.x * 0.05) * 1.5 : 0;
         ctx.save();
-        ctx.globalAlpha = 0.96;
-        ctx.translate(x, y + ch / 2 + oy);
+        ctx.globalAlpha = gop;
+        ctx.translate(x, y + ch / 2 + oy + gy);
         if (dir < 0) ctx.scale(-1, 1);
         ctx.drawImage(c, -cw / 2, -ch, cw, ch);
         ctx.restore();
+        if (a.ghost) {
+          ctx.save();
+          ctx.globalAlpha = 0.16;
+          ctx.strokeStyle = 'rgba(196,214,222,.95)';
+          ctx.beginPath(); ctx.ellipse(x, y + ch / 2 + oy + gy, cw * 0.6, 3, 0, 0, 6.283); ctx.stroke();
+          ctx.restore();
+        }
       }
       // 手持道具挂在前侧手上；背篓另挂在肩后，才不会被身体遮没
       if (a.prop) {
@@ -939,6 +1124,34 @@
         ctx.quadraticCurveTo(i * 3 + Math.sin(t * 3) * 2, -12, i * 2, -15);
         ctx.stroke();
       }
+    },
+    box: function (t) {             // 檀木盒：四角方盒，盒盖半开透出一线白
+      ctx.strokeStyle = 'rgba(150,104,66,.96)';
+      ctx.fillStyle = 'rgba(96,62,36,.62)';
+      ctx.beginPath(); ctx.rect(-6, -9, 12, 8); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-6.6, -9.6); ctx.lineTo(6.6, -9.6); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-4, -4.4); ctx.lineTo(4, -4.4); ctx.stroke();
+      ctx.globalAlpha *= 0.55 + Math.abs(Math.sin(t * 1.6)) * 0.3;
+      ctx.strokeStyle = 'rgba(232,228,214,.95)';
+      ctx.beginPath(); ctx.moveTo(-3.4, -10.4); ctx.lineTo(3.4, -10.4); ctx.stroke();
+    },
+    pill: function (t) {            // 白丸：一粒微光药丸
+      var g2 = 0.3 + Math.abs(Math.sin(t * 2.4)) * 0.22;
+      ctx.fillStyle = 'rgba(238,236,226,.9)';
+      ctx.strokeStyle = 'rgba(226,222,206,.95)';
+      ctx.beginPath(); ctx.arc(0, -4, 2.4, 0, 6.283); ctx.fill(); ctx.stroke();
+      ctx.globalAlpha *= g2;
+      ctx.beginPath(); ctx.arc(0, -4, 5.4, 0, 6.283); ctx.stroke();
+    },
+    lamp: function (t) {            // 油灯：小盏 + 豆大火苗
+      var f = 0.72 + Math.abs(Math.sin(t * 5.2)) * 0.28;
+      ctx.strokeStyle = 'rgba(160,150,128,.9)';
+      ctx.fillStyle = 'rgba(78,70,58,.6)';
+      ctx.beginPath(); ctx.ellipse(0, -2, 3.4, 1.8, 0, 0, 6.283); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = 'rgba(236,186,96,' + (0.6 + f * 0.3) + ')';
+      ctx.beginPath(); ctx.ellipse(0, -6 - f * 2, 1.5, 3 * f, 0, 0, 6.283); ctx.fill();
+      ctx.globalAlpha *= 0.34 * f;
+      ctx.beginPath(); ctx.arc(0, -7, 8 + f * 4, 0, 6.283); ctx.stroke();
     }
   };
 
@@ -1196,6 +1409,31 @@
       ctx.beginPath(); ctx.moveTo(bx, by - 3 - k); ctx.lineTo(bx, by - 9 - k * 2); ctx.stroke();
       ctx.globalAlpha = 0.32;
       ctx.beginPath(); ctx.arc(bx, by, 9 + k * 5, 0, 6.283); ctx.stroke();
+    },
+    give: function (x, y, dir, k) {          // 递物：双手前伸，掌心托着一件小物
+      var ex = x + dir * (11 + k * 5), ey = y - 17;
+      ctx.beginPath(); ctx.moveTo(x + dir * 2, y - 15); ctx.lineTo(ex, ey - 2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x + dir * 1, y - 13); ctx.lineTo(ex - dir, ey + 1); ctx.stroke();
+      ctx.beginPath(); ctx.rect(ex - 3, ey - 5, 6, 4.6); ctx.stroke();
+      ctx.globalAlpha *= .45;
+      ctx.beginPath(); ctx.arc(ex, ey - 3, 8 + k * 5, 0, 6.283); ctx.stroke();
+    },
+    swallow: function (x, y, dir, k) {       // 吞服：仰头，一手抬到嘴边
+      ctx.beginPath();
+      ctx.moveTo(x + dir * 3, y - 16);
+      ctx.quadraticCurveTo(x + dir * 9, y - 22 - k * 2, x + dir * 6, y - 26);
+      ctx.stroke();
+      ctx.beginPath(); ctx.arc(x + dir * 6, y - 27, 1.8, 0, 6.283); ctx.fill();
+      ctx.globalAlpha *= .5;
+      ctx.beginPath(); ctx.arc(x, y - 30, 6 + k * 4, 0.9, 2.2); ctx.stroke();
+    },
+    clench: function (x, y, dir, k) {        // 握拳：垂在身侧，指节绷紧
+      var fx = x + dir * 8, fy = y - 12;
+      ctx.beginPath(); ctx.moveTo(x + dir * 3, y - 15); ctx.lineTo(fx, fy); ctx.stroke();
+      ctx.beginPath(); ctx.arc(fx, fy, 2.8 + k * 0.8, 0, 6.283); ctx.stroke();
+      ctx.globalAlpha *= .4;
+      ctx.beginPath(); ctx.moveTo(fx - 3, fy - 5); ctx.lineTo(fx, fy - 9 - k * 2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(fx + 3, fy - 5); ctx.lineTo(fx, fy - 9 - k * 2); ctx.stroke();
     }
   };
 
@@ -1274,7 +1512,7 @@
       p.x = P.origin.x; p.y = P.origin.y; p.dir = P.heroDir || 1;
       p.moving = false;
     }
-    if (g) { g.cam.x = P.baseCam.x; g.cam.y = P.baseCam.y; g.camLag = null; }
+    if (g) { g.cam.x = P.baseCam.x; g.cam.y = P.baseCam.y; g.camLag = null; g.hideHero = false; }
     unmount();
     var f = P.onDone; P.onDone = null;
     if (f) f(kind);
@@ -1289,7 +1527,7 @@
     clearDialog();
     var g = G(), p = g && g.player;
     if (p) { p.x = P.origin.x; p.y = P.origin.y; p.dir = P.heroDir || 1; p.moving = false; }
-    if (g) { g.cam.x = P.baseCam.x; g.cam.y = P.baseCam.y; g.camLag = null; }
+    if (g) { g.cam.x = P.baseCam.x; g.cam.y = P.baseCam.y; g.camLag = null; g.hideHero = false; }
     unmount();
     P.onDone = null;
     return true;
@@ -1324,12 +1562,17 @@
       baseCam: { x: g.cam.x, y: g.cam.y },
       cam: { x: 0, y: 0 }, camFrom: { x: 0, y: 0 }, camTo: { x: 0, y: 0 },
       weather: null, fade: 0, clock: 0,
+      // 场调：indoor 会把整屏压成暖褐暗场 + 中心灯烛光，室内戏才不像站在野地里
+      tone: st.tone || '',
+      // 场调场景地面是实色的，会盖住主画布画的主角 —— 这类场景由本层自己画韩立
+      drawHero: !!st.tone,
       i: 0, stepT: 0, active: true, finished: null,
       onDone: onDone || null,
       replay: !!opts.replay,
       view: null
     };
     g.state = 'dialog';
+    if (P.drawHero) g.hideHero = true;
     g.camLag = null; g.shake = 0; g.flash = 0;
     g.dialogLines = null; g.dialogEnd = null; g.dialogId = null; g.dialogIdx = 0;
     g.dialogSynced = false; g.dialogIsChoice = false;

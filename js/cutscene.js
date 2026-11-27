@@ -117,6 +117,51 @@
           cam:{ z:[1.20,1.00], x:[-10,0], y:[0,0] } }
       ]
     },
+    // 墨府密谋（后山石屋）：第29~31章摊牌与尸虫丸、第47~57章铁奴与夺舍、第64章收曲魂。
+    // 只作剧目登记 / 旧插画兜底；真实玩家与洞府回顾都由 StoryStage 分流到主画布层。
+    mishi: {
+      title: '卷一 · 墨府密谋', sub: '后山 · 墨大夫石屋', seal: '鬼手',
+      shots: [
+        { id:0, t:0,     dur:2.6, kind:'chapter', scene:'cave', fx:'unroll',
+          cam:{ z:[1.00,1.05], x:[0,-6], y:[0,0] }, label:'卷一 · 墨府密谋' },
+        { id:1, t:2.6,   dur:3.2, scene:'cave', fx:'ink', li: 0,
+          cam:{ z:[1.05,1.12], x:[-6,0], y:[0,-4] } },
+        { id:2, t:5.8,   dur:3.0, scene:'cave', actors:[['hanli','L'],['mo','R']], fx:'dim', li: 1,
+          cam:{ z:[1.12,1.16], x:[0,6], y:[-4,0] } },
+        { id:3, t:8.8,   dur:2.8, scene:'cave', actors:[['hanli','L'],['mo','R']], fx:'dim', li: 2,
+          cam:{ z:[1.16,1.14], x:[6,2], y:[0,0] } },
+        { id:4, t:11.6,  dur:3.0, scene:'cave', actors:[['mo','R']], fx:'ink', li: 3,
+          cam:{ z:[1.14,1.20], x:[2,8], y:[0,-4] } },
+        { id:5, t:14.6,  dur:3.0, scene:'cave', actors:[['mo','R']], fx:'dim', li: 4,
+          cam:{ z:[1.20,1.18], x:[8,4], y:[-4,0] } },
+        { id:6, t:17.6,  dur:3.0, scene:'cave', actors:[['mo','R']], fx:'dim', li: 5,
+          cam:{ z:[1.18,1.16], x:[4,2], y:[0,0] } },
+        { id:7, t:20.6,  dur:3.0, scene:'cave', actors:[['mo','R']], fx:'ink', li: 6,
+          cam:{ z:[1.16,1.22], x:[2,6], y:[0,-6] } },
+        { id:8, t:23.6,  dur:3.4, scene:'cave', actors:[['hanli','L'],['mo','R']], fx:'glow', li: 7,
+          cam:{ z:[1.22,1.14], x:[6,0], y:[-6,0] } },
+        { id:9, t:27.0,  dur:2.6, scene:'cave', actors:[['hanli','L']], fx:'dim', li: 8,
+          cam:{ z:[1.14,1.18], x:[0,-4], y:[0,0] } },
+        { id:10, t:29.6, dur:3.0, scene:'cave', actors:[['hanli','L'],['mo','R']], fx:'glow', li: 9,
+          cam:{ z:[1.18,1.12], x:[-4,2], y:[0,-4] } },
+        { id:11, t:32.6, dur:3.2, scene:'cave', actors:[['mo','R']], fx:'dim', li: 10,
+          cam:{ z:[1.12,1.20], x:[2,8], y:[-4,0] } },
+        { id:12, t:35.8, dur:3.0, scene:'cave', actors:[['hanli','L']], fx:'dim', li: 11,
+          cam:{ z:[1.20,1.16], x:[8,2], y:[0,0] } },
+        { id:13, t:38.8, dur:3.0, scene:'cave', actors:[['mo','R']], fx:'dim', li: 12,
+          cam:{ z:[1.16,1.14], x:[2,4], y:[0,-4] } },
+        { id:14, t:41.8, dur:3.0, scene:'cave', actors:[['hanli','L']], fx:'ink', li: 13,
+          cam:{ z:[1.14,1.20], x:[4,-2], y:[-4,0] } },
+        { id:15, t:44.8, dur:3.0, scene:'cave', fx:'dim', li: 14,
+          cam:{ z:[1.20,1.10], x:[-2,4], y:[0,0] } },
+        { id:16, t:47.8, dur:3.0, scene:'cave', actors:[['mo','R']], fx:'seal', li: 15,
+          cam:{ z:[1.10,1.06], x:[4,0], y:[0,2] } },
+        { id:17, t:50.8, dur:3.2, scene:'cave', actors:[['hanli','L']], fx:'dim', li: 16,
+          cam:{ z:[1.06,1.14], x:[0,-4], y:[2,0] } },
+        { id:18, t:54.0, dur:3.4, scene:'cave', fx:'roll', li: 17,
+          cam:{ z:[1.14,1.00], x:[-4,0], y:[0,0] } }
+      ]
+    },
     // 野狼帮之围：七玄门后期人物在战斗地图当群众演员；这里只作剧目登记 / 旧插画兜底，
     // 真实玩家与洞府回顾都由 StoryStage 分流到主画布层（见 game.js replayStoryLive）。
     yelang: {
