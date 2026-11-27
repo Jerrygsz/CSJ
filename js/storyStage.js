@@ -1,7 +1,7 @@
-/* 凡人·长生劫 —— StoryStage（主画布剧情层 · 第一版）
+/* 凡人·长生劫 —— StoryStage（主画布剧情层）
  *
  * 目标：不换引擎、不另起插画屏。人物就在战斗地图上按原著剧情走动、说话、做小动作；
- *       建筑 / 迷宫墙 / 遗迹 / 药畦 / 山涧 / 天气是真实数据区，会挡路或改移速。
+ *       竹林 / 炼骨崖结绳 / 神手谷田园 / 赤水峰瀑布 / 石室 / 天气都是真实数据区，会挡路或改移速。
  *
  * 真源约束：
  *   - 台词只写 li，正文运行时从 window.MAP_STORIES.<mapId> 取，动画不另写一句；
@@ -18,86 +18,100 @@
 
   var STAGES = {
     qixuan: {
-      canon: '第一卷·七玄门（入门试、墨大夫收徒、授长春功）',
-      title: '彩霞山山门',
+      canon: '第一卷·七玄门（第1~8章：彩霞山入门试、炼骨崖结绳、墨大夫带入神手谷药庐，授无名口诀〈后称长春功〉）',
+      title: '彩霞山 · 炼骨崖',
       zones: [
-        { kind: 'house',  x: -300, y: -120, w: 100, h: 70,  block: true,  name: '五里沟村舍' },
-        { kind: 'house',  x: -190, y: -95,  w: 80,  h: 60,  block: true,  name: '山边人家' },
+        { kind: 'house',  x: -300, y: -120, w: 100, h: 70,  block: true,  name: '五里沟旧屋' },
+        { kind: 'house',  x: -190, y: -95,  w: 80,  h: 60,  block: true,  name: '青牛镇客舍' },
+        { kind: 'bamboo', x: -30,  y: -70,  w: 70,  h: 140, speed: 0.80, name: '竹林陡坡' },
         { kind: 'wall',   x: 35,   y: -200, w: 22,  h: 150, block: true,  name: '山门左墙' },
         { kind: 'wall',   x: 35,   y: 45,   w: 22,  h: 150, block: true,  name: '山门右墙' },
-        { kind: 'gate',   x: 25,   y: -55,  w: 42,  h: 100, name: '彩霞山山门' },
-        { kind: 'stair',  x: 58,   y: -105, w: 105, h: 210, speed: 0.74,  name: '落日峰石阶' },
-        { kind: 'wall',   x: 180,  y: -120, w: 16,  h: 70,  block: true,  name: '校场石墙' },
-        { kind: 'pillar', x: 205,  y: 20,   w: 20,  h: 20,  block: true,  name: '石锁' },
-        { kind: 'hut',    x: 300,  y: -85,  w: 85,  h: 62,  block: true,  name: '药庐' }
+        { kind: 'gate',   x: 25,   y: -55,  w: 42,  h: 100, name: '彩霞山石阶口' },
+        { kind: 'stair',  x: 58,   y: -105, w: 105, h: 210, speed: 0.74, name: '上山石阶' },
+        { kind: 'cliff',  x: 168,  y: -100, w: 96,  h: 190, speed: 0.70, name: '炼骨崖岩壁' },
+        { kind: 'rope',   x: 207,  y: -92,  w: 8,   h: 120, name: '打结麻绳' },
+        { kind: 'pillar', x: 252,  y: -20,  w: 18,  h: 18,  block: true,  name: '崖顶石锁' },
+        { kind: 'hut',    x: 300,  y: -85,  w: 85,  h: 62,  block: true,  name: '神手谷房舍' }
       ],
       actors: [
         { id: 'hanli',    x: 0,   y: 0,   dir: 1,  spr: 'hanli',    scale: 1.7, show: true },
         { id: 'zhangtie', x: 44,  y: 16,  dir: 1,  spr: 'zhangtie', scale: 1.6, show: true },
+        { id: 'wuyan',    x: 215, y: -72, dir: -1, spr: 'neimen',   scale: 1.5, show: false },
         { id: 'mo',       x: 310, y: -30, dir: -1, spr: 'mo',       scale: 1.8, show: false }
       ],
       steps: [
         { t: 'weather', kind: 'mist', speed: 0.90, label: '彩霞山 · 晨雾' },
         { t: 'say', li: [0], label: '五里沟' },
-        { t: 'walk', who: 'hanli', to: [-70, 20], speed: 72, dur: 2.6, label: '韩立随张铁上路' },
+        { t: 'walk', who: 'hanli', to: [-70, 20], speed: 72, dur: 2.6, label: '韩立随三叔上路' },
         { t: 'say', li: [1], label: '三叔捎话' },
         { t: 'walk', who: 'zhangtie', to: [-42, 26], speed: 72, dur: 1.5, label: '张铁并肩' },
-        { t: 'say', li: [2], label: '入门试' },
-        { t: 'cam', dx: 110, dy: 0, dur: 1.1, label: '镜头移向山门' },
-        { t: 'walk', who: 'hanli', to: [92, 4], speed: 82, dur: 3.0, label: '穿过山门' },
+        { t: 'say', li: [2], label: '彩霞山入门试' },
+        { t: 'cam', dx: 110, dy: 0, dur: 1.1, label: '镜头移向石阶' },
+        { t: 'walk', who: 'hanli', to: [92, 4], speed: 82, dur: 3.0, label: '踏上上山石阶' },
         { t: 'walk', who: 'zhangtie', to: [62, 12], speed: 82, dur: 3.0, label: '张铁跟进' },
-        { t: 'say', li: [3], label: '摸骨举石' },
-        { t: 'cam', dx: 215, dy: 0, dur: 0.9, label: '镜头随韩立进校场' },
-        { t: 'walk', who: 'hanli', to: [205, -8], speed: 84, dur: 2.4, label: '校场试胆' },
-        { t: 'say', li: [4], label: '墨大夫开口' },
-        { t: 'actor', who: 'mo', show: true, label: '墨大夫现身' },
-        { t: 'say', li: [5], label: '留在药庐' },
+        { t: 'say', li: [3], label: '炼骨崖 · 结绳攀崖' },
+        { t: 'actor', who: 'wuyan', show: true, x: 215, y: -72, dir: -1, label: '舞岩先到崖顶' },
+        { t: 'act', who: 'wuyan', anim: 'taunt', dir: -1, dur: 0.8, label: '小拇指轻慢' },
+        { t: 'cam', dx: 215, dy: 0, dur: 0.9, label: '镜头移向炼骨崖' },
+        { t: 'walk', who: 'hanli', to: [186, -8], speed: 76, dur: 2.8, label: '竹林 · 岩壁' },
+        { t: 'act', who: 'hanli', anim: 'climb', dir: 1, dur: 1.2, label: '抓结绳攀崖' },
+        { t: 'actor', who: 'wuyan', show: false, label: '舞岩下山' },
+        { t: 'walk', who: 'hanli', to: [228, -12], speed: 66, dur: 2.2, label: '正午前登顶' },
+        { t: 'say', li: [4], label: '只做记名弟子' },
+        { t: 'actor', who: 'mo', show: true, x: 270, y: -25, dir: -1, label: '墨大夫开口' },
+        { t: 'say', li: [5], label: '留下罢' },
         { t: 'act', who: 'hanli', anim: 'bow', dir: 1, dur: 0.9, label: '韩立行礼' },
-        { t: 'walk', who: 'hanli', to: [268, -12], speed: 78, dur: 1.8, label: '走向药庐' },
-        { t: 'say', li: [6], label: '一句话定了路' },
+        { t: 'walk', who: 'hanli', to: [285, -12], speed: 78, dur: 1.8, label: '随墨大夫进谷' },
+        { t: 'say', li: [6], label: '神手谷' },
         { t: 'weather', kind: 'clear', speed: 1, label: '雾散' },
-        { t: 'say', li: [7], label: '长春功 / 象甲功' },
+        { t: 'say', li: [7], label: '无名口诀 / 象甲功' },
         { t: 'fade', from: 0, to: 1, dur: 0.35, label: '收场' }
       ]
     },
     houshan: {
-      canon: '第一卷·后山采药（第八~十一章：药庐差事、长春功问进境、象甲功瀑布苦练）',
-      title: '七玄门·后山',
+      canon: '第一卷·后山药庐（第5~10章：神手谷田园、半年把脉、赤水峰瀑布顶水、山谷小绿瓶）',
+      title: '七玄门 · 神手谷 / 赤水峰',
       zones: [
-        { kind: 'hut',    x: -155, y: -125, w: 95, h: 70, block: true, name: '神手谷药庐' },
-        { kind: 'herb',   x: -20,  y: 35,   w: 120, h: 34, speed: 0.62, name: '药畦' },
-        { kind: 'wall',   x: 90,   y: -160, w: 16, h: 95, block: true, name: '山径石壁' },
-        { kind: 'stair',  x: 130,  y: -90,  w: 90, h: 180, speed: 0.78, name: '北麓山径' },
-        { kind: 'stream', x: 235,  y: -20,  w: 55, h: 140, speed: 1.25, name: '山涧顺流' },
-        { kind: 'ruin',   x: 320,  y: -110, w: 70, h: 60, block: true, name: '废弃药棚' },
-        { kind: 'herb',   x: 350,  y: 40,   w: 90, h: 30, speed: 0.65, name: '老药畦' }
+        { kind: 'hut',       x: -155, y: -125, w: 95, h: 70,  block: true, name: '神手谷房舍' },
+        { kind: 'stoneDoor', x: -120, y: -30,  w: 58, h: 46,  block: true, name: '石室青石门' },
+        { kind: 'herb',      x: -20,  y: 35,   w: 120, h: 34,  speed: 0.62, name: '药草田园' },
+        { kind: 'wall',      x: 90,   y: -160, w: 16, h: 95,  block: true, name: '山径石壁' },
+        { kind: 'stair',     x: 130,  y: -90,  w: 90, h: 180, speed: 0.78, name: '上山石阶' },
+        { kind: 'stream',    x: 235,  y: -20,  w: 55, h: 140, speed: 1.25, name: '赤水峰山径' },
+        { kind: 'waterfall', x: 272,  y: -40,  w: 30, h: 130, speed: 0.72, name: '赤水峰瀑布' },
+        { kind: 'wall',      x: 320,  y: -110, w: 70, h: 60,  block: true, name: '赤水峰山壁' }
       ],
       actors: [
         { id: 'hanli',    x: 0,   y: 0,   dir: 1,  spr: 'hanli',    scale: 1.7, show: true },
         { id: 'zhangtie', x: 46,  y: 18,  dir: 1,  spr: 'zhangtie', scale: 1.6, show: true },
-        { id: 'mo',       x: 168, y: -42, dir: -1, spr: 'mo',       scale: 1.8, show: true }
+        { id: 'mo',       x: 38,  y: -34, dir: 1,  spr: 'mo',       scale: 1.8, show: false }
       ],
       steps: [
-        { t: 'weather', kind: 'rain', speed: 0.88, label: '后山晨雾未散' },
-        { t: 'say', li: [0], label: '神手谷药庐' },
-        { t: 'walk', who: 'hanli', to: [70, 14], speed: 72, dur: 2.2, label: '背药篓出院' },
-        { t: 'say', li: [1], label: '不教武功' },
-        { t: 'cam', dx: 130, dy: -12, dur: 1.0, label: '镜头上后山' },
-        { t: 'walk', who: 'hanli', to: [150, -8], speed: 78, dur: 2.8, label: '踩石阶' },
-        { t: 'say', li: [2], label: '长春功第几层' },
-        { t: 'say', li: [3], label: '按月查问' },
-        { t: 'weather', kind: 'mist', speed: 0.82, label: '赤水峰水汽' },
-        { t: 'cam', dx: 210, dy: 0, dur: 1.0, label: '镜头移向瀑布' },
-        { t: 'walk', who: 'hanli', to: [245, 2], speed: 82, dur: 3.0, label: '沿山涧前行' },
-        { t: 'walk', who: 'zhangtie', to: [258, 8], speed: 78, dur: 2.5, label: '张铁跟到山涧' },
+        { t: 'weather', kind: 'mist', speed: 0.90, label: '神手谷晨雾' },
+        { t: 'say', li: [0], label: '神手谷田园与房舍' },
+        { t: 'walk', who: 'hanli', to: [40, 40], speed: 72, dur: 2.2, label: '穿过药园' },
+        { t: 'say', li: [1], label: '只教采药炼药' },
+        { t: 'actor', who: 'mo', show: true, x: 38, y: -34, dir: 1, label: '墨大夫在谷中' },
+        { t: 'cam', dx: 90, dy: -8, dur: 1.0, label: '镜头移向田园' },
+        { t: 'walk', who: 'hanli', to: [100, -8], speed: 78, dur: 2.6, label: '认药除草' },
+        { t: 'weather', kind: 'clear', speed: 1, label: '半年后' },
+        { t: 'say', li: [2], label: '半年把脉' },
+        { t: 'act', who: 'mo', anim: 'pulse', dir: 1, dur: 1.1, label: '墨大夫按脉门' },
+        { t: 'say', li: [3], label: '丹田里的凉气' },
+        { t: 'actor', who: 'mo', show: false, label: '墨大夫回房' },
+        { t: 'cam', dx: 210, dy: 0, dur: 1.0, label: '镜头上赤水峰' },
+        { t: 'walk', who: 'hanli', to: [210, 0], speed: 82, dur: 2.8, label: '沿山路上赤水峰' },
+        { t: 'weather', kind: 'mist', speed: 0.86, label: '瀑布水汽' },
+        { t: 'walk', who: 'zhangtie', to: [282, 8], speed: 78, dur: 2.5, label: '张铁站到瀑布下' },
         { t: 'say', li: [4], label: '象甲功' },
-        { t: 'act', who: 'zhangtie', anim: 'lift', dir: 1, dur: 1.0, label: '顶水冲练' },
+        { t: 'act', who: 'zhangtie', anim: 'lift', dir: 1, dur: 1.2, label: '顶水冲练' },
         { t: 'say', li: [5], label: '皮糙肉厚' },
-        { t: 'weather', kind: 'mist', speed: 0.90, label: '林间兽踪' },
-        { t: 'say', li: [6], label: '山贼脚印' },
-        { t: 'walk', who: 'hanli', to: [330, -6], speed: 82, dur: 2.2, label: '采老药' },
-        { t: 'say', li: [7], label: '这一日' },
-        { t: 'weather', kind: 'clear', speed: 1, label: '雾散开打' },
+        { t: 'walk', who: 'hanli', to: [258, 6], speed: 82, dur: 2.0, label: '韩立走近看张铁' },
+        { t: 'say', li: [6], label: '药汁木棒与石室' },
+        { t: 'walk', who: 'hanli', to: [286, 10], speed: 66, dur: 1.4, label: '脚下一滑' },
+        { t: 'act', who: 'hanli', anim: 'bottle', dir: 1, dur: 0.8, label: '踢到小绿瓶' },
+        { t: 'say', li: [7], label: '小绿瓶' },
+        { t: 'weather', kind: 'clear', speed: 1, label: '雾散' },
         { t: 'fade', from: 0, to: 1, dur: 0.3, label: '收场' }
       ]
     }
@@ -186,9 +200,16 @@
       styleEl.id = 'storyStageBackdrop';
       // 过场时只撤掉对话遮罩，让主画布地形透出来；破境题款有自己的类，不碰。
       styleEl.textContent = '#dialog{background:transparent !important;}' +
-        'body[data-skin="guigu"] #dialog:not(.break-scene){background:transparent !important;}';
+        'body[data-skin="guigu"] #dialog:not(.break-scene){background:transparent !important;}' +
+        // 剧情层是独占演出：战斗 HUD 全退，只留「跳过」，收层后随类一并恢复。
+        'body.story-stage-on #topbar,body.story-stage-on #quickbar,' +
+        'body.story-stage-on #parryBtn,body.story-stage-on #chatBtn,' +
+        'body.story-stage-on #skillrow,body.story-stage-on #banner,' +
+        'body.story-stage-on #fsHint,body.story-stage-on #ver' +
+        '{opacity:0 !important;pointer-events:none !important;}';
       document.head.appendChild(styleEl);
     }
+    document.body.classList.add('story-stage-on');
     resize();
     return true;
   }
@@ -471,6 +492,35 @@
     } else if (z.kind === 'stair') {
       c.globalAlpha = 0.32;
       for (var t = 0; t < z.h; t += 16) { c.beginPath(); c.moveTo(x, y + t); c.lineTo(x + z.w, y + t - 5); c.stroke(); }
+    } else if (z.kind === 'bamboo') {
+      c.globalAlpha = 0.42;
+      c.strokeStyle = 'rgba(52,66,45,.72)';
+      for (var bx = 8; bx < z.w; bx += 13) {
+        var lean = (bx % 3) * 2 - 2;
+        c.beginPath(); c.moveTo(x + bx, y + z.h); c.lineTo(x + bx + lean, y - 6); c.stroke();
+        c.beginPath(); c.moveTo(x + bx + lean, y + 18); c.lineTo(x + bx + lean + 9, y + 8); c.stroke();
+      }
+    } else if (z.kind === 'cliff') {
+      c.globalAlpha = 0.50;
+      c.fillStyle = 'rgba(44,40,35,.26)';
+      c.fillRect(x, y, z.w, z.h);
+      c.strokeStyle = 'rgba(28,24,20,.62)';
+      for (var ry = 10; ry < z.h; ry += 22) {
+        c.beginPath(); c.moveTo(x + 4 + (ry % 3) * 3, y + ry); c.lineTo(x + z.w - 6, y + ry - 7); c.stroke();
+      }
+    } else if (z.kind === 'rope') {
+      c.globalAlpha = 0.72;
+      c.strokeStyle = 'rgba(190,164,116,.9)';
+      c.beginPath(); c.moveTo(x + z.w / 2, y); c.lineTo(x + z.w / 2, y + z.h); c.stroke();
+      for (var ky = 14; ky < z.h; ky += 17) {
+        c.beginPath(); c.arc(x + z.w / 2, y + ky, 3.2, 0, 6.283); c.stroke();
+      }
+    } else if (z.kind === 'stoneDoor') {
+      c.globalAlpha = 0.62;
+      c.fillStyle = 'rgba(34,32,29,.62)';
+      c.fillRect(x, y + 8, z.w, z.h - 8);
+      c.strokeRect(x, y + 8, z.w, z.h - 8);
+      c.beginPath(); c.moveTo(x + z.w / 2, y + 8); c.lineTo(x + z.w / 2, y + z.h); c.stroke();
     } else if (z.kind === 'herb') {
       c.globalAlpha = 0.42;
       for (var hx = 6; hx < z.w; hx += 14) {
@@ -484,6 +534,15 @@
         c.bezierCurveTo(x + z.w * 0.3, y + sy2 - 7, x + z.w * 0.7, y + sy2 + 7, x + z.w, y + sy2);
         c.stroke();
       }
+    } else if (z.kind === 'waterfall') {
+      c.globalAlpha = 0.38;
+      c.strokeStyle = 'rgba(202,220,226,.95)';
+      for (var wx = 5; wx < z.w; wx += 7) {
+        c.beginPath(); c.moveTo(x + wx, y); c.lineTo(x + wx - 2, y + z.h); c.stroke();
+      }
+      c.globalAlpha = 0.22;
+      c.fillStyle = 'rgba(226,235,236,.5)';
+      c.fillRect(x - 4, y + z.h - 10, z.w + 8, 10);
     } else if (z.kind === 'pillar') {
       c.fillStyle = 'rgba(32,28,24,.55)'; c.beginPath(); c.ellipse(x + z.w / 2, y + z.h / 2, z.w / 2, z.h / 2, 0, 0, 6.283); c.fill(); c.stroke();
     }
@@ -515,6 +574,7 @@
 
   function drawAct(x, y, a) {
     var k = clamp((a.actT || 0) / (a.actDur || 0.6), 0, 1);
+    var dir = a.dir < 0 ? -1 : 1;
     ctx.save();
     ctx.globalAlpha = 0.82 * (1 - k * 0.35);
     ctx.strokeStyle = 'rgba(201,162,74,.95)';
@@ -527,6 +587,26 @@
       ctx.quadraticCurveTo(x, y - 5 - k * 4, x + 9, y - 20);
       ctx.stroke();
       ctx.beginPath(); ctx.arc(x, y - 24, 5 + k * 3, -0.2, Math.PI + 0.2); ctx.stroke();
+    } else if (a.act === 'taunt') {
+      // 舞岩的小拇指：只在肩前一点，不画大剑弧
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(x + dir * 6, y - 24); ctx.lineTo(x + dir * 16, y - 28 - k * 3); ctx.stroke();
+      ctx.beginPath(); ctx.arc(x + dir * 17, y - 29 - k * 3, 2.2, 0, 6.283); ctx.stroke();
+    } else if (a.act === 'climb') {
+      // 双手交替抓结绳，脚跟轻蹬岩壁
+      ctx.strokeStyle = 'rgba(205,176,118,.95)';
+      ctx.beginPath(); ctx.moveTo(x - 7, y - 12 - k * 6); ctx.lineTo(x - 2, y - 34 - k * 10); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x + 7, y - 16 + k * 6); ctx.lineTo(x + 3, y - 38 + k * 10); ctx.stroke();
+      ctx.beginPath(); ctx.arc(x - 2, y - 34 - k * 10, 2.6, 0, 6.283); ctx.stroke();
+      ctx.beginPath(); ctx.arc(x + 3, y - 38 + k * 10, 2.6, 0, 6.283); ctx.stroke();
+    } else if (a.act === 'pulse') {
+      // 墨大夫按脉门：一条细线从指端探向韩立腕 / 丹田
+      ctx.strokeStyle = 'rgba(201,162,74,.82)';
+      ctx.beginPath();
+      ctx.moveTo(x + dir * 8, y - 20);
+      ctx.quadraticCurveTo(x + dir * 28, y - 26, x + dir * 42 - k * 6, y - 18);
+      ctx.stroke();
+      ctx.beginPath(); ctx.arc(x + dir * 42 - k * 6, y - 18, 3 + k * 2, 0, 6.283); ctx.stroke();
     } else if (a.act === 'lift') {
       // 两条上举手臂 + 顶上一圈水劲，落在人物身上而不是远处
       ctx.beginPath();
@@ -534,6 +614,23 @@
       ctx.moveTo(x + 7, y - 14); ctx.lineTo(x + 11, y - 34 - k * 8);
       ctx.stroke();
       ctx.beginPath(); ctx.arc(x, y - 38 - k * 8, 5 + k * 3, 0, Math.PI * 2); ctx.stroke();
+      // 瀑布打在肩背上的短弧，强调顶水而不是凭空举重
+      ctx.strokeStyle = 'rgba(190,210,218,.72)';
+      for (var wi = 0; wi < 3; wi++) {
+        ctx.beginPath();
+        ctx.moveTo(x - 14 + wi * 14, y - 46 - k * 6);
+        ctx.quadraticCurveTo(x - 10 + wi * 14, y - 34, x - 14 + wi * 14, y - 22);
+        ctx.stroke();
+      }
+    } else if (a.act === 'bottle') {
+      // 脚边一点青光：韩立踢到小绿瓶的那一下
+      ctx.strokeStyle = 'rgba(112,196,154,.95)';
+      ctx.fillStyle = 'rgba(112,196,154,.30)';
+      var bx = x + dir * 15, by = y - 3;
+      ctx.beginPath(); ctx.ellipse(bx, by, 4 + k * 2, 3 + k, 0, 0, 6.283); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(bx, by - 3 - k); ctx.lineTo(bx, by - 9 - k * 2); ctx.stroke();
+      ctx.globalAlpha = 0.32;
+      ctx.beginPath(); ctx.arc(bx, by, 9 + k * 5, 0, 6.283); ctx.stroke();
     } else {
       ctx.beginPath(); ctx.arc(x, y - 12, 7 + k * 9, 0, Math.PI * 2); ctx.stroke();
     }
@@ -578,6 +675,7 @@
     if (sb) sb.style.display = 'none';
     if (styleEl && styleEl.parentNode) styleEl.parentNode.removeChild(styleEl);
     styleEl = null;
+    document.body.classList.remove('story-stage-on');
   }
 
   function finish(kind) {

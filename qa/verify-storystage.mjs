@@ -59,6 +59,9 @@ ok(/function replayStoryLive/.test(game)
 ok(/sb\.id = 'storyStageSkipBtn'/.test(stageSrc) && /sb\.addEventListener\('click'/.test(stageSrc)
    && /function placeSkip/.test(stageSrc),
    '剧情层自带可点的「跳过」，并按舞台缩放定位', null);
+ok(/story-stage-on #topbar/.test(stageSrc) && /classList\.add\('story-stage-on'\)/.test(stageSrc)
+   && /classList\.remove\('story-stage-on'\)/.test(stageSrc),
+   '剧情层独占画面：战斗 HUD 暂隐，收层后恢复', null);
 
 // ---- 数据真源：在 Node 里只跑数据层，不碰 DOM ----
 const sandbox = { window: { addEventListener() {} }, console: { warn() {} } };
@@ -82,12 +85,30 @@ for (const id of ['qixuan', 'houshan']) {
      id + ' 同时有阻挡区与速度区', st.zones.map(z => ({ kind: z.kind, block: !!z.block, speed: z.speed || null })));
   ok(st.steps.some(s => s.t === 'walk') && st.steps.some(s => s.t === 'act') && st.steps.some(s => s.t === 'cam'),
      id + ' 含走位 / 动作 / 镜头三类演出', null);
+  const kinds = st.zones.map(z => z.kind);
+  if (id === 'qixuan') {
+    ok(kinds.includes('bamboo') && kinds.includes('cliff') && kinds.includes('rope'),
+       'qixuan 有竹林 / 炼骨崖岩壁 / 打结麻绳', kinds);
+    ok(st.steps.some(s => s.t === 'act' && s.anim === 'climb') && st.steps.some(s => s.t === 'act' && s.anim === 'taunt'),
+       '舞岩轻慢与韩立攀崖都有贴身动作', null);
+  } else {
+    ok(kinds.includes('stoneDoor') && kinds.includes('waterfall'),
+       'houshan 有石室青石门与赤水峰瀑布', kinds);
+    ok(st.steps.some(s => s.t === 'act' && s.anim === 'pulse') && st.steps.some(s => s.t === 'act' && s.anim === 'bottle'),
+       '半年把脉与踢到小绿瓶都有动作', null);
+  }
   if (id === 'houshan') {
     const zt = st.steps.findIndex(s => s.t === 'walk' && s.who === 'zhangtie');
     const lift = st.steps.findIndex(s => s.t === 'act' && s.anim === 'lift');
-    ok(zt > 0 && lift > zt, '张铁先走到山涧再演顶水冲练', { zt, lift });
+    ok(zt > 0 && lift > zt, '张铁先走到瀑布下再演顶水冲练', { zt, lift });
   }
 }
+const twoStories = JSON.stringify({ q: stories.qixuan, h: stories.houshan });
+ok(!/摸骨|举石锁|同村|按月查问|山贼脚印|药篓/.test(twoStories),
+   '两段台词已去掉非原著概括', twoStories.slice(0, 120));
+ok(/炼骨崖/.test(stories.qixuan[2][1]) && /麻绳/.test(stories.qixuan[3][1])
+   && /赤水峰/.test(stories.houshan[4][1]) && /小绿瓶/.test(stories.houshan[7][1]),
+   '炼骨崖 / 结绳 / 赤水峰 / 小绿瓶四个原著锚点进入台词', null);
 ok(sandbox.window.StoryStage.blockedAt('qixuan', 45, -100) === true
    && sandbox.window.StoryStage.blockedAt('qixuan', 45, 0) === false,
    '山门石墙挡路，门洞留得出通道', null);
@@ -213,7 +234,10 @@ const R0 = await page.evaluate(() => {
             y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height),
             topbarBottom: Math.round(tb.bottom) },
     linesSame: (document.getElementById('dialogSpeaker').textContent + '|' + document.getElementById('dialogText').textContent)
-      === window.MAP_STORIES.qixuan[0].join('|')
+      === window.MAP_STORIES.qixuan[0].join('|'),
+    hud: ['topbar', 'quickbar', 'parryBtn', 'chatBtn', 'skillrow', 'banner', 'fsHint', 'ver'].reduce((o, id) => {
+      o[id] = +getComputedStyle(document.getElementById(id)).opacity; return o;
+    }, {})
   };
 });
 ok(R0.s && R0.s.active && R0.s.replay === true && R0.s.mapId === 'qixuan' && R0.s.gameState === 'dialog',
@@ -224,6 +248,7 @@ ok(R0.linesSame, '回放台词仍逐字来自 MAP_STORIES.qixuan', R0.linesSame)
 ok(R0.skip.display === 'block' && /跳过/.test(R0.skip.text) && R0.skip.y >= R0.skip.topbarBottom + 4
    && R0.skip.w >= 44 && R0.skip.h >= 20,
    '跳过按钮可见、够点、且不压顶栏素签', R0.skip);
+ok(Object.values(R0.hud).every(v => v === 0), '剧情中战斗 HUD 全隐，只留跳过', R0.hud);
 ok(await seenOf() === SEEN0, '回放不写 save.seen，账本不变', null);
 await page.screenshot({ path: join(here, 'shots', 'story-stage-replay.png') });
 
@@ -232,10 +257,14 @@ await page.waitForTimeout(120);
 const R1 = await page.evaluate(() => ({
   s: window.__FR.storyStage(), cs: window.Cutscene.active(), state: window.__FR.G.state,
   cave: document.getElementById('cave').style.display,
-  skip: getComputedStyle(document.getElementById('storyStageSkipBtn')).display
+  skip: getComputedStyle(document.getElementById('storyStageSkipBtn')).display,
+  hud: ['topbar', 'quickbar', 'parryBtn', 'chatBtn', 'skillrow', 'banner', 'ver'].reduce((o, id) => {
+    o[id] = +getComputedStyle(document.getElementById(id)).opacity; return o;
+  }, {})
 }));
 ok(!R1.s.active && R1.cs === false && R1.state === 'cave' && R1.cave === 'flex' && R1.skip === 'none',
    '点跳过只收层并回洞府，不进战斗、不留残影', R1);
+ok(Object.values(R1.hud).every(v => v === 1), '收层后战斗 HUD 原样恢复', R1.hud);
 ok(await seenOf() === SEEN0, '跳过后账本仍不变', null);
 
 const R2 = await page.evaluate(() => {
