@@ -193,6 +193,68 @@
         { t: 'fade', from: 0, to: 1, dur: 0.35, label: '收场' }
       ]
     },
+    chuisui: {
+      canon: '第一卷·七玄门中期（第20~21章：韩立在山崖下小溪边救起毒发的厉飞雨；抽髓丸由二十三种罕见物炼成、粉红腥臭、以寿命换功力；韩立自陈也吃过一粒分十份当药引；「给我一个不杀你的理由」「你发个毒誓」；结尾约定明天午时神手谷门口取药）',
+      title: '七玄门 · 松林小溪',
+      zones: [
+        { kind: 'stream', x: -168, y: -240, w: 58,  h: 380, speed: 1.14, name: '崖下小溪' },
+        { kind: 'cliff',  x: -300, y: -240, w: 132, h: 150, block: true, name: '上游崖壁' },
+        { kind: 'pine',   x: -300, y: 40,   w: 150, h: 190, speed: 0.84, name: '岸边松林' },
+        { kind: 'pine',   x: 96,   y: -200, w: 170, h: 210, speed: 0.86, name: '来路松林' },
+        { kind: 'pillar', x: -100, y: 8,    w: 24,  h: 16,  block: true, name: '溪边砭石' },
+        { kind: 'herb',   x: -80,  y: -70,  w: 54,  h: 34,  name: '水边野草' }
+      ],
+      actors: [
+        { id: 'hanli',   x: 44,  y: 12,   dir: -1, spr: 'hanli',   scale: 1.7, show: true },
+        // 厉飞雨：毒发趴在溪边，靠 rot 让他真的横躺下去（精灵只有站姿）
+        { id: 'lifeiyu', x: -86, y: -34,  dir: 1,  spr: 'lifeiyu', scale: 1.6, show: false, rot: -1.42 }
+      ],
+      steps: [
+        { t: 'weather', kind: 'clear', speed: 1, label: '松林外的溪谷' },
+        { t: 'say', li: [0], label: '出松林，一条小溪' },
+        { t: 'walk', who: 'hanli', to: [10, 6], speed: 58, dur: 2.0, label: '韩立走到溪边' },
+        { t: 'say', li: [1], label: '上游有人趴在水边' },
+        { t: 'actor', who: 'lifeiyu', show: true, x: -86, y: -34, dir: 1, rot: -1.42, label: '厉飞雨趴在水边抽动' },
+        { t: 'act', who: 'lifeiyu', anim: 'writhe', dir: 1, dur: 1.4, label: '四肢抽搐' },
+        { t: 'say', li: [2], label: '是厉师兄' },
+        { t: 'cam', dx: -60, dy: -10, dur: 0.9, label: '镜头推向上游' },
+        { t: 'walk', who: 'hanli', to: [-62, -20], speed: 76, dur: 2.2, label: '韩立跑过去' },
+        { t: 'act', who: 'hanli', anim: 'kneel', dir: -1, dur: 0.9, label: '跪在水边' },
+        { t: 'prop', who: 'hanli', n: 'box', hand: 1, s: 1.1, label: '取出檀木针盒' },
+        { t: 'prop', who: 'hanli', n: 'needle', hand: 1, s: 1.15, label: '抽出银针' },
+        { t: 'act', who: 'hanli', anim: 'pulse', dir: -1, dur: 1.2, label: '银针扎进背心穴位' },
+        { t: 'say', li: [3], label: '神手谷的，别说话' },
+        { t: 'say', li: [4], label: '药……在……' },
+        { t: 'prop', who: 'hanli', n: null, label: '收起针' },
+        { t: 'say', li: [5], label: '摸出一只小白玉瓶' },
+        { t: 'prop', who: 'hanli', n: 'vial', hand: 1, s: 1.2, label: '手里是那只白玉瓶' },
+        { t: 'say', li: [6], label: '抽髓丸，二十三种东西炼的' },
+        { t: 'say', li: [7], label: '血色褪干净' },
+        { t: 'say', li: [8], label: '我也吃过一粒' },
+        { t: 'say', li: [9], label: '吃还是扔' },
+        { t: 'prop', who: 'hanli', n: 'pill', hand: 1, s: 1.3, tint: 'pink', label: '指间夹起粉红药丸' },
+        { t: 'say', li: [10], label: '死死盯着那粒药' },
+        { t: 'actor', who: 'lifeiyu', rot: -1.10, label: '撑起上身' },
+        { t: 'act', who: 'hanli', anim: 'give', dir: -1, dur: 0.9, label: '把药丸塞进他嘴里' },
+        { t: 'prop', who: 'hanli', n: null, label: '药已入口' },
+        { t: 'act', who: 'lifeiyu', anim: 'swallow', dir: 1, dur: 1.1, label: '干咽下去' },
+        { t: 'say', li: [11], label: '药力上来，长刀已架上脖子' },
+        { t: 'actor', who: 'lifeiyu', rot: 0, x: -84, y: -20, dir: 1, label: '厉飞雨站起来' },
+        { t: 'prop', who: 'lifeiyu', n: 'blade', hand: 1, s: 1.05, label: '抽出长刀' },
+        { t: 'act', who: 'lifeiyu', anim: 'threaten', dir: 1, dur: 1.0, label: '刀架在韩立颈侧' },
+        { t: 'say', li: [12], label: '给我一个不杀你的理由' },
+        { t: 'say', li: [13], label: '救你一命算不算' },
+        { t: 'say', li: [14], label: '你发个毒誓' },
+        { t: 'say', li: [15], label: '刀收回鞘，颈上一道血痕' },
+        { t: 'prop', who: 'lifeiyu', n: null, label: '刀收回鞘' },
+        { t: 'act', who: 'hanli', anim: 'wipe', dir: 1, dur: 0.9, label: '摸了一把脖子' },
+        { t: 'act', who: 'lifeiyu', anim: 'fist', dir: -1, dur: 1.0, label: '抱拳立誓' },
+        { t: 'say', li: [16], label: '我厉飞雨欠你一个人情' },
+        { t: 'say', li: [17], label: '明天午时，谷口等我' },
+        { t: 'cam', dx: 0, dy: 0, dur: 0.8, label: '镜头拉回' },
+        { t: 'fade', from: 0, to: 1, dur: 0.35, label: '收场' }
+      ]
+    },
     yelang: {
       canon: '第一卷·七玄门后期（第74~99章：野狼帮围山门、金光上人逞威、韩立反杀得升仙令；落日峰三位师叔、李长老、马荣、蓝衣执法、王门主传令亲信、张袖儿、返乡小妹均在此时出场）',
       title: '七玄门 · 野狼帮之围',
@@ -570,6 +632,7 @@
         if (s.x != null) a.x = s.x;
         if (s.y != null) a.y = s.y;
         if (s.dir != null) a.dir = s.dir;
+        if (s.rot != null) a.rot = s.rot;   // 绕脚底旋转，演倒地 / 倚靠
       }
       next();
     } else if (s.t === 'say') {
@@ -596,10 +659,10 @@
       if (s.who) {
         var pa = actor(s.who);
         if (pa) {
-          pa.prop = s.n ? { n: s.n, hand: s.hand == null ? 1 : s.hand, s: s.s == null ? 1 : s.s } : null;
+          pa.prop = s.n ? { n: s.n, hand: s.hand == null ? 1 : s.hand, s: s.s == null ? 1 : s.s, tint: s.tint || null } : null;
         }
       } else if (s.n) {
-        P.props.push({ x: s.x || 0, y: s.y || 0, n: s.n, s: s.s == null ? 1 : s.s, t: 0 });
+        P.props.push({ x: s.x || 0, y: s.y || 0, n: s.n, s: s.s == null ? 1 : s.s, t: 0, tint: s.tint || null });
       } else if (s.clear) {
         P.props.length = 0;
       }
@@ -810,11 +873,17 @@
         c.beginPath(); c.moveTo(x + hx, y + z.h); c.lineTo(x + hx + 3, y + 6); c.stroke();
       }
     } else if (z.kind === 'stream') {
-      c.globalAlpha = 0.36;
-      for (var sy2 = 8; sy2 < z.h; sy2 += 18) {
+      // 溪流：先铺一条淡水带，再叠几道慢波纹。
+      // 只画波纹会变成一堆横线，看不出是水。
+      c.globalAlpha = 0.15;
+      c.fillStyle = 'rgba(176,206,212,.95)';
+      c.fillRect(x, y, z.w, z.h);
+      c.globalAlpha = 0.30;
+      c.strokeStyle = 'rgba(146,182,194,.95)';
+      for (var sy2 = 16; sy2 < z.h; sy2 += 36) {
         c.beginPath();
-        c.moveTo(x, y + sy2);
-        c.bezierCurveTo(x + z.w * 0.3, y + sy2 - 7, x + z.w * 0.7, y + sy2 + 7, x + z.w, y + sy2);
+        c.moveTo(x + 3, y + sy2);
+        c.bezierCurveTo(x + z.w * 0.3, y + sy2 - 11, x + z.w * 0.7, y + sy2 + 11, x + z.w - 3, y + sy2);
         c.stroke();
       }
     } else if (z.kind === 'waterfall') {
@@ -849,6 +918,29 @@
       c.fillRect(scx - 3, sby + sbh * 0.40, 6, 2);
       c.fillRect(scx - 4, sby + sbh * 0.56, 8, 2);
       c.fillRect(scx - 2, sby + sbh * 0.72, 4, 2);
+    } else if (z.kind === 'pine') {
+      // 松树：细直干 + 三层填充的针叶伞。用线画三层会叠成栅栏，必须填充
+      var pnum = Math.max(1, Math.round(z.w / 34));
+      for (var pi = 0; pi < pnum; pi++) {
+        var pcx = x + z.w * (pi + 0.5) / pnum;
+        var pph = z.h * (0.72 + (pi % 3) * 0.10);
+        var pby = y + z.h;
+        c.globalAlpha = 0.32;
+        c.strokeStyle = 'rgba(52,50,44,.95)';
+        c.lineWidth = 1.2;
+        c.beginPath(); c.moveTo(pcx, pby); c.lineTo(pcx, pby - pph); c.stroke();
+        c.globalAlpha = 0.20;
+        c.fillStyle = 'rgba(56,64,50,.95)';
+        for (var pl = 0; pl < 3; pl++) {
+          var ply = pby - pph + pl * pph * 0.24;
+          var plw = (11 + pl * 7) * (z.w / 130);
+          c.beginPath();
+          c.moveTo(pcx - plw, ply + plw * 0.40);
+          c.lineTo(pcx, ply - plw * 0.72);
+          c.lineTo(pcx + plw, ply + plw * 0.40);
+          c.closePath(); c.fill();
+        }
+      }
     } else if (z.kind === 'floor') {
       // 室内石砖地：把战斗地图的野外地表压住，才有「屋里的地」这一层
       // 室内石砖地：这里要「压住」战斗地图的野外地表，必须接近实色，
@@ -938,7 +1030,7 @@
       var p = P.props[i];
       var x = sx(p.x, g), y = sy(p.y, g) + hh / 2;
       if (x < -60 || x > P.view.w + 60 || y < -60 || y > P.view.h + 60) continue;
-      drawProp(p.n, x, y, 1, (p.s || 1) * K, p.t || 0);
+      drawProp(p.n, x, y, 1, (p.s || 1) * K, p.t || 0, p);
     }
   }
 
@@ -968,6 +1060,9 @@
         ctx.globalAlpha = gop;
         ctx.translate(x, y + ch / 2 + oy + gy);
         if (dir < 0) ctx.scale(-1, 1);
+        // rot：绕脚底锚点旋转。精灵只有站姿，不转就演不出「趴在溪边」；
+        // 配合 writhe 的贴地痉挛线，才像毒发倒地，而不是站着发抖。
+        if (a.rot) ctx.rotate(a.rot);
         ctx.drawImage(c, -cw / 2, -ch, cw, ch);
         ctx.restore();
         if (a.ghost) {
@@ -984,7 +1079,7 @@
         var px = x + dir * (a.prop.hand || 1) * 6 * K;
         var py = footY - 12 * K;
         if (pn === 'basket') { px = x - dir * 6 * K; py = footY - 21 * K; }
-        drawProp(pn, px, py, dir, (a.prop.s || 1) * K * 0.85, P.clock || 0);
+        drawProp(pn, px, py, dir, (a.prop.s || 1) * K * 0.85, P.clock || 0, a.prop);
       }
       if (a.act) drawAct(x, footY, a, ch);
     }
@@ -1168,13 +1263,25 @@
       ctx.strokeStyle = 'rgba(232,228,214,.95)';
       ctx.beginPath(); ctx.moveTo(-3.4, -10.4); ctx.lineTo(3.4, -10.4); ctx.stroke();
     },
-    pill: function (t) {            // 白丸：一粒微光药丸
+    pill: function (t, o) {         // 药丸：默认白丸（尸虫丸）；o.tint='pink' 是抽髓丸（原著「粉红色、奇异腥臭」）
       var g2 = 0.3 + Math.abs(Math.sin(t * 2.4)) * 0.22;
-      ctx.fillStyle = 'rgba(238,236,226,.9)';
-      ctx.strokeStyle = 'rgba(226,222,206,.95)';
+      var pk = !!(o && o.tint === 'pink');
+      ctx.fillStyle = pk ? 'rgba(230,158,166,.94)' : 'rgba(238,236,226,.9)';
+      ctx.strokeStyle = pk ? 'rgba(200,116,126,.95)' : 'rgba(226,222,206,.95)';
       ctx.beginPath(); ctx.arc(0, -4, 2.4, 0, 6.283); ctx.fill(); ctx.stroke();
       ctx.globalAlpha *= g2;
       ctx.beginPath(); ctx.arc(0, -4, 5.4, 0, 6.283); ctx.stroke();
+    },
+    vial: function () {             // 白玉瓶：小瓷身 + 木塞（抽髓丸那只「名贵的小白玉瓶」）
+      ctx.fillStyle = 'rgba(234,232,220,.78)';
+      ctx.strokeStyle = 'rgba(248,246,236,.96)';
+      ctx.beginPath();
+      ctx.moveTo(-3, -4.4); ctx.lineTo(-3.6, -9); ctx.lineTo(3.6, -9); ctx.lineTo(3, -4.4);
+      ctx.quadraticCurveTo(3.6, 2.2, 0, 2.8); ctx.quadraticCurveTo(-3.6, 2.2, -3, -4.4);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-2, -6.6); ctx.lineTo(2, -6.6); ctx.stroke();
+      ctx.fillStyle = 'rgba(172,134,90,.92)';
+      ctx.beginPath(); ctx.rect(-2.1, -11.6, 4.2, 2.6); ctx.fill();
     },
     lamp: function (t) {            // 油灯：小盏 + 豆大火苗
       var f = 0.72 + Math.abs(Math.sin(t * 5.2)) * 0.28;
@@ -1188,7 +1295,7 @@
     }
   };
 
-  function drawProp(n, x, y, dir, s, t) {
+  function drawProp(n, x, y, dir, s, t, o) {
     var fn = PROPS[n];
     if (!fn) return;
     ctx.save();
@@ -1201,7 +1308,7 @@
     ctx.lineJoin = 'round';
     ctx.strokeStyle = 'rgba(201,162,74,.92)';
     ctx.fillStyle = 'rgba(201,162,74,.18)';
-    fn(t || 0);
+    fn(t || 0, o || {});
     ctx.restore();
   }
 
@@ -1289,6 +1396,22 @@
       ctx.beginPath(); ctx.moveTo(x + dir * 2, y - 20); ctx.lineTo(ex, ey); ctx.stroke();
       ctx.lineWidth = 2.6;
       ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(ex + dir * 5, ey); ctx.stroke();
+    },
+    threaten: function (x, y, dir, k) {     // 刀架颈：横刃压到对方颈侧，手腕露出一截
+      var ty = y - 26;
+      ctx.strokeStyle = 'rgba(66,62,56,.95)';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(x + dir * 5, ty + 2);
+      ctx.lineTo(x + dir * 21, ty - 2);
+      ctx.stroke();
+      ctx.lineWidth = 3.4;
+      ctx.strokeStyle = 'rgba(150,110,64,.95)';
+      ctx.beginPath(); ctx.moveTo(x + dir * 3, ty + 3); ctx.lineTo(x + dir * 7, ty + 1); ctx.stroke();
+      ctx.lineWidth = 1.4;
+      ctx.globalAlpha *= .5;
+      ctx.strokeStyle = 'rgba(198,120,110,.9)';
+      ctx.beginPath(); ctx.moveTo(x + dir * 12, ty + 3 + Math.sin(k * 5) * .5); ctx.lineTo(x + dir * 17, ty + 2); ctx.stroke();
     },
     palm: function (x, y, dir, k) {         // 掌风：推掌 + 前方气环
       var px = x + dir * (11 + k * 6), py = y - 20;
@@ -1392,8 +1515,7 @@
       ctx.beginPath(); ctx.ellipse(x - 14, y - 9 + bob, 4, 3, 0, 0, 6.283); ctx.stroke();
       ctx.beginPath(); ctx.ellipse(x + 14, y - 9 + bob, 4, 3, 0, 0, 6.283); ctx.stroke();
     },
-    wipe: function (x, y, dir, k) {         // 抹汗：手从额角带下来
-      var e = ease(k);
+    wipe: function (x, y, dir, k) {         // 抹汗：手从额角带下来      var e = ease(k);
       var wx = x + dir * (4 + e * 8), wy = y - 27 + e * 6;
       ctx.beginPath(); ctx.moveTo(x + dir * 2, y - 15); ctx.lineTo(wx, wy); ctx.stroke();
       ctx.globalAlpha *= .45;
@@ -1467,6 +1589,25 @@
       ctx.globalAlpha *= .4;
       ctx.beginPath(); ctx.moveTo(fx - 3, fy - 5); ctx.lineTo(fx, fy - 9 - k * 2); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(fx + 3, fy - 5); ctx.lineTo(fx, fy - 9 - k * 2); ctx.stroke();
+    },
+    writhe: function (x, y, dir, k) {        // 毒发：贴地几道痉挛弧 + 汗点（人物靠 rot 横躺，这里只补痛感）
+      ctx.globalAlpha *= .42;
+      ctx.strokeStyle = 'rgba(92,80,66,.95)';
+      for (var i = 0; i < 3; i++) {
+        var a2 = k * 6.283 + i * 1.9;
+        ctx.beginPath();
+        ctx.arc(x - dir * (3 + i * 5), y - 2, 3.4 + i * 1.8, a2, a2 + 1.0);
+        ctx.stroke();
+      }
+      ctx.globalAlpha *= .8;
+      ctx.beginPath(); ctx.moveTo(x - 13, y + 1); ctx.lineTo(x + 13, y + 1); ctx.stroke();
+      ctx.globalAlpha *= .55;
+      ctx.fillStyle = 'rgba(120,110,96,.9)';
+      for (var j = 0; j < 3; j++) {
+        ctx.beginPath();
+        ctx.arc(x - dir * (6 + j * 7), y - 4 - (j % 2) * 2, 1.2, 0, 6.283);
+        ctx.fill();
+      }
     }
   };
 
@@ -1545,7 +1686,7 @@
       p.x = P.origin.x; p.y = P.origin.y; p.dir = P.heroDir || 1;
       p.moving = false;
     }
-    if (g) { g.cam.x = P.baseCam.x; g.cam.y = P.baseCam.y; g.camLag = null; g.hideHero = false; }
+    if (g) { g.cam.x = P.baseCam.x; g.cam.y = P.baseCam.y; g.camLag = null; g.hideHero = false; g.storyClean = false; }
     unmount();
     var f = P.onDone; P.onDone = null;
     if (f) f(kind);
@@ -1560,7 +1701,7 @@
     clearDialog();
     var g = G(), p = g && g.player;
     if (p) { p.x = P.origin.x; p.y = P.origin.y; p.dir = P.heroDir || 1; p.moving = false; }
-    if (g) { g.cam.x = P.baseCam.x; g.cam.y = P.baseCam.y; g.camLag = null; g.hideHero = false; }
+    if (g) { g.cam.x = P.baseCam.x; g.cam.y = P.baseCam.y; g.camLag = null; g.hideHero = false; g.storyClean = false; }
     unmount();
     P.onDone = null;
     return true;
@@ -1606,6 +1747,8 @@
     };
     g.state = 'dialog';
     if (P.drawHero) g.hideHero = true;
+    // 地上不留战斗残留：灵石 / 灵草 / 掉落物都不该出现在小人剧情里
+    g.storyClean = true;
     g.camLag = null; g.shake = 0; g.flash = 0;
     g.dialogLines = null; g.dialogEnd = null; g.dialogId = null; g.dialogIdx = 0;
     g.dialogSynced = false; g.dialogIsChoice = false;

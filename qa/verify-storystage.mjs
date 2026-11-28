@@ -71,7 +71,7 @@ const stories = sandbox.window.MAP_STORIES;
 const stages = sandbox.window.StoryStage.stages();
 const DATA = {};
 console.log('\n== 2. 原著剧情与地形数据 ==');
-for (const id of ['qixuan', 'houshan', 'mishi', 'yelang', 'xuesestory']) {
+for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'yelang', 'xuesestory']) {
   const st = stages[id];
   DATA[id] = st;
   const li = st.steps.filter(s => s.t === 'say').reduce((a, s) => a.concat(s.li || []), []);
@@ -132,6 +132,29 @@ for (const id of ['qixuan', 'houshan', 'mishi', 'yelang', 'xuesestory']) {
     const show = st.steps.filter(s => s.t === 'actor' && s.show).map(s => s.who);
     ok(['xiangzhili','fengyue','zhongwu'].every(x => show.indexOf(x) < show.indexOf('yukun')),
        '禁地试炼者先出场，绿波洞同门收场才露面（时间线不倒错）', show);
+  } else if (id === 'chuisui') {
+    const spr = st.actors.map(a => a.spr);
+    ok(spr.includes('hanli') && spr.includes('lifeiyu'),
+       '松林小溪两人到位：韩立与厉飞雨', spr);
+    ok(kinds.includes('stream') && kinds.includes('pine'),
+       '溪谷用 stream + pine（松林与竹林不是一回事，别拿 bamboo 顶）', kinds);
+    const txt = (stories.chuisui || []).map(l => l[1]).join('');
+    ok(/抽髓丸/.test(txt) && /二十三种/.test(txt) && /十年/.test(txt),
+       '台词守住抽髓丸三处硬点：药名 / 二十三种罕见物 / 十年必死', txt.slice(0, 40));
+    ok(/发个毒誓/.test(txt) && /厉飞雨欠你/.test(txt),
+       '「你发个毒誓」与自报姓名「我厉飞雨」两句原话都在', null);
+    const wr = st.steps.findIndex(s => s.t === 'act' && s.anim === 'writhe');
+    const th = st.steps.findIndex(s => s.t === 'act' && s.anim === 'threaten');
+    ok(wr > 0 && th > wr, '先毒发抽搐，后刀架颈（时间线不倒错）', { wr, th });
+    const vi = st.steps.findIndex(s => s.t === 'prop' && s.n === 'vial');
+    const pi = st.steps.findIndex(s => s.t === 'prop' && s.n === 'pill');
+    ok(vi > 0 && pi > vi, '先摸出小白玉瓶，再夹起粉红药丸', { vi, pi });
+    const pink = st.steps.find(s => s.t === 'prop' && s.n === 'pill');
+    ok(pink && pink.tint === 'pink', '抽髓丸是粉红丸子（原著「粉红色、奇异腥臭」，不是白丸）', pink);
+    const lie = st.actors.find(a => a.id === 'lifeiyu');
+    const up = st.steps.findIndex(s => s.t === 'actor' && s.who === 'lifeiyu' && s.rot === 0);
+    ok(lie && typeof lie.rot === 'number' && lie.rot !== 0 && up > 0,
+       '厉飞雨先横躺（rot）后站起来（rot 归零），不是站着发抖', { rot: lie && lie.rot, up });
   } else if (id === 'mishi') {
     const spr = st.actors.map(a => a.spr);
     ok(['hanli','mo','quhun','yuzitong'].every(x => spr.includes(x)),
@@ -170,15 +193,18 @@ ok(['herb','dig','carry','wipe','drink','read','pour','refine','pickup','climb',
    '活组齐全：采药 / 掘土 / 挑担 / 抹汗 / 饮 / 展卷 / 斟倒 / 控火 / 拾取 / 攀崖 / 顶水 / 按脉', actNames);
 ok(['give','swallow','clench'].every(x => actNames.includes(x)),
    '密谋组齐全：递物 / 吞服 / 握拳（尸虫丸那段全靠这三式）', actNames);
+ok(['writhe','threaten'].every(x => actNames.includes(x)),
+   '溪边组齐全：毒发抽动 / 刀架颈（厉飞雨那段全靠这两式）', actNames);
 ok(propNames.length >= 14, '剧情道具库至少 14 件', propNames);
 ok(['bottle','order','jade','map','talisman','sword','blade','token7','chest','hoe','basket','stone','pouch','cauldron','gold'].every(x => propNames.includes(x)),
    '原著关键道具齐备：小绿瓶 / 升仙令 / 玉简 / 舆图 / 符纸 / 剑 / 刀 / 铁牌 / 药箱 / 药锄 / 药篓 / 灵石 / 储物袋 / 丹炉 / 金砖', propNames);
 ok(['box','pill','lamp'].every(x => propNames.includes(x)),
    '密室道具齐备：檀木盒 / 白丸 / 油灯', propNames);
+ok(propNames.includes('vial'), '溪边道具齐备：小白玉瓶（装抽髓丸那只）', propNames);
 
 // 剧情里用到的道具必须都在库里，不能写个空气名字
 const usedProps = [];
-for (const id of ['qixuan', 'houshan', 'mishi', 'yelang', 'xuesestory']) {
+for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'yelang', 'xuesestory']) {
   for (const s of (sandbox.window.StoryStage.steps(id) || [])) {
     if (s.t === 'prop' && s.n) usedProps.push(s.n);
   }

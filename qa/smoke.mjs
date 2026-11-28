@@ -817,6 +817,14 @@ ok(hasLine('mishi', null, '曲魂'), '张铁躯壳改叫曲魂（第64章）');
 ok(hasLine('moutro', null, '张铁'), '铁奴揭面是张铁');
 ok(hasLine('moutro', null, '嘉元城'), '遗书指向嘉元城墨府');
 
+// 厉飞雨·松林小溪（第20~21章）：韩立第一次救人，也第一次被刀架住脖子
+ok(hasLine('chuisui', '韩立', '抽髓丸') && hasLine('chuisui', '韩立', '二十三种'), '抽髓丸由二十三种罕见物炼成（ch20 原文）');
+ok(hasLine('chuisui', '韩立', '十年'), '抽髓丸十年之内必死（用寿命换功力）');
+ok(hasLine('chuisui', '厉飞雨', '不杀你的理由'), '补上「给我一个不杀你的理由」');
+ok(hasLine('chuisui', '厉飞雨', '毒誓'), '补上「你发个毒誓」');
+ok(hasLine('chuisui', '厉飞雨', '厉飞雨欠你'), '厉飞雨自报姓名并许下人情');
+ok(hasLine('chuisui', null, '白玉瓶'), '药装在一只小白玉瓶里（原著细节，不是随手掏出来的）');
+
 ok(hasLine('jiayuan', null, '暖阳宝玉') && hasLine('jiayuan', null, '尸虫丸'), '嘉元城墨府补上暖阳宝玉解尸虫丸之毒');
 ok(hasLine('tainan', '韩立', '小妹出嫁'), '补上韩立回乡、小妹出嫁');
 ok((W.STORY || []).some(s => s.id === 'yj_open' && s.lines.some(l => l[0] === '田不缺')), '燕家堡补上合欢宗田不缺');

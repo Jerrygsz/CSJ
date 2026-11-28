@@ -162,6 +162,39 @@
           cam:{ z:[1.14,1.00], x:[-4,0], y:[0,0] } }
       ]
     },
+    // 松林小溪：ch20~21 韩立救厉飞雨。同样只作剧目登记 / 旧插画兜底，
+    // 真实玩家与洞府回顾由 StoryStage 分流到主画布层（见 game.js replayStoryLive）。
+    chuisui: {
+      title: '卷一 · 松林小溪', sub: '神手谷外 · 溪边', seal: '抽髓',
+      shots: [
+        { id:0, t:0,     dur:2.6, kind:'chapter', scene:'forest', fx:'unroll',
+          cam:{ z:[1.00,1.05], x:[0,-6], y:[0,0] }, label:'卷一 · 松林小溪' },
+        { id:1, t:2.6,   dur:3.0, scene:'forest', fx:'ink', li: 0,
+          cam:{ z:[1.05,1.10], x:[-6,0], y:[0,-4] } },
+        { id:2, t:5.6,   dur:3.0, scene:'forest', actors:[['hanli','L']], fx:'dim', li: 1,
+          cam:{ z:[1.10,1.14], x:[0,4], y:[-4,0] } },
+        { id:3, t:8.6,   dur:2.8, scene:'forest', actors:[['hanli','L'],['lifeiyu','R']], fx:'dim', li: 2,
+          cam:{ z:[1.14,1.18], x:[4,0], y:[0,0] } },
+        { id:4, t:11.4,  dur:3.2, scene:'forest', actors:[['hanli','L'],['lifeiyu','R']], fx:'dim', li: 3,
+          cam:{ z:[1.18,1.22], x:[0,-2], y:[0,-4] } },
+        { id:5, t:14.6,  dur:3.0, scene:'forest', actors:[['hanli','L'],['lifeiyu','R']], fx:'glow', li: 5,
+          cam:{ z:[1.22,1.18], x:[-2,2], y:[-4,0] } },
+        { id:6, t:17.6,  dur:3.4, scene:'forest', actors:[['hanli','L']], fx:'ink', li: 6,
+          cam:{ z:[1.18,1.24], x:[2,4], y:[0,-4] } },
+        { id:7, t:21.0,  dur:3.2, scene:'forest', actors:[['hanli','L'],['lifeiyu','R']], fx:'dim', li: 9,
+          cam:{ z:[1.24,1.16], x:[4,0], y:[-4,0] } },
+        { id:8, t:24.2,  dur:3.4, scene:'forest', actors:[['hanli','L'],['lifeiyu','R']], fx:'glow', li: 11,
+          cam:{ z:[1.16,1.22], x:[0,2], y:[0,-4] } },
+        { id:9, t:27.6,  dur:2.8, scene:'forest', actors:[['hanli','L'],['lifeiyu','R']], fx:'dim', li: 12,
+          cam:{ z:[1.22,1.18], x:[2,0], y:[-4,0] } },
+        { id:10, t:30.4, dur:3.0, scene:'forest', actors:[['hanli','L'],['lifeiyu','R']], fx:'dim', li: 15,
+          cam:{ z:[1.18,1.14], x:[0,-2], y:[0,0] } },
+        { id:11, t:33.4, dur:3.2, scene:'forest', actors:[['hanli','L'],['lifeiyu','R']], fx:'ink', li: 16,
+          cam:{ z:[1.14,1.20], x:[-2,2], y:[0,-4] } },
+        { id:12, t:36.6, dur:3.4, scene:'forest', fx:'roll', li: 17,
+          cam:{ z:[1.20,1.00], x:[2,0], y:[-4,0] } }
+      ]
+    },
     // 野狼帮之围：七玄门后期人物在战斗地图当群众演员；这里只作剧目登记 / 旧插画兜底，
     // 真实玩家与洞府回顾都由 StoryStage 分流到主画布层（见 game.js replayStoryLive）。
     yelang: {

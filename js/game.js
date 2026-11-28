@@ -10566,10 +10566,14 @@
     // P1-2 地标：画在装饰之上、地面特效之下（满屏特效也不会盖住），明度 0.55，不参与碰撞
     if (sc3.on) sc3DrawLandmarks(sc3);
     // 地面特效先铺：符文环是画在地上的，等角色都画完再画就成呼啦圈了
-    for (const pt of G.parts) if (pt.rune) drawPart(pt);
-    for (const g of G.gems) { if (g.kind === 'stone') drawStone(g); else drawSpr('gem', g.x, g.y, 1.6, false); }
-    for (const h of G.herbs) drawSpr('herb', h.x, h.y, 1.6, false);
-    for (const l of G.loot) drawLoot(l);
+    for (const pt of G.parts) if (pt.rune && !G.storyClean) drawPart(pt);
+    // 剧情层播放时地上不留战斗残留：灵石、灵草、掉落物都是「这一局」的痕迹，
+    // 摆在小人剧情里会像满地垃圾（houshan 那团青光最扎眼）。
+    if (!G.storyClean) {
+      for (const g of G.gems) { if (g.kind === 'stone') drawStone(g); else drawSpr('gem', g.x, g.y, 1.6, false); }
+      for (const h of G.herbs) drawSpr('herb', h.x, h.y, 1.6, false);
+      for (const l of G.loot) drawLoot(l);
+    }
     // 地面持续区先铺（贴地），预警圈与弹体压在上面
     for (const z of G.zones) { if (z.x < _zx0 || z.x > _zx1 || z.y < _zy0 || z.y > _zy1) continue; drawZone(z); }
     for (const h of G.hazards) drawHazardGround(h);
@@ -10852,11 +10856,15 @@
     // 队友打出来的攻击：画出来，让你看得见他在出手（不参与命中判定）
     for (const b of G.fxBullets) { if (b.x < _bx0 || b.x > _bx1 || b.y < _by0 || b.y > _by1) continue; drawBulletVfx(b, 0.78); }
     // 环绕：玄罡的金环 / 大庚剑阵的青碧飞剑
-    for (const o of G.orbPos) drawOrb(o);
-    // pixelfx 像素特效层：角色之后、飘字之前。关掉加法光（见 fxpix.js 文件头），否则在宣纸白底上等于没画
-    // 第102轮：浅纸上只把常驻领域法阵（hold）压到 0.42，一次性命中 / 暴击特效不受影响
-    if (window.FX3) FX3.draw(ctx, SC3_SOFT_RING ? 0.42 : 1);
-    for (const pt of G.parts) if (!pt.rune) drawPart(pt);
+    // 剧情层播放时整层战特效都不该出现：环绕物 / 像素特效层 / 粒子，
+    // 在宣纸白底上会变成一团青色光点，把小人戏盖掉。
+    if (!G.storyClean) {
+      for (const o of G.orbPos) drawOrb(o);
+      // pixelfx 像素特效层：角色之后、飘字之前。关掉加法光（见 fxpix.js 文件头），否则在宣纸白底上等于没画
+      // 第102轮：浅纸上只把常驻领域法阵（hold）压到 0.42，一次性命中 / 暴击特效不受影响
+      if (window.FX3) FX3.draw(ctx, SC3_SOFT_RING ? 0.42 : 1);
+      for (const pt of G.parts) if (!pt.rune) drawPart(pt);
+    }
     // 印蜕最后画：伤害数字也走 G.texts，先画它们，技能名才不会被压住读不清（第117轮实拍修正）。
     const drawOneText = (t) => {
       const kk = Math.max(0, t.life / t.maxlife);
@@ -11285,11 +11293,12 @@
   // 剧情回顾列表的「已阅」标记：与 startMap() / storySceneOf() 写进 save.seen 的键一致。
   // qixuan 是整场剧情图（scene:qixuan），houshan 是战斗图进图序章（cut:houshan）。
   // 只用于展示，不写、不删；铺新图时同步登记。
-  const CUTSCENE_SEEN = { qixuan: 'scene:qixuan', houshan: 'cut:houshan', mishi: 'intro:mishi', yelang: 'intro:yelang', xuesestory: 'cut:xuesestory' };
+  const CUTSCENE_SEEN = { qixuan: 'scene:qixuan', houshan: 'cut:houshan', chuisui: 'cut:chuisui', mishi: 'intro:mishi', yelang: 'intro:yelang', xuesestory: 'cut:xuesestory' };
   // 剧目 id → 回放时铺的战斗地图 id；只有 xuesestory 与地图不同名。
-  const STORY_REPLAY_MAP = { xuesestory: 'xuese' };
+  // chuisui（松林小溪）在神手谷外，铺后山那张图最贴合。
+  const STORY_REPLAY_MAP = { xuesestory: 'xuese', chuisui: 'houshan' };
   // 剧目 id → 回顾列表显示名；xuesestory 不是地图 id，没有 MAPS.name 可用。
-  const STORY_REPLAY_NAME = { xuesestory: '血色禁地·中心区' };
+  const STORY_REPLAY_NAME = { xuesestory: '血色禁地·中心区', chuisui: '七玄门·松林小溪' };
 
   function startMap(id, diffId) {
     const m = MAPS.find(x => x.id === id);
@@ -11557,7 +11566,19 @@
           && (window.StoryStage.force || !(window.__CSJ_QA__ || (typeof navigator !== 'undefined' && navigator.webdriver)))
           && !G.storyMute;
         if (stageLive) {
-          window.StoryStage.start(id, hsLines, () => { storyMarkSeen('cut:houshan'); G.state = 'play'; last = performance.now(); });
+          const hsDone = () => {
+            storyMarkSeen('cut:houshan');
+            // 采药这趟回来，谷外松林小溪还有半场：ch20~21 救厉飞雨。
+            // 同一次外出的前后半场，接在同一个 onDone 里，中间不跳回战斗。
+            if (!storySeen('cut:chuisui') && window.StoryStage.canPlay('chuisui') && !G.storyMute) {
+              window.StoryStage.start('chuisui', MAP_STORIES.chuisui, () => {
+                storyMarkSeen('cut:chuisui'); G.state = 'play'; last = performance.now();
+              });
+              return;
+            }
+            G.state = 'play'; last = performance.now();
+          };
+          window.StoryStage.start(id, hsLines, hsDone);
           return;
         }
         showLines(hsLines, () => { storyMarkSeen('cut:houshan'); G.state = 'play'; last = performance.now(); }, 'map:houshan');

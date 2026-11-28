@@ -21,6 +21,9 @@ const shots = [
   ['houshan', '蹲身认药', 0.55, 'houshan-herb'],
   ['houshan', '脚边一点青光', 0.0, 'houshan-bottle-ground'],
   ['houshan', '小绿瓶入手', 0.0, 'houshan-bottle-hand'],
+  ['chuisui', '四肢抽搐', 0.45, 'chuisui-writhe'],
+  ['chuisui', '指间夹起粉红药丸', 0.55, 'chuisui-pill'],
+  ['chuisui', '刀架在韩立颈侧', 0.45, 'chuisui-threaten'],
   ['yelang', '金光上人掐诀逞威', 0.45, 'yelang-seal'],
   ['yelang', '厉飞雨一身血污跑回来', 0.35, 'yelang-lifeiyu'],
   ['yelang', '斗篷下的巨汉跟出来', 0.45, 'yelang-quhun'],
@@ -35,6 +38,8 @@ const shots = [
 
 const b = await chromium.launch({ channel: 'chrome' });
 const allErrs = [];
+// 剧目 id 与地图 id 不同名时（血色禁地 / 松林小溪），进图要换成能承载它的那张
+const ENTER_MAP = { xuesestory: 'xuese', chuisui: 'houshan' };
 
 for (const [mapId, label, hold, name] of shots) {
   const page = await b.newPage({ viewport: { width: 480, height: 900 }, deviceScaleFactor: 2 });
@@ -48,7 +53,7 @@ for (const [mapId, label, hold, name] of shots) {
     F.clearProgress(); F.unlockAll(); F.setLevel(40);
     F.muteStory(true);
     F.enterMap(enterId);
-  }, mapId === 'xuesestory' ? 'xuese' : mapId);
+  }, ENTER_MAP[mapId] || mapId);
   await page.waitForTimeout(900);
 
   const r = await page.evaluate(async ({ mapId, label, hold }) => {
