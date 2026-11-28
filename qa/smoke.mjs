@@ -835,6 +835,9 @@ ok(hasLine('yelang', null, '金光上人') && hasLine('yelang_out', null, '升�
 // 「升仙令」这个名字是 ch141 青溪笔录才揭出来的，三个字一句都不许前移。
 ok(!hasLine('wagang', null, '升仙令') && !hasLine('tainan', null, '升仙令') && !hasLine('yelang_out', null, '升仙令'),
    '「升仙令」三字不得前移到入谷之前（ch141 才揭出，此前谁都不知道它叫什么）');
+// 通关描述也算台词：野狼帮那一关打完是 ch95，那时候同样还不知道这枚令牌叫什么
+ok(!/升仙令/.test((W.MAPS.find(m => m.id === 'yelang') || {}).clearDesc || ''),
+   '野狼帮通关描述不得提前叫出「升仙令」（ch95 只知刻着升仙二字）');
 ok(hasLine('wagang', null, '通音符') && hasLine('wagang', null, '五年一次'), '补上通音符开雾与「五年一次的小会」');
 ok(hasLine('tainan', '青颜真人', '第八层') && hasLine('tainan', '青颜真人', '木属性'),
    '青颜真人一眼看出木属性功法已到第八层（ch129 原文）');
