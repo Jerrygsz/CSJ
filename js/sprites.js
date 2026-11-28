@@ -391,13 +391,14 @@
       '..KGK..KGK..',
       '..KKK..KKK..'
     ] },
-    // 青颜真人：散修里的「真人」，道髻、青袍、白须。青是被叫「青颜」的那个青
-    { name: 'qingyan', pal: { K: '#1b1b2a', H: '#33302a', S: '#dcc09a', W: '#e4e2d6', G: '#2e6b62', g: '#1d4a44', B: '#8a7a4a' }, rows: [
+    // 青颜真人：散修里的「真人」，道髻、青袍、白须。
+    // ch129「一张青色斑斑的脸孔，实在有些惊人」——青斑是他这个外号的来处，脸上必须有 C。
+    { name: 'qingyan', pal: { K: '#1b1b2a', H: '#33302a', S: '#dcc09a', W: '#e4e2d6', G: '#3d8a78', g: '#285f52', B: '#8a7a4a', C: '#5e9e88' }, rows: [
       '....KKKK....',
       '...KHHHHK...',
       '..KHHHHHHK..',
-      '..KSSSSSSK..',
-      '..KSKSSKSK..',
+      '..KSSSCSSK..',
+      '..KSKCSKSK..',
       '..KSWWWWSK..',
       '..KGGGGGGK..',
       '.KGgGGGGgGK.',
@@ -1887,7 +1888,9 @@
       '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
     ] },
     // 太南小会 / 黄枫谷（ch126–171）
-    { name: 'wanshanxiao', label: '万小山', pal: { K, H: '#23232c', S: '#e0b48a', G: '#4a6a8a', g: '#324a66', B: '#b09050' }, rows: [
+    // 万小山：ch126「身穿白衣的十五六岁少年」「眉清目秀，皮肤白嫩，养尊处优的世家公子哥」。
+    // 白衣在宣纸米底上会糊，靠袍身暗部 g 与深描边 K 撑轮廓，别把 g 也调白。
+    { name: 'wanshanxiao', label: '万小山', pal: { K, H: '#23232c', S: '#f2d4b0', G: '#e4e0d2', g: '#a9a294', B: '#b09050' }, rows: [
       '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
       '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
       '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'

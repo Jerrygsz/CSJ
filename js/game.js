@@ -11293,12 +11293,13 @@
   // 剧情回顾列表的「已阅」标记：与 startMap() / storySceneOf() 写进 save.seen 的键一致。
   // qixuan 是整场剧情图（scene:qixuan），houshan 是战斗图进图序章（cut:houshan）。
   // 只用于展示，不写、不删；铺新图时同步登记。
-  const CUTSCENE_SEEN = { qixuan: 'scene:qixuan', houshan: 'cut:houshan', chuisui: 'cut:chuisui', mishi: 'intro:mishi', yelang: 'intro:yelang', xuesestory: 'cut:xuesestory' };
+  const CUTSCENE_SEEN = { qixuan: 'scene:qixuan', houshan: 'cut:houshan', chuisui: 'cut:chuisui', wagang: 'cut:wagang', tainan: 'intro:tainan', mishi: 'intro:mishi', yelang: 'intro:yelang', xuesestory: 'cut:xuesestory' };
   // 剧目 id → 回放时铺的战斗地图 id；只有 xuesestory 与地图不同名。
-  // chuisui（松林小溪）在神手谷外，铺后山那张图最贴合。
-  const STORY_REPLAY_MAP = { xuesestory: 'xuese', chuisui: 'houshan' };
-  // 剧目 id → 回顾列表显示名；xuesestory 不是地图 id，没有 MAPS.name 可用。
-  const STORY_REPLAY_NAME = { xuesestory: '血色禁地·中心区', chuisui: '七玄门·松林小溪' };
+  // chuisui（松林小溪）在神手谷外，铺后山那张图最贴合；
+  // wagang（怪坡）是太南小会的谷外前半场，铺 tainan 那张图。
+  const STORY_REPLAY_MAP = { xuesestory: 'xuese', chuisui: 'houshan', wagang: 'tainan' };
+  // 剧目 id → 回顾列表显示名；不在 MAPS 里的剧目必须在这里给名字。
+  const STORY_REPLAY_NAME = { xuesestory: '血色禁地·中心区', chuisui: '七玄门·松林小溪', wagang: '太南山下·怪坡', tainan: '太南谷·青砖广场' };
 
   function startMap(id, diffId) {
     const m = MAPS.find(x => x.id === id);
@@ -11502,12 +11503,28 @@
         }
         marketStake(m, openShop);
       };
-      // 坊市也有它自己的开场白（太南小会：金光上人的升仙令、万小山）
+      // 坊市也有它自己的开场白（太南小会：万小山与青颜真人）
       // 只讲一次 —— 坊市可以反复进出；原先按「是否通关」判断，没通关时每进一次就把整段开场重念一遍。
       // 现在与其它剧情统一走「已看节点」记账，进过一次就再不念。
       const mktKey = 'intro:' + m.id;
       const mktLines = MAP_STORIES[m.id];
       if (mktLines && mktLines.length && !storySeen(mktKey)) {
+        // 主画布剧情层：太南小会分成谷外（wagang·怪坡）与谷内（tainan·青砖广场）两场，
+        // 都是「进谷」这一件事的前后两半，接在同一个 onDone 里，中间不跳回战斗。
+        const stageMkt = window.StoryStage && window.StoryStage.canPlay(m.id) && window.StoryStage.available()
+          && (window.StoryStage.force || !(window.__CSJ_QA__ || (typeof navigator !== 'undefined' && navigator.webdriver)))
+          && !G.storyMute;
+        if (stageMkt && m.id === 'tainan' && window.StoryStage.canPlay('wagang')) {
+          window.StoryStage.start('wagang', MAP_STORIES.wagang, () => {
+            storyMarkSeen('cut:wagang');
+            window.StoryStage.start('tainan', mktLines, () => { storyMarkSeen(mktKey); meetThenShop(); });
+          });
+          return;
+        }
+        if (stageMkt) {
+          window.StoryStage.start(m.id, mktLines, () => { storyMarkSeen(mktKey); meetThenShop(); });
+          return;
+        }
         G.state = 'dialog';
         showLines(mktLines, () => { storyMarkSeen(mktKey); meetThenShop(); }, 'map:' + m.id);
         return;

@@ -826,12 +826,18 @@ ok(hasLine('chuisui', '厉飞雨', '厉飞雨欠你'), '厉飞雨自报姓名并
 ok(hasLine('chuisui', null, '白玉瓶'), '药装在一只小白玉瓶里（原著细节，不是随手掏出来的）');
 
 ok(hasLine('jiayuan', null, '暖阳宝玉') && hasLine('jiayuan', null, '尸虫丸'), '嘉元城墨府补上暖阳宝玉解尸虫丸之毒');
-ok(hasLine('tainan', '韩立', '小妹出嫁'), '补上韩立回乡、小妹出嫁');
+ok(hasLine('wagang', '万小山', '枯崖山'), '补上万小山自报「枯崖山万家」（ch126 原话）');
 ok((W.STORY || []).some(s => s.id === 'yj_open' && s.lines.some(l => l[0] === '田不缺')), '燕家堡补上合欢宗田不缺');
 
-// 太南小会：金光上人的升仙令 + 万小山
-ok(hasLine('yelang', null, '金光上人') && hasLine('yelang_out', null, '升仙令'), '野狼帮之围交代金光上人与升仙令来路');
-ok(hasLine('tainan', '万小山', '升仙令') || hasLine('tainan', '万小山', '令牌'), '补上万小山告诉他升仙令的用法');
+// 太南小会：万小山这条线 + 入谷那道怪坡白雾
+ok(hasLine('yelang', null, '金光上人') && hasLine('yelang_out', null, '升仙'), '野狼帮之围交代金光上人与那枚刻着「升仙」的青黑令牌');
+// 考据红线：ch95 韩立只当它是块不知用途的怪令牌，ch126~128 万小山也没看过它。
+// 「升仙令」这个名字是 ch141 青溪笔录才揭出来的，三个字一句都不许前移。
+ok(!hasLine('wagang', null, '升仙令') && !hasLine('tainan', null, '升仙令') && !hasLine('yelang_out', null, '升仙令'),
+   '「升仙令」三字不得前移到入谷之前（ch141 才揭出，此前谁都不知道它叫什么）');
+ok(hasLine('wagang', null, '通音符') && hasLine('wagang', null, '五年一次'), '补上通音符开雾与「五年一次的小会」');
+ok(hasLine('tainan', '青颜真人', '第八层') && hasLine('tainan', '青颜真人', '木属性'),
+   '青颜真人一眼看出木属性功法已到第八层（ch129 原文）');
 
 // 血色禁地：五年一开、开完封六十年、李化元打赌收记名弟子
 ok((W.STORY || []).some(s => s.id === 'xs_open' && s.lines.some(l => String(l[1]).includes('六十年'))), '血色禁地补上「五年一开、封六十年」');

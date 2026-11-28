@@ -195,6 +195,67 @@
           cam:{ z:[1.20,1.00], x:[2,0], y:[-4,0] } }
       ]
     },
+    // 太南山下·怪坡：入修仙界的门槛戏。真实玩家由 StoryStage 走 wagang 段，
+    // 这里只作剧目登记 / 旧插画兜底（回顾列表按 CUTSCENES 的键枚举）。
+    wagang: {
+      title: '卷一 · 太南山下', sub: '怪坡 · 村口', seal: '入道',
+      shots: [
+        { id:0, t:0,     dur:2.6, kind:'chapter', scene:'hut', fx:'unroll',
+          cam:{ z:[1.00,1.05], x:[0,-6], y:[0,0] }, label:'卷一 · 太南山下' },
+        { id:1, t:2.6,   dur:3.2, scene:'forest', actors:[['hanli','L']], fx:'glow', li: 0,
+          cam:{ z:[1.05,1.12], x:[-6,0], y:[0,-4] } },
+        { id:2, t:5.8,   dur:3.0, scene:'forest', actors:[['hanli','L']], fx:'ink', li: 1,
+          cam:{ z:[1.12,1.16], x:[0,2], y:[-4,0] } },
+        { id:3, t:8.8,   dur:3.2, scene:'hut', actors:[['hanli','L'],['wanshanxiao','R']], fx:'ink', li: 3,
+          cam:{ z:[1.16,1.20], x:[2,0], y:[0,-4] } },
+        { id:4, t:12.0,  dur:3.0, scene:'forest', actors:[['hanli','L'],['wanshanxiao','R']], fx:'dim', li: 5,
+          cam:{ z:[1.20,1.14], x:[0,-2], y:[0,0] } },
+        { id:5, t:15.0,  dur:3.0, scene:'forest', actors:[['hanli','L'],['wanshanxiao','R']], fx:'ink', li: 6,
+          cam:{ z:[1.14,1.18], x:[-2,2], y:[0,-4] } },
+        { id:6, t:18.0,  dur:3.4, scene:'hill', actors:[['hanli','L'],['wanshanxiao','R']], fx:'dim', li: 8,
+          cam:{ z:[1.18,1.22], x:[2,6], y:[-4,-6] } },
+        { id:7, t:21.4,  dur:3.6, scene:'hill', actors:[['hanli','L'],['wanshanxiao','R']], fx:'ink', li: 9,
+          cam:{ z:[1.22,1.16], x:[6,2], y:[-6,-2] } },
+        { id:8, t:25.0,  dur:3.0, scene:'hill', actors:[['hanli','L'],['wanshanxiao','R']], fx:'dim', li: 11,
+          cam:{ z:[1.16,1.20], x:[2,0], y:[0,-4] } },
+        { id:9, t:28.0,  dur:3.2, scene:'forest', actors:[['hanli','L'],['wanshanxiao','R']], fx:'seal', li: 14,
+          cam:{ z:[1.20,1.26], x:[0,4], y:[-4,-8] } },
+        { id:10, t:31.2, dur:3.2, scene:'forest', fx:'glow', li: 16,
+          cam:{ z:[1.26,1.18], x:[4,0], y:[-8,-2] } },
+        { id:11, t:34.4, dur:3.4, scene:'forest', actors:[['hanli','L']], fx:'roll', li: 17,
+          cam:{ z:[1.18,1.00], x:[0,-2], y:[-2,0] } }
+      ]
+    },
+    // 太南谷·青砖广场：谷内那半场。同样只作登记 / 兜底。
+    tainan: {
+      title: '卷一 · 太南小会', sub: '太南谷 · 青砖广场', seal: '散修',
+      shots: [
+        { id:0, t:0,     dur:2.6, kind:'chapter', scene:'village', fx:'unroll',
+          cam:{ z:[1.00,1.06], x:[0,4], y:[0,0] }, label:'卷一 · 太南小会' },
+        { id:1, t:2.6,   dur:3.2, scene:'village', actors:[['hanli','L']], fx:'ink', li: 0,
+          cam:{ z:[1.06,1.14], x:[4,0], y:[0,-4] } },
+        { id:2, t:5.8,   dur:3.0, scene:'gate', actors:[['hanli','L']], fx:'dim', li: 1,
+          cam:{ z:[1.14,1.18], x:[0,2], y:[-4,0] } },
+        { id:3, t:8.8,   dur:3.2, scene:'gate', fx:'glow', li: 2,
+          cam:{ z:[1.18,1.22], x:[2,4], y:[0,-6] } },
+        { id:4, t:12.0,  dur:3.0, scene:'gate', actors:[['hanli','L']], fx:'dim', li: 3,
+          cam:{ z:[1.22,1.16], x:[4,2], y:[-6,-2] } },
+        { id:5, t:15.0,  dur:3.2, scene:'village', actors:[['hanli','L'],['wanshanxiao','R'],['qingyan','R']], fx:'ink', li: 6,
+          cam:{ z:[1.16,1.20], x:[2,0], y:[0,-4] } },
+        { id:6, t:18.2,  dur:3.0, scene:'village', actors:[['hanli','L'],['wanshanxiao','R'],['qingyan','R']], fx:'seal', li: 8,
+          cam:{ z:[1.20,1.26], x:[0,4], y:[-4,-6] } },
+        { id:7, t:21.2,  dur:2.8, scene:'village', actors:[['hanli','L'],['wanshanxiao','R'],['qingyan','R']], fx:'dim', li: 10,
+          cam:{ z:[1.26,1.20], x:[4,2], y:[-6,-2] } },
+        { id:8, t:24.0,  dur:2.8, scene:'village', actors:[['hanli','L'],['wanshanxiao','R'],['qingyan','R']], fx:'ink', li: 11,
+          cam:{ z:[1.20,1.24], x:[2,0], y:[-2,-4] } },
+        { id:9, t:26.8,  dur:3.0, scene:'village', actors:[['hanli','L'],['qingyan','R']], fx:'dim', li: 14,
+          cam:{ z:[1.24,1.18], x:[0,-2], y:[-4,0] } },
+        { id:10, t:29.8, dur:3.2, scene:'gate', actors:[['hanli','L']], fx:'ink', li: 16,
+          cam:{ z:[1.18,1.12], x:[-2,0], y:[0,-4] } },
+        { id:11, t:33.0, dur:3.4, scene:'gate', actors:[['hanli','L']], fx:'roll', li: 17,
+          cam:{ z:[1.12,1.00], x:[0,2], y:[-4,0] } }
+      ]
+    },
     // 野狼帮之围：七玄门后期人物在战斗地图当群众演员；这里只作剧目登记 / 旧插画兜底，
     // 真实玩家与洞府回顾都由 StoryStage 分流到主画布层（见 game.js replayStoryLive）。
     yelang: {

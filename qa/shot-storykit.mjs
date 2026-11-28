@@ -33,13 +33,20 @@ const shots = [
   ['mishi', '取出四角檀木盒', 0.35, 'mishi-box'],
   ['mishi', '当着他的面吞下', 0.45, 'mishi-swallow'],
   ['mishi', '铁塔般堵在门口', 0.30, 'mishi-quhun'],
-  ['mishi', '灯影里浮起一团模糊人影', 0.45, 'mishi-ghost']
+  ['mishi', '灯影里浮起一团模糊人影', 0.45, 'mishi-ghost'],
+  ['wagang', '盘坐树下拔寒毒', 0.55, 'wagang-meditate'],
+  ['wagang', '枯崖山万家万小山', 0.40, 'wagang-meet'],
+  ['wagang', '少年掰着手指报家当', 0.40, 'wagang-goods'],
+  ['wagang', '白雾让出一条小路', 0.45, 'wagang-mist'],
+  ['tainan', '青铜灯盏托着白石', 0.45, 'tainan-lamp'],
+  ['tainan', '青颜真人只扫了一眼', 0.55, 'tainan-gaze'],
+  ['tainan', '一路回头', 0.45, 'tainan-leave']
 ];
 
 const b = await chromium.launch({ channel: 'chrome' });
 const allErrs = [];
 // 剧目 id 与地图 id 不同名时（血色禁地 / 松林小溪），进图要换成能承载它的那张
-const ENTER_MAP = { xuesestory: 'xuese', chuisui: 'houshan' };
+const ENTER_MAP = { xuesestory: 'xuese', chuisui: 'houshan', wagang: 'tainan' };
 
 for (const [mapId, label, hold, name] of shots) {
   const page = await b.newPage({ viewport: { width: 480, height: 900 }, deviceScaleFactor: 2 });
@@ -65,6 +72,11 @@ for (const [mapId, label, hold, name] of shots) {
       g.ebullets.length = 0; g.boss = null; g.chaseBoss = null;
     }
     if (S.state().active) S.stop();
+    // 坊市图（太南小会）进图会立刻弹商店 overlay，它压在剧情层之上 —— 不藏掉就只拍到买入面板
+    const sh = document.getElementById('shop');
+    if (sh) sh.style.display = 'none';
+    const cav = document.getElementById('cave');
+    if (cav) cav.style.display = 'none';
     S.force = true;
     S.start(mapId, window.MAP_STORIES[mapId], () => {});
     const yield_ = () => new Promise(res => setTimeout(res, 0));

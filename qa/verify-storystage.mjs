@@ -71,7 +71,7 @@ const stories = sandbox.window.MAP_STORIES;
 const stages = sandbox.window.StoryStage.stages();
 const DATA = {};
 console.log('\n== 2. 原著剧情与地形数据 ==');
-for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'yelang', 'xuesestory']) {
+for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'wagang', 'tainan', 'yelang', 'xuesestory']) {
   const st = stages[id];
   DATA[id] = st;
   const li = st.steps.filter(s => s.t === 'say').reduce((a, s) => a.concat(s.li || []), []);
@@ -173,6 +173,46 @@ for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'yelang', 'xuesestory
     ok(qh > gi, '铁奴在摊牌之后才踏进石门（不提前到摊牌拍）', { qh, gi });
     const ghost = st.actors.find(a => a.id === 'yuzitong');
     ok(ghost && ghost.ghost === true, '余子童以元神的半透明幽影出现，不做成活人', ghost);
+  } else if (id === 'wagang') {
+    const spr = st.actors.map(a => a.spr);
+    ok(spr.includes('hanli') && spr.includes('wanshanxiao'),
+       '怪坡两人到位：韩立与白衣少年万小山', spr);
+    ok(kinds.includes('mist') && kinds.includes('pine'),
+       '谷外用 mist 白雾 + pine 松林（怪坡「常年被浓浓白雾笼罩」是这场的招牌）', kinds);
+    const txt = (stories.wagang || []).map(l => l[1]).join('');
+    ok(/枯崖山/.test(txt) && /万小山/.test(txt) && /通音符/.test(txt),
+       '台词守住三处原著硬点：枯崖山万家 / 万小山 / 通音符', txt.slice(0, 40));
+    // 考据红线：第126~128章韩立并不知道身上那块令牌叫「升仙令」，万小山也没看过它。
+    // 升仙令是第141章《青溪笔录》才揭出的事，一句都不许前移到这里。
+    ok(!/升仙令/.test(txt) && !/认令不认人/.test(txt),
+       '怪坡段不得出现「升仙令 / 七派认令不认人」（那是 ch141 才揭出的事，时间线红线）', null);
+    const md = st.steps.findIndex(s => s.t === 'act' && s.anim === 'meditate');
+    const wj = st.steps.findIndex(s => s.t === 'prop' && s.n === 'warmjade');
+    ok(wj > 0 && md > wj, '先取出暖阳宝玉，再盘坐拔寒毒', { wj, md });
+    const arrive = st.steps.findIndex(s => s.t === 'actor' && s.who === 'wanshanxiao' && s.show);
+    const lead = st.steps.findIndex(s => s.t === 'act' && s.who === 'hanli' && s.anim === 'point');
+    ok(arrive > md && lead > arrive, '万小山先跑来拜门，韩立才抬手带路（原著是韩立领路）', { arrive, lead });
+    const toss = st.steps.findIndex(s => s.t === 'act' && s.anim === 'throw');
+    ok(toss > lead, '带路之后才抛通音符开雾', { toss, lead });
+  } else if (id === 'tainan') {
+    const spr = st.actors.map(a => a.spr);
+    ok(['hanli','wanshanxiao','qingyan'].every(x => spr.includes(x)),
+       '广场三人到位：韩立 / 万小山 / 青颜真人', spr);
+    ok(kinds.includes('paved') && kinds.includes('stall') && kinds.includes('stonelamp'),
+       '谷内用 paved 青砖广场 + stall 货摊 + stonelamp 灵石灯', kinds);
+    ok(st.tone === 'dusk', '太南小会是入夜戏，用 dusk 场调（天光退了靠灵石灯照）', st.tone);
+    const txt = (stories.tainan || []).map(l => l[1]).join('');
+    ok(/青颜真人/.test(txt) && /第八层/.test(txt) && /木属性/.test(txt),
+       '台词守住三处原著硬点：青颜真人 / 木属性 / 已到第八层', txt.slice(0, 40));
+    ok(!/升仙令/.test(txt) && !/认令不认人/.test(txt),
+       '谷内段同样不得出现「升仙令 / 认令不认人」', null);
+    ok(/白石/.test(txt) && /不放油/.test(txt),
+       '灯盏里不放灯油、托一块拳头大的白石（ch129 原文）', null);
+    const gz = st.steps.findIndex(s => s.t === 'act' && s.anim === 'gaze');
+    const lv = st.steps.findIndex(s => s.t === 'say' && s.li && s.li[0] === 8);
+    ok(gz > 0 && lv > gz, '青颜真人先审视，再说破第八层', { gz, lv });
+    const gone = st.steps.findIndex(s => s.t === 'walk' && s.who === 'wanshanxiao' && s.to && s.to[0] > 150);
+    ok(gone > lv, '说破修为之后万小山才被带回族中长辈处', { gone, lv });
   }
 }
 
@@ -195,6 +235,10 @@ ok(['give','swallow','clench'].every(x => actNames.includes(x)),
    '密谋组齐全：递物 / 吞服 / 握拳（尸虫丸那段全靠这三式）', actNames);
 ok(['writhe','threaten'].every(x => actNames.includes(x)),
    '溪边组齐全：毒发抽动 / 刀架颈（厉飞雨那段全靠这两式）', actNames);
+ok(['meditate','gaze'].every(x => actNames.includes(x)),
+   '入道组齐全：盘坐打坐 / 审视看破（太南山那两段全靠这两式）', actNames);
+ok(propNames.includes('warmjade'),
+   '暖阳宝玉已登记（拔寒毒与解尸虫丸之毒全靠它）', propNames);
 ok(propNames.length >= 14, '剧情道具库至少 14 件', propNames);
 ok(['bottle','order','jade','map','talisman','sword','blade','token7','chest','hoe','basket','stone','pouch','cauldron','gold'].every(x => propNames.includes(x)),
    '原著关键道具齐备：小绿瓶 / 升仙令 / 玉简 / 舆图 / 符纸 / 剑 / 刀 / 铁牌 / 药箱 / 药锄 / 药篓 / 灵石 / 储物袋 / 丹炉 / 金砖', propNames);
@@ -204,7 +248,7 @@ ok(propNames.includes('vial'), '溪边道具齐备：小白玉瓶（装抽髓丸
 
 // 剧情里用到的道具必须都在库里，不能写个空气名字
 const usedProps = [];
-for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'yelang', 'xuesestory']) {
+for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'wagang', 'tainan', 'yelang', 'xuesestory']) {
   for (const s of (sandbox.window.StoryStage.steps(id) || [])) {
     if (s.t === 'prop' && s.n) usedProps.push(s.n);
   }
@@ -479,6 +523,54 @@ ok(R4.names.indexOf('血色禁地·中心区') >= 0, '回顾列表用中文剧�
 await page.click('#storyStageSkipBtn');
 await page.waitForTimeout(120);
 ok(await seenOf() === SEEN0, '新增剧目回看仍不写账本', null);
+
+// 太南小会：谷外 wagang → 谷内 tainan 的链式。market 分支不走 showLines 通道，
+// 只有真进图才验得到「先演怪坡、再演广场、中间不弹商店」这条路径。
+console.log('\n== 4d. 太南谷入谷链式（谷外 wagang → 谷内 tainan）==');
+const W0 = await page.evaluate(async () => {
+  const F = window.__FR;
+  F.clearProgress(); F.unlockAll();
+  F.storyStageForce(true);
+  F.enterMap('tainan');
+  await new Promise(r => setTimeout(r, 160));
+  return {
+    s: F.storyStage(), map: F.G.mapId, state: F.G.state,
+    shop: document.getElementById('shop').style.display
+  };
+});
+ok(W0.s && W0.s.active && W0.s.mapId === 'wagang',
+   '进太南小会先在谷外演 wagang，不直接跳买入面板', W0.s);
+ok(W0.shop !== 'flex' && W0.state === 'dialog',
+   '剧情层占画面时不弹商店（G.state 冻结在 dialog）', { shop: W0.shop, state: W0.state });
+
+const W1 = await page.evaluate(async () => {
+  const F = window.__FR;
+  for (let i = 0; i < 900; i++) {
+    const s = F.storyStage();
+    if (!s || !s.active || s.mapId === 'tainan') break;
+    if (s.kind === 'say') F.advanceDialog();
+    else F.storyStageTick(0.05);
+    await new Promise(r => setTimeout(r, 0));
+  }
+  await new Promise(r => setTimeout(r, 60));
+  // tainan 第一拍是 weather、第二拍是 fade，要再拨到第一句 say 才读得到台词
+  for (let i = 0; i < 80; i++) {
+    const s = F.storyStage();
+    if (!s || !s.active || s.kind === 'say') break;
+    F.storyStageTick(0.05);
+    await new Promise(r => setTimeout(r, 0));
+  }
+  return {
+    s: F.storyStage(),
+    first: document.getElementById('dialogText').textContent,
+    want: window.MAP_STORIES.tainan[0][1]
+  };
+});
+ok(W1.s && W1.s.active && W1.s.mapId === 'tainan',
+   'wagang 收场后链式接上 tainan（进谷的前后两半，中间不跳回战斗）', W1.s);
+ok(W1.first === W1.want, '谷内开场白逐字同源 MAP_STORIES.tainan[0]', { got: W1.first, want: W1.want });
+await page.evaluate(() => window.__FR.storyStageSkip());
+await page.waitForTimeout(120);
 
 ok(errs.length === 0, '全程零报错', errs.slice(0, 4));
 await b.close(); server.close();

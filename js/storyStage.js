@@ -255,6 +255,134 @@
         { t: 'fade', from: 0, to: 1, dur: 0.35, label: '收场' }
       ]
     },
+    wagang: {
+      canon: '第一卷·入修仙界（第126~128章：韩立在太南山脚树林用暖阳宝玉拔完寒毒；村口遇枯崖山万家的白衣少年万小山，对方自来熟求同行；一路套问境界/寿元/散修与世家；万小山报出自己的家当把韩立听得脸白；少年抛通音符，怪坡白雾裂开一条小路。此处韩立尚不知身上令牌是升仙令——那是第141章《青溪笔录》才揭出的事）',
+      title: '太南山下 · 怪坡',
+      zones: [
+        // 地面排第一：先铺实色土色，再往上放雾与树；漏了它就会透出别的地图的装饰和战斗圈
+        { kind: 'ground', x: -340, y: -440, w: 680, h: 886, speed: 0.92, name: '村口土路' },
+        { kind: 'mist',   x: -340, y: -440, w: 680, h: 232, name: '远景雾带' },
+        { kind: 'hut',    x: -300, y: -128, w: 150, h: 96,  block: true, name: '村口农舍' },
+        { kind: 'pine',   x: -300, y: 12,   w: 168, h: 224, speed: 0.86, name: '村口松林' },
+        { kind: 'pine',   x: -120, y: -168, w: 190, h: 158, speed: 0.88, name: '北去松林' },
+        { kind: 'mist',   x: 26,   y: -300, w: 300, h: 290, name: '怪坡白雾' },
+        { kind: 'herb',   x: -84,  y: 62,   w: 74,  h: 34,  name: '路边野草' },
+        { kind: 'stele',  x: -196, y: 104,  w: 22,  h: 42,  block: true, name: '村口界石' }
+      ],
+      actors: [
+        // 韩立：开场盘坐在树下拔毒（meditate 自带下沉，动作收了他自己会站起来）
+        { id: 'hanli', x: -76, y: 8, dir: 1, spr: 'hanli', scale: 1.7, show: true },
+        // 万小山：ch126「身穿白衣的十五六岁少年」，比韩立矮半个头，从村口方向跑来
+        { id: 'wanshanxiao', x: -206, y: 26, dir: 1, spr: 'wanshanxiao', scale: 1.48, show: false }
+      ],
+      steps: [
+        { t: 'weather', kind: 'clear', speed: 1, label: '太南山脚的午后' },
+        { t: 'prop', who: 'hanli', n: 'warmjade', hand: 1, s: 1.15, label: '暖阳宝玉贴在丹田' },
+        { t: 'act', who: 'hanli', anim: 'meditate', dir: 1, dur: 2.2, label: '盘坐树下拔寒毒' },
+        { t: 'say', li: [0], label: '往北那片坡常年罩雾' },
+        { t: 'say', li: [1], label: '毒拔干净了' },
+        { t: 'prop', who: 'hanli', n: null, label: '把宝玉贴身收好' },
+        { t: 'walk', who: 'hanli', to: [-40, 12], speed: 52, dur: 1.6, label: '起身往村口走' },
+        { t: 'actor', who: 'wanshanxiao', show: true, x: -206, y: 26, dir: 1, label: '村口冒出一个白衣少年' },
+        { t: 'walk', who: 'wanshanxiao', to: [-124, 26], speed: 96, dur: 1.8, label: '少年一溜烟跑过来' },
+        { t: 'act', who: 'wanshanxiao', anim: 'fist', dir: 1, dur: 0.9, label: '自报家门' },
+        { t: 'say', li: [2], label: '白得像刚出匣的瓷人' },
+        { t: 'say', li: [3], label: '枯崖山万家万小山' },
+        { t: 'say', li: [4], label: '他连太南谷在哪儿都不知道' },
+        { t: 'say', li: [5], label: '第一次离家这么远' },
+        { t: 'cam', dx: -14, dy: -4, dur: 0.8, label: '镜头拉近两人' },
+        { t: 'act', who: 'hanli', anim: 'point', dir: 1, dur: 0.9, label: '往北一指' },
+        { t: 'say', li: [6], label: '跟我来吧，我带你走' },
+        { t: 'walk', who: 'hanli', to: [56, 10], speed: 62, dur: 2.4, label: '两人往北走' },
+        { t: 'walk', who: 'wanshanxiao', to: [18, 24], speed: 62, dur: 2.4, label: '少年跟在后头' },
+        { t: 'say', li: [7], label: '一路问，一路答' },
+        { t: 'say', li: [8], label: '筑基就能活两百多岁' },
+        { t: 'say', li: [9], label: '少年掰着手指报家当' },
+        { t: 'say', li: [10], label: '我身上只有两张符' },
+        { t: 'say', li: [11], label: '大哥你脸色怎么这么白' },
+        { t: 'say', li: [12], label: '进谷一定要带东西吗' },
+        { t: 'say', li: [13], label: '那倒没这规定' },
+        { t: 'prop', who: 'wanshanxiao', n: 'talisman', hand: 1, s: 1.1, label: '摸出一张通音符' },
+        { t: 'act', who: 'wanshanxiao', anim: 'throw', dir: 1, dur: 1.0, label: '往空里一抛' },
+        { t: 'prop', who: 'wanshanxiao', n: null, label: '符已离手' },
+        { t: 'cam', dx: 34, dy: -6, dur: 1.0, label: '镜头推向白雾' },
+        { t: 'say', li: [14], label: '一道火光钻进雾中' },
+        { t: 'say', li: [15], label: '通音符' },
+        { t: 'say', li: [16], label: '白雾让出一条小路' },
+        { t: 'act', who: 'hanli', anim: 'fist', dir: 1, dur: 0.8, label: '韩立拱手作别此前的山林' },
+        { t: 'say', li: [17], label: '这就是修仙界' },
+        { t: 'cam', dx: 0, dy: 0, dur: 0.8, label: '镜头拉回' },
+        { t: 'fade', from: 0, to: 1, dur: 0.45, label: '两人走进雾里' }
+      ]
+    },
+    tainan: {
+      canon: '第一卷·入修仙界（第128~129章：迷雾裂开一条小路通往上百亩的谷地，中央是宫殿楼阁与宽阔的青砖广场，散修围着广场摆「回」字形货摊；天暗后青铜灯盏里不放油、托一块拳头大的白石照明；青颜真人一眼看出韩立木属性功法已到第八层；万小山被带回族中长辈处，青颜真人话里暗指韩立是「心术不正的修仙者」）',
+      title: '太南谷 · 青砖广场',
+      tone: 'dusk',
+      zones: [
+        // 广场地面必须排第一：它在 zones 里先画，后面的楼阁 / 摊位才压得上去
+        // 同时兼作速度区：人挤着看货，走不快（speed 只降步速，不挡人）
+        { kind: 'paved', x: -340, y: -250, w: 680, h: 706, speed: 0.94, name: '青砖广场' },
+        { kind: 'house', x: 118,  y: -352, w: 240, h: 186, block: true, name: '谷中楼阁' },
+        { kind: 'house', x: -344, y: -340, w: 190, h: 156, block: true, name: '西侧楼阁' },
+        { kind: 'stonelamp', x: -150, y: -170, w: 132, h: 62, name: '青铜灯盏' },
+        { kind: 'stonelamp', x: 52,   y: -206, w: 132, h: 62, name: '廊下灯盏' },
+        { kind: 'stall',  x: -230, y: 172, w: 92,  h: 56, block: true, name: '散修货摊' },
+        { kind: 'stall',  x: -230, y: 252, w: 92,  h: 56, block: true, name: '散修货摊' },
+        { kind: 'stall',  x: 150,  y: 168, w: 92,  h: 56, block: true, name: '散修货摊' },
+        { kind: 'herb',   x: -60,  y: -120, w: 70, h: 30, name: '阶前花草' }
+      ],
+      actors: [
+        // 起点让开货摊（摊位都在 y>160 的下半场）：人若卡在摊子里，walk 会被 block 判成走不动，整段停在原地
+        { id: 'hanli', x: -198, y: 8, dir: 1, spr: 'hanli', scale: 1.7, show: true },
+        // 万小山与青颜真人：一个白衣少年，一个青衫瘦高老者（脸有青斑），都朝西面向韩立
+        { id: 'wanshanxiao', x: 62, y: 0, dir: -1, spr: 'wanshanxiao', scale: 1.48, show: false },
+        { id: 'qingyan', x: 120, y: -12, dir: -1, spr: 'qingyan', scale: 1.86, show: false },
+        // 广场上的散修：道士、背刀大胡子、带疤少妇 —— 只作背景人气，不给台词
+        { id: 'daoshi', x: -164, y: 178, dir: 1, spr: 'daoshi', scale: 1.5, show: false },
+        { id: 'luosaihu', x: -142, y: 258, dir: 1, spr: 'luosaihu', scale: 1.6, show: false },
+        { id: 'nvxiu', x: -100, y: 300, dir: -1, spr: 'nvxiu', scale: 1.42, show: false }
+      ],
+      steps: [
+        { t: 'weather', kind: 'clear', speed: 1, label: '谷里的傍晚' },
+        { t: 'fade', from: 1, to: 0, dur: 0.5, label: '从雾里走出来' },
+        { t: 'say', li: [0], label: '上百亩的山谷' },
+        { t: 'walk', who: 'hanli', to: [-118, 16], speed: 54, dur: 2.4, label: '韩立走进广场' },
+        { t: 'actor', who: 'daoshi', show: true, label: '摊前站着几个散修' },
+        { t: 'actor', who: 'luosaihu', show: true, label: '背刀大胡子' },
+        { t: 'actor', who: 'nvxiu', show: true, label: '带疤少妇' },
+        { t: 'say', li: [1], label: '这里的人全都是修仙者' },
+        { t: 'say', li: [2], label: '青铜灯盏托着白石' },
+        { t: 'cam', dx: 18, dy: -10, dur: 1.0, label: '镜头抬向灯盏' },
+        { t: 'say', li: [3], label: '灵石原来是这么用的' },
+        { t: 'actor', who: 'wanshanxiao', show: true, x: 74, y: 0, dir: -1, label: '万小山在楼阁前招手' },
+        { t: 'actor', who: 'qingyan', show: true, x: 132, y: -12, dir: -1, label: '身边一位青衫老者' },
+        { t: 'say', li: [4], label: '这边，韩大哥' },
+        { t: 'cam', dx: 22, dy: 0, dur: 0.9, label: '镜头移向楼阁' },
+        { t: 'say', li: [5], label: '少年站在老者身侧' },
+        { t: 'act', who: 'wanshanxiao', anim: 'beckon', dir: -1, dur: 0.9, label: '招手' },
+        { t: 'say', li: [6], label: '青颜真人，与万家是至交' },
+        { t: 'say', li: [7], label: '瘦高、肩宽手长、脸有青斑' },
+        { t: 'act', who: 'qingyan', anim: 'gaze', dir: -1, dur: 1.2, label: '青颜真人只扫了一眼' },
+        { t: 'say', li: [8], label: '第八层' },
+        { t: 'say', li: [9], label: '他只看了一眼' },
+        { t: 'act', who: 'qingyan', anim: 'point', dir: -1, dur: 0.8, label: '转向万小山' },
+        { t: 'say', li: [10], label: '家里几位都来了' },
+        { t: 'say', li: [11], label: '七姐和九哥也来了吧' },
+        { t: 'say', li: [12], label: '你说呢' },
+        { t: 'say', li: [13], label: '当然不行' },
+        { t: 'say', li: [14], label: '话里带刺' },
+        { t: 'act', who: 'hanli', anim: 'fist', dir: 1, dur: 0.9, label: '韩立抱拳告退' },
+        { t: 'say', li: [15], label: '在下先自己转转' },
+        { t: 'walk', who: 'wanshanxiao', to: [176, -18], speed: 44, dur: 2.0, label: '少年被带走' },
+        { t: 'walk', who: 'qingyan', to: [216, -26], speed: 44, dur: 2.0, label: '老者随行' },
+        { t: 'say', li: [16], label: '一路回头' },
+        { t: 'walk', who: 'hanli', to: [-72, 24], speed: 40, dur: 2.0, label: '韩立一个人走向摊位' },
+        { t: 'say', li: [17], label: '不问来路，只问价钱' },
+        { t: 'cam', dx: 0, dy: 0, dur: 0.8, label: '镜头拉回' },
+        { t: 'fade', from: 0, to: 1, dur: 0.45, label: '收场' }
+      ]
+    },
     yelang: {
       canon: '第一卷·七玄门后期（第74~99章：野狼帮围山门、金光上人逞威、韩立反杀得升仙令；落日峰三位师叔、李长老、马荣、蓝衣执法、王门主传令亲信、张袖儿、返乡小妹均在此时出场）',
       title: '七玄门 · 野狼帮之围',
@@ -753,27 +881,43 @@
   function drawTone(w, h) {
     if (!P.tone || P.tone === 'none') return;
     // 版本前缀：改了配色/参数一定换 key，否则旧场调会被缓存一直贴下去
-    var key = 't2:' + P.tone + ':' + w + 'x' + h;
+    var isDusk = P.tone === 'dusk';
+    var key = 't3:' + P.tone + ':' + w + 'x' + h;
     if (key !== toneKey || !toneCv) {
       toneKey = key;
       toneCv = document.createElement('canvas');
       toneCv.width = w; toneCv.height = h;
       var t2 = toneCv.getContext('2d');
       var cx = w / 2, cy = h * 0.56;
-      // 四壁压暗：越靠边越黑，模拟只有一盏盏灯烛照着的封闭石屋
-      // 只压边缘、中心留透：韩立是主画布画的，整屏压暗会把他一起吃掉。
+      // 只压边缘、中心留透：人物要看得清，整屏压暗会把他们一起吃掉。
       var grd = t2.createRadialGradient(cx, cy, Math.min(w, h) * 0.16, cx, cy, Math.max(w, h) * 0.80);
-      grd.addColorStop(0, 'rgba(44,28,16,0)');
-      grd.addColorStop(0.45, 'rgba(38,25,14,.10)');
-      grd.addColorStop(0.78, 'rgba(26,17,10,.40)');
-      grd.addColorStop(1, 'rgba(14,9,6,.66)');
+      if (isDusk) {
+        // 傍晚的广场：天光退了，照明全靠青铜灯盏里的白石（ch129）。
+        // 冷蓝紫压边，中心留一点暖 —— 压得太黑就看不出是「灯火通明」。
+        grd.addColorStop(0, 'rgba(28,32,56,0)');
+        grd.addColorStop(0.45, 'rgba(24,28,52,.14)');
+        grd.addColorStop(0.78, 'rgba(16,19,38,.44)');
+        grd.addColorStop(1, 'rgba(9,11,22,.72)');
+      } else {
+        // 室内：四壁压暗，模拟只有一盏盏灯烛照着的封闭石屋
+        grd.addColorStop(0, 'rgba(44,28,16,0)');
+        grd.addColorStop(0.45, 'rgba(38,25,14,.10)');
+        grd.addColorStop(0.78, 'rgba(26,17,10,.40)');
+        grd.addColorStop(1, 'rgba(14,9,6,.66)');
+      }
       t2.fillStyle = grd;
       t2.fillRect(0, 0, w, h);
-      // 中心暖光：油灯的火色，很轻，只染气氛
+      // 中心光：室内是油灯火色，傍晚是灵石那层冷白，都是很轻的一层气氛
       var warm = t2.createRadialGradient(cx, cy, 8, cx, cy, Math.min(w, h) * 0.42);
-      warm.addColorStop(0, 'rgba(246,192,104,.16)');
-      warm.addColorStop(0.55, 'rgba(232,166,76,.07)');
-      warm.addColorStop(1, 'rgba(226,164,80,0)');
+      if (isDusk) {
+        warm.addColorStop(0, 'rgba(214,226,236,.10)');
+        warm.addColorStop(0.55, 'rgba(176,196,222,.05)');
+        warm.addColorStop(1, 'rgba(160,186,214,0)');
+      } else {
+        warm.addColorStop(0, 'rgba(246,192,104,.16)');
+        warm.addColorStop(0.55, 'rgba(232,166,76,.07)');
+        warm.addColorStop(1, 'rgba(226,164,80,0)');
+      }
       t2.fillStyle = warm;
       t2.fillRect(0, 0, w, h);
     }
@@ -919,21 +1063,23 @@
       c.fillRect(scx - 4, sby + sbh * 0.56, 8, 2);
       c.fillRect(scx - 2, sby + sbh * 0.72, 4, 2);
     } else if (z.kind === 'pine') {
-      // 松树：细直干 + 三层填充的针叶伞。用线画三层会叠成栅栏，必须填充
-      var pnum = Math.max(1, Math.round(z.w / 34));
+      // 松树：细直干 + 三层填充的针叶伞。用线画三层会叠成栅栏，必须填充。
+      // alpha 低于 .35 时在宣纸米底上几乎只剩树干轮廓，看着像一排空心三角，别往下调。
+      var pnum = Math.max(1, Math.round(z.w / 46));
       for (var pi = 0; pi < pnum; pi++) {
         var pcx = x + z.w * (pi + 0.5) / pnum;
         var pph = z.h * (0.72 + (pi % 3) * 0.10);
         var pby = y + z.h;
-        c.globalAlpha = 0.32;
-        c.strokeStyle = 'rgba(52,50,44,.95)';
+        c.globalAlpha = 0.34;
+        c.strokeStyle = 'rgba(46,44,38,.95)';
         c.lineWidth = 1.2;
-        c.beginPath(); c.moveTo(pcx, pby); c.lineTo(pcx, pby - pph); c.stroke();
-        c.globalAlpha = 0.20;
-        c.fillStyle = 'rgba(56,64,50,.95)';
+        // 树干只画到树冠下缘 —— 直接画到树顶会有一根线从三角中间穿出来，像旗杆
+        c.beginPath(); c.moveTo(pcx, pby); c.lineTo(pcx, pby - pph * 0.42); c.stroke();
+        c.globalAlpha = 0.40;
+        c.fillStyle = 'rgba(46,58,44,.95)';
         for (var pl = 0; pl < 3; pl++) {
           var ply = pby - pph + pl * pph * 0.24;
-          var plw = (11 + pl * 7) * (z.w / 130);
+          var plw = (12 + pl * 8) * (z.w / 130);
           c.beginPath();
           c.moveTo(pcx - plw, ply + plw * 0.40);
           c.lineTo(pcx, ply - plw * 0.72);
@@ -959,6 +1105,42 @@
       }
       for (var fx = 0; fx < z.w; fx += 34) {
         c.beginPath(); c.moveTo(x + fx, y); c.lineTo(x + fx, y + z.h); c.stroke();
+      }
+    } else if (z.kind === 'ground') {
+      // 野外实色地面：谷外戏是铺在别的地图上的，地上会透出那张图的枯树 / 山丘 / 战斗圈，
+      // 一层土色压下去才像「村口的地」，而不是「太南小会地图上贴了两个人」。
+      c.globalAlpha = 1;
+      var gg2 = c.createLinearGradient(0, y, 0, y + z.h);
+      gg2.addColorStop(0, 'rgba(150,144,120,1)');
+      gg2.addColorStop(0.55, 'rgba(138,132,108,1)');
+      gg2.addColorStop(1, 'rgba(120,114,94,1)');
+      c.fillStyle = gg2;
+      c.fillRect(x, y, z.w, z.h);
+      // 土色斑驳：固定伪随机（同一 zone 每帧一致，不会闪）
+      c.globalAlpha = 0.09;
+      c.fillStyle = 'rgba(84,74,56,.95)';
+      for (var ci = 0; ci < 46; ci++) {
+        var ccx = x + ((ci * 97) % Math.max(Math.round(z.w), 1));
+        var ccy = y + ((ci * 173) % Math.max(Math.round(z.h), 1));
+        c.beginPath(); c.ellipse(ccx, ccy, 7 + (ci % 4) * 4, 2.6, 0, 0, 6.283); c.fill();
+      }
+    } else if (z.kind === 'paved') {
+      // 青砖广场：太南谷那片上百亩谷地中央的广场（ch128「宽阔的青砖广场」）。
+      // 与室内 floor 的暖石色分开——广场是青灰方砖，一冷一暖，一眼能分出屋里屋外。
+      c.globalAlpha = 1;
+      var pg = c.createLinearGradient(0, y, 0, y + z.h);
+      pg.addColorStop(0, 'rgba(112,120,114,1)');
+      pg.addColorStop(0.5, 'rgba(126,134,126,1)');
+      pg.addColorStop(1, 'rgba(102,110,104,1)');
+      c.fillStyle = pg;
+      c.fillRect(x, y, z.w, z.h);
+      c.globalAlpha = 0.28;
+      c.strokeStyle = 'rgba(56,62,58,.9)';
+      for (var py = 0; py < z.h; py += 30) {
+        c.beginPath(); c.moveTo(x, y + py); c.lineTo(x + z.w, y + py); c.stroke();
+      }
+      for (var pxx = 0; pxx < z.w; pxx += 30) {
+        c.beginPath(); c.moveTo(x + pxx, y); c.lineTo(x + pxx, y + z.h); c.stroke();
       }
     } else if (z.kind === 'table') {
       // 石桌：一条桌面 + 两条腿，侧视才像桌子（不要用 pillar 的椭圆，会像一摊水）
@@ -1014,12 +1196,88 @@
         c.beginPath(); c.arc(lx, ly - 4, 11, 0, 6.283); c.stroke();
         c.globalAlpha = 0.82;
       }
+    } else if (z.kind === 'mist') {
+      // 白雾：太南山北那道「常年不散、伸手不见五指」的怪雾（ch126）。
+      // 只画在人物之下当背景墙 —— 盖到人脸上就成了马赛克，不是雾。
+      // 每条雾带左右用横向渐变收边、上下用正弦起伏；硬边矩形一眼就是贴上去的白纸。
+      for (var mi = 0; mi < 3; mi++) {
+        var my0 = y + z.h * (mi * 0.24);
+        var mh = z.h * 0.38;
+        c.globalAlpha = 0.52 - mi * 0.11;
+        var mgx = c.createLinearGradient(x, 0, x + z.w, 0);
+        mgx.addColorStop(0, 'rgba(240,238,230,0)');
+        mgx.addColorStop(0.20, 'rgba(240,238,230,.96)');
+        mgx.addColorStop(0.80, 'rgba(240,238,230,.96)');
+        mgx.addColorStop(1, 'rgba(240,238,230,0)');
+        c.fillStyle = mgx;
+        c.beginPath();
+        c.moveTo(x, my0 + 14);
+        for (var mx = 0; mx <= z.w; mx += 7) {
+          c.lineTo(x + mx, my0 + 14 + Math.sin((mx / Math.max(z.w, 1)) * 6.283 + mi * 1.7) * 7);
+        }
+        for (var mx2 = z.w; mx2 >= 0; mx2 -= 7) {
+          c.lineTo(x + mx2, my0 + mh - 8 + Math.sin((mx2 / Math.max(z.w, 1)) * 5.1 + mi) * 6);
+        }
+        c.closePath();
+        c.fill();
+      }
+    } else if (z.kind === 'stonelamp') {
+      // 灵石灯：ch129「一米来高的青铜灯盏，盏里不放灯油，托一块拳头大的白石」。
+      // 太南小会夜里那片广场全靠它照亮，是这场戏最认得出的一件布景。
+      var sln = Math.max(1, Math.round(z.w / 62));
+      for (var si = 0; si < sln; si++) {
+        var scx = x + z.w * (si + 0.5) / sln;
+        var shy = y + z.h;
+        c.globalAlpha = 0.9;
+        // 柱身
+        c.strokeStyle = 'rgba(96,86,66,.95)';
+        c.beginPath(); c.moveTo(scx, shy); c.lineTo(scx, shy - z.h * 0.72); c.stroke();
+        // 底座与盏口
+        c.beginPath(); c.moveTo(scx - 6, shy); c.lineTo(scx + 6, shy); c.stroke();
+        c.beginPath(); c.moveTo(scx - 5, shy - z.h * 0.72); c.lineTo(scx + 5, shy - z.h * 0.72); c.stroke();
+        // 白石
+        c.fillStyle = 'rgba(246,244,232,.96)';
+        c.beginPath(); c.arc(scx, shy - z.h * 0.86, 4.2, 0, 6.283); c.fill();
+        // 光
+        c.globalAlpha = 0.30;
+        var lg = c.createRadialGradient(scx, shy - z.h * 0.86, 2, scx, shy - z.h * 0.86, 22);
+        lg.addColorStop(0, 'rgba(252,246,216,.85)');
+        lg.addColorStop(1, 'rgba(252,246,216,0)');
+        c.fillStyle = lg;
+        c.beginPath(); c.arc(scx, shy - z.h * 0.86, 22, 0, 6.283); c.fill();
+        c.globalAlpha = 0.9;
+      }
+    } else if (z.kind === 'stall') {
+      // 散修货摊：一张矮桌 + 摊布 + 桌上几件小物 + 一支挑杆（ch128「像小商贩一样摆起小货摊」）
+      var stw = z.w;
+      c.globalAlpha = 0.9;
+      c.strokeStyle = 'rgba(104,88,66,.95)';
+      // 挑杆与横杆
+      c.beginPath(); c.moveTo(x + 2, y + z.h); c.lineTo(x + 2, y - 22); c.stroke();
+      c.beginPath(); c.moveTo(x + 2, y - 22); c.lineTo(x + stw - 4, y - 16); c.stroke();
+      // 桌面
+      c.fillStyle = 'rgba(150,126,96,.9)';
+      c.beginPath(); c.rect(x + 3, y + z.h - 12, stw - 8, 5); c.fill(); c.stroke();
+      // 桌腿
+      c.beginPath(); c.moveTo(x + 7, y + z.h - 7); c.lineTo(x + 7, y + z.h); c.stroke();
+      c.beginPath(); c.moveTo(x + stw - 9, y + z.h - 7); c.lineTo(x + stw - 9, y + z.h); c.stroke();
+      // 摊布（垂在前面的一道浅色）
+      c.globalAlpha = 0.34;
+      c.fillStyle = 'rgba(214,200,172,.95)';
+      c.beginPath(); c.rect(x + 4, y + z.h - 8, stw - 10, 7); c.fill();
+      // 桌上小物：三只小方件，高低错开
+      c.globalAlpha = 0.86;
+      c.fillStyle = 'rgba(196,178,132,.95)';
+      for (var sti = 0; sti < 3; sti++) {
+        var stx = x + 10 + sti * (stw - 24) / 3;
+        c.beginPath(); c.rect(stx, y + z.h - 19 - (sti % 2) * 3, 7, 7 + (sti % 2) * 3); c.fill(); c.stroke();
+      }
     }
     c.restore();
   }
 
   // 需要压低身体的动作：剪影整体下沉，动作线才不会飘在半空
-  var ACT_DROP = { kneel: 7, fall: 13, herb: 8, dig: 5, sit: 11 };
+  var ACT_DROP = { kneel: 7, fall: 13, herb: 8, dig: 5, sit: 11, meditate: 11 };
 
   function drawProps(g) {
     if (!P.props || !P.props.length) return;
@@ -1283,6 +1541,23 @@
       ctx.fillStyle = 'rgba(172,134,90,.92)';
       ctx.beginPath(); ctx.rect(-2.1, -11.6, 4.2, 2.6); ctx.fill();
     },
+    warmjade: function (t) {        // 暖阳宝玉：ch126「青色美玉，纯净无暇，玉中深处隐隐透出几丝红光」
+      var wg = 0.34 + Math.abs(Math.sin(t * 1.8)) * 0.2;
+      ctx.fillStyle = 'rgba(122,188,170,.92)';
+      ctx.strokeStyle = 'rgba(84,148,134,.96)';
+      ctx.beginPath();
+      ctx.moveTo(0, -9); ctx.lineTo(4.6, -4.4); ctx.lineTo(3.4, 2.2); ctx.lineTo(-3.4, 2.2); ctx.lineTo(-4.6, -4.4);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // 玉里那几丝红光 —— 认这块玉全靠它
+      ctx.globalAlpha *= wg;
+      ctx.strokeStyle = 'rgba(238,110,88,.95)';
+      ctx.beginPath();
+      ctx.moveTo(-1.6, -5.2); ctx.lineTo(0.7, -1.8); ctx.lineTo(-0.5, 1.4);
+      ctx.stroke();
+      ctx.globalAlpha *= 0.55;
+      ctx.strokeStyle = 'rgba(154,210,194,.9)';
+      ctx.beginPath(); ctx.arc(0, -3.4, 7.6, 0, 6.283); ctx.stroke();
+    },
     lamp: function (t) {            // 油灯：小盏 + 豆大火苗
       var f = 0.72 + Math.abs(Math.sin(t * 5.2)) * 0.28;
       ctx.strokeStyle = 'rgba(160,150,128,.9)';
@@ -1412,6 +1687,28 @@
       ctx.globalAlpha *= .5;
       ctx.strokeStyle = 'rgba(198,120,110,.9)';
       ctx.beginPath(); ctx.moveTo(x + dir * 12, ty + 3 + Math.sin(k * 5) * .5); ctx.lineTo(x + dir * 17, ty + 2); ctx.stroke();
+    },
+    meditate: function (x, y, dir, k) {      // 盘膝打坐：双手抱物贴丹田，气息一缕缕往上走
+      var dy = y - 9;
+      ctx.beginPath(); ctx.moveTo(x - 6, y - 13); ctx.lineTo(x - 2, dy); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x + 6, y - 13); ctx.lineTo(x + 2, dy); ctx.stroke();
+      // 掌间那件物事的微光（贴丹田来回滚动，不是悬在空中的光环）
+      ctx.globalAlpha *= .48 + Math.abs(Math.sin(k * 3.1)) * .26;
+      ctx.beginPath(); ctx.arc(x, dy, 2.6, 0, 6.283); ctx.stroke();
+      // 气息：三道短弧，右高左低往上散
+      ctx.globalAlpha *= .5;
+      for (var mi2 = 0; mi2 < 3; mi2++) {
+        ctx.beginPath();
+        ctx.arc(x + Math.sin(mi2 * 2.1 + k * 2) * 3, y - 19 - mi2 * 6 - k * 3, 3.4, 3.34, 5.50);
+        ctx.stroke();
+      }
+    },
+    gaze: function (x, y, dir, k) {          // 审视：二指点在眉心，前方浮一道探视弧
+      var ex = x + dir * 3, ey = y - 22;
+      ctx.beginPath(); ctx.moveTo(x + dir * 8, y - 14); ctx.lineTo(ex, ey); ctx.stroke();
+      ctx.beginPath(); ctx.arc(ex, ey, 1.8, 0, 6.283); ctx.fill();
+      ctx.globalAlpha *= .42;
+      ctx.beginPath(); ctx.arc(x + dir * 15, y - 19, 5 + k * 3, -0.95, 0.95); ctx.stroke();
     },
     palm: function (x, y, dir, k) {         // 掌风：推掌 + 前方气环
       var px = x + dir * (11 + k * 6), py = y - 20;
@@ -1738,8 +2035,11 @@
       weather: null, fade: 0, clock: 0,
       // 场调：indoor 会把整屏压成暖褐暗场 + 中心灯烛光，室内戏才不像站在野地里
       tone: st.tone || '',
-      // 场调场景地面是实色的，会盖住主画布画的主角 —— 这类场景由本层自己画韩立
-      drawHero: !!st.tone,
+      // 实色地面（floor 室内石砖 / paved 青砖广场）会整块盖住主画布画的主角，
+      // 只留一个淡影 —— 凡是铺了实色地面的段落，韩立都交回本层自己画。
+      drawHero: !!(st.tone || (st.zones || []).some(function (z) {
+        return z.kind === 'floor' || z.kind === 'paved' || z.kind === 'ground';
+      })),
       i: 0, stepT: 0, active: true, finished: null,
       onDone: onDone || null,
       replay: !!opts.replay,
