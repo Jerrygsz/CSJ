@@ -319,6 +319,37 @@
           cam:{ z:[1.18,1.00], x:[-2,0], y:[-2,0] } }
       ]
     },
+    // 嘉元城·潇湘院：与 jiayuan / mofu 同一次进城的第三场。同样只作登记 / 兜底，
+    // 真实玩家与洞府回顾都由 StoryStage 走 xiaoxiang 段（回顾列表按 CUTSCENES 的键枚举）。
+    xiaoxiang: {
+      title: '卷二 · 潇湘院', sub: '小厮 · 笑魂散', seal: '夺帮',
+      shots: [
+        { id:0, t:0,     dur:2.6, kind:'chapter', scene:'hut', fx:'unroll',
+          cam:{ z:[1.00,1.05], x:[0,2], y:[0,0] }, label:'卷二 · 潇湘院' },
+        { id:1, t:2.6,   dur:3.0, scene:'hut', actors:[['hanli','L'],['sunergou','R']], fx:'ink', li: 1,
+          cam:{ z:[1.05,1.12], x:[2,0], y:[0,-4] } },
+        { id:2, t:5.6,   dur:3.0, scene:'hut', actors:[['hanli','L'],['quhun','R'],['sunergou','R']], fx:'dim', li: 4,
+          cam:{ z:[1.12,1.16], x:[0,2], y:[-4,-2] } },
+        { id:3, t:8.6,   dur:3.2, scene:'gate', actors:[['hanli','L']], fx:'ink', li: 7,
+          cam:{ z:[1.16,1.20], x:[2,0], y:[-2,-4] } },
+        { id:4, t:11.8,  dur:3.2, scene:'hut', actors:[['shenzhongshan','R'],['xiaojinzhi','R'],['qianjin','R']], fx:'dim', li: 8,
+          cam:{ z:[1.20,1.24], x:[0,2], y:[-4,-6] } },
+        { id:5, t:15.0,  dur:3.0, scene:'hut', actors:[['hanli','L'],['qianjin','R'],['shensan','R']], fx:'ink', li: 17,
+          cam:{ z:[1.24,1.18], x:[2,0], y:[-6,-2] } },
+        { id:6, t:18.0,  dur:3.0, scene:'hut', actors:[['hanli','L'],['shensan','R'],['fanju','R']], fx:'dim', li: 22,
+          cam:{ z:[1.18,1.22], x:[0,2], y:[-2,-4] } },
+        { id:7, t:21.0,  dur:3.2, scene:'hut', actors:[['hanli','L'],['qianjin','R']], fx:'ink', li: 28,
+          cam:{ z:[1.22,1.26], x:[2,4], y:[-4,-6] } },
+        { id:8, t:24.2,  dur:3.0, scene:'hill', actors:[['hanli','L']], fx:'seal', li: 33,
+          cam:{ z:[1.26,1.20], x:[4,2], y:[-6,-2] } },
+        { id:9, t:27.2,  dur:3.4, scene:'hut', actors:[['qianjin','R'],['shenzhongshan','R']], fx:'dim', li: 35,
+          cam:{ z:[1.20,1.26], x:[2,0], y:[-2,-6] } },
+        { id:10, t:30.6, dur:3.2, scene:'hut', actors:[['hanli','L']], fx:'ink', li: 43,
+          cam:{ z:[1.26,1.22], x:[0,-2], y:[-6,-2] } },
+        { id:11, t:33.8, dur:3.4, scene:'gate', actors:[['sunergou','L'],['quhun','R']], fx:'roll', li: 47,
+          cam:{ z:[1.22,1.00], x:[-2,0], y:[-2,0] } }
+      ]
+    },
     // 野狼帮之围：七玄门后期人物在战斗地图当群众演员；这里只作剧目登记 / 旧插画兜底，
     // 真实玩家与洞府回顾都由 StoryStage 分流到主画布层（见 game.js replayStoryLive）。
     yelang: {

@@ -71,7 +71,7 @@ const stories = sandbox.window.MAP_STORIES;
 const stages = sandbox.window.StoryStage.stages();
 const DATA = {};
 console.log('\n== 2. 原著剧情与地形数据 ==');
-for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'wagang', 'tainan', 'jiayuan', 'mofu', 'yelang', 'xuesestory']) {
+for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'wagang', 'tainan', 'jiayuan', 'mofu', 'xiaoxiang', 'yelang', 'xuesestory']) {
   const st = stages[id];
   DATA[id] = st;
   const li = st.steps.filter(s => s.t === 'say').reduce((a, s) => a.concat(s.li || []), []);
@@ -284,6 +284,61 @@ for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'wagang', 'tainan', '
     const mfCams = st.steps.filter(s => s.t === 'cam');
     ok(mfCams.some(s => (s.dx || 0) >= 800),
        '有一拍 cam 把机位从后院搬到小楼内室（dx ≥ 800）', mfCams.map(s => s.dx));
+  } else if (id === 'xiaoxiang') {
+    const spr = st.actors.map(a => a.spr);
+    ok(['hanli','shenzhongshan','xiaojinzhi','qianjin','fanju','shensan'].every(x => spr.includes(x)),
+       '潇湘院六人到场：韩立 / 沈重山 / 小金芝 / 钱进 / 范沮 / 沈三', spr);
+    ok(['pei1','pei2','pei3'].every(x => st.actors.some(a => a.id === x)),
+       '三大护法身边各有一名陪酒女子（ch121 原话「怀内都有一位面貌姣好的女子坐陪着」）', null);
+    ok(kinds.includes('floor') && kinds.includes('table') && kinds.includes('chair')
+       && kinds.includes('screen') && kinds.includes('candle') && kinds.includes('lamp'),
+       '包房用 floor 石砖 + table 矮桌 + chair 交椅 + screen 折屏 + candle 红烛 + lamp 灯烛', kinds);
+    ok(kinds.includes('paved') && kinds.includes('post'),
+       '檐下是青砖 + 檐柱（人要站在屋外等那一盏茶的工夫）', kinds);
+    const txt = (stories.xiaoxiang || []).map(l => l[1]).join('');
+    ok(/全杀了就是/.test(txt) && /引魂钟/.test(txt) && /曲魂/.test(txt),
+       '定计那一截必须有「全杀了就是」、曲魂与引魂钟（ch120 原话）', null);
+    ok(/李二/.test(txt), '冒名顶替的由头是替「李二」跑腿（ch122 原话，不是「小六子」之类自造）', null);
+    ok(/笑魂散/.test(txt) && /清灵散/.test(txt),
+       '毒是笑魂散、韩立事先吃过清灵散（ch122）', null);
+    ok(/王嬷嬷/.test(txt), '小金芝抬出王嬷嬷挡驾（ch121 原话）', null);
+    ok(/数百口人/.test(txt), '小金芝那句「潇湘院上上下下数百口人」，不是「几十人」', null);
+    // 考据红线：本段只该是四平帮与天霸门的事，不能把欧阳飞天 / 墨府的人和这一场搅在一起
+    ok(!/欧阳飞天/.test(txt) && !/墨彩环/.test(txt) && !/严氏/.test(txt),
+       '潇湘院这一场不得混入欧阳飞天 / 墨彩环 / 严氏（那是墨府那一段的人物）', null);
+    // 五人说话：少一个，包房里那场「试吃」的推诿就立不住
+    const who = new Set((stories.xiaoxiang || []).map(l => l[0]));
+    ok(['钱进','范沮','小金芝','沈重山','沈三','韩立','孙二狗'].every(x => who.has(x)),
+       '七个说话人到齐（孙二狗只在客栈与收场露面）', [...who]);
+    // 时序红线：先试吃、再毒发；先钱进、再沈重山；范沮与沈三最后冲到门口才倒
+    const idxOf = (pred) => st.steps.findIndex(pred);
+    const drink = idxOf(s => s.t === 'act' && s.anim === 'drink');
+    const writhe = idxOf(s => s.t === 'act' && s.anim === 'writhe');
+    const qFall = idxOf(s => s.t === 'actor' && s.who === 'qianjin' && s.rot != null);
+    const sFall = idxOf(s => s.t === 'actor' && s.who === 'shenzhongshan' && s.rot != null);
+    const fFall = idxOf(s => s.t === 'actor' && s.who === 'fanju' && s.rot != null);
+    ok(drink > 0 && writhe > drink, '先当着满屋人的面喝下那杯酒，毒发才在门后发生', { drink, writhe });
+    ok(qFall > writhe && sFall > qFall, '钱进喝得最多先倒，沈重山第二个倒（ch122 原话顺序）', { qFall, sFall });
+    ok(fFall > sFall, '范沮与沈三要到门口才滑倒 —— 不能跟钱进一起倒', { fFall, sFall });
+    // 镜头红线：包房 / 檐下 / 正堂分别在世界坐标 x≈1500 / 2300 / 3190，
+    // 三处都得有 cam 把机位搬过去，否则整段演在画外（jiayuan / mofu 都栽过这一跤）
+    const xxCams = st.steps.filter(s => s.t === 'cam').map(s => s.dx || 0);
+    ok(xxCams.filter(v => v >= 800).length >= 3,
+       '机位分别搬到包房 / 檐下 / 正堂（≥800 的 cam 至少三拍）', xxCams);
+    ok(xxCams.indexOf(0) < 0, '第一场客栈就在开演机位上，不需要 dx:0 的归位拍（原地不动才对）', xxCams);
+    // 檐下与包房之间是来回剪的：出屋、剪回屋里看毒发、再剪回檐下、再进屋察看
+    let cut = 0, last = null;
+    for (const s of st.steps) {
+      if (s.t !== 'cam') continue;
+      const v = s.dx || 0;
+      if (last != null && Math.abs(v - last) > 400) cut++;
+      last = v;
+    }
+    ok(cut >= 3, '包房与檐下之间至少三次大跨度切镜（出屋 / 看毒发 / 回檐下 / 再进屋）', cut);
+    ok(st.steps.some(s => s.t === 'prop' && s.n === 'tray')
+       && st.steps.some(s => s.t === 'prop' && s.n === 'flagon')
+       && st.steps.some(s => s.t === 'prop' && s.n === 'silver'),
+       '托盘 / 酒壶 / 二两银子三件道具都要真上场（不是只登记在 PROPS 里）', null);
   }
 }
 
@@ -323,7 +378,7 @@ ok(propNames.includes('vial'), '溪边道具齐备：小白玉瓶（装抽髓丸
 
 // 剧情里用到的道具必须都在库里，不能写个空气名字
 const usedProps = [];
-for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'wagang', 'tainan', 'jiayuan', 'mofu', 'yelang', 'xuesestory']) {
+for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'wagang', 'tainan', 'jiayuan', 'mofu', 'xiaoxiang', 'yelang', 'xuesestory']) {
   for (const s of (sandbox.window.StoryStage.steps(id) || [])) {
     if (s.t === 'prop' && s.n) usedProps.push(s.n);
   }
@@ -647,9 +702,9 @@ ok(W1.first === W1.want, '谷内开场白逐字同源 MAP_STORIES.tainan[0]', { 
 await page.evaluate(() => window.__FR.storyStageSkip());
 await page.waitForTimeout(120);
 
-// 嘉元城：码头 jiayuan → 墨府 mofu 的链式。story 分支同样不走 showLines 通道，
-// 只有真进图才验得到「先在码头收服孙二狗、再进墨府谈条件、中间不跳回战斗」这条路径。
-console.log('\n== 4e. 嘉元城两场链式（码头 jiayuan → 墨府 mofu）==');
+// 嘉元城：码头 jiayuan → 墨府 mofu → 潇湘院 xiaoxiang 的链式。story 分支同样不走 showLines 通道，
+// 只有真进图才验得到「先在码头收服孙二狗、再进墨府谈条件、最后去潇湘院毒杀沈重山，中间不跳回战斗」这条路径。
+console.log('\n== 4e. 嘉元城三场链式（码头 jiayuan → 墨府 mofu → 潇湘院 xiaoxiang）==');
 const J0 = await page.evaluate(async () => {
   const F = window.__FR;
   F.clearProgress(); F.unlockAll();
@@ -690,8 +745,36 @@ const J1 = await page.evaluate(async () => {
   };
 });
 ok(J1.s && J1.s.active && J1.s.mapId === 'mofu',
-   '码头收场后链式接上墨府（同一次进城的后半场，中间不跳回战斗）', J1.s);
+   '码头收场后链式接上墨府（同一次进城的第二场，中间不跳回战斗）', J1.s);
 ok(J1.got === J1.want, '墨府开场白逐字同源 MAP_STORIES.mofu[0]', { got: J1.got, want: J1.want });
+
+// 第三场：墨府散场后必须接着演潇湘院。这一截最容易漏 —— 只改 game.js 的链式不做断言的话，
+// 墨府演完直接进战斗，孙二狗从脚夫变帮主就没人讲了。
+const J1b = await page.evaluate(async () => {
+  const F = window.__FR;
+  for (let i = 0; i < 2400; i++) {
+    const s = F.storyStage();
+    if (!s || !s.active || s.mapId === 'xiaoxiang') break;
+    if (s.kind === 'say') F.advanceDialog();
+    else F.storyStageTick(0.05);
+    await new Promise(r => setTimeout(r, 0));
+  }
+  await new Promise(r => setTimeout(r, 60));
+  for (let i = 0; i < 80; i++) {
+    const s = F.storyStage();
+    if (!s || !s.active || s.kind === 'say') break;
+    F.storyStageTick(0.05);
+    await new Promise(r => setTimeout(r, 0));
+  }
+  return {
+    s: F.storyStage(),
+    got: document.getElementById('dialogText').textContent,
+    want: window.MAP_STORIES.xiaoxiang[0][1]
+  };
+});
+ok(J1b.s && J1b.s.active && J1b.s.mapId === 'xiaoxiang',
+   '墨府收场后链式接上潇湘院（第三场，毒杀沈重山那一夜的前半）', J1b.s);
+ok(J1b.got === J1b.want, '潇湘院开场白逐字同源 MAP_STORIES.xiaoxiang[0]', { got: J1b.got, want: J1b.want });
 
 await page.evaluate(() => window.__FR.storyStageSkip());
 await page.waitForTimeout(180);

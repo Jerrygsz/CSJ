@@ -530,7 +530,7 @@
         { kind: 'wall',   x: 660,  y: -520, w: 620, h: 150,  name: '内室里墙' },
         { kind: 'lamp',   x: 726,  y: -300, w: 150, h: 90,  name: '满屋灯烛' },
         { kind: 'rack',   x: 712,  y: -190, w: 92,  h: 126, block: true, name: '药架' },
-        { kind: 'screen', x: 1092, y: -320, w: 124, h: 210, block: true, name: '绢面折屏' },
+        { kind: 'screen', x: 1092, y: -72,  w: 124, h: 72,  block: true, name: '绢面折屏' },
         { kind: 'table',  x: 812,  y: -46,  w: 116, h: 36,  block: true, name: '案几' },
         // 白日点着的那一对白蜡烛 —— 迷药千人醉就藏在蜡芯里（ch116）
         { kind: 'candle', x: 838,  y: -60,  w: 72,  h: 44,  name: '白蜡烛' },
@@ -600,6 +600,229 @@
         { t: 'say', li: [26], label: '吴剑鸣就是欧阳飞天派来的' },
         { t: 'act', who: 'hanli', anim: 'fist', dir: -1, dur: 0.9, label: '韩立抱拳应下' },
         { t: 'say', li: [27], label: '备一匹好马，再备一副画像' },
+        { t: 'fade', from: 0, to: 1, dur: 0.5, label: '收场' }
+      ]
+    },
+    xiaoxiang: {
+      canon: '第二卷·嘉元城（第119~122章：孙二狗打探到沈重山每日下午必去西城潇湘院；韩立一句「全杀了就是」定下夺帮之计，'
+        + '把曲魂与引魂钟交给孙二狗，又放云翅鸟盯着他；韩立扮作替李二跑腿的小厮，捧托盘送酒菜进包房，'
+        + '飞刀沈三起疑，毒秀才范沮献计「让此人试吃」，黑胖子钱进最先毒发、沈重山第二、范沮与沈三冲到门口才滑倒；'
+        + '次日四平帮落在孙二狗身上）',
+      title: '嘉元城 · 潇湘院',
+      // 五场里没有一处露天：客栈客房、潇湘院后廊、包房、檐下、四平帮正堂。
+      // 全部按 indoor 压暗，既省掉野外亮土色，也让「檐下等毒发」那一段自然读成傍晚。
+      tone: 'indoor',
+      zones: [
+        /* ── 一·客栈客房 ── */
+        // 折屏与床都按「落地」摆：screen / bed 的 y 是顶边、往下画到 y+h，
+        // 挂在 y=-330 的话整架屏就漂在人头顶，实拍读成三扇高窗。
+        { kind: 'floor', x: -300, y: -520, w: 620, h: 1040, name: '客栈客房' },
+        { kind: 'wall',  x: -320, y: -520, w: 660, h: 150, block: true, name: '客栈里墙' },
+        { kind: 'bed',   x: -236, y: -40,  w: 126, h: 100,  name: '客栈木床' },
+        { kind: 'screen', x: -96, y: -66,  w: 96,  h: 66,   block: true, name: '客房折屏' },
+        { kind: 'table', x: 100,  y: -18,  w: 112, h: 34,   block: true, name: '客房方桌' },
+        // 桌上那盏油灯：客房只有一盏灯，人是就着这一点光在说事
+        { kind: 'candle', x: 118, y: -56,  w: 72,  h: 38,   name: '桌上油灯' },
+        { kind: 'lamp',  x: 10,   y: -330, w: 140, h: 90,   name: '客房灯烛' },
+        /* ── 二·潇湘院后廊 ── */
+        // 木廊比外头的青砖平整，走起来略快一档（speed 是行速修正，不是视差）
+        { kind: 'floor',  x: 600,  y: -520, w: 520, h: 1040, speed: 1.05, name: '潇湘院后廊' },
+        { kind: 'wall',   x: 580,  y: -520, w: 560, h: 170,  block: true, name: '后廊花墙' },
+        { kind: 'lamp',   x: 620,  y: -320, w: 140, h: 90,   name: '廊下灯笼' },
+        { kind: 'post',   x: 1072, y: -330, w: 20,  h: 330,  name: '后廊廊柱' },
+        /* ── 三·包房 ── */
+        { kind: 'floor',  x: 1500, y: -520, w: 500, h: 1040, name: '潇湘院包房' },
+        { kind: 'wall',   x: 1480, y: -520, w: 540, h: 170,  block: true, name: '包房里墙' },
+        { kind: 'table',  x: 1660, y: -22,  w: 116, h: 36,   block: true, name: '酒菜矮桌' },
+        // 交椅：沈重山整场都是坐着的，靠椅面挡掉他下半身
+        { kind: 'chair',  x: 1636, y: -6,   w: 40,  h: 14,   name: '主位交椅' },
+        { kind: 'lamp',   x: 1520, y: -330, w: 150, h: 95,   name: '满屋灯烛' },
+        { kind: 'candle', x: 1704, y: -64,  w: 72,  h: 42,   name: '桌上红烛' },
+        // 折屏摆在主位背后：青楼包房的主位后头一定有一架屏，摆到右沿会被画框切掉半架
+        { kind: 'screen', x: 1594, y: -68,  w: 100, h: 68,   block: true, name: '主位后折屏' },
+        /* ── 四·檐下 ── */
+        { kind: 'paved',  x: 2300, y: -520, w: 520, h: 1040, name: '潇湘院檐下青砖' },
+        { kind: 'wall',   x: 2280, y: -520, w: 560, h: 190,  block: true, name: '潇湘院楼墙' },
+        { kind: 'post',   x: 2320, y: -340, w: 20,  h: 340,  name: '檐柱' },
+        { kind: 'post',   x: 2704, y: -340, w: 20,  h: 340,  name: '檐柱' },
+        // 灯笼挂在门边：人退出来就站在这一点光下面，画面里才有「谁在等」
+        { kind: 'lamp',   x: 2396, y: -320, w: 140, h: 90,   name: '檐下灯笼' },
+        /* ── 五·四平帮正堂 ── */
+        { kind: 'floor',  x: 3190, y: -520, w: 520, h: 1040, name: '四平帮正堂' },
+        { kind: 'wall',   x: 3170, y: -520, w: 560, h: 180,  block: true, name: '正堂后壁' },
+        { kind: 'chair',  x: 3362, y: -6,   w: 44,  h: 16,   name: '帮主大椅' },
+        { kind: 'table',  x: 3226, y: -20,  w: 110, h: 34,   block: true, name: '堂前长案' },
+        { kind: 'lamp',   x: 3210, y: -330, w: 150, h: 95,   name: '堂上灯烛' },
+        // 堂口该有兵器架：四平帮是打出来的帮会，一面空墙不像话
+        { kind: 'rack',   x: 3478, y: -250, w: 90,  h: 122,  block: true, name: '堂上木架' }
+      ],
+      actors: [
+        { id: 'hanli', x: -66, y: 24, dir: 1, spr: 'hanli', scale: 1.70, show: true },
+        { id: 'sunergou', x: 30, y: 26, dir: -1, spr: 'sunergou', scale: 1.60, show: true },
+        { id: 'quhun', x: 190, y: 30, dir: -1, spr: 'quhun', scale: 2.06, show: false },
+        // 包房里一共八个人：沈重山与三大护法各拥一名女子，加上门口的小厮。
+        // 间距压到 40~50px，靠「一男一女错开半个身位」把座位关系画出来。
+        { id: 'shenzhongshan', x: 1650, y: 6,  dir: -1, spr: 'shenzhongshan', scale: 1.96, show: false },
+        { id: 'xiaojinzhi',    x: 1672, y: 10, dir: -1, spr: 'xiaojinzhi',    scale: 1.56, show: false },
+        { id: 'qianjin',       x: 1730, y: 30, dir: -1, spr: 'qianjin',       scale: 1.74, show: false },
+        { id: 'fanju',         x: 1798, y: 4,  dir: -1, spr: 'fanju',         scale: 1.64, show: false },
+        { id: 'shensan',       x: 1866, y: 28, dir: -1, spr: 'shensan',       scale: 1.66, show: false },
+        { id: 'pei1', x: 1752, y: 54, dir: -1, spr: 'peijiu1', scale: 1.44, show: false },
+        { id: 'pei2', x: 1822, y: 52, dir: -1, spr: 'peijiu2', scale: 1.42, show: false },
+        { id: 'pei3', x: 1890, y: 56, dir: -1, spr: 'peijiu1', scale: 1.40, show: false }
+      ],
+      steps: [
+        { t: 'weather', kind: 'clear', speed: 1, label: '客栈客房 · 定计' },
+        { t: 'say', li: [0], label: '孙二狗一条条报消息' },
+        { t: 'say', li: [1], label: '想不想做帮主' },
+        { t: 'act', who: 'sunergou', anim: 'wipe', dir: 1, dur: 1.0, label: '孙二狗擦汗' },
+        { t: 'say', li: [2], label: '莫要戏耍小人' },
+        { t: 'act', who: 'hanli', anim: 'point', dir: 1, dur: 0.9, label: '韩立轻描淡写' },
+        { t: 'say', li: [3], label: '全杀了就是' },
+        { t: 'act', who: 'hanli', anim: 'point', dir: 1, dur: 0.8, label: '把曲魂派给你' },
+        { t: 'say', li: [4], label: '让曲魂处理干净' },
+        { t: 'act', who: 'hanli', anim: 'point', dir: 1, dur: 0.7, label: '三下轻敲隔壁' },
+        { t: 'actor', who: 'quhun', show: true, label: '隔壁的曲魂走出来' },
+        { t: 'prop', who: 'hanli', n: 'token7', hand: 1, s: 1.15, label: '掏出引魂钟' },
+        { t: 'act', who: 'hanli', anim: 'give', dir: 1, dur: 0.9, label: '把引魂钟交给孙二狗' },
+        { t: 'prop', who: 'hanli', n: null, label: '引魂钟脱手' },
+        { t: 'prop', who: 'sunergou', n: 'token7', hand: 1, s: 1.0, label: '孙二狗贴身收好' },
+        { t: 'say', li: [5], label: '铁奴从此听他的号令' },
+        // 换场：客栈 → 潇湘院。中间隔着半座城，不做长距离走路。
+        { t: 'fade', from: 0, to: 1, dur: 0.5, label: '关了屋门' },
+        { t: 'actor', who: 'sunergou', show: false, label: '' },
+        { t: 'actor', who: 'quhun', show: false, label: '' },
+        { t: 'prop', who: 'sunergou', n: null, label: '' },
+        { t: 'actor', who: 'hanli', x: 720, y: 24, dir: 1, label: '韩立换了小厮衣裳' },
+        { t: 'prop', who: 'hanli', n: 'tray', hand: 1, s: 1.0, label: '捧起一副托盘' },
+        { t: 'cam', dx: 850, dy: -8, dur: 0.2, label: '镜头交到潇湘院后廊' },
+        { t: 'fade', from: 1, to: 0, dur: 0.5, label: '后廊' },
+        { t: 'say', li: [6], label: '沈重山每日下午都来' },
+        { t: 'say', li: [7], label: '天霸门的产业' },
+        { t: 'walk', who: 'hanli', to: [900, 22], speed: 52, dur: 2.0, label: '端着托盘走到包房门口' },
+        // 换场：廊里 → 包房内。门一开，八个人一并亮相。
+        { t: 'fade', from: 0, to: 1, dur: 0.4, label: '门里' },
+        { t: 'actor', who: 'hanli', x: 1560, y: 22, dir: 1, label: '韩立立在门口' },
+        { t: 'actor', who: 'shenzhongshan', show: true, label: '沈重山拥着小金芝' },
+        { t: 'actor', who: 'xiaojinzhi', show: true, label: '头牌小金芝' },
+        { t: 'actor', who: 'qianjin', show: true, label: '黑胖子钱进' },
+        { t: 'actor', who: 'fanju', show: true, label: '毒秀才范沮' },
+        { t: 'actor', who: 'shensan', show: true, label: '黑衣人沈三' },
+        { t: 'actor', who: 'pei1', show: true, label: '三名陪酒女子' },
+        { t: 'actor', who: 'pei2', show: true, label: '' },
+        { t: 'actor', who: 'pei3', show: true, label: '' },
+        { t: 'cam', dx: 1750, dy: -8, dur: 0.2, label: '镜头进包房' },
+        { t: 'fade', from: 1, to: 0, dur: 0.5, label: '包房里的灯' },
+        { t: 'say', li: [8], label: '钱进劝金芝从了帮主' },
+        { t: 'say', li: [9], label: '范沮算这五天的银子' },
+        { t: 'act', who: 'xiaojinzhi', anim: 'refuse', dir: -1, dur: 0.9, label: '小金芝两眼雾气' },
+        { t: 'say', li: [10], label: '冤枉金芝了' },
+        { t: 'say', li: [11], label: '身子是潇湘院的' },
+        { t: 'say', li: [12], label: '三大护法' },
+        { t: 'say', li: [13], label: '咚咚，敲门' },
+        { t: 'act', who: 'hanli', anim: 'point', dir: 1, dur: 0.8, label: '韩立在门上敲了两下' },
+        { t: 'say', li: [14], label: '钱进问是谁' },
+        { t: 'say', li: [15], label: '送酒水的' },
+        { t: 'say', li: [16], label: '快送进来' },
+        { t: 'walk', who: 'hanli', to: [1620, 22], speed: 46, dur: 1.4, label: '小厮捧托盘进来' },
+        { t: 'say', li: [17], label: '饭菜和两壶酒' },
+        { t: 'act', who: 'qianjin', anim: 'lift', dir: -1, dur: 0.9, label: '钱进一见酒两眼放光' },
+        { t: 'say', li: [18], label: '先尝尝味道' },
+        // 托盘放在桌上：酒壶与菜碟一起落地，之后单独把酒壶递给钱进
+        { t: 'prop', who: 'hanli', n: null, label: '托盘离手' },
+        { t: 'prop', x: 1686, y: -25, n: 'tray', s: 1.0, label: '托盘搁在桌上' },
+        { t: 'prop', x: 1712, y: -17, n: 'cup', s: 1.0, label: '一只酒盅摆在桌上' },
+        { t: 'prop', who: 'qianjin', n: 'flagon', hand: 1, s: 1.05, label: '钱进一把抓起酒壶' },
+        { t: 'act', who: 'shensan', anim: 'point', dir: -1, dur: 0.9, label: '沈三按住刀囊站起来' },
+        { t: 'say', li: [19], label: '慢着，胖子' },
+        { t: 'prop', who: 'qianjin', n: null, label: '酒壶停在半空' },
+        { t: 'say', li: [20], label: '上菜的人不是你' },
+        { t: 'say', li: [21], label: '李二给别的厢房跑腿去了' },
+        { t: 'say', li: [22], label: '金姑娘可认识这人' },
+        { t: 'say', li: [23], label: '看着眼生，可也不稀奇' },
+        { t: 'act', who: 'shenzhongshan', anim: 'taunt', dir: -1, dur: 1.1, label: '沈重山满不在乎' },
+        { t: 'say', li: [24], label: '难道他是杀手不成' },
+        { t: 'say', li: [25], label: '刀口上混饭吃的，小心点好' },
+        { t: 'act', who: 'fanju', anim: 'point', dir: -1, dur: 1.0, label: '范沮冷笑献计' },
+        { t: 'say', li: [26], label: '我有法辨认真伪' },
+        { t: 'say', li: [27], label: '让他全都试吃一口' },
+        { t: 'say', li: [28], label: '喝一口，再吃菜' },
+        // 试吃：一杯酒、几口菜。清灵散压在心里，脸上要哭丧着。
+        { t: 'act', who: 'hanli', anim: 'pour', dir: 1, dur: 1.0, label: '给自己斟了一杯' },
+        { t: 'act', who: 'hanli', anim: 'drink', dir: 1, dur: 0.9, label: '仰头喝下去' },
+        { t: 'say', li: [29], label: '满屋人盯着他' },
+        { t: 'act', who: 'hanli', anim: 'swallow', dir: 1, dur: 1.0, label: '又夹了几口菜' },
+        { t: 'act', who: 'fanju', anim: 'taunt', dir: -1, dur: 1.0, label: '范沮得意' },
+        { t: 'say', li: [30], label: '沈老弟谨慎过头了' },
+        { t: 'act', who: 'shenzhongshan', anim: 'taunt', dir: -1, dur: 0.9, label: '沈重山哈哈大笑' },
+        { t: 'say', li: [31], label: '这锭银子赏你的' },
+        { t: 'prop', who: 'shenzhongshan', n: 'silver', hand: 1, s: 1.2, label: '摸出一块二两银子' },
+        { t: 'act', who: 'shenzhongshan', anim: 'throw', dir: -1, dur: 0.7, label: '扔给小厮' },
+        { t: 'prop', who: 'shenzhongshan', n: null, label: '银子脱手' },
+        { t: 'prop', x: 1608, y: 2, n: 'silver', s: 1.15, label: '银子落在他脚边' },
+        { t: 'act', who: 'hanli', anim: 'bow', dir: 1, dur: 0.9, label: '小厮千恩万谢' },
+        { t: 'say', li: [32], label: '那小的就告退了' },
+        { t: 'walk', who: 'hanli', to: [1544, 22], speed: 44, dur: 1.5, label: '退到门外，顺手带上门' },
+        // 换场：包房 → 檐下。毒发之前，先给一段「什么都不发生」的等待。
+        { t: 'fade', from: 0, to: 1, dur: 0.45, label: '门合上了' },
+        { t: 'actor', who: 'hanli', x: 2480, y: 22, dir: -1, label: '站到屋檐下' },
+        { t: 'cam', dx: 2550, dy: -8, dur: 0.2, label: '镜头交到檐下' },
+        { t: 'fade', from: 1, to: 0, dur: 0.5, label: '檐下的光' },
+        { t: 'say', li: [33], label: '像一截影子似的站着' },
+        { t: 'say', li: [34], label: '一盏茶的功夫' },
+        // 毒发在屋里，人在屋外：镜头剪回包房去拍那四声笑
+        { t: 'fade', from: 0, to: 1, dur: 0.35, label: '屋里' },
+        { t: 'cam', dx: 1750, dy: -8, dur: 0.15, label: '镜头剪回包房' },
+        { t: 'fade', from: 1, to: 0, dur: 0.4, label: '灯下' },
+        { t: 'say', li: [35], label: '钱进先叫起来' },
+        { t: 'act', who: 'qianjin', anim: 'writhe', dir: -1, dur: 1.0, label: '钱进笑得直不起腰' },
+        { t: 'actor', who: 'qianjin', rot: 1.52, y: -30, label: '黑胖子先栽下去' },
+        { t: 'say', li: [36], label: '诡异大笑两声，气息全无' },
+        { t: 'act', who: 'shenzhongshan', anim: 'writhe', dir: -1, dur: 1.0, label: '沈重山惊怒交加' },
+        { t: 'say', li: [37], label: '贱人，竟敢谋害本帮主' },
+        { t: 'actor', who: 'shenzhongshan', rot: -1.50, y: -28, label: '第二个倒地' },
+        { t: 'say', li: [38], label: '干笑两声，栽倒在地' },
+        { t: 'act', who: 'shensan', anim: 'point', dir: -1, dur: 0.8, label: '沈三猛地站起来' },
+        { t: 'say', li: [39], label: '那小厮，是他下的毒' },
+        { t: 'say', li: [40], label: '那小厮，肯定有解药' },
+        { t: 'walk', who: 'shensan', to: [1640, 26], speed: 120, dur: 1.2, label: '两人往门口冲' },
+        // 两人一起冲：只让沈三跑、范沮还坐在原处倒下，就跟旁白「两人…向门口冲去」对不上
+        { t: 'walk', who: 'fanju', to: [1666, 0], speed: 118, dur: 1.2, label: '范沮也扑向门口' },
+        { t: 'act', who: 'fanju', anim: 'fall', dir: -1, dur: 0.8, label: '范沮刚到门边就滑倒' },
+        { t: 'actor', who: 'fanju', rot: 1.44, y: -32, label: '倒在门边' },
+        { t: 'actor', who: 'shensan', rot: 1.48, y: -34, label: '沈三也倒了' },
+        { t: 'say', li: [41], label: '哈哈两声，慢慢滑倒' },
+        // 笑魂散不分男女：ch122「连小金芝和其他三名陪酒的女子，也早已气绝身亡」。
+        // 只让四个男人倒、女子还站着，后面那句旁白就成了瞎话。
+        { t: 'actor', who: 'xiaojinzhi', rot: -1.50, y: -26, label: '小金芝伏在案边' },
+        { t: 'actor', who: 'pei1', rot: 1.50, y: -28, label: '陪酒女子也倒了' },
+        { t: 'actor', who: 'pei2', rot: -1.52, y: -26, label: '' },
+        { t: 'actor', who: 'pei3', rot: 1.48, y: -28, label: '' },
+        // 剪回檐下：韩立把「笑魂散」与「清灵散」这两笔在心里对完
+        { t: 'fade', from: 0, to: 1, dur: 0.35, label: '屋外' },
+        { t: 'cam', dx: 2550, dy: -8, dur: 0.15, label: '镜头剪回檐下' },
+        { t: 'fade', from: 1, to: 0, dur: 0.45, label: '檐下' },
+        { t: 'say', li: [42], label: '一滴入口也必死' },
+        // 再进包房：推门、察看、确认无活口
+        { t: 'fade', from: 0, to: 1, dur: 0.4, label: '推门' },
+        { t: 'actor', who: 'hanli', x: 1546, y: 22, dir: 1, label: '韩立推门进来' },
+        { t: 'cam', dx: 1750, dy: -8, dur: 0.15, label: '镜头跟着进屋' },
+        { t: 'fade', from: 1, to: 0, dur: 0.45, label: '屋里已无一盏活人的灯' },
+        { t: 'walk', who: 'hanli', to: [1616, 22], speed: 40, dur: 1.4, label: '绕过门口的两具尸首' },
+        { t: 'say', li: [43], label: '连小金芝与三名陪酒女子也气绝' },
+        { t: 'say', li: [44], label: '不过是江湖仇杀' },
+        // 换场：次日清晨的四平帮正堂
+        { t: 'fade', from: 0, to: 1, dur: 0.5, label: '一夜过去' },
+        { t: 'actor', who: 'hanli', show: false, label: '' },
+        { t: 'actor', who: 'sunergou', x: 3384, y: 8, dir: 1, show: true, label: '孙二狗坐上主位' },
+        { t: 'actor', who: 'quhun', x: 3436, y: -18, dir: -1, show: true, label: '曲魂立在他背后' },
+        { t: 'cam', dx: 3440, dy: -8, dur: 0.2, label: '镜头交到四平帮正堂' },
+        { t: 'fade', from: 1, to: 0, dur: 0.55, label: '次日清晨' },
+        { t: 'say', li: [45], label: '为那个位子火拼了一夜' },
+        { t: 'say', li: [46], label: '落到一个毫不起眼的小头目身上' },
+        { t: 'act', who: 'sunergou', anim: 'fist', dir: 1, dur: 1.0, label: '孙二狗拍胸脯' },
+        { t: 'say', li: [47], label: '那位见了男女神仙的家伙' },
+        { t: 'say', li: [48], label: '替他把人都处理干净了' },
         { t: 'fade', from: 0, to: 1, dur: 0.5, label: '收场' }
       ]
     },
@@ -1291,6 +1514,30 @@
       c.fillRect(x - 4, y + z.h - 10, z.w + 8, 10);
     } else if (z.kind === 'pillar') {
       c.fillStyle = 'rgba(32,28,24,.55)'; c.beginPath(); c.ellipse(x + z.w / 2, y + z.h / 2, z.w / 2, z.h / 2, 0, 0, 6.283); c.fill(); c.stroke();
+    } else if (z.kind === 'post') {
+      // 廊柱：柱础 + 柱身 + 柱头。用 pillar 的椭圆当柱子是不行的 —— 那是个竖着的灰眼睛，
+      // 立在檐下像飘着一枚瓜子；柱子必须有础有顶，才在画面里「落地」。
+      var pcx = x + z.w / 2, pw = Math.max(7, z.w * 0.62);
+      c.globalAlpha = 0.9;
+      // 柱础
+      c.fillStyle = 'rgba(96,92,84,.95)';
+      c.strokeStyle = 'rgba(32,28,24,.9)';
+      c.beginPath(); c.rect(pcx - pw * 0.95, y + z.h - 6, pw * 1.9, 6); c.fill(); c.stroke();
+      // 柱身：一根竖向木柱，左缘一道亮、右缘一道暗，才有圆柱的转折
+      c.fillStyle = 'rgba(126,92,58,1)';
+      c.fillRect(pcx - pw / 2, y + 8, pw, z.h - 14);
+      c.strokeRect(pcx - pw / 2, y + 8, pw, z.h - 14);
+      c.globalAlpha = 0.34;
+      c.fillStyle = 'rgba(214,176,124,1)';
+      c.fillRect(pcx - pw / 2 + 1, y + 9, 2, z.h - 16);
+      c.globalAlpha = 0.4;
+      c.fillStyle = 'rgba(42,32,22,1)';
+      c.fillRect(pcx + pw / 2 - 2.5, y + 9, 2, z.h - 16);
+      // 柱头
+      c.globalAlpha = 0.9;
+      c.fillStyle = 'rgba(142,104,66,1)';
+      c.fillRect(pcx - pw * 0.8, y + 2, pw * 1.6, 7);
+      c.strokeRect(pcx - pw * 0.8, y + 2, pw * 1.6, 7);
     } else if (z.kind === 'stele') {
       // 断碑：石座 + 碑身 + 崩口 + 刻痕。pillar 的椭圆立在地上像一面镜子，当碑不能用
       var scx = x + z.w / 2, sbw = z.w * 0.66, sby = y + z.h * 0.10, sbh = z.h * 0.90;
@@ -1452,15 +1699,22 @@
       c.globalAlpha = 0.94;
       c.fillStyle = 'rgba(102,76,48,1)';
       c.strokeStyle = 'rgba(30,22,14,.9)';
-      c.fillRect(x, y, z.w, 7); c.strokeRect(x, y, z.w, 7);
-      // 桌沿一道暗：桌面才有厚度，不然是一条贴上去的横线
-      c.globalAlpha = 0.45;
+      c.fillRect(x, y, z.w, 9); c.strokeRect(x, y, z.w, 9);
+      // 桌面一道高光 + 下沿一道暗：桌子才有厚度，不然是一条贴上去的横线
+      c.globalAlpha = 0.32;
+      c.fillStyle = 'rgba(186,148,98,1)';
+      c.fillRect(x + 1, y + 1, z.w - 2, 1.6);
+      c.globalAlpha = 0.5;
       c.fillStyle = 'rgba(30,22,14,1)';
-      c.fillRect(x, y + 6, z.w, 2);
+      c.fillRect(x, y + 8, z.w, 2);
+      // 桌牙：两腿之间那道横撑。省掉它，腿就像两根钉子钉在桌面底下
+      c.globalAlpha = 0.72;
+      c.fillStyle = 'rgba(86,62,38,1)';
+      c.fillRect(x + 6, y + 10, z.w - 12, 3);
       c.globalAlpha = 0.92;
       c.beginPath();
-      c.moveTo(x + 6, y + 8); c.lineTo(x + 6, y + z.h);
-      c.moveTo(x + z.w - 6, y + 8); c.lineTo(x + z.w - 6, y + z.h);
+      c.moveTo(x + 6, y + 10); c.lineTo(x + 6, y + z.h);
+      c.moveTo(x + z.w - 6, y + 10); c.lineTo(x + z.w - 6, y + z.h);
       c.stroke();
       // 桌上一只药碗
       c.globalAlpha = 0.6;
@@ -1771,9 +2025,14 @@
         c.beginPath(); c.ellipse(cdx2, cdb, 7.5, 2.6, 0, 0, 6.283); c.fill(); c.stroke();
         c.fillStyle = 'rgba(246,208,122,.95)';
         c.beginPath(); c.ellipse(cdx2, cdb - z.h * 0.80, 1.8, 4, 0, 0, 6.283); c.fill();
-        c.globalAlpha = 0.26;
-        c.fillStyle = 'rgba(250,224,154,.9)';
-        c.beginPath(); c.arc(cdx2, cdb - z.h * 0.78, 15, 0, 6.283); c.fill();
+        // 光晕走径向渐变：一版是纯色圆片，两支蜡烛并排就成了两个白气球挂在墙上
+        var cgl2 = c.createRadialGradient(cdx2, cdb - z.h * 0.78, 1, cdx2, cdb - z.h * 0.78, 21);
+        cgl2.addColorStop(0, 'rgba(250,226,158,.40)');
+        cgl2.addColorStop(0.5, 'rgba(248,218,146,.15)');
+        cgl2.addColorStop(1, 'rgba(246,214,140,0)');
+        c.globalAlpha = 0.72;
+        c.fillStyle = cgl2;
+        c.beginPath(); c.arc(cdx2, cdb - z.h * 0.78, 21, 0, 6.283); c.fill();
       }
     }
     c.restore();
@@ -1990,6 +2249,70 @@
       ctx.closePath(); ctx.fill(); ctx.stroke();
       ctx.globalAlpha *= .6;
       ctx.beginPath(); ctx.moveTo(-5, -1); ctx.lineTo(6, -5); ctx.stroke();
+    },
+    // 托盘：ch121「双手捧着托盘，上面装有一些饭菜和两壶酒」。
+    // 第一版把壶画成两个空心椭圆，实拍读成了首饰盒里的两只镯子 —— 壶必须是实心的，
+    // 有颈有嘴；托盘本身要有厚边，才不像一条搁在桌上的浅色木条。
+    tray: function (t) {
+      // 一坑：浅木盘 + 两只深色壶，缩到十来像素就读成「一副眼镜」。
+      // 反过来 —— 深木盘、浅瓷壶：亮的东西浮在暗底上，才数得出两壶一碟。
+      ctx.fillStyle = 'rgba(66,44,26,.96)';
+      ctx.strokeStyle = 'rgba(150,112,68,.9)';
+      ctx.beginPath(); ctx.rect(-14, -5.5, 28, 6.5); ctx.fill(); ctx.stroke();
+      ctx.globalAlpha *= .85;
+      ctx.fillStyle = 'rgba(176,138,90,.85)';
+      ctx.fillRect(-13, 0, 26, 1.2);
+      ctx.globalAlpha /= .85;
+      // 两只酒壶：浅青瓷，壶身 + 短颈 + 斜嘴
+      for (var i = 0; i < 2; i++) {
+        var bx = -8 + i * 7;
+        ctx.fillStyle = 'rgba(206,212,206,.98)';
+        ctx.strokeStyle = 'rgba(34,30,26,.92)';
+        ctx.beginPath(); ctx.ellipse(bx, -10, 2.7, 3.8, 0, 0, 6.283); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = 'rgba(228,232,224,.98)';
+        ctx.beginPath(); ctx.rect(bx - 1, -15, 2, 3.4); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(bx + 2, -13.4); ctx.lineTo(bx + 4.6, -15.2); ctx.stroke();
+      }
+      // 一碟菜与一只小碗：右半边，同样是浅色浮在暗盘上
+      ctx.fillStyle = 'rgba(216,210,192,.95)';
+      ctx.strokeStyle = 'rgba(34,30,26,.85)';
+      ctx.beginPath(); ctx.ellipse(6.2, -7.6, 4.4, 1.8, 0, 0, 6.283); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = 'rgba(120,88,52,.95)';
+      ctx.beginPath(); ctx.ellipse(6.2, -8, 2.4, 0.9, 0, 0, 6.283); ctx.fill();
+      ctx.fillStyle = 'rgba(212,206,188,.95)';
+      ctx.strokeStyle = 'rgba(34,30,26,.85)';
+      ctx.beginPath(); ctx.arc(10.8, -6.8, 2.4, 0, Math.PI); ctx.fill(); ctx.stroke();
+    },
+    // 酒壶：试吃那一拍要单独递到嘴边，所以它得能脱离托盘拿在手上
+    flagon: function (t) {
+      ctx.fillStyle = 'rgba(98,104,112,.82)';
+      ctx.strokeStyle = 'rgba(178,184,192,.96)';
+      ctx.beginPath(); ctx.ellipse(0, -7, 4.6, 6, 0, 0, 6.283); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-1.6, -12); ctx.lineTo(-1.6, -15); ctx.lineTo(1.6, -15); ctx.lineTo(1.6, -12); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(4, -10); ctx.lineTo(8, -14); ctx.stroke();
+      ctx.globalAlpha *= .55;
+      ctx.beginPath(); ctx.arc(-1.4, -8, 2.2, -1.2, 1.2); ctx.stroke();
+    },
+    // 酒盅：喝过一口就搁在桌上，个头要小，不能和药碗混
+    cup: function (t) {
+      ctx.fillStyle = 'rgba(212,206,188,.42)';
+      ctx.strokeStyle = 'rgba(226,220,202,.96)';
+      ctx.beginPath();
+      ctx.moveTo(-3.4, -7); ctx.lineTo(3.4, -7); ctx.lineTo(2.4, -2.6); ctx.lineTo(-2.4, -2.6);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    },
+    // 银子：ch122「摸出一块二两重的银子」—— 腰形锭，和「金砖」的斜梯形分开认
+    silver: function () {
+      ctx.fillStyle = 'rgba(206,210,216,.5)';
+      ctx.strokeStyle = 'rgba(228,232,238,.98)';
+      ctx.beginPath();
+      ctx.moveTo(-6, -2); ctx.quadraticCurveTo(-3, -7, 0, -6);
+      ctx.quadraticCurveTo(3, -7, 6, -2);
+      ctx.quadraticCurveTo(3, 1, 0, 0);
+      ctx.quadraticCurveTo(-3, 1, -6, -2);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.globalAlpha *= .5;
+      ctx.beginPath(); ctx.moveTo(-3, -3.4); ctx.lineTo(3, -3.4); ctx.stroke();
     },
     map: function (t) {             // 禁地舆图：展开卷轴 + 折线
       var w2 = 10 + Math.abs(Math.sin(t * 1.4)) * 2;
@@ -2350,7 +2673,10 @@
       ctx.beginPath(); ctx.ellipse(x - 14, y - 9 + bob, 4, 3, 0, 0, 6.283); ctx.stroke();
       ctx.beginPath(); ctx.ellipse(x + 14, y - 9 + bob, 4, 3, 0, 0, 6.283); ctx.stroke();
     },
-    wipe: function (x, y, dir, k) {         // 抹汗：手从额角带下来      var e = ease(k);
+    // 抹汗：手从额角带下来。注意本行不能把 var e 写在 // 后面 —— 它会被整行注释吃掉，
+    // 一调用就 ReferenceError（潇湘院那段孙二狗擦汗才第一次真的用到这一式）。
+    wipe: function (x, y, dir, k) {
+      var e = ease(k);
       var wx = x + dir * (4 + e * 8), wy = y - 27 + e * 6;
       ctx.beginPath(); ctx.moveTo(x + dir * 2, y - 15); ctx.lineTo(wx, wy); ctx.stroke();
       ctx.globalAlpha *= .45;

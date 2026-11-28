@@ -50,13 +50,25 @@ const shots = [
   // 「严氏坐在椅上」那一拍还在黑场里（前一步是 fade 到全黑，后一步才亮灯），
   // 要拍的是灯亮之后、几位夫人都在屋里的那一刻
   ['mofu', '两只戒指的龙纹严丝合缝', 0.35, 'mofu-wives'],
-  ['mofu', '指尖腾起一团火球', 0.55, 'mofu-flame']
+  ['mofu', '指尖腾起一团火球', 0.55, 'mofu-flame'],
+  // 第三场潇湘院：五处场区各自要拍一张，否则「机位没搬过去」这类空场景看不出来
+  ['xiaoxiang', '把引魂钟交给孙二狗', 0.45, 'xiao-hostel'],
+  ['xiaoxiang', '饭菜和两壶酒', 0.40, 'xiao-tray'],
+  ['xiaoxiang', '沈三按住刀囊站起来', 0.50, 'xiao-shensan'],
+  ['xiaoxiang', '仰头喝下去', 0.45, 'xiao-taste'],
+  ['xiaoxiang', '银子落在他脚边', 0.40, 'xiao-silver'],
+  ['xiaoxiang', '像一截影子似的站着', 0.45, 'xiao-eaves'],
+  ['xiaoxiang', '钱进笑得直不起腰', 0.45, 'xiao-poison'],
+  ['xiaoxiang', '连小金芝与三名陪酒女子也气绝', 0.40, 'xiao-check'],
+  // 正堂那一拍别停在 fade 上：「孙二狗坐上主位」是零时长的 actor 步，紧跟着一拍才亮灯，
+  // 用零时长步当机位会拍出一张半黑的图 —— 换成灯亮之后那句台词
+  ['xiaoxiang', '那位见了男女神仙的家伙', 0.45, 'xiao-hall']
 ];
 
 const b = await chromium.launch({ channel: 'chrome' });
 const allErrs = [];
 // 剧目 id 与地图 id 不同名时（血色禁地 / 松林小溪 / 墨府小楼），进图要换成能承载它的那张
-const ENTER_MAP = { xuesestory: 'xuese', chuisui: 'houshan', wagang: 'tainan', mofu: 'jiayuan' };
+const ENTER_MAP = { xuesestory: 'xuese', chuisui: 'houshan', wagang: 'tainan', mofu: 'jiayuan', xiaoxiang: 'jiayuan' };
 
 for (const [mapId, label, hold, name] of shots) {
   const page = await b.newPage({ viewport: { width: 480, height: 900 }, deviceScaleFactor: 2 });

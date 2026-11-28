@@ -1919,6 +1919,43 @@
       '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
       '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
     ] },
+    // ── 四平帮（ch120~122，嘉元城西城）──
+    // 沈重山：ch121「手臂、胸膛长满黑毛的大汉，两只胳膊都比普通人要长了一大截，
+    // 整个人看起来如同一个穿着衣裳的人形野兽」。认人靠两样：一是外伸的长臂，
+    // 二是压在肩胸上的那层黑毛（M）—— 只把衣服画深，读出来是个普通的黑大汉。
+    { name: 'shenzhongshan', label: '沈重山', pal: { K, H: '#141210', S: '#9a7452', G: '#5e4c3c', g: '#42352a', B: '#2e2620', M: '#141210' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '..KMSSSSMK..', '.KMGGGGGGMK.', 'KMGgGGGGgGMK', 'KMGgGBBGgGMK', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    // 钱进：ch121「身穿肥大灰衫的黑胖子，腰大如水桶，足有平常人两个那么粗，说完就气喘」。
+    // 胖要胖在骨架上：肩圆、腰外扩到满格、两腿短一截；只把 palette 调深读不出「水桶腰」。
+    { name: 'qianjin', label: '钱进', pal: { K, H: '#211d19', S: '#c69a72', G: '#8b8880', g: '#66645e', B: '#48423a' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '..KKSSSSKK..', '.KGGGGGGGGK.', 'KGGGGGGGGGGK', 'KGGgGGGGgGGK', '.KGGGGGGGGK.',
+      '..KGGBBGGK..', '..KGKKKKGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    // 范沮：「脸上有颗黑痣的中年儒生，双目流露出阴狠之色」。方巾是平顶的，
+    // 那颗痣（M）必须画出来 —— 三人同穿深色时，靠这颗痣和方巾才认得出是「毒秀才」。
+    { name: 'fanju', label: '范沮', pal: { K, H: '#262230', S: '#d6b28c', G: '#586a58', g: '#3d4a3d', B: '#2c2c30', M: '#141216' }, rows: [
+      '...KKKKKK...', '..KHHHHHHK..', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '..KSSMSSSK..', '..KBBBBBBK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    // 沈三：ch121「始终没有开口说话的黑衣人，十八柄飞刀连发的绝技」。
+    // 黑衣不能真给成墨团（和 K 轮廓糊成一块剪影），玄色里掺一档冷灰，腰间刀囊提亮。
+    { name: 'shensan', label: '沈三', pal: { K, H: '#1b1b22', S: '#cdac88', G: '#2c3038', g: '#1e2128', B: '#9aa0a8' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGBBGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    // 小金芝：「潇湘院的头牌，娇艳、丰满、风情万种」。高髻上一支珠花（Y），
+    // 广袖艳红裙；肩头留出皮肤，才不像又一位穿红衣裳的夫人。
+    { name: 'xiaojinzhi', label: '小金芝', pal: { K, H: '#221820', Y: '#d8b24a', S: '#f0cfa8', G: '#b23a54', g: '#8a2438', B: '#e2c9a4' }, rows: [
+      '....KYKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '.KSSGGGGSSK.', 'KGGgGGGGgGGK', 'KGGgGBBGgGGK', '..KGgGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
     // 太南小会 / 黄枫谷（ch126–171）
     // 万小山：ch126「身穿白衣的十五六岁少年」「眉清目秀，皮肤白嫩，养尊处优的世家公子哥」。
     // 白衣在宣纸米底上会糊，靠袍身暗部 g 与深描边 K 撑轮廓，别把 g 也调白。
@@ -2180,6 +2217,19 @@
     { name: 'tiewei', label: '野狼帮铁卫', pal: { K, H: '#1e2026', S: '#c99a72', G: '#a83a2f', g: '#7a2820', B: '#b8bcc4' }, rows: [
       '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KBBBBBBK..', '..KSKSSKSK..',
       '...KBBBBK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    // 潇湘院陪酒女子（ch121「这三人也和沈重山一样，怀内都有一位面貌姣好的女子坐陪着」）。
+    // 名字都没留下，是背景：衣色压得比小金芝淡两档，头面也不给珠花，
+    // 三个人立在头牌边上，一眼看得出谁是「金姑娘」。
+    { name: 'peijiu1', label: '陪酒女子', pal: { K, H: '#2a2430', S: '#e6c6a2', G: '#7a8aa0', g: '#566480', B: '#b0a0b8' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    { name: 'peijiu2', label: '陪酒女子', pal: { K, H: '#2e2226', S: '#ecd0ac', G: '#b08a96', g: '#8a6874', B: '#d8c0a0' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
       '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
     ] }
   ];
