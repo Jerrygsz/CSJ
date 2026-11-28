@@ -383,6 +383,226 @@
         { t: 'fade', from: 0, to: 1, dur: 0.45, label: '收场' }
       ]
     },
+    jiayuan: {
+      canon: '第二卷·嘉元城（第100~103章：韩立与曲魂搭扁叶小舟在岚州嘉元城那个又破又偏的小码头下船；'
+        + '本地规矩是不管东西多少都要出钱雇一名脚夫；西城四平帮的孙二狗与铁拳会的黑熊把这只「肥羊」'
+        + '交给两个脚夫引进黑水巷；曲魂屠尽二十余人，韩立一剑穿了黑熊的喉咙；孙二狗吞下「腐心丸」，'
+        + '被银子与解药两头牵住，从此成了韩立在嘉元城的地头蛇）',
+      title: '嘉元城 · 小码头与黑水巷',
+      zones: [
+        // 兜底土色排第一：小码头与黑水巷分别落在世界坐标的两头，中间不能露出这张图自己的野外地表
+        { kind: 'ground', x: -420, y: -660, w: 1800, h: 1280, speed: 1, name: '城南土路' },
+        // 码头：上面是河，中间一整片木栈，人站在栈上；栈面接近实色，才压得住河水的波纹
+        { kind: 'river',  x: -420, y: -660, w: 860,  h: 400, name: '乡鲁大运河' },
+        // 栈面一直铺到画面下沿：码头下面还给「城南土路」的话，屏幕上就横着一道生硬的接缝
+        { kind: 'dock',   x: -420, y: -260, w: 860,  h: 760, name: '小码头木栈' },
+        { kind: 'shed',   x: -330, y: -252, w: 178, h: 108, block: true, name: '码头竹棚' },
+        { kind: 'shed',   x: 18,   y: -252, w: 178, h: 108, block: true, name: '码头竹棚' },
+        { kind: 'crate',  x: -368, y: -26,  w: 150, h: 40, name: '烂筐破袋' },
+        { kind: 'crate',  x: 210,  y: -12,  w: 118, h: 36, name: '烂筐破袋' },
+        // 黑水巷：两岸高墙夹一条臭巷，人贴着墙根走。墙上墙下都留不得大空 ——
+        // 墙脚离人两百多像素的话，这条「巷子」看着就是一片空场，围杀也没了压迫感。
+        // 巷底铺夯土压石：一层夯土色夹在两道砖墙中间会亮成一条空白的带子，
+        // 满是方砖又会冷成一块板子 —— lane 是「压实的土 + 几块半埋石头」。
+        { kind: 'lane',   x: 620,  y: -120, w: 620, h: 260, name: '黑水巷石街' },
+        { kind: 'wall',   x: 700,  y: -560, w: 520, h: 440, speed: 0.88, name: '巷口高墙' },
+        { kind: 'wall',   x: 700,  y: 140,  w: 520, h: 330, block: true, name: '巷尾石墙' },
+        { kind: 'crate',  x: 756,  y: 104,  w: 150, h: 34, name: '墙根破筐' },
+        { kind: 'stele',  x: 1148, y: -40,  w: 22,  h: 44, block: true, name: '巷尾界石' }
+      ],
+      actors: [
+        { id: 'hanli',    x: -168, y: 44,  dir: 1,  spr: 'hanli',    scale: 1.70, show: true },
+        // 曲魂：ch100「比普通人高出两头还要多的巨汉」，头戴斗篷、绿袍，替韩立背着那个大包
+        { id: 'quhun',    x: -112, y: 56,  dir: 1,  spr: 'quhun',    scale: 2.10, show: true },
+        { id: 'sunergou', x: 40,   y: 26,  dir: -1, spr: 'sunergou', scale: 1.60, show: false },
+        { id: 'heixiong', x: 92,   y: 20,  dir: -1, spr: 'heixiong', scale: 1.86, show: false },
+        { id: 'ku1',      x: -40,  y: 6,   dir: -1, spr: 'kuli',     scale: 1.48, show: false },
+        { id: 'ku2',      x: 0,    y: 40,  dir: -1, spr: 'kuli',     scale: 1.44, show: false },
+        { id: 'th1',      x: 820,  y: -44, dir: 1,  spr: 'bandit',   scale: 1.54, show: false },
+        { id: 'th2',      x: 868,  y: -2,  dir: 1,  spr: 'bandit',   scale: 1.50, show: false },
+        { id: 'th3',      x: 824,  y: 58,  dir: 1,  spr: 'bandit',   scale: 1.56, show: false },
+        { id: 'th4',      x: 878,  y: 26,  dir: 1,  spr: 'bandit',   scale: 1.52, show: false }
+      ],
+      steps: [
+        { t: 'weather', kind: 'clear', speed: 1, label: '岚州城南的小码头' },
+        { t: 'say', li: [0], label: '嘉元城' },
+        { t: 'say', li: [1], label: '三个月路，遗书只有一处' },
+        { t: 'actor', who: 'sunergou', show: true, label: '孙二狗在竹棚下' },
+        { t: 'actor', who: 'heixiong', show: true, label: '对头的黑熊' },
+        { t: 'actor', who: 'ku1', show: true, label: '棚下的脚夫' },
+        { t: 'actor', who: 'ku2', show: true, label: '棚下的脚夫' },
+        { t: 'say', li: [2], label: '破码头与雇脚夫的规矩' },
+        { t: 'act', who: 'hanli', anim: 'beckon', dir: 1, dur: 0.9, label: '招呼脚夫' },
+        { t: 'say', li: [3], label: '我要雇脚夫' },
+        { t: 'say', li: [4], label: '两帮对骂，这趟轮到黑熊的人接' },
+        { t: 'walk', who: 'ku1', to: [10, 18], speed: 84, dur: 1.3, label: '一个汉子跑来抢包裹' },
+        { t: 'say', li: [5], label: '一个人搬不了' },
+        { t: 'act', who: 'ku1', anim: 'carry', dir: -1, dur: 1.2, label: '扛大包，脸涨红' },
+        { t: 'say', li: [6], label: '只好又叫一人，把肥羊引进黑巷' },
+        { t: 'cam', dx: -16, dy: 0, dur: 0.8, label: '镜头跟到巷口' },
+        { t: 'fade', from: 0, to: 1, dur: 0.45, label: '跟着脚夫拐进巷子' },
+        // 换场：黑水巷在世界的另一头，人是被「领过去」的，挪过去再亮灯，不做长距离走路
+        { t: 'actor', who: 'hanli', x: 736, y: 24, dir: 1, label: '韩立被领进黑水巷' },
+        { t: 'actor', who: 'quhun', x: 792, y: 36, dir: 1, label: '曲魂背着大包跟进来' },
+        { t: 'actor', who: 'ku1', x: 868, y: 4, dir: -1, label: '脚夫在前头' },
+        { t: 'actor', who: 'ku2', x: 902, y: 48, dir: -1, label: '另一个脚夫' },
+        { t: 'actor', who: 'sunergou', x: 1010, y: 28, dir: -1, label: '孙二狗堵住巷尾' },
+        { t: 'actor', who: 'heixiong', x: 1074, y: 20, dir: -1, label: '黑熊也在' },
+        { t: 'actor', who: 'th1', show: true, label: '十几条大汉闪出来' },
+        { t: 'actor', who: 'th2', show: true, label: '铁棒尖刀' },
+        { t: 'actor', who: 'th3', show: true, label: '堵住来路' },
+        { t: 'actor', who: 'th4', show: true, label: '一个活口也不打算留' },
+        // 黑水巷在世界坐标的另一头（x≈700~1100），镜头必须跟着搬过去：
+        // cam 的 dx 是相对开演时那台机位的偏移，不离位就整段打斗都发生在画外。
+        // 取景宽度就一屏：机位落点要罩住 688（黑熊摸到背后）到 1010（孙二狗）这一段，
+        // dx 大了黑熊被切在左沿，小了孙二狗跑出右沿。
+        { t: 'cam', dx: 860, dy: -8, dur: 0.3, label: '镜头跟到黑水巷' },
+        { t: 'fade', from: 1, to: 0, dur: 0.45, label: '巷子里的光' },
+        { t: 'say', li: [7], label: '越走越偏' },
+        { t: 'say', li: [8], label: '十几条大汉，一身血腥味' },
+        { t: 'say', li: [9], label: '黑熊：要怪就怪你命不好' },
+        { t: 'say', li: [10], label: '杀了他们，不用留手' },
+        { t: 'walk', who: 'quhun', to: [866, 26], speed: 160, dur: 0.9, label: '曲魂冲进人群' },
+        { t: 'act', who: 'quhun', anim: 'palm', dir: 1, dur: 1.0, label: '一拳打在头颅上' },
+        { t: 'say', li: [11], label: '那人飞出去撞在石墙上' },
+        { t: 'act', who: 'th1', anim: 'fall', dir: -1, dur: 0.7, label: '脑瓜只剩半边' },
+        { t: 'actor', who: 'th1', rot: -1.44, y: -30, label: '倒在墙根' },
+        { t: 'act', who: 'quhun', anim: 'slash', dir: 1, dur: 0.8, label: '左右开弓' },
+        { t: 'act', who: 'th2', anim: 'fall', dir: -1, dur: 0.6, label: '铁棒脱手' },
+        { t: 'actor', who: 'th2', rot: -1.40, y: -52, label: '横飞出去' },
+        { t: 'actor', who: 'th3', show: false, label: '剩下的人不敢上前' },
+        { t: 'actor', who: 'th4', show: false, label: '' },
+        // 黑熊绕到背后 —— 他看准这年轻人才是正主，想挟人质逃命（ch102）
+        { t: 'actor', who: 'heixiong', x: 688, y: 40, dir: 1, label: '黑熊悄悄绕到背后' },
+        { t: 'act', who: 'heixiong', anim: 'palm', dir: 1, dur: 0.9, label: '两只黑毛大手抓过去' },
+        { t: 'say', li: [12], label: '黑熊摸到背后' },
+        { t: 'actor', who: 'hanli', x: 740, y: 18, dir: -1, label: '人忽然不见了' },
+        { t: 'prop', who: 'hanli', n: 'sword', hand: 1, s: 1.05, label: '腰间抽出软剑' },
+        { t: 'act', who: 'hanli', anim: 'thrust', dir: -1, dur: 0.7, label: '一剑穿喉' },
+        { t: 'say', li: [13], label: '剑尖从喉咙处伸出来' },
+        { t: 'act', who: 'heixiong', anim: 'fall', dir: 1, dur: 0.8, label: '血从指缝里冒出来' },
+        { t: 'actor', who: 'heixiong', rot: -1.50, y: -34, label: '瘫倒在地上' },
+        { t: 'prop', who: 'hanli', n: null, label: '收剑' },
+        { t: 'say', li: [14], label: '软剑比刀省事' },
+        { t: 'actor', who: 'quhun', x: 810, y: 30, dir: 1, label: '曲魂抱着肩立定' },
+        { t: 'say', li: [15], label: '二十余人全躺在地上' },
+        { t: 'act', who: 'sunergou', anim: 'kneel', dir: -1, dur: 1.0, label: '孙二狗瘫软下去' },
+        { t: 'say', li: [16], label: '我投降，我通晓大小消息' },
+        { t: 'walk', who: 'hanli', to: [948, 26], speed: 70, dur: 1.6, label: '韩立走到他跟前' },
+        { t: 'say', li: [17], label: '先暂且住手' },
+        { t: 'say', li: [18], label: '一草一木都了如指掌' },
+        { t: 'prop', who: 'hanli', n: 'vial', hand: 1, s: 1.15, label: '从怀里掏出一只瓷瓶' },
+        { t: 'say', li: [19], label: '要么服下它，要么死' },
+        { t: 'prop', who: 'hanli', n: 'pill', hand: 1, s: 1.25, label: '倒出一颗龙眼大的白药丸' },
+        { t: 'act', who: 'hanli', anim: 'give', dir: 1, dur: 0.9, label: '递过去' },
+        { t: 'prop', who: 'hanli', n: null, label: '药丸到了对方手里' },
+        { t: 'say', li: [20], label: '哆嗦了几下，还是吞了' },
+        { t: 'act', who: 'sunergou', anim: 'swallow', dir: 1, dur: 1.0, label: '仰头吞下' },
+        { t: 'say', li: [21], label: '腐心丸，一月一次解药' },
+        { t: 'say', li: [22], label: '不吞是死，吞了还有个盼头' },
+        { t: 'prop', who: 'hanli', n: 'pouch', hand: 1, s: 1.1, label: '甩出一袋碎银' },
+        { t: 'say', li: [23], label: '这里处理干净，明天一早来客栈找我' },
+        { t: 'act', who: 'hanli', anim: 'fist', dir: 1, dur: 0.8, label: '韩立转身出巷' },
+        // 收场直接黑场：不要在这里把镜头一路摇回码头，中间那九百步全是空路，会像幻灯片
+        { t: 'fade', from: 0, to: 1, dur: 0.5, label: '收场' }
+      ]
+    },
+    mofu: {
+      canon: '第二卷·墨府（第108~118章：韩立午夜潜入墨府后院，隔窗听见严氏与墨彩环谈暗舵利银、骂那个冒牌货；'
+        + '投进纹龙戒认亲；次日几位夫人一身缟素——墨居仁那封信里藏着暗信，她们已经知道他死了；'
+        + '一枚火弹露了修仙者的底，蜡烛里的迷药千人醉对清灵散无效；最后谈成只杀一个首脑：欧阳飞天。'
+        + '吴剑鸣是欧阳飞天派来的七弟子，墨府早已识破他在做戏，这是严氏亲口说的）',
+      title: '嘉元城 · 墨府小楼',
+      // 午夜潜入墨府（ch108「夜色里看不清颜色」）：整段都按深夜调压，
+      // 后院的月光与楼里的灯烛才分得开 —— dusk 那点边角压暗是压不住亮土色的。
+      tone: 'night',
+      zones: [
+        { kind: 'ground', x: -420, y: -660, w: 1800, h: 1280, speed: 1, name: '墨府后院' },
+        // 后院：竹林、药圃、老松，主楼在后头压住画面
+        { kind: 'house',  x: -380, y: -430, w: 320, h: 210, block: true, name: '墨府主楼' },
+        { kind: 'bamboo', x: -330, y: -300, w: 190, h: 270, speed: 0.90, name: '后院竹林' },
+        { kind: 'herb',   x: -250, y: -70,  w: 150, h: 40,  name: '后院药圃' },
+        { kind: 'herb',   x: 20,   y: -130, w: 130, h: 36,  name: '后院药圃' },
+        { kind: 'pine',   x: 110,  y: -330, w: 176, h: 226, speed: 0.86, name: '院角老松' },
+        // 小楼内室：实色石砖地压住屋外的院子，家具才像摆在屋里
+        { kind: 'floor',  x: 700,  y: -520, w: 560, h: 1040, name: '小楼二层内室' },
+        // 里墙：屋里不画墙，画面上半截就是一片空地，看不出这是间屋子
+        { kind: 'wall',   x: 660,  y: -520, w: 620, h: 150,  name: '内室里墙' },
+        { kind: 'lamp',   x: 726,  y: -300, w: 150, h: 90,  name: '满屋灯烛' },
+        { kind: 'rack',   x: 712,  y: -190, w: 92,  h: 126, block: true, name: '药架' },
+        { kind: 'screen', x: 1092, y: -320, w: 124, h: 210, block: true, name: '绢面折屏' },
+        { kind: 'table',  x: 812,  y: -46,  w: 116, h: 36,  block: true, name: '案几' },
+        // 白日点着的那一对白蜡烛 —— 迷药千人醉就藏在蜡芯里（ch116）
+        { kind: 'candle', x: 838,  y: -60,  w: 72,  h: 44,  name: '白蜡烛' },
+        // 交椅就摆在严氏脚下：椅面挡掉她下半身，这个「坐着」才算立住
+        { kind: 'chair',  x: 922,  y: -4,   w: 40,  h: 14,  name: '交椅' }
+      ],
+      actors: [
+        { id: 'hanli',     x: -180, y: 24,  dir: 1,  spr: 'hanli',     scale: 1.70, show: true },
+        { id: 'yanfuren',  x: 942,  y: 4,   dir: -1, spr: 'yanfuren',  scale: 1.74, show: false },
+        { id: 'mocaihuan', x: 872,  y: 26,  dir: -1, spr: 'mocaihuan', scale: 1.48, show: false },
+        { id: 'lieru',     x: 1010, y: -8,  dir: -1, spr: 'lieru',     scale: 1.66, show: false },
+        { id: 'liuru',     x: 1046, y: 10,  dir: -1, spr: 'liuru',     scale: 1.68, show: false },
+        { id: 'wangru',    x: 1080, y: 34,  dir: -1, spr: 'wangru',    scale: 1.62, show: false }
+      ],
+      steps: [
+        { t: 'weather', kind: 'clear', speed: 1, label: '墨府后院的半夜' },
+        { t: 'say', li: [0], label: '后院种着罕见花草' },
+        { t: 'walk', who: 'hanli', to: [-96, 18], speed: 48, dur: 1.8, label: '顺着园中小路潜进去' },
+        { t: 'act', who: 'hanli', anim: 'sneak', dir: 1, dur: 1.4, label: '贴着墙根，避开暗哨' },
+        { t: 'say', li: [1], label: '小楼二层还亮着灯' },
+        { t: 'cam', dx: 34, dy: -8, dur: 0.9, label: '镜头抬向小楼' },
+        { t: 'say', li: [2], label: '暗舵解送的银子一个月比一个月少' },
+        { t: 'say', li: [3], label: '那个冒牌货真讨厌' },
+        { t: 'say', li: [4], label: '名义上是你未来姐夫，别让他看出破绽' },
+        { t: 'say', li: [5], label: '墨府早就知道吴剑鸣是假的' },
+        { t: 'say', li: [6], label: '为了争取时间，牺牲你大姐的名誉' },
+        { t: 'prop', who: 'hanli', n: 'ring', hand: 1, s: 1.2, label: '摸出那枚龙形戒指' },
+        { t: 'act', who: 'hanli', anim: 'throw', dir: 1, dur: 0.9, label: '隔着窗纸扔进屋' },
+        { t: 'prop', who: 'hanli', n: null, label: '戒指脱手' },
+        { t: 'say', li: [7], label: '当的一声落在地上' },
+        { t: 'say', li: [8], label: '怎么是枚戒指——和娘你戴的好像' },
+        { t: 'say', li: [9], label: '纹龙戒！' },
+        { t: 'cam', dx: 0, dy: 0, dur: 0.4, label: '镜头归位' },
+        { t: 'say', li: [10], label: '弟子韩立，奉墨师之命' },
+        { t: 'fade', from: 0, to: 1, dur: 0.45, label: '屋门开了' },
+        // 换场：从后院挪到楼内。几位夫人的孝服与妆扮在这里才第一次照面
+        { t: 'actor', who: 'hanli', x: 748, y: 30, dir: 1, label: '韩立进了屋' },
+        { t: 'actor', who: 'yanfuren', show: true, label: '严氏坐在椅上' },
+        { t: 'actor', who: 'mocaihuan', show: true, label: '墨彩环站在她背后' },
+        { t: 'actor', who: 'lieru', show: true, label: '二夫人李氏' },
+        { t: 'actor', who: 'liuru', show: true, label: '三夫人刘氏' },
+        { t: 'actor', who: 'wangru', show: true, label: '五夫人王氏' },
+        { t: 'cam', dx: 920, dy: -8, dur: 0.2, label: '镜头交到屋里' },
+        { t: 'fade', from: 1, to: 0, dur: 0.5, label: '屋里的灯' },
+        { t: 'say', li: [11], label: '两只戒指的龙纹严丝合缝' },
+        { t: 'say', li: [12], label: '信物是真的，亲笔信呢' },
+        { t: 'say', li: [13], label: '次日清晨，一身缟素' },
+        { t: 'act', who: 'yanfuren', anim: 'gaze', dir: -1, dur: 1.1, label: '严氏冷眼看着他' },
+        { t: 'say', li: [14], label: '你胆子很大啊' },
+        { t: 'act', who: 'lieru', anim: 'point', dir: -1, dur: 0.9, label: '李氏再忍不住' },
+        { t: 'say', li: [15], label: '是不是死在你这逆徒手上' },
+        { t: 'say', li: [16], label: '可以说死在我手上，也可以说是自杀的' },
+        { t: 'say', li: [17], label: '我一只手就可以杀个鸡犬不留' },
+        { t: 'act', who: 'hanli', anim: 'flame', dir: -1, dur: 1.3, label: '指尖腾起一团火球' },
+        { t: 'say', li: [18], label: '满屋骤然像进了酷暑' },
+        { t: 'say', li: [19], label: '修仙者！' },
+        { t: 'act', who: 'liuru', anim: 'fall', dir: -1, dur: 0.7, label: '刘氏脸都白了' },
+        { t: 'say', li: [20], label: '这是迷药千人醉' },
+        { t: 'say', li: [21], label: '清灵散事先吃过一颗' },
+        { t: 'say', li: [22], label: '只有好好谈谈了' },
+        { t: 'act', who: 'yanfuren', anim: 'gaze', dir: -1, dur: 1.0, label: '严氏恢复了当家人的神色' },
+        { t: 'say', li: [23], label: '灭了五色门和独霸山庄，宝玉双手奉上' },
+        { t: 'act', who: 'hanli', anim: 'refuse', dir: -1, dur: 0.9, label: '韩立摆手' },
+        { t: 'say', li: [24], label: '只出手一次，只杀一个首脑' },
+        { t: 'act', who: 'yanfuren', anim: 'point', dir: -1, dur: 0.9, label: '严氏点出一个名字' },
+        { t: 'say', li: [25], label: '独霸山庄的庄主，欧阳飞天' },
+        { t: 'say', li: [26], label: '吴剑鸣就是欧阳飞天派来的' },
+        { t: 'act', who: 'hanli', anim: 'fist', dir: -1, dur: 0.9, label: '韩立抱拳应下' },
+        { t: 'say', li: [27], label: '备一匹好马，再备一副画像' },
+        { t: 'fade', from: 0, to: 1, dur: 0.5, label: '收场' }
+      ]
+    },
     yelang: {
       canon: '第一卷·七玄门后期（第74~99章：野狼帮围山门、金光上人逞威、韩立反杀得升仙令；落日峰三位师叔、李长老、马荣、蓝衣执法、王门主传令亲信、张袖儿、返乡小妹均在此时出场）',
       title: '七玄门 · 野狼帮之围',
@@ -882,6 +1102,7 @@
     if (!P.tone || P.tone === 'none') return;
     // 版本前缀：改了配色/参数一定换 key，否则旧场调会被缓存一直贴下去
     var isDusk = P.tone === 'dusk';
+    var isNight = P.tone === 'night';
     var key = 't3:' + P.tone + ':' + w + 'x' + h;
     if (key !== toneKey || !toneCv) {
       toneKey = key;
@@ -891,7 +1112,15 @@
       var cx = w / 2, cy = h * 0.56;
       // 只压边缘、中心留透：人物要看得清，整屏压暗会把他们一起吃掉。
       var grd = t2.createRadialGradient(cx, cy, Math.min(w, h) * 0.16, cx, cy, Math.max(w, h) * 0.80);
-      if (isDusk) {
+      if (isNight) {
+        // 深夜：先整屏压一层冷蓝（地表本来偏亮，只靠边缘晕压不下来），再叠暗角。
+        t2.fillStyle = 'rgba(16,21,40,.34)';
+        t2.fillRect(0, 0, w, h);
+        grd.addColorStop(0, 'rgba(12,16,32,0)');
+        grd.addColorStop(0.42, 'rgba(10,14,28,.26)');
+        grd.addColorStop(0.76, 'rgba(6,9,20,.56)');
+        grd.addColorStop(1, 'rgba(3,4,10,.84)');
+      } else if (isDusk) {
         // 傍晚的广场：天光退了，照明全靠青铜灯盏里的白石（ch129）。
         // 冷蓝紫压边，中心留一点暖 —— 压得太黑就看不出是「灯火通明」。
         grd.addColorStop(0, 'rgba(28,32,56,0)');
@@ -909,9 +1138,10 @@
       t2.fillRect(0, 0, w, h);
       // 中心光：室内是油灯火色，傍晚是灵石那层冷白，都是很轻的一层气氛
       var warm = t2.createRadialGradient(cx, cy, 8, cx, cy, Math.min(w, h) * 0.42);
-      if (isDusk) {
-        warm.addColorStop(0, 'rgba(214,226,236,.10)');
-        warm.addColorStop(0.55, 'rgba(176,196,222,.05)');
+      if (isDusk || isNight) {
+        var cw = isNight ? 0.06 : 0.10;
+        warm.addColorStop(0, 'rgba(214,226,236,' + cw + ')');
+        warm.addColorStop(0.55, 'rgba(176,196,222,' + (cw * 0.5) + ')');
         warm.addColorStop(1, 'rgba(160,186,214,0)');
       } else {
         warm.addColorStop(0, 'rgba(246,192,104,.16)');
@@ -930,8 +1160,11 @@
     if (!g) return;
     var w = P.view.w, h = P.view.h;
     ctx.clearRect(0, 0, w, h);
-    drawTone(w, h);
     drawZones(g);
+    // 场调压在「地面之后、人物之前」：地面是不透明的，场调画在前面会被整片盖掉
+    // （曾经 indoor / dusk 一点效果都没有，就是因为顺序反了）；放在人物之前，
+    // 剪影不被压暗，台上一眼还看得清谁在说话。
+    drawTone(w, h);
     drawProps(g);
     drawActors(g);
     drawWeather(Math.min(w, h));
@@ -972,9 +1205,26 @@
         c.beginPath(); c.moveTo(x + z.w * 0.2, y + z.h * 0.2); c.lineTo(x + z.w * 0.35, y + z.h * 0.8); c.stroke();
       }
     } else if (z.kind === 'wall') {
-      c.fillStyle = 'rgba(30,26,22,.55)'; c.fillRect(x, y, z.w, z.h); c.strokeRect(x, y, z.w, z.h);
-      c.globalAlpha = 0.28;
-      for (var q = 12; q < z.h; q += 18) { c.beginPath(); c.moveTo(x, y + q); c.lineTo(x + z.w, y + q + 4); c.stroke(); }
+      // 高墙：黑水巷两岸、七玄门山门都用这个。整块压暗 + 错缝石砌 + 墙头压顶。
+      // 不描外框 —— 一圈矩形边框看着像木板围栏，不像砖石墙。
+      c.globalAlpha = 0.72;
+      var wgd = c.createLinearGradient(0, y, 0, y + z.h);
+      wgd.addColorStop(0, 'rgba(64,56,48,1)');
+      wgd.addColorStop(1, 'rgba(42,36,30,1)');
+      c.fillStyle = wgd; c.fillRect(x, y, z.w, z.h);
+      c.globalAlpha = 0.24; c.strokeStyle = 'rgba(20,16,12,.9)';
+      var wrow = 0;
+      for (var wy = 0; wy < z.h; wy += 18, wrow++) {
+        c.beginPath(); c.moveTo(x, y + wy); c.lineTo(x + z.w, y + wy); c.stroke();
+        for (var wx = (wrow % 2) * 22; wx < z.w; wx += 44) {
+          c.beginPath(); c.moveTo(x + wx, y + wy); c.lineTo(x + wx, y + wy + 18); c.stroke();
+        }
+      }
+      // 墙头压顶一道略亮的石条，墙脚一道暗影 —— 墙才有「立起来」的高度
+      c.globalAlpha = 0.34; c.fillStyle = 'rgba(148,136,114,.95)';
+      c.fillRect(x, y, z.w, 4);
+      c.globalAlpha = 0.30; c.fillStyle = 'rgba(14,10,8,1)';
+      c.fillRect(x, y + z.h - 5, z.w, 5);
     } else if (z.kind === 'gate') {
       c.globalAlpha = 0.5;
       c.beginPath(); c.moveTo(x - 10, y + z.h); c.lineTo(x + 4, y - 12); c.stroke();
@@ -1098,13 +1348,15 @@
       fg.addColorStop(1, 'rgba(118,102,84,1)');
       c.fillStyle = fg;
       c.fillRect(x, y, z.w, z.h);
-      c.globalAlpha = 0.26;
+      // 砖缝错开画：横竖都拉通就成了一页方格纸，纵横各错开半格才像铺的石砖
+      c.globalAlpha = 0.22;
       c.strokeStyle = 'rgba(56,44,32,.9)';
-      for (var fy = 0; fy < z.h; fy += 22) {
+      var frow = 0;
+      for (var fy = 0; fy < z.h; fy += 22, frow++) {
         c.beginPath(); c.moveTo(x, y + fy); c.lineTo(x + z.w, y + fy); c.stroke();
-      }
-      for (var fx = 0; fx < z.w; fx += 34) {
-        c.beginPath(); c.moveTo(x + fx, y); c.lineTo(x + fx, y + z.h); c.stroke();
+        for (var fx = (frow % 2) * 17; fx < z.w; fx += 34) {
+          c.beginPath(); c.moveTo(x + fx, y + fy); c.lineTo(x + fx, y + fy + 22); c.stroke();
+        }
       }
     } else if (z.kind === 'ground') {
       // 野外实色地面：谷外戏是铺在别的地图上的，地上会透出那张图的枯树 / 山丘 / 战斗圈，
@@ -1116,13 +1368,66 @@
       gg2.addColorStop(1, 'rgba(120,114,94,1)');
       c.fillStyle = gg2;
       c.fillRect(x, y, z.w, z.h);
-      // 土色斑驳：固定伪随机（同一 zone 每帧一致，不会闪）
-      c.globalAlpha = 0.09;
+      // 土色斑驳：固定伪随机（同一 zone 每帧一致，不会闪）。密度得跟着面积走 ——
+      // 固定四十来摊涂在 1800×1280 上等于没涂，整片地就成了一块纯色板。
+      var gn = Math.min(260, Math.max(40, Math.round(z.w * z.h / 11000)));
+      c.globalAlpha = 0.10;
       c.fillStyle = 'rgba(84,74,56,.95)';
-      for (var ci = 0; ci < 46; ci++) {
+      for (var ci = 0; ci < gn; ci++) {
         var ccx = x + ((ci * 97) % Math.max(Math.round(z.w), 1));
         var ccy = y + ((ci * 173) % Math.max(Math.round(z.h), 1));
         c.beginPath(); c.ellipse(ccx, ccy, 7 + (ci % 4) * 4, 2.6, 0, 0, 6.283); c.fill();
+      }
+      // 一层碎石子：更小更亮，压住那片土的空
+      c.globalAlpha = 0.13;
+      c.fillStyle = 'rgba(202,194,170,.95)';
+      for (var gi = 0; gi < gn; gi++) {
+        var gsx = x + ((gi * 211 + 53) % Math.max(Math.round(z.w), 1));
+        var gsy = y + ((gi * 89 + 31) % Math.max(Math.round(z.h), 1));
+        c.beginPath(); c.ellipse(gsx, gsy, 1.6 + (gi % 3), 1.3, 0, 0, 6.283); c.fill();
+      }
+    } else if (z.kind === 'lane') {
+      // 城中小巷的地面（黑水巷 ch101）。夯土压实 + 几块半埋的石头 + 墙根潮气。
+      // 不要铺满方砖：满格青砖夹在两道暖色砖墙中间会亮成一块冷板子，像泳池不像巷子。
+      c.globalAlpha = 1;
+      var lgd = c.createLinearGradient(0, y, 0, y + z.h);
+      lgd.addColorStop(0, 'rgba(100,92,76,1)');
+      lgd.addColorStop(0.5, 'rgba(114,104,86,1)');
+      lgd.addColorStop(1, 'rgba(92,84,70,1)');
+      c.fillStyle = lgd; c.fillRect(x, y, z.w, z.h);
+      // 半埋的石头：手画的不规则边，别用矩形，一水儿方块就又成了砖
+      var ln = Math.max(3, Math.round(z.w / 58));
+      for (var li2 = 0; li2 < ln; li2++) {
+        var lbx = x + ((li2 * 137) % Math.max(1, Math.round(z.w)));
+        var lby = y + ((li2 * 71 + 19) % Math.max(1, Math.round(z.h)));
+        var lbw = 24 + (li2 % 4) * 9, lbh = 10 + (li2 % 3) * 4;
+        c.globalAlpha = 0.34;
+        c.fillStyle = 'rgba(140,142,132,.95)';
+        c.beginPath();
+        c.moveTo(lbx, lby + lbh * 0.24);
+        c.lineTo(lbx + lbw * 0.24, lby);
+        c.lineTo(lbx + lbw * 0.76, lby + lbh * 0.14);
+        c.lineTo(lbx + lbw, lby + lbh * 0.58);
+        c.lineTo(lbx + lbw * 0.68, lby + lbh);
+        c.lineTo(lbx + lbw * 0.16, lby + lbh * 0.82);
+        c.closePath(); c.fill();
+        // 石头下沿一道暗影：不画就是几片贴纸
+        c.globalAlpha = 0.16;
+        c.strokeStyle = 'rgba(40,34,26,.9)';
+        c.beginPath();
+        c.moveTo(lbx + lbw * 0.16, lby + lbh * 0.86);
+        c.lineTo(lbx + lbw * 0.68, lby + lbh + 1.5);
+        c.lineTo(lbx + lbw, lby + lbh * 0.62);
+        c.stroke();
+      }
+      // 潮气：两道横向的水痕，靠中间亮一点，边缘化开
+      c.globalAlpha = 0.10;
+      c.fillStyle = 'rgba(58,62,56,.95)';
+      for (var lw = 0; lw < 2; lw++) {
+        var lwy = y + z.h * (0.36 + lw * 0.26);
+        c.beginPath();
+        c.ellipse(x + z.w * (0.34 + lw * 0.28), lwy, z.w * 0.20, 5.5, 0, 0, 6.283);
+        c.fill();
       }
     } else if (z.kind === 'paved') {
       // 青砖广场：太南谷那片上百亩谷地中央的广场（ch128「宽阔的青砖广场」）。
@@ -1143,18 +1448,23 @@
         c.beginPath(); c.moveTo(x + pxx, y); c.lineTo(x + pxx, y + z.h); c.stroke();
       }
     } else if (z.kind === 'table') {
-      // 石桌：一条桌面 + 两条腿，侧视才像桌子（不要用 pillar 的椭圆，会像一摊水）
-      c.globalAlpha = 0.66;
-      c.fillStyle = 'rgba(116,88,58,.66)';
-      c.strokeStyle = 'rgba(38,30,22,.9)';
+      // 案几：一条实木桌面 + 两条腿，侧视才像桌子（不要用 pillar 的椭圆，会像一摊水）
+      c.globalAlpha = 0.94;
+      c.fillStyle = 'rgba(102,76,48,1)';
+      c.strokeStyle = 'rgba(30,22,14,.9)';
       c.fillRect(x, y, z.w, 7); c.strokeRect(x, y, z.w, 7);
+      // 桌沿一道暗：桌面才有厚度，不然是一条贴上去的横线
+      c.globalAlpha = 0.45;
+      c.fillStyle = 'rgba(30,22,14,1)';
+      c.fillRect(x, y + 6, z.w, 2);
+      c.globalAlpha = 0.92;
       c.beginPath();
-      c.moveTo(x + 6, y + 7); c.lineTo(x + 6, y + z.h);
-      c.moveTo(x + z.w - 6, y + 7); c.lineTo(x + z.w - 6, y + z.h);
+      c.moveTo(x + 6, y + 8); c.lineTo(x + 6, y + z.h);
+      c.moveTo(x + z.w - 6, y + 8); c.lineTo(x + z.w - 6, y + z.h);
       c.stroke();
       // 桌上一只药碗
-      c.globalAlpha = 0.5;
-      c.beginPath(); c.arc(x + z.w * 0.32, y + 2, 3.2, Math.PI, 0); c.stroke();
+      c.globalAlpha = 0.6;
+      c.beginPath(); c.arc(x + z.w * 0.32, y + 1, 3.2, Math.PI, 0); c.stroke();
     } else if (z.kind === 'bed') {
       // 石床：整块石台，一头堆着薄被
       c.globalAlpha = 0.54;
@@ -1167,18 +1477,46 @@
       c.globalAlpha = 0.26;
       c.beginPath(); c.moveTo(x + 9, y + z.h * 0.72); c.lineTo(x + z.w - 9, y + z.h * 0.64); c.stroke();
     } else if (z.kind === 'rack') {
-      // 药架：三层格，摆着一排小瓶
-      c.globalAlpha = 0.60;
-      c.strokeStyle = 'rgba(38,30,22,.85)';
-      c.fillStyle = 'rgba(98,80,58,.50)';
+      // 药架：三层格，摆着一排小瓶。fill 半透会变成一只空心方框，
+      // 架上得有实木色、有厚隔板、瓶子要有瓶颈，才像件家具。
+      c.globalAlpha = 0.92;
+      c.strokeStyle = 'rgba(30,24,18,.9)';
+      c.fillStyle = 'rgba(84,66,46,1)';
       c.fillRect(x, y, z.w, z.h); c.strokeRect(x, y, z.w, z.h);
+      c.fillStyle = 'rgba(118,96,68,1)';
       for (var r = 1; r <= 2; r++) {
-        c.beginPath(); c.moveTo(x, y + z.h * r / 3); c.lineTo(x + z.w, y + z.h * r / 3); c.stroke();
+        c.fillRect(x + 2, y + z.h * r / 3 - 2, z.w - 4, 4);
       }
-      c.fillStyle = 'rgba(200,192,170,.82)';
+      c.fillStyle = 'rgba(200,192,168,.95)';
       for (var p = 0; p < 6; p++) {
-        c.fillRect(x + 8 + p * (z.w - 18) / 5, y + (p % 3) * z.h / 3 + 4, 4, 7);
+        var rpx = x + 8 + p * (z.w - 18) / 5;
+        var rpy = y + (p % 3) * z.h / 3 + 6;
+        c.fillRect(rpx, rpy, 4, 6);
+        c.fillRect(rpx + 1.4, rpy - 2, 1.4, 2);
       }
+    } else if (z.kind === 'chair') {
+      // 交椅：靠背 + 椅面 + 椅腿。靠背要做成「两根立柱 + 一道顶档」的框，
+      // 实心一大块就成床头柜了。椅面顶边压在人身高一半偏下，人站在这个坐标上，
+      // 被椅面挡掉下半身，就读成「坐着」。
+      c.globalAlpha = 0.94;
+      c.strokeStyle = 'rgba(30,22,14,.9)';
+      c.fillStyle = 'rgba(92,68,44,1)';
+      var chb = z.h * 1.7;                    // 靠背高度（在椅面之上）
+      c.fillRect(x + 5, y - chb, 3, chb);
+      c.fillRect(x + z.w - 8, y - chb, 3, chb);
+      c.fillRect(x + 5, y - chb, z.w - 10, 3);
+      // 椅面：一块略厚的板，前沿一道暗
+      c.fillStyle = 'rgba(112,84,54,1)';
+      c.fillRect(x, y, z.w, 5);
+      c.globalAlpha = 0.45;
+      c.fillStyle = 'rgba(30,22,14,1)';
+      c.fillRect(x, y + 4, z.w, 1.6);
+      c.globalAlpha = 0.94;
+      // 四条腿（前后各两条，侧视只看得见前后各一）
+      c.beginPath();
+      c.moveTo(x + 3, y + 5); c.lineTo(x + 2, y + z.h);
+      c.moveTo(x + z.w - 3, y + 5); c.lineTo(x + z.w - 2, y + z.h);
+      c.stroke();
     } else if (z.kind === 'lamp') {
       // 满屋灯烛：一排小盏 + 暖黄火点，室内戏的主要光源
       c.globalAlpha = 0.82;
@@ -1192,8 +1530,12 @@
         c.fillStyle = 'rgba(244,196,104,.95)';
         c.beginPath(); c.ellipse(lx, ly - 4.4, 1.5, 3, 0, 0, 6.283); c.fill();
         c.globalAlpha = 0.34;
-        c.strokeStyle = 'rgba(240,196,112,.9)';
-        c.beginPath(); c.arc(lx, ly - 4, 11, 0, 6.283); c.stroke();
+        // 光用填不用描：一道圆环摆在平面上就是个铁圈，一团晕才像光
+        var lgl = c.createRadialGradient(lx, ly - 4, 1, lx, ly - 4, 15);
+        lgl.addColorStop(0, 'rgba(252,214,142,.55)');
+        lgl.addColorStop(1, 'rgba(252,214,142,0)');
+        c.fillStyle = lgl;
+        c.beginPath(); c.arc(lx, ly - 4, 15, 0, 6.283); c.fill();
         c.globalAlpha = 0.82;
       }
     } else if (z.kind === 'mist') {
@@ -1271,6 +1613,167 @@
       for (var sti = 0; sti < 3; sti++) {
         var stx = x + 10 + sti * (stw - 24) / 3;
         c.beginPath(); c.rect(stx, y + z.h - 19 - (sti % 2) * 3, 7, 7 + (sti % 2) * 3); c.fill(); c.stroke();
+      }
+    } else if (z.kind === 'river') {
+      // 河面：乡鲁大运河从嘉元城城心穿过（ch100）。水面必须接近实色，
+      // 否则这张图自己的野外地表会从水纹缝里透出来，一眼就露馅。
+      c.globalAlpha = 1;
+      var rgd = c.createLinearGradient(0, y, 0, y + z.h);
+      rgd.addColorStop(0, 'rgba(128,146,148,1)');
+      rgd.addColorStop(0.50, 'rgba(110,132,138,1)');
+      rgd.addColorStop(1, 'rgba(92,114,122,1)');
+      c.fillStyle = rgd; c.fillRect(x, y, z.w, z.h);
+      c.strokeStyle = 'rgba(214,228,230,.6)';
+      for (var rv = 12; rv < z.h; rv += 16) {
+        c.globalAlpha = 0.10 + (rv / z.h) * 0.16;
+        c.beginPath();
+        for (var rx = 0; rx <= z.w; rx += 14) {
+          var ryy = y + rv + Math.sin(rx / 26 + rv * 0.7) * 1.7;
+          if (rx === 0) c.moveTo(x + rx, ryy); else c.lineTo(x + rx, ryy);
+        }
+        c.stroke();
+      }
+    } else if (z.kind === 'dock') {
+      // 木栈码头：ch100「整个码头全部都用简易的木板搭制而成，脏乱无比」。
+      // 一坑：相邻两行明暗交替 + 竖缝画实 = 砖墙，人像站在墙上。板子是同一种木料、
+      // 顺着河岸一路铺过去，行与行只差一点点色，靠一道细缝分开，再加沿板长的木纹。
+      c.globalAlpha = 1;
+      var dgd = c.createLinearGradient(0, y, 0, y + z.h);
+      dgd.addColorStop(0, 'rgba(152,130,100,1)');
+      dgd.addColorStop(1, 'rgba(126,106,80,1)');
+      c.fillStyle = dgd; c.fillRect(x, y, z.w, z.h);
+      var prow = 22, pidx = 0;
+      for (var dy2 = 0; dy2 < z.h; dy2 += prow, pidx++) {
+        // 同色系微差（±5%）：只在整块里造一点不匀，不做明暗交替
+        var jt = (((pidx * 37) % 7) / 7) - 0.5;
+        c.globalAlpha = 0.04 + Math.abs(jt) * 0.05;
+        c.fillStyle = jt > 0 ? 'rgba(228,206,170,.9)' : 'rgba(52,38,26,.9)';
+        c.fillRect(x, y + dy2, z.w, prow);
+        // 板缝：细、浅，只落在行脚
+        c.globalAlpha = 0.15;
+        c.strokeStyle = 'rgba(50,38,26,.9)';
+        c.beginPath(); c.moveTo(x, y + dy2); c.lineTo(x + z.w, y + dy2); c.stroke();
+        // 木纹：两道沿板长方向拉开的淡痕，凑近才看得见
+        c.globalAlpha = 0.06;
+        for (var gr2 = 1; gr2 <= 2; gr2++) {
+          var gy2 = y + dy2 + prow * (gr2 / 3) + jt * 2;
+          c.beginPath(); c.moveTo(x, gy2); c.lineTo(x + z.w, gy2); c.stroke();
+        }
+      }
+      // 板头：隔很远才有一道接头，错开半个板宽 —— 只画一短截，不留通长的竖缝
+      c.globalAlpha = 0.12;
+      c.strokeStyle = 'rgba(48,36,24,.9)';
+      for (var dj = 0; dj < z.w; dj += 196) {
+        var drow = (Math.floor(dj / 196) % 2) * prow;
+        c.beginPath(); c.moveTo(x + dj, y + drow); c.lineTo(x + dj, y + drow + prow); c.stroke();
+      }
+      // 靠水那一侧的栈沿与木桩：桩要扎进河里，码头才不像一块铺开的地毯
+      c.globalAlpha = 0.56; c.strokeStyle = 'rgba(70,56,40,.95)';
+      c.beginPath(); c.moveTo(x, y); c.lineTo(x + z.w, y); c.stroke();
+      for (var dp = 14; dp < z.w; dp += 48) {
+        c.beginPath(); c.moveTo(x + dp, y); c.lineTo(x + dp, y - 12); c.stroke();
+      }
+    } else if (z.kind === 'shed') {
+      // 竹棚：ch100「码头上搭建的唯一两座竹棚内，各站着数十名精壮的汉子」。
+      // 只画一个三角形就是一面旗 —— 必须有填充、有檐口厚边、柱子顶到檐下。
+      var rh2 = z.h * 0.40, top2 = y - 14, eave = y + rh2;
+      c.globalAlpha = 0.9;
+      c.strokeStyle = 'rgba(96,80,58,.95)';
+      c.beginPath(); c.moveTo(x + 8, y + z.h); c.lineTo(x + 8, eave); c.stroke();
+      c.beginPath(); c.moveTo(x + z.w - 8, y + z.h); c.lineTo(x + z.w - 8, eave); c.stroke();
+      c.fillStyle = 'rgba(178,154,114,.95)';
+      c.beginPath();
+      c.moveTo(x - 12, eave); c.lineTo(x + z.w / 2, top2);
+      c.lineTo(x + z.w + 12, eave); c.closePath();
+      c.fill(); c.stroke();
+      c.globalAlpha = 0.74;
+      c.fillStyle = 'rgba(146,124,90,.95)';
+      c.beginPath(); c.rect(x - 12, eave, z.w + 24, 5); c.fill(); c.stroke();
+      // 席纹：顺着斜面横压四道
+      c.globalAlpha = 0.22;
+      for (var sh2 = 1; sh2 <= 4; sh2++) {
+        var shp = sh2 / 5;
+        c.beginPath();
+        c.moveTo(x - 12 + (z.w / 2 + 12) * shp, eave + (top2 - eave) * shp);
+        c.lineTo(x + z.w + 12 - (z.w / 2 + 12) * shp, eave + (top2 - eave) * shp);
+        c.stroke();
+      }
+      // 棚下挂的一块破幔
+      c.globalAlpha = 0.20;
+      c.fillStyle = 'rgba(208,194,166,.9)';
+      c.beginPath();
+      c.moveTo(x + 12, eave + 7); c.lineTo(x + z.w * 0.54, eave + 7);
+      c.lineTo(x + z.w * 0.48, eave + 27); c.lineTo(x + 14, eave + 23);
+      c.closePath(); c.fill();
+    } else if (z.kind === 'crate') {
+      // 烂筐破袋：ch100「东一处西一角的堆得到处是烂筐、破袋子」。
+      // 只描一个椭圆边框就是水洼：必须有实底、有敞口的暗、有一道亮起来的筐沿。
+      var crn = Math.max(1, Math.round(z.w / 34));
+      for (var ci3 = 0; ci3 < crn; ci3++) {
+        // 四只里少一只、大小高低再错开：等距等大摆一排，看着像四只碗摆在柜台上
+        if (ci3 % 4 === 3) continue;
+        var ccx2 = x + z.w * (ci3 + 0.5) / crn;
+        var crw = (z.w / (crn * 2.3)) * (0.90 + ((ci3 * 3) % 4) * 0.07);
+        var crh = z.h * (0.66 + (ci3 % 3) * 0.16);
+        var ccy = y + z.h - crh * 0.5 + (((ci3 * 7) % 5) - 2) * 2.4;
+        c.strokeStyle = 'rgba(58,44,30,.9)';
+        // 筐身：实底
+        c.globalAlpha = 0.86;
+        c.fillStyle = 'rgba(152,128,94,1)';
+        c.beginPath(); c.ellipse(ccx2, ccy, crw, crh * 0.5, 0, 0, 6.283);
+        c.fill(); c.stroke();
+        // 敞口的暗：上半个椭圆灌暗色，才有「口是开着的」
+        c.globalAlpha = 0.30;
+        c.fillStyle = 'rgba(40,30,20,1)';
+        c.beginPath(); c.ellipse(ccx2, ccy - crh * 0.14, crw * 0.66, crh * 0.26, 0, 0, 6.283);
+        c.fill();
+        // 筐沿：一道亮起来的边，把它从地面抬起来
+        c.globalAlpha = 0.50;
+        c.strokeStyle = 'rgba(206,182,140,.95)';
+        c.beginPath(); c.ellipse(ccx2, ccy, crw, crh * 0.5, 0, 3.34, 6.08); c.stroke();
+        // 编纹：短竖道，比通长的横线更像编出来的
+        c.globalAlpha = 0.16;
+        c.strokeStyle = 'rgba(48,36,24,.9)';
+        for (var bd = -2; bd <= 2; bd++) {
+          var bx2 = ccx2 + bd * crw * 0.36;
+          c.beginPath();
+          c.moveTo(bx2, ccy - crh * 0.10);
+          c.lineTo(bx2, ccy + crh * 0.44);
+          c.stroke();
+        }
+      }
+    } else if (z.kind === 'screen') {
+      // 绢面折屏：三扇，绢上两笔墨竹。室内戏靠它挡住背后那片空。
+      var scr = 3, scw = z.w / scr;
+      for (var si3 = 0; si3 < scr; si3++) {
+        var scx2 = x + si3 * scw;
+        c.globalAlpha = 0.68;
+        c.fillStyle = 'rgba(198,186,158,.5)';
+        c.strokeStyle = 'rgba(48,38,28,.9)';
+        c.beginPath(); c.rect(scx2 + 2, y, scw - 4, z.h); c.fill(); c.stroke();
+        c.globalAlpha = 0.24;
+        c.beginPath(); c.moveTo(scx2 + scw * 0.44, y + z.h * 0.84); c.lineTo(scx2 + scw * 0.56, y + z.h * 0.18); c.stroke();
+        c.beginPath(); c.moveTo(scx2 + scw * 0.54, y + z.h * 0.46); c.lineTo(scx2 + scw * 0.80, y + z.h * 0.38); c.stroke();
+        c.beginPath(); c.moveTo(scx2 + scw * 0.52, y + z.h * 0.62); c.lineTo(scx2 + scw * 0.26, y + z.h * 0.56); c.stroke();
+      }
+    } else if (z.kind === 'candle') {
+      // 白蜡烛：ch116「多出一对点了一小半的白色蜡烛」，蜡芯里就是迷药千人醉。
+      // 白日点蜡本身就是破绽，所以它在画面里得显眼：白蜡身 + 一点黄火 + 一圈光。
+      var cdn2 = Math.max(1, Math.round(z.w / 34));
+      for (var cdi2 = 0; cdi2 < cdn2; cdi2++) {
+        var cdx2 = x + z.w * (cdi2 + 0.5) / cdn2;
+        var cdb = y + z.h;
+        c.globalAlpha = 0.9;
+        c.fillStyle = 'rgba(238,232,216,.96)';
+        c.strokeStyle = 'rgba(74,64,50,.9)';
+        c.beginPath(); c.rect(cdx2 - 3.2, cdb - z.h * 0.74, 6.4, z.h * 0.74); c.fill(); c.stroke();
+        c.fillStyle = 'rgba(122,104,72,.9)';
+        c.beginPath(); c.ellipse(cdx2, cdb, 7.5, 2.6, 0, 0, 6.283); c.fill(); c.stroke();
+        c.fillStyle = 'rgba(246,208,122,.95)';
+        c.beginPath(); c.ellipse(cdx2, cdb - z.h * 0.80, 1.8, 4, 0, 0, 6.283); c.fill();
+        c.globalAlpha = 0.26;
+        c.fillStyle = 'rgba(250,224,154,.9)';
+        c.beginPath(); c.arc(cdx2, cdb - z.h * 0.78, 15, 0, 6.283); c.fill();
       }
     }
     c.restore();
@@ -1558,6 +2061,17 @@
       ctx.strokeStyle = 'rgba(154,210,194,.9)';
       ctx.beginPath(); ctx.arc(0, -3.4, 7.6, 0, 6.283); ctx.stroke();
     },
+    ring: function (t) {            // 纹龙戒：墨居仁留给妻室的信物，一枚素圈上盘着一条龙
+      var wg = 0.52 + Math.abs(Math.sin(t * 1.7)) * 0.24;
+      ctx.strokeStyle = 'rgba(200,178,112,.95)';
+      ctx.beginPath(); ctx.arc(0, -3, 3.6, 0, 6.283); ctx.stroke();
+      // 龙纹：两段弧错开半圈，像一条绕圈的脊
+      ctx.globalAlpha *= wg;
+      ctx.beginPath(); ctx.arc(0, -3, 3.6, 0.35, 2.35); ctx.stroke();
+      ctx.beginPath(); ctx.arc(0, -3, 3.6, 3.49, 5.49); ctx.stroke();
+      ctx.globalAlpha *= 0.5;
+      ctx.beginPath(); ctx.arc(0, -3, 6.6, 0, 6.283); ctx.stroke();
+    },
     lamp: function (t) {            // 油灯：小盏 + 豆大火苗
       var f = 0.72 + Math.abs(Math.sin(t * 5.2)) * 0.28;
       ctx.strokeStyle = 'rgba(160,150,128,.9)';
@@ -1709,6 +2223,30 @@
       ctx.beginPath(); ctx.arc(ex, ey, 1.8, 0, 6.283); ctx.fill();
       ctx.globalAlpha *= .42;
       ctx.beginPath(); ctx.arc(x + dir * 15, y - 19, 5 + k * 3, -0.95, 0.95); ctx.stroke();
+    },
+    flame: function (x, y, dir, k) {         // 火弹术：指尖托一团酒杯口大的火，四周一圈热晕
+      var fe = ease(k), fx = x + dir * (10 + fe * 5), fy = y - 26;
+      ctx.beginPath(); ctx.moveTo(x + dir * 3, y - 16); ctx.lineTo(fx, fy); ctx.stroke();
+      var fr = 3 + fe * 3.6;
+      ctx.globalAlpha *= .9;
+      ctx.fillStyle = 'rgba(232,120,48,.85)';
+      ctx.beginPath(); ctx.arc(fx, fy, fr, 0, 6.283); ctx.fill();
+      ctx.fillStyle = 'rgba(252,214,120,.9)';
+      ctx.beginPath(); ctx.arc(fx, fy, fr * .52, 0, 6.283); ctx.fill();
+      // 热晕：两道往外涨的环，别做成一颗静止的圆点
+      ctx.globalAlpha *= .38;
+      ctx.strokeStyle = 'rgba(240,150,70,.9)';
+      ctx.beginPath(); ctx.arc(fx, fy, fr * 2.4 + Math.sin(k * 9) * 1.6, 0, 6.283); ctx.stroke();
+      ctx.globalAlpha *= .55;
+      ctx.beginPath(); ctx.arc(fx, fy, fr * 3.8, 0, 6.283); ctx.stroke();
+    },
+    sneak: function (x, y, dir, k) {         // 潜行：贴墙压低，一手扶着墙沿，脚下两道轻痕
+      var hx = x + dir * 9, hy = y - 21;
+      ctx.beginPath(); ctx.moveTo(x - dir * 4, y - 12); ctx.lineTo(hx, hy); ctx.stroke();
+      ctx.beginPath(); ctx.arc(hx, hy, 1.7, 0, 6.283); ctx.stroke();
+      ctx.globalAlpha *= .30;
+      ctx.beginPath(); ctx.moveTo(x + dir * 3, y + 1); ctx.lineTo(x + dir * 16, y + 1); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x + dir * 1, y + 5); ctx.lineTo(x + dir * 13, y + 5); ctx.stroke();
     },
     palm: function (x, y, dir, k) {         // 掌风：推掌 + 前方气环
       var px = x + dir * (11 + k * 6), py = y - 20;

@@ -842,6 +842,34 @@ ok(hasLine('wagang', null, '通音符') && hasLine('wagang', null, '五年一次
 ok(hasLine('tainan', '青颜真人', '第八层') && hasLine('tainan', '青颜真人', '木属性'),
    '青颜真人一眼看出木属性功法已到第八层（ch129 原文）');
 
+// 嘉元城：码头收服孙二狗 → 墨府谈条件。两场分开记，台词各自同源
+ok(hasLine('jiayuan', '孙二狗', '四平帮') || hasLine('jiayuan', null, '四平帮'),
+   '码头那一场点明孙二狗是西城四平帮的人（ch100 原文）');
+ok(hasLine('jiayuan', '黑熊', '命不好') && hasLine('jiayuan', null, '铁拳会'),
+   '黑熊与铁拳会都在（ch100~102：两帮为了一个客商合谋）');
+ok(hasLine('jiayuan', '韩立', '不用留手') && hasLine('jiayuan', null, '腐心丸'),
+   '曲魂出手是韩立亲口下的令，收服手段是那颗「腐心丸」（ch102~103 原话）');
+// 时间线红线：暖阳宝玉这时还在墨府 —— 码头段只允许「遗书说它在墨府」那一句提到名字
+ok(!hasLine('jiayuan', null, '墨彩环') && !hasLine('jiayuan', null, '欧阳飞天'),
+   '码头段不得提前出现墨彩环 / 欧阳飞天（都还在墨府那半场）');
+ok((W.MAP_STORIES.jiayuan || []).filter(l => /暖阳宝玉/.test(l[1])).length === 1,
+   '暖阳宝玉在码头段只被提到一次（遗书指向它，人还没见着玉）');
+// 墨府：ch108 严氏亲口说「我们知道姓吴的是个假货」，不能写成墨府被骗
+ok(hasLine('mofu', null, '冒牌货') && hasLine('mofu', null, '破绽'),
+   '墨府早就识破吴剑鸣是冒牌货，还在陪他做戏（ch108 严氏亲口）');
+ok(hasLine('mofu', '严氏', '纹龙戒') && hasLine('mofu', '韩立', '弟子韩立'),
+   '认亲靠纹龙戒与「弟子韩立，奉墨师之命」（ch109 原话）');
+ok(hasLine('mofu', '严氏', '千人醉') && hasLine('mofu', null, '清灵散'),
+   '蜡烛里的迷药是千人醉，韩立事先吃过清灵散（ch116~117）');
+ok(hasLine('mofu', '严氏', '欧阳飞天') && hasLine('mofu', '严氏', '吴剑鸣'),
+   '最后只杀一个首脑：欧阳飞天，而吴剑鸣正是他派来的七弟子（ch123）');
+// 交玉的是严氏。ch126 回述「严氏确认完首级后，当场就把宝玉拿出来」，
+// 墨彩环当场把宝玉当嫁妆塞给他，是旧版改编出来的情节，已经删掉。
+ok(!hasLine('mofu', '墨彩环', '嫁妆') && !hasLine('mofu', '墨彩环', '宝玉'),
+   '墨彩环不得当场把宝玉当嫁妆塞给韩立（交玉的是严氏）');
+ok(!/墨彩环/.test((W.MAPS.find(m => m.id === 'jiayuan') || {}).clearDesc || ''),
+   '嘉元城通关描述不得写成墨彩环交玉（ch126 是严氏验过首级才交）');
+
 // 血色禁地：五年一开、开完封六十年、李化元打赌收记名弟子
 ok((W.STORY || []).some(s => s.id === 'xs_open' && s.lines.some(l => String(l[1]).includes('六十年'))), '血色禁地补上「五年一开、封六十年」');
 ok(hasLine('xsoutro', '李化元', '记名弟子'), '李化元打赌赢了才收记名弟子');

@@ -489,20 +489,22 @@ try {
       overflow: body.scrollWidth > body.clientWidth + 2, state: F.G.state
     };
   });
-  ok('50 洞府新增「剧情回顾」页签，列表跨全部地图（含没有洞府的后山 / 松林小溪 / 太南山下 / 太南谷 / 墨府密室 / 野狼帮之围 / 血色试炼）',
-     out.review.tabs.indexOf('story') >= 0 && out.review.ids.length === 8
-     && out.review.rows.length === 8 && out.review.rows[0].id === 'qixuan'
+  ok('50 洞府新增「剧情回顾」页签，列表跨全部地图（含没有洞府的后山 / 松林小溪 / 太南山下 / 太南谷 / 嘉元城两场 / 墨府密室 / 野狼帮之围 / 血色试炼）',
+     out.review.tabs.indexOf('story') >= 0 && out.review.ids.length === 10
+     && out.review.rows.length === 10 && out.review.rows[0].id === 'qixuan'
      && out.review.rows[1].id === 'houshan' && out.review.rows[2].id === 'mishi'
      && out.review.rows[3].id === 'chuisui'
      && out.review.rows[4].id === 'wagang' && out.review.rows[5].id === 'tainan'
-     && out.review.rows[6].id === 'yelang' && out.review.rows[7].id === 'xuesestory'
+     && out.review.rows[6].id === 'jiayuan' && out.review.rows[7].id === 'mofu'
+     && out.review.rows[8].id === 'yelang' && out.review.rows[9].id === 'xuesestory'
      && /七玄门·后山/.test(out.review.rows[1].nm) && /墨大夫·密室/.test(out.review.rows[2].nm)
      && /松林小溪/.test(out.review.rows[3].nm)
      && /怪坡/.test(out.review.rows[4].nm) && /青砖广场/.test(out.review.rows[5].nm)
-     && /野狼帮之围/.test(out.review.rows[6].nm)
-     && /血色禁地/.test(out.review.rows[7].nm) && out.review.state === 'cave', out.review);
+     && /小码头/.test(out.review.rows[6].nm) && /墨府小楼/.test(out.review.rows[7].nm)
+     && /野狼帮之围/.test(out.review.rows[8].nm)
+     && /血色禁地/.test(out.review.rows[9].nm) && out.review.state === 'cave', out.review);
   ok('51 列表元数据取自分镜表与 MAP_STORIES，已阅/未阅按 save.seen 显示',
-     /8 段/.test(out.review.title)
+     /10 段/.test(out.review.title)
      && /卷一 · 七玄门/.test(out.review.rows[0].meta) && /9 拍 \/ 28\.4s/.test(out.review.rows[0].meta)
      && /8 句台词 · 已阅/.test(out.review.rows[0].meta)
      && /卷一 · 后山采药/.test(out.review.rows[1].meta) && /8 句台词 · 未阅/.test(out.review.rows[1].meta)
@@ -510,8 +512,10 @@ try {
      && /松林小溪/.test(out.review.rows[3].meta) && /18 句台词/.test(out.review.rows[3].meta)
      && /太南山下/.test(out.review.rows[4].meta) && /18 句台词/.test(out.review.rows[4].meta)
      && /太南小会/.test(out.review.rows[5].meta) && /18 句台词/.test(out.review.rows[5].meta)
-     && /野狼帮之围/.test(out.review.rows[6].meta) && /11 句台词/.test(out.review.rows[6].meta)
-     && /血色试炼/.test(out.review.rows[7].meta)
+     && /卷二 · 嘉元城/.test(out.review.rows[6].meta) && /24 句台词/.test(out.review.rows[6].meta)
+     && /卷二 · 墨府/.test(out.review.rows[7].meta) && /28 句台词/.test(out.review.rows[7].meta)
+     && /野狼帮之围/.test(out.review.rows[8].meta) && /11 句台词/.test(out.review.rows[8].meta)
+     && /血色试炼/.test(out.review.rows[9].meta)
      && out.review.overflow === false, out.review);
   ok('52 Cutscene.meta() 返回章节卡/地点/拍数/时长，与分镜表同源',
      out.review.meta && out.review.meta.title === '卷一 · 后山采药'
@@ -551,7 +555,7 @@ try {
   });
   ok('55 播完只收层回洞府：账本一字不改、列表仍在、不进战斗',
      out.reviewEnd.active === false && out.reviewEnd.display === 'none'
-     && out.reviewEnd.state === 'cave' && out.reviewEnd.rows === 8
+     && out.reviewEnd.state === 'cave' && out.reviewEnd.rows === 10
      && JSON.stringify(out.reviewEnd.seen) === JSON.stringify(['scene:qixuan']), out.reviewEnd);
 
   out.reviewQX = await page.evaluate(() => {
@@ -575,7 +579,7 @@ try {
              overflow: b.scrollWidth > b.clientWidth + 2 };
   });
   ok('57 墨皮下剧情回顾列表仍完整、无横向溢出',
-     out.reviewInk.rows === 8 && out.reviewInk.ink === true && out.reviewInk.overflow === false, out.reviewInk);
+     out.reviewInk.rows === 10 && out.reviewInk.ink === true && out.reviewInk.overflow === false, out.reviewInk);
 
   // ---- 逐拍审片回归（2026-11-10）：矮视口不裁、印章不裁、场景元素不落进字幕区 ----
   await page.setViewportSize({ width: 1280, height: 720 });

@@ -11293,13 +11293,14 @@
   // 剧情回顾列表的「已阅」标记：与 startMap() / storySceneOf() 写进 save.seen 的键一致。
   // qixuan 是整场剧情图（scene:qixuan），houshan 是战斗图进图序章（cut:houshan）。
   // 只用于展示，不写、不删；铺新图时同步登记。
-  const CUTSCENE_SEEN = { qixuan: 'scene:qixuan', houshan: 'cut:houshan', chuisui: 'cut:chuisui', wagang: 'cut:wagang', tainan: 'intro:tainan', mishi: 'intro:mishi', yelang: 'intro:yelang', xuesestory: 'cut:xuesestory' };
+  const CUTSCENE_SEEN = { qixuan: 'scene:qixuan', houshan: 'cut:houshan', chuisui: 'cut:chuisui', wagang: 'cut:wagang', tainan: 'intro:tainan', jiayuan: 'scene:jiayuan', mofu: 'cut:mofu', mishi: 'intro:mishi', yelang: 'intro:yelang', xuesestory: 'cut:xuesestory' };
   // 剧目 id → 回放时铺的战斗地图 id；只有 xuesestory 与地图不同名。
   // chuisui（松林小溪）在神手谷外，铺后山那张图最贴合；
-  // wagang（怪坡）是太南小会的谷外前半场，铺 tainan 那张图。
-  const STORY_REPLAY_MAP = { xuesestory: 'xuese', chuisui: 'houshan', wagang: 'tainan' };
+  // wagang（怪坡）是太南小会的谷外前半场，铺 tainan 那张图；
+  // mofu（墨府小楼）是嘉元城那张图的第二场，前后两场共用同一张地图做背景。
+  const STORY_REPLAY_MAP = { xuesestory: 'xuese', chuisui: 'houshan', wagang: 'tainan', mofu: 'jiayuan' };
   // 剧目 id → 回顾列表显示名；不在 MAPS 里的剧目必须在这里给名字。
-  const STORY_REPLAY_NAME = { xuesestory: '血色禁地·中心区', chuisui: '七玄门·松林小溪', wagang: '太南山下·怪坡', tainan: '太南谷·青砖广场' };
+  const STORY_REPLAY_NAME = { xuesestory: '血色禁地·中心区', chuisui: '七玄门·松林小溪', wagang: '太南山下·怪坡', tainan: '太南谷·青砖广场', jiayuan: '嘉元城·小码头与黑水巷', mofu: '嘉元城·墨府小楼' };
 
   function startMap(id, diffId) {
     const m = MAPS.find(x => x.id === id);
@@ -11479,6 +11480,15 @@
         && (window.StoryStage.force || !(window.__CSJ_QA__ || (typeof navigator !== 'undefined' && navigator.webdriver)))
         && !G.storyMute;
       if (stageLive) {
+        // 嘉元城分两场：小码头与黑水巷（收服孙二狗）→ 墨府小楼（见严氏、谈条件）。
+        // 两段是「进嘉元城」这一件事的前后两半，接在同一个 onDone 里，中间不跳回战斗。
+        if (id === 'jiayuan' && window.StoryStage.canPlay('mofu') && MAP_STORIES.mofu) {
+          window.StoryStage.start('jiayuan', sc.lines, () => {
+            storyMarkSeen(sc.key);
+            window.StoryStage.start('mofu', MAP_STORIES.mofu, () => { storyMarkSeen('cut:mofu'); onStoryMapDone(m); });
+          });
+          return;
+        }
         window.StoryStage.start(id, sc.lines, () => { storyMarkSeen(sc.key); onStoryMapDone(m); });
         return;
       }

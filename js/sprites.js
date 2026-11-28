@@ -1840,7 +1840,7 @@
       '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGGGGgGK.', '..KgGGGGgK..',
       '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
     ] },
-    { name: 'quhun', label: '曲魂·铁奴', pal: { K, H: '#22232a', S: '#9fa089', G: '#2f3238', g: '#1e2026', B: '#5a5f66' }, rows: [
+    { name: 'quhun', label: '曲魂·铁奴', pal: { K, H: '#262b26', S: '#9fa089', G: '#3d4a38', g: '#2a3527', B: '#6d6b3c' }, rows: [
       '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
       '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
       '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
@@ -1862,8 +1862,38 @@
       '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
       '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
     ] },
-    { name: 'yanfuren', label: '严氏', pal: { K, H: '#1c1d26', S: '#e6bf9a', G: '#6a3348', g: '#482230', B: '#c9a227' }, rows: [
-      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+    // 黑熊：ch100「膀大腰圆的黑大汉」、ch102 一身三流好手的功夫。光头 + 络腮胡 + 赤膊短褂，
+    // 六人里唯一没有袍裾的——先看剪影就该分出他不是帮里那些脚夫。
+    { name: 'heixiong', label: '黑熊', pal: { K: '#15151b', S: '#c08a5e', b: '#1f1a18', G: '#4a4238', g: '#332d26', B: '#6a4a2a' }, rows: [
+      '...KKKKKK...', '..KSSSSSSK..', '..KSSSSSSK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '..KbbSSbbK..', '.KGGGGGGGGK.', '.KGgGGGGgGK.', '.KGgBBBBgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    // 严氏：ch109「三十许岁的美艳夫人」、ch104「生性沉稳，心计过人，有大家风范」。
+    // 这一幕是「一身缟素」的次日（ch115），所以几位夫人都是素服——认人靠头肩剪影与腰封颜色，
+    // 不能再靠袍色。严氏高髻 + 一支金簪，腰封压深绛（当家寡妇的那一条）。
+    { name: 'yanfuren', label: '严氏', pal: { K, H: '#1c1d26', Y: '#c9a227', S: '#e6bf9a', G: '#d2cbbc', g: '#9c9587', B: '#6a3348' }, rows: [
+      '...KKKKKK...', '..KHHYHHHK..', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGGGGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    // 二夫人李氏：ch111「三十一二岁，秀丽端庄，眉宇间隐有一股书卷之气」，月白素衫。
+    { name: 'lieru', label: '李氏', pal: { K: '#1b1b2a', H: '#242430', S: '#e6c4a0', W: '#dcdad0', w: '#a9a79c', B: '#7a94a8' }, rows: [
+      '...KKKKKK...', '..KHHHHHHK..', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KWWWWWWK..', '.KWwWWWWwWK.', '.KWwWBBWwWK.', '..KwWWWWwK..',
+      '..KWWKKWWK..', '..KWK..KWK..', '..KWK..KWK..', '..KKK..KKK..'
+    ] },
+    // 三夫人刘氏：ch110「二十三四的少妇……比墨玉珠还要美艳三分」，练天狐大法。
+    // 素服里唯一露肩的一个——孝服也压不住她，ch116 她照样笑得花枝招展。
+    { name: 'liuru', label: '刘氏', pal: { K: '#1b1b2a', H: '#1a1620', S: '#f2d2ae', G: '#e2d3d2', g: '#b3a0a2', B: '#c9a227' }, rows: [
+      '...KKKKKK...', '..KHHHHHHK..', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '.KSGGGGGGSK.', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    // 五夫人王氏：ch111「二十六七，一脸的冷霜……目光中寒光闪动」，掌暗舵。
+    // 素服里最冷的一个：冷灰蓝衫，与李氏的月白拉开一档。
+    { name: 'wangru', label: '王氏', pal: { K: '#15151f', H: '#1a1a24', S: '#e0c0a0', G: '#a8b0ba', g: '#7e868f', B: '#4a5058' }, rows: [
+      '...KKKKKK...', '..KHHHHHHK..', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
       '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
       '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
     ] },
@@ -1872,8 +1902,10 @@
       '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
       '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
     ] },
-    { name: 'mocaihuan', label: '墨彩环', pal: { K, H: '#1c1d26', S: '#eac8a4', G: '#7a9c72', g: '#55704f', B: '#d8c878' }, rows: [
-      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+    // 墨彩环：ch109「十五六岁的娇美女孩」、ch113 那个「小妖精」。双鬟是她的标识，别改成垂发。
+    // 与几位夫人同为素服，只留一条浅碧腰封认人。
+    { name: 'mocaihuan', label: '墨彩环', pal: { K, H: '#1c1d26', S: '#eac8a4', G: '#dcd8c8', g: '#aaa596', B: '#8fb07f' }, rows: [
+      '..KKKKKKKK..', '.KHHHKKHHHK.', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
       '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
       '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
     ] },

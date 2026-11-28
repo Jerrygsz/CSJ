@@ -71,7 +71,7 @@ const stories = sandbox.window.MAP_STORIES;
 const stages = sandbox.window.StoryStage.stages();
 const DATA = {};
 console.log('\n== 2. 原著剧情与地形数据 ==');
-for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'wagang', 'tainan', 'yelang', 'xuesestory']) {
+for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'wagang', 'tainan', 'jiayuan', 'mofu', 'yelang', 'xuesestory']) {
   const st = stages[id];
   DATA[id] = st;
   const li = st.steps.filter(s => s.t === 'say').reduce((a, s) => a.concat(s.li || []), []);
@@ -213,6 +213,77 @@ for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'wagang', 'tainan', '
     ok(gz > 0 && lv > gz, '青颜真人先审视，再说破第八层', { gz, lv });
     const gone = st.steps.findIndex(s => s.t === 'walk' && s.who === 'wanshanxiao' && s.to && s.to[0] > 150);
     ok(gone > lv, '说破修为之后万小山才被带回族中长辈处', { gone, lv });
+  } else if (id === 'jiayuan') {
+    const spr = st.actors.map(a => a.spr);
+    ok(['hanli','quhun','sunergou','heixiong'].every(x => spr.includes(x)),
+       '码头上四人到位：韩立 / 曲魂 / 孙二狗 / 黑熊', spr);
+    ok(kinds.includes('river') && kinds.includes('dock') && kinds.includes('shed') && kinds.includes('crate'),
+       '小码头用 river 河面 + dock 木栈 + shed 竹棚 + crate 烂筐破袋（ch100 原样）', kinds);
+    ok(kinds.includes('wall'), '黑水巷两岸是 wall 高墙，人贴着墙根走', kinds);
+    const txt = (stories.jiayuan || []).map(l => l[1]).join('');
+    ok(/四平帮/.test(txt) && /铁拳会/.test(txt) && /孙二狗/.test(txt) && /黑熊/.test(txt),
+       '台词守住码头那一场的原著硬点：四平帮 / 铁拳会 / 孙二狗 / 黑熊', txt.slice(0, 40));
+    ok(/腐心丸/.test(txt) && /解药/.test(txt),
+       '收服的手段是那颗「腐心丸」与一月一次的解药（ch103）', null);
+    ok(/杀了他们，不用留手/.test(txt), '曲魂出手是韩立亲口下的令（ch102 原话）', null);
+    // 时间线红线：暖阳宝玉这会儿还在墨府，码头这一场谁都还没见着它 ——
+    // 只允许「遗书说它在墨府」那一句提到名字，不许有第二处，更不许墨彩环/欧阳飞天提前登场。
+    const jyLines = (stories.jiayuan || []).map(l => l[1]);
+    ok(!jyLines.some(t => /墨彩环/.test(t)) && !jyLines.some(t => /欧阳飞天/.test(t))
+       && jyLines.filter(t => /暖阳宝玉/.test(t)).length === 1,
+       '码头段不得提前出现墨彩环 / 欧阳飞天；暖阳宝玉只在「遗书说它在墨府」那一句被提到', null);
+    const palm = st.steps.findIndex(s => s.t === 'act' && s.who === 'quhun' && s.anim === 'palm');
+    const thrust = st.steps.findIndex(s => s.t === 'act' && s.who === 'hanli' && s.anim === 'thrust');
+    ok(palm > 0 && thrust > palm, '曲魂先屠场，韩立才一剑穿黑熊的喉咙', { palm, thrust });
+    const pill = st.steps.findIndex(s => s.t === 'prop' && s.n === 'pill');
+    const sw2 = st.steps.findIndex(s => s.t === 'act' && s.who === 'sunergou' && s.anim === 'swallow');
+    ok(pill > thrust && sw2 > pill, '先杀黑熊、再递药丸，孙二狗最后才吞下去', { pill, sw2 });
+    ok(st.steps.some(s => s.t === 'fade' && s.from === 0 && s.to === 1)
+       && st.steps.some(s => s.t === 'actor' && s.who === 'hanli' && s.x === 736),
+       '码头与黑水巷之间用 fade + 挪位换场（两条街不在同一个地方）', null);
+    // 镜头红线：黑水巷在世界坐标的另一头（x≈700~1100），cam.dx 不离位的话，
+    // 这一整场围杀都演在画外 —— 标签、动作、台词的闸门全绿，实拍出来只有一片空码头。
+    const jyCams = st.steps.filter(s => s.t === 'cam');
+    ok(jyCams.some(s => (s.dx || 0) >= 800),
+       '有一拍 cam 把机位从码头搬到黑水巷（dx ≥ 800）', jyCams.map(s => s.dx));
+  } else if (id === 'mofu') {
+    const spr = st.actors.map(a => a.spr);
+    ok(['hanli','yanfuren','mocaihuan','lieru','liuru','wangru'].every(x => spr.includes(x)),
+       '墨府五人到位：韩立 / 严氏 / 墨彩环 / 二夫人李氏 / 三夫人刘氏 / 五夫人王氏', spr);
+    ok(kinds.includes('floor') && kinds.includes('table') && kinds.includes('screen')
+       && kinds.includes('candle') && kinds.includes('lamp'),
+       '小楼内室用 floor 石砖 + table 案几 + screen 折屏 + candle 白蜡烛 + lamp 灯烛', kinds);
+    ok(kinds.includes('herb') && kinds.includes('bamboo'),
+       '后院那一片药草与竹林都在（ch108 先闻出药草香）', kinds);
+    const txt = (stories.mofu || []).map(l => l[1]).join('');
+    ok(/纹龙戒/.test(txt) && /弟子韩立/.test(txt),
+       '认亲靠那枚纹龙戒与「弟子韩立，奉墨师之命」（ch109 原话）', txt.slice(0, 40));
+    ok(/千人醉/.test(txt) && /清灵散/.test(txt),
+       '蜡烛里是迷药千人醉，韩立事先吃过清灵散（ch116~117）', null);
+    ok(/修仙者/.test(txt) && /欧阳飞天/.test(txt) && /吴剑鸣/.test(txt),
+       '修仙者身份被叫破、要杀的是欧阳飞天、吴剑鸣是他派来的七弟子', null);
+    // 考据红线：墨府早就识破吴剑鸣是冒牌货（ch108 严氏亲口），不能写成「墨府被骗了」
+    ok(/冒牌货/.test(txt) && /破绽/.test(txt),
+       '严氏与墨彩环那场夜谈要点明「冒牌货」与「别让他看出破绽」（墨府在做戏，不是被骗）', null);
+    // 交玉的是严氏：ch126 回述「严氏确认完首级后，当场就把宝玉拿出来」
+    ok(!/嫁妆/.test(txt)
+       && !(stories.mofu || []).some(l => /墨彩环/.test(l[0]) && /宝玉/.test(l[1])),
+       '墨彩环不得当场把宝玉当嫁妆塞给韩立（交玉的是严氏，ch126 回述）', null);
+    const rg = st.steps.findIndex(s => s.t === 'prop' && s.n === 'ring');
+    const thr = st.steps.findIndex(s => s.t === 'act' && s.anim === 'throw');
+    ok(rg > 0 && thr > rg, '先摸出纹龙戒，再隔着窗纸扔进屋', { rg, thr });
+    const fl = st.steps.findIndex(s => s.t === 'act' && s.anim === 'flame');
+    const cry = st.steps.findIndex(s => s.t === 'say' && s.li && s.li[0] === 19);
+    ok(fl > 0 && cry > fl, '指尖先腾起火球，李氏才叫出「修仙者！」', { fl, cry });
+    const mao = st.steps.findIndex(s => s.t === 'say' && s.li && s.li[0] === 25);
+    const wu = st.steps.findIndex(s => s.t === 'say' && s.li && s.li[0] === 26);
+    ok(mao > 0 && wu > mao, '先点出欧阳飞天，再补一句吴剑鸣是他派来的', { mao, wu });
+    ok(st.steps.some(s => s.t === 'act' && s.anim === 'sneak'),
+       '夜入后院那一段用 sneak 贴着墙根走（不是大摇大摆走进去）', null);
+    // 同上：小楼内室在世界坐标 x≈700~1260，机位不搬过去，整场「火弹术翻脸」都在画外
+    const mfCams = st.steps.filter(s => s.t === 'cam');
+    ok(mfCams.some(s => (s.dx || 0) >= 800),
+       '有一拍 cam 把机位从后院搬到小楼内室（dx ≥ 800）', mfCams.map(s => s.dx));
   }
 }
 
@@ -237,6 +308,10 @@ ok(['writhe','threaten'].every(x => actNames.includes(x)),
    '溪边组齐全：毒发抽动 / 刀架颈（厉飞雨那段全靠这两式）', actNames);
 ok(['meditate','gaze'].every(x => actNames.includes(x)),
    '入道组齐全：盘坐打坐 / 审视看破（太南山那两段全靠这两式）', actNames);
+ok(['sneak','flame'].every(x => actNames.includes(x)),
+   '嘉元城组齐全：贴墙潜行 / 指尖火弹（夜入墨府与露修仙者身份全靠这两式）', actNames);
+ok(propNames.includes('ring'),
+   '纹龙戒已登记（墨府认亲全靠那枚龙戒）', propNames);
 ok(propNames.includes('warmjade'),
    '暖阳宝玉已登记（拔寒毒与解尸虫丸之毒全靠它）', propNames);
 ok(propNames.length >= 14, '剧情道具库至少 14 件', propNames);
@@ -248,7 +323,7 @@ ok(propNames.includes('vial'), '溪边道具齐备：小白玉瓶（装抽髓丸
 
 // 剧情里用到的道具必须都在库里，不能写个空气名字
 const usedProps = [];
-for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'wagang', 'tainan', 'yelang', 'xuesestory']) {
+for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'wagang', 'tainan', 'jiayuan', 'mofu', 'yelang', 'xuesestory']) {
   for (const s of (sandbox.window.StoryStage.steps(id) || [])) {
     if (s.t === 'prop' && s.n) usedProps.push(s.n);
   }
@@ -571,6 +646,60 @@ ok(W1.s && W1.s.active && W1.s.mapId === 'tainan',
 ok(W1.first === W1.want, '谷内开场白逐字同源 MAP_STORIES.tainan[0]', { got: W1.first, want: W1.want });
 await page.evaluate(() => window.__FR.storyStageSkip());
 await page.waitForTimeout(120);
+
+// 嘉元城：码头 jiayuan → 墨府 mofu 的链式。story 分支同样不走 showLines 通道，
+// 只有真进图才验得到「先在码头收服孙二狗、再进墨府谈条件、中间不跳回战斗」这条路径。
+console.log('\n== 4e. 嘉元城两场链式（码头 jiayuan → 墨府 mofu）==');
+const J0 = await page.evaluate(async () => {
+  const F = window.__FR;
+  F.clearProgress(); F.unlockAll();
+  F.storyStageForce(true);
+  F.enterMap('jiayuan');
+  await new Promise(r => setTimeout(r, 160));
+  return {
+    s: F.storyStage(), map: F.G.mapId, state: F.G.state,
+    got: document.getElementById('dialogText').textContent,
+    want: window.MAP_STORIES.jiayuan[0][1]
+  };
+});
+ok(J0.s && J0.s.active && J0.s.mapId === 'jiayuan',
+   '进嘉元城先演码头那一场（jiayuan），不直接跳墨府', J0.s);
+ok(J0.got === J0.want, '码头开场白逐字同源 MAP_STORIES.jiayuan[0]', { got: J0.got, want: J0.want });
+
+const J1 = await page.evaluate(async () => {
+  const F = window.__FR;
+  for (let i = 0; i < 1600; i++) {
+    const s = F.storyStage();
+    if (!s || !s.active || s.mapId === 'mofu') break;
+    if (s.kind === 'say') F.advanceDialog();
+    else F.storyStageTick(0.05);
+    await new Promise(r => setTimeout(r, 0));
+  }
+  await new Promise(r => setTimeout(r, 60));
+  // mofu 第一拍是 weather，要再拨到第一句 say 才读得到台词
+  for (let i = 0; i < 80; i++) {
+    const s = F.storyStage();
+    if (!s || !s.active || s.kind === 'say') break;
+    F.storyStageTick(0.05);
+    await new Promise(r => setTimeout(r, 0));
+  }
+  return {
+    s: F.storyStage(),
+    got: document.getElementById('dialogText').textContent,
+    want: window.MAP_STORIES.mofu[0][1]
+  };
+});
+ok(J1.s && J1.s.active && J1.s.mapId === 'mofu',
+   '码头收场后链式接上墨府（同一次进城的后半场，中间不跳回战斗）', J1.s);
+ok(J1.got === J1.want, '墨府开场白逐字同源 MAP_STORIES.mofu[0]', { got: J1.got, want: J1.want });
+
+await page.evaluate(() => window.__FR.storyStageSkip());
+await page.waitForTimeout(180);
+const J2 = await page.evaluate(() => {
+  const s = window.__FR.storyStage();
+  return { active: !!(s && s.active), state: window.__FR.G.state };
+});
+ok(!J2.active, '跳过之后剧情层收干净，不留残影', J2);
 
 ok(errs.length === 0, '全程零报错', errs.slice(0, 4));
 await b.close(); server.close();

@@ -256,6 +256,69 @@
           cam:{ z:[1.12,1.00], x:[0,2], y:[-4,0] } }
       ]
     },
+    // 嘉元城·小码头与黑水巷：第二卷开篇那一场。真实玩家由 StoryStage 走 jiayuan 段，
+    // 这里只作剧目登记 / 旧插画兜底（回顾列表按 CUTSCENES 的键枚举）。
+    jiayuan: {
+      title: '卷二 · 嘉元城', sub: '小码头 · 黑水巷', seal: '地头蛇',
+      shots: [
+        { id:0, t:0,     dur:2.6, kind:'chapter', scene:'village', fx:'unroll',
+          cam:{ z:[1.00,1.05], x:[0,-4], y:[0,0] }, label:'卷二 · 嘉元城' },
+        { id:1, t:2.6,   dur:3.2, scene:'village', actors:[['hanli','L']], fx:'ink', li: 0,
+          cam:{ z:[1.05,1.12], x:[-4,0], y:[0,-4] } },
+        { id:2, t:5.8,   dur:3.0, scene:'village', actors:[['hanli','L'],['sunergou','R'],['heixiong','R']], fx:'dim', li: 2,
+          cam:{ z:[1.12,1.16], x:[0,2], y:[-4,0] } },
+        { id:3, t:8.8,   dur:3.0, scene:'village', actors:[['hanli','L'],['sunergou','R'],['heixiong','R']], fx:'ink', li: 4,
+          cam:{ z:[1.16,1.20], x:[2,0], y:[0,-4] } },
+        { id:4, t:11.8,  dur:3.2, scene:'gate', actors:[['hanli','L']], fx:'dim', li: 6,
+          cam:{ z:[1.20,1.24], x:[0,2], y:[-4,-6] } },
+        { id:5, t:15.0,  dur:3.0, scene:'gate', actors:[['hanli','L'],['quhun','R']], fx:'ink', li: 8,
+          cam:{ z:[1.24,1.18], x:[2,0], y:[-6,-2] } },
+        { id:6, t:18.0,  dur:3.0, scene:'gate', actors:[['hanli','L'],['quhun','R'],['heixiong','R']], fx:'seal', li: 10,
+          cam:{ z:[1.18,1.24], x:[0,4], y:[-2,-6] } },
+        { id:7, t:21.0,  dur:3.2, scene:'gate', actors:[['quhun','L']], fx:'dim', li: 11,
+          cam:{ z:[1.24,1.20], x:[4,2], y:[-6,-2] } },
+        { id:8, t:24.2,  dur:3.0, scene:'gate', actors:[['hanli','L'],['heixiong','R']], fx:'ink', li: 13,
+          cam:{ z:[1.20,1.26], x:[2,0], y:[-2,-8] } },
+        { id:9, t:27.2,  dur:3.0, scene:'gate', actors:[['hanli','L'],['sunergou','R']], fx:'dim', li: 15,
+          cam:{ z:[1.26,1.20], x:[0,-2], y:[-8,-2] } },
+        { id:10, t:30.2, dur:3.2, scene:'gate', actors:[['hanli','L'],['sunergou','R']], fx:'ink', li: 18,
+          cam:{ z:[1.20,1.24], x:[-2,0], y:[-2,-4] } },
+        { id:11, t:33.4, dur:3.4, scene:'gate', actors:[['hanli','L'],['sunergou','R']], fx:'roll', li: 21,
+          cam:{ z:[1.24,1.00], x:[0,2], y:[-4,0] } },
+        { id:12, t:36.8, dur:3.0, scene:'village', actors:[['hanli','L']], fx:'ink', li: 23,
+          cam:{ z:[1.00,1.06], x:[2,0], y:[0,-2] } }
+      ]
+    },
+    // 嘉元城·墨府小楼：与 jiayuan 是同一次进城的后半场。同样只作登记 / 兜底。
+    mofu: {
+      title: '卷二 · 墨府', sub: '后院 · 小楼二层', seal: '缟素',
+      shots: [
+        { id:0, t:0,     dur:2.6, kind:'chapter', scene:'hut', fx:'unroll',
+          cam:{ z:[1.00,1.05], x:[0,4], y:[0,0] }, label:'卷二 · 墨府' },
+        { id:1, t:2.6,   dur:3.2, scene:'herb', actors:[['hanli','L']], fx:'ink', li: 0,
+          cam:{ z:[1.05,1.12], x:[4,0], y:[0,-4] } },
+        { id:2, t:5.8,   dur:3.0, scene:'hut', fx:'dim', li: 2,
+          cam:{ z:[1.12,1.16], x:[0,2], y:[-4,-2] } },
+        { id:3, t:8.8,   dur:3.0, scene:'hut', fx:'ink', li: 5,
+          cam:{ z:[1.16,1.20], x:[2,0], y:[-2,-4] } },
+        { id:4, t:11.8,  dur:3.0, scene:'hut', fx:'glow', li: 7,
+          cam:{ z:[1.20,1.24], x:[0,2], y:[-4,-6] } },
+        { id:5, t:14.8,  dur:3.0, scene:'hut', actors:[['hanli','L'],['yanfuren','R']], fx:'dim', li: 10,
+          cam:{ z:[1.24,1.18], x:[2,0], y:[-6,-2] } },
+        { id:6, t:17.8,  dur:3.2, scene:'hut', actors:[['hanli','L'],['yanfuren','R'],['mocaihuan','R']], fx:'ink', li: 12,
+          cam:{ z:[1.18,1.22], x:[0,2], y:[-2,-4] } },
+        { id:7, t:21.0,  dur:3.2, scene:'hut', actors:[['hanli','L'],['yanfuren','R'],['lieru','R']], fx:'dim', li: 15,
+          cam:{ z:[1.22,1.26], x:[2,4], y:[-4,-6] } },
+        { id:8, t:24.2,  dur:3.0, scene:'hut', actors:[['hanli','L']], fx:'seal', li: 18,
+          cam:{ z:[1.26,1.20], x:[4,2], y:[-6,-2] } },
+        { id:9, t:27.2,  dur:3.0, scene:'hut', actors:[['hanli','L'],['yanfuren','R']], fx:'ink', li: 21,
+          cam:{ z:[1.20,1.24], x:[2,0], y:[-2,-4] } },
+        { id:10, t:30.2, dur:3.2, scene:'hut', actors:[['hanli','L'],['yanfuren','R'],['liuru','R']], fx:'dim', li: 24,
+          cam:{ z:[1.24,1.18], x:[0,-2], y:[-4,-2] } },
+        { id:11, t:33.4, dur:3.4, scene:'hill', actors:[['hanli','L']], fx:'roll', li: 27,
+          cam:{ z:[1.18,1.00], x:[-2,0], y:[-2,0] } }
+      ]
+    },
     // 野狼帮之围：七玄门后期人物在战斗地图当群众演员；这里只作剧目登记 / 旧插画兜底，
     // 真实玩家与洞府回顾都由 StoryStage 分流到主画布层（见 game.js replayStoryLive）。
     yelang: {
