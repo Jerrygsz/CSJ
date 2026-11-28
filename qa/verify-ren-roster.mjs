@@ -38,11 +38,12 @@ const REN_NAMES = ['sanshu','wuyan','yuetangzhu','wanghufa','zhangjun','wumingru
   'zhaozhanglao','marong','lanyizhifa','wangqinxin','hanxiaomei','yunchi',
   'xiangzhili','fengyue','zhongwu','yukun','songmeng','wuxuan',
   'heixiong','lieru','liuru','wangru',
-  'shenzhongshan','qianjin','fanju','shensan','xiaojinzhi','ouyangfeitian'];
+  'shenzhongshan','qianjin','fanju','shensan','xiaojinzhi','ouyangfeitian',
+  'mashibo','yuzhishi'];
 const CROWD_NAMES = ['cunfu','cunpo','zayi','xiaofan','tanzhu','huojie','kuli','chefu','chuanfu',
   'shusheng','daoshi','heshang','tongzi','jintongzi','tiewei','peijiu1','peijiu2'];
 const REN1 = REN_NAMES.slice(0, 25), REN2 = REN_NAMES.slice(25, 37), REN3 = REN_NAMES.slice(37, 43);
-const REN4 = REN_NAMES.slice(43, 47), REN5 = REN_NAMES.slice(47);
+const REN4 = REN_NAMES.slice(43, 47), REN5 = REN_NAMES.slice(47, 53), REN6 = REN_NAMES.slice(53);
 ok(REN1.every(n => src.includes("name: '" + n + "'")),
    '第一批 25 位人界具名人物全部登记（按原著考据）', null);
 ok(REN2.every(n => src.includes("name: '" + n + "'")) && REN2.length === 12,
@@ -57,6 +58,10 @@ ok(REN4.every(n => src.includes("name: '" + n + "'")) && REN4.length === 4,
 // 少一个包房里那场「试吃」就推不下去 —— 尤其沈三那句「慢着，胖子！」是整场的转折。
 ok(REN5.every(n => src.includes("name: '" + n + "'")) && REN5.length === 6,
    '第五批 6 位四平帮 / 独霸山庄人物全部登记（ch120–126 考据）', REN5);
+// 第六批：黄枫谷（ch149~152）。马师伯枯瘦矮小 + 枯黄小胡子（ch151「人形大耗子」），
+// 于执事百机堂中年执事（ch149 领竹简处），缺一张百药园那场就少一人。
+ok(REN6.every(n => src.includes("name: '" + n + "'")) && REN6.length === 2,
+   '第六批 2 位黄枫谷人物全部登记（ch149–152 考据）', REN6);
 ok(CROWD_NAMES.every(n => src.includes("name: '" + n + "'")) && CROWD_NAMES.length === 17,
    '第一批 15 类路人 / 群众 + 2 名陪酒女子全部登记', null);
 ok(!REN_NAMES.concat(CROWD_NAMES).some(n => ['wangxia','wulong','maliang'].includes(n))
@@ -106,9 +111,9 @@ const probe = await page.evaluate(() => {
   const meanDrop = jinSat.reduce((a, b) => a + b, 0) / jinSat.length - inkSat.reduce((a, b) => a + b, 0) / inkSat.length;
   return { count: all.length, same, blanks, dimSame: JSON.stringify(dimJin) === JSON.stringify(dimInk), meanDrop };
 });
-ok(probe.count === 70, '图鉴 70 项（53 具名 + 17 路人）', probe.count);
+ok(probe.count === 72, '图鉴 72 项（55 具名 + 17 路人）', probe.count);
 ok(probe.same.length === 0, '金皮 / 墨皮取到两份不同画布', probe.same.slice(0, 4));
-ok(probe.blanks.length === 0, '70 张全部非空白（墨皮也画得出）', probe.blanks.slice(0, 6));
+ok(probe.blanks.length === 0, '72 张全部非空白（墨皮也画得出）', probe.blanks.slice(0, 6));
 ok(probe.dimSame, '墨化不改像素尺寸', null);
 ok(probe.meanDrop > 0.04, '墨皮平均饱和度显著下降（墨阶重绘真生效）', probe.meanDrop.toFixed(3));
 

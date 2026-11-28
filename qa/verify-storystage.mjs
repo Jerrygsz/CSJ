@@ -71,7 +71,7 @@ const stories = sandbox.window.MAP_STORIES;
 const stages = sandbox.window.StoryStage.stages();
 const DATA = {};
 console.log('\n== 2. 原著剧情与地形数据 ==');
-for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'wagang', 'tainan', 'jiayuan', 'mofu', 'xiaoxiang', 'duba', 'yelang', 'xuesestory']) {
+for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'wagang', 'tainan', 'jiayuan', 'mofu', 'xiaoxiang', 'duba', 'yaoyuan', 'yelang', 'xuesestory']) {
   const st = stages[id];
   DATA[id] = st;
   const li = st.steps.filter(s => s.t === 'say').reduce((a, s) => a.concat(s.li || []), []);
@@ -365,6 +365,26 @@ for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'wagang', 'tainan', '
     ok(dbCams.some(v => v >= 800),
        '有一拍 cam 把机位从庭园搬到墨府正厅（dx ≥ 800）', dbCams);
     ok(dbCams.indexOf(0) < 0, '第一场庭园就在开演机位上，不需要 dx:0 的归位拍', dbCams);
+  } else if (id === 'yaoyuan') {
+    const spr = st.actors.map(a => a.spr);
+    ok(spr.includes('mashibo') && spr.includes('yuzhishi'),
+       '马师伯与于执事都要真人到场（考较与领差两场缺一不可）', spr);
+    ok(kinds.includes('herb') && kinds.includes('shed'),
+       '药田畦与园中茅屋都要在（ch151「数间茅草屋位于园子中央」）', kinds);
+    const txt = (stories.yaoyuan || []).map(l => l[1]).join('');
+    ok(/子夜花/.test(txt) && /白鹤芝/.test(txt) && /十分之一/.test(txt),
+       '认药考较三件套：报偏门药名 + 「十分之一」原话（ch151 原文）', null);
+    ok(/法宝残片/.test(txt) && /绿液/.test(txt),
+       '埋瓶遮掩要提法宝残片；绿液口径与 yaoshan 捡瓶 / yaopu 绿液区一致', null);
+    const who = new Set((stories.yaoyuan || []).map(l => l[0]));
+    ok(!who.has('吴风') && !who.has('叶师叔'),
+       '传功师兄吴风与叶师叔不进这场戏（叶师叔换丹在 huangfeng 段已演过）', [...who]);
+    const dig = st.steps.findIndex(s => s.t === 'act' && s.anim === 'dig');
+    const bottle = st.steps.findIndex(s => s.t === 'prop' && s.n === 'bottle');
+    ok(dig > 0 && bottle > dig, '先挖坑再埋瓶', { dig, bottle });
+    const yyCams = st.steps.filter(s => s.t === 'cam').map(s => s.dx || 0);
+    ok(yyCams.some(v => v >= 800),
+       '有一拍 cam 把机位从园门口搬到药田角（dx ≥ 800）', yyCams);
   }
 }
 
@@ -404,7 +424,7 @@ ok(propNames.includes('vial'), '溪边道具齐备：小白玉瓶（装抽髓丸
 
 // 剧情里用到的道具必须都在库里，不能写个空气名字
 const usedProps = [];
-for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'wagang', 'tainan', 'jiayuan', 'mofu', 'xiaoxiang', 'duba', 'yelang', 'xuesestory']) {
+for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'wagang', 'tainan', 'jiayuan', 'mofu', 'xiaoxiang', 'duba', 'yaoyuan', 'yelang', 'xuesestory']) {
   for (const s of (sandbox.window.StoryStage.steps(id) || [])) {
     if (s.t === 'prop' && s.n) usedProps.push(s.n);
   }

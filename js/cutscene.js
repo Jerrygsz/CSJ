@@ -373,6 +373,27 @@
           cam:{ z:[1.20,1.00], x:[0,-2], y:[-2,0] } }
       ]
     },
+    // 百药园：接管药园（马师伯考较扔令牌）→ 夜埋小绿瓶。同上只作剧目登记 / 旧插画兜底，
+    // 真实玩家与洞府回顾由 StoryStage 分流到主画布层。
+    yaoyuan: {
+      title: '卷二 · 百药园', sub: '挑差 · 考较 · 绿液', seal: '管园',
+      shots: [
+        { id:0, t:0,    dur:2.6, kind:'chapter', scene:'herb', fx:'unroll',
+          cam:{ z:[1.00,1.05], x:[0,2], y:[0,0] }, label:'卷二 · 百药园' },
+        { id:1, t:2.6,  dur:3.0, scene:'herb', actors:[['hanli','L'],['yuzhishi','R']], fx:'ink', li: 2,
+          cam:{ z:[1.05,1.10], x:[2,0], y:[0,-2] } },
+        { id:2, t:5.6,  dur:3.2, scene:'hut', actors:[['hanli','L'],['mashibo','R']], fx:'dim', li: 5,
+          cam:{ z:[1.10,1.16], x:[0,2], y:[-2,-4] } },
+        { id:3, t:8.8,  dur:2.8, scene:'herb', actors:[['hanli','L']], fx:'ink', li: 8,
+          cam:{ z:[1.16,1.20], x:[2,0], y:[-4,-2] } },
+        { id:4, t:11.6, dur:3.0, scene:'hut', actors:[['hanli','L'],['mashibo','R']], fx:'seal', li: 10,
+          cam:{ z:[1.20,1.16], x:[0,2], y:[-2,0] } },
+        { id:5, t:14.6, dur:3.4, scene:'night', actors:[['hanli','L']], fx:'ink', li: 13,
+          cam:{ z:[1.16,1.10], x:[2,0], y:[0,-2] } },
+        { id:6, t:18.0, dur:3.2, scene:'herb', actors:[['hanli','L']], fx:'roll', li: 16,
+          cam:{ z:[1.10,1.00], x:[0,-2], y:[-2,0] } }
+      ]
+    },
     // 野狼帮之围：七玄门后期人物在战斗地图当群众演员；这里只作剧目登记 / 旧插画兜底，
     // 真实玩家与洞府回顾都由 StoryStage 分流到主画布层（见 game.js replayStoryLive）。
     yelang: {

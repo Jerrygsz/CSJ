@@ -11293,15 +11293,15 @@
   // 剧情回顾列表的「已阅」标记：与 startMap() / storySceneOf() 写进 save.seen 的键一致。
   // qixuan 是整场剧情图（scene:qixuan），houshan 是战斗图进图序章（cut:houshan）。
   // 只用于展示，不写、不删；铺新图时同步登记。
-  const CUTSCENE_SEEN = { qixuan: 'scene:qixuan', houshan: 'cut:houshan', chuisui: 'cut:chuisui', wagang: 'cut:wagang', tainan: 'intro:tainan', jiayuan: 'scene:jiayuan', mofu: 'cut:mofu', xiaoxiang: 'cut:xiaoxiang', duba: 'cut:duba', mishi: 'intro:mishi', yelang: 'intro:yelang', xuesestory: 'cut:xuesestory' };
+  const CUTSCENE_SEEN = { qixuan: 'scene:qixuan', houshan: 'cut:houshan', chuisui: 'cut:chuisui', wagang: 'cut:wagang', tainan: 'intro:tainan', jiayuan: 'scene:jiayuan', mofu: 'cut:mofu', xiaoxiang: 'cut:xiaoxiang', duba: 'cut:duba', yaoyuan: 'cut:yaoyuan', mishi: 'intro:mishi', yelang: 'intro:yelang', xuesestory: 'cut:xuesestory' };
   // 剧目 id → 回放时铺的战斗地图 id；只有 xuesestory 与地图不同名。
   // chuisui（松林小溪）在神手谷外，铺后山那张图最贴合；
   // wagang（怪坡）是太南小会的谷外前半场，铺 tainan 那张图；
   // mofu（墨府小楼）/ xiaoxiang（潇湘院）/ duba（独霸山庄回述）都是嘉元城那条线的
   // 后几场，duba 的收尾（墨府正厅交玉）也铺 jiayuan 那张图做背景。
-  const STORY_REPLAY_MAP = { xuesestory: 'xuese', chuisui: 'houshan', wagang: 'tainan', mofu: 'jiayuan', xiaoxiang: 'jiayuan', duba: 'tainan' };
+  const STORY_REPLAY_MAP = { xuesestory: 'xuese', chuisui: 'houshan', wagang: 'tainan', mofu: 'jiayuan', xiaoxiang: 'jiayuan', duba: 'tainan', yaoyuan: 'yaoyuan' };
   // 剧目 id → 回顾列表显示名；不在 MAPS 里的剧目必须在这里给名字。
-  const STORY_REPLAY_NAME = { xuesestory: '血色禁地·中心区', chuisui: '七玄门·松林小溪', wagang: '太南山下·怪坡', tainan: '太南谷·青砖广场', jiayuan: '嘉元城·小码头与黑水巷', mofu: '嘉元城·墨府小楼', xiaoxiang: '嘉元城·潇湘院', duba: '独霸山庄·赏月夜袭（回述）' };
+  const STORY_REPLAY_NAME = { xuesestory: '血色禁地·中心区', chuisui: '七玄门·松林小溪', wagang: '太南山下·怪坡', tainan: '太南谷·青砖广场', jiayuan: '嘉元城·小码头与黑水巷', mofu: '嘉元城·墨府小楼', xiaoxiang: '嘉元城·潇湘院', duba: '独霸山庄·赏月夜袭（回述）', yaoyuan: '黄枫谷·百药园' };
 
   function startMap(id, diffId) {
     const m = MAPS.find(x => x.id === id);
@@ -11493,6 +11493,12 @@
               window.StoryStage.start('xiaoxiang', MAP_STORIES.xiaoxiang, () => { storyMarkSeen('cut:xiaoxiang'); onStoryMapDone(m); });
             });
           });
+          return;
+        }
+        // 百药园：接管药园（马师伯考较、扔令牌）→ 夜埋小绿瓶（绿液一滴、翌日药苗疯长）两场
+        // 一气呵成，收场黑屏后雾气里「有东西在动」，正好交给本图战斗层的银色巨蟒。
+        if (id === 'yaoyuan' && window.StoryStage.canPlay('yaoyuan') && MAP_STORIES.yaoyuan) {
+          window.StoryStage.start('yaoyuan', MAP_STORIES.yaoyuan, () => { storyMarkSeen('cut:yaoyuan'); onStoryMapDone(m); });
           return;
         }
         window.StoryStage.start(id, sc.lines, () => { storyMarkSeen(sc.key); onStoryMapDone(m); });

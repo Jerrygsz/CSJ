@@ -65,13 +65,16 @@ const shots = [
   ['xiaoxiang', '那位见了男女神仙的家伙', 0.45, 'xiao-hall'],
   ['duba', '这一夜，庄主独自赏月', 0.45, 'duba-moon'],
   ['duba', '白光一闪，满园死寂', 0.35, 'duba-slash'],
-  ['duba', '暖阳宝玉在此，当场两讫', 0.40, 'duba-jade']
+  ['duba', '暖阳宝玉在此，当场两讫', 0.40, 'duba-jade'],
+  ['yaoyuan', '韩立挑中百药园', 0.45, 'yy-choice'],
+  ['yaoyuan', '马师伯嫌他年轻功力差', 0.45, 'yy-mashi'],
+  ['yaoyuan', '子夜，瓶口凝出一滴绿液', 0.45, 'yy-bottle']
 ];
 
 const b = await chromium.launch({ channel: 'chrome' });
 const allErrs = [];
 // 剧目 id 与地图 id 不同名时（血色禁地 / 松林小溪 / 墨府小楼），进图要换成能承载它的那张
-const ENTER_MAP = { xuesestory: 'xuese', chuisui: 'houshan', wagang: 'tainan', mofu: 'jiayuan', xiaoxiang: 'jiayuan', duba: 'tainan' };
+const ENTER_MAP = { xuesestory: 'xuese', chuisui: 'houshan', wagang: 'tainan', mofu: 'jiayuan', xiaoxiang: 'jiayuan', duba: 'tainan', yaoyuan: 'yaoyuan' };
 
 for (const [mapId, label, hold, name] of shots) {
   const page = await b.newPage({ viewport: { width: 480, height: 900 }, deviceScaleFactor: 2 });

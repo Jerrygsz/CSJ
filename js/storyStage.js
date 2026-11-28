@@ -676,6 +676,84 @@
         { t: 'fade', from: 0, to: 1, dur: 0.5, label: '收场' }
       ]
     },
+    yaoyuan: {
+      canon: '第二卷·黄枫谷（第149/151/152章：百机堂领竹简挑杂务，叶师叔特批种植类任挑；韩立挑中人人躲着走的'
+        + '青石岭百药园；禁制白光拦路、玉牌绿芒开门；马师伯嫌他年轻功力差，韩立开口就报规矩，又一路报出'
+        + '子夜花/黄球草/白鹤芝/望月草等偏门药名，小老头扔下禁制令牌走人；当夜把小绿瓶埋进药田角、盖上'
+        + '法宝残片遮掩灵气迹象，绿液一滴，翌日药苗疯长——此后两年谷里没人记得这个弟子。掌天瓶口径与'
+        + 'yaoshan 捡瓶、yaopu 绿液区一致；结尾雾气里的动静交给本图战斗层的银色巨蟒）',
+      title: '黄枫谷 · 百药园',
+      zones: [
+        /* ── 一·园门外 ── */
+        // dusk：赶路进门是傍晚的事。两座山丘间一块盆地，白光禁制拦在园门上
+        { kind: 'ground', x: -300, y: -520, w: 780, h: 1040, name: '青石岭山道' },
+        { kind: 'bamboo', x: -180, y: -300, w: 170, h: 300, speed: 0.90, name: '岭上竹丛' },
+        { kind: 'mist',   x: 170,  y: -320, w: 110, h: 460,  block: true, name: '园门禁制白光' },
+        { kind: 'ground', x: 480,  y: -520, w: 700, h: 1040, name: '百药园' },
+        { kind: 'herb',   x: 540,  y: -180, w: 260, h: 300,  name: '灵田一畦' },
+        { kind: 'herb',   x: 820,  y: -60,  w: 280, h: 320,  name: '灵田二畦' },
+        { kind: 'herb',   x: 520,  y: 220,  w: 620, h: 180,  name: '灵田三畦' },
+        // 园中央数间茅草屋（ch151「数间茅草屋位于园子的中央」）；x 要留在机位 dx:800
+        // 的视野内，摆到 1000 开外马师伯出场时茅屋就在画外了
+        { kind: 'shed',   x: 760,  y: -186, w: 210, h: 150,  name: '园中茅屋' },
+        { kind: 'table',  x: 900,  y: -20,  w: 108, h: 34,   name: '屋前条凳' },
+        /* ── 二·药田角 ── */
+        // floor 换 ground：夜里挖坑埋瓶在西北角那半畦，土色要跟药田分开
+        { kind: 'ground', x: 800,  y: -520, w: 780, h: 1040, name: '药田西北角' },
+        { kind: 'herb',   x: 860,  y: -180, w: 300, h: 340,  name: '遮掩角的药苗' },
+        { kind: 'herb',   x: 1240, y: -40,  w: 260, h: 300,  name: '隔壁老畦' },
+        { kind: 'bamboo', x: 1078, y: -330, w: 160, h: 260,  speed: 0.88, name: '篱边竹丛' }
+      ],
+      actors: [
+        { id: 'hanli', x: -60, y: 24, dir: 1, spr: 'hanli', scale: 1.70, show: true },
+        { id: 'zhishi', x: -140, y: 30, dir: 1, spr: 'yuzhishi', scale: 1.58, show: true },
+        { id: 'mashi', x: 900, y: 20, dir: -1, spr: 'mashibo', scale: 1.66, show: false }
+      ],
+      steps: [
+        { t: 'weather', kind: 'dusk', speed: 1, label: '青石岭的傍晚' },
+        { t: 'say', li: [0], label: '百机堂，竹简摊了一案' },
+        { t: 'say', li: [1], label: '于执事让韩立慢慢看' },
+        { t: 'act', who: 'hanli', anim: 'read', dir: 1, dur: 1.2, label: '翻竹简' },
+        { t: 'say', li: [2], label: '韩立挑中百药园' },
+        { t: 'say', li: [3], label: '于执事：可真会挑' },
+        { t: 'walk', who: 'hanli', to: [110, 22], speed: 130, dur: 1.4, label: '走到园门禁制前' },
+        { t: 'say', li: [4], label: '禁制白光拦路，玉牌开门' },
+        { t: 'act', who: 'hanli', anim: 'point', dir: 1, dur: 0.9, label: '玉牌绿芒照进禁制' },
+        { t: 'actor', who: 'zhishi', show: false, label: '于执事留步' },
+        { t: 'actor', who: 'hanli', x: 640, y: 24, dir: 1, label: '进园' },
+        { t: 'cam', dx: 800, dy: -8, dur: 0.3, label: '镜头跟进园门' },
+        { t: 'actor', who: 'mashi', show: true, label: '马师伯在茅屋前等着' },
+        { t: 'say', li: [5], label: '马师伯嫌他年轻功力差' },
+        { t: 'say', li: [6], label: '韩立开口就报规矩' },
+        { t: 'say', li: [7], label: '马师伯：这些草药你能认出多少' },
+        { t: 'say', li: [8], label: '十分之一——子夜花、黄球草、白鹤芝、望月草' },
+        { t: 'walk', who: 'hanli', to: [760, 26], speed: 120, dur: 1.6, label: '园内漫步辨药' },
+        { t: 'act', who: 'hanli', anim: 'herb', dir: 1, dur: 1.0, label: '抬手报药名' },
+        { t: 'say', li: [9], label: '报的都是偏门药名' },
+        { t: 'say', li: [10], label: '马师伯扔下禁制令牌' },
+        { t: 'act', who: 'mashi', anim: 'throw', dir: -1, dur: 0.8, label: '墨绿木牌抛过来' },
+        { t: 'act', who: 'hanli', anim: 'pickup', dir: 1, dur: 0.7, label: '韩立伸手接住' },
+        { t: 'say', li: [11], label: '这位比叶师叔强多了' },
+        { t: 'actor', who: 'mashi', show: false, label: '马师伯飞天而去' },
+        { t: 'fade', from: 0, to: 1, dur: 0.5, label: '天黑了' },
+        // 换场：傍晚的园门口挪到夜里的药田角。埋瓶是这场戏真正的心事
+        { t: 'actor', who: 'hanli', x: 900, y: 30, dir: 1, label: '夜里潜到药田角' },
+        { t: 'cam', dx: 860, dy: -8, dur: 0.2, label: '镜头交到药田角' },
+        { t: 'fade', from: 1, to: 0, dur: 0.5, label: '夜里的药田' },
+        { t: 'weather', kind: 'clear', speed: 1, label: '子夜' },
+        { t: 'act', who: 'hanli', anim: 'dig', dir: 1, dur: 1.3, label: '挖个浅坑' },
+        { t: 'prop', who: 'hanli', n: 'bottle', hand: 1, s: 1.0, label: '小绿瓶' },
+        { t: 'act', who: 'hanli', anim: 'give', dir: 1, dur: 0.9, label: '瓶子埋进土里，盖上法宝残片' },
+        { t: 'prop', who: 'hanli', n: null, label: '瓶离手' },
+        { t: 'say', li: [12], label: '埋瓶遮掩灵气迹象' },
+        { t: 'say', li: [13], label: '子夜，瓶口凝出一滴绿液' },
+        { t: 'act', who: 'hanli', anim: 'gaze', dir: 1, dur: 1.0, label: '盯着那一角' },
+        { t: 'say', li: [14], label: '明天早上，这一畦就不是今天这一畦了' },
+        { t: 'say', li: [15], label: '翌日药苗疯长；两年后，没人记得这个弟子' },
+        { t: 'say', li: [16], label: '雾气里，有东西在动' },
+        { t: 'fade', from: 0, to: 1, dur: 0.5, label: '收场' }
+      ]
+    },
     xiaoxiang: {
       canon: '第二卷·嘉元城（第119~122章：孙二狗打探到沈重山每日下午必去西城潇湘院；韩立一句「全杀了就是」定下夺帮之计，'
         + '把曲魂与引魂钟交给孙二狗，又放云翅鸟盯着他；韩立扮作替李二跑腿的小厮，捧托盘送酒菜进包房，'
@@ -1529,12 +1607,34 @@
       c.globalAlpha = 0.32;
       for (var t = 0; t < z.h; t += 16) { c.beginPath(); c.moveTo(x, y + t); c.lineTo(x + z.w, y + t - 5); c.stroke(); }
     } else if (z.kind === 'bamboo') {
-      c.globalAlpha = 0.42;
-      c.strokeStyle = 'rgba(52,66,45,.72)';
-      for (var bx = 8; bx < z.w; bx += 13) {
+      // 竹丛：光杆细线远看是篱笆桩。竿要分节（一道道亮档），顶部要压叶簇，
+      // 底下再铺一层落竹叶 —— 三样齐了才读得出「竹」。
+      c.globalAlpha = 0.50;
+      for (var bx = 8; bx < z.w; bx += 15) {
         var lean = (bx % 3) * 2 - 2;
-        c.beginPath(); c.moveTo(x + bx, y + z.h); c.lineTo(x + bx + lean, y - 6); c.stroke();
-        c.beginPath(); c.moveTo(x + bx + lean, y + 18); c.lineTo(x + bx + lean + 9, y + 8); c.stroke();
+        var top = y - 6;
+        // 竿：一节一个色阶，节间一道亮档
+        c.strokeStyle = 'rgba(58,74,50,.85)';
+        c.beginPath(); c.moveTo(x + bx, y + z.h); c.lineTo(x + bx + lean, top); c.stroke();
+        c.strokeStyle = 'rgba(118,138,96,.9)';
+        for (var seg = 1; seg <= 3; seg++) {
+          var sy = y + z.h - (z.h + 6) * seg / 4;
+          c.beginPath(); c.moveTo(x + bx - 2.4, sy); c.lineTo(x + bx + lean + 2.4, sy); c.stroke();
+        }
+        // 叶簇：竿顶三两笔斜叶，左右各一撇；中段再压一簇 —— 光顶上有一撮，
+        // 中段光杆一排还是栅栏
+        c.strokeStyle = 'rgba(74,96,60,.92)';
+        c.beginPath(); c.moveTo(x + bx + lean, top); c.lineTo(x + bx + lean + 11, top - 7); c.stroke();
+        c.beginPath(); c.moveTo(x + bx + lean, top + 4); c.lineTo(x + bx + lean - 10, top - 4); c.stroke();
+        c.beginPath(); c.moveTo(x + bx + lean, top + 9); c.lineTo(x + bx + lean + 9, top + 2); c.stroke();
+        var mid2 = y + z.h * 0.42;
+        c.beginPath(); c.moveTo(x + bx + lean, mid2); c.lineTo(x + bx + lean - 10, mid2 - 8); c.stroke();
+        c.beginPath(); c.moveTo(x + bx + lean, mid2 + 5); c.lineTo(x + bx + lean + 10, mid2 - 3); c.stroke();
+        // 落叶：竿脚一小片
+        c.globalAlpha = 0.24;
+        c.strokeStyle = 'rgba(74,96,60,.9)';
+        c.beginPath(); c.moveTo(x + bx - 7, y + z.h - 2); c.lineTo(x + bx + 8, y + z.h - 5); c.stroke();
+        c.globalAlpha = 0.50;
       }
     } else if (z.kind === 'cliff') {
       c.globalAlpha = 0.50;
@@ -1558,9 +1658,24 @@
       c.strokeRect(x, y + 8, z.w, z.h - 8);
       c.beginPath(); c.moveTo(x + z.w / 2, y + 8); c.lineTo(x + z.w / 2, y + z.h); c.stroke();
     } else if (z.kind === 'herb') {
-      c.globalAlpha = 0.42;
+      // 灵田：只画竖苗线就是一排篱笆桩。先铺一整块畦底（比地面深一档），
+      // 苗画成簇状短撇、按垄排布，垄间留出沟 —— 这样才读得出「一畦一畦的药田」。
+      c.globalAlpha = 0.30;
+      c.fillStyle = 'rgba(58,66,44,1)';
+      c.fillRect(x, y, z.w, z.h);
+      c.globalAlpha = 0.34;
+      c.strokeStyle = 'rgba(30,36,24,.9)';
+      for (var fy = y + 12; fy < y + z.h; fy += 26) {
+        c.beginPath(); c.moveTo(x, fy); c.lineTo(x + z.w, fy); c.stroke();
+      }
+      c.globalAlpha = 0.60;
+      c.strokeStyle = 'rgba(96,116,64,.95)';
       for (var hx = 6; hx < z.w; hx += 14) {
-        c.beginPath(); c.moveTo(x + hx, y + z.h); c.lineTo(x + hx + 3, y + 6); c.stroke();
+        var hbase = y + 14 + ((hx / 14 | 0) % 2) * 13;
+        for (var hy = hbase; hy < y + z.h - 6; hy += 26) {
+          c.beginPath(); c.moveTo(x + hx, hy + 5); c.lineTo(x + hx + 3, hy - 2); c.stroke();
+          c.beginPath(); c.moveTo(x + hx + 3, hy + 5); c.lineTo(x + hx, hy - 1); c.stroke();
+        }
       }
     } else if (z.kind === 'stream') {
       // 溪流：先铺一条淡水带，再叠几道慢波纹。

@@ -1964,6 +1964,21 @@
       '..KbbbbbbK..', '.KGGGGGGGGK.', '.KGgGGGGgGK.', '.KGgBBBBgGK.', '..KgGGGGgK..',
       '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
     ] },
+    // 马师伯：ch151「枯瘦的矮小老头，约五十来岁，留着两撇枯黄的小胡子，一双混浊的小眼睛，
+    // 猛一看真像一只成了精的人形大耗子」。矮个（14 行里肩线压低一格）+ 枯黄髭 + 驼背灰袍。
+    // 矮是他的剪影主特征：整行下移、头距顶边留两格，别画成常人身高换灰袍。
+    { name: 'mashibo', label: '马师伯', pal: { K, H: '#2a241c', S: '#b08e62', G: '#6e6656', g: '#4e463a', B: '#8a7434', M: '#1a1610' }, rows: [
+      '............', '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSKSSKSK..',
+      '..KbbbbbbK..', '.KGGGGGGGGK.', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
+    // 于执事：ch149 百机堂「中年执事模样的人」。青灰官袍 + 端正站姿，与门派杂役区别靠
+    // 袍身直筒无补丁、腰束深色；别给他背东西拿器物，他只管翻竹简。
+    { name: 'yuzhishi', label: '于执事', pal: { K, H: '#1c1a18', S: '#c8a078', G: '#4a5860', g: '#34404a', B: '#2a3038' }, rows: [
+      '....KKKK....', '...KHHHHK...', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '...KSSSSK...', '..KGGGGGGK..', '.KGgGGGGgGK.', '.KGgGBBGgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
     // 太南小会 / 黄枫谷（ch126–171）
     // 万小山：ch126「身穿白衣的十五六岁少年」「眉清目秀，皮肤白嫩，养尊处优的世家公子哥」。
     // 白衣在宣纸米底上会糊，靠袍身暗部 g 与深描边 K 撑轮廓，别把 g 也调白。
