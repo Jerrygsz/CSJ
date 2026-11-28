@@ -603,6 +603,79 @@
         { t: 'fade', from: 0, to: 1, dur: 0.5, label: '收场' }
       ]
     },
+    // 独霸山庄·欧阳飞天（ch126 回述）。原著里这段是韩立坐在太南山脚拔毒时的补述，
+    // 不是实时戏——canon 里注明「回述」，剧情也按「先交代、再回放」的顺序讲：
+    // 赏月夜袭一场按 night 调压，墨府交玉一场按 indoor 压暗。
+    duba: {
+      canon: '第二卷·嘉元城收尾（第126章回述：韩立快马十日到独霸山庄，连探数日抓庄主独自赏月'
+        + '的良机，一道剑符削掉「怒狮」欧阳飞天的脑袋；验旧伤与胎记确认没杀错；首级送回墨府，'
+        + '严氏验毕当场以暖阳宝玉交换尸虫丸解药；谢绝挽留，当夜出城往太南山——wagang 开场'
+        + '「宝玉贴了半个月丹田」由此接上）。这是回述，不是实时。',
+      title: '独霸山庄 · 赏月夜袭',
+      tone: 'night',
+      zones: [
+        /* ── 一·独霸山庄庭园 ── */
+        { kind: 'ground', x: -300, y: -520, w: 760, h: 1040, name: '独霸山庄庭园' },
+        { kind: 'wall',   x: -320, y: -520, w: 800, h: 170,  block: true, name: '庄园围墙' },
+        { kind: 'pine',   x: -150, y: -260, w: 190, h: 260,  speed: 0.88, name: '月下老松' },
+        { kind: 'pine',   x: 200,  y: -230, w: 170, h: 230,  speed: 0.86, name: '庭中孤松' },
+        { kind: 'table',  x: 60,   y: -18,  w: 110, h: 34,   name: '庭中石桌' },
+        { kind: 'lamp',   x: 330,  y: -320, w: 140, h: 90,   name: '廊下灯笼' },
+        /* ── 二·墨府正厅 ── */
+        // floor 要铺到机位视野左缘之外：zone 只到 x=700 的话，画面左半截露出底下
+        // 的野外背景，正厅就成了「半间砖房半间荒地」
+        { kind: 'floor',  x: 600,  y: -520, w: 760, h: 1040, name: '墨府正厅' },
+        { kind: 'wall',   x: 580,  y: -520, w: 800, h: 170,  block: true, name: '正厅后壁' },
+        { kind: 'table',  x: 760,  y: -20,  w: 110, h: 34,   block: true, name: '厅中条案' },
+        { kind: 'candle', x: 778,  y: -66,  w: 72,  h: 42,   name: '案上红烛' },
+        { kind: 'chair',  x: 1000, y: -6,   w: 44,  h: 16,   name: '主位交椅' },
+        { kind: 'screen', x: 1180, y: -72,  w: 100, h: 72,   block: true, name: '厅后折屏' },
+        { kind: 'lamp',   x: 710,  y: -330, w: 150, h: 95,   name: '厅上灯烛' }
+      ],
+      actors: [
+        { id: 'hanli', x: -80, y: 24, dir: 1, spr: 'hanli', scale: 1.70, show: true },
+        { id: 'ouyang', x: 184, y: 26, dir: -1, spr: 'ouyangfeitian', scale: 1.92, show: false },
+        { id: 'yanfuren', x: 1002, y: 8, dir: -1, spr: 'yanfuren', scale: 1.62, show: false }
+      ],
+      steps: [
+        { t: 'weather', kind: 'clear', speed: 1, label: '独霸山庄的夜' },
+        { t: 'say', li: [0], label: '快马十日，独霸山庄到了' },
+        { t: 'say', li: [1], label: '连探五夜，行踪摸清' },
+        { t: 'act', who: 'hanli', anim: 'sneak', dir: 1, dur: 1.4, label: '贴着游廊避开庄丁' },
+        { t: 'say', li: [2], label: '霸王甲刀枪不入，好在他没把我当修仙的看' },
+        { t: 'actor', who: 'ouyang', show: true, label: '欧阳飞天独自赏月' },
+        { t: 'say', li: [3], label: '这一夜，庄主独自赏月' },
+        { t: 'act', who: 'hanli', anim: 'gaze', dir: 1, dur: 0.8, label: '盯住他的背影' },
+        { t: 'say', li: [4], label: '就是现在' },
+        { t: 'walk', who: 'hanli', to: [140, 26], speed: 150, dur: 1.5, label: '欺近到庄主身后' },
+        { t: 'act', who: 'hanli', anim: 'slash', dir: 1, dur: 0.9, label: '剑符出鞘' },
+        { t: 'actor', who: 'ouyang', rot: -1.50, y: -26, label: '人头落地' },
+        { t: 'say', li: [5], label: '白光一闪，满园死寂' },
+        { t: 'say', li: [6], label: '顺利得让人心里发毛' },
+        { t: 'act', who: 'hanli', anim: 'gaze', dir: 1, dur: 1.0, label: '蹲身验旧伤与胎记' },
+        { t: 'say', li: [7], label: '没杀错——他多半把剑符当了暗器' },
+        { t: 'prop', who: 'hanli', n: 'box', hand: 1, s: 1.1, label: '首级装匣' },
+        { t: 'say', li: [8], label: '快马返回嘉元城' },
+        { t: 'fade', from: 0, to: 1, dur: 0.5, label: '离了独霸山庄' },
+        // 换场：庭园挪到墨府正厅。收束这段回述，交玉换解药
+        { t: 'actor', who: 'hanli', x: 860, y: 26, dir: 1, label: '首级送到墨府正厅' },
+        { t: 'actor', who: 'yanfuren', show: true, label: '严氏坐在主位' },
+        { t: 'cam', dx: 860, dy: -8, dur: 0.2, label: '镜头交到正厅' },
+        { t: 'fade', from: 1, to: 0, dur: 0.5, label: '正厅的灯' },
+        { t: 'say', li: [9], label: '公子好手段' },
+        { t: 'act', who: 'yanfuren', anim: 'gaze', dir: -1, dur: 0.9, label: '严氏冷眼打量' },
+        { t: 'say', li: [10], label: '侥幸而已。说好的东西——' },
+        { t: 'say', li: [11], label: '暖阳宝玉在此，当场两讫' },
+        { t: 'prop', who: 'yanfuren', n: 'warmjade', hand: 1, s: 1.2, label: '暖阳宝玉托在掌上' },
+        { t: 'act', who: 'yanfuren', anim: 'give', dir: -1, dur: 0.9, label: '双手奉上' },
+        { t: 'prop', who: 'yanfuren', n: null, label: '宝玉离手' },
+        { t: 'prop', who: 'hanli', n: 'warmjade', hand: 1, s: 1.2, label: '韩立接过宝玉' },
+        { t: 'act', who: 'hanli', anim: 'bow', dir: -1, dur: 0.8, label: '谢绝挽留，长身一揖' },
+        { t: 'say', li: [12], label: '当夜出城，往太南山去' },
+        { t: 'say', li: [13], label: '剩下半个月，慢慢拔毒吧' },
+        { t: 'fade', from: 0, to: 1, dur: 0.5, label: '收场' }
+      ]
+    },
     xiaoxiang: {
       canon: '第二卷·嘉元城（第119~122章：孙二狗打探到沈重山每日下午必去西城潇湘院；韩立一句「全杀了就是」定下夺帮之计，'
         + '把曲魂与引魂钟交给孙二狗，又放云翅鸟盯着他；韩立扮作替李二跑腿的小厮，捧托盘送酒菜进包房，'

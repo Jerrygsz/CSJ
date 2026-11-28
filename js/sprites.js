@@ -1956,6 +1956,14 @@
       '...KSSSSK...', '.KSSGGGGSSK.', 'KGGgGGGGgGGK', 'KGGgGBBGgGGK', '..KGgGGGgK..',
       '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
     ] },
+    // 欧阳飞天：「怒狮」，独霸山庄庄主，练有江湖顶尖横练硬功「霸王甲」，ch126 被韩立
+    // 一道剑符削掉脑袋（赏月夜袭，回述）。认人靠两点：满脸虬髯盖满下半脸（黑熊只在颌下
+    // 两撇）、铁灰甲片配金缘的宽肩铠。与黑熊同是宽肩壮汉，剪影靠髯形分开。
+    { name: 'ouyangfeitian', label: '欧阳飞天', pal: { K, H: '#181410', S: '#c98f66', b: '#1d1712', G: '#565b63', g: '#3a3e45', B: '#9a7a34' }, rows: [
+      '...KKKKKK...', '..KHHHHHHK..', '..KHHHHHHK..', '..KSSSSSSK..', '..KSKSSKSK..',
+      '..KbbbbbbK..', '.KGGGGGGGGK.', '.KGgGGGGgGK.', '.KGgBBBBgGK.', '..KgGGGGgK..',
+      '..KGGKKGGK..', '..KGK..KGK..', '..KGK..KGK..', '..KKK..KKK..'
+    ] },
     // 太南小会 / 黄枫谷（ch126–171）
     // 万小山：ch126「身穿白衣的十五六岁少年」「眉清目秀，皮肤白嫩，养尊处优的世家公子哥」。
     // 白衣在宣纸米底上会糊，靠袍身暗部 g 与深描边 K 撑轮廓，别把 g 也调白。

@@ -71,7 +71,7 @@ const stories = sandbox.window.MAP_STORIES;
 const stages = sandbox.window.StoryStage.stages();
 const DATA = {};
 console.log('\n== 2. 原著剧情与地形数据 ==');
-for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'wagang', 'tainan', 'jiayuan', 'mofu', 'xiaoxiang', 'yelang', 'xuesestory']) {
+for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'wagang', 'tainan', 'jiayuan', 'mofu', 'xiaoxiang', 'duba', 'yelang', 'xuesestory']) {
   const st = stages[id];
   DATA[id] = st;
   const li = st.steps.filter(s => s.t === 'say').reduce((a, s) => a.concat(s.li || []), []);
@@ -339,6 +339,32 @@ for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'wagang', 'tainan', '
        && st.steps.some(s => s.t === 'prop' && s.n === 'flagon')
        && st.steps.some(s => s.t === 'prop' && s.n === 'silver'),
        '托盘 / 酒壶 / 二两银子三件道具都要真上场（不是只登记在 PROPS 里）', null);
+  } else if (id === 'duba') {
+    const spr = st.actors.map(a => a.spr);
+    ok(spr.includes('ouyangfeitian') && st.actors.some(a => a.id === 'yanfuren'),
+       '欧阳飞天与严氏都要真人到场（剑符削的是他，交玉的是她）', spr);
+    ok(kinds.includes('pine') && kinds.includes('wall') && kinds.includes('table') && kinds.includes('chair'),
+       '庭园有松林与围墙，正厅有条案与交椅（赏月与交玉两处都不能是空场）', kinds);
+    const txt = (stories.duba || []).map(l => l[1]).join('');
+    ok(/赏月/.test(txt) && /剑符/.test(txt) && /胎记/.test(txt),
+       '削头三件套：赏月良机 / 剑符 / 验旧伤与胎记（ch126 回述原文）', null);
+    ok(/霸王甲/.test(txt) && /暗器/.test(txt),
+       '霸王甲刀枪不入、他多半把剑符当了暗器没躲（ch126 原文）', null);
+    ok(/暖阳宝玉/.test(txt) && /两讫/.test(txt),
+       '交玉：严氏验毕首级当场两讫（不是先给玉再办事）', null);
+    const who = new Set((stories.duba || []).map(l => l[0]));
+    ok(!who.has('墨彩环') && !who.has('孙二狗'),
+       '回述段不得混入墨彩环 / 孙二狗（那两段各有各的场）', [...who]);
+    const slash = st.steps.findIndex(s => s.t === 'act' && s.anim === 'slash');
+    const ofall = st.steps.findIndex(s => s.t === 'actor' && s.who === 'ouyang' && s.rot != null);
+    ok(slash > 0 && ofall > slash, '剑符先出鞘，人头才落地', { slash, ofall });
+    const jadeGive = st.steps.findIndex(s => s.t === 'prop' && s.n === 'warmjade' && s.who === 'yanfuren');
+    const jadeTake = st.steps.findIndex(s => s.t === 'prop' && s.n === 'warmjade' && s.who === 'hanli');
+    ok(jadeGive > 0 && jadeTake > jadeGive, '宝玉先托在严氏掌上，再交到韩立手上', { jadeGive, jadeTake });
+    const dbCams = st.steps.filter(s => s.t === 'cam').map(s => s.dx || 0);
+    ok(dbCams.some(v => v >= 800),
+       '有一拍 cam 把机位从庭园搬到墨府正厅（dx ≥ 800）', dbCams);
+    ok(dbCams.indexOf(0) < 0, '第一场庭园就在开演机位上，不需要 dx:0 的归位拍', dbCams);
   }
 }
 
@@ -378,7 +404,7 @@ ok(propNames.includes('vial'), '溪边道具齐备：小白玉瓶（装抽髓丸
 
 // 剧情里用到的道具必须都在库里，不能写个空气名字
 const usedProps = [];
-for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'wagang', 'tainan', 'jiayuan', 'mofu', 'xiaoxiang', 'yelang', 'xuesestory']) {
+for (const id of ['qixuan', 'houshan', 'chuisui', 'mishi', 'wagang', 'tainan', 'jiayuan', 'mofu', 'xiaoxiang', 'duba', 'yelang', 'xuesestory']) {
   for (const s of (sandbox.window.StoryStage.steps(id) || [])) {
     if (s.t === 'prop' && s.n) usedProps.push(s.n);
   }
@@ -654,9 +680,10 @@ await page.click('#storyStageSkipBtn');
 await page.waitForTimeout(120);
 ok(await seenOf() === SEEN0, '新增剧目回看仍不写账本', null);
 
-// 太南小会：谷外 wagang → 谷内 tainan 的链式。market 分支不走 showLines 通道，
-// 只有真进图才验得到「先演怪坡、再演广场、中间不弹商店」这条路径。
-console.log('\n== 4d. 太南谷入谷链式（谷外 wagang → 谷内 tainan）==');
+// 太南小会：独霸山庄回述 duba（ch126 补述）→ 谷外 wagang → 谷内 tainan 的三段链式。
+// market 分支不走 showLines 通道，只有真进图才验得到「先放回述、再演怪坡、再演广场、
+// 中间不弹商店」这条路径。
+console.log('\n== 4d. 太南谷入谷链式（回述 duba → 谷外 wagang → 谷内 tainan）==');
 const W0 = await page.evaluate(async () => {
   const F = window.__FR;
   F.clearProgress(); F.unlockAll();
@@ -668,8 +695,8 @@ const W0 = await page.evaluate(async () => {
     shop: document.getElementById('shop').style.display
   };
 });
-ok(W0.s && W0.s.active && W0.s.mapId === 'wagang',
-   '进太南小会先在谷外演 wagang，不直接跳买入面板', W0.s);
+ok(W0.s && W0.s.active && W0.s.mapId === 'duba',
+   '进太南小会先演独霸山庄回述（duba），不直接跳买入面板', W0.s);
 ok(W0.shop !== 'flex' && W0.state === 'dialog',
    '剧情层占画面时不弹商店（G.state 冻结在 dialog）', { shop: W0.shop, state: W0.state });
 
@@ -697,7 +724,7 @@ const W1 = await page.evaluate(async () => {
   };
 });
 ok(W1.s && W1.s.active && W1.s.mapId === 'tainan',
-   'wagang 收场后链式接上 tainan（进谷的前后两半，中间不跳回战斗）', W1.s);
+   '回述与怪坡都收场后链式接上 tainan（三段一气呵成，中间不跳回战斗）', W1.s);
 ok(W1.first === W1.want, '谷内开场白逐字同源 MAP_STORIES.tainan[0]', { got: W1.first, want: W1.want });
 await page.evaluate(() => window.__FR.storyStageSkip());
 await page.waitForTimeout(120);

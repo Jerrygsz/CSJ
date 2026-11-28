@@ -11293,14 +11293,15 @@
   // 剧情回顾列表的「已阅」标记：与 startMap() / storySceneOf() 写进 save.seen 的键一致。
   // qixuan 是整场剧情图（scene:qixuan），houshan 是战斗图进图序章（cut:houshan）。
   // 只用于展示，不写、不删；铺新图时同步登记。
-  const CUTSCENE_SEEN = { qixuan: 'scene:qixuan', houshan: 'cut:houshan', chuisui: 'cut:chuisui', wagang: 'cut:wagang', tainan: 'intro:tainan', jiayuan: 'scene:jiayuan', mofu: 'cut:mofu', xiaoxiang: 'cut:xiaoxiang', mishi: 'intro:mishi', yelang: 'intro:yelang', xuesestory: 'cut:xuesestory' };
+  const CUTSCENE_SEEN = { qixuan: 'scene:qixuan', houshan: 'cut:houshan', chuisui: 'cut:chuisui', wagang: 'cut:wagang', tainan: 'intro:tainan', jiayuan: 'scene:jiayuan', mofu: 'cut:mofu', xiaoxiang: 'cut:xiaoxiang', duba: 'cut:duba', mishi: 'intro:mishi', yelang: 'intro:yelang', xuesestory: 'cut:xuesestory' };
   // 剧目 id → 回放时铺的战斗地图 id；只有 xuesestory 与地图不同名。
   // chuisui（松林小溪）在神手谷外，铺后山那张图最贴合；
   // wagang（怪坡）是太南小会的谷外前半场，铺 tainan 那张图；
-  // mofu（墨府小楼）/ xiaoxiang（潇湘院）都是嘉元城那张图的后两场，三场共用同一张地图做背景。
-  const STORY_REPLAY_MAP = { xuesestory: 'xuese', chuisui: 'houshan', wagang: 'tainan', mofu: 'jiayuan', xiaoxiang: 'jiayuan' };
+  // mofu（墨府小楼）/ xiaoxiang（潇湘院）/ duba（独霸山庄回述）都是嘉元城那条线的
+  // 后几场，duba 的收尾（墨府正厅交玉）也铺 jiayuan 那张图做背景。
+  const STORY_REPLAY_MAP = { xuesestory: 'xuese', chuisui: 'houshan', wagang: 'tainan', mofu: 'jiayuan', xiaoxiang: 'jiayuan', duba: 'tainan' };
   // 剧目 id → 回顾列表显示名；不在 MAPS 里的剧目必须在这里给名字。
-  const STORY_REPLAY_NAME = { xuesestory: '血色禁地·中心区', chuisui: '七玄门·松林小溪', wagang: '太南山下·怪坡', tainan: '太南谷·青砖广场', jiayuan: '嘉元城·小码头与黑水巷', mofu: '嘉元城·墨府小楼', xiaoxiang: '嘉元城·潇湘院' };
+  const STORY_REPLAY_NAME = { xuesestory: '血色禁地·中心区', chuisui: '七玄门·松林小溪', wagang: '太南山下·怪坡', tainan: '太南谷·青砖广场', jiayuan: '嘉元城·小码头与黑水巷', mofu: '嘉元城·墨府小楼', xiaoxiang: '嘉元城·潇湘院', duba: '独霸山庄·赏月夜袭（回述）' };
 
   function startMap(id, diffId) {
     const m = MAPS.find(x => x.id === id);
@@ -11526,14 +11527,21 @@
       if (mktLines && mktLines.length && !storySeen(mktKey)) {
         // 主画布剧情层：太南小会分成谷外（wagang·怪坡）与谷内（tainan·青砖广场）两场，
         // 都是「进谷」这一件事的前后两半，接在同一个 onDone 里，中间不跳回战斗。
+        // 前头再挂一段 duba（独霸山庄·欧阳飞天，ch126 回述）：原著里这段是韩立坐在
+        // 太南山脚拔毒时的补述，正好垫在「宝玉贴了半个月丹田」那句之前讲完。
         const stageMkt = window.StoryStage && window.StoryStage.canPlay(m.id) && window.StoryStage.available()
           && (window.StoryStage.force || !(window.__CSJ_QA__ || (typeof navigator !== 'undefined' && navigator.webdriver)))
           && !G.storyMute;
         if (stageMkt && m.id === 'tainan' && window.StoryStage.canPlay('wagang')) {
-          window.StoryStage.start('wagang', MAP_STORIES.wagang, () => {
-            storyMarkSeen('cut:wagang');
-            window.StoryStage.start('tainan', mktLines, () => { storyMarkSeen(mktKey); meetThenShop(); });
-          });
+          const afterDuba = () => {
+            window.StoryStage.start('wagang', MAP_STORIES.wagang, () => {
+              storyMarkSeen('cut:wagang');
+              window.StoryStage.start('tainan', mktLines, () => { storyMarkSeen(mktKey); meetThenShop(); });
+            });
+          };
+          if (window.StoryStage.canPlay('duba') && MAP_STORIES.duba) {
+            window.StoryStage.start('duba', MAP_STORIES.duba, () => { storyMarkSeen('cut:duba'); afterDuba(); });
+          } else afterDuba();
           return;
         }
         if (stageMkt) {

@@ -62,13 +62,16 @@ const shots = [
   ['xiaoxiang', '连小金芝与三名陪酒女子也气绝', 0.40, 'xiao-check'],
   // 正堂那一拍别停在 fade 上：「孙二狗坐上主位」是零时长的 actor 步，紧跟着一拍才亮灯，
   // 用零时长步当机位会拍出一张半黑的图 —— 换成灯亮之后那句台词
-  ['xiaoxiang', '那位见了男女神仙的家伙', 0.45, 'xiao-hall']
+  ['xiaoxiang', '那位见了男女神仙的家伙', 0.45, 'xiao-hall'],
+  ['duba', '这一夜，庄主独自赏月', 0.45, 'duba-moon'],
+  ['duba', '白光一闪，满园死寂', 0.35, 'duba-slash'],
+  ['duba', '暖阳宝玉在此，当场两讫', 0.40, 'duba-jade']
 ];
 
 const b = await chromium.launch({ channel: 'chrome' });
 const allErrs = [];
 // 剧目 id 与地图 id 不同名时（血色禁地 / 松林小溪 / 墨府小楼），进图要换成能承载它的那张
-const ENTER_MAP = { xuesestory: 'xuese', chuisui: 'houshan', wagang: 'tainan', mofu: 'jiayuan', xiaoxiang: 'jiayuan' };
+const ENTER_MAP = { xuesestory: 'xuese', chuisui: 'houshan', wagang: 'tainan', mofu: 'jiayuan', xiaoxiang: 'jiayuan', duba: 'tainan' };
 
 for (const [mapId, label, hold, name] of shots) {
   const page = await b.newPage({ viewport: { width: 480, height: 900 }, deviceScaleFactor: 2 });

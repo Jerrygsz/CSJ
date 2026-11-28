@@ -350,6 +350,29 @@
           cam:{ z:[1.22,1.00], x:[-2,0], y:[-2,0] } }
       ]
     },
+    // 独霸山庄·欧阳飞天（ch126 回述）：同上只作登记 / 兜底，真实玩家与洞府回顾由
+    // StoryStage 走 duba 段。原著是补述——章节卡标注「回述」。
+    duba: {
+      title: '卷二 · 独霸山庄', sub: '赏月 · 剑符 · 回述', seal: '换玉',
+      shots: [
+        { id:0, t:0,    dur:2.6, kind:'chapter', scene:'hill', fx:'unroll',
+          cam:{ z:[1.00,1.05], x:[0,2], y:[0,0] }, label:'卷二 · 独霸山庄（回述）' },
+        { id:1, t:2.6,  dur:3.0, scene:'hill', actors:[['hanli','L']], fx:'ink', li: 1,
+          cam:{ z:[1.05,1.10], x:[2,0], y:[0,-2] } },
+        { id:2, t:5.6,  dur:3.2, scene:'hill', actors:[['hanli','L'],['ouyangfeitian','R']], fx:'dim', li: 3,
+          cam:{ z:[1.10,1.16], x:[0,2], y:[-2,-4] } },
+        { id:3, t:8.8,  dur:2.8, scene:'hill', actors:[['hanli','L']], fx:'seal', li: 5,
+          cam:{ z:[1.16,1.22], x:[2,2], y:[-4,-6] } },
+        { id:4, t:11.6, dur:3.2, scene:'hill', actors:[['hanli','L']], fx:'ink', li: 7,
+          cam:{ z:[1.22,1.18], x:[2,0], y:[-6,-2] } },
+        { id:5, t:14.8, dur:3.0, scene:'hut', actors:[['hanli','L'],['yanfuren','R']], fx:'dim', li: 9,
+          cam:{ z:[1.18,1.22], x:[0,2], y:[-2,-4] } },
+        { id:6, t:17.8, dur:3.0, scene:'hut', actors:[['hanli','L'],['yanfuren','R']], fx:'seal', li: 11,
+          cam:{ z:[1.22,1.20], x:[2,0], y:[-4,-2] } },
+        { id:7, t:20.8, dur:3.2, scene:'gate', actors:[['hanli','L']], fx:'roll', li: 13,
+          cam:{ z:[1.20,1.00], x:[0,-2], y:[-2,0] } }
+      ]
+    },
     // 野狼帮之围：七玄门后期人物在战斗地图当群众演员；这里只作剧目登记 / 旧插画兜底，
     // 真实玩家与洞府回顾都由 StoryStage 分流到主画布层（见 game.js replayStoryLive）。
     yelang: {
